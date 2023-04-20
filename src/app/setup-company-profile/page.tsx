@@ -99,9 +99,12 @@ const Profile: React.FC = () => {
             <Header></Header>
             <header style={{color:'#2C3F58',padding:'20px',fontFamily: 'Golos Text',fontStyle: 'normal',fontWeight: '600',fontSize: '25px',lineHeight:'30px',letterSpacing:'0.02em',left: '30px',top:'101px'}}>Tell us more about youself</header>
 
-          <div className='container' style={{display:'flex',justifyContent:'center'}}>  
-            <Progress percent={percent} style={{width:'100%', left:'10%'}}/>
-          </div>
+            <div className='container' style={{position:'relative', display:'flex',justifyContent:'center'}}>  
+  <Progress percent={percent} style={{width:'100%', left:'10%'}}/>
+  <div className='circle' style={{ position:'relative',top:'0px',right:'200px', left: `${percent}%`, transform: 'translateX(-50%)'}}>
+    <div className='inner-circle'/>
+  </div>
+</div>
         <div className='progressbar' style={{display:'flex',flexDirection:'row',position:'relative'}}>
         <div className='left'>Company Details</div>
         <div className='right'>Settings</div>
@@ -124,7 +127,7 @@ const Profile: React.FC = () => {
                             {/* <span className="title">Personal Details</span> */}
                             <div className="fields" style={{ display: 'flex', flexDirection: "row" }}>
                                 <div className="input-field" style={{ display: 'flex', flexBasis: '15%' }}>
-                                    <img src='userIcon.png' style={{ boxSizing:'border-box',width:'180px',height:'195px',left:'50px',top:'264px',background: '#ACB9CB',borderRadius:'5px'}}></img>
+                                    <img src='userIcon.png' style={{ boxSizing:'border-box',width:'180px',height:'185px',left:'50px',top:'264px',background: '#ACB9CB',borderRadius:'5px'}}></img>
                                 </div>
                                 <div className='firstSection' style={{ display: 'flex', flexDirection: 'column' ,flex:'1.5',marginRight:'60px'}}>
                                     <div className="input-field" style={{ width: '100%' ,padding: '10px 8px'}}>
