@@ -129,7 +129,7 @@ form .fields .input-field{
     display: flex;
     width: calc(100% / 3 - 15px);
     flex-direction: column;
-    margin: 4px 0;
+    margin:0;
 }
 
 form .fields .fields .input-field{
@@ -142,6 +142,8 @@ form .fields .fields .input-field{
 .input-field label{
     font-size: 15px;
     font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0.02em;
     color: #2C3F58;
     font-family: 'Golos Text';
 font-style: normal;

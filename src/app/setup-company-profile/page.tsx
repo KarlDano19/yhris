@@ -91,39 +91,43 @@ const Profile: React.FC = () => {
                                 <div className="input-field" style={{ display: 'flex', flexBasis: '15%' }}>
                                     <img src='userIcon.png' style={{ boxSizing:'border-box',width:'180px',height:'195px',left:'50px',top:'264px',background: '#ACB9CB',borderRadius:'5px'}}></img>
                                 </div>
-                                <div className='firstSection' style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <div className="input-field" style={{ width: '100%' ,padding: '0 8px'}}>
+                                <div className='firstSection' style={{ display: 'flex', flexDirection: 'column' ,flex:'1.5',marginRight:'60px'}}>
+                                    <div className="input-field" style={{ width: '100%' ,padding: '10px 8px'}}>
                                         <label>Company Name<span className="required">*</span></label>
-                                        <input type="text" placeholder="Enter Company name" value={formValues.companyName} onChange={(event) => setFormValues({...formValues, companyName: event.target.value})} required style={{ boxSizing: 'border-box',width: '100%',height: '2.8125rem',left: '233px',top: '288px',background: '#FFFFFF',border: '1px solid #ACB9CB',borderRadius: '5px'}}></input>
+                                        <input type="text" placeholder="Enter Company name" value={formValues.companyName} onChange={(event) => setFormValues({...formValues, companyName: event.target.value})} required style={{ boxSizing: 'border-box',width: '100%',left: '233px',top: '288px',background: '#FFFFFF',border: '1px solid #ACB9CB',borderRadius: '5px'}}></input>
                                     </div>
 
-                                    <div className="input-field" style={{ width: '100%',padding: '0 8px' }}>
+                                    <div className="input-field" style={{ width: '100%',padding: '10px 8px' }}>
                                         <label>Company Logo</label>
-                                        <input type="text" placeholder="" value={formValues.companyLogo} onChange={(event) => setFormValues({...formValues, companyLogo: event.target.value})} required style={{boxSizing: 'border-box',width: '21.875rem',height: '2.8125rem',left: '233px',top: '288px',background: '#FFFFFF',border: '1px solid #ACB9CB',borderRadius: '5px'}}></input>
+                                        <input type="text" placeholder="Upload logo" value={formValues.companyLogo} onChange={(event) => setFormValues({...formValues, companyLogo: event.target.value})} required style={{boxSizing: 'border-box',width: '100%',height: '2.8125rem',left: '233px',top: '288px',background: '#FFFFFF',border: '1px solid #ACB9CB',borderRadius: '5px'}}></input>
                                     </div>
                                 </div>
-                                <div className="input-field" style={{ display: 'flex', width: '599px',boxSizing:'border-box',height:'140px',left:'639px',top:'288px',backgroundColor:'#FFFFFF',borderRadius:'px' }}>
+                                <div className="input-field" style={{ display: 'flex',flex:'2', width: '599px',boxSizing:'border-box',height:'100%',left:'639px',top:'288px',backgroundColor:'#FFFFFF',borderRadius:'px' }}>
                                     <label>About the Company</label>
                                     <input type="text" placeholder="Enter details about the company" value={formValues.aboutCompany} onChange={(event) => setFormValues({...formValues, aboutCompany: event.target.value})} required style={{ width: '100%', height: '8rem' }}></input>
                                 </div>
                             </div>
 
-                            <div className='fields1 fields' style={{ display: 'flex',flexDirection:'row' }}>
-                                <div className="input-field" style={{ display: 'flex', padding: '0 8px' }}>
+                            <div className="details ID">
+                            <span className="title" style={{fontFamily:'Golos Text',fontStyle:'normal',color:'#2C3F58',fontWeight:'600'}}>Contact Details</span>
+
+                            <div className="fields">
+                                <div className="input-field">
                                     <label>Type of Industry<span className="required">*</span></label>
-                                    <input type="text" placeholder="Enter type of Industry" value={formValues.industryType} onChange={(event) => setFormValues({...formValues, industryType: event.target.value})} required></input>
+                                    <input type="text" placeholder="Enter your email" value={formValues.email} onChange={(event) => setFormValues({...formValues, email: event.target.value})} required></input>
                                 </div>
 
-                                <div className="input-field" style={{ display: 'flex', padding: '0 8px' }}>
-                                    <label>No. of Employees<span className="required">*</span></label>
-                                    <input type="number" placeholder="Enter no. of employees" value={formValues.numberOfEmployees} onChange={(event) => setFormValues({...formValues, numberOfEmployees: event.target.value})} required></input>
+                                <div className="input-field">
+                                    <label>No.of Employees<span className="required">*</span></label>
+                                    <input type="number" placeholder="Enter mobile number" value={formValues.mobileNumber} onChange={(event) => setFormValues({...formValues, mobileNumber: event.target.value})} required></input>
                                 </div>
 
-                                <div className="input-field" style={{ display: 'flex', padding: '0 8px' }}>
-                                    <label>Work Setup</label>
-                                    <input type="text" placeholder="Enter work type" value={formValues.workSetup} onChange={(event) => setFormValues({...formValues, workSetup: event.target.value})} required></input>
+                                <div className="input-field">
+                                    <label>Work Set-up</label>
+                                    <input type="text" placeholder="Enter Work Setup Type"value={formValues.landlineNumber} onChange={(event) => setFormValues({...formValues, landlineNumber: event.target.value})} required></input>
                                 </div>
                             </div>
+                        </div>
 
                         </div>
 
