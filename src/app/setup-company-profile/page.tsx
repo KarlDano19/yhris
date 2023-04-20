@@ -1,9 +1,11 @@
 'use client';
 import { FormEvent, useState } from 'react';
 import Header from '../header/page';
-import { Form, Select, Progress } from 'antd';
+import { Form, Select, Progress,Button } from 'antd';
 import { MailOutlined } from '@ant-design/icons';
 import Modal from 'react-modal'; 
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+
 
 type FormValues = {
     companyName: string;
@@ -45,6 +47,8 @@ const initialFormValues: FormValues = {
 const Profile: React.FC = () => {
     const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
     const [activeStep, setActiveStep] = useState<number>(0);
+    const [percent, setPercent] = useState<number>(0);
+
     const handleChange = (event: { target: { name: any; value: any; }; }) => {
         const { name, value } = event.target;
         setFormValues({
@@ -63,6 +67,28 @@ const Profile: React.FC = () => {
     }
 
 
+  const increase = () => {
+    setPercent((prevPercent) => {
+      const newPercent = prevPercent + 50;
+      if (newPercent > 100) {
+        return 100;
+      }
+      return newPercent;
+    });
+  };
+
+  const decline = () => {
+    setPercent((prevPercent) => {
+      const newPercent = prevPercent - 50;
+      if (newPercent < 0) {
+        return 0;
+      }
+      return newPercent;
+    });
+  };
+
+
+
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
@@ -71,15 +97,24 @@ const Profile: React.FC = () => {
     return (
         <>
             <Header></Header>
-           
-            <div className="containerProfile container">
-            <header style={{color:'#2C3F58',fontFamily: 'Golos Text',fontStyle: 'normal',fontWeight: '600',fontSize: '25px' }}>Tell us more about youself</header>
-                <div className="progress">
+            <header style={{color:'#2C3F58',padding:'20px',fontFamily: 'Golos Text',fontStyle: 'normal',fontWeight: '600',fontSize: '25px',lineHeight:'30px',letterSpacing:'0.02em',left: '30px',top:'101px'}}>Tell us more about youself</header>
+
+          <div className='container' style={{display:'flex',justifyContent:'center'}}>  
+            <Progress percent={percent} style={{width:'100%', left:'10%'}}/>
+          </div>
+        <div className='progressbar' style={{display:'flex',flexDirection:'row',position:'relative'}}>
+        <div className='left'>Company Details</div>
+        <div className='right'>Settings</div>
+        </div>
+      
+            <div className="containerProfile">
+
+                {/* <div className="progress">
                     <div className={`point ${activeStep === 1 ? 'active' : 'active'}`}>
                         <br></br><b>Company Details</b></div>
-                    <div className="line" style={{width: '700px',height: '4px'}}></div>
+                    <div className="line"></div>
                     <div className={`point ${activeStep === 2 ? 'active' : ''}`}><br></br><b>Settings</b></div>
-                </div>
+                </div> */}
                 
 
                 <form onSubmit={handleSubmit}>
@@ -102,7 +137,7 @@ const Profile: React.FC = () => {
                                         <input type="text" placeholder="Upload logo" value={formValues.companyLogo} onChange={(event) => setFormValues({...formValues, companyLogo: event.target.value})} required style={{boxSizing: 'border-box',width: '100%',height: '2.8125rem',left: '233px',top: '288px',background: '#FFFFFF',border: '1px solid #ACB9CB',borderRadius: '5px'}}></input>
                                     </div>
                                 </div>
-                                <div className="input-field" style={{ display: 'flex',flex:'2', width: '599px',boxSizing:'border-box',height:'100%',left:'639px',top:'288px',backgroundColor:'#FFFFFF',borderRadius:'px' }}>
+                                <div className="input-field" style={{ display: 'flex',flex:'2', width: '599px',boxSizing:'border-box',height:'100%',backgroundColor:'#FFFFFF',borderRadius:'5px' }}>
                                     <label>About the Company</label>
                                     <input type="text" placeholder="Enter details about the company" value={formValues.aboutCompany} onChange={(event) => setFormValues({...formValues, aboutCompany: event.target.value})} required style={{ width: '100%', height: '8rem' }}></input>
                                 </div>
@@ -193,7 +228,7 @@ const Profile: React.FC = () => {
                             </div>
 
                             <button className="nextBtn">
-                                <span className="btnText" onClick={handleNext}>Next</span>
+                                <span className="btnText" onClick={handleNext} onSubmit={increase}>Next</span>
                                 <i className="uil uil-navigator"></i>
                             </button>
                         </div>

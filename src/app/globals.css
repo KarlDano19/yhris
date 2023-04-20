@@ -3,22 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+    :root {
+        --foreground-rgb: 255, 255, 255;
+        --background-start-rgb: 0, 0, 0;
+        --background-end-rgb: 0, 0, 0;
+    }
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  /* background: linear-gradient(
+    color: rgb(var(--foreground-rgb));
+    font-family: 'Golos Text';
+    /* background: linear-gradient(
       to bottom,
       transparent,
       rgb(var(--background-end-rgb))
@@ -34,31 +35,34 @@ body {
     height: 1px;
     left: -10000px;
     overflow: hidden;
-  }
+}
 
 label {
     display: inline-block;
     /* width: 120px; */
     vertical-align: top;
-  }
-  
-  .required {
+}
+
+.required {
     color: red;
-  }
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
-*{
+
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Golo Text';
 }
-body{
+
+body {
     /* min-height: 100vh; */
     align-items: center;
     justify-content: center;
 }
-.containerProfile{
+
+.containerProfile {
     position: relative;
     max-width: 1800px;
     width: 100%;
@@ -66,14 +70,16 @@ body{
     /* padding: 30px; */
     margin: 0 15px;
     background-color: #fff;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
-.containerProfile header{
+
+.containerProfile header {
     position: relative;
     padding-top: 10px;
     margin-left: 25px;
 }
-.containerProfile header::before{
+
+.containerProfile header::before {
     content: "";
     position: absolute;
     left: 0;
@@ -83,35 +89,41 @@ body{
     border-radius: 8px;
     background-color: #4070f4;
 }
-.containerProfile form{
+
+.containerProfile form {
     position: relative;
     margin-top: 16px;
     /* Height of the form  */
-    min-height: 800px; 
+    min-height: 800px;
     background-color: #fff;
     overflow: hidden;
 }
-.containerProfile form .form{
+
+.containerProfile form .form {
     position: absolute;
     background-color: #fff;
     transition: 0.3s ease;
 }
-.containerProfile form .form.second{
+
+.containerProfile form .form.second {
     opacity: 0;
     pointer-events: none;
     transform: translateX(100%);
 }
-form.secActive .form.second{
+
+form.secActive .form.second {
     opacity: 1;
     pointer-events: auto;
     transform: translateX(0);
 }
-form.secActive .form.first{
+
+form.secActive .form.first {
     opacity: 0;
     pointer-events: none;
     transform: translateX(-100%);
 }
-.containerProfile form .title{
+
+.containerProfile form .title {
     display: block;
     margin-bottom: 8px;
     font-size: 16px;
@@ -119,36 +131,42 @@ form.secActive .form.first{
     margin: 6px 0;
     color: #333;
 }
-.containerProfile form .fields{
+
+.containerProfile form .fields {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
 }
-form .fields .input-field{
+
+form .fields .input-field {
     display: flex;
     width: calc(100% / 3 - 15px);
     flex-direction: column;
-    margin:0;
+    margin: 0;
+    padding-top: 12px;
+    border-radius: 5px;
 }
 
-form .fields .fields .input-field{
+form .fields .fields .input-field {
     display: flex;
     width: calc(100% / 3 - 15px);
     flex-direction: column;
     margin: 4px 0;
 }
 
-.input-field label{
+.input-field label {
     font-size: 15px;
     font-weight: 400;
     line-height: 18px;
     letter-spacing: 0.02em;
     color: #2C3F58;
     font-family: 'Golos Text';
-font-style: normal;
+    font-style: normal;
 }
-.input-field input, select{
+
+.input-field input,
+select {
     outline: none;
     font-size: 14px;
     font-weight: 400;
@@ -159,18 +177,23 @@ font-style: normal;
     height: 42px;
     margin: 8px 0;
 }
+
 .input-field input :focus,
-.input-field select:focus{
-    box-shadow: 0 3px 6px rgba(0,0,0,0.13);
+.input-field select:focus {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.13);
 }
+
 .input-field select,
-.input-field input[type="date"]{
+.input-field input[type="date"] {
     color: #707070;
 }
-.input-field input[type="date"]:valid{
+
+.input-field input[type="date"]:valid {
     color: #333;
 }
-.containerProfile form button, .backBtn{
+
+.containerProfile form button,
+.backBtn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -186,87 +209,89 @@ font-style: normal;
     transition: all 0.3s linear;
     cursor: pointer;
 }
-.containerProfile form .btnText{
+
+.containerProfile form .btnText {
     font-size: 14px;
     font-weight: 400;
 }
-form button:hover{
+
+form button:hover {
     background-color: #265df2;
 }
+
 form button i,
-form .backBtn i{
+form .backBtn i {
     margin: 0 6px;
 }
-form .backBtn i{
+
+form .backBtn i {
     transform: rotate(180deg);
 }
-form .buttons{
+
+form .buttons {
     display: flex;
     align-items: center;
 }
-form .buttons button , .backBtn{
+
+form .buttons button,
+.backBtn {
     margin-right: 14px;
 }
 
 @media (max-width: 750px) {
-    .containerProfile form{
+    .containerProfile form {
         overflow-y: scroll;
     }
-    .containerProfile form::-webkit-scrollbar{
-       display: none;
+
+    .containerProfile form::-webkit-scrollbar {
+        display: none;
     }
-    form .fields .input-field{
+
+    form .fields .input-field {
         width: calc(100% / 2 - 15px);
     }
 }
 
 @media (max-width: 550px) {
-    form .fields .input-field{
+    form .fields .input-field {
         width: 100%;
     }
 }
- 
+
 
 /* Styling for Progress Bar */
-.progress {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
-  margin-bottom: 3.5rem;
+
+.progressbar .left {
+    position: relative;
+    width: 129px;
+    height: 18px;
+    left: 99px;
+    font-family: 'Golos Text';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 18px;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.02em;
+
+    color: #2C3F58;
 }
 
-.progress .point {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #cccccc;
-  position: relative;
-}
+.progressbar .right {
+    position: relative;
+    width: 129px;
+    height: 18px;
+    left: 1499px;
+    font-family: 'Golos Text';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 18px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    letter-spacing: 0.02em;
+    color: #2C3F58;
 
-.progress .point.active {
-  background-color: #1890ff;
 }
-
-.progress .point:after {
-  content: "";
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 50%;
-  color: #fff;
-  background-color: #65C979;
-}
-
-.progress .line {
-  flex: 1;
-  height: 3px;
-  background-color: #cccccc;
-  margin: auto 0;
-}
-
-.progress .line.active {
-  background-color: #1890ff;
-}
-
