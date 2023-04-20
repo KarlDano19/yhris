@@ -1,6 +1,7 @@
 // Login.tsx
 'use client';
-import React from 'react';
+import React, { FormEvent } from 'react';
+import Modal from 'react-modal';
 import { useState } from 'react';
 import imageToAdd from "./../assets/images/logo.png";
 import { Button, Checkbox, Form, Input } from 'antd';
@@ -17,10 +18,16 @@ export default function Login() {
     setFormData({ ...formData, [name]: value });
   }
 
-  const handleSubmit = (event: { preventDefault: () => void; }) => {
+ 
+  const [modalIsOpen, setModalIsOpen] = useState(false); // define modalIsOpen and setModalIsOpen
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Handle form submission
-  }
+    console.log('Submitting form...');
+    setModalIsOpen(true); // open the modal on form submission
+};
+const handleModal = () => {
+    setModalIsOpen(!modalIsOpen);
+}
 
   const { email, password } = formData;
 
@@ -81,6 +88,39 @@ export default function Login() {
           </div>
         </div>
       </section>
+
+      <Modal isOpen={modalIsOpen} style={{
+                overlay: {
+                    borderRadius: '50px',
+                    width: '515px',
+                    height: '502px',
+                    textAlign: "center",
+                    alignItems: 'center',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%,-50%)',
+                    padding: '10px',
+                    outline: 'none',
+                    boxShadow: 'none',
+                }, content: {
+                    backgroundColor: 'none'
+                }
+            }} onRequestClose={() => setModalIsOpen(false)}>
+                <div className="popupModal flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center justify-center mb-4">
+                        <div className="flex items-center justify-center rounded-full mb-4">
+                            <img src='welcomeEmoji.png' style={{ width: '113px', height: '113px' }} />
+                        </div>
+                        <br />
+                        <h1 className="font-bold text-2xl text-[#4CAF50]">Welcome to YAHSHUA HRIS</h1>
+                        <br />
+                        <p className="text-[#2C3F58] text-center flex-grow" style={{ paddingBottom: '50px' }}><b>I am your help in managing your people.</b>Are you ready to transform your team?</p>
+                        <button className="bg-blue-700 hover:bg-[#355FD0] text-[#FFFFFF] py-2 px-4 rounded" style={{ width: '85%', position: 'absolute', bottom: 5, margin: '2rem 0rem', borderRadius: '5px' }} onClick={() => setModalIsOpen(false)}>YES, LET'S GO</button>
+                    </div>
+                </div>
+
+            </Modal>
 
 
     </>
