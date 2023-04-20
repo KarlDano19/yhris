@@ -72,54 +72,54 @@ const Profile: React.FC = () => {
         <>
             <Header></Header>
            
-            <div className="containerProfile">
-            <header>Tell us more about youself</header>
+            <div className="containerProfile container">
+            <header style={{color:'#2C3F58',fontFamily: 'Golos Text',fontStyle: 'normal',fontWeight: '600',fontSize: '25px' }}>Tell us more about youself</header>
                 <div className="progress">
                     <div className={`point ${activeStep === 1 ? 'active' : 'active'}`}>
                         <br></br><b>Company Details</b></div>
-                    <div className="line"></div>
+                    <div className="line" style={{width: '700px',height: '4px'}}></div>
                     <div className={`point ${activeStep === 2 ? 'active' : ''}`}><br></br><b>Settings</b></div>
                 </div>
                 
 
                 <form onSubmit={handleSubmit}>
-                    <div className="form first" style={{ width: '100%'}}>
+                    <div className="form first" style={{ width: '100%', paddingLeft:'5rem',paddingRight:'5rem'}}>
 
                         <div className="details personal">
                             {/* <span className="title">Personal Details</span> */}
                             <div className="fields" style={{ display: 'flex', flexDirection: "row" }}>
-                                <div className="input" style={{ display: 'flex', flexBasis: '15%' }}>
-                                    <img src='userIcon.png' style={{ width: '15.938rem', height: '12.25rem' }}></img>
+                                <div className="input-field" style={{ display: 'flex', flexBasis: '15%' }}>
+                                    <img src='userIcon.png' style={{ boxSizing:'border-box',width:'180px',height:'195px',left:'50px',top:'264px',background: '#ACB9CB',borderRadius:'5px'}}></img>
                                 </div>
-                                <div className='firstSection' style={{ display: 'flex', flexDirection: 'column', width: '50%', flexBasis: '35%', padding: '20px' }}>
-                                    <div className="input-field" style={{ width: '100%' }}>
-                                        <label>Company Name</label>
-                                        <input type="text" placeholder="Enter Company name" value={formValues.companyName} onChange={(event) => setFormValues({...formValues, companyName: event.target.value})} required></input>
+                                <div className='firstSection' style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div className="input-field" style={{ width: '100%' ,padding: '0 8px'}}>
+                                        <label>Company Name<span className="required">*</span></label>
+                                        <input type="text" placeholder="Enter Company name" value={formValues.companyName} onChange={(event) => setFormValues({...formValues, companyName: event.target.value})} required style={{ boxSizing: 'border-box',width: '100%',height: '2.8125rem',left: '233px',top: '288px',background: '#FFFFFF',border: '1px solid #ACB9CB',borderRadius: '5px'}}></input>
                                     </div>
 
-                                    <div className="input-field" style={{ width: '100%' }}>
+                                    <div className="input-field" style={{ width: '100%',padding: '0 8px' }}>
                                         <label>Company Logo</label>
-                                        <input type="text" placeholder="" value={formValues.companyLogo} onChange={(event) => setFormValues({...formValues, companyLogo: event.target.value})} required></input>
+                                        <input type="text" placeholder="" value={formValues.companyLogo} onChange={(event) => setFormValues({...formValues, companyLogo: event.target.value})} required style={{boxSizing: 'border-box',width: '21.875rem',height: '2.8125rem',left: '233px',top: '288px',background: '#FFFFFF',border: '1px solid #ACB9CB',borderRadius: '5px'}}></input>
                                     </div>
                                 </div>
-                                <div className="input-field" style={{ display: 'flex', flexBasis: '50%', width: '100%' }}>
+                                <div className="input-field" style={{ display: 'flex', width: '599px',boxSizing:'border-box',height:'140px',left:'639px',top:'288px',backgroundColor:'#FFFFFF',borderRadius:'px' }}>
                                     <label>About the Company</label>
                                     <input type="text" placeholder="Enter details about the company" value={formValues.aboutCompany} onChange={(event) => setFormValues({...formValues, aboutCompany: event.target.value})} required style={{ width: '100%', height: '8rem' }}></input>
                                 </div>
                             </div>
 
-                            <div className='secondRow' style={{ display: 'flex' }}>
-                                <div className="input-field" style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '0 8px' }}>
-                                    <label>Type of Industry</label>
+                            <div className='fields1 fields' style={{ display: 'flex',flexDirection:'row' }}>
+                                <div className="input-field" style={{ display: 'flex', padding: '0 8px' }}>
+                                    <label>Type of Industry<span className="required">*</span></label>
                                     <input type="text" placeholder="Enter type of Industry" value={formValues.industryType} onChange={(event) => setFormValues({...formValues, industryType: event.target.value})} required></input>
                                 </div>
 
-                                <div className="input-field" style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '0 8px' }}>
-                                    <label>No. of Employees</label>
+                                <div className="input-field" style={{ display: 'flex', padding: '0 8px' }}>
+                                    <label>No. of Employees<span className="required">*</span></label>
                                     <input type="number" placeholder="Enter no. of employees" value={formValues.numberOfEmployees} onChange={(event) => setFormValues({...formValues, numberOfEmployees: event.target.value})} required></input>
                                 </div>
 
-                                <div className="input-field" style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '0 8px' }}>
+                                <div className="input-field" style={{ display: 'flex', padding: '0 8px' }}>
                                     <label>Work Setup</label>
                                     <input type="text" placeholder="Enter work type" value={formValues.workSetup} onChange={(event) => setFormValues({...formValues, workSetup: event.target.value})} required></input>
                                 </div>
@@ -128,16 +128,16 @@ const Profile: React.FC = () => {
                         </div>
 
                         <div className="details ID">
-                            <span className="title">Contact Details</span>
+                            <span className="title" style={{fontFamily:'Golos Text',fontStyle:'normal',color:'#2C3F58',fontWeight:'600'}}>Contact Details</span>
 
                             <div className="fields">
                                 <div className="input-field">
-                                    <label>Email</label>
+                                    <label>Email<span className="required">*</span></label>
                                     <input type="text" placeholder="Enter your email" value={formValues.email} onChange={(event) => setFormValues({...formValues, email: event.target.value})} required></input>
                                 </div>
 
                                 <div className="input-field">
-                                    <label>Mobile Number</label>
+                                    <label>Mobile Number<span className="required">*</span></label>
                                     <input type="number" placeholder="Enter mobile number" value={formValues.mobileNumber} onChange={(event) => setFormValues({...formValues, mobileNumber: event.target.value})} required></input>
                                 </div>
 
@@ -148,36 +148,36 @@ const Profile: React.FC = () => {
                             </div>
                         </div>
                         <div className="details ID2">
-                            <span className="title">Address</span>
+                            <span className="title" style={{fontFamily:'Golos Text',fontStyle:'normal',color:'#2C3F58',fontWeight:'600'}}>Address</span>
 
                             <div className="fields">
                                 <div className="input-field">
-                                    <label>House No./Bldg/Apartment/Suite,etc.</label>
+                                    <label>House No./Apartment.</label>
                                     <input type="text" placeholder="Enter your house details" value={formValues.address} onChange={(event) => setFormValues({...formValues, address: event.target.value})} required></input>
                                 </div>
 
                                 <div className="input-field">
-                                    <label>Street</label>
+                                    <label>Street<span className="required">*</span></label>
                                     <input type="text" placeholder="Enter street address" value={formValues.street} onChange={(event) => setFormValues({...formValues, street: event.target.value})} required></input>
                                 </div>
 
                                 <div className="input-field">
-                                    <label>Town/Brgy.</label>
+                                    <label>Town/Brgy.<span className="required">*</span></label>
                                     <input type="text" placeholder="Enter Town details" value={formValues.town} onChange={(event) => setFormValues({...formValues, town: event.target.value})} required></input>
                                 </div>
 
                                 <div className="input-field">
-                                    <label>City</label>
+                                    <label>City<span className="required">*</span></label>
                                     <input type="text" placeholder="Enter City name" value={formValues.city} onChange={(event) => setFormValues({...formValues, city: event.target.value})} required></input>
                                 </div>
 
                                 <div className="input-field">
-                                    <label>ZipCode</label>
+                                    <label>ZipCode<span className="required">*</span></label>
                                     <input type="number" value={formValues.pincode} placeholder="Enter Zip Code" onChange={(event) => setFormValues({...formValues, pincode: event.target.value})} required></input>
                                 </div>
 
                                 <div className="input-field">
-                                    <label>Country</label>
+                                    <label>Country<span className="required">*</span></label>
                                     <select id="country" name="country" value={formValues.country} onChange={handleChange}  required>
                                         <option value="">Select a country</option>
                                         <option value="India">India</option>

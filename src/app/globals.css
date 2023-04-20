@@ -28,12 +28,30 @@ body {
 
 /* Styling for Profile Component */
 
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    left: -10000px;
+    overflow: hidden;
+  }
+
+label {
+    display: inline-block;
+    /* width: 120px; */
+    vertical-align: top;
+  }
+  
+  .required {
+    color: red;
+  }
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Golo Text';
 }
 body{
     /* min-height: 100vh; */
@@ -42,19 +60,18 @@ body{
 }
 .containerProfile{
     position: relative;
-    /* max-width: 1800px; */
+    max-width: 1800px;
     width: 100%;
     border-radius: 6px;
-    padding: 30px;
+    /* padding: 30px; */
     margin: 0 15px;
     background-color: #fff;
     box-shadow: 0 5px 10px rgba(0,0,0,0.1);
 }
 .containerProfile header{
     position: relative;
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
+    padding-top: 10px;
+    margin-left: 25px;
 }
 .containerProfile header::before{
     content: "";
@@ -114,10 +131,20 @@ form .fields .input-field{
     flex-direction: column;
     margin: 4px 0;
 }
+
+form .fields .fields .input-field{
+    display: flex;
+    width: calc(100% / 3 - 15px);
+    flex-direction: column;
+    margin: 4px 0;
+}
+
 .input-field label{
-    font-size: 12px;
-    font-weight: 500;
-    color: #2e2e2e;
+    font-size: 15px;
+    font-weight: 400;
+    color: #2C3F58;
+    font-family: 'Golos Text';
+font-style: normal;
 }
 .input-field input, select{
     outline: none;
