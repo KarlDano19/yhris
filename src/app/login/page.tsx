@@ -34,12 +34,12 @@ export default function Login() {
     <>
       {/* <section className=" container min-h-screen flex items-center justify-center"> */}
         <div className="flex rounded-2xl items-center" style={{position:"absolute", top:"0px", right:"0px", left:"0px", bottom:"0px", padding:"0px"}}>
-          <div className="md:w-1 md:px-16" style={{margin: '70px',width: '35%',height: '70%'}}>
-            <p className=" text" style={{fontStyle: 'normal',fontWeight: '700',fontSize: '45px',textAlign:'center',alignItems:'center',color:'#2C3F58',fontFamily:'Golo Text',width:'371px',height:'54px',lineHeight:'5rem'}}>
+          <div className="md:w-1 md:px-16" style={{margin: '70px',width: '35%'}}>
+            <p className=" text" style={{position:'absolute', display:'flex',flexDirection:'row',marginLeft:'115px', fontStyle: 'normal',fontWeight: '700',fontSize: '45px',top:'160px',color:'#2C3F58',fontFamily:'Golo Text',width:'371px',height:'54px',lineHeight:'5rem'}}>
               Welcome back!
             </p>
-            <p className="text-[rgba(111,130,155,1)]" style={{fontFamily: 'Golos Text',margin:'10px',width:'370px',height:'35px',fontStyle: 'normal',fontWeight: '400',fontSize: '15px',lineHeight: '18px',display: 'flex',alignItems: 'center',textAlign: 'center',letterSpacing: '0.02em' }}>
-              Start managing your people faster and better
+            <p className="text-[rgba(111,130,155,1)]" style={{position:'absolute',fontFamily: 'Golos Text',margin:'10px',width:'370px',height:'35px',fontStyle: 'normal',fontWeight: '400',fontSize: '15px',lineHeight: '18px',display: 'flex',alignItems: 'center',textAlign: 'center',letterSpacing: '0.02em',top: '210px',left: '250px'}}>
+              Start managing your people faster and better 
             </p>
             <form
               onSubmit={handleSubmit}
@@ -86,8 +86,8 @@ export default function Login() {
             </div>
 
 
-          <div className="buttons" style={{display:'flex',flexDirection:'row',gap: '75px', padding: '10px 0' }}>
-            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]"  style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
+          <div className="buttons w-full" style={{display:'flex',flexDirection:'row',gap: '115px'}}>
+            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]"  style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'200px',height:'45px'}}>
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +113,7 @@ export default function Login() {
               </svg>
               Google
             </button>
-            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]" style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
+            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]" style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'200px',height:'45px'}}>
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
