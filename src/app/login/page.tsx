@@ -2,9 +2,12 @@
 "use client";
 import React, { FormEvent } from "react";
 import Modal from "react-modal";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from "react";
+import { Library, library } from "@fortawesome/fontawesome-svg-core";
 import imageToAdd from "./../assets/images/logo.png";
 import { Button, Checkbox, Form, Input } from "antd";
+import { BiEnvelope, BiLock } from "react-icons/bi";
 export default function Login() {
   // const [email, setEmail] = useState('');
   // const [password, setPassword] = useState('');
@@ -12,6 +15,7 @@ export default function Login() {
     email: "",
     password: "",
   });
+
 
   const handleInputChange = (event: { target: { name: any; value: any } }) => {
     const { name, value } = event.target;
@@ -33,61 +37,130 @@ export default function Login() {
   return (
     <>
       {/* <section className=" container min-h-screen flex items-center justify-center"> */}
-        <div className="flex rounded-2xl items-center" style={{position:"absolute", top:"0px", right:"0px", left:"0px", bottom:"0px", padding:"0px"}}>
-          <div className="md:w-1 md:px-16" style={{margin: '70px',width: '35%'}}>
-            <p className=" text" style={{position:'absolute', display:'flex',flexDirection:'row',marginLeft:'115px', fontStyle: 'normal',fontWeight: '700',fontSize: '45px',top:'160px',color:'#2C3F58',fontFamily:'Golo Text',width:'371px',height:'54px',lineHeight:'5rem'}}>
-              Welcome back!
-            </p>
-            <p className="text-[rgba(111,130,155,1)]" style={{position:'absolute',fontFamily: 'Golos Text',margin:'10px',width:'370px',height:'35px',fontStyle: 'normal',fontWeight: '400',fontSize: '15px',lineHeight: '18px',display: 'flex',alignItems: 'center',textAlign: 'center',letterSpacing: '0.02em',top: '210px',left: '250px'}}>
-              Start managing your people faster and better 
-            </p>
-            <form
-              onSubmit={handleSubmit}
-              action=""
-              className="flex flex-col gap-2"
-            >
-              <input
-                type="email"
-                className="p-2 border"
-                name="email"
-                onChange={handleInputChange}
-                value={email}
-                required
-                placeholder="Email"
-              />
-              <div className="relative">
-                <Form.Item
-                  className=""
-                  name="password"
-                  initialValue={password}
-                  rules={[
-                    { required: true, message: "Please input your password!" },
-                  ]}
-                >
-                  <Input.Password placeholder="Password" />
-                </Form.Item>
-              </div>
-              <div className=" border-[#002D74] " style={{display:'flex',justifyContent:'flex-end',gap:'1px ',color:'rgba(53, 95, 208, 1)',fontStyle: 'normal',fontWeight: '400'}}>
-                <a href="/forget-password"><b>Forgot password?</b></a>
-              </div>
-              <button className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300">
-                Sign In
-              </button>
-              <div className="footer" style={{fontFamily: 'Golos Text',fontStyle: 'normal',fontWeight: '400',fontSize: '15px',lineHeight: '18px',textAlign: 'center',letterSpacing: '0.02em',color: '#2C3F58'
-}}>
-                 <p>Don't have an account?<b style={{color:'rgba(53, 95, 208, 1)'}}>Sign Up here</b></p>
-              </div>
-              
-            </form>
-            <div className="mt-6 grid grid-cols-3 items-center text-gray-400">
-              <hr className="border-gray-400"></hr>
-              <p className="text-center text-sm">or</p>
-              <hr className="border-gray-400"></hr>
+      <div
+        className="flex rounded-2xl items-center"
+        style={{
+          position: "absolute",
+          top: "0px",
+          right: "0px",
+          left: "0px",
+          bottom: "0px",
+          padding: "0px",
+        }}
+      >
+        <div
+          className="md:w-1 md:px-16"
+          style={{ margin: "70px", width: "35%" }}
+        >
+          <p
+            className=" text"
+            style={{
+              position: "absolute",
+              display: "flex",
+              flexDirection: "row",
+              marginLeft: "115px",
+              fontStyle: "normal",
+              fontWeight: "700",
+              fontSize: "45px",
+              top: "160px",
+              color: "#2C3F58",
+              fontFamily: "Golo Text",
+              width: "371px",
+              height: "54px",
+              lineHeight: "5rem",
+            }}
+          >
+            Welcome back!
+          </p>
+          <p
+            className="text-[rgba(111,130,155,1)]"
+            style={{
+              position: "absolute",
+              fontFamily: "Golos Text",
+              margin: "10px",
+              width: "370px",
+              height: "35px",
+              fontStyle: "normal",
+              fontWeight: "400",
+              fontSize: "15px",
+              lineHeight: "18px",
+              display: "flex",
+              alignItems: "center",
+              textAlign: "center",
+              letterSpacing: "0.02em",
+              top: "210px",
+              left: "250px",
+            }}
+          >
+            Start managing your people faster and better
+          </p>
+          <form
+            onSubmit={handleSubmit}
+            action=""
+            className="flex flex-col gap-2"
+          >
+            <div className="relative">
+              <Input size="large" placeholder="Email" prefix={<BiEnvelope style={{color:'#355FD0'}} />} />
             </div>
+            <div className="relative">
+              <Input size="large" placeholder="password" prefix={<BiLock  style={{color:'#355FD0'}}/>} />
+            </div>
+            <div
+              className=" border-[#002D74] "
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "1px ",
+                color: "rgba(53, 95, 208, 1)",
+                fontStyle: "normal",
+                fontWeight: "400",
+              }}
+            >
+              <a href="/forget-password">
+                <b>Forgot password?</b>
+              </a>
+            </div>
+            <button className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300">
+              Sign In
+            </button>
+            <div
+              className="footer"
+              style={{
+                fontFamily: "Golos Text",
+                fontStyle: "normal",
+                fontWeight: "400",
+                fontSize: "15px",
+                lineHeight: "18px",
+                textAlign: "center",
+                letterSpacing: "0.02em",
+                color: "#2C3F58",
+              }}
+            >
+              <p>
+                Don't have an account?
+                <b style={{ color: "rgba(53, 95, 208, 1)" }}>Sign Up here</b>
+              </p>
+            </div>
+          </form>
+          <div className="mt-6 grid grid-cols-3 items-center text-gray-400">
+            <hr className="border-gray-400"></hr>
+            <p className="text-center text-sm">or</p>
+            <hr className="border-gray-400"></hr>
+          </div>
 
-
-          <div className="buttons w-full" style={{display:'flex',flexDirection:'row',gap: '115px'}}>
-            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]"  style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'200px',height:'45px'}}>
+          <div
+            className="buttons w-full"
+            style={{ display: "flex", flexDirection: "row", gap: "115px" }}
+          >
+            <button
+              className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]"
+              style={{
+                border: "1px solid #ACB9CB",
+                borderRadius: "5px",
+                width: "200px",
+                height: "45px",
+              }}
+            >
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +186,15 @@ export default function Login() {
               </svg>
               Google
             </button>
-            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]" style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'200px',height:'45px'}}>
+            <button
+              className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]"
+              style={{
+                border: "1px solid #ACB9CB",
+                borderRadius: "5px",
+                width: "200px",
+                height: "45px",
+              }}
+            >
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
@@ -128,15 +209,30 @@ export default function Login() {
               Facebook
             </button>
           </div>
-          <div className="privacyNotice" style={{fontStyle: 'normal',marginTop:'1rem',fontWeight: '400',fontSize: '15px',textAlign:'center',lineHeight: '18px',alignItems:'center',letterSpacing:'0.02em',textDecorationLine:'underline',color:'#2C3F58'}}>Privacy Notice</div>
-          </div>
-
-          <div style={{position:"absolute", right:"0px", height:"100%"}}>
-            <img src="image1.png" style={{height:"100%"}}  />
+          <div
+            className="privacyNotice"
+            style={{
+              fontStyle: "normal",
+              marginTop: "1rem",
+              fontWeight: "400",
+              fontSize: "15px",
+              textAlign: "center",
+              lineHeight: "18px",
+              alignItems: "center",
+              letterSpacing: "0.02em",
+              textDecorationLine: "underline",
+              color: "#2C3F58",
+            }}
+          >
+            Privacy Notice
           </div>
         </div>
-     
-      
+
+        <div style={{ position: "absolute", right: "0px", height: "100%" }}>
+          <img src="image1.png" style={{ height: "100%" }} />
+        </div>
+      </div>
+
       <Modal
         isOpen={modalIsOpen}
         style={{
