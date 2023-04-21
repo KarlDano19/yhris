@@ -57,7 +57,7 @@ export default function Login() {
               />
               <div className="relative">
                 <Form.Item
-                  className="border"
+                  className=""
                   name="password"
                   initialValue={password}
                   rules={[
@@ -81,13 +81,13 @@ export default function Login() {
             </form>
             <div className="mt-6 grid grid-cols-3 items-center text-gray-400">
               <hr className="border-gray-400"></hr>
-              <p className="text-center text-sm">OR</p>
+              <p className="text-center text-sm">or</p>
               <hr className="border-gray-400"></hr>
             </div>
 
 
-          <div className="buttons" style={{display:'flex',flexDirection:'row',gap: '50px', padding: '10px 0' }}>
-            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#002D74]"  style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
+          <div className="buttons" style={{display:'flex',flexDirection:'row',gap: '75px', padding: '10px 0' }}>
+            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]"  style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +113,7 @@ export default function Login() {
               </svg>
               Google
             </button>
-            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#3b5998]" style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
+            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#2C3F58]" style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +132,7 @@ export default function Login() {
           </div>
 
           <div style={{position:"absolute", right:"0px", height:"100%"}}>
-            <img src="image1.png" style={{height:"100%"}} className="rounded-2xl" />
+            <img src="image1.png" style={{height:"100%"}}  />
           </div>
         </div>
      

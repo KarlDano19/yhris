@@ -132,7 +132,7 @@ const Register: React.FC = () => {
           </div>
 
           <div style={{position:"absolute", right:"0px", height:"100%"}}>
-            <img src="image1.png" style={{height:"100%"}}  className="rounded-2xl" />
+            <img src="image1.png" style={{height:"100%"}} />
           </div>
         </div>
       {/* </section> */}

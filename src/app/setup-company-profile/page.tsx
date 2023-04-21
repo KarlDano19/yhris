@@ -126,7 +126,7 @@ const Profile: React.FC = () => {
           <div className="flex flex-col items-center justify-center mb-4">
             <div className="flex items-center justify-center rounded-full mb-4">
               <img
-                src="welcomeEmoji.png"
+                src="emoji.png"
                 style={{ width: "113px", height: "113px" }}
               />
             </div>
