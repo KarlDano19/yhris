@@ -34,21 +34,21 @@ export default function Login() {
     <>
       {/* <section className=" container min-h-screen flex items-center justify-center"> */}
         <div className="flex rounded-2xl items-center" style={{position:"absolute", top:"0px", right:"0px", left:"0px", bottom:"0px", padding:"0px"}}>
-          <div className="md:w-1/2 px-8 md:px-16">
-            <h2 className="font-bold text-2xl text-[rgb(72,61,139)]">
-              Welcome Back{" "}
-            </h2>
-            <p className="text-xs mt-4 text-[rgb(169,169,169)]">
+          <div className="md:w-1 md:px-16" style={{margin: '70px',width: '35%',height: '70%'}}>
+            <p className=" text" style={{fontStyle: 'normal',fontWeight: '700',fontSize: '45px',textAlign:'center',alignItems:'center',color:'#2C3F58',fontFamily:'Golo Text',width:'371px',height:'54px',lineHeight:'5rem'}}>
+              Welcome back!
+            </p>
+            <p className="text-[rgba(111,130,155,1)]" style={{fontFamily: 'Golos Text',margin:'10px',width:'370px',height:'35px',fontStyle: 'normal',fontWeight: '400',fontSize: '15px',lineHeight: '18px',display: 'flex',alignItems: 'center',textAlign: 'center',letterSpacing: '0.02em' }}>
               Start managing your people faster and better
             </p>
             <form
               onSubmit={handleSubmit}
               action=""
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-2"
             >
               <input
                 type="email"
-                className="p-2 mt-8 rounded-xl border"
+                className="p-2 border"
                 name="email"
                 onChange={handleInputChange}
                 value={email}
@@ -57,7 +57,7 @@ export default function Login() {
               />
               <div className="relative">
                 <Form.Item
-                  className="p-2 rounded-xl border w-full"
+                  className="border"
                   name="password"
                   initialValue={password}
                   rules={[
@@ -67,12 +67,17 @@ export default function Login() {
                   <Input.Password placeholder="Password" />
                 </Form.Item>
               </div>
+              <div className=" border-[#002D74] " style={{display:'flex',justifyContent:'flex-end',gap:'1px ',color:'rgba(53, 95, 208, 1)',fontStyle: 'normal',fontWeight: '400'}}>
+                <a href="/forget-password"><b>Forgot password?</b></a>
+              </div>
               <button className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300">
                 Sign In
               </button>
-              <div className="mt-5 text-xs border-b border-[#002D74] py-4 text-[#002D74]">
-                <a href="#">Forgot your password?</a>
+              <div className="footer" style={{fontFamily: 'Golos Text',fontStyle: 'normal',fontWeight: '400',fontSize: '15px',lineHeight: '18px',textAlign: 'center',letterSpacing: '0.02em',color: '#2C3F58'
+}}>
+                 <p>Don't have an account?<b style={{color:'rgba(53, 95, 208, 1)'}}>Sign Up here</b></p>
               </div>
+              
             </form>
             <div className="mt-6 grid grid-cols-3 items-center text-gray-400">
               <hr className="border-gray-400"></hr>
@@ -80,7 +85,9 @@ export default function Login() {
               <hr className="border-gray-400"></hr>
             </div>
 
-            <button className="bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#002D74]">
+
+          <div className="buttons" style={{display:'flex',flexDirection:'row',gap: '50px', padding: '10px 0' }}>
+            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#002D74]"  style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
@@ -104,9 +111,9 @@ export default function Login() {
                   d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
                 />
               </svg>
-              Login with Google
+              Google
             </button>
-            <button className="bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#3b5998]">
+            <button className="bg-white border py-2 w-full  mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#3b5998]" style={{border: '1px solid #ACB9CB',borderRadius: '5px',width:'177px',height:'45px'}}>
               <svg
                 className="mr-3"
                 xmlns="http://www.w3.org/2000/svg"
@@ -118,17 +125,13 @@ export default function Login() {
                   d="M22.5,0H1.5C0.673,0,0,0.673,0,1.5v21c0,0.827,0.673,1.5,1.5,1.5h10.73v-8.823H9.81v-3.431h2.42v-2.576c0-2.396,1.465-3.695,3.586-3.695c0.981,0,1.821,0.073,2.065,0.105v2.494l-1.414,0.002c-1.112,0-1.327,0.529-1.327,1.301v1.704h2.647l-0.346,3.43h-2.301v8.823h4.499c0.827,0,1.5-0.673,1.5-1.5V1.5C24,0.673,23.327,0,22.5,0z"
                 />
               </svg>
-              Login with Facebook
+              Facebook
             </button>
-            <div className="mt-3 text-xs flex justify-between items-center text-[#002D74]">
-              <p>Don't have an account?</p>
-              <button className="py-2 px-5 bg-white border rounded-xl hover:scale-110 duration-300">
-                <a href="/register">Register</a>
-              </button>
-            </div>
+          </div>
+          <div className="privacyNotice" style={{fontStyle: 'normal',marginTop:'1rem',fontWeight: '400',fontSize: '15px',textAlign:'center',lineHeight: '18px',alignItems:'center',letterSpacing:'0.02em',textDecorationLine:'underline',color:'#2C3F58'}}>Privacy Notice</div>
           </div>
 
-          <div style={{position:"absolute", right:"0px", height:"100%"}} >
+          <div style={{position:"absolute", right:"0px", height:"100%"}}>
             <img src="image1.png" style={{height:"100%"}} className="rounded-2xl" />
           </div>
         </div>

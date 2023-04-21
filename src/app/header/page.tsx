@@ -56,11 +56,11 @@ const Header = () => {
         </h1>
       </div>
       <div className="grow">
-        <div className="flex items-center justify-center gap-2 md:gap-8">
+        <div className="flex items-center justify-end gap-2 md:gap-8">
           <img src="user.png" height="29px" width="29px" />
           <div
             className="currentDate"
-            style={{ width: "142px", height: "16px", fontSize: "small" }}
+            style={{ height: "16px", fontSize: "small" }}
           >
             {date}
           </div>
