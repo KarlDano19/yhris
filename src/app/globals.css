@@ -311,3 +311,11 @@ form .buttons button,
     border-radius: 100%;
     background-color: rgb(241, 249, 241);
   }
+
+  .formBox {
+    display: none;
+  }
+  
+  .modal2Open .formBox {
+    display: block;
+  }
