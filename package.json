@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
+    "@fortawesome/fontawesome-svg-core": "^6.4.0",
+    "@fortawesome/free-brands-svg-icons": "^6.4.0",
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@types/node": "18.15.11",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
@@ -27,6 +31,7 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.4",
     "react-dom": "^18.2.0",
+    "react-hydration-provider": "^1.0.2",
     "react-icons": "^4.8.0",
     "react-modal": "^3.16.1",
     "react-redux": "^8.0.5",

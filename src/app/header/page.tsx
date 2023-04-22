@@ -1,10 +1,12 @@
-"use client";
+"use client"; 
+
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
-import Link from "next/link";
+import { HydrationProvider, Client } from "react-hydration-provider";
+
 
 const Header = () => {
+  
   const [date, setDate] = useState(
     new Date().toLocaleString("en-US", {
       month: "long",
@@ -28,11 +30,13 @@ const Header = () => {
           second: "numeric",
         })
       );
-    }, 1000);
+    }, 1);
     return () => clearInterval(timer);
   }, []);
 
   return (
+    <HydrationProvider>
+      <Client>
     <div
       className={"mx-auto flex items-center border-b-2 px-6 py-2"}
       style={{ fontSize: "28px" }}
@@ -67,6 +71,8 @@ const Header = () => {
         </div>
       </div>
     </div>
+    </Client>
+    </HydrationProvider>
   );
 };
 
