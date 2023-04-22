@@ -102,9 +102,12 @@ const Register: React.FC = () => {
             >
               <Input.Password placeholder="Password" />
             </Form.Item>
+
             <button className="bg-[rgb(65,105,225)] rounded-xl text-white py-2 hover:scale-105 duration-300">
-              Sign Up
+            <a href="/setup-company-profile">
+              Sign Up</a>
             </button>
+
           </form>
           <div className="mt-3 text-xs flex justify-between items-center text-[#002D74]">
             <div>
