@@ -74,6 +74,7 @@ const jobPosting = () => {
 
           <div className="dashField">
             <div>
+               <img src="employee.png" style={{position:'absolute'}}></img>
               <img src="employeeKit.png" />
             </div>
             <div className="description">Employee kit</div>
