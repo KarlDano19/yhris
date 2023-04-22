@@ -121,7 +121,7 @@ export default function Login() {
               </a>
             </div>
             <button className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300" style={{cursor:'pointer'}}>
-              Sign In
+             <a href="/setup-company-profile"> Sign In</a>
             </button>
             <div
               className="footer"
@@ -138,7 +138,7 @@ export default function Login() {
             >
               <p>
                 Don't have an account?
-                <b style={{ color: "rgba(53, 95, 208, 1)" }}>Sign Up here</b>
+                <b style={{ color: "rgba(53, 95, 208, 1)" }}><a href="/create-account">Sign Up here</a></b>
               </p>
             </div>
           </form>
