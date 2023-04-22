@@ -319,3 +319,77 @@ form .buttons button,
   .modal2Open .formBox {
     display: block;
   }
+
+  /* Job Posting CSS */
+.upperDashboard .dashField{
+  box-sizing: border-box;
+  position: relative;
+  width: 290.6px;
+  height: 250px;
+  background: #FFFFFF;
+  box-shadow: -1px 1px 5px 1px rgba(50, 64, 79, 0.09);
+  border-radius: 20px;
+  display: flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  grid-row-gap: 12px;
+  margin: 20px;
+}
+
+.upperDashboard .dashField div{
+    padding: 1.6rem;
+}
+
+.lowerDashboard .dashField{
+    box-sizing: border-box;
+    position: relative;
+    width: 290.6px;
+  height: 250px;
+    background: #FFFFFF;
+    box-shadow: -1px 1px 5px 1px rgba(50, 64, 79, 0.09);
+    border-radius: 20px;
+    display: flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    grid-column-gap: 12px;
+    margin: 20px;
+
+}
+
+.lowerDashboard .dashField div{
+    padding:1.6rem;
+}
+
+.dashField .description{
+font-family: 'Golos Text';
+font-style: normal;
+font-weight: 600;
+font-size: 20px;
+line-height: 24px;
+display: flex;
+align-items: center;
+text-align: center;
+letter-spacing: 0.02em;
+
+color: #2C3F58;
+}
+
+.dashBody h1{
+    font-family: 'Golos Text';
+font-style: normal;
+font-weight: 600;
+font-size: 28px;
+line-height: 30px;
+/* identical to box height */
+
+display: flex;
+align-items: center;
+letter-spacing: 0.02em;
+
+color: #2C3F58;
+width: 311px;
+height: 30px;
+
+}
