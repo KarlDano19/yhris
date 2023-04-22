@@ -59,8 +59,8 @@ const Register: React.FC = () => {
         }}
       >
         <div className="md:w-1/2 px-8 md:px-16">
-          <h2 className="font-bold text-2xl text-[rgb(72,61,139)]">
-            Create Account{" "}
+          <h2 className="font-bold text-2xl" style={{color: '#2C3F58',fontFamily: 'Golos Text',fontStyle: 'normal',fontWeight: '400',marginBottom:'40px'}}>
+            <b>Create Account</b>
           </h2>
           <form action="" className="flex flex-col gap-4">
             Register As

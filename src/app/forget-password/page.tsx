@@ -43,12 +43,12 @@ const ForgetPassword: React.FC = () => {
         }}
       >
         <div className="md:w-1/2 px-8 md:px-16">
-          <h2 className="font-bold text-2xl text-[rgb(72,61,139)]">
+          <h2 className="font-bold text-2xl text-[#2C3F58]">
             Forget your password?
           </h2>
-          <p className="text-xs mt-4 text-[rgb(169,169,169)]">
+          <p className="text-xs mt-4 text-[rgb(169,169,169)]"  style={{marginBottom:'10px',fontWeight: '400',fontSize: '15px'}}>
             Enter your email below and we'll send you a link to reset your
-            password{" "}
+            password
           </p>
           <form
             onSubmit={handleSubmit}
@@ -65,7 +65,7 @@ const ForgetPassword: React.FC = () => {
               Submit
             </button>
             <div className="text-[rgb(65,105,225)]">
-              <a href="/login" className="text-[rgb(65,105,225)]">
+              <a href="/login" style={{color:'#355FD0',fontStyle: 'normal',fontWeight: '600',fontSize: '18px',display:'flex',flexDirection:'row',justifyContent:'center'}}>
                 Back to Sign In
               </a>
             </div>
