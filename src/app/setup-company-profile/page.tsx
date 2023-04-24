@@ -427,7 +427,7 @@ const Profile: React.FC = () => {
                   }}
                 >
                   Contact Details
-                </span>
+                </span> 
 
                 <div className="fields">
                   <div className="input-field">

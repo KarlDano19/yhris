@@ -404,6 +404,7 @@ height: 30px;
 
 /* Post Job Modal design */
 .modal {
+    font-family: 'Golos Text';
   width: 828px;
   height: 509px;
   background-color: #F9FBFC;
@@ -412,3 +413,12 @@ height: 30px;
   margin-left: 27%;
   margin-top: 10%;
 }
+
+.field p{
+    color: #2C3F58;
+    font-size: 20px;
+}
+
+/* .field .inputField{
+    font-size: 45px;
+} */
