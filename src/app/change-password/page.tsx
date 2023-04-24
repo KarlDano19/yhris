@@ -56,11 +56,11 @@ const ChangePassword: React.FC = () => {
             className="flex flex-col gap-4"
           >
            <div className="relative">
-              <Input size="large" placeholder="New Password" prefix={<BiLock  style={{color:'#355FD0'}}/>} />
+              <Input type="password" size="large" placeholder="New Password" prefix={<BiLock  style={{color:'#355FD0'}}/>}  required/>
             </div>
 
             <div className="relative">
-              <Input size="large" placeholder="Confirm Password" prefix={<BiLock  style={{color:'#355FD0'}}/>} />
+              <Input  type="password" required size="large" placeholder="Confirm Password" prefix={<BiLock  style={{color:'#355FD0'}}/>} />
             </div>
             <button
               className="bg-[rgb(65,105,225)] rounded-xl text-white py-2 hover:scale-105 duration-300"
