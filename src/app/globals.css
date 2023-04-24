@@ -338,14 +338,18 @@ form .buttons button,
 }
 
 .upperDashboard .dashField div{
-    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 40px;
 }
 
 .lowerDashboard .dashField{
     box-sizing: border-box;
     position: relative;
     width: 290.6px;
-  height: 250px;
+    height: 250px;
     background: #FFFFFF;
     box-shadow: -1px 1px 5px 1px rgba(50, 64, 79, 0.09);
     border-radius: 20px;
@@ -353,13 +357,17 @@ form .buttons button,
     flex-direction:column;
     align-items:center;
     text-align:center;
-    grid-column-gap: 12px;
+    grid-row-gap: 12px;
     margin: 20px;
 
 }
 
 .lowerDashboard .dashField div{
-    padding:1.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 40px;
 }
 
 .dashField .description{
@@ -392,4 +400,15 @@ color: #2C3F58;
 width: 311px;
 height: 30px;
 
+}
+
+/* Post Job Modal design */
+.modal {
+  width: 828px;
+  height: 509px;
+  background-color: #F9FBFC;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-left: 27%;
+  margin-top: 10%;
 }
