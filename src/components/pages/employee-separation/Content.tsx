@@ -5,19 +5,25 @@ import SeparationLetter from './SeparationLetter'
 import { DocumentsModal, LastPayModal, LetterModal, QuitclaimModal } from '@/types/globals'
 import SignDocuments from './SignDocuments'
 import LastPay from './LastPay'
-import Quitclaim from './QuitClaim'
+import Quitclaim from './Quitclaim'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import { separationItems } from './testData'
+import toast from 'react-hot-toast';
+import AddSeparationModal from './modals/AddSeparationModal'
+import LetterModalMain from './modals/LetterModal'
+import ConfirmModal from './modals/ConfirmModal'
 
 const Content = () => {
+    const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState<LetterModal | null>(null);
     const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<DocumentsModal | null>(null);
     const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<LastPayModal | null>(null);
     const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<QuitclaimModal | null>(null);
     return (
+        <>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="p-2 md:p-8 lg:p-4">
-                <h2 className="text-xl font-bold text-indigo-dye">Separate</h2>
+                <h2 className="text-xl font-bold text-indigo-dye">Employee Separation</h2>
                 <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
                     <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
                         <input
@@ -53,7 +59,7 @@ const Content = () => {
                         </div>
                     </div>
                     <div className="flex-1 flex justify-end">
-                        <button className="bg-green-500 rounded-md py-1.5 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80">CREATE</button>
+                        <button className="bg-green-500 rounded-md py-1.5 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80" onClick={() => setIsAddSeparationModalOpen(true)}>CREATE</button>
                     </div>
                 </div>
                 <div className="mt-8 flow-root">
@@ -104,10 +110,10 @@ const Content = () => {
                                                 <SignDocuments id={item.id} isDocumentsSent={item.isDocumentsSent} isDocumentsReceived={item.isDocumentsReceived} documentReceivedDate={item.documentReceivedDate} setIsDocumentModalOpen={setIsDocumentModalOpen} />
                                             </td>
                                             <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                                                <LastPay id={item.id} isLastPayReleased={item.isLastPayReleased} setIsLastPayModalOpen={setIsDocumentModalOpen} />
+                                                <LastPay id={item.id} isLastPayReleased={item.isLastPayReleased} setIsLastPayModalOpen={setIsLastPayModalOpen} />
                                             </td>
                                             <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                                                <Quitclaim id={item.id} isQuitclaimSigned={item.isQuitclaimSigned} isQuitclaimReceived={item.isQuitclaimReceived} quitclaimReceivedDate={item.quitclaimReceivedDate} setIsQuitclaimModalOpen={setIsDocumentModalOpen} />
+                                                <Quitclaim id={item.id} isQuitclaimSigned={item.isQuitclaimSigned} isQuitclaimReceived={item.isQuitclaimReceived} quitclaimReceivedDate={item.quitclaimReceivedDate} setIsQuitclaimModalOpen={setIsQuitclaimModalOpen} />
                                             </td>
                                         </tr>
                                     )) : (
@@ -127,6 +133,8 @@ const Content = () => {
                 </div>
             </div>
         </div>
+        <ConfirmModal isOpen={isAddSeparationModalOpen} setIsOpen={setIsAddSeparationModalOpen} />
+        </>
     )
 }
 
