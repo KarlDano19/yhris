@@ -12,8 +12,12 @@ import {
     UserGroupIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline'
+import {
+    ChevronDownIcon
+} from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import MainLogo from '../svg/MainLogo'
+import AccountLogo from '@/svg/AccountLogo'
 const user = {
     name: 'Chelsea Hagon',
     email: 'chelsea.hagon@example.com',
@@ -55,7 +59,7 @@ const MainHeader = () => {
                             </div>
                             <div className="flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden">
                                 {/* Mobile menu button */}
-                                <Popover.Button className="-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500">
+                                <Popover.Button className="-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500">
                                     <span className="sr-only">Open menu</span>
                                     {open ? (
                                         <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
@@ -69,9 +73,14 @@ const MainHeader = () => {
                                 {/* Profile dropdown */}
                                 <Menu as="div" className="relative ml-5 flex-shrink-0">
                                     <div>
-                                        <Menu.Button className="flex rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">
+                                        <Menu.Button className="flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
                                             <span className="sr-only">Open user menu</span>
-                                            <img className="h-8 w-8 rounded-full" src={user.imageUrl} alt="" />
+                                            <AccountLogo/>
+                                            <div className="">
+                                                <h3 className="text-sm font-bold">The ABBA Initiative</h3>
+                                                <p className="text-xs">Apr 7, 2023 23:37:05</p>
+                                            </div>
+                                            <ChevronDownIcon className="h-5 w-5" />
                                         </Menu.Button>
                                     </div>
                                     <Transition
@@ -108,63 +117,17 @@ const MainHeader = () => {
 
                     <Popover.Panel as="nav" className="lg:hidden" aria-label="Global">
                         <div className="mx-auto max-w-3xl space-y-1 px-2 pb-3 pt-2 sm:px-4">
-                            {navigation.map((item) => (
+                            {userNavigation.map((item) => (
                                 <a
                                     key={item.name}
                                     href={item.href}
-                                    aria-current={item.current ? 'page' : undefined}
                                     className={classNames(
-                                        item.current ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-50',
-                                        'block rounded-md py-2 px-3 text-base font-medium'
+                                        'block rounded-md py-2 px-3 text-base font-medium hover:bg-gray-50'
                                     )}
                                 >
                                     {item.name}
                                 </a>
                             ))}
-                        </div>
-                        <div className="border-t border-gray-200 pt-4">
-                            <div className="mx-auto flex max-w-3xl items-center px-4 sm:px-6">
-                                <div className="flex-shrink-0">
-                                    <img className="h-10 w-10 rounded-full" src={user.imageUrl} alt="" />
-                                </div>
-                                <div className="ml-3">
-                                    <div className="text-base font-medium text-gray-800">{user.name}</div>
-                                    <div className="text-sm font-medium text-gray-500">{user.email}</div>
-                                </div>
-                                <button
-                                    type="button"
-                                    className="ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
-                                >
-                                    <span className="sr-only">View notifications</span>
-                                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                                </button>
-                            </div>
-                            <div className="mx-auto mt-3 max-w-3xl space-y-1 px-2 sm:px-4">
-                                {userNavigation.map((item) => (
-                                    <a
-                                        key={item.name}
-                                        href={item.href}
-                                        className="block rounded-md px-3 py-2 text-base font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                                    >
-                                        {item.name}
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="mx-auto mt-6 max-w-3xl px-4 sm:px-6">
-                            <a
-                                href="#"
-                                className="flex w-full items-center justify-center rounded-md border border-transparent bg-rose-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-rose-700"
-                            >
-                                New Post
-                            </a>
-
-                            <div className="mt-6 flex justify-center">
-                                <a href="#" className="text-base font-medium text-gray-900 hover:underline">
-                                    Go Premium
-                                </a>
-                            </div>
                         </div>
                     </Popover.Panel>
                 </>
