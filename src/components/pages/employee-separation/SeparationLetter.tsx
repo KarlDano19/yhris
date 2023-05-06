@@ -2,15 +2,15 @@ import { Dispatch, Fragment } from 'react'
 import { Menu, Transition } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import classNames from '@/helpers/classNames'
-import { LetterModal } from '@/types/globals'
+import { T_LetterModal } from '@/types/globals'
 import { DocumentIcon } from '@heroicons/react/24/outline'
 
 const items = [
-    { name: 'Letter of Acceptance', type: 'acceptance' },
-    { name: 'Letter of Separation', type: 'separation' },
+    { name: 'Letter of Acceptance', type: 'Acceptance' },
+    { name: 'Letter of Separation', type: 'Separation' },
 ]
 
-export default function SeparationLetter({ id, isLetterSent, isLetterReceived, letterReceivedDate, setIsLetterModalOpen }: { id: number, isLetterSent: boolean, isLetterReceived: boolean, letterReceivedDate?: string, setIsLetterModalOpen: Dispatch<LetterModal> }) {
+export default function SeparationLetter({ id, isLetterSent, isLetterReceived, letterReceivedDate, setIsLetterModalOpen }: { id: number, isLetterSent: boolean, isLetterReceived: boolean, letterReceivedDate?: string, setIsLetterModalOpen: Dispatch<T_LetterModal> }) {
     return (
         <>
             <div className="inline-flex rounded-md shadow-sm">

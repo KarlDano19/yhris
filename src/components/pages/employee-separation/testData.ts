@@ -16,6 +16,16 @@ export const separationItems = [
             to: '',
             message: '',
         },
+        signDocuments: {
+            template: '',
+            to: '',
+            message: '',
+        },
+        quitclaim: {
+            template: '',
+            to: '',
+            message: '',
+        },
         isLetterSent: true,
         isLetterReceived: true,
         letterReceivedDate: "04/07/2023",
@@ -29,7 +39,7 @@ export const separationItems = [
     },
     {
         id: 2,
-        separationDate: '04/07/2023',
+        separationDate: '05/10/2023',
         name: 'Heather Sakitsaulo',
         reasonForLeaving: 'Resignation',
         department: '',
@@ -41,6 +51,16 @@ export const separationItems = [
         },
         separationLetter: {
             date: '',
+            to: '',
+            message: '',
+        },
+        signDocuments: {
+            template: '',
+            to: '',
+            message: '',
+        },
+        quitclaim: {
+            template: '',
             to: '',
             message: '',
         },

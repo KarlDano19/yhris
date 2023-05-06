@@ -1,9 +1,9 @@
 import classNames from '@/helpers/classNames'
-import { DocumentsModal } from '@/types/globals'
+import { T_DocumentsModal } from '@/types/globals'
 import { DocumentIcon } from '@heroicons/react/24/outline'
 import React, { Dispatch } from 'react'
 
-const SignDocuments = ({ id, isDocumentsSent, isDocumentsReceived, documentReceivedDate, setIsDocumentModalOpen }: { id: number, isDocumentsSent: boolean, isDocumentsReceived: boolean, documentReceivedDate?: string, setIsDocumentModalOpen: Dispatch<DocumentsModal> }) => {
+const SignDocuments = ({ id, isDocumentsSent, isDocumentsReceived, documentReceivedDate, setIsDocumentModalOpen }: { id: number, isDocumentsSent: boolean, isDocumentsReceived: boolean, documentReceivedDate?: string, setIsDocumentModalOpen: Dispatch<T_DocumentsModal> }) => {
     return (
         <div className="flex flex-col gap-2">
             <div>

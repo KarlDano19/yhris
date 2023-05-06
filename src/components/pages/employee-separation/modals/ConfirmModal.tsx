@@ -1,14 +1,13 @@
 import { Dispatch, Fragment, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XCircleIcon } from '@heroicons/react/24/solid'
 
-export default function ConfirmModal({ message = 'Are you sure?', isOpen, setIsOpen }: { message?: string, isOpen: boolean, setIsOpen: Dispatch<boolean> }) {
+export default function ConfirmModal({ message = 'Are you sure?', isOpen, setIsOpen, confirmAction }: { message?: string, isOpen: boolean, setIsOpen: Dispatch<boolean>, confirmAction: Function }) {
 
     const cancelButtonRef = useRef(null)
 
     return (
         <Transition.Root show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={setIsOpen}>
+            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={() => setIsOpen(false)}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -48,7 +47,10 @@ export default function ConfirmModal({ message = 'Are you sure?', isOpen, setIsO
                                     <button
                                         type="button"
                                         className="w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
-                                        onClick={() => setIsOpen(false)}
+                                        onClick={() => {
+                                            confirmAction()
+                                            setIsOpen(false)
+                                        }}
                                     >
                                         Yes
                                     </button>

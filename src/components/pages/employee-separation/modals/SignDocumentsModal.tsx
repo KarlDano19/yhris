@@ -1,50 +1,66 @@
-import { Dispatch, Fragment, useRef, useState } from 'react'
+import { Dispatch, Fragment, useEffect, useRef, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon } from '@heroicons/react/24/solid'
-import { T_LetterModal } from '@/types/globals'
+import { T_DocumentsModal } from '@/types/globals'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import ConfirmModal from './ConfirmModal';
 
 type FormValues = {
-    date: string;
+    template: string;
     email: string;
     message: string;
 };
 
-export default function LetterModal({ separationItems, setSeparationItems, type = 'Acceptance', isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, type?: 'Acceptance' | 'Separation', isOpen: T_LetterModal | null, setIsOpen: Dispatch<T_LetterModal | null> }) {
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [toSaveData, setToSaveData] = useState<any>(null);
-    const { register, handleSubmit, reset } = useForm<FormValues>();
+const templates = [
+    {
+        name: 'Please Sign: Offboarding Documents',
+        message: `A blessed day!
+
+        Thank you for your contribution in ABBA-YAHSHUA.
+        
+        To move forward with your separation, please sign the ABBA-YAHSHUA offboarding documents attached on or before 5:30 PM today.
+        
+        Let us know if you have any questions.
+        Thank you and GOD bless,
+        --
+        `,
+    },
+    {
+        name: 'Please Sign: Quitclaim',
+        message: `A blessed day!
+
+        Thank you for your full cooperation in our offboarding process.
+        
+        To move forward with your separation, please sign the quitclaim attached on or before 5:30 PM today.
+        
+        Let us know if you have any questions.
+        Thank you and GOD bless,
+        --        
+        `,
+    }
+];
+
+export default function SignDocumentsModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: T_DocumentsModal | null, setIsOpen: Dispatch<T_DocumentsModal | null> }) {
+    const { register, handleSubmit, reset, watch, formState: { isDirty }, setValue } = useForm<FormValues>({ defaultValues: { template: 'Please Sign: Offboarding Documents', message: templates[0].message } });
     const onSubmit = handleSubmit((data) => {
         if(isOpen && isOpen.id) {
             const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
             const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
-            separationItemsCopy[itemIndex][type === "Acceptance" ? 'acceptanceLetter' : 'separationLetter'].date = data.date;
-            separationItemsCopy[itemIndex][type === "Acceptance" ? 'acceptanceLetter' : 'separationLetter'].to = data.email;
-            separationItemsCopy[itemIndex][type === "Acceptance" ? 'acceptanceLetter' : 'separationLetter'].message = data.message;
-            separationItemsCopy[itemIndex].isLetterSent = true;
-            separationItemsCopy[itemIndex].isLetterReceived = true;
-            separationItemsCopy[itemIndex].letterReceivedDate = new Intl.DateTimeFormat('en-US').format(new Date());
-            setToSaveData([...separationItemsCopy]);
+            separationItemsCopy[itemIndex].signDocuments.template = data.template;
+            separationItemsCopy[itemIndex].signDocuments.to = data.email;
+            separationItemsCopy[itemIndex].signDocuments.message = data.message;
+            separationItemsCopy[itemIndex].isDocumentsSent = true;
+            separationItemsCopy[itemIndex].isDocumentsReceived = true;
+            separationItemsCopy[itemIndex].documentReceivedDate = new Intl.DateTimeFormat('en-US').format(new Date());
+            setSeparationItems([...separationItemsCopy]);
+            toast.success('Successfully sent signed documents', { duration: 4000 });
+            reset();
             setIsOpen(null);
-            setIsConfirmModalOpen(true);
         } else {
             toast.error('Incomplete information', { duration: 4000 });
         }
     });
-    const saveData = () => {
-        setSeparationItems([...toSaveData]);
-        toast.success('Successfully sent email', { duration: 4000 });
-        reset();
-    }
-    const updateConfirmModal = (value: boolean) => {
-        if(!value) {
-            setIsConfirmModalOpen(false);
-            reset();
-        }
-    }
-    const cancelButtonRef = useRef(null)
+    const cancelButtonRef = useRef(null);
     return (
         <>
             <Transition.Root show={isOpen ? true : false} as={Fragment}>
@@ -74,24 +90,29 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
                             >
                                 <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                                     <div className="flex bg-savoy-blue p-2 items-center">
-                                        <h3 className="flex-1 text-white ml-2 font-semibold">Letter of {type}</h3>
+                                        <h3 className="flex-1 text-white ml-2 font-semibold">Send Documents via Email</h3>
                                         <XCircleIcon className="w-8 h-8 text-white cursor-pointer" onClick={() => setIsOpen(null)} />
                                     </div>
                                     <form onSubmit={onSubmit}>
                                         <div className="px-4 pt-4 pb-6">
                                             <div className="sm:col-span-4">
-                                                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-                                                    Date<span className="text-red-600">*</span>
+                                                <label htmlFor="reason" className="block text-sm font-medium leading-6 text-gray-900">
+                                                    Email Template<span className="text-red-600">*</span>
                                                 </label>
                                                 <div className="mt-2">
-                                                    <input
-                                                        type="date"
-                                                        {...register("date", { required: true })}
-                                                        id="date"
-                                                        className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                                                        placeholder="you@example.com"
-                                                        aria-describedby="email-optional"
-                                                    />
+                                                    <select
+                                                        id="template"
+                                                        {...register("template", { required: true })}
+                                                        className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                        onChange={(e) => {
+                                                            const currTemplate = templates.find((template) => template.name === e.target.value);
+                                                            setValue('message', currTemplate ? currTemplate?.message : "")
+                                                        }}
+                                                    >
+                                                        <option value="">Select...</option>
+                                                        <option>Please Sign: Offboarding Documents</option>
+                                                        <option>Please Sign: Quitclaim</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div className="sm:col-span-4 mt-4">
@@ -118,7 +139,6 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
                                                         {...register("message", { required: true })}
                                                         id="message"
                                                         className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
-                                                        defaultValue={''}
                                                     />
                                                 </div>
                                             </div>
@@ -147,7 +167,6 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
                     </div>
                 </Dialog>
             </Transition.Root>
-            <ConfirmModal message="Would you like to send the letter of acceptance?" isOpen={isConfirmModalOpen} setIsOpen={updateConfirmModal} confirmAction={saveData} />
         </>
     )
 }

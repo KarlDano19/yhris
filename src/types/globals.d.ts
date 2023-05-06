@@ -1,19 +1,19 @@
-export type LetterModal = {
+export type T_LetterModal = {
     type: acceptance | separation,
     id: number,
 }
 
-export type DocumentsModal = {
+export type T_DocumentsModal = {
     isOpen: boolean,
     id: number,
 }
 
-export type LastPayModal = {
+export type T_LastPayModal = {
     isOpen: boolean,
     id: number,
 }
 
-export type QuitclaimModal = {
+export type T_QuitclaimModal = {
     isOpen: boolean,
     id: number,
 }
