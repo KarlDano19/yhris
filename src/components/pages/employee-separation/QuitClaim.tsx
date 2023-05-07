@@ -1,9 +1,9 @@
 import classNames from '@/helpers/classNames'
-import { QuitclaimModal } from '@/types/globals'
+import { T_QuitclaimModal } from '@/types/globals'
 import { DocumentIcon } from '@heroicons/react/24/outline'
 import React, { Dispatch } from 'react'
 
-const QuitClaim = ({ id, isQuitclaimSigned, isQuitclaimReceived, quitclaimReceivedDate, setIsQuitclaimModalOpen }: { id: number, isQuitclaimSigned: boolean, isQuitclaimReceived: boolean, quitclaimReceivedDate?: string, setIsQuitclaimModalOpen: Dispatch<QuitclaimModal> }) => {
+const Quitclaim = ({ id, isQuitclaimSigned, isQuitclaimReceived, quitclaimReceivedDate, setIsQuitclaimModalOpen }: { id: number, isQuitclaimSigned: boolean, isQuitclaimReceived: boolean, quitclaimReceivedDate?: string, setIsQuitclaimModalOpen: Dispatch<T_QuitclaimModal> }) => {
     return (
         <div className="flex flex-col gap-2">
             <div>
@@ -27,4 +27,4 @@ const QuitClaim = ({ id, isQuitclaimSigned, isQuitclaimReceived, quitclaimReceiv
     )
 }
 
-export default QuitClaim
+export default Quitclaim
