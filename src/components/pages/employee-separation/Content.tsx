@@ -14,8 +14,10 @@ import SignDocumentsModal from './modals/SignDocumentsModal'
 import ConfirmModal from './modals/ConfirmModal'
 import toast from 'react-hot-toast';
 import QuitclaimModal from './modals/QuitclaimModal'
+// import useGetSeparationItems from './hooks/useGetSeparationItems'
 
 const Content = () => {
+    // const { data: separationItems, isLoading: isSeparationItemsLoading } = useGetSeparationItems();
     const [separationItems, setSeparationItems] = useState(testData);
     const [filteredItems, setFilteredItems] = useState(testData);
     const [dateFilter, setDateFilter] = useState({ from: "", to: "" });

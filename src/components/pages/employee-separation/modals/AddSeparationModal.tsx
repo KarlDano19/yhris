@@ -3,19 +3,23 @@ import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-
-type FormValues = {
-    date: string;
-    name: string;
-    position: string;
-    department: string;
-    reason: string;
-};
+import { T_Separation } from '@/types/globals';
+// import useAddSeparationItems from '../hooks/useAddSeparationItems';
 
 export default function AddSeparationModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: boolean, setIsOpen: Dispatch<boolean> }) {
-    const { register, handleSubmit } = useForm<FormValues>();
+    // const { mutate, isLoading } = useAddSeparationItems();
+    const { register, handleSubmit } = useForm<T_Separation>();
     const cancelButtonRef = useRef(null)
     const onSubmit = handleSubmit((data) => {
+        // const callbackReq = {
+        //     onSuccess: (data: any) => {
+        //         toast.success('Successfully created separation', { duration: 5000 });
+        //     },
+        //     onError: (err: any) => {
+        //         toast.error(err);
+        //     },
+        // }
+        // mutate(data, callbackReq)
         const newItem = {
             id: separationItems.length + 1,
             separationDate: data.date,
