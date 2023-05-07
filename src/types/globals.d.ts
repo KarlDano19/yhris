@@ -17,3 +17,11 @@ export type T_QuitclaimModal = {
     isOpen: boolean,
     id: number,
 }
+
+export type T_Separation = {
+    date: string;
+    name: string;
+    position: string;
+    department: string;
+    reason: string;
+};
