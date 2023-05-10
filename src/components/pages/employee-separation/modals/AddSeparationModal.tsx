@@ -22,7 +22,7 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
         // mutate(data, callbackReq)
         const newItem = {
             id: separationItems.length + 1,
-            separationDate: data.date,
+            separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
             name: data.name,
             reasonForLeaving: data.reason,
             department: data.department,

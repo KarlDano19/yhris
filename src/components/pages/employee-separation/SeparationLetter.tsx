@@ -3,7 +3,7 @@ import { Menu, Transition } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import classNames from '@/helpers/classNames'
 import { T_LetterModal } from '@/types/globals'
-import { DocumentIcon } from '@heroicons/react/24/outline'
+import ClipIcon from '@/svg/ClipIcon'
 
 const items = [
     { name: 'Letter of Acceptance', type: 'Acceptance' },
@@ -55,15 +55,15 @@ export default function SeparationLetter({ id, isLetterSent, isLetterReceived, l
             </div>
             <div className="flex gap-2 mt-2">
                 <div>
-                    <button className={classNames(isLetterSent ? 'bg-red-500 border-[1px] border-red-500 text-white' : 'border-[1px] border-red-500 text-red-500', 'relative inline-flex items-center rounded-md px-2 py-1  focus:z-10 cursor-default')}>Send</button>
+                    <button className={classNames(isLetterSent ? 'bg-red-500 border-[1px] border-red-500 text-white' : 'border-[1px] border-red-500 text-red-500', 'relative inline-flex items-center rounded-md px-2 py-1  focus:z-10 cursor-default')}>{isLetterSent ? "Sent" : "Send"}</button>
                 </div>
                 <div className="flex flex-col">
                     <div>
-                        <button className={classNames(isLetterReceived ? 'bg-green-500 text-white' : 'bg-blue-100 text-gray-400', 'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10 cursor-default')}>Received</button>
+                        <button className={classNames(isLetterReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10 cursor-default')}>Received</button>
                     </div>
                     { isLetterReceived ? (
                         <div className="flex gap-1 items-center mt-2">
-                            <DocumentIcon className="text-green-500 w-4 h-4" />
+                            <ClipIcon/>
                             <p className="text-xs">{letterReceivedDate}</p>
                         </div>
                     ) : null }

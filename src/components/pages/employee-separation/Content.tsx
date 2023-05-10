@@ -114,7 +114,7 @@ const Content = () => {
                 <tr>
                     <td colSpan={7}>
                         <h4 className="text-center text-gray-300 text-sm mt-4">There{`'`}s no data yet.</h4>
-                        <h4 className="text-center text-gray-300 text-sm">Please click create to add separtion of employee.</h4>
+                        <h4 className="text-center text-gray-300 text-sm mb-4">Please click create to add separtion of employee.</h4>
                     </td>
                 </tr>
             );
