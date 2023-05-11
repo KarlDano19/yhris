@@ -11,6 +11,8 @@ type FormValues = {
     template: string;
     email: string;
     message: string;
+    cc: string;
+    bcc: string;
 };
 
 const templates = [
@@ -44,6 +46,8 @@ const templates = [
 
 export default function QuitclaimModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: T_DocumentsModal | null, setIsOpen: Dispatch<T_DocumentsModal | null> }) {
     const { register, handleSubmit, reset, watch, formState: { isDirty }, setValue } = useForm<FormValues>({ defaultValues: { template: 'Please Sign: Quitclaim', message: templates[1].message } });
+    const [isCCOpen, setIsCCOPen] = useState(false);
+    const [isBCCOpen, setIsBCCOpen] = useState(false);
     const onSubmit = handleSubmit((data) => {
         if (isOpen && isOpen.id) {
             const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
@@ -124,16 +128,63 @@ export default function QuitclaimModal({ separationItems, setSeparationItems, is
                                                 <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                                                     To<span className="text-red-600">*</span>
                                                 </label>
-                                                <div className="mt-2">
-                                                    <input
-                                                        id="email"
-                                                        {...register("email", { required: true })}
-                                                        type="email"
-                                                        autoComplete="email"
-                                                        className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
-                                                    />
+                                                <div className="mt-2 flex rounded-md shadow-sm">
+                                                    <div className="relative flex flex-grow items-stretch focus-within:z-10">
+                                                        <input
+                                                            type="email"
+                                                            {...register("email", { required: true })}
+                                                            id="email"
+                                                            className="block w-full rounded-none rounded-l-md border-0 py-1.5 pl-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${isCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'}`}
+                                                        onClick={() => setIsCCOPen(!isCCOpen)}
+                                                    >
+                                                        CC
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${isBCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'}`}
+                                                        onClick={() => setIsBCCOpen(!isBCCOpen)}
+                                                    >
+                                                        BCC
+                                                    </button>
                                                 </div>
                                             </div>
+                                            {isCCOpen && (
+                                                <div className="sm:col-span-4 mt-4">
+                                                    <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                                        CC
+                                                    </label>
+                                                    <div className="mt-2">
+                                                        <input
+                                                            id="cc"
+                                                            {...register("cc")}
+                                                            type="cc"
+                                                            autoComplete="email"
+                                                            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {isBCCOpen && (
+                                                <div className="sm:col-span-4 mt-4">
+                                                    <label htmlFor="bcc" className="block text-sm font-medium leading-6 text-gray-900">
+                                                        BCC
+                                                    </label>
+                                                    <div className="mt-2">
+                                                        <input
+                                                            id="bcc"
+                                                            {...register("bcc")}
+                                                            type="bcc"
+                                                            autoComplete="email"
+                                                            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                             <div className="sm:col-span-4 mt-4">
                                                 <label htmlFor="message" className="block text-sm font-medium leading-6 text-gray-900">
                                                     Message<span className="text-red-600">*</span>

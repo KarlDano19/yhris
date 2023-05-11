@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
 import CustomToast from '@/components/CustomToast';
+import DateCalendar from '@/svg/DateCalendar';
 
 type FormValues = {
     date: string;
@@ -84,15 +85,18 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
                                                 <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                                                     Date<span className="text-red-600">*</span>
                                                 </label>
-                                                <div className="mt-2">
+                                                <div className="relative mt-2">
                                                     <input
                                                         type="date"
                                                         {...register("date", { required: true })}
                                                         id="date"
-                                                        className="appearance-none block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                        className="appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                         placeholder="you@example.com"
                                                         aria-describedby="email-optional"
                                                     />
+                                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                                        <DateCalendar />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="sm:col-span-4 mt-4">
