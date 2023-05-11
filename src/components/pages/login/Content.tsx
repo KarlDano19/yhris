@@ -1,4 +1,5 @@
 'use client';
+import React, { useEffect, useState } from 'react';
 import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
 import { useForm } from 'react-hook-form';
@@ -6,9 +7,25 @@ import Link from 'next/link';
 import EyePassword from '@/svg/EyePassword';
 import toast from 'react-hot-toast';
 import { T_Login } from '@/types/globals';
+import useAccessAuth from './hooks/useAccessAuth';
 const Content = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { mutate, isLoading } = useAccessAuth();
   const { register, handleSubmit } = useForm<T_Login>();
-  const onSubmit = handleSubmit((data) => {});
+  const onSubmit = handleSubmit((data) => {
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.success(data.message, { duration: 5000 });
+        localStorage.token = data.token;
+        localStorage.hasProfile = data.has_profile;
+        localStorage.accountType = data.account_type;
+      },
+      onError: (err: any) => {
+        toast.error(err);
+      },
+    };
+    mutate(data, callbackReq);
+  });
   return (
     <SplitLayout
       left={<></>}
@@ -47,7 +64,7 @@ const Content = () => {
                     </label>
                     <div className='relative mx-auto'>
                       <input
-                        type='password'
+                        type={showPassword ? 'text' : 'password'}
                         id='password'
                         {...register('password', { required: true })}
                         className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
@@ -55,9 +72,11 @@ const Content = () => {
                       <button
                         type='button'
                         className='absolute inset-y-0 right-0 flex items-center px-4 text-gray-600 text-blue-400'
-                        onClick={void 0}
+                        onClick={() => {
+                          setShowPassword(!showPassword);
+                        }}
                       >
-                        <EyePassword visible={false} />
+                        <EyePassword visible={showPassword} />
                       </button>
                     </div>
                   </div>

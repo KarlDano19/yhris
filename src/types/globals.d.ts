@@ -38,3 +38,26 @@ export type T_Register = {
     password: string;
     confirmPassword: string;
 }
+
+export type T_EmployerDetails = {
+    companyName: string;
+    companyLogo: any;
+    companyDescription: string;
+    typeOfIndustry: string;
+    noOfEmployees: string;
+    workSetUp: string;
+    email: string;
+    mobileNumber: string;
+    landlineNumber: string;
+    building: string;
+    street: string;
+    locality: string;
+    city: string;
+    zipCode: string;
+    country: string;
+}
+
+export type T_EmployerSettings = {
+    language: string;
+    currency: string;
+}
