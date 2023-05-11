@@ -12,12 +12,12 @@ const items = [
 
 export default function SeparationLetter({ id, isLetterSent, isLetterReceived, letterReceivedDate, setIsLetterModalOpen }: { id: number, isLetterSent: boolean, isLetterReceived: boolean, letterReceivedDate?: string, setIsLetterModalOpen: Dispatch<T_LetterModal> }) {
     return (
-        <>
-            <div className="inline-flex rounded-md shadow-sm">
-                <Menu as="div" className="relative -ml-px block">
-                    <Menu.Button className="relative inline-flex items-center rounded-md bg-green-500 pl-4 pr-3 py-2 text-white hover:bg-green-600 focus:z-10">
+        <div className="flex flex-col">
+            <div className="inline-flex">
+                <Menu as="div" className="relative -ml-px">
+                    <Menu.Button className="w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-11 pr-3 py-2 text-white hover:bg-green-600 focus:z-10">
                         <span className="sr-only">Open options</span>
-                        <div className="flex gap-2"><span>Create</span><ChevronDownIcon className="h-5 w-5" aria-hidden="true" /></div>
+                        <div className="flex gap-4"><span className="flex-1">Create</span><ChevronDownIcon className="flex-none h-5 w-5" aria-hidden="true" /></div>
                     </Menu.Button>
                     <Transition
                         as={Fragment}
@@ -69,6 +69,6 @@ export default function SeparationLetter({ id, isLetterSent, isLetterReceived, l
                     ) : null }
                 </div>
             </div>
-        </>
+        </div>
     )
 }

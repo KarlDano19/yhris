@@ -5,6 +5,7 @@ import { T_LetterModal } from '@/types/globals'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import CustomToast from '@/components/CustomToast';
 
 type FormValues = {
     date: string;
@@ -17,7 +18,7 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
     const [toSaveData, setToSaveData] = useState<any>(null);
     const { register, handleSubmit, reset } = useForm<FormValues>();
     const onSubmit = handleSubmit((data) => {
-        if(isOpen && isOpen.id) {
+        if (isOpen && isOpen.id) {
             const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
             const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
             separationItemsCopy[itemIndex][type === "Acceptance" ? 'acceptanceLetter' : 'separationLetter'].date = data.date;
@@ -30,16 +31,16 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
             setIsOpen(null);
             setIsConfirmModalOpen(true);
         } else {
-            toast.error('Incomplete information', { duration: 4000 });
+            toast.custom(() => <CustomToast message="Incomplete information." type="error" />, { duration: 4000 });
         }
     });
     const saveData = () => {
         setSeparationItems([...toSaveData]);
-        toast.success('Successfully sent email', { duration: 4000 });
+        toast.custom(() => <CustomToast message="Successfully sent email." type="success" />, { duration: 4000 });
         reset();
     }
     const updateConfirmModal = (value: boolean) => {
-        if(!value) {
+        if (!value) {
             setIsConfirmModalOpen(false);
             reset();
         }
@@ -88,7 +89,7 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
                                                         type="date"
                                                         {...register("date", { required: true })}
                                                         id="date"
-                                                        className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                        className="appearance-none block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                         placeholder="you@example.com"
                                                         aria-describedby="email-optional"
                                                     />

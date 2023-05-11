@@ -7,13 +7,13 @@ const SignDocuments = ({ id, isDocumentsSent, isDocumentsReceived, documentRecei
     return (
         <div className="flex flex-col gap-2">
             <div>
-                <button className={classNames(isDocumentsSent ? 'bg-red-500 border-[1px] border-red-500 text-white' : 'border-[1px] border-red-500 text-red-500', 'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10')} onClick={() => setIsDocumentModalOpen({
+                <button className={classNames(isDocumentsSent ? 'bg-red-500 border-[1px] border-red-500 text-white' : 'border-[1px] border-red-500 text-red-500', 'items-center rounded-md px-2 py-1 focus:z-10 w-24')} onClick={() => setIsDocumentModalOpen({
                     isOpen: true,
                     id
                 })}>{isDocumentsSent ? "Sent" : "Send"}</button>
             </div>
             <div>
-                <button className={classNames(isDocumentsReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10')}>Received</button>
+                <button className={classNames(isDocumentsReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'items-center rounded-md px-auto py-1 focus:z-10 w-24')}>Received</button>
             </div>
             {isDocumentsReceived ? (
                 <div>

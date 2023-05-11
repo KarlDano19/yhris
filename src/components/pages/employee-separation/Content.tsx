@@ -14,6 +14,7 @@ import SignDocumentsModal from './modals/SignDocumentsModal'
 import ConfirmModal from './modals/ConfirmModal'
 import toast from 'react-hot-toast';
 import QuitclaimModal from './modals/QuitclaimModal'
+import CustomToast from '@/components/CustomToast'
 // import useGetSeparationItems from './hooks/useGetSeparationItems'
 
 const Content = () => {
@@ -32,10 +33,10 @@ const Content = () => {
             const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
             separationItemsCopy[itemIndex].isLastPayReleased = true;
             setSeparationItems([...separationItemsCopy]);
-            toast.success('Last pay marked as release', { duration: 4000 });
+            toast.custom(() => <CustomToast message="Last pay marked as release." type="success" />, { duration: 4000 });
             setIsLastPayModalOpen(null);
         } else {
-            toast.error('Incomplete information', { duration: 4000 });
+            toast.custom(() => <CustomToast message="Incomplete information." type="error" />, { duration: 4000 });
         }
     };
     const updateReleaseModal = (value: boolean) => {
@@ -69,16 +70,16 @@ const Content = () => {
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                         {item.reasonForLeaving}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <SeparationLetter id={item.id} isLetterSent={item.isLetterSent} isLetterReceived={item.isLetterReceived} letterReceivedDate={item.letterReceivedDate} setIsLetterModalOpen={setIsLetterModalOpen} />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <SignDocuments id={item.id} isDocumentsSent={item.isDocumentsSent} isDocumentsReceived={item.isDocumentsReceived} documentReceivedDate={item.documentReceivedDate} setIsDocumentModalOpen={setIsDocumentModalOpen} />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <LastPay id={item.id} isLastPayReleased={item.isLastPayReleased} setIsLastPayModalOpen={setIsLastPayModalOpen} />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <Quitclaim id={item.id} isQuitclaimSigned={item.isQuitclaimSigned} isQuitclaimReceived={item.isQuitclaimReceived} quitclaimReceivedDate={item.quitclaimReceivedDate} setIsQuitclaimModalOpen={setIsQuitclaimModalOpen} />
                     </td>
                 </tr>
@@ -95,16 +96,16 @@ const Content = () => {
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                         {item.reasonForLeaving}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <SeparationLetter id={item.id} isLetterSent={item.isLetterSent} isLetterReceived={item.isLetterReceived} letterReceivedDate={item.letterReceivedDate} setIsLetterModalOpen={setIsLetterModalOpen} />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <SignDocuments id={item.id} isDocumentsSent={item.isDocumentsSent} isDocumentsReceived={item.isDocumentsReceived} documentReceivedDate={item.documentReceivedDate} setIsDocumentModalOpen={setIsDocumentModalOpen} />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <LastPay id={item.id} isLastPayReleased={item.isLastPayReleased} setIsLastPayModalOpen={setIsLastPayModalOpen} />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
                         <Quitclaim id={item.id} isQuitclaimSigned={item.isQuitclaimSigned} isQuitclaimReceived={item.isQuitclaimReceived} quitclaimReceivedDate={item.quitclaimReceivedDate} setIsQuitclaimModalOpen={setIsQuitclaimModalOpen} />
                     </td>
                 </tr>
@@ -121,7 +122,6 @@ const Content = () => {
         }
     }
 
-
     return (
         <>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -133,7 +133,7 @@ const Content = () => {
                                 type="date"
                                 name="to"
                                 id="to"
-                                className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                className="appearance-none block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                 onChange={(e) => setDateFilter({ ...dateFilter, to: e.target.value })}
                             />
                             <p>to</p>
@@ -141,7 +141,7 @@ const Content = () => {
                                 type="date"
                                 name="from"
                                 id="from"
-                                className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                className="appearance-none block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                 onChange={(e) => setDateFilter({ ...dateFilter, from: e.target.value })}
                             />
                         </div>
@@ -165,7 +165,7 @@ const Content = () => {
                     </div>
                     <div className="mt-8 flow-root">
                         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]">
+                            <div className="min-w-full py-2 sm:px-6 lg:px-8">
                                 <table className={`min-w-full divide-y divide-gray-300 ${separationItems.length === 0 && "mb-6"}`}>
                                     <thead>
                                         <tr>

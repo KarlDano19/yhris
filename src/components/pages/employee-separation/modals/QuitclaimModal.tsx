@@ -4,6 +4,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid'
 import { T_DocumentsModal } from '@/types/globals'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 type FormValues = {
     template: string;
@@ -53,11 +54,11 @@ export default function QuitclaimModal({ separationItems, setSeparationItems, is
             separationItemsCopy[itemIndex].isQuitclaimReceived = true;
             separationItemsCopy[itemIndex].quitclaimReceivedDate = new Intl.DateTimeFormat('en-US').format(new Date());
             setSeparationItems([...separationItemsCopy]);
-            toast.success('Successfully sent quitclaim', { duration: 4000 });
+            toast.custom(() => <CustomToast message="Successfully sent quitclaim." type="success" />, { duration: 4000 });
             reset();
             setIsOpen(null);
         } else {
-            toast.error('Incomplete information', { duration: 4000 });
+            toast.custom(() => <CustomToast message="Incomplete information." type="error" />, { duration: 4000 });
         }
     });
     const cancelButtonRef = useRef(null)
@@ -103,7 +104,7 @@ export default function QuitclaimModal({ separationItems, setSeparationItems, is
                                                     <select
                                                         id="template"
                                                         {...register("template", { required: true })}
-                                                        className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                        className="appearance-none block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                         onChange={(e) => {
                                                             const currTemplate = templates.find((template) => template.name === e.target.value);
                                                             setValue('message', currTemplate ? currTemplate?.message : "")

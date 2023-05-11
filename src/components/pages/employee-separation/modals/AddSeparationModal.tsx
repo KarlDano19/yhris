@@ -13,10 +13,10 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
     const onSubmit = handleSubmit((data) => {
         // const callbackReq = {
         //     onSuccess: (data: any) => {
-        //         toast.success('Successfully created separation', { duration: 5000 });
+        //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
         //     },
         //     onError: (err: any) => {
-        //         toast.error(err);
+        //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
         //     },
         // }
         // mutate(data, callbackReq)
@@ -94,7 +94,7 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                                     type="date"
                                                     {...register("date", { required: true })}
                                                     id="date"
-                                                    className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                    className="appearance-none block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                     placeholder="you@example.com"
                                                     aria-describedby="email-optional"
                                                 />
@@ -121,7 +121,7 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                                 <select
                                                     id="position"
                                                     {...register("position", { required: true })}
-                                                    className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                    className="appearance-none block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
                                                     <option>Payroll Consultant</option>
@@ -138,7 +138,7 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                                 <select
                                                     id="department"
                                                     {...register("department", { required: true })}
-                                                    className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                    className="appearance-none block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
                                                     <option>Payroll</option>
@@ -155,7 +155,7 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                                 <select
                                                     id="reason"
                                                     {...register("reason", { required: true })}
-                                                    className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                    className="appearance-none block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
                                                     <option>Resignation</option>
