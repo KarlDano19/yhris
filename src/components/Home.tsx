@@ -75,7 +75,7 @@ const Home = () => {
             return (
               <Link href={menu.link} key={index} className="bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80">
                 {menu.icon}
-                <h3 className="text-indigo-dye font-semibold">{menu.text}</h3>
+                <h3 className="text-indigo-dye font-semibold text-center">{menu.text}</h3>
               </Link>
             );
           })}

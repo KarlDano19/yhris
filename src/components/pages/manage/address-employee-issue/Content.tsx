@@ -1,21 +1,13 @@
 "use client"
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 import React, { useEffect, useState, useRef } from 'react'
-import SeparationLetter from './SeparationLetter'
 import { T_DocumentsModal, T_LastPayModal, T_LetterModal, T_QuitclaimModal } from '@/types/globals'
-import SignDocuments from './SignDocuments'
-import LastPay from './LastPay'
-import Quitclaim from './Quitclaim'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import { separationItems as testData } from '@/helpers/testData'
-import AddSeparationModal from './modals/AddSeparationModal'
-import LetterModal from './modals/LetterModal'
-import SignDocumentsModal from './modals/SignDocumentsModal'
-import ConfirmModal from './modals/ConfirmModal'
 import toast from 'react-hot-toast';
-import QuitclaimModal from './modals/QuitclaimModal'
 import CustomToast from '@/components/CustomToast'
 import DateCalendar from '@/svg/DateCalendar'
+import IncidentReportModal from './modals.tsx/IncidentReportModal'
 // import useGetSeparationItems from './hooks/useGetSeparationItems'
 
 const Content = () => {
@@ -23,7 +15,7 @@ const Content = () => {
     const [separationItems, setSeparationItems] = useState(testData);
     const [filteredItems, setFilteredItems] = useState(testData);
     const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
-    const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
+    const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
     const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
     const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
@@ -74,16 +66,10 @@ const Content = () => {
                         {item.reasonForLeaving}
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <SeparationLetter id={item.id} isLetterSent={item.isLetterSent} isLetterReceived={item.isLetterReceived} letterReceivedDate={item.letterReceivedDate} setIsLetterModalOpen={setIsLetterModalOpen} />
+                        asdasd
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <SignDocuments id={item.id} isDocumentsSent={item.isDocumentsSent} isDocumentsReceived={item.isDocumentsReceived} documentReceivedDate={item.documentReceivedDate} setIsDocumentModalOpen={setIsDocumentModalOpen} />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <LastPay id={item.id} isLastPayReleased={item.isLastPayReleased} setIsLastPayModalOpen={setIsLastPayModalOpen} />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <Quitclaim id={item.id} isQuitclaimSigned={item.isQuitclaimSigned} isQuitclaimReceived={item.isQuitclaimReceived} quitclaimReceivedDate={item.quitclaimReceivedDate} setIsQuitclaimModalOpen={setIsQuitclaimModalOpen} />
+                        asdasd
                     </td>
                 </tr>
             ));
@@ -100,16 +86,10 @@ const Content = () => {
                         {item.reasonForLeaving}
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <SeparationLetter id={item.id} isLetterSent={item.isLetterSent} isLetterReceived={item.isLetterReceived} letterReceivedDate={item.letterReceivedDate} setIsLetterModalOpen={setIsLetterModalOpen} />
+                        asdasd
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <SignDocuments id={item.id} isDocumentsSent={item.isDocumentsSent} isDocumentsReceived={item.isDocumentsReceived} documentReceivedDate={item.documentReceivedDate} setIsDocumentModalOpen={setIsDocumentModalOpen} />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <LastPay id={item.id} isLastPayReleased={item.isLastPayReleased} setIsLastPayModalOpen={setIsLastPayModalOpen} />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <Quitclaim id={item.id} isQuitclaimSigned={item.isQuitclaimSigned} isQuitclaimReceived={item.isQuitclaimReceived} quitclaimReceivedDate={item.quitclaimReceivedDate} setIsQuitclaimModalOpen={setIsQuitclaimModalOpen} />
+                        asdasd
                     </td>
                 </tr>
             ));
@@ -118,7 +98,7 @@ const Content = () => {
                 <tr>
                     <td colSpan={7}>
                         <h4 className="text-center text-gray-300 text-sm mt-4">There{`'`}s no data yet.</h4>
-                        <h4 className="text-center text-gray-300 text-sm mb-4">Please click create to add separation of employee.</h4>
+                        <h4 className="text-center text-gray-300 text-sm mb-4">Please click create to add incident report.</h4>
                     </td>
                 </tr>
             );
@@ -129,7 +109,7 @@ const Content = () => {
         <>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="p-2 md:p-8 lg:p-4">
-                    <h2 className="text-xl font-bold text-indigo-dye">Employee Separation</h2>
+                    <h2 className="text-xl font-bold text-indigo-dye">Address Employee Issue</h2>
                     <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
                         <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
                             <div className="relative">
@@ -179,7 +159,7 @@ const Content = () => {
                             </div>
                         </div>
                         <div className="flex-1 flex justify-end">
-                            <button className="bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80" onClick={() => setIsAddSeparationModalOpen(true)}>CREATE</button>
+                            <button className="bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80" onClick={() => setIsIncidentReportModalOpen(true)}>CREATE</button>
                         </div>
                     </div>
                     <div className="mt-8 flow-root">
@@ -189,25 +169,19 @@ const Content = () => {
                                     <thead>
                                         <tr>
                                             <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
-                                                Date of Separation
+                                                Date
                                             </th>
                                             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                                 Name
                                             </th>
                                             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Reason of Leaving
+                                                Issue NTE
                                             </th>
                                             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Letter of Separation
+                                                Investigate
                                             </th>
                                             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Sign Documents
-                                            </th>
-                                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Last Pay
-                                            </th>
-                                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                Quitclaim
+                                                Send Decision
                                             </th>
                                         </tr>
                                     </thead>
@@ -222,11 +196,7 @@ const Content = () => {
                     </div>
                 </div>
             </div>
-            <AddSeparationModal separationItems={separationItems} setSeparationItems={setSeparationItems} isOpen={isAddSeparationModalOpen} setIsOpen={setIsAddSeparationModalOpen} />
-            <LetterModal separationItems={separationItems} setSeparationItems={setSeparationItems} type={isLetterModalOpen?.type} isOpen={isLetterModalOpen} setIsOpen={setIsLetterModalOpen} />
-            <SignDocumentsModal separationItems={separationItems} setSeparationItems={setSeparationItems} isOpen={isDocumentModalOpen} setIsOpen={setIsDocumentModalOpen} />
-            <ConfirmModal message="Are you sure the employee’s Last Pay has been released?" isOpen={!!isLastPayModalOpen} setIsOpen={updateReleaseModal} confirmAction={releaseLastPay} />
-            <QuitclaimModal separationItems={separationItems} setSeparationItems={setSeparationItems} isOpen={isQuitclaimModalOpen} setIsOpen={setIsQuitclaimModalOpen} />
+            <IncidentReportModal isOpen={isIncidentReportModalOpen} setIsOpen={setIsIncidentReportModalOpen} />
         </>
     )
 }

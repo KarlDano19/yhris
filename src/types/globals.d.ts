@@ -25,3 +25,13 @@ export type T_Separation = {
     department: string;
     reason: string;
 };
+
+export type T_IncidentReport = {
+    date: string;
+    name: string;
+    position: string;
+    department: string;
+    incidentDate: string;
+    incidentPlace: string;
+    briefBackground: string;
+};

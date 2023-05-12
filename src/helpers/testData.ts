@@ -76,3 +76,71 @@ export const separationItems = [
         quitclaimReceivedDate: "",
     },
 ]
+
+export const employeeIssueItems = [
+    {
+        id: 1,
+        incidentDate: '04/07/2023',
+        name: 'Heather Sakitsaulo',
+        incidentPlace: 'WFX',
+        department: '',
+        position: '',
+        briefBackground: '',
+        issueNTE: {
+            date: '',
+            to: '',
+            message: '',
+        },
+        isNTESent: false,
+        isNTEReceived: false,
+        investigate: {
+            date: '',
+            witness: '',
+            presider: '',
+            isEmployeePresent: false,
+            result: '',
+            decision: '',
+            attachment: '',
+        },
+        isInvestigated: false,
+        sendDecision: {
+            date: '',
+            to: '',
+            message: '',
+        },
+        isDecisionSent: false,
+        isDecisionReceived: false,
+    }
+];
+
+export const createMemoPolicyItems = [
+    {
+        id: 1,
+        type: 'memo',
+        title: '',
+        to: '',
+        body: '',
+        name: '',
+        position: '',
+        signature: '',
+        qrCode: '',
+        file: '',
+        purpose: '',
+        policy: '',
+        procedure: '',
+        withResponse: false,
+        isDeleted: false,
+    },
+];
+
+export const designBenefitsItems = [
+    {
+        id: 1,
+        title: '',
+        to: '',
+        purpose: '',
+        benefits: '',
+        coverage: '',
+        eligibility: '',
+    }
+];
