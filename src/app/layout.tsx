@@ -1,10 +1,10 @@
-import MainHeader from '@/components/MainHeader';
-import './globals.css';
-import { Inter } from 'next/font/google';
+import MainHeader from '@/components/MainHeader'
+import './globals.css'
+import { Golos_Text } from 'next/font/google'
 import { Toaster } from 'react-hot-toast';
 import ReactQueryWrapper from './ReactQueryWrapper'
 
-const inter = Inter({ subsets: ['latin'] });
+const golos = Golos_Text({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'Home - Yahshua HRIS',
@@ -17,11 +17,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
-      <body className={`${inter.className} bg-gray-100`}>
+    <html lang="en">
+      <body className={`${golos.className} bg-gray-100`}>
         <MainHeader />
         <ReactQueryWrapper>{children}</ReactQueryWrapper>
-        <Toaster position='top-right' />
+        <Toaster position="top-right" />
       </body>
     </html>
   );
