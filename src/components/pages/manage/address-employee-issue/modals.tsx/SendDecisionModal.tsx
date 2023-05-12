@@ -8,7 +8,7 @@ import {
 } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import { T_SendNTEModal } from "@/types/globals";
+import { T_SendDecisionModal } from "@/types/globals";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
@@ -25,12 +25,12 @@ type FormValues = {
 const templates = [
   {
     name: "Please Sign: Offboarding Documents",
-    message: `A blessed day, Hera! Attached is a Notice to Explain (NTE) to which a reply from you is expected within five (5) days, inclusive of weekend and holiday. Please read the NTE thoroughly and accomplish on or before April 12, 2023. Kindly note, failure to return back the accomplished NTE on or before the stipulated date will be construed as admission of guilt and/or waiver to due process. Let us know if you have any questions. Thank you and GOD bless, --
+    message: `A blessed day, Hera! Based on the investigation, you are hereby put on probationary for 6 months. Let us know if you have questions and concerns. Thank you and God Bless,--
         `,
   },
 ];
 
-export default function SendNTEModal({
+export default function SendDecisionModal({
   employeeIssueItems,
   setEmployeeIssueItems,
   isOpen,
@@ -38,8 +38,8 @@ export default function SendNTEModal({
 }: {
   employeeIssueItems: any;
   setEmployeeIssueItems: any;
-  isOpen: T_SendNTEModal | null;
-  setIsOpen: Dispatch<T_SendNTEModal | null>;
+  isOpen: T_SendDecisionModal | null;
+  setIsOpen: Dispatch<T_SendDecisionModal | null>;
 }) {
   const {
     register,
@@ -68,8 +68,8 @@ export default function SendNTEModal({
       //   separationItemsCopy[itemIndex].quitclaim.to = data.email;
       //   separationItemsCopy[itemIndex].quitclaim.message = data.message;
       //   separationItemsCopy[itemIndex].isQuitclaimSigned = true;
-      employeeIssueItemsCopy[itemIndex].isNTESent = true;
-      employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
+      employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
+      employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
 
       //   separationItemsCopy[itemIndex].quitclaimReceivedDate =
       //     new Intl.DateTimeFormat("en-US").format(new Date());
@@ -125,7 +125,7 @@ export default function SendNTEModal({
                 <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                   <div className="flex bg-savoy-blue p-2 items-center">
                     <h3 className="flex-1 text-white ml-2 font-semibold">
-                      Send NTE via Email
+                      Send Decision via Email
                     </h3>
                     <XCircleIcon
                       className="w-8 h-8 text-white cursor-pointer"
