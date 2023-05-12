@@ -1,5 +1,6 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { T_EmployerProfile } from '@/types/globals';
 import Details from './Details';
 import Settings from './Settings';
 

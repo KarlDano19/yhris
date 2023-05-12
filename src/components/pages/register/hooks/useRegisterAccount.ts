@@ -9,7 +9,7 @@ async function register(user: T_Register) {
       password: user.password,
       confirm_password: user.confirmPassword,
       account_type: user.accountType.toLowerCase(),
-    }
+    };
     const config = {
       headers: {
         'content-type': 'application/json',
@@ -25,8 +25,7 @@ async function register(user: T_Register) {
     if (Object.hasOwn(err, 'response')) {
       throw err.response.data.message;
     }
-    console.log(`Reason's: ${err.message}`);
-    throw 'Something went wrong, Please contact the administrator.';
+    throw err.message;
   }
 }
 

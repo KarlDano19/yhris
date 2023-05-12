@@ -39,9 +39,9 @@ export type T_Register = {
     confirmPassword: string;
 }
 
-export type T_EmployerDetails = {
+export type T_EmployerProfile = {
     companyName: string;
-    companyLogo: any;
+    companyLogo: Blob;
     companyDescription: string;
     typeOfIndustry: string;
     noOfEmployees: string;
@@ -55,9 +55,7 @@ export type T_EmployerDetails = {
     city: string;
     zipCode: string;
     country: string;
-}
-
-export type T_EmployerSettings = {
     language: string;
     currency: string;
+    imagePath: any;
 }

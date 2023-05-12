@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import NoUserPicture from '@/assets/no_user.png';
-import { T_EmployerDetails } from '@/types/globals';
+import { T_EmployerProfile } from '@/types/globals';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -16,7 +16,7 @@ const Details = ({
   setProgressBar: any;
   setForm: any;
 }) => {
-  const { register, handleSubmit } = useForm<T_EmployerDetails>();
+  const { register, handleSubmit } = useForm<T_EmployerProfile>();
   const onSubmit = handleSubmit((data) => {
     setIsDetails(false);
     setProgressBar(100);
@@ -80,7 +80,6 @@ const Details = ({
               <input
                 type='file'
                 id='companyLogo'
-                {...register('companyLogo', { required: false })}
                 className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                 onChange={uploadImgOnChange}
               />

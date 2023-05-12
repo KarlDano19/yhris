@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
 import { useForm } from 'react-hook-form';
@@ -8,7 +8,9 @@ import EyePassword from '@/svg/EyePassword';
 import toast from 'react-hot-toast';
 import { T_Login } from '@/types/globals';
 import useAccessAuth from './hooks/useAccessAuth';
+import { useRouter } from 'next/navigation';
 const Content = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const { mutate, isLoading } = useAccessAuth();
   const { register, handleSubmit } = useForm<T_Login>();
@@ -19,6 +21,13 @@ const Content = () => {
         localStorage.token = data.token;
         localStorage.hasProfile = data.has_profile;
         localStorage.accountType = data.account_type;
+        if (!data.has_profile) {
+          if (data.account_type === 'employer') {
+            router.push("/setup-employer-profile");
+          }
+        } else {
+          router.push("/");
+        }
       },
       onError: (err: any) => {
         toast.error(err);

@@ -1,8 +1,9 @@
 'use client';
-import { T_EmployerSettings } from '@/types/globals';
+import { T_EmployerProfile } from '@/types/globals';
 import { useForm } from 'react-hook-form';
 import useSavedProfile from './hooks/useSavedProfile';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const Details = ({
   form,
@@ -15,10 +16,22 @@ const Details = ({
   setProgressBar: any;
   setForm: any;
 }) => {
+  const router = useRouter();
   const { mutate, isLoading } = useSavedProfile();
-  const { register, handleSubmit } = useForm<T_EmployerSettings>();
+  const { register, handleSubmit } = useForm<T_EmployerProfile>();
   const onSubmit = handleSubmit((data) => {
-
+    setForm({ ...form, ...data });
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.success(data.message, { duration: 5000 });
+        localStorage.hasProfile = true;
+        router.push("/");
+      },
+      onError: (err: any) => {
+        toast.error(err);
+      },
+    };
+    mutate(form, callbackReq);
   });
   return (
     <>
@@ -33,6 +46,7 @@ const Details = ({
           <select
             id='language'
             {...register('language', { required: true })}
+            value={form.language}
             className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-94 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
           >
             <option value='English'>English</option>
@@ -48,6 +62,7 @@ const Details = ({
           <select
             id='currency'
             {...register('currency', { required: true })}
+            value={form.currency}
             className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-94 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
           >
             <option value='PHP'>PHP</option>

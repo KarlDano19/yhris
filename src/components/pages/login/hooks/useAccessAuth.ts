@@ -19,8 +19,7 @@ async function login(credentials: T_Login) {
     if (Object.hasOwn(err, "response")) {
       throw err.response.data.message;
     }
-    console.log(`Reason's: ${err.message}`);
-    throw 'Something went wrong, Please contact the administrator.';
+    throw err.message;
   }
 }
 

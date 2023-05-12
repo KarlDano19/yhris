@@ -8,7 +8,9 @@ import EyePassword from '@/svg/EyePassword';
 import toast from 'react-hot-toast';
 import { T_Register } from '@/types/globals';
 import useRegisterAccount from './hooks/useRegisterAccount';
+import { useRouter } from 'next/navigation';
 const Content = () => {
+  const router = useRouter();
   const [isAgree, setIsAgree] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { mutate, isLoading } = useRegisterAccount();
@@ -20,6 +22,7 @@ const Content = () => {
         localStorage.token = data.token;
         localStorage.hasProfile = false;
         localStorage.accountType = data.account_type;
+        router.push("/setup-employer-profile");
       },
       onError: (err: any) => {
         toast.error(err);
