@@ -3,31 +3,26 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { T_Separation } from "@/types/globals";
+import { T_Investigation, T_InvestigationModal } from "@/types/globals";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import DateCalendar from "@/svg/DateCalendar";
 // import useAddSeparationItems from '../hooks/useAddSeparationItems';
 
-export default function AddSeparationModal({
-  separationItems,
-  setSeparationItems,
+export default function InvestigationModal({
   isOpen,
   setIsOpen,
 }: {
-  separationItems: any;
-  setSeparationItems: any;
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
+  isOpen: T_InvestigationModal | null;
+  setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
-  console.log(separationItems);
-
   // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit } = useForm<T_Separation>();
-  const dateInputRef = useRef(null);
-  const cancelButtonRef = useRef(null);
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
+  const { register, handleSubmit } = useForm<T_Investigation>();
+  const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
+  const IncidentDateInputRef = useRef<HTMLInputElement>(null);
 
+  const cancelButtonRef = useRef(null);
+
+  const onSubmit = handleSubmit((data) => {
     // const callbackReq = {
     //     onSuccess: (data: any) => {
     //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
@@ -37,48 +32,45 @@ export default function AddSeparationModal({
     //     },
     // }
     // mutate(data, callbackReq)
-    const newItem = {
-      id: separationItems.length + 1,
-      separationDate: Intl.DateTimeFormat("en-US").format(new Date(data.date)),
-      name: data.name,
-      reasonForLeaving: data.reason,
-      department: data.department,
-      position: data.position,
-      acceptanceLetter: {
-        date: "",
-        to: "",
-        message: "",
-      },
-      separationLetter: {
-        date: "",
-        to: "",
-        message: "",
-      },
-      isLetterSent: false,
-      isLetterReceived: false,
-      letterReceivedDate: "",
-      isDocumentsSent: false,
-      isDocumentsReceived: false,
-      documentReceivedDate: "",
-      isLastPayReleased: false,
-      isQuitclaimSigned: false,
-      isQuitclaimReceived: false,
-      quitclaimReceivedDate: "",
-    };
-
-    console.log(newItem);
-
-    setSeparationItems([...separationItems, newItem]);
-    setIsOpen(false);
+    // const newItem = {
+    //     id: separationItems.length + 1,
+    //     separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
+    //     name: data.name,
+    //     reasonForLeaving: data.reason,
+    //     department: data.department,
+    //     position: data.position,
+    //     acceptanceLetter: {
+    //         date: '',
+    //         to: '',
+    //         message: '',
+    //     },
+    //     separationLetter: {
+    //         date: '',
+    //         to: '',
+    //         message: '',
+    //     },
+    //     isLetterSent: false,
+    //     isLetterReceived: false,
+    //     letterReceivedDate: "",
+    //     isDocumentsSent: false,
+    //     isDocumentsReceived: false,
+    //     documentReceivedDate: "",
+    //     isLastPayReleased: false,
+    //     isQuitclaimSigned: false,
+    //     isQuitclaimReceived: false,
+    //     quitclaimReceivedDate: "",
+    // }
+    // setSeparationItems([...separationItems, newItem]);
+    setIsOpen(null);
     toast.success("Successfully created separation", { duration: 5000 });
   });
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition.Root show={isOpen ? true : false} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
+        onClose={() => setIsOpen(null)}
       >
         <Transition.Child
           as={Fragment}
@@ -106,33 +98,34 @@ export default function AddSeparationModal({
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Separate
+                    Investigation Report Template
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => setIsOpen(null)}
                   />
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className="px-4 pt-4 pb-6">
-                    <div className="sm:col-span-4">
+                    <div>
                       <label
-                        htmlFor="email"
+                        htmlFor="dateOfInvestigation"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Date of Separation
+                        Date of Investigation
                         <span className="text-red-600">*</span>
                       </label>
                       <div className="relative mt-2">
                         <input
                           type="date"
                           {...register("date", { required: true })}
-                          id="date"
+                          id="dateOfInvestigation"
                           className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                           aria-describedby="email-optional"
-                          ref={dateInputRef}
-                          // @ts-expect-error
-                          onClick={() => dateInputRef.current.showPicker()}
+                          ref={InvestigationDateInputRef}
+                          onClick={() =>
+                            InvestigationDateInputRef.current?.showPicker()
+                          }
                         />
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                           <DateCalendar />
@@ -141,15 +134,15 @@ export default function AddSeparationModal({
                     </div>
                     <div className="sm:col-span-4 mt-4">
                       <label
-                        htmlFor="email"
+                        htmlFor="witness"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Name<span className="text-red-600">*</span>
+                        Witness<span className="text-red-600">*</span>
                       </label>
                       <div className="mt-2">
                         <input
-                          id="name"
-                          {...register("name", { required: true })}
+                          id="witness"
+                          {...register("witness", { required: true })}
                           type="name"
                           className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                         />
@@ -157,21 +150,39 @@ export default function AddSeparationModal({
                     </div>
                     <div className="sm:col-span-4 mt-4">
                       <label
-                        htmlFor="position"
+                        htmlFor="presider"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Position<span className="text-red-600">*</span>
+                        Presider<span className="text-red-600">*</span>
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          id="presider"
+                          {...register("presider", { required: true })}
+                          type="name"
+                          className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-4 mt-4">
+                      <label
+                        htmlFor="isAttendHearing"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Did the employee attend the hearing
+                        <span className="text-red-600">*</span>
                       </label>
                       <div className="relative mt-2">
                         <select
-                          id="position"
-                          {...register("position", { required: true })}
+                          id="isAttendHearing"
+                          {...register("isAttendHearing", { required: true })}
                           className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                         >
-                          <option value="">Select...</option>
-                          <option>Payroll Consultant</option>
-                          <option>Programmer</option>
-                          <option>QA Analyst</option>
+                          <option disabled selected>
+                            Select...
+                          </option>
+                          <option>YES</option>
+                          <option>NO</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                           <SelectChevronDown />
@@ -180,21 +191,44 @@ export default function AddSeparationModal({
                     </div>
                     <div className="sm:col-span-4 mt-4">
                       <label
-                        htmlFor="department"
+                        htmlFor="briefBackground"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Department<span className="text-red-600">*</span>
+                        Result of Investigation
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <div className="mt-2">
+                        <textarea
+                          rows={4}
+                          {...register("briefBackground", { required: true })}
+                          id="briefBackground"
+                          className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-4 mt-4">
+                      <label
+                        htmlFor="decision"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Decision <span className="text-red-600">*</span>
                       </label>
                       <div className="relative mt-2">
                         <select
-                          id="department"
-                          {...register("department", { required: true })}
+                          id="decision"
+                          {...register("decision", { required: true })}
                           className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                         >
-                          <option value="">Select...</option>
-                          <option>Payroll</option>
-                          <option>Information Technology</option>
-                          <option>Marketing</option>
+                          <option disabled selected>
+                            Select...
+                          </option>
+                          <option>First Warning</option>
+                          <option>Second Warning</option>
+                          <option>Final Warning</option>
+                          <option>1-3 Days Suspension</option>
+                          <option>5 Days Suspension</option>
+                          <option>Terminate</option>
+                          <option>Other...</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                           <SelectChevronDown />
@@ -203,26 +237,34 @@ export default function AddSeparationModal({
                     </div>
                     <div className="sm:col-span-4 mt-4">
                       <label
-                        htmlFor="reason"
+                        htmlFor="other"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Reason of Leaving<span className="text-red-600">*</span>
+                        If you selected other, please specify the decision.
                       </label>
-                      <div className="relative mt-2">
-                        <select
-                          id="reason"
-                          {...register("reason", { required: true })}
-                          className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        >
-                          <option value="">Select...</option>
-                          <option>Resignation</option>
-                          <option>Absence Without Leave (AWoL)</option>
-                          <option>Layoff</option>
-                          <option>Termination</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                          <SelectChevronDown />
-                        </div>
+                      <div className="mt-2">
+                        <input
+                          id="other"
+                          {...register("other", { required: false })}
+                          type="name"
+                          className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-4 mt-4">
+                      <label
+                        htmlFor="attachment"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Attachment<span className="text-red-600">*</span>
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          id="attachment"
+                          {...register("attachment", { required: true })}
+                          type="file"
+                          className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                        />
                       </div>
                     </div>
                   </div>
@@ -237,7 +279,7 @@ export default function AddSeparationModal({
                     <button
                       type="button"
                       className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => setIsOpen(null)}
                       ref={cancelButtonRef}
                     >
                       Close

@@ -1,92 +1,67 @@
 "use client";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import React, { useEffect, useState, useRef } from "react";
-import {
-  T_SendNTEModal,
-  T_SendDecisionModal,
-  T_InvestigationModal,
-} from "@/types/globals";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { employeeIssueItems as testData } from "@/helpers/testData";
+import React, { useEffect, useState, useRef, Fragment } from "react";
+import ClipIcon from "@/svg/ClipIcon";
+import { createMemoPolicyItems as testData } from "@/helpers/testData";
 import DateCalendar from "@/svg/DateCalendar";
-import IncidentReportModal from "./modals/IncidentReportModal";
-import SendNTEModal from "./modals/SendNTEModal";
-import SendNTE from "./SendNTE";
-import Investigation from "./Investigation";
-import InvestigationModal from "./modals/InvestigationModal";
-import SendDecision from "./SendDecision";
-import SendDecisionModal from "./modals/SendDecisionModal";
+import CreateMemoModal from "./modals/CreateMemoModal";
+import CreatePolicyModal from "./modals/CreatePolicyModal";
+import CreateMemoChevronLogo from "@/svg/CreateMemoChevronLogo";
+import { Menu, Transition } from '@headlessui/react'
+import classNames from "@/helpers/classNames";
+import DeleteMemoLogo from "@/svg/DeleteMemoLogo";
 
 const Content = () => {
-  const [employeeIssueItems, setEmployeeIssueItems] = useState(testData);
+  const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState(testData);
   const [filteredItems, setFilteredItems] = useState(testData);
   const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
-  const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] =
-    useState(false);
-  const [isSendNTEModalOpen, setIsSendNTEModalOpen] =
-    useState<T_SendNTEModal | null>(null);
-  const [isInvestigateModalOpen, setIsInvestigateModalOpen] =
-    useState<T_InvestigationModal | null>(null);
-  const [isSendDecisionModalOpen, setIsSendDecisionModalOpen] =
-    useState<T_SendDecisionModal | null>(null);
+  const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
+  const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (dateFilter.from && dateFilter.to) {
-      const filteredByDate = employeeIssueItems.filter((item) => {
-        let date = new Date(item.incidentDate);
+      const filteredByDate = createMemoPolicyItems.filter((item) => {
+        let date = new Date(item.date);
         let start = new Date(dateFilter.from);
         let end = new Date(dateFilter.to);
         return date >= end && date <= start;
       });
       setFilteredItems([...filteredByDate]);
     }
-  }, [dateFilter, employeeIssueItems]);
+  }, [dateFilter, createMemoPolicyItems]);
 
   const renderRows = () => {
     if (
       !dateFilter.from &&
       !dateFilter.to &&
-      employeeIssueItems &&
-      employeeIssueItems.length > 0
+      createMemoPolicyItems &&
+      createMemoPolicyItems.length > 0
     ) {
-      return employeeIssueItems.map((item, index) => (
+      return createMemoPolicyItems.map((item, index) => (
         <tr key={index}>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.incidentDate}
+            {item.date}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             <div className="flex gap-2">
-              <span>{item.name}</span>{" "}
-              <InformationCircleIcon className="text-yellow-500 h-5 w-5" />
+              <span>{item.title}</span> <ClipIcon />
             </div>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SendNTE
-              id={item.id}
-              isNTESent={item.isNTESent}
-              isNTEReceived={item.isNTEReceived}
-              incidentReceivedDate={item.incidentDate}
-              setIsSendNTEModalOpen={setIsSendNTEModalOpen}
+            <input
+              type="checkbox"
+              defaultChecked={item.withResponse}
+              className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
             />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <Investigation
-              id={item.id}
-              investigatedDate={item.investigatedDate}
-              isInvestigated={item.isInvestigated}
-              setIsInvestigateModalOpen={setIsInvestigateModalOpen}
-            />
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
+            <p className="font-bold">View Responses</p>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <SendDecision
-              id={item.id}
-              isDecisionSent={item.isDecisionSent}
-              isDecisionReceived={item.isDecisionReceived}
-              decisionSentDate={item.decisionSentDate}
-              setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
-            />
+            <DeleteMemoLogo/>
           </td>
         </tr>
       ));
@@ -99,39 +74,25 @@ const Content = () => {
       return filteredItems.map((item, index) => (
         <tr key={index}>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.incidentDate}
+            {item.date}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             <div className="flex gap-2">
-              <span>{item.name}</span>{" "}
-              <InformationCircleIcon className="text-yellow-500 h-5 w-5" />
+              <span>{item.title}</span> <ClipIcon />
             </div>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SendNTE
-              id={item.id}
-              isNTESent={item.isNTESent}
-              isNTEReceived={item.isNTEReceived}
-              incidentReceivedDate={item.incidentDate}
-              setIsSendNTEModalOpen={setIsSendNTEModalOpen}
+            <input
+              type="checkbox"
+              defaultChecked={item.withResponse}
+              className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
             />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <Investigation
-              id={item.id}
-              investigatedDate={item.investigatedDate}
-              isInvestigated={item.isInvestigated}
-              setIsInvestigateModalOpen={setIsInvestigateModalOpen}
-            />
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
+            <p className="font-bold">View Responses</p>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <SendDecision
-              id={item.id}
-              isDecisionSent={item.isDecisionSent}
-              isDecisionReceived={item.isDecisionReceived}
-              decisionSentDate={item.decisionSentDate}
-              setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
-            />
+            <DeleteMemoLogo/>
           </td>
         </tr>
       ));
@@ -156,7 +117,7 @@ const Content = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="p-2 md:p-8 lg:p-4">
           <h2 className="text-xl font-bold text-indigo-dye">
-            Address Employee Issue
+            Create Memo/Policy
           </h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
             <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
@@ -210,20 +171,69 @@ const Content = () => {
                 </div>
               </div>
             </div>
-            <div className="flex-1 flex justify-end">
-              <button
-                className="bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80"
-                onClick={() => setIsIncidentReportModalOpen(true)}
-              >
-                CREATE
-              </button>
+            <div className="flex-1 flex justify-end relative">
+              <Menu as="div" className="relative inline-block text-left">
+                <div>
+                  <Menu.Button className="inline-flex w-full justify-center gap-x-4 items-center rounded-md bg-green-500 px-5 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-green-500 hover:opacity-90">
+                    CREATE
+                    <CreateMemoChevronLogo />
+                  </Menu.Button>
+                </div>
+
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-green-500 focus:outline-none">
+                    <div className="py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <span
+                            className={classNames(
+                              active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                              'block px-4 py-2 text-sm cursor-pointer'
+                            )}
+                            onClick={() => {
+                              setIsCreateMemoModalOpen(true);
+                              setIsOpen(!isOpen);
+                            }}
+                          >
+                            Create Memo
+                          </span>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <span
+                            className={classNames(
+                              active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                              'block px-4 py-2 text-sm cursor-pointer'
+                            )}
+                            onClick={() => {
+                              setIsCreatePolicyModalOpen(true);
+                              setIsOpen(!isOpen);
+                            }}
+                          >
+                            Create Policy
+                          </span>
+                        )}
+                      </Menu.Item>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
             </div>
           </div>
           <div className="mt-8 flow-root">
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="min-w-full py-2 sm:px-6 lg:px-8">
                 <table
-                  className={`min-w-full divide-y divide-gray-300 ${employeeIssueItems.length === 0 && "mb-6"
+                  className={`min-w-full divide-y divide-gray-300 ${createMemoPolicyItems.length === 0 && "mb-6"
                     }`}
                 >
                   <thead>
@@ -238,25 +248,25 @@ const Content = () => {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Name
+                        Title
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Issue NTE
+                        With Response
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Investigate
+                        Response/s
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Send Decision
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -266,32 +276,20 @@ const Content = () => {
                 </table>
                 <hr />
                 <p className="text-xs text-gray-500 mt-2">
-                  Total record/s: {employeeIssueItems.length}
+                  Total record/s: {createMemoPolicyItems.length}
                 </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <IncidentReportModal
-        isOpen={isIncidentReportModalOpen}
-        setIsOpen={setIsIncidentReportModalOpen}
+      <CreateMemoModal
+        isOpen={isCreateMemoModalOpen}
+        setIsOpen={setIsCreateMemoModalOpen}
       />
-      <SendNTEModal
-        isOpen={isSendNTEModalOpen}
-        setIsOpen={setIsSendNTEModalOpen}
-        employeeIssueItems={employeeIssueItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
-      />
-      <InvestigationModal
-        isOpen={isInvestigateModalOpen}
-        setIsOpen={setIsInvestigateModalOpen}
-      />
-      <SendDecisionModal
-        isOpen={isSendDecisionModalOpen}
-        setIsOpen={setIsSendDecisionModalOpen}
-        employeeIssueItems={employeeIssueItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
+      <CreatePolicyModal
+        isOpen={isCreatePolicyModalOpen}
+        setIsOpen={setIsCreatePolicyModalOpen}
       />
     </>
   );
