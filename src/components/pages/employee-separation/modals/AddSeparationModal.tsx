@@ -10,7 +10,7 @@ import DateCalendar from '@/svg/DateCalendar';
 
 export default function AddSeparationModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: boolean, setIsOpen: Dispatch<boolean> }) {
     // const { mutate, isLoading } = useAddSeparationItems();
-    const { register, handleSubmit } = useForm<T_Separation>();
+    const { register, handleSubmit, watch, setValue, reset } = useForm<T_Separation>();
     const dateInputRef = useRef(null);
     const cancelButtonRef = useRef(null)
     const onSubmit = handleSubmit((data) => {
@@ -54,6 +54,7 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
         setSeparationItems([...separationItems, newItem]);
         setIsOpen(false);
         toast.success('Successfully created separation', { duration: 5000 });
+        reset()
     });
     return (
         <Transition.Root show={isOpen} as={Fragment}>
@@ -89,16 +90,16 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                 <form onSubmit={onSubmit}>
                                     <div className="px-4 pt-4 pb-6">
                                         <div className="sm:col-span-4">
-                                            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                            <label htmlFor="date" className="block text-sm font-medium leading-6 text-gray-900">
                                                 Date of Separation<span className="text-red-600">*</span>
                                             </label>
                                             <div className="relative mt-2">
                                                 <input
                                                     type="date"
-                                                    {...register("date", { required: true })}
+                                                    onChange={(e) => setValue('date', Intl.DateTimeFormat('en-US').format(new Date(e.target.value)))}
+                                                    required
                                                     id="date"
                                                     className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                                                    aria-describedby="email-optional"
                                                     ref={dateInputRef}
                                                     // @ts-expect-error
                                                     onClick={() => dateInputRef.current.showPicker()}

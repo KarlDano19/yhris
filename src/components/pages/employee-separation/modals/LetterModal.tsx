@@ -17,7 +17,7 @@ type FormValues = {
 export default function LetterModal({ separationItems, setSeparationItems, type = 'Acceptance', isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, type?: 'Acceptance' | 'Separation', isOpen: T_LetterModal | null, setIsOpen: Dispatch<T_LetterModal | null> }) {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [toSaveData, setToSaveData] = useState<any>(null);
-    const { register, handleSubmit, reset } = useForm<FormValues>();
+    const { register, handleSubmit, reset, setValue } = useForm<FormValues>();
     const onSubmit = handleSubmit((data) => {
         if (isOpen && isOpen.id) {
             const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
@@ -88,7 +88,8 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
                                                 <div className="relative mt-2">
                                                     <input
                                                         type="date"
-                                                        {...register("date", { required: true })}
+                                                        onChange={(e) => setValue('date', Intl.DateTimeFormat('en-US').format(new Date(e.target.value)))}
+                                                        required
                                                         id="date"
                                                         className="appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                         placeholder="you@example.com"
