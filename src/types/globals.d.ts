@@ -35,3 +35,8 @@ export type T_IncidentReport = {
     incidentPlace: string;
     briefBackground: string;
 };
+
+export type T_DesignBenefitsModal = {
+    isOpen: boolean,
+    id: number,
+}

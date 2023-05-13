@@ -136,11 +136,12 @@ export const createMemoPolicyItems = [
 export const designBenefitsItems = [
     {
         id: 1,
-        title: '',
-        to: '',
-        purpose: '',
-        benefits: '',
-        coverage: '',
-        eligibility: '',
+        title: 'Birthday Leave',
+        to: 'test@gmail.com',
+        purpose: 'Lorem Ipsum Dolor',
+        benefits: 'Lorem Ipsum Dolor',
+        coverage: 'Lorem Ipsum Dolor',
+        eligibility: 'Lorem Ipsum Dolor',
+        date: '04/07/2023',
     }
 ];
