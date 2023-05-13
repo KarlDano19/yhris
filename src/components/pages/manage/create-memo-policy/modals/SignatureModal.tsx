@@ -30,7 +30,6 @@ export default function SignatureModal({
 
   const saveSignature = () => {
     const dataUrl = signatureCanvasRef.current.toDataURL();
-    console.log(dataUrl);
     setSignatureUrl(dataUrl);
     setIsOpen(false);
   };

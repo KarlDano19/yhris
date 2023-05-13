@@ -19,15 +19,11 @@ export default function AddSeparationModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  console.log(separationItems);
-
   // const { mutate, isLoading } = useAddSeparationItems();
   const { register, handleSubmit } = useForm<T_Separation>();
   const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
-
     // const callbackReq = {
     //     onSuccess: (data: any) => {
     //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
@@ -65,8 +61,6 @@ export default function AddSeparationModal({
       isQuitclaimReceived: false,
       quitclaimReceivedDate: "",
     };
-
-    console.log(newItem);
 
     setSeparationItems([...separationItems, newItem]);
     setIsOpen(false);
