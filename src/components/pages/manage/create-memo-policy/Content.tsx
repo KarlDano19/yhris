@@ -1,46 +1,29 @@
 "use client";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useState, useRef } from "react";
-import {
-  T_SendNTEModal,
-  T_SendDecisionModal,
-  T_InvestigationModal,
-  T_LetterModal,
-  T_QuitclaimModal,
-} from "@/types/globals";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { employeeIssueItems as testData } from "@/helpers/testData";
+import ClipIcon from "@/svg/ClipIcon";
+import SelectChevronDown from "@/svg/SelectChevronDown";
+
+import { createMemoPolicyItems as testData } from "@/helpers/testData";
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
 import DateCalendar from "@/svg/DateCalendar";
-import IncidentReportModal from "./modals/IncidentReportModal";
-import SendNTEModal from "./modals/SendNTEModal";
-import SendNTE from "./SendNTE"; // import useGetSeparationItems from './hooks/useGetSeparationItems'
-import Investigation from "./Investigation";
-import InvestigationModal from "./modals/InvestigationModal";
-import SendDecision from "./SendDecision";
-import SendDecisionModal from "./modals/SendDecisionModal";
+import CreateMemoModal from "./modals/CreateMemoModal";
+import CreatePolicyModal from "./modals/CreatePolicyModal";
 
 const Content = () => {
   // const { data: separationItems, isLoading: isSeparationItemsLoading } = useGetSeparationItems();
-  const [employeeIssueItems, setEmployeeIssueItems] = useState(testData);
+  const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState(testData);
   const [filteredItems, setFilteredItems] = useState(testData);
   const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
-  const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] =
-    useState(false);
-  const [isLetterModalOpen, setIsLetterModalOpen] =
-    useState<T_LetterModal | null>(null);
-  const [isSendNTEModalOpen, setIsSendNTEModalOpen] =
-    useState<T_SendNTEModal | null>(null);
-  const [isInvestigateModalOpen, setIsInvestigateModalOpen] =
-    useState<T_InvestigationModal | null>(null);
-  const [isSendDecisionModalOpen, setIsSendDecisionModalOpen] =
-    useState<T_SendDecisionModal | null>(null);
-
-  const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] =
-    useState<T_QuitclaimModal | null>(null);
+  const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
+  const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
+
+  // Button for Create
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("");
   // const releaseLastPay = () => {
   //   if (isLastPayModalOpen && isLastPayModalOpen.id) {
   //     const itemIndex = employeeIssueItems.findIndex(
@@ -50,7 +33,7 @@ const Content = () => {
   //       JSON.stringify(employeeIssueItems)
   //     );
   //     separationItemsCopy[itemIndex].isLastPayReleased = true;
-  //     setEmployeeIssueItems([...separationItemsCopy]);
+  //     setCreateMemoPolicyItems([...separationItemsCopy]);
   //     toast.custom(
   //       () => (
   //         <CustomToast message="Last pay marked as release." type="success" />
@@ -74,59 +57,45 @@ const Content = () => {
 
   useEffect(() => {
     if (dateFilter.from && dateFilter.to) {
-      const filteredByDate = employeeIssueItems.filter((item) => {
-        let date = new Date(item.incidentDate);
+      const filteredByDate = createMemoPolicyItems.filter((item) => {
+        let date = new Date(item.date);
         let start = new Date(dateFilter.from);
         let end = new Date(dateFilter.to);
         return date >= end && date <= start;
       });
       setFilteredItems([...filteredByDate]);
     }
-  }, [dateFilter, employeeIssueItems]);
+  }, [dateFilter, createMemoPolicyItems]);
 
   const renderRows = () => {
     if (
       !dateFilter.from &&
       !dateFilter.to &&
-      employeeIssueItems &&
-      employeeIssueItems.length > 0
+      createMemoPolicyItems &&
+      createMemoPolicyItems.length > 0
     ) {
-      return employeeIssueItems.map((item, index) => (
+      return createMemoPolicyItems.map((item, index) => (
         <tr key={index}>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.incidentDate}
+            {item.date}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             <div className="flex gap-2">
-              <span>{item.name}</span>{" "}
-              <InformationCircleIcon className="text-yellow-500 h-5 w-5" />
+              <span>{item.title}</span> <ClipIcon />
             </div>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SendNTE
-              id={item.id}
-              isNTESent={item.isNTESent}
-              isNTEReceived={item.isNTEReceived}
-              incidentReceivedDate={item.incidentDate}
-              setIsSendNTEModalOpen={setIsSendNTEModalOpen}
+            <input
+              type="checkbox"
+              defaultChecked={item.withResponse}
+              className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
             />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <Investigation
-              id={item.id}
-              investigatedDate={item.investigatedDate}
-              isInvestigated={item.isInvestigated}
-              setIsInvestigateModalOpen={setIsInvestigateModalOpen}
-            />
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
+            <p className="font-bold">View Responses</p>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <SendDecision
-              id={item.id}
-              isDecisionSent={item.isDecisionSent}
-              isDecisionReceived={item.isDecisionReceived}
-              decisionSentDate={item.decisionSentDate}
-              setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
-            />
+            Action
           </td>
         </tr>
       ));
@@ -139,39 +108,25 @@ const Content = () => {
       return filteredItems.map((item, index) => (
         <tr key={index}>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.incidentDate}
+            {item.date}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             <div className="flex gap-2">
-              <span>{item.name}</span>{" "}
-              <InformationCircleIcon className="text-yellow-500 h-5 w-5" />
+              <span>{item.title}</span> <ClipIcon />
             </div>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SendNTE
-              id={item.id}
-              isNTESent={item.isNTESent}
-              isNTEReceived={item.isNTEReceived}
-              incidentReceivedDate={item.incidentDate}
-              setIsSendNTEModalOpen={setIsSendNTEModalOpen}
+            <input
+              type="checkbox"
+              defaultChecked={item.withResponse}
+              className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
             />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <Investigation
-              id={item.id}
-              investigatedDate={item.investigatedDate}
-              isInvestigated={item.isInvestigated}
-              setIsInvestigateModalOpen={setIsInvestigateModalOpen}
-            />
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
+            <p className="font-bold">View Responses</p>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <SendDecision
-              id={item.id}
-              isDecisionSent={item.isDecisionSent}
-              isDecisionReceived={item.isDecisionReceived}
-              decisionSentDate={item.decisionSentDate}
-              setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
-            />
+            Action
           </td>
         </tr>
       ));
@@ -250,13 +205,55 @@ const Content = () => {
                 </div>
               </div>
             </div>
-            <div className="flex-1 flex justify-end">
-              <button
-                className="bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80"
-                onClick={() => setIsIncidentReportModalOpen(true)}
-              >
-                CREATE
-              </button>
+            <div className="flex-1 flex justify-end relative">
+              <div className="inline-block text-left">
+                <button
+                  type="button"
+                  className="bg-green-500 rounded-md py-2 pl-8 pr-16 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80"
+                  id="options-menu"
+                  aria-expanded="true"
+                  aria-haspopup="true"
+                  onClick={() => {
+                    setIsOpen(!isOpen);
+                  }}
+                >
+                  {selectedOption || "CREATE"}
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                    <SelectChevronDown />
+                  </div>
+                </button>
+              </div>
+              {isOpen && (
+                <div className=" absolute top-8 right-0 mt-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div
+                    className="py-1 "
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="options-menu"
+                  >
+                    <button
+                      className="block px-8 py-2 text-sm text-gray-800 hover:bg-green-500 hover:text-white"
+                      role="menuitem"
+                      onClick={() => {
+                        setIsCreateMemoModalOpen(true);
+                        setIsOpen(!isOpen);
+                      }}
+                    >
+                      Create Memo
+                    </button>
+                    <button
+                      className="block px-8 py-2 text-sm text-gray-800 hover:bg-green-500 hover:text-white"
+                      role="menuitem"
+                      onClick={() => {
+                        setIsCreatePolicyModalOpen(true);
+                        setIsOpen(!isOpen);
+                      }}
+                    >
+                      Create Policy
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="mt-8 flow-root">
@@ -264,7 +261,7 @@ const Content = () => {
               <div className="min-w-full py-2 sm:px-6 lg:px-8">
                 <table
                   className={`min-w-full divide-y divide-gray-300 ${
-                    employeeIssueItems.length === 0 && "mb-6"
+                    createMemoPolicyItems.length === 0 && "mb-6"
                   }`}
                 >
                   <thead>
@@ -279,25 +276,25 @@ const Content = () => {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Name
+                        Title
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Issue NTE
+                        With Response
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Investigate
+                        Response/s
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Send Decision
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -307,33 +304,31 @@ const Content = () => {
                 </table>
                 <hr />
                 <p className="text-xs text-gray-500 mt-2">
-                  Total record/s: {employeeIssueItems.length}
+                  Total record/s: {createMemoPolicyItems.length}
                 </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <IncidentReportModal
-        isOpen={isIncidentReportModalOpen}
-        setIsOpen={setIsIncidentReportModalOpen}
+      <CreateMemoModal
+        isOpen={isCreateMemoModalOpen}
+        setIsOpen={setIsCreateMemoModalOpen}
       />
-      <SendNTEModal
+      <CreatePolicyModal
+        isOpen={isCreatePolicyModalOpen}
+        setIsOpen={setIsCreatePolicyModalOpen}
+      />
+      {/* <SendNTEModal
         isOpen={isSendNTEModalOpen}
         setIsOpen={setIsSendNTEModalOpen}
-        employeeIssueItems={employeeIssueItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
+        createMemoPolicyItems={createMemoPolicyItems}
+        setcreateMemoPolicyItems={setcreateMemoPolicyItems}
       />
       <InvestigationModal
         isOpen={isInvestigateModalOpen}
         setIsOpen={setIsInvestigateModalOpen}
-      />
-      <SendDecisionModal
-        isOpen={isSendDecisionModalOpen}
-        setIsOpen={setIsSendDecisionModalOpen}
-        employeeIssueItems={employeeIssueItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
-      />
+      /> */}
     </>
   );
 };

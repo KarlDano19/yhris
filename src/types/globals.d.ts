@@ -43,6 +43,15 @@ export type T_InvestigationModal = {
 };
 
 export type T_IncidentReport = {
+  name: string;
+  position: string;
+  department: string;
+  incidentDate: string;
+  incidentPlace: string;
+  briefBackground: string;
+};
+
+export type T_Investigation = {
   date: string;
   presider: string;
   witness: string;
@@ -51,4 +60,35 @@ export type T_IncidentReport = {
   isAttendHearing: string;
   briefBackground: string;
   attachment: File;
+};
+
+export type T_IncidentReport = {
+  name: string;
+  position: string;
+  department: string;
+  incidentDate: string;
+  incidentPlace: string;
+  briefBackground: string;
+};
+
+export type T_CreateMemoPolicy = {
+  date: string;
+  type: string;
+  isResponse: boolean;
+  title: string;
+  email: string;
+  body: string;
+  name: string;
+  position: string;
+  signature: File;
+  qrCode: File;
+  file: File;
+  purpose: string;
+  policy: string;
+  procedure: string;
+  eligibility: string;
+  application: string;
+  coverage: string;
+  termination: string;
+  createPolicyFile: File | null;
 };

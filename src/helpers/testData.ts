@@ -117,9 +117,10 @@ export const employeeIssueItems = [
 
 export const createMemoPolicyItems = [
   {
+    date: "2023-04-07",
     id: 1,
     type: "memo",
-    title: "",
+    title: "PHIC Update 2023",
     to: "",
     body: "",
     name: "",

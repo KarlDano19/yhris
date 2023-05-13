@@ -3,7 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { T_IncidentReport, T_InvestigationModal } from "@/types/globals";
+import { T_Investigation, T_InvestigationModal } from "@/types/globals";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import DateCalendar from "@/svg/DateCalendar";
 // import useAddSeparationItems from '../hooks/useAddSeparationItems';
@@ -16,7 +16,7 @@ export default function InvestigationModal({
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
   // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit } = useForm<T_IncidentReport>();
+  const { register, handleSubmit } = useForm<T_Investigation>();
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
   const IncidentDateInputRef = useRef<HTMLInputElement>(null);
 
