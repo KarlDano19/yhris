@@ -86,7 +86,7 @@ const Content = () => {
         <>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="p-2 md:p-8 lg:p-4">
-                    <h2 className="text-xl font-bold text-indigo-dye">Address Employee Issue</h2>
+                    <h2 className="text-xl font-bold text-indigo-dye">Design Benefits</h2>
                     <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
                         <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
                             <div className="relative">
