@@ -9,11 +9,11 @@ async function getDepartmentItems() {
             'Authorization': `Token ${localStorage.token}`,
           },
         };
-        const res = await axios.post(
+        const res = await axios.get(
           `${process.env.hostName}/api/departments/`,
           config
         );
-        return res.data;
+        return res.data.departments;
       } catch (err: any) {
         if (Object.hasOwn(err, "response")) {
           throw err.response.data.message;

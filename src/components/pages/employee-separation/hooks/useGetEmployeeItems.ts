@@ -9,11 +9,11 @@ async function getEmployeeItems() {
             'Authorization': `Token ${localStorage.token}`,
           },
         };
-        const res = await axios.post(
+        const res = await axios.get(
           `${process.env.hostName}/api/employees/`,
           config
         );
-        return res.data;
+        return res.data.employees;
       } catch (err: any) {
         if (Object.hasOwn(err, "response")) {
           throw err.response.data.message;

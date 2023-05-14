@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import Image from 'next/image';
 import { Fragment } from 'react';
 import { Menu, Popover, Transition } from '@headlessui/react';
 import classNames from '@/helpers/classNames';
@@ -17,6 +18,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import MainLogo from '@/svg/MainLogo';
 import AccountLogo from '@/svg/AccountLogo';
+import useGetProfile from './hooks/useGetProfile';
+import dynamic from 'next/dynamic';
 const user = {
   name: 'Chelsea Hagon',
   email: 'chelsea.hagon@example.com',
@@ -32,11 +35,15 @@ const navigation = [
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
   { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '/login' },
+  { name: 'Sign out', href: '#' },
 ];
+const Timer = dynamic(() => import('./Timer'), {
+  ssr: false,
+});
 const MainHeader = () => {
   const pathname = usePathname();
   const showHeader = ['/login', '/register'].includes(pathname) ? false : true;
+  const { data } = useGetProfile();
   return (
     <Popover
       as='header'
@@ -76,12 +83,24 @@ const MainHeader = () => {
                     <div>
                       <Menu.Button className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
                         <span className='sr-only'>Open user menu</span>
-                        <AccountLogo />
+                        {data ? (
+                          <Image
+                            className='rounded-full mx-auto'
+                            width='29'
+                            height='29'
+                            src={`${process.env.hostName}${data.logo}`}
+                            alt='profile logo'
+                          />
+                        ) : (
+                          <AccountLogo />
+                        )}
                         <div className=''>
                           <h3 className='text-sm font-bold'>
-                            The ABBA Initiative
+                            {data ? data.name : ''}
                           </h3>
-                          <p className='text-xs'>Apr 7, 2023 23:37:05</p>
+                          <p className='text-xs w-32'>
+                            <Timer />
+                          </p>
                         </div>
                         <ChevronDownIcon className='h-5 w-5' />
                       </Menu.Button>

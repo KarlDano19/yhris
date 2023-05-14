@@ -6,23 +6,24 @@ import toast from 'react-hot-toast';
 import { T_Separation } from '@/types/globals';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import DateCalendar from '@/svg/DateCalendar';
-// import useAddSeparationItems from '../hooks/useAddSeparationItems';
+import useAddSeparationItems from '../hooks/useAddSeparationItems';
+import CustomToast from '@/components/CustomToast';
 
-export default function AddSeparationModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: boolean, setIsOpen: Dispatch<boolean> }) {
-    // const { mutate, isLoading } = useAddSeparationItems();
+export default function AddSeparationModal({ separationItems, departmentItems, employeeItems, positionItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, departmentItems: any, employeeItems: any, positionItems: any, setSeparationItems: any, isOpen: boolean, setIsOpen: Dispatch<boolean> }) {
+    const { mutate, isLoading } = useAddSeparationItems();
     const { register, handleSubmit } = useForm<T_Separation>();
     const dateInputRef = useRef(null);
     const cancelButtonRef = useRef(null)
     const onSubmit = handleSubmit((data) => {
-        // const callbackReq = {
-        //     onSuccess: (data: any) => {
-        //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
-        //     },
-        //     onError: (err: any) => {
-        //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
-        //     },
-        // }
-        // mutate(data, callbackReq)
+        const callbackReq = {
+            onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
+            },
+            onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
+            },
+        }
+        mutate(data, callbackReq)
         const newItem = {
             id: separationItems.length + 1,
             separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
@@ -112,13 +113,24 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                             <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                                                 Name<span className="text-red-600">*</span>
                                             </label>
-                                            <div className="mt-2">
-                                                <input
-                                                    id="name"
+                                            <div className="relative mt-2">
+                                                <select
+                                                    id="position"
                                                     {...register("name", { required: true })}
-                                                    type="name"
-                                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
-                                                />
+                                                    className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                >
+                                                    <option value="">Select...</option>
+                                                    {
+                                                        employeeItems.map((item: any) => {
+                                                            return (
+                                                                <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
+                                                            )
+                                                        })
+                                                    }
+                                                </select>
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                                    <SelectChevronDown />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="sm:col-span-4 mt-4">
@@ -132,9 +144,13 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                                     className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
-                                                    <option>Payroll Consultant</option>
-                                                    <option>Programmer</option>
-                                                    <option>QA Analyst</option>
+                                                    {
+                                                        positionItems.map((item: any) => {
+                                                            return (
+                                                                <option key={item.id} value={item.id}>{item.name}</option>
+                                                            )
+                                                        })
+                                                    }
                                                 </select>
                                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                                                     <SelectChevronDown />
@@ -152,9 +168,13 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                                     className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
-                                                    <option>Payroll</option>
-                                                    <option>Information Technology</option>
-                                                    <option>Marketing</option>
+                                                    {
+                                                        departmentItems.map((item: any) => {
+                                                            return (
+                                                                <option key={item.id} value={item.id}>{item.name}</option>
+                                                            )
+                                                        })
+                                                    }
                                                 </select>
                                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                                                     <SelectChevronDown />

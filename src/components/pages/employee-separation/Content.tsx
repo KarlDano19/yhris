@@ -16,12 +16,20 @@ import toast from 'react-hot-toast';
 import QuitclaimModal from './modals/QuitclaimModal'
 import CustomToast from '@/components/CustomToast'
 import DateCalendar from '@/svg/DateCalendar'
-// import useGetSeparationItems from './hooks/useGetSeparationItems'
+import useGetSeparationItems from './hooks/useGetSeparationItems'
+import useGetDepartmentItems from './hooks/useGetDepartmentItems'
+import useGetEmployeeItems from './hooks/useGetEmployeeItems'
+import useGetPositionItems from './hooks/useGetPositionItems'
 
 const Content = () => {
-    // const { data: separationItems, isLoading: isSeparationItemsLoading } = useGetSeparationItems();
+    const { data: dataSepration, isLoading: isLoadingSeparation } = useGetSeparationItems();
+    const { data: dataDepartment, isLoading: isLoadingDepartment } = useGetDepartmentItems();
+    const { data: dataEmployee, isLoading: isLoadingEmployee } = useGetEmployeeItems();
+    const { data: dataPosition, isLoading: isLoadingPosition } = useGetPositionItems();
     const [separationItems, setSeparationItems] = useState(testData);
-    const [filteredItems, setFilteredItems] = useState(testData);
+    const [departmentItems, setDepartmentItems] = useState(dataDepartment || []);
+    const [employeeItems, setEmployeeItems] = useState(dataEmployee || []);
+    const [positionItems, setPositionItems] = useState(dataPosition || []);
     const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
     const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
@@ -47,48 +55,25 @@ const Content = () => {
             setIsLastPayModalOpen(null);
         }
     }
-
+    
     useEffect(() => {
-        if (dateFilter.from && dateFilter.to) {
-            const filteredByDate = separationItems.filter(item => {
-                let date = new Date(item.separationDate);
-                let start = new Date(dateFilter.from);
-                let end = new Date(dateFilter.to);
-                return date >= end && date <= start;
-            });
-            setFilteredItems([...filteredByDate])
+        if (dataSepration) {
+            
         }
-    }, [dateFilter, separationItems])
+        if (dataDepartment) {
+            setDepartmentItems(dataDepartment)
+        }
+        if (dataEmployee) {
+            setEmployeeItems(dataEmployee)
+        }
+        if (dataPosition) {
+            setPositionItems(dataPosition)
+        }
+    }, [separationItems, dataDepartment, dataEmployee, dataPosition])
 
     const renderRows = () => {
-        if (!dateFilter.from && !dateFilter.to && separationItems && separationItems.length > 0) {
+        if (separationItems && separationItems.length > 0) {
             return separationItems.map((item, index) => (
-                <tr key={index}>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        {item.separationDate}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        <div className="flex gap-2"><span>{item.name}</span> <InformationCircleIcon className="text-yellow-500 h-5 w-5" /></div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        {item.reasonForLeaving}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <SeparationLetter id={item.id} isLetterSent={item.isLetterSent} isLetterReceived={item.isLetterReceived} letterReceivedDate={item.letterReceivedDate} setIsLetterModalOpen={setIsLetterModalOpen} />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <SignDocuments id={item.id} isDocumentsSent={item.isDocumentsSent} isDocumentsReceived={item.isDocumentsReceived} documentReceivedDate={item.documentReceivedDate} setIsDocumentModalOpen={setIsDocumentModalOpen} />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <LastPay id={item.id} isLastPayReleased={item.isLastPayReleased} setIsLastPayModalOpen={setIsLastPayModalOpen} />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-                        <Quitclaim id={item.id} isQuitclaimSigned={item.isQuitclaimSigned} isQuitclaimReceived={item.isQuitclaimReceived} quitclaimReceivedDate={item.quitclaimReceivedDate} setIsQuitclaimModalOpen={setIsQuitclaimModalOpen} />
-                    </td>
-                </tr>
-            ));
-        } else if (dateFilter.from && dateFilter.to && filteredItems && filteredItems.length > 0) {
-            return filteredItems.map((item, index) => (
                 <tr key={index}>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                         {item.separationDate}
@@ -222,7 +207,7 @@ const Content = () => {
                     </div>
                 </div>
             </div>
-            <AddSeparationModal separationItems={separationItems} setSeparationItems={setSeparationItems} isOpen={isAddSeparationModalOpen} setIsOpen={setIsAddSeparationModalOpen} />
+            <AddSeparationModal separationItems={separationItems} departmentItems={departmentItems} employeeItems={employeeItems} positionItems={positionItems} setSeparationItems={setSeparationItems} isOpen={isAddSeparationModalOpen} setIsOpen={setIsAddSeparationModalOpen} />
             <LetterModal separationItems={separationItems} setSeparationItems={setSeparationItems} type={isLetterModalOpen?.type} isOpen={isLetterModalOpen} setIsOpen={setIsLetterModalOpen} />
             <SignDocumentsModal separationItems={separationItems} setSeparationItems={setSeparationItems} isOpen={isDocumentModalOpen} setIsOpen={setIsDocumentModalOpen} />
             <ConfirmModal message="Are you sure the employee’s Last Pay has been released?" isOpen={!!isLastPayModalOpen} setIsOpen={updateReleaseModal} confirmAction={releaseLastPay} />
