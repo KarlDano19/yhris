@@ -4,25 +4,28 @@ import { XCircleIcon } from '@heroicons/react/24/solid'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { T_Separation } from '@/types/globals';
+import SelectChevronDown from '@/svg/SelectChevronDown';
+import DateCalendar from '@/svg/DateCalendar';
 // import useAddSeparationItems from '../hooks/useAddSeparationItems';
 
 export default function AddSeparationModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: boolean, setIsOpen: Dispatch<boolean> }) {
     // const { mutate, isLoading } = useAddSeparationItems();
-    const { register, handleSubmit } = useForm<T_Separation>();
+    const { register, handleSubmit, watch, setValue, reset } = useForm<T_Separation>();
+    const dateInputRef = useRef(null);
     const cancelButtonRef = useRef(null)
     const onSubmit = handleSubmit((data) => {
         // const callbackReq = {
         //     onSuccess: (data: any) => {
-        //         toast.success('Successfully created separation', { duration: 5000 });
+        //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
         //     },
         //     onError: (err: any) => {
-        //         toast.error(err);
+        //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
         //     },
         // }
         // mutate(data, callbackReq)
         const newItem = {
             id: separationItems.length + 1,
-            separationDate: data.date,
+            separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
             name: data.name,
             reasonForLeaving: data.reason,
             department: data.department,
@@ -51,6 +54,7 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
         setSeparationItems([...separationItems, newItem]);
         setIsOpen(false);
         toast.success('Successfully created separation', { duration: 5000 });
+        reset()
     });
     return (
         <Transition.Root show={isOpen} as={Fragment}>
@@ -86,18 +90,23 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                 <form onSubmit={onSubmit}>
                                     <div className="px-4 pt-4 pb-6">
                                         <div className="sm:col-span-4">
-                                            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                            <label htmlFor="date" className="block text-sm font-medium leading-6 text-gray-900">
                                                 Date of Separation<span className="text-red-600">*</span>
                                             </label>
-                                            <div className="mt-2">
+                                            <div className="relative mt-2">
                                                 <input
                                                     type="date"
-                                                    {...register("date", { required: true })}
+                                                    onChange={(e) => setValue('date', Intl.DateTimeFormat('en-US').format(new Date(e.target.value)))}
+                                                    required
                                                     id="date"
-                                                    className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                                                    placeholder="you@example.com"
-                                                    aria-describedby="email-optional"
+                                                    className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                                                    ref={dateInputRef}
+                                                    // @ts-expect-error
+                                                    onClick={() => dateInputRef.current.showPicker()}
                                                 />
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                                    <DateCalendar />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="sm:col-span-4 mt-4">
@@ -117,45 +126,51 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                             <label htmlFor="position" className="block text-sm font-medium leading-6 text-gray-900">
                                                 Position<span className="text-red-600">*</span>
                                             </label>
-                                            <div className="mt-2">
+                                            <div className="relative mt-2">
                                                 <select
                                                     id="position"
                                                     {...register("position", { required: true })}
-                                                    className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                    className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
                                                     <option>Payroll Consultant</option>
                                                     <option>Programmer</option>
                                                     <option>QA Analyst</option>
                                                 </select>
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                                    <SelectChevronDown />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="sm:col-span-4 mt-4">
                                             <label htmlFor="department" className="block text-sm font-medium leading-6 text-gray-900">
                                                 Department<span className="text-red-600">*</span>
                                             </label>
-                                            <div className="mt-2">
+                                            <div className="relative mt-2">
                                                 <select
                                                     id="department"
                                                     {...register("department", { required: true })}
-                                                    className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                    className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
                                                     <option>Payroll</option>
                                                     <option>Information Technology</option>
                                                     <option>Marketing</option>
                                                 </select>
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                                    <SelectChevronDown />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="sm:col-span-4 mt-4">
                                             <label htmlFor="reason" className="block text-sm font-medium leading-6 text-gray-900">
                                                 Reason of Leaving<span className="text-red-600">*</span>
                                             </label>
-                                            <div className="mt-2">
+                                            <div className="relative mt-2">
                                                 <select
                                                     id="reason"
                                                     {...register("reason", { required: true })}
-                                                    className="block w-full rounded-md border-0 py-2 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                    className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                 >
                                                     <option value="">Select...</option>
                                                     <option>Resignation</option>
@@ -163,6 +178,9 @@ export default function AddSeparationModal({ separationItems, setSeparationItems
                                                     <option>Layoff</option>
                                                     <option>Termination</option>
                                                 </select>
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                                    <SelectChevronDown />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

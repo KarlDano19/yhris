@@ -5,6 +5,8 @@ import { T_LetterModal } from '@/types/globals'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import CustomToast from '@/components/CustomToast';
+import DateCalendar from '@/svg/DateCalendar';
 
 type FormValues = {
     date: string;
@@ -15,9 +17,9 @@ type FormValues = {
 export default function LetterModal({ separationItems, setSeparationItems, type = 'Acceptance', isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, type?: 'Acceptance' | 'Separation', isOpen: T_LetterModal | null, setIsOpen: Dispatch<T_LetterModal | null> }) {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [toSaveData, setToSaveData] = useState<any>(null);
-    const { register, handleSubmit, reset } = useForm<FormValues>();
+    const { register, handleSubmit, reset, setValue } = useForm<FormValues>();
     const onSubmit = handleSubmit((data) => {
-        if(isOpen && isOpen.id) {
+        if (isOpen && isOpen.id) {
             const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
             const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
             separationItemsCopy[itemIndex][type === "Acceptance" ? 'acceptanceLetter' : 'separationLetter'].date = data.date;
@@ -30,16 +32,16 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
             setIsOpen(null);
             setIsConfirmModalOpen(true);
         } else {
-            toast.error('Incomplete information', { duration: 4000 });
+            toast.custom(() => <CustomToast message="Incomplete information." type="error" />, { duration: 4000 });
         }
     });
     const saveData = () => {
         setSeparationItems([...toSaveData]);
-        toast.success('Successfully sent email', { duration: 4000 });
+        toast.custom(() => <CustomToast message="Successfully sent email." type="success" />, { duration: 4000 });
         reset();
     }
     const updateConfirmModal = (value: boolean) => {
-        if(!value) {
+        if (!value) {
             setIsConfirmModalOpen(false);
             reset();
         }
@@ -83,15 +85,19 @@ export default function LetterModal({ separationItems, setSeparationItems, type 
                                                 <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                                                     Date<span className="text-red-600">*</span>
                                                 </label>
-                                                <div className="mt-2">
+                                                <div className="relative mt-2">
                                                     <input
                                                         type="date"
-                                                        {...register("date", { required: true })}
+                                                        onChange={(e) => setValue('date', Intl.DateTimeFormat('en-US').format(new Date(e.target.value)))}
+                                                        required
                                                         id="date"
-                                                        className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                                        className="appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                         placeholder="you@example.com"
                                                         aria-describedby="email-optional"
                                                     />
+                                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                                        <DateCalendar />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="sm:col-span-4 mt-4">
