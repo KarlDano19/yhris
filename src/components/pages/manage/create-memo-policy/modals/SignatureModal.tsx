@@ -75,31 +75,32 @@ export default function SignatureModal({
                     onClick={() => setIsOpen(false)}
                   />
                 </div>
-                <div className="w-[800px] mx-auto m-5">
+                <div className="p-4">
                   <button
                     className="text-right w-full underline"
                     onClick={clearSignature}
                   >
                     Clear
                   </button>
-                  <div className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6">
+                  <div className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 mt-2">
                     <SignatureCanvas
                       ref={signatureCanvasRef}
                       canvasProps={{
-                        width: 800,
+                        width: 900,
                         height: 200,
                         className: "",
                       }}
                     />
                   </div>
                 </div>
+                <hr />
                 <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
                   <button
                     type="submit"
                     className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
                     onClick={saveSignature}
                   >
-                    Send
+                    Sign
                   </button>
                   <button
                     type="button"

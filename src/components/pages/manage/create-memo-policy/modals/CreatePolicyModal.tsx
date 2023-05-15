@@ -3,21 +3,20 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { T_CreateMemoPolicy } from "@/types/globals";
-import SelectChevronDown from "@/svg/SelectChevronDown";
-import DateCalendar from "@/svg/DateCalendar";
-// import useAddSeparationItems from '../hooks/useAddSeparationItems';
+import { T_CreatePolicy } from "@/types/globals";
 
 export default function CreatePolicyModal({
+  createMemoPolicyItems,
+  setCreateMemoPolicyItems,
   isOpen,
   setIsOpen,
 }: {
+  createMemoPolicyItems: any,
+  setCreateMemoPolicyItems: any,
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit, setValue } = useForm<T_CreateMemoPolicy>();
-  const dateInputRef = useRef(null);
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<T_CreatePolicy>();
   const cancelButtonRef = useRef(null);
   const [isNextForm, setIsNextForm] = useState(false);
   const [fileProps, setFileProps] = useState<{
@@ -25,53 +24,24 @@ export default function CreatePolicyModal({
     fileSize?: number;
   }>({});
 
-  // function bytesToMegabytes(data: number): number {
-  //   const megabytes = data / (1024 * 1024);
-  //   return megabytes;
-  // }
-
   const onSubmit = handleSubmit((data) => {
-    // const callbackReq = {
-    //     onSuccess: (data: any) => {
-    //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
-    //     },
-    //     onError: (err: any) => {
-    //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
-    //     },
-    // }
-    // mutate(data, callbackReq)
-    // const newItem = {
-    //     id: separationItems.length + 1,
-    //     separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
-    //     name: data.name,
-    //     reasonForLeaving: data.reason,
-    //     department: data.department,
-    //     position: data.position,
-    //     acceptanceLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     separationLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     isLetterSent: false,
-    //     isLetterReceived: false,
-    //     letterReceivedDate: "",
-    //     isDocumentsSent: false,
-    //     isDocumentsReceived: false,
-    //     documentReceivedDate: "",
-    //     isLastPayReleased: false,
-    //     isQuitclaimSigned: false,
-    //     isQuitclaimReceived: false,
-    //     quitclaimReceivedDate: "",
-    // }
-    // setSeparationItems([...separationItems, newItem]);
+    const newItem = {
+      date: Intl.DateTimeFormat('en-US').format(new Date()),
+      id: createMemoPolicyItems.length + 1,
+      type: "memo",
+      title: data.title,
+      to: data.email,
+      file: data.file,
+      withResponse: data.withResponse,
+      isDeleted: false,
+    }
+    setCreateMemoPolicyItems([...createMemoPolicyItems, newItem]);
     setIsOpen(false);
-    toast.success("Successfully created separation", { duration: 5000 });
+    toast.success("Successfully created policy", { duration: 5000 });
+    reset();
   });
+  // console.log('eee 1', watch());
+  // console.log('eee 2', errors);
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -106,7 +76,7 @@ export default function CreatePolicyModal({
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Create Incident Report
+                    Create Policy
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
@@ -135,13 +105,13 @@ export default function CreatePolicyModal({
                         </div>
                         <div className="sm:col-span-4 flex ml-4 mt-4">
                           <input
-                            id="isResponse"
+                            id="withResponse"
                             type="checkbox"
-                            {...register("isResponse", { required: true })}
+                            {...register("withResponse", { required: true })}
                             className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
                           />
                           <label
-                            htmlFor="isResponse"
+                            htmlFor="withResponse"
                             className="block text-sm font-medium leading-6 text-gray-900 ml-2"
                           >
                             With Response
@@ -152,7 +122,7 @@ export default function CreatePolicyModal({
                             htmlFor="email"
                             className="block text-sm font-medium leading-6 text-gray-900"
                           >
-                            to<span className="text-red-600">*</span>
+                            To<span className="text-red-600">*</span>
                           </label>
                           <div className="mt-2">
                             <input
@@ -227,7 +197,7 @@ export default function CreatePolicyModal({
                     </>
                   ) : (
                     <>
-                      <div className="px-4 pt-4 pb-6">
+                      <div className="px-4 pb-6">
                         <p className="font-bold my-4">Provisions</p>
                         <div className="sm:col-span-4 mt-4">
                           <label
@@ -272,8 +242,9 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={3}
-                              {...register("coverage", { required: true })}
+                              name="coverage"
                               id="coverage"
+                              onChange={(e) => setValue("coverage", e.target.value)}
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
                           </div>
@@ -288,8 +259,9 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={3}
-                              {...register("termination", { required: true })}
+                              name="termination"
                               id="termination"
+                              onChange={(e) => setValue("termination", e.target.value)}
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
                           </div>
@@ -331,7 +303,7 @@ export default function CreatePolicyModal({
                                 </div>
                                 <input
                                   id="file"
-                                  {...register("createPolicyFile", {
+                                  {...register("file", {
                                     required: false,
                                   })}
                                   type="file"
@@ -355,7 +327,7 @@ export default function CreatePolicyModal({
                                   type="button"
                                   className="absolute bottom-10 underline text-savoy-blue"
                                   onClick={() => {
-                                    setValue("createPolicyFile", null);
+                                    setValue("file", "");
                                     setFileProps({});
                                   }}
                                 >

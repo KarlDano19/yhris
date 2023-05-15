@@ -1,24 +1,24 @@
-import { Dispatch, Fragment, useRef, useState } from "react";
+import { Dispatch, Fragment, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { T_CreateMemoPolicy } from "@/types/globals";
-import SelectChevronDown from "@/svg/SelectChevronDown";
-import DateCalendar from "@/svg/DateCalendar";
+import { T_CreateMemo } from "@/types/globals";
 import SignatureModal from "./SignatureModal";
-// import useAddSeparationItems from '../hooks/useAddSeparationItems';
 import Image from "next/image";
 
 export default function CreateMemoModal({
+  setCreateMemoPolicyItems,
+  createMemoPolicyItems,
   isOpen,
   setIsOpen,
 }: {
+  setCreateMemoPolicyItems: any,
+  createMemoPolicyItems: any,
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit, setValue } = useForm<T_CreateMemoPolicy>();
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<T_CreateMemo>();
   const cancelButtonRef = useRef(null);
 
   const [signatureUrl, setSignatureUrl] = useState("");
@@ -29,48 +29,33 @@ export default function CreateMemoModal({
   }>({});
 
   const onSubmit = handleSubmit((data) => {
-    // const callbackReq = {
-    //     onSuccess: (data: any) => {
-    //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
-    //     },
-    //     onError: (err: any) => {
-    //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
-    //     },
-    // }
-    // mutate(data, callbackReq)
-    // const newItem = {
-    //     id: separationItems.length + 1,
-    //     separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
-    //     name: data.name,
-    //     reasonForLeaving: data.reason,
-    //     department: data.department,
-    //     position: data.position,
-    //     acceptanceLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     separationLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     isLetterSent: false,
-    //     isLetterReceived: false,
-    //     letterReceivedDate: "",
-    //     isDocumentsSent: false,
-    //     isDocumentsReceived: false,
-    //     documentReceivedDate: "",
-    //     isLastPayReleased: false,
-    //     isQuitclaimSigned: false,
-    //     isQuitclaimReceived: false,
-    //     quitclaimReceivedDate: "",
-    // }
-
-    // setSeparationItems([...separationItems, newItem]);
+    const newItem = {
+        date: Intl.DateTimeFormat('en-US').format(new Date()),
+        id: createMemoPolicyItems.length + 1,
+        type: "memo",
+        title: data.title,
+        to: data.email,
+        body: data.body,
+        name: data.name,
+        position: data.position,
+        signature: data.signature,
+        qrCode: data.qrCode,
+        file: data.file,
+        withResponse: data.withResponse,
+        isDeleted: false,
+    }
+    setCreateMemoPolicyItems([...createMemoPolicyItems, newItem]);
     setIsOpen(false);
-    toast.success("Successfully created separation", { duration: 5000 });
+    toast.success("Successfully created memo", { duration: 5000 });
+    reset();
   });
+  useEffect(() => {
+    if(signatureUrl) {
+      setValue("signature", signatureUrl);
+    } else {
+      setSignatureUrl("");
+    }
+  }, [signatureUrl, setValue]);
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -132,13 +117,13 @@ export default function CreateMemoModal({
                     </div>
                     <div className="sm:col-span-4 flex ml-4 mt-4">
                       <input
-                        id="isResponse"
+                        id="withResponse"
                         type="checkbox"
-                        {...register("isResponse", { required: true })}
+                        {...register("withResponse", { required: true })}
                         className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
                       />
                       <label
-                        htmlFor="isResponse"
+                        htmlFor="withResponse"
                         className="block text-sm font-medium leading-6 text-gray-900 ml-2"
                       >
                         With Response
@@ -149,7 +134,7 @@ export default function CreateMemoModal({
                         htmlFor="email"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        to<span className="text-red-600">*</span>
+                        To<span className="text-red-600">*</span>
                       </label>
                       <div className="mt-2">
                         <input
@@ -188,7 +173,7 @@ export default function CreateMemoModal({
                       <div className="mt-2">
                         <input
                           id="name"
-                          {...register("name", { required: true })}
+                          {...register("name")}
                           type="text"
                           className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                         />
@@ -204,7 +189,7 @@ export default function CreateMemoModal({
                       <div className="mt-2">
                         <input
                           id="position"
-                          {...register("position", { required: true })}
+                          {...register("position")}
                           type="text"
                           className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                         />
@@ -224,9 +209,11 @@ export default function CreateMemoModal({
                         <div className="mt-2">
                           <button
                             id="draw"
+                            type="button"
                             className="block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             onClick={() => {
                               setSignatureModalOpen(true);
+                              // setSignatureUrl("");
                             }}
                           >
                             Draw
@@ -244,7 +231,8 @@ export default function CreateMemoModal({
                         <div className="mt-2">
                           <input
                             id="signature"
-                            {...register("signature", { required: true })}
+                            {...register("signature")}
+                            onChange={(e) => e.target.value ? setSignatureUrl("") : null}
                             type="file"
                             className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                           />
@@ -272,7 +260,7 @@ export default function CreateMemoModal({
                       <div className="mt-2">
                         <input
                           id="qrCode"
-                          {...register("qrCode", { required: true })}
+                          {...register("qrCode")}
                           type="file"
                           className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                         />
@@ -339,7 +327,7 @@ export default function CreateMemoModal({
                               type="button"
                               className="absolute bottom-10 underline text-savoy-blue"
                               onClick={() => {
-                                setValue("createPolicyFile", null);
+                                setValue("file", "");
                                 setFileProps({});
                               }}
                             >
