@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { T_Separation } from '@/types/globals';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import DateCalendar from '@/svg/DateCalendar';
+import CustomToast from '@/components/CustomToast';
 // import useAddSeparationItems from '../hooks/useAddSeparationItems';
 
 export default function AddSeparationModal({
@@ -64,7 +65,12 @@ export default function AddSeparationModal({
     };
     setSeparationItems([...separationItems, newItem]);
     setIsOpen(false);
-    toast.success('Successfully created separation', { duration: 5000 });
+    toast.custom(
+      () => (
+        <CustomToast message="Successfully created separation." type="success" />
+      ),
+      { duration: 5000 }
+    );
     reset();
   });
   return (
