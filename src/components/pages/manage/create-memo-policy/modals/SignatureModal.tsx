@@ -1,15 +1,10 @@
 import {
   Dispatch,
   Fragment,
-  useEffect,
-  useMemo,
   useRef,
-  useState,
 } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import { T_SendNTEModal } from "@/types/globals";
-import { useForm } from "react-hook-form";
 import SignatureCanvas from "react-signature-canvas";
 
 export default function SignatureModal({

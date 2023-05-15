@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { T_CreateMemo } from "@/types/globals";
 import SignatureModal from "./SignatureModal";
 import Image from "next/image";
+import CustomToast from "@/components/CustomToast";
 
 export default function CreateMemoModal({
   setCreateMemoPolicyItems,
@@ -46,7 +47,12 @@ export default function CreateMemoModal({
     }
     setCreateMemoPolicyItems([...createMemoPolicyItems, newItem]);
     setIsOpen(false);
-    toast.success("Successfully created memo", { duration: 5000 });
+    toast.custom(
+      () => (
+        <CustomToast message="Successfully created memo." type="success" />
+      ),
+      { duration: 5000 }
+    );
     reset();
   });
   useEffect(() => {

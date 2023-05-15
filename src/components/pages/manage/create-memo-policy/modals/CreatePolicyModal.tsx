@@ -4,6 +4,7 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { T_CreatePolicy } from "@/types/globals";
+import CustomToast from "@/components/CustomToast";
 
 export default function CreatePolicyModal({
   createMemoPolicyItems,
@@ -37,11 +38,14 @@ export default function CreatePolicyModal({
     }
     setCreateMemoPolicyItems([...createMemoPolicyItems, newItem]);
     setIsOpen(false);
-    toast.success("Successfully created policy", { duration: 5000 });
+    toast.custom(
+      () => (
+        <CustomToast message="Successfully created policy." type="success" />
+      ),
+      { duration: 5000 }
+    );
     reset();
   });
-  // console.log('eee 1', watch());
-  // console.log('eee 2', errors);
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -85,7 +89,7 @@ export default function CreatePolicyModal({
                 </div>
                 <form onSubmit={onSubmit}>
                   {!isNextForm ? (
-                    <>
+                    <div key="1">
                       <div className="px-4 pt-4 pb-6">
                         <div className="sm:col-span-4">
                           <label
@@ -143,7 +147,7 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={4}
-                              {...register("purpose", { required: true })}
+                              {...register("purpose")}
                               id="purpose"
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
@@ -160,7 +164,7 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={4}
-                              {...register("policy", { required: true })}
+                              {...register("policy")}
                               id="policy"
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
@@ -176,27 +180,16 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={4}
-                              {...register("procedure", { required: true })}
+                              {...register("procedure")}
                               id="procedure"
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
                           </div>
                         </div>
                       </div>
-                      <hr />
-                      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
-                        <button
-                          type="button"
-                          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                          onClick={() => setIsNextForm(true)}
-                          ref={cancelButtonRef}
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </>
+                    </div>
                   ) : (
-                    <>
+                    <div key="2">
                       <div className="px-4 pb-6">
                         <p className="font-bold my-4">Provisions</p>
                         <div className="sm:col-span-4 mt-4">
@@ -209,7 +202,7 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={3}
-                              {...register("eligibility", { required: true })}
+                              {...register("eligibility")}
                               id="eligibility"
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
@@ -226,7 +219,7 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={3}
-                              {...register("application", { required: true })}
+                              {...register("application")}
                               id="application"
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
@@ -242,9 +235,8 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={3}
-                              name="coverage"
                               id="coverage"
-                              onChange={(e) => setValue("coverage", e.target.value)}
+                              {...register("coverage")}
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
                           </div>
@@ -259,9 +251,8 @@ export default function CreatePolicyModal({
                           <div className="mt-2">
                             <textarea
                               rows={3}
-                              name="termination"
                               id="termination"
-                              onChange={(e) => setValue("termination", e.target.value)}
+                              {...register("termination")}
                               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
                             />
                           </div>
@@ -335,30 +326,39 @@ export default function CreatePolicyModal({
                                 </button>
                               )}
                             </div>
-
                             <p className="text-sm">Maximum file size: 10mb</p>
                           </div>
                         </div>
                       </div>
-                      <hr />
-                      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4">
-                        <button
-                          type="submit"
-                          className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-                        >
-                          Create
-                        </button>
-                        <button
-                          type="button"
-                          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                          onClick={() => setIsNextForm(false)}
-                          ref={cancelButtonRef}
-                        >
-                          Back
-                        </button>
-                      </div>
-                    </>
+                    </div>
                   )}
+                  <hr />
+                  {!isNextForm ? (
+                    <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
+                      <span
+                        className="mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                        onClick={() => setIsNextForm(true)}
+                      >
+                        Next
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4">
+                      <button
+                        type="submit"
+                        className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
+                      >
+                        Create
+                      </button>
+                      <span
+                        className="mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                        onClick={() => setIsNextForm(false)}
+                      >
+                        Back
+                      </span>
+                    </div>
+                  )}
+
                 </form>
               </Dialog.Panel>
             </Transition.Child>

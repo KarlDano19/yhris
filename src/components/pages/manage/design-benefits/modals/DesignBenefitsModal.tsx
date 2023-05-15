@@ -1,12 +1,9 @@
 import { Dispatch, Fragment, useRef, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon } from '@heroicons/react/24/solid'
-import { T_DesignBenefitsModal, T_DocumentsModal } from '@/types/globals'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { BarsArrowUpIcon, UsersIcon } from '@heroicons/react/20/solid'
 import CustomToast from '@/components/CustomToast';
-import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type FormValues = {
     title: string;
@@ -25,15 +22,6 @@ export default function DesignBenefitsModal({ designBenefitsItems, setDesignBene
     const [isBCCOpen, setIsBCCOpen] = useState(false);
     const { register, handleSubmit, reset, watch, formState: { isDirty }, setValue } = useForm<FormValues>();
     const onSubmit = handleSubmit((data) => {
-        // const callbackReq = {
-        //     onSuccess: (data: any) => {
-        //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
-        //     },
-        //     onError: (err: any) => {
-        //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
-        //     },
-        // }
-        // mutate(data, callbackReq)
         const newItem = {
             id: designBenefitsItems.length + 1,
             title: data.title,
@@ -46,7 +34,12 @@ export default function DesignBenefitsModal({ designBenefitsItems, setDesignBene
         }
         setDesignBenefitsItems([...designBenefitsItems, newItem]);
         setIsOpen(false);
-        toast.success('Successfully designed benefits', { duration: 5000 });
+        toast.custom(
+            () => (
+                <CustomToast message="Successfully created designed benefits." type="success" />
+            ),
+            { duration: 5000 }
+        );
         reset();
     });
     const cancelButtonRef = useRef(null);
