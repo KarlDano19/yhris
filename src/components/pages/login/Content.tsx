@@ -6,31 +6,32 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import EyePassword from '@/svg/EyePassword';
 import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast'
 import { T_Login } from '@/types/globals';
 import useAccessAuth from './hooks/useAccessAuth';
-import { useRouter } from 'next/navigation';
 const Content = () => {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const { mutate, isLoading } = useAccessAuth();
   const { register, handleSubmit } = useForm<T_Login>();
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.success(data.message, { duration: 5000 });
+        toast.custom(() => <CustomToast message={data.message} type="success" />, { duration: 4000 });
         localStorage.token = data.token;
         localStorage.hasProfile = data.has_profile;
         localStorage.accountType = data.account_type;
-        if (!data.has_profile) {
-          if (data.account_type === 'employer') {
-            router.push("/setup-employer-profile");
+        setTimeout(() => {
+          if (!data.has_profile) {
+            if (data.account_type === 'employer') {
+              location.href = "/setup-employer-profile";
+            }
+          } else {
+            location.href = "/";
           }
-        } else {
-          router.push("/");
-        }
+        }, 1000);
       },
       onError: (err: any) => {
-        toast.error(err);
+        toast.custom(() => <CustomToast message={err} type="error" />, { duration: 4000 });
       },
     };
     mutate(data, callbackReq);

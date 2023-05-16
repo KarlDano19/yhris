@@ -19,31 +19,35 @@ import { usePathname } from 'next/navigation';
 import MainLogo from '@/svg/MainLogo';
 import AccountLogo from '@/svg/AccountLogo';
 import useGetProfile from './hooks/useGetProfile';
-import dynamic from 'next/dynamic';
-const user = {
-  name: 'Chelsea Hagon',
-  email: 'chelsea.hagon@example.com',
-  imageUrl:
-    'https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast'
+import useLogout from './hooks/useLogout';
+import Timer from './Timer';
+const logout = () => {
+  const response = useLogout();
+  response
+    .then((data: any) => {
+      toast.custom(() => <CustomToast message={data.message} type="success" />, { duration: 4000 });
+      localStorage.removeItem('token');
+      localStorage.removeItem('hasProfile');
+      localStorage.removeItem('accountType');
+      setTimeout(() => {
+        location.href = '/login';
+      }, 1000);
+    })
+    .catch((err: any) => {
+      toast.custom(() => <CustomToast message={err} type="error" />, { duration: 4000 });
+    });
 };
-const navigation = [
-  { name: 'Home', href: '#', icon: HomeIcon, current: true },
-  { name: 'Popular', href: '#', icon: FireIcon, current: false },
-  { name: 'Communities', href: '#', icon: UserGroupIcon, current: false },
-  { name: 'Trending', href: '#', icon: ArrowTrendingUpIcon, current: false },
-];
 const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
+  { name: 'Your Profile', href: '#', onClick: void 0 },
+  { name: 'Settings', href: '#', onClick: void 0 },
+  { name: 'Sign out', href: void 0, onClick: logout },
 ];
-const Timer = dynamic(() => import('./Timer'), {
-  ssr: false,
-});
 const MainHeader = () => {
   const pathname = usePathname();
   const showHeader = ['/login', '/register'].includes(pathname) ? false : true;
-  const { data } = useGetProfile();
+  const { data, isLoading } = useGetProfile();
   return (
     <Popover
       as='header'
@@ -94,14 +98,22 @@ const MainHeader = () => {
                         ) : (
                           <AccountLogo />
                         )}
-                        <div className=''>
-                          <h3 className='text-sm font-bold'>
-                            {data ? data.name : ''}
-                          </h3>
-                          <p className='text-xs w-32'>
-                            <Timer />
-                          </p>
-                        </div>
+                        {(!isLoading) && (
+                          <div className=''>
+                            <h3 className='text-sm font-bold'>
+                              {data ? data.name : '...'}
+                            </h3>
+                            <p className='text-xs w-32'>
+                              <Timer />
+                            </p>
+                          </div>
+                        )}
+                        {isLoading && (
+                          <div role="status" className="max-w-sm animate-pulse">
+                            <div className="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mt-1 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-32"></div>
+                          </div>
+                        )}
                         <ChevronDownIcon className='h-5 w-5' />
                       </Menu.Button>
                     </div>
@@ -124,6 +136,7 @@ const MainHeader = () => {
                                   active ? 'bg-gray-100' : '',
                                   'block px-4 py-2 text-sm text-gray-700'
                                 )}
+                                onClick={item.onClick}
                               >
                                 {item.name}
                               </a>

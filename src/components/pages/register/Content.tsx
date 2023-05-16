@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import EyePassword from '@/svg/EyePassword';
 import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast'
 import { T_Register } from '@/types/globals';
 import useRegisterAccount from './hooks/useRegisterAccount';
 import { useRouter } from 'next/navigation';
@@ -18,14 +19,14 @@ const Content = () => {
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.success(data.message, { duration: 5000 });
+        toast.custom(() => <CustomToast message={data.message} type="success" />, { duration: 4000 });
         localStorage.token = data.token;
         localStorage.hasProfile = false;
         localStorage.accountType = data.account_type;
         router.push("/setup-employer-profile");
       },
       onError: (err: any) => {
-        toast.error(err);
+        toast.custom(() => <CustomToast message={err} type="error" />, { duration: 4000 });
       },
     };
     mutate(data, callbackReq);

@@ -51,37 +51,6 @@ export default function AddSeparationModal({
       },
     };
     mutate(data, callbackReq);
-    const newItem = {
-      id: separationItems.length + 1,
-      separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
-      name: data.name,
-      reasonForLeaving: data.reason,
-      department: data.department,
-      position: data.position,
-      acceptanceLetter: {
-        date: '',
-        to: '',
-        message: '',
-      },
-      separationLetter: {
-        date: '',
-        to: '',
-        message: '',
-      },
-      isLetterSent: false,
-      isLetterReceived: false,
-      letterReceivedDate: '',
-      isDocumentsSent: false,
-      isDocumentsReceived: false,
-      documentReceivedDate: '',
-      isLastPayReleased: false,
-      isQuitclaimSigned: false,
-      isQuitclaimReceived: false,
-      quitclaimReceivedDate: '',
-    };
-    setSeparationItems([...separationItems, newItem]);
-    setIsOpen(false);
-    toast.success('Successfully created separation', { duration: 5000 });
     reset();
   });
 
@@ -138,14 +107,14 @@ export default function AddSeparationModal({
                       </label>
                       <div className='relative mt-2'>
                         <input
-                          type='date'
-                          {...register('date', { required: true })}
-                          id='date'
-                          className='block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
-                          aria-describedby='email-optional'
-                          ref={dateInputRef}
-                          // @ts-expect-error
-                          onClick={() => dateInputRef.current.showPicker()}
+                            type="date"
+                            onChange={(e) => setValue('date', e.target.value)}
+                            required
+                            id="date"
+                            className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                            ref={dateInputRef}
+                            // @ts-expect-error
+                            onClick={() => dateInputRef.current.showPicker()}
                         />
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <DateCalendar />

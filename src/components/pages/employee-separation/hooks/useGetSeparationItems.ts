@@ -1,24 +1,32 @@
 import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
-async function getSeparationItems() {
-  const res = await fetch(
-    `/api/employee-separation`,
-    {
-      method: 'GET',
+async function getSeparationItems(filters: any) {
+  try {
+    const config = {
+      params: filters,
       headers: {
         'content-type': 'application/json',
+        Authorization: `Token ${localStorage.token}`,
       },
-    },
-  );
-  return res.json();
+    };
+    const res = await axios.get(`${process.env.hostName}/api/separations/`, config);
+    return res.data.separations;
+  } catch (err: any) {
+    if (Object.hasOwn(err, 'response')) {
+      throw err.response.data.message;
+    }
+    throw err.message;
+  }
 }
 
-function useGetSeparationItems() {
-
+function useGetSeparationItems(filters: any) {
   const query = useQuery(
-    ['separationsItemCache'],
-    () => getSeparationItems(),
-    { keepPreviousData: true }
+    ['separationsItemCache', filters],
+    () => getSeparationItems(filters),
+    {
+      keepPreviousData: true,
+    }
   );
 
   return query;

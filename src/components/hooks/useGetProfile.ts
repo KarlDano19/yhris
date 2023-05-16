@@ -12,11 +12,15 @@ async function getProfile() {
     let url = '';
     if (localStorage.accountType === 'employer') {
       url = `${process.env.hostName}/api/employer-profile/`;
-    } else {
+    }
+    if (localStorage.accountType === 'employee') {
       url = `${process.env.hostName}/api/employee-profile/`;
     }
-    const res = await axios.get(url, config);
-    return res.data.profile;
+    if (url) {
+      const res = await axios.get(url, config);
+      return res.data.profile;
+    }
+    return {};
   } catch (err: any) {
     if (Object.hasOwn(err, 'response')) {
       throw err.response.data.message;

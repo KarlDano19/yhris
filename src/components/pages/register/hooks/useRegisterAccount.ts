@@ -5,6 +5,7 @@ import axios from 'axios';
 async function register(user: T_Register) {
   try {
     const data = {
+      name: user.name,
       email: user.email,
       password: user.password,
       confirm_password: user.confirmPassword,
