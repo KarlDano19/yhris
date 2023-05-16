@@ -36,7 +36,7 @@ const Content = () => {
             const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
             separationItemsCopy[itemIndex].isLastPayReleased = true;
             setSeparationItems([...separationItemsCopy]);
-            toast.custom(() => <CustomToast message="Last pay marked as release." type="success" />, { duration: 4000 });
+            toast.custom(() => <CustomToast message="Last pay marked as released." type="success" />, { duration: 4000 });
             setIsLastPayModalOpen(null);
         } else {
             toast.custom(() => <CustomToast message="Incomplete information." type="error" />, { duration: 4000 });
@@ -68,7 +68,7 @@ const Content = () => {
                         {item.separationDate}
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        <div className="flex gap-2"><span>{item.name}</span> <InformationCircleIcon className="text-yellow-500 h-5 w-5" /></div>
+                        <div className="flex gap-2"><span>{item.name}</span></div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                         {item.reasonForLeaving}
