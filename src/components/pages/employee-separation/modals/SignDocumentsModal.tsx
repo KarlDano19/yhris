@@ -4,9 +4,11 @@ import { XCircleIcon } from '@heroicons/react/24/solid'
 import { T_DocumentsModal } from '@/types/globals'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { BarsArrowUpIcon, UsersIcon } from '@heroicons/react/20/solid'
 import CustomToast from '@/components/CustomToast';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import dynamic from "next/dynamic";
+import 'react-quill/dist/quill.snow.css';
+import { QUILL_FORMATS, QUILL_MODULES, SEPARATION_TEMPLATE } from '@/helpers/constants';
 
 type FormValues = {
     template: string;
@@ -16,39 +18,11 @@ type FormValues = {
     bcc: string;
 };
 
-const templates = [
-    {
-        name: 'Please Sign: Offboarding Documents',
-        message: `A blessed day!
-
-        Thank you for your contribution in ABBA-YAHSHUA.
-        
-        To move forward with your separation, please sign the ABBA-YAHSHUA offboarding documents attached on or before 5:30 PM today.
-        
-        Let us know if you have any questions.
-        Thank you and GOD bless,
-        --
-        `,
-    },
-    {
-        name: 'Please Sign: Quitclaim',
-        message: `A blessed day!
-
-        Thank you for your full cooperation in our offboarding process.
-        
-        To move forward with your separation, please sign the quitclaim attached on or before 5:30 PM today.
-        
-        Let us know if you have any questions.
-        Thank you and GOD bless,
-        --        
-        `,
-    }
-];
-
 export default function SignDocumentsModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: T_DocumentsModal | null, setIsOpen: Dispatch<T_DocumentsModal | null> }) {
     const [isCCOpen, setIsCCOPen] = useState(false);
     const [isBCCOpen, setIsBCCOpen] = useState(false);
-    const { register, handleSubmit, reset, watch, formState: { isDirty }, setValue } = useForm<FormValues>({ defaultValues: { template: 'Please Sign: Offboarding Documents', message: templates[0].message } });
+    const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+    const { register, handleSubmit, reset, watch, formState: { isDirty }, setValue, getValues } = useForm<FormValues>({ defaultValues: { template: 'Please Sign: Offboarding Documents', message: SEPARATION_TEMPLATE[0].message } });
     const onSubmit = handleSubmit((data) => {
         if (isOpen && isOpen.id) {
             const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
@@ -112,7 +86,7 @@ export default function SignDocumentsModal({ separationItems, setSeparationItems
                                                         {...register("template", { required: true })}
                                                         className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                                                         onChange={(e) => {
-                                                            const currTemplate = templates.find((template) => template.name === e.target.value);
+                                                            const currTemplate = SEPARATION_TEMPLATE.find((template) => template.name === e.target.value);
                                                             setValue('message', currTemplate ? currTemplate?.message : "")
                                                         }}
                                                     >
@@ -190,13 +164,14 @@ export default function SignDocumentsModal({ separationItems, setSeparationItems
                                                 <label htmlFor="message" className="block text-sm font-medium leading-6 text-gray-900">
                                                     Message<span className="text-red-600">*</span>
                                                 </label>
-                                                <div className="mt-2">
-                                                    <textarea
+                                                <div className="mt-2 h-72 mb-12">
+                                                <textarea
                                                         rows={4}
                                                         {...register("message", { required: true })}
                                                         id="message"
-                                                        className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                                                        hidden
                                                     />
+                                                    <ReactQuill onChange={(value) => setValue('message', value)} formats={QUILL_FORMATS} modules={QUILL_MODULES} style={{height: '100%'}} defaultValue={getValues("message")} />
                                                 </div>
                                             </div>
                                         </div>
