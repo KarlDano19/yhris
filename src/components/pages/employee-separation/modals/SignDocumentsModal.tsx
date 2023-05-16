@@ -71,7 +71,7 @@ export default function SignDocumentsModal({ separationItems, setSeparationItems
                             >
                                 <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                                     <div className="flex bg-savoy-blue p-2 items-center">
-                                        <h3 className="flex-1 text-white ml-2 font-semibold">Send Documents via Email</h3>
+                                        <h3 className="flex-1 text-white ml-2 font-semibold">Sign Documents via Email</h3>
                                         <XCircleIcon className="w-8 h-8 text-white cursor-pointer" onClick={() => setIsOpen(null)} />
                                     </div>
                                     <form onSubmit={onSubmit}>

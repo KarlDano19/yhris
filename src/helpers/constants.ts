@@ -29,3 +29,9 @@ export const SEPARATION_TEMPLATE = [
         message: "<p>A blessed day!</p><p><br></p><p>Thank you for you contribution in AABA-YAHSHUA.</p><p><br></p><p>To move forward with your separation, please sign the ABBA-YASHUA offboard documents attached on or before 5:30 PM today.</p><p><br></p><p>Let us know if you have any questions.</p><p>Thank you and GOD bless.</p><p><br></p><p>--</p>",
     }
 ];
+export const NTE_TEMPLATE = [
+    {
+        name: "Please Sign: Offboarding Documents",
+        message: "<p>A blessed day!</p><p><br></p><p>Thank you for you contribution in AABA-YAHSHUA.</p><p><br></p><p>To move forward with your separation, please sign the ABBA-YASHUA offboard documents attached on or before 5:30 PM today.</p><p><br></p><p>Let us know if you have any questions.</p><p>Thank you and GOD bless.</p><p><br></p><p>--</p>",
+    },
+];
