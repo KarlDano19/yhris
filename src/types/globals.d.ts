@@ -33,12 +33,22 @@ export type T_CreateJob = {
   language: string;
   jobTitle: string;
   placeAdvertise: string;
-  jobType: {
-    fullTime: boolean;
-    partTime: boolean;
-    internship: boolean;
-    projectBased: boolean;
-    other: boolean;
-  };
+  jobType: string;
   otherJobType: string | null;
+  schedule: string;
+  hireCount: number;
+  hireDate: string;
+  salary: {
+    salaryType: string;
+    salaryValue: string;
+  };
+  rate: string;
 };
+
+//  jobType: {
+//     fullTime: boolean;
+//     partTime: boolean;
+//     internship: boolean;
+//     projectBased: boolean;
+//     other: boolean;
+//   };
