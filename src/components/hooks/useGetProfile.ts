@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { getCookie } from 'cookies-next';
 
 async function getProfile() {
   try {
+    const token = getCookie('token');
     const config = {
       headers: {
         'content-type': 'application/json',
-        Authorization: `Token ${localStorage.token}`,
+        Authorization: `Token ${token}`,
       },
     };
     let url = '';

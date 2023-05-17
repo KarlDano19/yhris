@@ -1,11 +1,13 @@
 import axios from 'axios';
+import { getCookie } from 'cookies-next';
 
 async function useLogout() {
   try {
+    const token = getCookie('token');
     const config = {
       headers: {
         'content-type': 'application/json',
-        Authorization: `Token ${localStorage.token}`,
+        Authorization: `Token ${token}`,
       },
     };
     const res = await axios.get(`${process.env.hostName}/api/logout/`, config);

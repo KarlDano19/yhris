@@ -23,6 +23,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useLogout from './hooks/useLogout';
 import Timer from './Timer';
+import { deleteCookie } from 'cookies-next';
 const logout = () => {
   const response = useLogout();
   response
@@ -31,9 +32,9 @@ const logout = () => {
         () => <CustomToast message={data.message} type='success' />,
         { duration: 4000 }
       );
-      localStorage.removeItem('token');
       localStorage.removeItem('hasProfile');
       localStorage.removeItem('accountType');
+      deleteCookie('token');
       setTimeout(() => {
         location.href = '/login';
       }, 1000);

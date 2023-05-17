@@ -1,9 +1,11 @@
 import { T_EmployerProfile } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
+import { getCookie } from 'cookies-next';
 
 async function saveProfile(profile: T_EmployerProfile) {
   try {
+    const token = getCookie('token');
     const data = new FormData();
     data.append('name', profile.companyName);
     data.append('description', profile.companyDescription);
@@ -25,7 +27,7 @@ async function saveProfile(profile: T_EmployerProfile) {
     const config = {
       headers: {
         'content-type': 'multipart/form-data',
-        'Authorization': `Token ${localStorage.token}`,
+        'Authorization': `Token ${token}`,
       },
     };
     const res = await axios.post(

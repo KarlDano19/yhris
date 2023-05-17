@@ -1,11 +1,13 @@
 import { T_Separation } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
+import { getCookie } from 'cookies-next';
 
 async function addSeparation(
   separation: T_Separation,
 ) {
   try {
+    const token = getCookie('token');
     const data = {
       employee: separation.name,
       position: separation.position,
@@ -16,7 +18,7 @@ async function addSeparation(
     const config = {
       headers: {
         'content-type': 'application/json',
-        'Authorization': `Token ${localStorage.token}`,
+        'Authorization': `Token ${token}`,
       },
     };
     const res = await axios.post(

@@ -6,9 +6,10 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import EyePassword from '@/svg/EyePassword';
 import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast'
+import CustomToast from '@/components/CustomToast';
 import { T_Login } from '@/types/globals';
 import useAccessAuth from './hooks/useAccessAuth';
+import { setCookie } from 'cookies-next';
 const Content = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { mutate, isLoading } = useAccessAuth();
@@ -16,22 +17,27 @@ const Content = () => {
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type="success" />, { duration: 4000 });
-        localStorage.token = data.token;
+        toast.custom(
+          () => <CustomToast message={data.message} type='success' />,
+          { duration: 4000 }
+        );
         localStorage.hasProfile = data.has_profile;
         localStorage.accountType = data.account_type;
+        setCookie('token', data.token, {maxAge: 60*60*24*1});
         setTimeout(() => {
           if (!data.has_profile) {
             if (data.account_type === 'employer') {
-              location.href = "/setup-employer-profile";
+              location.href = '/setup-employer-profile';
             }
           } else {
-            location.href = "/";
+            location.href = '/';
           }
         }, 1000);
       },
       onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type="error" />, { duration: 4000 });
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 4000,
+        });
       },
     };
     mutate(data, callbackReq);
