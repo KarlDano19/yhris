@@ -1,20 +1,38 @@
 import { T_Separation } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import { getCookie } from 'cookies-next';
 
 async function addSeparation(
   separation: T_Separation,
 ) {
-  const res = await fetch(
-    `/api/auth`,
-    {
-      method: 'POST',
-      body: JSON.stringify(separation),
+  try {
+    const token = getCookie('token');
+    const data = {
+      employee: separation.name,
+      position: separation.position,
+      department: separation.department,
+      date_of_separation: separation.date,
+      reason_of_leaving: separation.reason,
+    };
+    const config = {
       headers: {
         'content-type': 'application/json',
+        'Authorization': `Token ${token}`,
       },
-    },
-  );
-  return res.json();
+    };
+    const res = await axios.post(
+      `${process.env.hostName}/api/separations/`,
+      data,
+      config
+    );
+    return res.data;
+  } catch (err: any) {
+    if (Object.hasOwn(err, 'response')) {
+      throw err.response.data.message;
+    }
+    throw err.message;
+  }
 }
 
 function useAddSeparationItems() {

@@ -2,21 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
 
-async function getSeparationItems(filters: any) {
+async function getEmployeeItems() {
   try {
     const token = getCookie('token');
     const config = {
-      params: filters,
       headers: {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
     };
     const res = await axios.get(
-      `${process.env.hostName}/api/separations/`,
+      `${process.env.hostName}/api/employees/`,
       config
     );
-    return res.data.separations;
+    return res.data.employees;
   } catch (err: any) {
     if (Object.hasOwn(err, 'response')) {
       throw err.response.data.message;
@@ -25,16 +24,12 @@ async function getSeparationItems(filters: any) {
   }
 }
 
-function useGetSeparationItems(filters: any) {
-  const query = useQuery(
-    ['separationsItemCache', filters],
-    () => getSeparationItems(filters),
-    {
-      keepPreviousData: true,
-    }
-  );
+function useGetEmployeeItems() {
+  const query = useQuery(['employeesItemCache'], () => getEmployeeItems(), {
+    keepPreviousData: true,
+  });
 
   return query;
 }
 
-export default useGetSeparationItems;
+export default useGetEmployeeItems;
