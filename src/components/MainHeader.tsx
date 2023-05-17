@@ -20,14 +20,17 @@ import MainLogo from '@/svg/MainLogo';
 import AccountLogo from '@/svg/AccountLogo';
 import useGetProfile from './hooks/useGetProfile';
 import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast'
+import CustomToast from '@/components/CustomToast';
 import useLogout from './hooks/useLogout';
 import Timer from './Timer';
 const logout = () => {
   const response = useLogout();
   response
     .then((data: any) => {
-      toast.custom(() => <CustomToast message={data.message} type="success" />, { duration: 4000 });
+      toast.custom(
+        () => <CustomToast message={data.message} type='success' />,
+        { duration: 4000 }
+      );
       localStorage.removeItem('token');
       localStorage.removeItem('hasProfile');
       localStorage.removeItem('accountType');
@@ -36,7 +39,9 @@ const logout = () => {
       }, 1000);
     })
     .catch((err: any) => {
-      toast.custom(() => <CustomToast message={err} type="error" />, { duration: 4000 });
+      toast.custom(() => <CustomToast message={err} type='error' />, {
+        duration: 4000,
+      });
     });
 };
 const userNavigation = [
@@ -88,17 +93,21 @@ const MainHeader = () => {
                       <Menu.Button className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
                         <span className='sr-only'>Open user menu</span>
                         {data ? (
-                          <Image
-                            className='rounded-full mx-auto'
-                            width='29'
-                            height='29'
-                            src={`${process.env.hostName}${data.logo}`}
-                            alt='profile logo'
-                          />
+                          data.logo ? (
+                            <Image
+                              className='rounded-full mx-auto'
+                              width='29'
+                              height='29'
+                              src={`${process.env.hostName}${data.logo}`}
+                              alt='profile logo'
+                            />
+                          ) : (
+                            <AccountLogo />
+                          )
                         ) : (
                           <AccountLogo />
                         )}
-                        {(!isLoading) && (
+                        {!isLoading && (
                           <div className=''>
                             <h3 className='text-sm font-bold'>
                               {data ? data.name : '...'}
@@ -109,9 +118,9 @@ const MainHeader = () => {
                           </div>
                         )}
                         {isLoading && (
-                          <div role="status" className="max-w-sm animate-pulse">
-                            <div className="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mt-1 mb-2"></div>
-                            <div className="h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-32"></div>
+                          <div role='status' className='max-w-sm animate-pulse'>
+                            <div className='h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mt-1 mb-2'></div>
+                            <div className='h-3 bg-gray-200 rounded-full dark:bg-gray-700 w-32'></div>
                           </div>
                         )}
                         <ChevronDownIcon className='h-5 w-5' />

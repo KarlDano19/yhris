@@ -44,7 +44,7 @@ const Content = () => {
             const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
             separationItemsCopy[itemIndex].isLastPayReleased = true;
             setSeparationItems([...separationItemsCopy]);
-            toast.custom(() => <CustomToast message="Last pay marked as release." type="success" />, { duration: 4000 });
+            toast.custom(() => <CustomToast message="Last pay marked as released." type="success" />, { duration: 4000 });
             setIsLastPayModalOpen(null);
         } else {
             toast.custom(() => <CustomToast message="Incomplete information." type="error" />, { duration: 4000 });
