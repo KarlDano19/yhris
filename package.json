@@ -38,7 +38,6 @@
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^4.29.6",
-    "@types/cookie": "^0.5.1",
     "@types/react-signature-canvas": "^1.0.2"
   }
 }
