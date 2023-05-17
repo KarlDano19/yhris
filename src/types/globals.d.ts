@@ -34,7 +34,6 @@ export type T_CreateJob = {
   jobTitle: string;
   placeAdvertise: string;
   jobType: string;
-  otherJobType: string | null;
   schedule: string;
   hireCount: number;
   hireDate: string;
@@ -43,6 +42,9 @@ export type T_CreateJob = {
     salaryValue: string;
   };
   rate: string;
+  benefits: string[];
+  JobDescription: string;
+  JobDescriptionFile: File;
 };
 
 //  jobType: {

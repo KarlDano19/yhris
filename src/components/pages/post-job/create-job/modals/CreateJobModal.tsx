@@ -10,6 +10,8 @@ import SalaryRangeModal from "./SalaryRangeModal";
 import CreateJobPageOne from "./ModalPages/CreateJobPageOne";
 import CreateJobPageTwo from "./ModalPages/CreateJobPageTwo";
 import CreateJobPageThree from "./ModalPages/CreateJobPageThree";
+import CreateJobPageFour from "./ModalPages/CreateJobPageFour";
+import { CREATEJOB_TEMPLATE } from "@/helpers/constants";
 // import useAddSeparationItems from '../hooks/useAddSeparationItems';
 
 export default function CreateJobModal({
@@ -20,16 +22,18 @@ export default function CreateJobModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit, watch, setValue } = useForm<T_CreateJob>({
-    defaultValues: {
-      country: "Philippines",
-      language: "English",
-      salary: {
-        salaryType: "Range",
+  const { register, handleSubmit, watch, setValue, getValues } =
+    useForm<T_CreateJob>({
+      defaultValues: {
+        country: "Philippines",
+        language: "English",
+        salary: {
+          salaryType: "Range",
+        },
+        rate: "Monthly",
+        JobDescription: CREATEJOB_TEMPLATE[0],
       },
-      rate: "Monthly",
-    },
-  });
+    });
 
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
@@ -144,7 +148,17 @@ export default function CreateJobModal({
                     {pageNumber == 3 && (
                       <CreateJobPageThree
                         watch={watch}
+                        setValue={setValue}
                         onSubmit={onSubmit}
+                        register={register}
+                        setPageNumber={setPageNumber}
+                      />
+                    )}
+                    {pageNumber == 4 && (
+                      <CreateJobPageFour
+                        onSubmit={onSubmit}
+                        setValue={setValue}
+                        getValues={getValues}
                         register={register}
                         setPageNumber={setPageNumber}
                       />
@@ -157,8 +171,6 @@ export default function CreateJobModal({
         </Dialog>
       </Transition.Root>
       <SalaryRangeModal
-        onSubmit={onSubmit}
-        pageNumber={pageNumber}
         setPageNumber={setPageNumber}
         isOpen={isSalaryRangeModalOpen}
         setIsOpen={setIsSalaryRangeModalOpen}

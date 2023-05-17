@@ -3,16 +3,12 @@ import { Dialog, Transition } from "@headlessui/react";
 import GetHelpLogoDummy from "@/svg/GetHelpLogoDummy";
 
 export default function SalaryRangeModal({
-  onSubmit,
-  pageNumber,
   setPageNumber,
   isOpen,
   setIsOpen,
 }: {
-  onSubmit: () => void;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  pageNumber: number;
   setPageNumber: Dispatch<number>;
 }) {
   const cancelButtonRef = useRef(null);
@@ -78,7 +74,10 @@ export default function SalaryRangeModal({
                   <button
                     type="submit"
                     className="text-lg block sm:flex m-auto font-bold leading-6 text-savoy-blue  shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all mt-3 sm:mt-0"
-                    onClick={() => onSubmit()}
+                    onClick={() => {
+                      setPageNumber(4);
+                      setIsOpen(false);
+                    }}
                   >
                     NO DON&#39;T ADD THEM.
                   </button>
