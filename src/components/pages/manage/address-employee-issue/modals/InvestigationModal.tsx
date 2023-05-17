@@ -6,63 +6,58 @@ import toast from "react-hot-toast";
 import { T_Investigation, T_InvestigationModal } from "@/types/globals";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import DateCalendar from "@/svg/DateCalendar";
-// import useAddSeparationItems from '../hooks/useAddSeparationItems';
+import CustomToast from "@/components/CustomToast";
 
 export default function InvestigationModal({
+  employeeIssueItems,
+  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
 }: {
+  employeeIssueItems: any;
+  setEmployeeIssueItems: any;
   isOpen: T_InvestigationModal | null;
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
-  // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit } = useForm<T_Investigation>();
+  const { register, handleSubmit, reset, setValue } = useForm<T_Investigation>();
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
-  const IncidentDateInputRef = useRef<HTMLInputElement>(null);
 
   const cancelButtonRef = useRef(null);
 
   const onSubmit = handleSubmit((data) => {
-    // const callbackReq = {
-    //     onSuccess: (data: any) => {
-    //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
-    //     },
-    //     onError: (err: any) => {
-    //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
-    //     },
-    // }
-    // mutate(data, callbackReq)
-    // const newItem = {
-    //     id: separationItems.length + 1,
-    //     separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
-    //     name: data.name,
-    //     reasonForLeaving: data.reason,
-    //     department: data.department,
-    //     position: data.position,
-    //     acceptanceLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     separationLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     isLetterSent: false,
-    //     isLetterReceived: false,
-    //     letterReceivedDate: "",
-    //     isDocumentsSent: false,
-    //     isDocumentsReceived: false,
-    //     documentReceivedDate: "",
-    //     isLastPayReleased: false,
-    //     isQuitclaimSigned: false,
-    //     isQuitclaimReceived: false,
-    //     quitclaimReceivedDate: "",
-    // }
-    // setSeparationItems([...separationItems, newItem]);
-    setIsOpen(null);
-    toast.success("Successfully created separation", { duration: 5000 });
+    if (isOpen && isOpen.id) {
+      const itemIndex = employeeIssueItems.findIndex(
+        (item: any) => item.id === isOpen.id
+      );
+      const employeeIssueItemsCopy = JSON.parse(
+        JSON.stringify(employeeIssueItems)
+      );
+
+      employeeIssueItemsCopy[itemIndex].investigate.date = data.date;
+      employeeIssueItemsCopy[itemIndex].investigate.witness = data.witness;
+      employeeIssueItemsCopy[itemIndex].investigate.presider = data.presider;
+      employeeIssueItemsCopy[itemIndex].investigate.isEmployeePresent = data.isAttendHearing;
+      employeeIssueItemsCopy[itemIndex].investigate.decision = data.decision;
+      employeeIssueItemsCopy[itemIndex].investigate.attachment = data.attachment;
+
+      employeeIssueItemsCopy[itemIndex].isInvestigated = true;
+      employeeIssueItemsCopy[itemIndex].investigatedDate = Intl.DateTimeFormat('en-US').format(new Date());
+
+      setEmployeeIssueItems([...employeeIssueItemsCopy]);
+      toast.custom(
+        () => (
+          <CustomToast message="Successfully investigated." type="success" />
+        ),
+        { duration: 4000 }
+      );
+      reset();
+      setIsOpen(null);
+    } else {
+      toast.custom(
+        () => <CustomToast message="Incomplete information." type="error" />,
+        { duration: 4000 }
+      );
+    }
   });
   return (
     <Transition.Root show={isOpen ? true : false} as={Fragment}>
@@ -118,10 +113,11 @@ export default function InvestigationModal({
                       <div className="relative mt-2">
                         <input
                           type="date"
-                          {...register("date", { required: true })}
+                          name="dateOfInvestigation"
                           id="dateOfInvestigation"
                           className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                           aria-describedby="email-optional"
+                          onChange={(e) => setValue("date", e.target.value)}
                           ref={InvestigationDateInputRef}
                           onClick={() =>
                             InvestigationDateInputRef.current?.showPicker()
