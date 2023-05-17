@@ -64,6 +64,9 @@ export default function SendDecisionModal({
       const employeeIssueItemsCopy = JSON.parse(
         JSON.stringify(employeeIssueItems)
       );
+      employeeIssueItemsCopy[itemIndex].sendDecision.template = data.template;
+      employeeIssueItemsCopy[itemIndex].sendDecision.to = data.email;
+      employeeIssueItemsCopy[itemIndex].sendDecision.message = data.message;
       employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
       employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
       setEmployeeIssueItems([...employeeIssueItemsCopy]);

@@ -61,6 +61,9 @@ export default function SendNTEModal({
       const employeeIssueItemsCopy = JSON.parse(
         JSON.stringify(employeeIssueItems)
       );
+      employeeIssueItemsCopy[itemIndex].issueNTE.template = data.template;
+      employeeIssueItemsCopy[itemIndex].issueNTE.to = data.email;
+      employeeIssueItemsCopy[itemIndex].issueNTE.message = data.message;
       employeeIssueItemsCopy[itemIndex].isNTESent = true;
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
       setEmployeeIssueItems([...employeeIssueItemsCopy]);

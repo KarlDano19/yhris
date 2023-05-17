@@ -105,7 +105,7 @@ export const employeeIssueItems = [
     isInvestigated: false,
     investigatedDate: "05/10/2023",
     sendDecision: {
-      date: "",
+      template: "",
       to: "",
       message: "",
     },
