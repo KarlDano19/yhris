@@ -107,18 +107,26 @@ export type T_IncidentReport = {
   briefBackground: string;
 };
 
-export type T_CreateMemoPolicy = {
+export type T_CreateMemo = {
   date: string;
   type: string;
-  isResponse: boolean;
   title: string;
   email: string;
   body: string;
   name: string;
   position: string;
-  signature: File;
-  qrCode: File;
-  file: File;
+  signature: string | File;
+  qrCode: string | File;
+  file: string | File;
+  withResponse: boolean;
+};
+
+export type T_CreatePolicy = {
+  date: string;
+  type: string;
+  title: string;
+  email: string;
+  file: string | File;
   purpose: string;
   policy: string;
   procedure: string;
@@ -126,5 +134,7 @@ export type T_CreateMemoPolicy = {
   application: string;
   coverage: string;
   termination: string;
-  createPolicyFile: File | null;
+  createPolicyFile: string | File;
+  withResponse: boolean;
 };
+

@@ -33,44 +33,60 @@ const Content = () => {
     }
   }, [dateFilter, createMemoPolicyItems]);
 
+  function deleteMemo(id: number): void {
+    const updatedItems = createMemoPolicyItems.map((item) => {
+      return item.id !== id ? item : {
+        ...item,
+        isDeleted: true,
+      };
+    });
+    setCreateMemoPolicyItems([...updatedItems])
+  }
+
   const renderRows = () => {
+    const deletedCount = createMemoPolicyItems.filter((item) => item.isDeleted).length;
     if (
       !dateFilter.from &&
       !dateFilter.to &&
       createMemoPolicyItems &&
-      createMemoPolicyItems.length > 0
+      createMemoPolicyItems.length > 0 &&
+      createMemoPolicyItems.length !== deletedCount
     ) {
-      return createMemoPolicyItems.map((item, index) => (
-        <tr key={index}>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.date}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <div className="flex gap-2">
-              <span>{item.title}</span> <ClipIcon />
-            </div>
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <input
-              type="checkbox"
-              defaultChecked={item.withResponse}
-              className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
-            />
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
-            <p className="font-bold">View Responses</p>
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <DeleteMemoLogo/>
-          </td>
-        </tr>
-      ));
+      return createMemoPolicyItems.map((item, index) => { 
+        return !item.isDeleted && (
+          <tr key={index}>
+            <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+              {item.date}
+            </td>
+            <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+              <div className="flex gap-2">
+                <span>{item.title}</span> <ClipIcon />
+              </div>
+            </td>
+            <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+              <input
+                type="checkbox"
+                defaultChecked={item.withResponse}
+                className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
+              />
+            </td>
+            <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
+              <p className="font-bold">View Responses</p>
+            </td>
+            <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
+              <span className="cursor-pointer" onClick={() => deleteMemo(item.id)}><DeleteMemoLogo/></span>
+            </td>
+          </tr>
+        )
+      }).filter((item) => item);
     } else if (
       dateFilter.from &&
       dateFilter.to &&
       filteredItems &&
-      filteredItems.length > 0
+      filteredItems.length > 0 &&
+      createMemoPolicyItems.length !== deletedCount
     ) {
+
       return filteredItems.map((item, index) => (
         <tr key={index}>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
@@ -92,7 +108,7 @@ const Content = () => {
             <p className="font-bold">View Responses</p>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <DeleteMemoLogo/>
+            <span onClick={() => deleteMemo(item.id)}><DeleteMemoLogo/></span>
           </td>
         </tr>
       ));
@@ -286,8 +302,12 @@ const Content = () => {
       <CreateMemoModal
         isOpen={isCreateMemoModalOpen}
         setIsOpen={setIsCreateMemoModalOpen}
+        setCreateMemoPolicyItems={setCreateMemoPolicyItems}
+        createMemoPolicyItems={createMemoPolicyItems}
       />
       <CreatePolicyModal
+        setCreateMemoPolicyItems={setCreateMemoPolicyItems}
+        createMemoPolicyItems={createMemoPolicyItems}
         isOpen={isCreatePolicyModalOpen}
         setIsOpen={setIsCreatePolicyModalOpen}
       />

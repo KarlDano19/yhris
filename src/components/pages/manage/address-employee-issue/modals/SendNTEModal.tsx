@@ -13,6 +13,9 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import dynamic from "next/dynamic";
+import 'react-quill/dist/quill.snow.css';
+import { NTE_TEMPLATE, QUILL_FORMATS, QUILL_MODULES, SEPARATION_TEMPLATE } from '@/helpers/constants';
 
 type FormValues = {
   template: string;
@@ -21,14 +24,6 @@ type FormValues = {
   cc: string;
   bcc: string;
 };
-
-const templates = [
-  {
-    name: "Please Sign: Offboarding Documents",
-    message: `A blessed day, Hera! Attached is a Notice to Explain (NTE) to which a reply from you is expected within five (5) days, inclusive of weekend and holiday. Please read the NTE thoroughly and accomplish on or before April 12, 2023. Kindly note, failure to return back the accomplished NTE on or before the stipulated date will be construed as admission of guilt and/or waiver to due process. Let us know if you have any questions. Thank you and GOD bless, --
-        `,
-  },
-];
 
 export default function SendNTEModal({
   employeeIssueItems,
@@ -48,14 +43,16 @@ export default function SendNTEModal({
     watch,
     formState: { isDirty },
     setValue,
+    getValues,
   } = useForm<FormValues>({
     defaultValues: {
       template: "Notice to explain",
-      message: templates[0].message,
+      message: NTE_TEMPLATE[0].message,
     },
   });
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
+  const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex(
@@ -64,6 +61,9 @@ export default function SendNTEModal({
       const employeeIssueItemsCopy = JSON.parse(
         JSON.stringify(employeeIssueItems)
       );
+      employeeIssueItemsCopy[itemIndex].issueNTE.template = data.template;
+      employeeIssueItemsCopy[itemIndex].issueNTE.to = data.email;
+      employeeIssueItemsCopy[itemIndex].issueNTE.message = data.message;
       employeeIssueItemsCopy[itemIndex].isNTESent = true;
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
       setEmployeeIssueItems([...employeeIssueItemsCopy]);
@@ -140,7 +140,7 @@ export default function SendNTEModal({
                             {...register("template", { required: true })}
                             className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                             onChange={(e) => {
-                              const currTemplate = templates.find(
+                              const currTemplate = NTE_TEMPLATE.find(
                                 (template) => template.name === e.target.value
                               );
                               setValue(
@@ -175,20 +175,18 @@ export default function SendNTEModal({
                           </div>
                           <button
                             type="button"
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isCCOpen &&
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${isCCOpen &&
                               "bg-savoy-blue text-white hover:bg-blue-700"
-                            }`}
+                              }`}
                             onClick={() => setIsCCOPen(!isCCOpen)}
                           >
                             CC
                           </button>
                           <button
                             type="button"
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isBCCOpen &&
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${isBCCOpen &&
                               "bg-savoy-blue text-white hover:bg-blue-700"
-                            }`}
+                              }`}
                             onClick={() => setIsBCCOpen(!isBCCOpen)}
                           >
                             BCC
@@ -240,13 +238,14 @@ export default function SendNTEModal({
                         >
                           Message<span className="text-red-600">*</span>
                         </label>
-                        <div className="mt-2">
+                        <div className="mt-2 h-72 mb-12">
                           <textarea
                             rows={4}
                             {...register("message", { required: true })}
                             id="message"
-                            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                            hidden
                           />
+                          <ReactQuill onChange={(value) => setValue('message', value)} formats={QUILL_FORMATS} modules={QUILL_MODULES} style={{ height: '100%' }} defaultValue={getValues("message")} />
                         </div>
                       </div>
                     </div>

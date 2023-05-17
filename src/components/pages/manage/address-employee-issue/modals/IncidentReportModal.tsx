@@ -4,62 +4,68 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { T_IncidentReport } from "@/types/globals";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import DateCalendar from "@/svg/DateCalendar";
-// import useAddSeparationItems from '../hooks/useAddSeparationItems';
+import CustomToast from "@/components/CustomToast";
 
 export default function IncidentReportModal({
+  employeeIssueItems,
+  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
 }: {
+  employeeIssueItems: any;
+  setEmployeeIssueItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit } = useForm<T_IncidentReport>();
+  const { register, handleSubmit, setValue, reset, formState: { errors }  } = useForm<T_IncidentReport>();
   const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   const onSubmit = handleSubmit((data) => {
-    // const callbackReq = {
-    //     onSuccess: (data: any) => {
-    //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
-    //     },
-    //     onError: (err: any) => {
-    //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
-    //     },
-    // }
-    // mutate(data, callbackReq)
-    // const newItem = {
-    //     id: separationItems.length + 1,
-    //     separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
-    //     name: data.name,
-    //     reasonForLeaving: data.reason,
-    //     department: data.department,
-    //     position: data.position,
-    //     acceptanceLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     separationLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     isLetterSent: false,
-    //     isLetterReceived: false,
-    //     letterReceivedDate: "",
-    //     isDocumentsSent: false,
-    //     isDocumentsReceived: false,
-    //     documentReceivedDate: "",
-    //     isLastPayReleased: false,
-    //     isQuitclaimSigned: false,
-    //     isQuitclaimReceived: false,
-    //     quitclaimReceivedDate: "",
-    // }
-    // setSeparationItems([...separationItems, newItem]);
+    const newItem = {
+        id: employeeIssueItems.length + 1,
+        incidentDate: Intl.DateTimeFormat('en-US').format(new Date(data.incidentDate)),
+        name: data.name,
+        incidentPlace: data.incidentPlace,
+        department: data.department,
+        position: data.position,
+        briefBackground: data.briefBackground,
+        issueNTE: {
+          date: "",
+          to: "",
+          message: "",
+        },
+        isNTESent: false,
+        isNTEReceived: false,
+        investigate: {
+          date: "",
+          witness: "",
+          presider: "",
+          isEmployeePresent: false,
+          result: "",
+          decision: "",
+          attachment: "",
+        },
+        isInvestigated: false,
+        investigatedDate: "",
+        sendDecision: {
+          date: "",
+          to: "",
+          message: "",
+        },
+        decisionSentDate: "",
+        isDecisionSent: false,
+        isDecisionReceived: false,
+    }
+    setEmployeeIssueItems([...employeeIssueItems, newItem]);
     setIsOpen(false);
-    toast.success("Successfully created separation", { duration: 5000 });
+    toast.custom(
+      () => (
+        <CustomToast message="Successfully created incident report." type="success" />
+      ),
+      { duration: 5000 }
+    );
+    reset();
   });
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -166,7 +172,14 @@ export default function IncidentReportModal({
                         <div className="relative mt-2">
                           <input
                             type="date"
-                            {...register("incidentDate", { required: true })}
+                            onChange={(e) =>
+                              setValue(
+                                'incidentDate',
+                                Intl.DateTimeFormat('en-US').format(
+                                  new Date(e.target.value)
+                                )
+                              )
+                            }
                             id="incidentDate"
                             className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                             aria-describedby="email-optional"

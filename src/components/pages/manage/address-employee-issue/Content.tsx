@@ -59,7 +59,6 @@ const Content = () => {
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             <div className="flex gap-2">
               <span>{item.name}</span>{" "}
-              <InformationCircleIcon className="text-yellow-500 h-5 w-5" />
             </div>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
@@ -150,7 +149,6 @@ const Content = () => {
       );
     }
   };
-
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -274,6 +272,8 @@ const Content = () => {
         </div>
       </div>
       <IncidentReportModal
+        employeeIssueItems={employeeIssueItems}
+        setEmployeeIssueItems={setEmployeeIssueItems}
         isOpen={isIncidentReportModalOpen}
         setIsOpen={setIsIncidentReportModalOpen}
       />
@@ -284,6 +284,8 @@ const Content = () => {
         setEmployeeIssueItems={setEmployeeIssueItems}
       />
       <InvestigationModal
+        employeeIssueItems={employeeIssueItems}
+        setEmployeeIssueItems={setEmployeeIssueItems}
         isOpen={isInvestigateModalOpen}
         setIsOpen={setIsInvestigateModalOpen}
       />
