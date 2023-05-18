@@ -20,9 +20,6 @@ const Content = () => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type="success" />, { duration: 4000 });
-        localStorage.token = data.token;
-        localStorage.hasProfile = false;
-        localStorage.accountType = data.account_type;
         router.push("/setup-employer-profile");
       },
       onError: (err: any) => {
