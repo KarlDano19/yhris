@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    hostName: 'http://139.59.118.36:8000',
+    hostName: 'https://5bd3-103-62-152-147.ngrok-free.app',
   },
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: '139.59.118.36',
-        port: '8000',
+        protocol: 'https',
+        hostname: '5bd3-103-62-152-147.ngrok-free.app',
+        port: '',
         pathname: '**',
       },
     ],

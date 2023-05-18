@@ -24,15 +24,13 @@ const Content = () => {
         localStorage.hasProfile = data.has_profile;
         localStorage.accountType = data.account_type;
         setCookie('token', data.token, {maxAge: 60*60*24*1});
-        setTimeout(() => {
-          if (!data.has_profile) {
-            if (data.account_type === 'employer') {
-              location.href = '/setup-employer-profile';
-            }
-          } else {
-            location.href = '/';
+        if (!data.has_profile) {
+          if (data.account_type === 'employer') {
+            location.href = '/setup-employer-profile';
           }
-        }, 1000);
+        } else {
+          location.href = '/';
+        }
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {

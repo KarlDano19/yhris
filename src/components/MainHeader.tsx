@@ -35,9 +35,7 @@ const logout = () => {
       localStorage.removeItem('hasProfile');
       localStorage.removeItem('accountType');
       deleteCookie('token');
-      setTimeout(() => {
-        location.href = '/login';
-      }, 1000);
+      location.href = '/login';
     })
     .catch((err: any) => {
       toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -93,13 +91,13 @@ const MainHeader = () => {
                     <div>
                       <Menu.Button className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
                         <span className='sr-only'>Open user menu</span>
-                        {!isLoading && data.profile ? (
+                        {!isLoading && data ? (
                           data.logo ? (
                             <Image
                               className='rounded-full mx-auto'
                               width='29'
                               height='29'
-                              src={`${process.env.hostName}${data.profile.logo}`}
+                              src={`${process.env.hostName}${data.logo}`}
                               alt='profile logo'
                             />
                           ) : (
@@ -111,7 +109,7 @@ const MainHeader = () => {
                         {!isLoading && (
                           <div className=''>
                             <h3 className='text-sm font-bold'>
-                              {data.profile ? data.name : '...'}
+                              {data ? data.name : '...'}
                             </h3>
                             <p className='text-xs w-32'>
                               <Timer />
