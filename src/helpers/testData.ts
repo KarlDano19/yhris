@@ -80,7 +80,6 @@ export const separationItems = [
 export const jobPostHistory = [
   {
     id: 1,
-    date: "04/07/2023",
     isActive: false,
     JobNo: "000001",
     country: "",
@@ -90,13 +89,13 @@ export const jobPostHistory = [
     jobType: "Full-Time",
     schedule: "8 Hour shift",
     hireCount: 2,
-    hireDate: "",
+    hireDate: "04/07/2023",
     salary: {
-      salaryType: "",
-      salaryValue: "",
+      salaryType: "Minimum Amount",
+      salaryValue: "20,000",
     },
     rate: "",
-    benefits: [],
+    benefits: ["Work from home", "Paid Training", "Flexible Schedule"],
     jobDescription:
       "<p><strong>Ensuring the accounts of the company are accurate and free of error.</strong></p><p><br></p><ul><li>Must have at least 2 years of experience in accounting.</li><li>Any graduate of business course</li><li>Must have attention to details and a good communicator</li></ul>",
     jobDescriptionFile: "",
@@ -119,11 +118,11 @@ export const jobPostHistory = [
     hireCount: 4,
     hireDate: "",
     salary: {
-      salaryType: "",
-      salaryValue: "",
+      salaryType: "Exact Amount",
+      salaryValue: "20,000",
     },
     rate: "",
-    benefits: [],
+    benefits: ["Birthday Leave", "Meal Allowance", "Flexible Schedule"],
     jobDescription:
       "<p><strong>Ensuring the accounts of the company are accurate and free of error.</strong></p><p><br></p><ul><li>Must have at least 2 years of experience in accounting.</li><li>Any graduate of business course</li><li>Must have attention to details and a good communicator</li></ul>",
     jobDescriptionFile: "",

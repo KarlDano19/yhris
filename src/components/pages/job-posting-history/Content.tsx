@@ -45,7 +45,7 @@ const Content = () => {
   useEffect(() => {
     if (dateFilter.from && dateFilter.to) {
       const filteredByDate = jobPostHistoryItems.filter((item) => {
-        let date = new Date(item.date);
+        let date = new Date(item.hireDate);
         let start = new Date(dateFilter.from);
         let end = new Date(dateFilter.to);
         return date >= end && date <= start;
@@ -80,6 +80,7 @@ const Content = () => {
             }`}
           >
             <SetJob
+              item={item}
               id={item.id}
               jobTitle={item.jobTitle}
               setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}

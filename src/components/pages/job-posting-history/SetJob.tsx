@@ -1,14 +1,18 @@
 import React, { Dispatch, useState } from "react";
 import classNames from "@/helpers/classNames";
+import CopyJob from "./CopyJob";
+import { T_CreateJob } from "@/types/globals";
 
 const SetJob = ({
   id,
   jobTitle,
   setIsSetJobInactiveModalOpen,
+  item,
 }: {
   id: number;
   jobTitle: string;
   setIsSetJobInactiveModalOpen: Dispatch<boolean>;
+  item: T_CreateJob | any;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
@@ -41,16 +45,7 @@ const SetJob = ({
               >
                 Set Job to Inactive
               </button>
-              <button
-                className="block w-full px-8 py-2 text-sm text-gray-800 hover:bg-green-500 hover:text-white"
-                role="menuitem"
-                // onClick={() => {
-                //   setIsSetJobInactiveModalOpen(true);
-                //   setIsOpen(!isOpen);
-                // }}
-              >
-                Copy Job
-              </button>
+              <CopyJob item={item} setIsOpen={setIsOpen} />
             </div>
           </div>
         )}

@@ -34,7 +34,10 @@ export type T_JobPreviewModal = {
 // Post a Job
 
 export type T_CreateJob = {
+  id: number;
+  JobNo: string;
   country: string;
+  isActive: boolean;
   language: string;
   jobTitle: string;
   placeAdvertise: string;
@@ -55,9 +58,9 @@ export type T_CreateJob = {
   postIn: string[];
 };
 
-export type T_JobPostHistory = {
-  isActive: boolean;
-};
+// export type T_JobPostHistory = {
+//   isActive: boolean;
+// };
 
 //  jobType: {
 //     fullTime: boolean;
