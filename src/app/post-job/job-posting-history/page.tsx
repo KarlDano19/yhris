@@ -1,7 +1,13 @@
 import React from "react";
+import Content from "@/components/pages/job-posting-history/Content";
 
-function page() {
-  return <div>pagesdfsdf</div>;
-}
+export const metadata = {
+  title: "Job Posting History - Yahshua HRIS",
+  description: "HRIS",
+};
 
-export default page;
+const JobPostingHistoryPage = async () => {
+  return <Content />;
+};
+
+export default JobPostingHistoryPage;

@@ -12,6 +12,10 @@ import CreateJobPageTwo from "./ModalPages/CreateJobPageTwo";
 import CreateJobPageThree from "./ModalPages/CreateJobPageThree";
 import CreateJobPageFour from "./ModalPages/CreateJobPageFour";
 import { CREATEJOB_TEMPLATE } from "@/helpers/constants";
+import CreateJobPageFive from "./ModalPages/CreateJobPageFive";
+import CreateJobPageSix from "./ModalPages/CreateJobPageSix";
+import CreateJobPageSeven from "./ModalPages/CreateJobPageSeven";
+import CreateJobPageEight from "./ModalPages/CreateJobPageEight";
 // import useAddSeparationItems from '../hooks/useAddSeparationItems';
 
 export default function CreateJobModal({
@@ -31,12 +35,14 @@ export default function CreateJobModal({
           salaryType: "Range",
         },
         rate: "Monthly",
-        JobDescription: CREATEJOB_TEMPLATE[0],
+        jobDescription: CREATEJOB_TEMPLATE[0],
       },
     });
 
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
+  const [isCreateJobPageEightModalOpen, setIsCreateJobPageEightModalOpen] =
+    useState(false);
   const dateInputRef = useRef(null);
 
   const cancelButtonRef = useRef(null);
@@ -84,6 +90,7 @@ export default function CreateJobModal({
     // setSeparationItems([...separationItems, newItem]);
     setIsOpen(false);
     setIsSalaryRangeModalOpen(false);
+    setIsCreateJobPageEightModalOpen(false);
     toast.success("Successfully created separation", { duration: 5000 });
   });
 
@@ -156,11 +163,39 @@ export default function CreateJobModal({
                     )}
                     {pageNumber == 4 && (
                       <CreateJobPageFour
-                        onSubmit={onSubmit}
                         setValue={setValue}
                         getValues={getValues}
                         register={register}
                         setPageNumber={setPageNumber}
+                      />
+                    )}
+                    {pageNumber == 5 && (
+                      <CreateJobPageFive
+                        setValue={setValue}
+                        watch={watch}
+                        register={register}
+                        setPageNumber={setPageNumber}
+                      />
+                    )}
+                    {pageNumber == 6 && (
+                      <CreateJobPageSix
+                        getValues={getValues}
+                        setValue={setValue}
+                        watch={watch}
+                        register={register}
+                        setPageNumber={setPageNumber}
+                      />
+                    )}
+                    {pageNumber == 7 && (
+                      <CreateJobPageSeven
+                        setValue={setValue}
+                        watch={watch}
+                        register={register}
+                        setPageNumber={setPageNumber}
+                        setIsCreateJobPageEightModalOpen={
+                          setIsCreateJobPageEightModalOpen
+                        }
+                        setParentOpen={setIsOpen}
                       />
                     )}
                   </form>
@@ -170,6 +205,11 @@ export default function CreateJobModal({
           </div>
         </Dialog>
       </Transition.Root>
+      <CreateJobPageEight
+        onSubmit={onSubmit}
+        isOpen={isCreateJobPageEightModalOpen}
+        setIsOpen={setIsCreateJobPageEightModalOpen}
+      />
       <SalaryRangeModal
         setPageNumber={setPageNumber}
         isOpen={isSalaryRangeModalOpen}

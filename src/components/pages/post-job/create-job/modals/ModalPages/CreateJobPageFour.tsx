@@ -10,9 +10,7 @@ export default function CreateJobPageFour({
   getValues,
   register,
   setPageNumber,
-  onSubmit,
 }: {
-  onSubmit: any;
   register: any;
   setValue: any;
   getValues: any;
@@ -63,7 +61,7 @@ export default function CreateJobPageFour({
                   type="button"
                   className="underline text-savoy-blue"
                   onClick={() => {
-                    setValue("JobDescriptionFile", null);
+                    setValue("jobDescriptionFile", null);
                     setFileProps({});
                   }}
                 >
@@ -74,7 +72,7 @@ export default function CreateJobPageFour({
             <div className="mt-2">
               <input
                 id="jobDescriptionFile"
-                {...register("JobDescriptionFile", {
+                {...register("jobDescriptionFile", {
                   required: true,
                 })}
                 type="file"
@@ -99,16 +97,16 @@ export default function CreateJobPageFour({
           <div className="mt-2 h-72 mb-12">
             <textarea
               rows={4}
-              {...register("JobDescription", { required: true })}
-              id="JobDescription"
+              {...register("jobDescription", { required: true })}
+              id="jobDescription"
               hidden
             />
             <ReactQuill
-              onChange={(value) => setValue("JobDescription", value)}
+              onChange={(value) => setValue("jobDescription", value)}
               formats={QUILL_FORMATS}
               modules={QUILL_MODULES}
               style={{ height: "100%" }}
-              defaultValue={getValues("JobDescription")}
+              defaultValue={getValues("jobDescription")}
             />
           </div>
         </div>
@@ -118,8 +116,8 @@ export default function CreateJobPageFour({
         <button
           type="button"
           className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-          // onClick={() => setPageNumber(5)}
-          onClick={() => onSubmit()}
+          onClick={() => setPageNumber(5)}
+          // onClick={() => onSubmit()}
         >
           Next
         </button>

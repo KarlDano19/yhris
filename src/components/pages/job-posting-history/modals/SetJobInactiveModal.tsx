@@ -1,17 +1,18 @@
-import { Dispatch, Fragment, useRef } from "react";
+import { Dispatch, Fragment, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import Warning from "@/svg/Warning";
-export default function SalaryRangeModal({
-  setPageNumber,
+import JobSuccessfullyInactiveModal from "./JobSuccessfullyInactiveModal";
+
+export default function SetJobInactiveModal({
   isOpen,
   setIsOpen,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  setPageNumber: Dispatch<number>;
 }) {
   const cancelButtonRef = useRef(null);
-
+  const [jobSuccessInactiveModalOpen, setJobSuccessInactiveModalOpen] =
+    useState(false);
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -48,42 +49,40 @@ export default function SalaryRangeModal({
                   <Warning />
                 </div>
                 <p className="text-xl font-bold text-gray-900 text-center">
-                  Would you like to indicate the possible salary (the range or
-                  the starting amount ) and benfits?
+                  Are you sure you want to set this job to inactive? 🧐
                 </p>
                 <p className="text-xl font-bold text-gray-900 text-center">
-                  <span>Fun Fact 👇:</span>
-                  <br />
-                  <span className="text-green-500">
-                    Adding Salary Range and Benefits help attract the right
-                    candidates to your company.
-                  </span>
+                  Setting this job to inactive will stop you from receiving
+                  matched applicants.
                 </p>
                 <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between">
                   <button
                     type="button"
-                    className="text-lg block sm:flex m-auto font-bold leading-6 text-white bg-savoy-blue shadow-sm py-3 px-6 rounded-md transition-all"
+                    className="flex-1 sm:ml-10 justify-center text-lg block sm:flex m-auto font-bold leading-6 text-white bg-savoy-blue shadow-sm py-3 px-6 rounded-md transition-all"
                     onClick={() => {
-                      setPageNumber(3);
-                      setIsOpen(false);
+                      setJobSuccessInactiveModalOpen(true);
                     }}
                   >
-                    YES, ADD THEM.
+                    YES, I AM.
                   </button>
                   <button
                     type="submit"
-                    className="text-lg block sm:flex m-auto font-bold leading-6 text-savoy-blue  shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all mt-3 sm:mt-0"
+                    className="flex-1 justify-center text-lg block sm:flex m-auto font-bold leading-6 text-savoy-blue  shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all mt-3 sm:mt-0"
                     onClick={() => {
-                      setPageNumber(4);
                       setIsOpen(false);
                     }}
                   >
-                    NO DON&#39;T ADD THEM.
+                    NO I&#39;M NOT.
                   </button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
+          <JobSuccessfullyInactiveModal
+            isOpen={jobSuccessInactiveModalOpen}
+            setIsOpen={setJobSuccessInactiveModalOpen}
+            setJobInactiveModal={setIsOpen}
+          />
         </div>
       </Dialog>
     </Transition.Root>

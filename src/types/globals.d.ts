@@ -26,6 +26,11 @@ export type T_Separation = {
   reason: string;
 };
 
+export type T_JobPreviewModal = {
+  isOpen: boolean;
+  id: number;
+};
+
 // Post a Job
 
 export type T_CreateJob = {
@@ -43,8 +48,15 @@ export type T_CreateJob = {
   };
   rate: string;
   benefits: string[];
-  JobDescription: string;
-  JobDescriptionFile: File;
+  jobDescription: string;
+  jobDescriptionFile: File;
+  postAs: string;
+  postAsUpload: File;
+  postIn: string[];
+};
+
+export type T_JobPostHistory = {
+  isActive: boolean;
 };
 
 //  jobType: {

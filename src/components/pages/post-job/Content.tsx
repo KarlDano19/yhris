@@ -1,13 +1,13 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import GetHelpLogoDummy from "@/svg/GetHelpLogoDummy";
-import MainLogo from "@/svg/MainLogo";
+import CreateJob from "@/svg/CreateJob";
+import JobPostingHistory from "@/svg/JobPostingHistory";
 import CreateJobModal from "./create-job/modals/CreateJobModal";
 
 const menus = [
   {
-    icon: <GetHelpLogoDummy />,
+    icon: <JobPostingHistory />,
     text: "Job Posting History",
     link: "/post-job/job-posting-history",
   },
@@ -25,7 +25,7 @@ const Content = () => {
             onClick={() => setIsCreateJobModalOpen(true)}
             className="bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none"
           >
-            <GetHelpLogoDummy />
+            <CreateJob />
             <h3 className="text-indigo-dye font-semibold text-center">
               Create a Job
             </h3>

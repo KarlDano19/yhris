@@ -1,127 +1,120 @@
 "use client";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useState } from "react";
-import SeparationLetter from "./SeparationLetter";
+import { T_JobPreviewModal } from "@/types/globals";
+import JobPreview from "./JobPreview";
 import {
-  T_DocumentsModal,
-  T_LastPayModal,
-  T_LetterModal,
-  T_QuitclaimModal,
-} from "@/types/globals";
-import SignDocuments from "./SignDocuments";
-import LastPay from "./LastPay";
-import Quitclaim from "./Quitclaim";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { separationItems as testData } from "@/helpers/testData";
-import AddSeparationModal from "./modals/AddSeparationModal";
-import LetterModal from "./modals/LetterModal";
-import SignDocumentsModal from "./modals/SignDocumentsModal";
-import ConfirmModal from "./modals/ConfirmModal";
-import toast from "react-hot-toast";
-import QuitclaimModal from "./modals/QuitclaimModal";
-// import useGetSeparationItems from './hooks/useGetSeparationItems'
+  Facebook,
+  Indeed,
+  LinkedIn,
+  Instagram,
+  Twitter,
+} from "@/svg/SocialMedia";
 
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { jobPostHistory as testData } from "@/helpers/testData";
+
+import toast from "react-hot-toast";
+import JobPreviewModal from "./modals/JobPreviewModal";
+import SetJob from "./SetJob";
+import SetJobInactiveModal from "./modals/SetJobInactiveModal";
+
+// import useGetSeparationItems from './hooks/useGetSeparationItems'
+type ComponentMap = {
+  [key: string]: React.ElementType;
+};
 const Content = () => {
   // const { data: separationItems, isLoading: isSeparationItemsLoading } = useGetSeparationItems();
-  const [separationItems, setSeparationItems] = useState(testData);
+  const [jobPostHistoryItems, setJobPostHistoryItems] = useState(testData);
   const [filteredItems, setFilteredItems] = useState(testData);
   const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
-  const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] =
+
+  const [isJobPreviewOpen, setIsJobPreviewOpen] =
+    useState<T_JobPreviewModal | null>(null);
+  const [isSetJobInactiveModalOpen, setIsSetJobInactiveModalOpen] =
     useState(false);
-  const [isLetterModalOpen, setIsLetterModalOpen] =
-    useState<T_LetterModal | null>(null);
-  const [isDocumentModalOpen, setIsDocumentModalOpen] =
-    useState<T_DocumentsModal | null>(null);
-  const [isLastPayModalOpen, setIsLastPayModalOpen] =
-    useState<T_LastPayModal | null>(null);
-  const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] =
-    useState<T_QuitclaimModal | null>(null);
-  const releaseLastPay = () => {
-    if (isLastPayModalOpen && isLastPayModalOpen.id) {
-      const itemIndex = separationItems.findIndex(
-        (item: any) => item.id === isLastPayModalOpen.id
-      );
-      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
-      separationItemsCopy[itemIndex].isLastPayReleased = true;
-      setSeparationItems([...separationItemsCopy]);
-      toast.success("Last pay marked as release", { duration: 4000 });
-      setIsLastPayModalOpen(null);
-    } else {
-      toast.error("Incomplete information", { duration: 4000 });
-    }
-  };
-  const updateReleaseModal = (value: boolean) => {
-    if (!value) {
-      setIsLastPayModalOpen(null);
-    }
+  const componentMap: ComponentMap = {
+    Facebook,
+    Indeed,
+    LinkedIn,
+    Instagram,
+    Twitter,
+    // Add other components here if needed
   };
 
   useEffect(() => {
     if (dateFilter.from && dateFilter.to) {
-      const filteredByDate = separationItems.filter((item) => {
-        let date = new Date(item.separationDate);
+      const filteredByDate = jobPostHistoryItems.filter((item) => {
+        let date = new Date(item.date);
         let start = new Date(dateFilter.from);
         let end = new Date(dateFilter.to);
         return date >= end && date <= start;
       });
       setFilteredItems([...filteredByDate]);
     }
-  }, [dateFilter, separationItems]);
+  }, [dateFilter, jobPostHistoryItems]);
 
   const renderRows = () => {
     if (
       !dateFilter.from &&
       !dateFilter.to &&
-      separationItems &&
-      separationItems.length > 0
+      jobPostHistoryItems &&
+      jobPostHistoryItems.length > 0
     ) {
-      return separationItems.map((item, index) => (
+      return jobPostHistoryItems.map((item, index) => (
         <tr key={index}>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.separationDate}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <div className="flex gap-2">
-              <span>{item.name}</span>{" "}
-              <InformationCircleIcon className="text-yellow-500 h-5 w-5" />
-            </div>
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.reasonForLeaving}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SeparationLetter
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              item.isActive ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            <JobPreview
               id={item.id}
-              isLetterSent={item.isLetterSent}
-              isLetterReceived={item.isLetterReceived}
-              letterReceivedDate={item.letterReceivedDate}
-              setIsLetterModalOpen={setIsLetterModalOpen}
+              jobNumber={item.JobNo}
+              setIsJobPreviewOpen={setIsJobPreviewOpen}
             />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SignDocuments
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              item.isActive ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            <SetJob
               id={item.id}
-              isDocumentsSent={item.isDocumentsSent}
-              isDocumentsReceived={item.isDocumentsReceived}
-              documentReceivedDate={item.documentReceivedDate}
-              setIsDocumentModalOpen={setIsDocumentModalOpen}
+              jobTitle={item.jobTitle}
+              setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
             />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <LastPay
-              id={item.id}
-              isLastPayReleased={item.isLastPayReleased}
-              setIsLastPayModalOpen={setIsLastPayModalOpen}
-            />
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              item.isActive ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            {item.jobType}
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <Quitclaim
-              id={item.id}
-              isQuitclaimSigned={item.isQuitclaimSigned}
-              isQuitclaimReceived={item.isQuitclaimReceived}
-              quitclaimReceivedDate={item.quitclaimReceivedDate}
-              setIsQuitclaimModalOpen={setIsQuitclaimModalOpen}
-            />
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              item.isActive ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            {item.schedule}
+          </td>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              item.isActive ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            {item.hireCount}
+          </td>
+          <td className="flex space-x-2 whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.postIn.map((item, index) => {
+              const DynamicComponent = componentMap[item];
+              return (
+                <span key={index}>
+                  <DynamicComponent />
+                </span>
+              );
+            })}
           </td>
         </tr>
       ));
@@ -134,50 +127,29 @@ const Content = () => {
       return filteredItems.map((item, index) => (
         <tr key={index}>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.separationDate}
+            {item.JobNo}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <div className="flex gap-2">
-              <span>{item.name}</span>{" "}
-              <InformationCircleIcon className="text-yellow-500 h-5 w-5" />
-            </div>
+            <span>{item.jobTitle}</span>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.reasonForLeaving}
+            {item.jobType}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SeparationLetter
-              id={item.id}
-              isLetterSent={item.isLetterSent}
-              isLetterReceived={item.isLetterReceived}
-              letterReceivedDate={item.letterReceivedDate}
-              setIsLetterModalOpen={setIsLetterModalOpen}
-            />
+            {item.schedule}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <SignDocuments
-              id={item.id}
-              isDocumentsSent={item.isDocumentsSent}
-              isDocumentsReceived={item.isDocumentsReceived}
-              documentReceivedDate={item.documentReceivedDate}
-              setIsDocumentModalOpen={setIsDocumentModalOpen}
-            />
+            {item.hireCount}
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <LastPay
-              id={item.id}
-              isLastPayReleased={item.isLastPayReleased}
-              setIsLastPayModalOpen={setIsLastPayModalOpen}
-            />
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <Quitclaim
-              id={item.id}
-              isQuitclaimSigned={item.isQuitclaimSigned}
-              isQuitclaimReceived={item.isQuitclaimReceived}
-              quitclaimReceivedDate={item.quitclaimReceivedDate}
-              setIsQuitclaimModalOpen={setIsQuitclaimModalOpen}
-            />
+          <td className="flex space-x-2 whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.postIn.map((item, index) => {
+              const DynamicComponent = componentMap[item];
+              return (
+                <span key={index}>
+                  <DynamicComponent />
+                </span>
+              );
+            })}
           </td>
         </tr>
       ));
@@ -202,7 +174,7 @@ const Content = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="p-2 md:p-8 lg:p-4">
           <h2 className="text-xl font-bold text-indigo-dye">
-            Employee Separation
+            Job Posting History
           </h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
             <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
@@ -226,7 +198,7 @@ const Content = () => {
                 }
               />
             </div>
-            <div className="flex-1">
+            <div className="flex">
               <div className="relative flex items-center">
                 <input
                   type="text"
@@ -240,21 +212,13 @@ const Content = () => {
                 </div>
               </div>
             </div>
-            <div className="flex-1 flex justify-end">
-              <button
-                className="bg-green-500 rounded-md py-1.5 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80"
-                onClick={() => setIsAddSeparationModalOpen(true)}
-              >
-                CREATE
-              </button>
-            </div>
           </div>
           <div className="mt-8 flow-root">
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]">
                 <table
                   className={`min-w-full divide-y divide-gray-300 ${
-                    separationItems.length === 0 && "mb-6"
+                    jobPostHistoryItems.length === 0 && "mb-6"
                   }`}
                 >
                   <thead>
@@ -263,43 +227,37 @@ const Content = () => {
                         scope="col"
                         className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
                       >
-                        Date of Separation
+                        Job No.
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Name
+                        Job Title
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Reason of Leaving
+                        Job Type
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Letter of Separation
+                        Job Schedule
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Sign Documents
+                        No. of Hires Needed
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Last Pay
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Quitclaim
+                        Platform/s Posted
                       </th>
                     </tr>
                   </thead>
@@ -309,14 +267,24 @@ const Content = () => {
                 </table>
                 <hr />
                 <p className="text-xs text-gray-500 mt-2">
-                  Total record/s: {separationItems.length}
+                  Total record/s: {jobPostHistoryItems.length}
                 </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <AddSeparationModal
+      <JobPreviewModal
+        id={isJobPreviewOpen?.id}
+        jobPostHistoryItems={jobPostHistoryItems}
+        isOpen={isJobPreviewOpen}
+        setIsOpen={setIsJobPreviewOpen}
+      />
+      <SetJobInactiveModal
+        isOpen={isSetJobInactiveModalOpen}
+        setIsOpen={setIsSetJobInactiveModalOpen}
+      />
+      {/* <AddSeparationModal
         separationItems={separationItems}
         setSeparationItems={setSeparationItems}
         isOpen={isAddSeparationModalOpen}
@@ -342,11 +310,11 @@ const Content = () => {
         confirmAction={releaseLastPay}
       />
       <QuitclaimModal
-        separationItems={separationItems} 
+        separationItems={separationItems}
         setSeparationItems={setSeparationItems}
         isOpen={isQuitclaimModalOpen}
         setIsOpen={setIsQuitclaimModalOpen}
-      />
+      /> */}
     </>
   );
 };
