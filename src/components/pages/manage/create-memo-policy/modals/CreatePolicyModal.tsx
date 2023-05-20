@@ -111,7 +111,7 @@ export default function CreatePolicyModal({
                           <input
                             id="withResponse"
                             type="checkbox"
-                            {...register("withResponse", { required: true })}
+                            {...register("withResponse")}
                             className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
                           />
                           <label
@@ -326,7 +326,7 @@ export default function CreatePolicyModal({
                                 </button>
                               )}
                             </div>
-                            <p className="text-sm">Maximum file size: 10mb</p>
+                            <p className="text-xs mt-1 text-gray-400 italic">Maximum file size: 10mb</p>
                           </div>
                         </div>
                       </div>

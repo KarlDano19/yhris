@@ -52,7 +52,7 @@ const Content = () => {
       employeeIssueItems.length > 0
     ) {
       return employeeIssueItems.map((item, index) => (
-        <tr key={index}>
+        <tr key={index} onClick={() => alert("Clicked Employee Issue Item")} className="hover:bg-gray-200/30 cursor-pointer">
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.incidentDate}
           </td>
@@ -96,7 +96,7 @@ const Content = () => {
       filteredItems.length > 0
     ) {
       return filteredItems.map((item, index) => (
-        <tr key={index}>
+        <tr key={index} onClick={() => alert("Clicked")} className="hover:bg-gray-50">
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.incidentDate}
           </td>

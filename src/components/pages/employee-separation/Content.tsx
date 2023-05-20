@@ -11,7 +11,7 @@ import { separationItems as testData } from '@/helpers/testData'
 import AddSeparationModal from './modals/AddSeparationModal'
 import LetterModal from './modals/LetterModal'
 import SignDocumentsModal from './modals/SignDocumentsModal'
-import ConfirmModal from './modals/ConfirmModal'
+import ConfirmModal from '../../ConfirmModal'
 import toast from 'react-hot-toast';
 import QuitclaimModal from './modals/QuitclaimModal'
 import CustomToast from '@/components/CustomToast'
