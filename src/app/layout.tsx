@@ -1,10 +1,7 @@
 import MainHeader from '@/components/MainHeader';
 import './globals.css';
-import { Golos_Text } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import ReactQueryWrapper from './reactQueryWrapper';
-
-const golos = Golos_Text({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'Home - Yahshua HRIS',
@@ -18,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className={`${golos.className} bg-gray-100`}>
+      <body className="bg-gray-100">
         <ReactQueryWrapper>
           <MainHeader />
           {children}
