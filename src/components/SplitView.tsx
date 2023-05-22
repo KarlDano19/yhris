@@ -15,7 +15,7 @@ const SplitLayout = ({
       >
         {left}
       </div>
-      <div className='bg-white w-full flex-1 bg-blue-lightest p-4'>
+      <div className='bg-white w-full flex-1 p-4'>
         {right}
       </div>
     </div>

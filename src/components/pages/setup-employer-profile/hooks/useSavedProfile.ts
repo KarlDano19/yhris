@@ -23,7 +23,9 @@ async function saveProfile(profile: T_EmployerProfile) {
     data.append('country', profile.country);
     data.append('language', profile.language);
     data.append('currency', profile.currency);
-    data.append('logo', profile.companyLogo);
+    if (profile.companyLogo) {
+      data.append('img', profile.companyLogo);
+    }
     const config = {
       headers: {
         'content-type': 'multipart/form-data',

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
   if (token) {
     if (
@@ -9,6 +9,27 @@ export function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/register')
     ) {
       return NextResponse.redirect(new URL('/', request.url));
+    }
+    if (
+      request.nextUrl.pathname === '/' ||
+      request.nextUrl.pathname.startsWith('/employee-separation') ||
+      request.nextUrl.pathname.startsWith('/manage')
+    ) {
+      const config = {
+        method: 'GET',
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+      };
+      const res = await (
+        await fetch(`${process.env.hostName}/api/employer-profile/`, config)
+      ).json();
+      if (!Object.keys(res.profile).length) {
+        return NextResponse.redirect(
+          new URL('/setup-employer-profile', request.url)
+        );
+      }
     }
   } else {
     if (
@@ -20,6 +41,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
+  return NextResponse.next();
 }
 
 export const config = {

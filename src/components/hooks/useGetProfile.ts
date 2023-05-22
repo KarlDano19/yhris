@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { getCookie } from 'cookies-next';
+import { getCookie, deleteCookie } from 'cookies-next';
 
 async function getProfile() {
   try {
@@ -11,20 +11,19 @@ async function getProfile() {
         Authorization: `Token ${token}`,
       },
     };
-    let url = '';
-    if (localStorage.accountType === 'employer') {
-      url = `${process.env.hostName}/api/employer-profile/`;
-    }
-    if (localStorage.accountType === 'employee') {
-      url = `${process.env.hostName}/api/employee-profile/`;
-    }
-    if (url) {
-      const res = await axios.get(url, config);
+    if (token) {
+      const res = await axios.get(`${process.env.hostName}/api/employer-profile/`, config);
       return res.data.profile;
     }
     return {};
   } catch (err: any) {
     if (Object.hasOwn(err, 'response')) {
+      if (Object.hasOwn(err.response.data, 'detail')) {
+        if ((err.response.data.detail).includes('Invalid token.')) {
+          deleteCookie('token');
+          location.href = '/login';
+        }
+      }
       throw err.response.data.message;
     }
     throw err.message;

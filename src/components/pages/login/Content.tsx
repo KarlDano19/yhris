@@ -21,8 +21,6 @@ const Content = () => {
           () => <CustomToast message={data.message} type='success' />,
           { duration: 4000 }
         );
-        localStorage.hasProfile = data.has_profile;
-        localStorage.accountType = data.account_type;
         setCookie('token', data.token, {maxAge: 60*60*24*1});
         if (!data.has_profile) {
           if (data.account_type === 'employer') {
@@ -66,7 +64,8 @@ const Content = () => {
                       type='email'
                       id='email'
                       {...register('email', { required: true })}
-                      className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 '
+                      className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                      tabIndex={1}
                     />
                   </div>
                   <div>
@@ -82,6 +81,7 @@ const Content = () => {
                         id='password'
                         {...register('password', { required: true })}
                         className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                        tabIndex={2}
                       />
                       <button
                         type='button'
@@ -102,6 +102,7 @@ const Content = () => {
                           aria-describedby='remember'
                           type='checkbox'
                           className='w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300'
+                          tabIndex={3}
                         />
                       </div>
                       <div className='ml-3 text-sm'>
@@ -116,6 +117,7 @@ const Content = () => {
                     <a
                       href='#'
                       className='text-sm font-medium text-blue-600 hover:underline'
+                      tabIndex={4}
                     >
                       Forgot password?
                     </a>
@@ -123,10 +125,11 @@ const Content = () => {
                   <button
                     type='submit'
                     className='w-full uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
+                    tabIndex={5}
                   >
                     Sign in
                   </button>
-                  <p className='text-sm font-light text-gray-500'>
+                  <p className='text-sm font-light text-gray-500 text-center'>
                     Don’t have an account yet?{' '}
                     <Link
                       href='/register'

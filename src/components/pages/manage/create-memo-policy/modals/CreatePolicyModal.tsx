@@ -272,7 +272,7 @@ export default function CreatePolicyModal({
                               >
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                   {!fileProps.fileName ? (
-                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="mb-2 text-sm text-gray-500">
                                       <span className="font-semibold">
                                         Click to upload
                                       </span>{" "}
@@ -280,10 +280,10 @@ export default function CreatePolicyModal({
                                     </p>
                                   ) : (
                                     <>
-                                      <p className="mb-2  text-sm text-gray-500 dark:text-gray-400">
+                                      <p className="mb-2  text-sm text-gray-500">
                                         {fileProps.fileName}
                                       </p>
-                                      <p className="mb-2  text-sm font-bold text-gray-900 dark:text-gray-400">
+                                      <p className="mb-2  text-sm font-bold text-gray-900">
                                         {`${(fileProps?.fileSize
                                           ? fileProps.fileSize / 1024 / 1024
                                           : 0
