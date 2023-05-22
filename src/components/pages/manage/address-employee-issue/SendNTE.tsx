@@ -26,11 +26,15 @@ const SendNTE = ({
               : "border-[1px] border-red-500 text-red-500",
             "items-center rounded-md px-2 py-1 focus:z-10 w-24"
           )}
-          onClick={() =>
-            setIsSendNTEModalOpen({
-              isOpen: true,
-              id,
-            })
+          onClick={(e) => {
+              e.stopPropagation()
+              if(!isNTESent) {
+                setIsSendNTEModalOpen({
+                  isOpen: true,
+                  id,
+                })
+              }
+            }
           }
         >
           {isNTESent ? "Sent" : "Send"}

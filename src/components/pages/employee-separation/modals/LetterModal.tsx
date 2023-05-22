@@ -4,7 +4,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid'
 import { T_LetterModal } from '@/types/globals'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import ConfirmModal from './ConfirmModal';
+import ConfirmModal from '../../../ConfirmModal';
 import CustomToast from '@/components/CustomToast';
 import DateCalendar from '@/svg/DateCalendar';
 

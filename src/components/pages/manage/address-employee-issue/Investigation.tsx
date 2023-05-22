@@ -24,11 +24,15 @@ const Investigation = ({
               : "border-[1px] border-red-500 text-red-500",
             "items-center rounded-md px-2 py-1 focus:z-10"
           )}
-          onClick={() =>
-            setIsInvestigateModalOpen({
-              isOpen: true,
-              id,
-            })
+          onClick={(e) => {
+              e.stopPropagation();
+              if(!isInvestigated) {
+                setIsInvestigateModalOpen({
+                  isOpen: true,
+                  id,
+                })
+              }
+            }
           }
         >
           {isInvestigated ? "Investigated" : "Investigate"}

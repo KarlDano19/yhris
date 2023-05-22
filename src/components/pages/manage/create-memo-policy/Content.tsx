@@ -68,10 +68,14 @@ const Content = () => {
                 type="checkbox"
                 defaultChecked={item.withResponse}
                 className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
+                onClick={(e) => {
+                  e.preventDefault(); 
+                  e.stopPropagation() 
+                }}
               />
             </td>
             <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
-              <p className="font-bold">View Responses</p>
+              <p className="font-bold hover:underline cursor-pointer" onClick={() => alert("View responses clicked")}>View Responses</p>
             </td>
             <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
               <span className="cursor-pointer" onClick={() => deleteMemo(item.id)}><DeleteMemoLogo/></span>
@@ -102,6 +106,10 @@ const Content = () => {
               type="checkbox"
               defaultChecked={item.withResponse}
               className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
+              onClick={(e) => {
+                e.preventDefault(); 
+                e.stopPropagation() 
+              }}
             />
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top">
@@ -120,7 +128,7 @@ const Content = () => {
               There{`'`}s no data yet.
             </h4>
             <h4 className="text-center text-gray-300 text-sm mb-4">
-              Please click create to add incident report.
+              Please click create to add memo/policy.
             </h4>
           </td>
         </tr>
@@ -292,7 +300,7 @@ const Content = () => {
                 </table>
                 <hr />
                 <p className="text-xs text-gray-500 mt-2">
-                  Total record/s: {createMemoPolicyItems.length}
+                  Total record/s: {createMemoPolicyItems.filter((item) => !item.isDeleted).length}
                 </p>
               </div>
             </div>

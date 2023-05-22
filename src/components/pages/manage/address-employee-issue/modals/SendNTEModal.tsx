@@ -1,7 +1,6 @@
 import {
   Dispatch,
   Fragment,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -52,7 +51,7 @@ export default function SendNTEModal({
   });
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex(

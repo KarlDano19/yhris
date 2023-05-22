@@ -19,11 +19,13 @@ export default function CreateMemoModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<T_CreateMemo>();
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors }, getValues } = useForm<T_CreateMemo>();
   const cancelButtonRef = useRef(null);
 
   const [signatureUrl, setSignatureUrl] = useState("");
   const [signatureModalOpen, setSignatureModalOpen] = useState(false);
+  const [attachmentExist, setAttachmentExist] = useState(false);
+  const [qrCodeExist, setQrCodeExist] = useState(false);
   const [fileProps, setFileProps] = useState<{
     fileName?: string;
     fileSize?: number;
@@ -31,19 +33,19 @@ export default function CreateMemoModal({
 
   const onSubmit = handleSubmit((data) => {
     const newItem = {
-        date: Intl.DateTimeFormat('en-US').format(new Date()),
-        id: createMemoPolicyItems.length + 1,
-        type: "memo",
-        title: data.title,
-        to: data.email,
-        body: data.body,
-        name: data.name,
-        position: data.position,
-        signature: data.signature,
-        qrCode: data.qrCode,
-        file: data.file,
-        withResponse: data.withResponse,
-        isDeleted: false,
+      date: Intl.DateTimeFormat('en-US').format(new Date()),
+      id: createMemoPolicyItems.length + 1,
+      type: "memo",
+      title: data.title,
+      to: data.email,
+      body: data.body,
+      name: data.name,
+      position: data.position,
+      signature: data.signature,
+      qrCode: data.qrCode,
+      file: data.file,
+      withResponse: data.withResponse,
+      isDeleted: false,
     }
     setCreateMemoPolicyItems([...createMemoPolicyItems, newItem]);
     setIsOpen(false);
@@ -56,12 +58,16 @@ export default function CreateMemoModal({
     reset();
   });
   useEffect(() => {
-    if(signatureUrl) {
+    if (signatureUrl) {
       setValue("signature", signatureUrl);
     } else {
       setSignatureUrl("");
     }
   }, [signatureUrl, setValue]);
+  if (!isOpen && signatureUrl) {
+    setSignatureUrl("");
+  }
+
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -125,7 +131,7 @@ export default function CreateMemoModal({
                       <input
                         id="withResponse"
                         type="checkbox"
-                        {...register("withResponse", { required: true })}
+                        {...register("withResponse")}
                         className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
                       />
                       <label
@@ -204,8 +210,8 @@ export default function CreateMemoModal({
                     <p className="my-4 block text-sm font-medium leading-6 text-gray-900">
                       Signature
                     </p>
-                    <div className="sm:flex w-full items-end gap-6 mt-4">
-                      <div className="basis-1/2">
+                    <div className="flex flex-col md:flex-row items-start gap-6 mt-4">
+                      <div className="flex-1">
                         <label
                           htmlFor="draw"
                           className="block text-sm font-medium leading-6 text-gray-900"
@@ -216,7 +222,7 @@ export default function CreateMemoModal({
                           <button
                             id="draw"
                             type="button"
-                            className="block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                            className={`block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 ${signatureUrl ? "bg-savoy-blue text-white " : ""}`}
                             onClick={() => {
                               setSignatureModalOpen(true);
                               // setSignatureUrl("");
@@ -226,8 +232,8 @@ export default function CreateMemoModal({
                           </button>
                         </div>
                       </div>
-                      <p className="my-2 text-center">or</p>
-                      <div className="basis-1/2">
+                      <p className="text-center mt-10">or</p>
+                      <div className="flex-1">
                         <label
                           htmlFor="signature"
                           className="block text-sm font-medium leading-6 text-gray-900"
@@ -238,10 +244,25 @@ export default function CreateMemoModal({
                           <input
                             id="signature"
                             {...register("signature")}
-                            onChange={(e) => e.target.value ? setSignatureUrl("") : null}
+                            onChange={(e) => {
+                              e.target.value ? setSignatureUrl("") : null;
+                              e.target.value ? setAttachmentExist(true) : null;
+                            }}
                             type="file"
                             className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                           />
+                          {attachmentExist ? (
+                            <button
+                              type="button"
+                              className="underline text-savoy-blue text-sm mt-1"
+                              onClick={() => {
+                                setValue("signature", "");
+                                setAttachmentExist(false);
+                              }}
+                            >
+                              Remove Attachment
+                            </button>
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -268,8 +289,23 @@ export default function CreateMemoModal({
                           id="qrCode"
                           {...register("qrCode")}
                           type="file"
+                          onChange={(e) => {
+                            e.target.value ? setQrCodeExist(true) : null;
+                          }}
                           className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                         />
+                        {qrCodeExist ? (
+                          <button
+                            type="button"
+                            className="underline text-savoy-blue text-sm mt-1"
+                            onClick={() => {
+                              setValue("qrCode", "");
+                              setQrCodeExist(false);
+                            }}
+                          >
+                            Remove QR Code
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                     <div className="sm:col-span-4 mt-4">
@@ -341,8 +377,7 @@ export default function CreateMemoModal({
                             </button>
                           )}
                         </div>
-
-                        <p className="text-sm">Maximum file size: 10mb</p>
+                        <p className="text-xs mt-1 text-gray-400 italic">Maximum file size: 10mb</p>
                       </div>
                     </div>
                   </div>
