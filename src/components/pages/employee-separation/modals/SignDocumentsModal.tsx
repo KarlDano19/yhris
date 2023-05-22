@@ -21,7 +21,7 @@ type FormValues = {
 export default function SignDocumentsModal({ separationItems, setSeparationItems, isOpen, setIsOpen }: { separationItems: any, setSeparationItems: any, isOpen: T_DocumentsModal | null, setIsOpen: Dispatch<T_DocumentsModal | null> }) {
     const [isCCOpen, setIsCCOPen] = useState(false);
     const [isBCCOpen, setIsBCCOpen] = useState(false);
-    const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+    const ReactQuill = dynamic(() => import('react-quill'), { ssr: true });
     const { register, handleSubmit, reset, watch, formState: { isDirty }, setValue, getValues } = useForm<FormValues>({ defaultValues: { template: 'Please Sign: Offboarding Documents', message: SEPARATION_TEMPLATE[0].message } });
     const onSubmit = handleSubmit((data) => {
         if (isOpen && isOpen.id) {

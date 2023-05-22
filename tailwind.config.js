@@ -20,10 +20,13 @@ module.exports = {
       },
       colors: {
         ...colors,
-        "indigo-dye": "#2C3F58",
-        "savoy-blue": "#355FD0",
-      }
+        'indigo-dye': '#2C3F58',
+        'savoy-blue': '#355FD0',
+      },
+      width: {
+        '94': '22.2rem',
+      },
     },
   },
   plugins: [],
-}
+};
