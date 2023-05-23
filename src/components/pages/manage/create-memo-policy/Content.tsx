@@ -10,9 +10,12 @@ import CreateMemoChevronLogo from "@/svg/CreateMemoChevronLogo";
 import { Menu, Transition } from '@headlessui/react'
 import classNames from "@/helpers/classNames";
 import DeleteMemoLogo from "@/svg/DeleteMemoLogo";
+import ConfirmModal from "@/components/ConfirmModal";
 
 const Content = () => {
   const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState(testData);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<number | null>(null);
   const [filteredItems, setFilteredItems] = useState(testData);
   const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
@@ -33,14 +36,16 @@ const Content = () => {
     }
   }, [dateFilter, createMemoPolicyItems]);
 
-  function deleteMemo(id: number): void {
-    const updatedItems = createMemoPolicyItems.map((item) => {
-      return item.id !== id ? item : {
-        ...item,
-        isDeleted: true,
-      };
-    });
-    setCreateMemoPolicyItems([...updatedItems])
+  function deleteMemo(): void {
+    if(idToDelete) {
+      const updatedItems = createMemoPolicyItems.map((item) => {
+        return item.id !== idToDelete ? item : {
+          ...item,
+          isDeleted: true,
+        };
+      });
+      setCreateMemoPolicyItems([...updatedItems]);
+    }
   }
 
   const renderRows = () => {
@@ -67,7 +72,7 @@ const Content = () => {
               <input
                 type="checkbox"
                 defaultChecked={item.withResponse}
-                className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
+                className={`form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white ${!item.withResponse && "opacity-30"}`}
                 onClick={(e) => {
                   e.preventDefault(); 
                   e.stopPropagation() 
@@ -78,7 +83,10 @@ const Content = () => {
               <p className="font-bold hover:underline cursor-pointer" onClick={() => alert("View responses clicked")}>View Responses</p>
             </td>
             <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-              <span className="cursor-pointer" onClick={() => deleteMemo(item.id)}><DeleteMemoLogo/></span>
+              <span className="cursor-pointer" onClick={() => {
+                setIdToDelete(item.id);
+                setIsConfirmModalOpen(true);
+              }}><DeleteMemoLogo/></span>
             </td>
           </tr>
         )
@@ -105,7 +113,7 @@ const Content = () => {
             <input
               type="checkbox"
               defaultChecked={item.withResponse}
-              className="form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white"
+              className={`form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white ${!item.withResponse && "opacity-30"}`}
               onClick={(e) => {
                 e.preventDefault(); 
                 e.stopPropagation() 
@@ -116,7 +124,10 @@ const Content = () => {
             <p className="font-bold">View Responses</p>
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top">
-            <span onClick={() => deleteMemo(item.id)}><DeleteMemoLogo/></span>
+            <span onClick={() => {
+                setIdToDelete(item.id);
+                setIsConfirmModalOpen(true);
+            }}><DeleteMemoLogo/></span>
           </td>
         </tr>
       ));
@@ -135,7 +146,6 @@ const Content = () => {
       );
     }
   };
-
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -319,6 +329,7 @@ const Content = () => {
         isOpen={isCreatePolicyModalOpen}
         setIsOpen={setIsCreatePolicyModalOpen}
       />
+      <ConfirmModal message="Are you sure you want to delete this memo/policy?" isOpen={isConfirmModalOpen} setIsOpen={setIsConfirmModalOpen} confirmAction={deleteMemo} />
     </>
   );
 };

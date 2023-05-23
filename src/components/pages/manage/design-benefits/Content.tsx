@@ -33,7 +33,7 @@ const Content = () => {
 
     useEffect(() => {
         setDateFilter({ from: "", to: "" });
-    }, [designBenefitsItems])
+    }, [designBenefitsItems]);
     
     const renderRows = () => {
         if (!dateFilter.from && !dateFilter.to && designBenefitsItems && designBenefitsItems.length > 0) {
