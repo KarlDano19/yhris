@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { T_CreatePolicy } from "@/types/globals";
 import CustomToast from "@/components/CustomToast";
+import DragDrop from "@/components/DragDrop";
 
 export default function CreatePolicyModal({
   createMemoPolicyItems,
@@ -17,7 +18,7 @@ export default function CreatePolicyModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<T_CreatePolicy>();
+  const { register, handleSubmit, setValue, reset, watch, trigger, formState: { errors } } = useForm<T_CreatePolicy>();
   const cancelButtonRef = useRef(null);
   const [isNextForm, setIsNextForm] = useState(false);
   const [fileProps, setFileProps] = useState<{
@@ -260,74 +261,12 @@ export default function CreatePolicyModal({
                         <div className="sm:col-span-4 mt-4">
                           <label
                             htmlFor="file"
-                            className="block text-sm font-medium leading-6 text-gray-900"
+                            className="block text-sm font-medium leading-6 text-gray-900 mb-2"
                           >
                             Upload File (Optional)
                           </label>
-                          <div className="mt-2">
-                            <div className="relative flex items-center justify-center w-full">
-                              <label
-                                htmlFor="file"
-                                className="block w-full rounded-md border-0 py-10 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300"
-                              >
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                  {!fileProps.fileName ? (
-                                    <p className="mb-2 text-sm text-gray-500">
-                                      <span className="font-semibold">
-                                        Click to upload
-                                      </span>{" "}
-                                      or drag and drop
-                                    </p>
-                                  ) : (
-                                    <>
-                                      <p className="mb-2  text-sm text-gray-500">
-                                        {fileProps.fileName}
-                                      </p>
-                                      <p className="mb-2  text-sm font-bold text-gray-900">
-                                        {`${(fileProps?.fileSize
-                                          ? fileProps.fileSize / 1024 / 1024
-                                          : 0
-                                        ).toFixed(2)} MB`}
-                                      </p>
-                                    </>
-                                  )}
-                                </div>
-                                <input
-                                  id="file"
-                                  {...register("file", {
-                                    required: false,
-                                  })}
-                                  type="file"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      const fileName = e.target.files?.[0].name;
-                                      const fileSize = e.target.files?.[0].size;
-
-                                      setFileProps({
-                                        fileName: fileName,
-                                        fileSize: fileSize,
-                                      });
-                                    }
-                                  }}
-                                />
-                              </label>
-                              {fileProps.fileName && (
-                                <button
-                                  type="button"
-                                  className="absolute bottom-10 underline text-savoy-blue"
-                                  onClick={() => {
-                                    setValue("file", "");
-                                    setFileProps({});
-                                  }}
-                                >
-                                  Remove File
-                                </button>
-                              )}
-                            </div>
-                            <p className="text-xs mt-1 text-gray-400 italic">Maximum file size: 10mb</p>
-                          </div>
+                          <DragDrop setValue={(value: any) => setValue("file", value)} />
+                          <p className="text-xs mt-1 text-gray-400">Maximum file size: 10mb</p>
                         </div>
                       </div>
                     </div>
@@ -337,7 +276,15 @@ export default function CreatePolicyModal({
                     <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
                       <span
                         className="mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                        onClick={() => setIsNextForm(true)}
+                        onClick={async () => {
+                          const title = await trigger("title");
+                          const email = await trigger("email");
+                          const results = [title, email];
+                          const incomplete = results.some((item: boolean) => !item);
+                          if(!incomplete) {
+                            setIsNextForm(true)
+                          }
+                        }}
                       >
                         Next
                       </span>
