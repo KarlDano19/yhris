@@ -1,5 +1,5 @@
 "use client";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useState, useRef, Fragment } from "react";
 import ClipIcon from "@/svg/ClipIcon";
 import { createMemoPolicyItems as testData } from "@/helpers/testData";
@@ -11,6 +11,7 @@ import { Menu, Transition } from '@headlessui/react'
 import classNames from "@/helpers/classNames";
 import DeleteMemoLogo from "@/svg/DeleteMemoLogo";
 import ConfirmModal from "@/components/ConfirmModal";
+import Link from "next/link";
 
 const Content = () => {
   const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState(testData);
@@ -149,7 +150,13 @@ const Content = () => {
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="p-2 md:p-8 lg:p-4">
+        <div className="flex p-4">
+          <Link href="/manage" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+            <ArrowLeftIcon className="h-5 w-5" />
+            <h4>Manage</h4>
+          </Link>
+        </div>
+        <div className="px-2 md:px-8 lg:px-4">
           <h2 className="text-xl font-bold text-indigo-dye">
             Create Memo/Policy
           </h2>
