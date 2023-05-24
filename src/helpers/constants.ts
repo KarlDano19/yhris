@@ -11,7 +11,7 @@ export const QUILL_MODULES = {
         ['bold', 'italic', 'underline', 'strike', 'blockquote'],
         [{ 'list': 'ordered' }, { 'list': 'bullet' },
         { 'indent': '-1' }, { 'indent': '+1' }],
-        ['link', 'image', 'video'],
+        ['link'],
         ['clean']
     ],
     clipboard: {

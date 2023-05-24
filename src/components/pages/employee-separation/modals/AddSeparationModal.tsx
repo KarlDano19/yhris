@@ -27,22 +27,17 @@ export default function AddSeparationModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit, watch, setValue, reset } =
-    useForm<T_Separation>();
+  const { register, handleSubmit, setValue, reset } = useForm<T_Separation>();
   const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
-          () => (
-            <CustomToast
-              message='Successfully created separation.'
-              type='success'
-            />
-          ),
+          () => <CustomToast message={data.message} type='success' />,
           { duration: 5000 }
         );
+        setIsOpen(false);
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -107,14 +102,14 @@ export default function AddSeparationModal({
                       </label>
                       <div className='relative mt-2'>
                         <input
-                            type="date"
-                            onChange={(e) => setValue('date', e.target.value)}
-                            required
-                            id="date"
-                            className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                            ref={dateInputRef}
-                            // @ts-expect-error
-                            onClick={() => dateInputRef.current.showPicker()}
+                          type='date'
+                          onChange={(e) => setValue('date', e.target.value)}
+                          required
+                          id='date'
+                          className='block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
+                          ref={dateInputRef}
+                          // @ts-expect-error
+                          onClick={() => dateInputRef.current.showPicker()}
                         />
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <DateCalendar />

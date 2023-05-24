@@ -54,6 +54,14 @@ export type T_Separation = {
     reason: string;
 };
 
+export type T_SeparationEmail = {
+  id: string;
+  type: string;
+  separationLetter: any;
+  signDocuments: any;
+  quitclaim: any;
+};
+
 export type T_Login = {
     email: string;
     password: string;

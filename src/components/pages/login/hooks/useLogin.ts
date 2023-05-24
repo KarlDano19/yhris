@@ -23,9 +23,9 @@ async function login(credentials: T_Login) {
   }
 }
 
-function useAccessAuth() {
+function useLogin() {
   const query = useMutation((credentials: T_Login) => login(credentials));
   return query;
 }
 
-export default useAccessAuth;
+export default useLogin;

@@ -1,6 +1,7 @@
+import axios from 'axios';
+
 import { T_Separation } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
 import { getCookie } from 'cookies-next';
 
 async function addSeparation(

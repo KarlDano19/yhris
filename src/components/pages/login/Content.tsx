@@ -8,11 +8,11 @@ import EyePassword from '@/svg/EyePassword';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import { T_Login } from '@/types/globals';
-import useAccessAuth from './hooks/useAccessAuth';
+import useLogin from './hooks/useLogin';
 import { setCookie } from 'cookies-next';
 const Content = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { mutate, isLoading } = useAccessAuth();
+  const { mutate, isLoading } = useLogin();
   const { register, handleSubmit } = useForm<T_Login>();
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {

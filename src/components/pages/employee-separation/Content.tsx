@@ -20,6 +20,7 @@ import useGetSeparationItems from './hooks/useGetSeparationItems'
 import useGetDepartmentItems from './hooks/useGetDepartmentItems'
 import useGetEmployeeItems from './hooks/useGetEmployeeItems'
 import useGetPositionItems from './hooks/useGetPositionItems'
+import useSendSeparationEmail from './hooks/useSendSeparationEmail';
 
 const Content = () => {
     const [separationItems, setSeparationItems] = useState<any>([]);
@@ -32,6 +33,7 @@ const Content = () => {
     const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
     const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
     const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
+    const { mutate, isLoading } = useSendSeparationEmail();
     const { data: dataSepration, isLoading: isLoadingSeparation } = useGetSeparationItems(itemsFilter);
     const { data: dataDepartment, isLoading: isLoadingDepartment } = useGetDepartmentItems();
     const { data: dataEmployee, isLoading: isLoadingEmployee } = useGetEmployeeItems();
@@ -42,10 +44,25 @@ const Content = () => {
         if (isLastPayModalOpen && isLastPayModalOpen.id) {
             const itemIndex = separationItems.findIndex((item: any) => item.id === isLastPayModalOpen.id);
             const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
+            separationItemsCopy[itemIndex].id = isLastPayModalOpen.id;
+            separationItemsCopy[itemIndex].type = 'last pay';
             separationItemsCopy[itemIndex].isLastPayReleased = true;
-            setSeparationItems([...separationItemsCopy]);
-            toast.custom(() => <CustomToast message="Last pay marked as released." type="success" />, { duration: 4000 });
-            setIsLastPayModalOpen(null);
+            const callbackReq = {
+            onSuccess: (data: any) => {
+                setSeparationItems([...separationItemsCopy]);
+                setIsLastPayModalOpen(null);
+                toast.custom(
+                () => <CustomToast message={data.message} type='success' />,
+                { duration: 5000 }
+                );
+            },
+            onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, {
+                duration: 7000,
+                });
+            },
+            };
+            mutate(separationItemsCopy[0], callbackReq);
         } else {
             toast.custom(() => <CustomToast message="Incomplete information." type="error" />, { duration: 4000 });
         }
@@ -72,6 +89,38 @@ const Content = () => {
                 separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation))
                 separation['name'] = `${employee.firstname} ${employee.lastname}`
                 separation['reasonForLeaving'] = separation.reason_of_leaving;
+                separation['isLetterSent'] = separation.is_letter_sent;
+                separation['isLetterReceived'] = separation.is_letter_received;
+                separation['letterReceivedDate'] = separation.letter_received_date;
+                separation['isDocumentsSent'] = separation.is_documents_sent;
+                separation['isDocumentsReceived'] = separation.is_documents_received;
+                separation['documentReceivedDate'] = separation.documents_received_date;
+                separation['isLastPayReleased'] = separation.is_last_pay_released;
+                separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
+                separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
+                separation['quitclaimReceivedDate'] = separation.quit_claim_received_date;
+                separation['separationLetter'] = {
+                    date: '',
+                    to: '',
+                    message: '',
+                }
+                separation['acceptanceLetter'] = {
+                    date: '',
+                    to: '',
+                    message: '',
+                }
+                separation['signDocuments'] = {
+                    template: '',
+                    date: '',
+                    to: '',
+                    message: '',
+                }
+                separation['quitclaim'] = {
+                    template: '',
+                    date: '',
+                    to: '',
+                    message: '',
+                }
                 return separation;
             })
             setSeparationItems(dataSepration);
