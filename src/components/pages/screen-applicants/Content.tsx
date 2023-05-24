@@ -5,27 +5,27 @@ export default function Content() {
   return (
     <Wrapper title="Screen Applicants">
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
-        <div className="rounded-2xl p-8 shadow-md text-indigo-dye text-center">
+        <button
+          type="button"
+          className="rounded-2xl p-8 shadow-md text-indigo-dye text-center bg-white"
+        >
           <h2 className="font-semibold text-xl">Accounting Officer</h2>
           <p className="text-[15px] mb-8">Cagayan de Oro City</p>
-          <button
-            type="button"
-            className="bg-[#EAC645] hover:bg-[#e1bf42] rounded-lg font-semibold text-[15px] w-full py-4"
-          >
+          <div className="bg-[#EAC645] rounded-lg font-semibold text-[15px] w-full py-4">
             <p>2 New Applicant/s</p>
-          </button>
-        </div>
-        <PostAJobCard />
-        <PostAJobCard />
-        <PostAJobCard />
-        <PostAJobCard />
-        <PostAJobCard />
+          </div>
+        </button>
+        <PostJobCard />
+        <PostJobCard />
+        <PostJobCard />
+        <PostJobCard />
+        <PostJobCard />
       </div>
     </Wrapper>
   )
 }
 
-export function PostAJobCard() {
+export function PostJobCard() {
   return (
     <button
       type="button"
