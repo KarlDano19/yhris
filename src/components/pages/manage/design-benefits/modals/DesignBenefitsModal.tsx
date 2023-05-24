@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react'
+import { Dispatch, Fragment, useEffect, useRef, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon } from '@heroicons/react/24/solid'
 import { useForm } from 'react-hook-form';
@@ -20,7 +20,7 @@ export default function DesignBenefitsModal({ designBenefitsItems, setDesignBene
     const [page, setPage] = useState(1);
     const [isCCOpen, setIsCCOPen] = useState(false);
     const [isBCCOpen, setIsBCCOpen] = useState(false);
-    const { register, handleSubmit, reset, watch, formState: { isDirty }, setValue } = useForm<FormValues>();
+    const { register, handleSubmit, reset, trigger, watch, formState: { isDirty }, setValue } = useForm<FormValues>();
     const onSubmit = handleSubmit((data) => {
         const newItem = {
             id: designBenefitsItems.length + 1,
@@ -36,12 +36,17 @@ export default function DesignBenefitsModal({ designBenefitsItems, setDesignBene
         setIsOpen(false);
         toast.custom(
             () => (
-                <CustomToast message="Successfully created designed benefits." type="success" />
+                <CustomToast message="Successfully designed benefits." type="success" />
             ),
             { duration: 5000 }
         );
         reset();
     });
+    useEffect(() => {
+        if(!isOpen){
+            setPage(1);
+        }
+    }, [isOpen])
     const cancelButtonRef = useRef(null);
     return (
         <>
@@ -216,7 +221,17 @@ export default function DesignBenefitsModal({ designBenefitsItems, setDesignBene
                                                 <button
                                                     type="submit"
                                                     className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-                                                    onClick={() => setPage(2)}
+                                                    onClick={async () => {
+                                                        const title = await trigger("title");
+                                                        const email = await trigger("email");
+                                                        const purpose = await trigger("purpose");
+                                                        const benefits = await trigger("benefits");
+                                                        const results = [title, email, purpose, benefits];
+                                                        const incomplete = results.some((item: boolean) => !item);
+                                                        if(!incomplete) {
+                                                            setPage(2)
+                                                        }
+                                                    }}
                                                 >
                                                     Next
                                                 </button>
