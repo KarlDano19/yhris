@@ -1,13 +1,12 @@
 "use client"
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 import React, { useEffect, useState, useRef } from 'react'
-import { T_DesignBenefitsModal, T_DocumentsModal, T_LastPayModal, T_LetterModal, T_QuitclaimModal } from '@/types/globals'
-import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import { designBenefitsItems as testData } from '@/helpers/testData'
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast'
 import DateCalendar from '@/svg/DateCalendar'
 import DesignBenefitsModal from './modals/DesignBenefitsModal'
+import Link from 'next/link'
 // import useGetSeparationItems from './hooks/useGetSeparationItems'
 
 const Content = () => {
@@ -33,8 +32,8 @@ const Content = () => {
 
     useEffect(() => {
         setDateFilter({ from: "", to: "" });
-    }, [designBenefitsItems])
-    
+    }, [designBenefitsItems]);
+
     const renderRows = () => {
         if (!dateFilter.from && !dateFilter.to && designBenefitsItems && designBenefitsItems.length > 0) {
             return designBenefitsItems.map((item, index) => (
@@ -85,7 +84,13 @@ const Content = () => {
     return (
         <>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="p-2 md:p-8 lg:p-4">
+                <div className="flex p-4">
+                    <Link href="/manage" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+                        <ArrowLeftIcon className="h-5 w-5" />
+                        <h4>Manage</h4>
+                    </Link>
+                </div>
+                <div className="px-2 md:px-8 lg:px-4">
                     <h2 className="text-xl font-bold text-indigo-dye">Design Benefits</h2>
                     <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
                         <div className="flex-none flex flex-col lg:flex-row items-center gap-2">

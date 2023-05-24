@@ -7,6 +7,7 @@ import { T_CreateMemo } from "@/types/globals";
 import SignatureModal from "./SignatureModal";
 import Image from "next/image";
 import CustomToast from "@/components/CustomToast";
+import DragDrop from "@/components/DragDrop";
 
 export default function CreateMemoModal({
   setCreateMemoPolicyItems,
@@ -67,7 +68,6 @@ export default function CreateMemoModal({
   if (!isOpen && signatureUrl) {
     setSignatureUrl("");
   }
-
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -311,74 +311,12 @@ export default function CreateMemoModal({
                     <div className="sm:col-span-4 mt-4">
                       <label
                         htmlFor="file"
-                        className="block text-sm font-medium leading-6 text-gray-900"
+                        className="block text-sm font-medium leading-6 text-gray-900 mb-2"
                       >
                         Upload File (Optional)
                       </label>
-                      <div className="mt-2">
-                        <div className="relative flex items-center justify-center w-full">
-                          <label
-                            htmlFor="file"
-                            className="block w-full rounded-md border-0 py-10 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300"
-                          >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              {!fileProps.fileName ? (
-                                <p className="mb-2 text-sm text-gray-500">
-                                  <span className="font-semibold">
-                                    Click to upload
-                                  </span>{" "}
-                                  or drag and drop
-                                </p>
-                              ) : (
-                                <>
-                                  <p className="mb-2  text-sm text-gray-500">
-                                    {fileProps.fileName}
-                                  </p>
-                                  <p className="mb-2  text-sm font-bold text-gray-900">
-                                    {`${(fileProps?.fileSize
-                                      ? fileProps.fileSize / 1024 / 1024
-                                      : 0
-                                    ).toFixed(2)} MB`}
-                                  </p>
-                                </>
-                              )}
-                            </div>
-                            <input
-                              id="file"
-                              {...register("file", {
-                                required: false,
-                              })}
-                              type="file"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const fileName = e.target.files?.[0].name;
-                                  const fileSize = e.target.files?.[0].size;
-
-                                  setFileProps({
-                                    fileName: fileName,
-                                    fileSize: fileSize,
-                                  });
-                                }
-                              }}
-                            />
-                          </label>
-                          {fileProps.fileName && (
-                            <button
-                              type="button"
-                              className="absolute bottom-10 underline text-savoy-blue"
-                              onClick={() => {
-                                setValue("file", "");
-                                setFileProps({});
-                              }}
-                            >
-                              Remove File
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-xs mt-1 text-gray-400 italic">Maximum file size: 10mb</p>
-                      </div>
+                      <DragDrop setValue={(value: any) => setValue("file", value)} />
+                      <p className="text-xs mt-1 text-gray-400">Maximum file size: 10mb</p>
                     </div>
                   </div>
                   <hr />
