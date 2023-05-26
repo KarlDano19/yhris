@@ -1,40 +1,32 @@
 import Wrapper from "@/components/layouts/Wrapper"
-import { PlusIcon } from "@heroicons/react/24/outline"
+import PostJobCard from "./PostJobCard"
+import data from "./testData"
+import Link from "next/link"
 
 export default function Content() {
   return (
     <Wrapper title="Screen Applicants">
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
-        <button
-          type="button"
-          className="rounded-2xl p-8 shadow-md text-indigo-dye text-center bg-white"
-        >
-          <h2 className="font-semibold text-xl">Accounting Officer</h2>
-          <p className="text-[15px] mb-8">Cagayan de Oro City</p>
-          <div className="bg-[#EAC645] rounded-lg font-semibold text-[15px] w-full py-4">
-            <p>2 New Applicant/s</p>
-          </div>
-        </button>
-        <PostJobCard />
-        <PostJobCard />
-        <PostJobCard />
-        <PostJobCard />
-        <PostJobCard />
+        {data.map((item, index) => {
+          return (
+            <Link
+              href={`screen-applicants/${item.id}`}
+              key={item.id}
+              className="rounded-2xl p-8 shadow-md text-indigo-dye text-center bg-white"
+            >
+              <h2 className="font-semibold text-xl">{item.title}</h2>
+              <p className="text-[15px] mb-8">{item.address}</p>
+              <div className="bg-[#EAC645] rounded-lg font-semibold text-[15px] w-full py-4">
+                <p>{item.applicants.length} New Applicant/s</p>
+              </div>
+            </Link>
+          )
+        })}
+        {/* ensuring cards displayed are always six */}
+        {Array.from({ length: 6 - data.length }).map((_, index) => {
+          return <PostJobCard key={index} />
+        })}
       </div>
     </Wrapper>
-  )
-}
-
-export function PostJobCard() {
-  return (
-    <button
-      type="button"
-      className="rounded-2xl px-8 py-24 shadow-md text-[#CCE0FF] bg-[#EBF3FF] flex"
-    >
-      <div className="m-auto flex items-center gap-2">
-        <PlusIcon className="h-8 w-8 font-bold" />
-        <p className="font-bold text-3xl">Post a Job</p>
-      </div>
-    </button>
   )
 }
