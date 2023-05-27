@@ -1,7 +1,7 @@
 export const separationItems = [
   {
     id: 1,
-    separationDate: "04/07/2023",
+    separationDate: "05/10/2023",
     name: "Heather Sakitsaulo",
     reasonForLeaving: "Resignation",
     department: "",
@@ -28,7 +28,7 @@ export const separationItems = [
     },
     isLetterSent: true,
     isLetterReceived: true,
-    letterReceivedDate: "04/07/2023",
+    letterReceivedDate: "05/10/2023",
     isDocumentsSent: false,
     isDocumentsReceived: false,
     documentReceivedDate: "",
@@ -77,57 +77,74 @@ export const separationItems = [
   },
 ];
 
-export const jobPostHistory = [
+export const employeeIssueItems = [
   {
     id: 1,
-    isActive: false,
-    JobNo: "000001",
-    country: "",
-    language: "",
-    jobTitle: "Accounting Officer",
-    placeAdvertise: "Cagayan de Oro City",
-    jobType: "Full-Time",
-    schedule: "8 Hour shift",
-    hireCount: 2,
-    hireDate: "04/07/2023",
-    salary: {
-      salaryType: "Minimum Amount",
-      salaryValue: "20,000",
+    incidentDate: "05/10/2023",
+    name: "Heather Sakitsaulo",
+    incidentPlace: "WFX",
+    department: "",
+    position: "",
+    briefBackground: "",
+    issueNTE: {
+      date: "",
+      to: "",
+      message: "",
     },
-    rate: "",
-    benefits: ["Work from home", "Paid Training", "Flexible Schedule"],
-    jobDescription:
-      "<p><strong>Ensuring the accounts of the company are accurate and free of error.</strong></p><p><br></p><ul><li>Must have at least 2 years of experience in accounting.</li><li>Any graduate of business course</li><li>Must have attention to details and a good communicator</li></ul>",
-    jobDescriptionFile: "",
-    postAs: "",
-    postAsUpload: "",
-    postIn: ["LinkedIn", "Facebook", "Indeed"],
+    isNTESent: false,
+    isNTEReceived: false,
+    investigate: {
+      date: "",
+      witness: "",
+      presider: "",
+      isEmployeePresent: false,
+      result: "",
+      decision: "",
+      attachment: "",
+    },
+    isInvestigated: false,
+    investigatedDate: "05/10/2023",
+    sendDecision: {
+      template: "",
+      to: "",
+      message: "",
+    },
+    decisionSentDate: "05/10/2023",
+    isDecisionSent: false,
+    isDecisionReceived: false,
   },
+];
 
+export const createMemoPolicyItems = [
   {
-    id: 2,
-    date: "04/12/2023",
-    isActive: true,
-    JobNo: "000002",
-    country: "",
-    language: "",
-    jobTitle: "Software Engineer",
-    placeAdvertise: "Cagayan de Oro City",
-    jobType: "Full-Time",
-    schedule: "8 Hour shift",
-    hireCount: 4,
-    hireDate: "",
-    salary: {
-      salaryType: "Exact Amount",
-      salaryValue: "20,000",
-    },
-    rate: "",
-    benefits: ["Birthday Leave", "Meal Allowance", "Flexible Schedule"],
-    jobDescription:
-      "<p><strong>Ensuring the accounts of the company are accurate and free of error.</strong></p><p><br></p><ul><li>Must have at least 2 years of experience in accounting.</li><li>Any graduate of business course</li><li>Must have attention to details and a good communicator</li></ul>",
-    jobDescriptionFile: "",
-    postAs: "",
-    postAsUpload: "",
-    postIn: ["LinkedIn", "Facebook", "Indeed", "Twitter", "Instagram"],
+    date: "05/10/2023",
+    id: 1,
+    type: "memo",
+    title: "PHIC Update 2023",
+    to: "",
+    body: "",
+    name: "",
+    position: "",
+    signature: "",
+    qrCode: "",
+    file: "",
+    purpose: "",
+    policy: "",
+    procedure: "",
+    withResponse: false,
+    isDeleted: false,
   },
+];
+
+export const designBenefitsItems = [
+    {
+        id: 1,
+        title: 'Birthday Leave',
+        to: 'test@gmail.com',
+        purpose: 'Lorem Ipsum Dolor',
+        benefits: 'Lorem Ipsum Dolor',
+        coverage: 'Lorem Ipsum Dolor',
+        eligibility: 'Lorem Ipsum Dolor',
+        date: '04/07/2023',
+    }
 ];

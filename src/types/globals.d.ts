@@ -58,14 +58,131 @@ export type T_CreateJob = {
   postIn: string[];
 };
 
-// export type T_JobPostHistory = {
-//   isActive: boolean;
-// };
+export type T_Separation = {
+  date: string;
+  name: string;
+  position: string;
+  department: string;
+  reason: string;
+};
 
-//  jobType: {
-//     fullTime: boolean;
-//     partTime: boolean;
-//     internship: boolean;
-//     projectBased: boolean;
-//     other: boolean;
-//   };
+export type T_SendNTEModal = {
+  isOpen: boolean;
+  id: number;
+};
+
+export type T_SendDecisionModal = {
+  isOpen: boolean;
+  id: number;
+};
+
+export type T_InvestigationModal = {
+  isOpen: boolean;
+  id: number;
+};
+
+export type T_DesignBenefitsModal = {
+    isOpen: boolean,
+    id: number,
+}
+
+export type T_Separation = {
+    date: string;
+    name: string;
+    position: string;
+    department: string;
+    reason: string;
+};
+
+export type T_SeparationEmail = {
+  id: string;
+  type: string;
+  separationLetter: any;
+  signDocuments: any;
+  quitclaim: any;
+};
+
+export type T_Login = {
+    email: string;
+    password: string;
+}
+
+export type T_Register = {
+    accountType: string;
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export type T_EmployerProfile = {
+    companyName: string;
+    companyLogo: Blob;
+    companyDescription: string;
+    typeOfIndustry: string;
+    noOfEmployees: string;
+    workSetUp: string;
+    email: string;
+    mobileNumber: string;
+    landlineNumber: string;
+    building: string;
+    street: string;
+    locality: string;
+    city: string;
+    zipCode: string;
+    country: string;
+    language: string;
+    currency: string;
+    imagePath: any;
+}
+export type T_Investigation = {
+  date: string;
+  presider: string;
+  witness: string;
+  decision: string;
+  other: string;
+  isAttendHearing: string;
+  briefBackground: string;
+  attachment: File;
+};
+
+export type T_IncidentReport = {
+  name: string;
+  position: string;
+  department: string;
+  incidentDate: string;
+  incidentPlace: string;
+  briefBackground: string;
+};
+
+export type T_CreateMemo = {
+  date: string;
+  type: string;
+  title: string;
+  email: string;
+  body: string;
+  name: string;
+  position: string;
+  signature: string | File;
+  qrCode: string | File;
+  file: string | File;
+  withResponse: boolean;
+};
+
+export type T_CreatePolicy = {
+  date: string;
+  type: string;
+  title: string;
+  email: string;
+  file: string | File;
+  purpose: string;
+  policy: string;
+  procedure: string;
+  eligibility: string;
+  application: string;
+  coverage: string;
+  termination: string;
+  createPolicyFile: string | File;
+  withResponse: boolean;
+};
+

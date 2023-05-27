@@ -1,24 +1,24 @@
 import classNames from '@/helpers/classNames'
+import ClipIcon from '@/svg/ClipIcon'
 import { T_QuitclaimModal } from '@/types/globals'
-import { DocumentIcon } from '@heroicons/react/24/outline'
 import React, { Dispatch } from 'react'
 
 const Quitclaim = ({ id, isQuitclaimSigned, isQuitclaimReceived, quitclaimReceivedDate, setIsQuitclaimModalOpen }: { id: number, isQuitclaimSigned: boolean, isQuitclaimReceived: boolean, quitclaimReceivedDate?: string, setIsQuitclaimModalOpen: Dispatch<T_QuitclaimModal> }) => {
     return (
         <div className="flex flex-col gap-2">
             <div>
-                <button className={classNames(isQuitclaimSigned ? 'bg-red-500 border-[1px] border-red-500 text-white' : 'border-[1px] border-red-500 text-red-500', 'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10')} onClick={() => setIsQuitclaimModalOpen({
+                <button className={classNames(isQuitclaimSigned ? 'bg-red-500 border-[1px] border-red-500 text-white' : 'border-[1px] border-red-500 text-red-500', 'items-center rounded-md px-2 py-1 focus:z-10 w-24')} onClick={() => setIsQuitclaimModalOpen({
                     isOpen: true,
                     id
-                })}>Sign</button>
+                })}>{isQuitclaimSigned ? "Signed" : "Sign"}</button>
             </div>
             <div>
-                <button className={classNames(isQuitclaimReceived ? 'bg-green-500 text-white' : 'bg-blue-100 text-gray-400', 'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10')}>Received</button>
+                <button className={classNames(isQuitclaimReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'items-center rounded-md px-2 py-1 focus:z-10 w-24 cursor-default')}>Received</button>
             </div>
             {isQuitclaimReceived ? (
                 <div>
                     <div className="flex gap-1 items-center mt-2">
-                        <DocumentIcon className="text-green-500 w-4 h-4" />
+                        <ClipIcon/>
                         <p className="text-xs">{quitclaimReceivedDate}</p>
                     </div>
                 </div>
