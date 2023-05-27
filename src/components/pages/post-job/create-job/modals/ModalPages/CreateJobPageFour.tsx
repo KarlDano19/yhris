@@ -23,7 +23,7 @@ export default function CreateJobPageFour({
   }>({});
   return (
     <>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pb-6">
         <div className="sm:col-span-4 mt-4">
           <div>
             <label

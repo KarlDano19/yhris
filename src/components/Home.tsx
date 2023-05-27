@@ -1,55 +1,65 @@
 import { ArrowsRightLeftIcon, Cog6ToothIcon, InformationCircleIcon, LightBulbIcon, MagnifyingGlassIcon, PlusCircleIcon, PresentationChartLineIcon, UserGroupIcon, UsersIcon, WalletIcon } from '@heroicons/react/24/outline'
 import React from 'react';
 import Link from 'next/link';
+import AddPostLogo from '@/svg/AddPostLogo';
+import ScreenApplicantsLogo from '@/svg/ScreenApplicantsLogo';
+import OrientLogo from '@/svg/OrientLogo';
+import ManageLogo from '@/svg/ManageLogo';
+import TrainLogo from '@/svg/TrainLogo';
+import PayrollLogo from '@/svg/PayrollLogo';
+import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
+import GetHelpLogo from '@/svg/GetHelpLogo';
+import SettingsLogo from '@/svg/SettingsLogo';
+import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 
 const menus = [
   {
-    icon: <PlusCircleIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <AddPostLogo/>,
     text: "Post a Job",
     link: "/post-job"
   },
   {
-    icon: <MagnifyingGlassIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <ScreenApplicantsLogo/>,
     text: "Screen Applicants",
     link: "/screen-applicants"
   },
   {
-    icon: <UsersIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <OrientLogo/>,
     text: "Orient",
     link: "/hired-applicants"
   },
   {
-    icon: <UserGroupIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <ManageLogo/>,
     text: "Manage",
     link: "/manage"
   },
   {
-    icon: <PresentationChartLineIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <TrainLogo/>,
     text: "Train",
     link: "/train"
   },
   {
-    icon: <WalletIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <PayrollLogo/>,
     text: "Payroll",
     link: "/payroll"
   },
   {
-    icon: <ArrowsRightLeftIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <EmployeeSeparationLogo/>,
     text: "Employee Separation",
     link: "/employee-separation"
   },
   {
-    icon: <LightBulbIcon className="h-20 w-20 text-savoy-blue" />,
-    text: "Branding Kit",
+    icon: <EmployeeKitLogo/>,
+    text: "Employee Kit",
     link: "/branding-kit"
   },
   {
-    icon: <InformationCircleIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <GetHelpLogo/>,
     text: "Get Help",
     link: "/get-help"
   },
   {
-    icon: <Cog6ToothIcon className="h-20 w-20 text-savoy-blue" />,
+    icon: <SettingsLogo/>,
     text: "Settings",
     link: "/settings"
   },
@@ -63,9 +73,9 @@ const Home = () => {
         <div className="grid grid-cols-5 gap-6 mt-6">
           {menus.map((menu, index) => {
             return (
-              <Link href={menu.link} key={index} className="bg-white shadow rounded-lg px-4 py-8 flex flex-col items-center hover:shadow-md focus:shadow-none focus:opacity-80">
+              <Link href={menu.link} key={index} className="bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80">
                 {menu.icon}
-                <h3 className="text-indigo-dye font-semibold">{menu.text}</h3>
+                <h3 className="text-indigo-dye font-semibold text-center">{menu.text}</h3>
               </Link>
             );
           })}

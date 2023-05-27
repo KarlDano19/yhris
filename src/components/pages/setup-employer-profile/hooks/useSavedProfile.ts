@@ -1,0 +1,60 @@
+import { useMutation } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
+
+import { T_EmployerProfile } from '@/types/globals';
+
+async function saveProfile(profile: T_EmployerProfile) {
+  try {
+    const token = getCookie('token');
+    const data = new FormData();
+    data.append('name', profile.companyName);
+    data.append('description', profile.companyDescription);
+    data.append('type_of_industry', profile.typeOfIndustry);
+    data.append('no_of_employees', profile.noOfEmployees);
+    data.append('work_set_up', profile.workSetUp);
+    data.append('email', profile.email);
+    data.append('mobile_number', profile.mobileNumber);
+    data.append('landline_number', profile.landlineNumber);
+    data.append('building', profile.building);
+    data.append('street', profile.street);
+    data.append('locality', profile.locality);
+    data.append('city', profile.city);
+    data.append('zip_code', profile.zipCode);
+    data.append('country', profile.country);
+    data.append('language', profile.language);
+    data.append('currency', profile.currency);
+    if (profile.companyLogo) {
+      data.append('img', profile.companyLogo);
+    }
+    const config = {
+      method: 'POST',
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+      body: data,
+    };
+    const res = await fetch(
+      `${process.env.hostName}/api/employer-profile/`,
+      config
+    );
+    if (res.ok) {
+      return res.json();
+    }
+    throw res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
+  }
+}
+
+function useSavedProfile() {
+  const query = useMutation((profile: T_EmployerProfile) =>
+    saveProfile(profile)
+  );
+  return query;
+}
+
+export default useSavedProfile;

@@ -1,4 +1,4 @@
-import { Dispatch, useState } from "react";
+import { Dispatch, useRef, useState } from "react";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 import DateCalendarDummy from "@/svg/DateCalendarDummy";
 
@@ -17,6 +17,7 @@ export default function CreateJobPageTwo({
 }) {
   const [otherJobType, setOtherJobType] = useState(false);
   const [otherSchedule, setOtherSchedule] = useState(false);
+  const dateInputRef = useRef(null);
 
   // getting the value of JobType
   const handleJobType = (option: string) => {
@@ -42,7 +43,7 @@ export default function CreateJobPageTwo({
   ];
   return (
     <>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pb-6">
         <div className="sm:col-span-4 mt-4">
           <label
             htmlFor="language"
@@ -202,9 +203,12 @@ export default function CreateJobPageTwo({
                 type="date"
                 {...register("hireDate", { required: true })}
                 id="date"
-                className="appearance-none bg-white block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                className="appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                 placeholder="you@example.com"
                 aria-describedby="email-optional"
+                ref={dateInputRef}
+                // @ts-expect-error
+                onClick={() => dateInputRef.current.showPicker()}
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                 <DateCalendarDummy />

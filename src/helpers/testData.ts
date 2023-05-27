@@ -3,7 +3,7 @@ import { faL } from "@fortawesome/free-solid-svg-icons";
 export const separationItems = [
   {
     id: 1,
-    separationDate: "04/07/2023",
+    separationDate: "05/10/2023",
     name: "Heather Sakitsaulo",
     reasonForLeaving: "Resignation",
     department: "",
@@ -30,7 +30,7 @@ export const separationItems = [
     },
     isLetterSent: true,
     isLetterReceived: true,
-    letterReceivedDate: "04/07/2023",
+    letterReceivedDate: "05/10/2023",
     isDocumentsSent: false,
     isDocumentsReceived: false,
     documentReceivedDate: "",
@@ -77,6 +77,78 @@ export const separationItems = [
     isQuitclaimReceived: false,
     quitclaimReceivedDate: "",
   },
+];
+
+export const employeeIssueItems = [
+  {
+    id: 1,
+    incidentDate: "05/10/2023",
+    name: "Heather Sakitsaulo",
+    incidentPlace: "WFX",
+    department: "",
+    position: "",
+    briefBackground: "",
+    issueNTE: {
+      date: "",
+      to: "",
+      message: "",
+    },
+    isNTESent: false,
+    isNTEReceived: false,
+    investigate: {
+      date: "",
+      witness: "",
+      presider: "",
+      isEmployeePresent: false,
+      result: "",
+      decision: "",
+      attachment: "",
+    },
+    isInvestigated: false,
+    investigatedDate: "05/10/2023",
+    sendDecision: {
+      template: "",
+      to: "",
+      message: "",
+    },
+    decisionSentDate: "05/10/2023",
+    isDecisionSent: false,
+    isDecisionReceived: false,
+  },
+];
+
+export const createMemoPolicyItems = [
+  {
+    date: "05/10/2023",
+    id: 1,
+    type: "memo",
+    title: "PHIC Update 2023",
+    to: "",
+    body: "",
+    name: "",
+    position: "",
+    signature: "",
+    qrCode: "",
+    file: "",
+    purpose: "",
+    policy: "",
+    procedure: "",
+    withResponse: false,
+    isDeleted: false,
+  },
+];
+
+export const designBenefitsItems = [
+    {
+        id: 1,
+        title: 'Birthday Leave',
+        to: 'test@gmail.com',
+        purpose: 'Lorem Ipsum Dolor',
+        benefits: 'Lorem Ipsum Dolor',
+        coverage: 'Lorem Ipsum Dolor',
+        eligibility: 'Lorem Ipsum Dolor',
+        date: '04/07/2023',
+    }
 ];
 
 export const jobPostHistory = [

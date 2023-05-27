@@ -16,12 +16,9 @@ export default function CreateJobPageFive({
     fileSize?: number;
   }>({});
 
-  console.log(watch("postAs"));
-  console.log(watch("postAsUpload"));
-
   return (
     <>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pb-6">
         {/* start */}
         <div className="sm:col-span-4 mt-4">
           <label
@@ -45,7 +42,7 @@ export default function CreateJobPageFive({
               </span>
             </label>
 
-            <label className="inline-flex items-start mr-4">
+            <label className="inline-flex items-start">
               <input
                 type="radio"
                 className="form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900"
@@ -77,7 +74,7 @@ export default function CreateJobPageFive({
           </div>
           <label
             htmlFor="postAsUpload"
-            className="block ml-9 text-sm font-normal text-gray-400 border w-40 p-2.5 border-gray-400 rounded-md cursor-pointer"
+            className="block ml-9 text-sm font-normal text-gray-400 border w-fit p-2.5 border-gray-400 rounded-md cursor-pointer"
           >
             Upload Jpeg or PNG...
           </label>

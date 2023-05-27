@@ -23,7 +23,7 @@ export default function CreateJobPageSix({
 
   return (
     <>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pb-6">
         {/* start */}
         <div className="sm:col-span-4 mt-4">
           <label className="block text-sm font-medium leading-6 text-gray-900">
