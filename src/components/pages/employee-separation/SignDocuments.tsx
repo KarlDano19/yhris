@@ -13,13 +13,13 @@ const SignDocuments = ({ id, isDocumentsSent, isDocumentsReceived, documentRecei
                 })}>{isDocumentsSent ? "Sent" : "Send"}</button>
             </div>
             <div>
-                <button className={classNames(isDocumentsReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'items-center rounded-md px-auto py-1 focus:z-10 w-24')}>Received</button>
+                <button className={classNames(isDocumentsReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'items-center rounded-md px-auto py-1 focus:z-10 w-24 cursor-default')}>Received</button>
             </div>
             {isDocumentsReceived ? (
                 <div>
-                    <div className="flex gap-1 items-center mt-2">
+                    <div className="flex gap-1 items-center">
                         <ClipIcon/>
-                        <p className="text-xs">{documentReceivedDate}</p>
+                        <p className="ml-2 text-xs">{documentReceivedDate}</p>
                     </div>
                 </div>
             ) : null}

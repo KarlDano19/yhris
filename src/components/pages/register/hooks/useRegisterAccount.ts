@@ -1,6 +1,6 @@
-import { T_Register } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+
+import { T_Register } from '@/types/globals';
 
 async function register(user: T_Register) {
   try {
@@ -12,21 +12,23 @@ async function register(user: T_Register) {
       account_type: user.accountType.toLowerCase(),
     };
     const config = {
+      method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
+      body: JSON.stringify(data),
     };
-    const res = await axios.post(
-      `${process.env.hostName}/api/register/`,
-      data,
-      config
-    );
-    return res.data;
-  } catch (err: any) {
-    if (Object.hasOwn(err, 'response')) {
-      throw err.response.data.message;
+    const res = await fetch(`${process.env.hostName}/api/register/`, config);
+    if (res.ok) {
+      return res.json();
     }
-    throw err.message;
+    throw res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
   }
 }
 

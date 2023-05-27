@@ -7,10 +7,10 @@ import CustomToast from '@/components/CustomToast'
 import DateCalendar from '@/svg/DateCalendar'
 import DesignBenefitsModal from './modals/DesignBenefitsModal'
 import Link from 'next/link'
-// import useGetSeparationItems from './hooks/useGetSeparationItems'
+import useGetBenefitItems from './hooks/useGetBenefitItems'
 
 const Content = () => {
-    // const { data: designBenefitsItems, isLoading: isSeparationItemsLoading } = useGetSeparationItems();
+    const { data: dataBenefits, isLoading: isGetBenefitsLoading } = useGetBenefitItems();
     const [designBenefitsItems, setDesignBenefitsItems] = useState(testData);
     const [filteredItems, setFilteredItems] = useState(testData);
     const [dateFilter, setDateFilter] = useState({ from: "", to: "" });

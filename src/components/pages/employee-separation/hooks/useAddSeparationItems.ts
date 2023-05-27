@@ -1,12 +1,9 @@
-import axios from 'axios';
-
-import { T_Separation } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function addSeparation(
-  separation: T_Separation,
-) {
+import { T_Separation } from '@/types/globals';
+
+async function addSeparation(separation: T_Separation) {
   try {
     const token = getCookie('token');
     const data = {
@@ -17,30 +14,30 @@ async function addSeparation(
       reason_of_leaving: separation.reason,
     };
     const config = {
+      method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'Authorization': `Token ${token}`,
+        Authorization: `Token ${token}`,
       },
+      body: JSON.stringify(data),
     };
-    const res = await axios.post(
-      `${process.env.hostName}/api/separations/`,
-      data,
-      config
-    );
-    return res.data;
-  } catch (err: any) {
-    if (Object.hasOwn(err, 'response')) {
-      throw err.response.data.message;
+    const res = await fetch(`${process.env.hostName}/api/separations/`, config);
+    if (res.ok) {
+      return res.json();
     }
-    throw err.message;
+    throw res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
   }
 }
 
 function useAddSeparationItems() {
-
-  const query = useMutation(
-    (separation: T_Separation) =>
-    addSeparation(separation),
+  const query = useMutation((separation: T_Separation) =>
+    addSeparation(separation)
   );
 
   return query;

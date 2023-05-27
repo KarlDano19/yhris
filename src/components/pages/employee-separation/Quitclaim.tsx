@@ -13,7 +13,7 @@ const Quitclaim = ({ id, isQuitclaimSigned, isQuitclaimReceived, quitclaimReceiv
                 })}>{isQuitclaimSigned ? "Signed" : "Sign"}</button>
             </div>
             <div>
-                <button className={classNames(isQuitclaimReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'items-center rounded-md px-2 py-1 focus:z-10 w-24')}>Received</button>
+                <button className={classNames(isQuitclaimReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-gray-400', 'items-center rounded-md px-2 py-1 focus:z-10 w-24 cursor-default')}>Received</button>
             </div>
             {isQuitclaimReceived ? (
                 <div>

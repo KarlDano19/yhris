@@ -21,7 +21,7 @@ const Content = () => {
           () => <CustomToast message={data.message} type='success' />,
           { duration: 4000 }
         );
-        setCookie('token', data.token, {maxAge: 60*60*24*1});
+        setCookie('token', data.token, {maxAge: 60*60*8*1});
         if (!data.has_profile) {
           if (data.account_type === 'employer') {
             location.href = '/setup-employer-profile';

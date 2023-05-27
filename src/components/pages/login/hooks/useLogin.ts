@@ -1,25 +1,27 @@
-import { T_Login } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+
+import { T_Login } from '@/types/globals';
 
 async function login(credentials: T_Login) {
   try {
     const config = {
+      method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
+      body: JSON.stringify(credentials),
     };
-    const res = await axios.post(
-      `${process.env.hostName}/api/login/`,
-      credentials,
-      config
-    );
-    return res.data;
-  } catch (err: any) {
-    if (Object.hasOwn(err, "response")) {
-      throw err.response.data.message;
+    const res = await fetch(`${process.env.hostName}/api/login/`, config);
+    if (res.ok) {
+      return res.json();
     }
-    throw err.message;
+    throw res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
   }
 }
 

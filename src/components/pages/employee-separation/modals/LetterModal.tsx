@@ -46,9 +46,6 @@ export default function LetterModal({
       separationItemsCopy[itemIndex].separationLetter.to = data.email;
       separationItemsCopy[itemIndex].separationLetter.message = data.message;
       separationItemsCopy[itemIndex].isLetterSent = true;
-      separationItemsCopy[itemIndex].isLetterReceived = true;
-      separationItemsCopy[itemIndex].letterReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(new Date());
       setToSaveData([...separationItemsCopy]);
       setIsOpen(null);
       setIsConfirmModalOpen(true);

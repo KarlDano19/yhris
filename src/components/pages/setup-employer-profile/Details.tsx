@@ -22,7 +22,7 @@ const Details = ({
   const onSubmit = handleSubmit((data) => {
     setIsDetails(false);
     setProgressBar(100);
-    setForm({...data});
+    setForm({ ...form, ...data });
   });
 
   const uploadImgOnChange = ({ target }: { target: any }) => {
@@ -43,7 +43,10 @@ const Details = ({
 
   return (
     <>
-      <form onSubmit={onSubmit} style={{ display: isDetails ? 'block' : 'none' }}>
+      <form
+        onSubmit={onSubmit}
+        style={{ display: isDetails ? 'block' : 'none' }}
+      >
         <div className='flex flex-row my-10'>
           <div className='basis-44 mr-10'>
             <Image

@@ -16,10 +16,10 @@ import toast from 'react-hot-toast';
 import QuitclaimModal from './modals/QuitclaimModal'
 import CustomToast from '@/components/CustomToast'
 import DateCalendar from '@/svg/DateCalendar'
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems'
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems'
+import useGetPositionItems from '@/components/hooks/useGetPositionItems'
 import useGetSeparationItems from './hooks/useGetSeparationItems'
-import useGetDepartmentItems from './hooks/useGetDepartmentItems'
-import useGetEmployeeItems from './hooks/useGetEmployeeItems'
-import useGetPositionItems from './hooks/useGetPositionItems'
 import useSendSeparationEmail from './hooks/useSendSeparationEmail';
 import Link from 'next/link'
 
@@ -34,11 +34,11 @@ const Content = () => {
     const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
     const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
     const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
-    const { mutate, isLoading } = useSendSeparationEmail();
-    const { data: dataSepration, isLoading: isLoadingSeparation } = useGetSeparationItems(itemsFilter);
-    const { data: dataDepartment, isLoading: isLoadingDepartment } = useGetDepartmentItems();
-    const { data: dataEmployee, isLoading: isLoadingEmployee } = useGetEmployeeItems();
-    const { data: dataPosition, isLoading: isLoadingPosition } = useGetPositionItems();
+    const { mutate, isLoading: isSendEmailLoading } = useSendSeparationEmail();
+    const { data: dataSeparation, isLoading: isGetSeparationLoading } = useGetSeparationItems(itemsFilter);
+    const { data: dataDepartment, isLoading: isGetDepartmentLoading } = useGetDepartmentItems();
+    const { data: dataEmployee, isLoading: isGetEmployeeLoading } = useGetEmployeeItems();
+    const { data: dataPosition, isLoading: isGetPositionLoading } = useGetPositionItems();
     const date1InputRef = useRef(null);
     const date2InputRef = useRef(null);
     const releaseLastPay = () => {
@@ -76,16 +76,16 @@ const Content = () => {
     
     useEffect(() => {
         if (dataDepartment) {
-            setDepartmentItems(dataDepartment)
+            setDepartmentItems(dataDepartment.departments)
         }
         if (dataEmployee) {
-            setEmployeeItems(dataEmployee)
+            setEmployeeItems(dataEmployee.employees)
         }
         if (dataPosition) {
-            setPositionItems(dataPosition)
+            setPositionItems(dataPosition.positions)
         }
-        if (dataSepration) {
-            dataSepration.map((separation: any) => {
+        if (dataSeparation) {
+            dataSeparation.separations.map((separation: any) => {
                 const employee = separation.employee_dict;
                 separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation))
                 separation['name'] = `${employee.firstname} ${employee.lastname}`
@@ -95,7 +95,7 @@ const Content = () => {
                 separation['letterReceivedDate'] = separation.letter_received_date;
                 separation['isDocumentsSent'] = separation.is_documents_sent;
                 separation['isDocumentsReceived'] = separation.is_documents_received;
-                separation['documentReceivedDate'] = separation.documents_received_date;
+                separation['documentReceivedDate'] = separation.documents_received_date && new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
                 separation['isLastPayReleased'] = separation.is_last_pay_released;
                 separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
                 separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
@@ -124,9 +124,9 @@ const Content = () => {
                 }
                 return separation;
             })
-            setSeparationItems(dataSepration);
+            setSeparationItems(dataSeparation.separations);
         }
-    }, [dataSepration, dataDepartment, dataEmployee, dataPosition])
+    }, [dataSeparation, dataDepartment, dataEmployee, dataPosition])
 
     const renderRows = () => {
         if (separationItems && separationItems.length > 0) {

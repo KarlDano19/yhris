@@ -1,26 +1,30 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { getCookie } from 'cookies-next';
 
 async function getEmployeeItems() {
   try {
     const token = getCookie('token');
     const config = {
+      method: 'GET',
       headers: {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
     };
-    const res = await axios.get(
-      `${process.env.hostName}/api/employees/`,
-      config
-    );
-    return res.data.employees;
-  } catch (err: any) {
-    if (Object.hasOwn(err, 'response')) {
-      throw err.response.data.message;
+    if (token) {
+      const res = await fetch(`${process.env.hostName}/api/employees/`, config);
+      if (res.ok) {
+        return res.json();
+      }
+      throw res.json();
     }
-    throw err.message;
+    return {};
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
   }
 }
 

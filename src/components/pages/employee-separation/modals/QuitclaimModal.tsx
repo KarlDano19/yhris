@@ -67,9 +67,6 @@ export default function QuitclaimModal({
       separationItemsCopy[itemIndex].quitclaim.to = data.email;
       separationItemsCopy[itemIndex].quitclaim.message = data.message;
       separationItemsCopy[itemIndex].isQuitclaimSigned = true;
-      separationItemsCopy[itemIndex].isQuitclaimReceived = true;
-      separationItemsCopy[itemIndex].quitclaimReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(new Date());
       const callbackReq = {
         onSuccess: (data: any) => {
           setSeparationItems([...separationItemsCopy]);

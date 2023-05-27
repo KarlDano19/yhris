@@ -67,9 +67,6 @@ export default function SignDocumentsModal({
       separationItemsCopy[itemIndex].signDocuments.to = data.email;
       separationItemsCopy[itemIndex].signDocuments.message = data.message;
       separationItemsCopy[itemIndex].isDocumentsSent = true;
-      separationItemsCopy[itemIndex].isDocumentsReceived = true;
-      separationItemsCopy[itemIndex].documentReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(new Date());
       const callbackReq = {
         onSuccess: (data: any) => {
           setSeparationItems([...separationItemsCopy]);

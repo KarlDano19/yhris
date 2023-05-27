@@ -1,13 +1,11 @@
-import axios from 'axios';
-
-import { T_SeparationEmail } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
+
+import { T_SeparationEmail } from '@/types/globals';
 
 async function sendSeparationEmail(
   separationEmail: T_SeparationEmail,
 ) {
-  debugger
   try {
     const token = getCookie('token');
     const data = {
@@ -31,7 +29,6 @@ async function sendSeparationEmail(
       data.cc = separationEmail.signDocuments.cc;
       data.bcc = separationEmail.signDocuments.bcc;
       data.context = separationEmail.signDocuments.message;
-      debugger
     }
     if (separationEmail.type === 'last pay') {
       
@@ -44,22 +41,24 @@ async function sendSeparationEmail(
       data.context = separationEmail.quitclaim.message;
     }
     const config = {
+      method: 'PATCH',
       headers: {
         'content-type': 'application/json',
-        'Authorization': `Token ${token}`,
+        Authorization: `Token ${token}`,
       },
+      body: JSON.stringify(data),
     };
-    const res = await axios.patch(
-      `${process.env.hostName}/api/separation/${separationEmail.id}/`,
-      data,
-      config
-    );
-    return res.data;
-  } catch (err: any) {
-    if (Object.hasOwn(err, 'response')) {
-      throw err.response.data.message;
+    const res = await fetch(`${process.env.hostName}/api/separation/${separationEmail.id}/`, config);
+    if (res.ok) {
+      return res.json();
     }
-    throw err.message;
+    throw res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
   }
 }
 

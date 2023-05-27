@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getSeparationItems(filters: any) {
+async function getBenefitItems() {
   try {
-    const searchParams = new URLSearchParams(filters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -14,7 +13,7 @@ async function getSeparationItems(filters: any) {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.hostName}/api/separations/?${searchParams}`,
+        `${process.env.hostName}/api/benefits/`,
         config
       );
       if (res.ok) {
@@ -32,16 +31,12 @@ async function getSeparationItems(filters: any) {
   }
 }
 
-function useGetSeparationItems(filters: any) {
-  const query = useQuery(
-    ['separationsItemCache', filters],
-    () => getSeparationItems(filters),
-    {
-      keepPreviousData: true,
-    }
-  );
+function useGetBenefitItems() {
+  const query = useQuery(['benefitsItemCache'], () => getBenefitItems(), {
+    keepPreviousData: true,
+  });
 
   return query;
 }
 
-export default useGetSeparationItems;
+export default useGetBenefitItems;

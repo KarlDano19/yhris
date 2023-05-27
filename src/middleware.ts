@@ -15,26 +15,22 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/employee-separation') ||
       request.nextUrl.pathname.startsWith('/manage')
     ) {
-      try {
-        const config = {
-          method: 'GET',
-          headers: {
-            'content-type': 'application/json',
-            Authorization: `Token ${token}`,
-          },
-        };
-        const res = await (
-          await fetch(`${process.env.hostName}/api/employer-profile/`, config)
-        ).json();
-        if (Object.hasOwn(res, 'profile')) {
-          if (!Object.keys(res.profile).length) {
-            return NextResponse.redirect(
-              new URL('/setup-employer-profile', request.url)
-            );
-          }
+      const config = {
+        method: 'GET',
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+      };
+      const res = await (
+        await fetch(`${process.env.hostName}/api/employer-profile/`, config)
+      ).json();
+      if (Object.hasOwn(res, 'profile')) {
+        if (!Object.keys(res.profile).length) {
+          return NextResponse.redirect(
+            new URL('/setup-employer-profile', request.url)
+          );
         }
-      } catch (err) {
-        // Nothing
       }
     }
   } else {

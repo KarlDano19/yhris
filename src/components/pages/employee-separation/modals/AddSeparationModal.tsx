@@ -8,13 +8,12 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import DateCalendar from '@/svg/DateCalendar';
 import useAddSeparationItems from '../hooks/useAddSeparationItems';
 import CustomToast from '@/components/CustomToast';
+import { useQueryClient  } from '@tanstack/react-query';
 
 export default function AddSeparationModal({
-  separationItems,
   departmentItems,
   employeeItems,
   positionItems,
-  setSeparationItems,
   isOpen,
   setIsOpen,
 }: {
@@ -26,6 +25,7 @@ export default function AddSeparationModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
+  const queryClient = useQueryClient();
   const { mutate, isLoading } = useAddSeparationItems();
   const { register, handleSubmit, setValue, reset } = useForm<T_Separation>();
   const dateInputRef = useRef(null);
@@ -38,6 +38,7 @@ export default function AddSeparationModal({
           { duration: 5000 }
         );
         setIsOpen(false);
+        queryClient.refetchQueries({ queryKey: ['separationsItemCache']});
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {

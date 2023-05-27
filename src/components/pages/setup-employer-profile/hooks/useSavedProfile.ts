@@ -1,7 +1,7 @@
-import { T_EmployerProfile } from '@/types/globals';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
 import { getCookie } from 'cookies-next';
+
+import { T_EmployerProfile } from '@/types/globals';
 
 async function saveProfile(profile: T_EmployerProfile) {
   try {
@@ -27,22 +27,26 @@ async function saveProfile(profile: T_EmployerProfile) {
       data.append('img', profile.companyLogo);
     }
     const config = {
+      method: 'POST',
       headers: {
-        'content-type': 'multipart/form-data',
-        'Authorization': `Token ${token}`,
+        Authorization: `Token ${token}`,
       },
+      body: data,
     };
-    const res = await axios.post(
+    const res = await fetch(
       `${process.env.hostName}/api/employer-profile/`,
-      data,
       config
     );
-    return res.data;
-  } catch (err: any) {
-    if (Object.hasOwn(err, 'response')) {
-      throw err.response.data.message;
+    if (res.ok) {
+      return res.json();
     }
-    throw err.message;
+    throw res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
   }
 }
 
