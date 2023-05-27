@@ -16,7 +16,7 @@ const menus = [
   {
     icon: <UsersIcon className="h-20 w-20 text-savoy-blue" />,
     text: "Orient",
-    link: "/orient"
+    link: "/hired-applicants"
   },
   {
     icon: <UserGroupIcon className="h-20 w-20 text-savoy-blue" />,

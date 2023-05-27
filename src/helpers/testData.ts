@@ -1,3 +1,5 @@
+import { faL } from "@fortawesome/free-solid-svg-icons";
+
 export const separationItems = [
   {
     id: 1,
@@ -130,4 +132,38 @@ export const jobPostHistory = [
     postAsUpload: "",
     postIn: ["LinkedIn", "Facebook", "Indeed", "Twitter", "Instagram"],
   },
+];
+
+export const orientItems = [
+  {
+    id: 1,
+    date: "04/12/2023",
+    name: "Juan Dela Cruz",
+    sendContract: {
+      template: "",
+      to: "",
+      message: "",
+    },
+    isContractSent: false,
+    isContractReceived: false,
+    contractReceivedDate: "04/12/2023",
+    orient: {
+      accountExist: false,
+      integratedToDolo: false,
+      loggedInToDolo: false,
+      material: "New Hire Orientation",
+      likeToSend: false,
+      sendTo: null,
+    },
+    isOrientationSent: false,
+    isNewHireOriented: false,
+    introduce: {
+      template: "",
+      to: "",
+      message: "",
+    },
+    isIntroduceSent: false,
+    isSingedInToPayroll: false,
+    isNewHireEnrolled: false,
+  }
 ];
