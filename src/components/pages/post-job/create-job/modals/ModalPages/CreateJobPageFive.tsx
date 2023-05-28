@@ -5,12 +5,17 @@ export default function CreateJobPageFive({
   setValue,
   register,
   setPageNumber,
+  getValues,
+  isRangeBenefitsAdded,
 }: {
   watch: any;
   setValue: any;
   register: any;
   setPageNumber: Dispatch<number>;
+  getValues: any;
+  isRangeBenefitsAdded: boolean;
 }) {
+  const [manualInputFocus, setManualInputFocus] = useState(false);
   const [fileProps, setFileProps] = useState<{
     fileName?: string;
     fileSize?: number;
@@ -28,7 +33,7 @@ export default function CreateJobPageFive({
             Post as
             <span className="text-red-600">*</span>
           </label>
-          <div className="flex flex-col space-y-2 ml-2 mt-2">
+          <div className={`flex flex-col space-y-2 ml-2 mt-2 ${ manualInputFocus ? "border-2 border-blue-700" : ""}`}>
             <label className="inline-flex items-center mr-4">
               <input
                 type="radio"
@@ -36,6 +41,7 @@ export default function CreateJobPageFive({
                 value="text"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Text
@@ -49,6 +55,7 @@ export default function CreateJobPageFive({
                 value="poster"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Poster
@@ -66,15 +73,15 @@ export default function CreateJobPageFive({
                 value="upload"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Upload
               </span>
             </label>
-          </div>
-          <label
+            <label
             htmlFor="postAsUpload"
-            className="block ml-9 text-sm font-normal text-gray-400 border w-fit p-2.5 border-gray-400 rounded-md cursor-pointer"
+            className="block ml-7 text-sm font-normal text-gray-400 border w-fit p-2.5 border-gray-400 rounded-md cursor-pointer"
           >
             Upload Jpeg or PNG...
           </label>
@@ -89,7 +96,7 @@ export default function CreateJobPageFive({
               </p>
               <button
                 type="button"
-                className="underline text-savoy-blue"
+                className="underline text-savoy-blue text-sm"
                 onClick={() => {
                   setValue("postAsUpload", null);
                   setFileProps({});
@@ -121,6 +128,7 @@ export default function CreateJobPageFive({
               }}
             />
           </div>
+          </div>
         </div>
       </div>
       <hr />
@@ -128,15 +136,27 @@ export default function CreateJobPageFive({
         <button
           type="button"
           className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-          onClick={() => setPageNumber(6)}
-          // onClick={() => onSubmit()}
+          onClick={() => {
+            const postAs = getValues("postAs");
+            if ((postAs && postAs !== "upload") || (postAs === "upload" && fileProps.fileName)) {
+              setPageNumber(6);
+            } else {
+              setManualInputFocus(true);
+            }
+          }}
         >
           Next
         </button>
         <button
           type="button"
           className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
-          onClick={() => setPageNumber(4)}
+          onClick={() => {
+            if(isRangeBenefitsAdded) {
+              setPageNumber(3)
+            } else {
+              setPageNumber(4)
+            }
+          }}
         >
           Back
         </button>

@@ -63,13 +63,13 @@ export default function JobPreviewModal({
                       const markup = { __html: item.jobDescription };
 
                       return (
-                        <div key={index} className="px-4 pt-4 pb-6">
+                        <div key={index} className="px-4 pb-6">
                           {/* start */}
                           <div className="sm:col-span-4 mt-4">
                             <label className="block text-sm font-medium leading-6 text-gray-900">
                               Preview
                             </label>
-                            <div className="relative flex flex-col space-y-2 ml-2 mt-2 text-sm font-medium leading-6 text-gray-900 rounded-md border-2 border-text-gray-400 px-2 py-3">
+                            <div className="relative flex flex-col space-y-2 mt-2 text-sm font-medium leading-6 text-gray-900 rounded-md border-2 border-text-gray-400 px-2 py-3">
                               <p className="font-bold">{item.jobTitle}</p>
                               <p>
                                 The ABBA Initiative -{" "}

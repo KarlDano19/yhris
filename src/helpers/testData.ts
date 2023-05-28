@@ -190,7 +190,7 @@ export const jobPostHistory = [
     jobType: "Full-Time",
     schedule: "8 Hour shift",
     hireCount: 4,
-    hireDate: "",
+    hireDate: "05/10/2023",
     salary: {
       salaryType: "Exact Amount",
       salaryValue: "20,000",

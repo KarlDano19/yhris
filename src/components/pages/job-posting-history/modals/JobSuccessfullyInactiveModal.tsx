@@ -50,8 +50,8 @@ export default function JobSuccessfullyInactiveModal({
                 <h3 className="text-center font-semibold text-3xl text-green-600">
                   Awesome!
                 </h3>
-                <h5 className="text-xl font-bold text-indigo-dye">
-                  You have successfully set-up your company.
+                <h5 className="text-xl font-bold text-indigo-dye text-center">
+                  You have successfully set the job to inactive.
                 </h5>
                 <button
                   type="button"

@@ -1,27 +1,19 @@
 "use client";
 import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import React, { useEffect, useState } from "react";
-import SeparationLetter from "../employee-separation/SeparationLetter";
-import {
-    T_DocumentsModal,
-    T_LastPayModal,
-    T_LetterModal,
-    T_QuitclaimModal,
-} from "@/types/globals";
+import React, { useEffect, useRef, useState } from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { orientItems as testData } from "@/helpers/testData";
-import ConfirmModal from "../employee-separation/modals/ConfirmModal";
-import toast from "react-hot-toast";
 import Link from "next/link";
 import SendContract from "./SendContract";
 import Orient from "./Orient";
 import IntroduceToTeam from "./IntroduceToTeam";
 import EnrollToPayroll from "./EnrollToPayroll";
+import DateCalendar from "@/svg/DateCalendar";
 
 const Content = () => {
     const [orientItems, setOrientItems] = useState(testData);
     const [filteredItems, setFilteredItems] = useState(testData);
-    const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
+    const [itemsFilter, setItemsFilter] = useState({ from: "", to: "", search: "" });
     const [isSendContractModalOpen, setIsSendContractModalOpen] =
         useState(false);
     const [isOrientFirstModalOpen, setIsOrientFirstModalOpen] =
@@ -30,23 +22,25 @@ const Content = () => {
         useState(false);
     const [isEnrollModalOpen, setIsEnrollModalOpen] =
         useState(false);
+    const date1InputRef = useRef(null);
+    const date2InputRef = useRef(null);
 
     useEffect(() => {
-        if (dateFilter.from && dateFilter.to) {
+        if (itemsFilter.from && itemsFilter.to) {
             const filteredByDate = orientItems.filter((item) => {
                 let date = new Date(item.date);
-                let start = new Date(dateFilter.from);
-                let end = new Date(dateFilter.to);
+                let start = new Date(itemsFilter.from);
+                let end = new Date(itemsFilter.to);
                 return date >= end && date <= start;
             });
             setFilteredItems([...filteredByDate]);
         }
-    }, [dateFilter, orientItems]);
+    }, [itemsFilter, orientItems]);
 
     const renderRows = () => {
         if (
-            !dateFilter.from &&
-            !dateFilter.to &&
+            !itemsFilter.from &&
+            !itemsFilter.to &&
             orientItems &&
             orientItems.length > 0
         ) {
@@ -75,8 +69,8 @@ const Content = () => {
                 </tr>
             ));
         } else if (
-            dateFilter.from &&
-            dateFilter.to &&
+            itemsFilter.from &&
+            itemsFilter.to &&
             filteredItems &&
             filteredItems.length > 0
         ) {
@@ -136,25 +130,37 @@ const Content = () => {
                     </h2>
                     <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
                         <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
-                            <input
-                                type="date"
-                                name="to"
-                                id="to"
-                                className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                                onChange={(e) =>
-                                    setDateFilter({ ...dateFilter, to: e.target.value })
-                                }
-                            />
+                            <div className="relative">
+                                <input
+                                    type="date"
+                                    name="to"
+                                    id="to"
+                                    className="appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                    onChange={(e) => setItemsFilter({ ...itemsFilter, from: e.target.value })}
+                                    ref={date1InputRef}
+                                    // @ts-expect-error
+                                    onClick={() => date1InputRef.current.showPicker()}
+                                />
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <DateCalendar />
+                                </div>
+                            </div>
                             <p>to</p>
-                            <input
-                                type="date"
-                                name="from"
-                                id="from"
-                                className="block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                                onChange={(e) =>
-                                    setDateFilter({ ...dateFilter, from: e.target.value })
-                                }
-                            />
+                            <div className="relative">
+                                <input
+                                    type="date"
+                                    name="from"
+                                    id="from"
+                                    className="appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                    onChange={(e) => setItemsFilter({ ...itemsFilter, to: e.target.value })}
+                                    ref={date2InputRef}
+                                    // @ts-expect-error
+                                    onClick={() => date2InputRef.current.showPicker()}
+                                />
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <DateCalendar />
+                                </div>
+                            </div>
                         </div>
                         <div className="flex-none">
                             <div className="relative flex items-center">
@@ -162,7 +168,8 @@ const Content = () => {
                                     type="text"
                                     name="search"
                                     id="search"
-                                    className="block w-full rounded-md border-0 py-[5px] px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                    className="block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                                    onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                                     placeholder="Search..."
                                 />
                                 <div className="absolute inset-y-0 right-0 flex py-2 pr-2">

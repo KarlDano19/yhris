@@ -5,9 +5,11 @@ import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 export default function CreateJobPageOne({
   register,
   setPageNumber,
+  trigger,
 }: {
   register: any;
   setPageNumber: Dispatch<number>;
+  trigger: any;
 }) {
   return (
     <>
@@ -25,7 +27,7 @@ export default function CreateJobPageOne({
             <select
               id="country"
               {...register("country", { required: true })}
-              className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+              className="appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             >
               <option>Philippines</option>
               <option>Indonesia</option>
@@ -47,7 +49,7 @@ export default function CreateJobPageOne({
             <select
               id="language"
               {...register("language", { required: true })}
-              className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+              className="appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             >
               <option>English</option>
               <option>Chinese</option>
@@ -100,9 +102,19 @@ export default function CreateJobPageOne({
       <hr />
       <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
         <button
-          type="button"
+          type="submit"
           className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-          onClick={() => setPageNumber(2)}
+          onClick={async () => {
+            const country = await trigger("country");
+            const language = await trigger("language");
+            const jobTitle = await trigger("jobTitle");
+            const placeAdvertise = await trigger("placeAdvertise");
+            const results = [country, language, jobTitle, placeAdvertise];
+            const incomplete = results.some((item: boolean) => !item);
+            if (!incomplete) {
+              setPageNumber(2)
+            }
+          }}
         >
           Next
         </button>
