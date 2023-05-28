@@ -1,5 +1,10 @@
 import Content from "@/components/pages/screen-applicants/[id]/Content"
 
-export default function page({ params }) {
-  return <Content id={parseInt(params.id)} />
+export const metadata = {
+  title: "Screen Applicants - Accounting Officer Application",
+  description: "Screen Applicants",
+}
+
+export default function page() {
+  return <Content />
 }
