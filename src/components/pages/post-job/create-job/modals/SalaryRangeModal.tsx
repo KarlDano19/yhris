@@ -5,10 +5,12 @@ export default function SalaryRangeModal({
   setPageNumber,
   isOpen,
   setIsOpen,
+  setIsRangeBenefitsAdded,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   setPageNumber: Dispatch<number>;
+  setIsRangeBenefitsAdded: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
 
@@ -66,6 +68,7 @@ export default function SalaryRangeModal({
                     onClick={() => {
                       setPageNumber(3);
                       setIsOpen(false);
+                      setIsRangeBenefitsAdded(true);
                     }}
                   >
                     YES, ADD THEM.

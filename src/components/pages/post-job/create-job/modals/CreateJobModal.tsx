@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from "react";
+import { Dispatch, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useForm } from "react-hook-form";
@@ -16,7 +16,7 @@ import CreateJobPageFive from "./ModalPages/CreateJobPageFive";
 import CreateJobPageSix from "./ModalPages/CreateJobPageSix";
 import CreateJobPageSeven from "./ModalPages/CreateJobPageSeven";
 import CreateJobPageEight from "./ModalPages/CreateJobPageEight";
-// import useAddSeparationItems from '../hooks/useAddSeparationItems';
+import CustomToast from "@/components/CustomToast";
 
 export default function CreateJobModal({
   isOpen,
@@ -25,8 +25,7 @@ export default function CreateJobModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  // const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit, watch, setValue, getValues } =
+  const { register, handleSubmit, watch, setValue, getValues, trigger, setFocus, reset } =
     useForm<T_CreateJob>({
       defaultValues: {
         country: "Philippines",
@@ -43,55 +42,15 @@ export default function CreateJobModal({
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isCreateJobPageEightModalOpen, setIsCreateJobPageEightModalOpen] =
     useState(false);
-  const dateInputRef = useRef(null);
-
+  const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
   const cancelButtonRef = useRef(null);
 
   const onSubmit = handleSubmit((data: T_CreateJob) => {
-    console.log(data);
-
-    // const callbackReq = {
-    //     onSuccess: (data: any) => {
-    //         toast.custom(() => <CustomToast message="Successfully created separation." type="success" />, { duration: 5000 });
-    //     },
-    //     onError: (err: any) => {
-    //         toast.custom(() => <CustomToast message={err} type="error" />, { duration: 7000 });
-    //     },
-    // }
-    // mutate(data, callbackReq)
-    // const newItem = {
-    //     id: separationItems.length + 1,
-    //     separationDate: Intl.DateTimeFormat('en-US').format(new Date(data.date)),
-    //     name: data.name,
-    //     reasonForLeaving: data.reason,
-    //     department: data.department,
-    //     position: data.position,
-    //     acceptanceLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     separationLetter: {
-    //         date: '',
-    //         to: '',
-    //         message: '',
-    //     },
-    //     isLetterSent: false,
-    //     isLetterReceived: false,
-    //     letterReceivedDate: "",
-    //     isDocumentsSent: false,
-    //     isDocumentsReceived: false,
-    //     documentReceivedDate: "",
-    //     isLastPayReleased: false,
-    //     isQuitclaimSigned: false,
-    //     isQuitclaimReceived: false,
-    //     quitclaimReceivedDate: "",
-    // }
-    // setSeparationItems([...separationItems, newItem]);
+    console.log('dataToBeAdded', data);
+    setPageNumber(1);
     setIsOpen(false);
     setIsSalaryRangeModalOpen(false);
-    setIsCreateJobPageEightModalOpen(false);
-    toast.success("Successfully created separation", { duration: 5000 });
+    reset();
   });
 
   return (
@@ -141,6 +100,7 @@ export default function CreateJobModal({
                       <CreateJobPageOne
                         register={register}
                         setPageNumber={setPageNumber}
+                        trigger={trigger}
                       />
                     )}
                     {pageNumber == 2 && (
@@ -150,6 +110,9 @@ export default function CreateJobModal({
                         setValue={setValue}
                         register={register}
                         setPageNumber={setPageNumber}
+                        trigger={trigger}
+                        getValues={getValues}
+                        setFocus={setFocus}
                       />
                     )}
                     {pageNumber == 3 && (
@@ -158,7 +121,10 @@ export default function CreateJobModal({
                         setValue={setValue}
                         onSubmit={onSubmit}
                         register={register}
+                        trigger={trigger}
                         setPageNumber={setPageNumber}
+                        setFocus={setFocus}
+                        getValues={getValues}
                       />
                     )}
                     {pageNumber == 4 && (
@@ -175,6 +141,8 @@ export default function CreateJobModal({
                         watch={watch}
                         register={register}
                         setPageNumber={setPageNumber}
+                        getValues={getValues}
+                        isRangeBenefitsAdded={isRangeBenefitsAdded}
                       />
                     )}
                     {pageNumber == 6 && (
@@ -196,6 +164,7 @@ export default function CreateJobModal({
                           setIsCreateJobPageEightModalOpen
                         }
                         setParentOpen={setIsOpen}
+                        onSubmit={onSubmit}
                       />
                     )}
                   </form>
@@ -206,7 +175,6 @@ export default function CreateJobModal({
         </Dialog>
       </Transition.Root>
       <CreateJobPageEight
-        onSubmit={onSubmit}
         isOpen={isCreateJobPageEightModalOpen}
         setIsOpen={setIsCreateJobPageEightModalOpen}
       />
@@ -214,6 +182,7 @@ export default function CreateJobModal({
         setPageNumber={setPageNumber}
         isOpen={isSalaryRangeModalOpen}
         setIsOpen={setIsSalaryRangeModalOpen}
+        setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
       />
     </>
   );

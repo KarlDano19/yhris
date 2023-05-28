@@ -11,7 +11,6 @@ import {
   Twitter,
 } from "@/svg/SocialMedia";
 import { jobPostHistory as testData } from "@/helpers/testData";
-import toast from "react-hot-toast";
 import JobPreviewModal from "./modals/JobPreviewModal";
 import SetJob from "./SetJob";
 import SetJobInactiveModal from "./modals/SetJobInactiveModal";
@@ -47,7 +46,7 @@ const Content = () => {
         let date = new Date(item.hireDate);
         let start = new Date(itemsFilter.from);
         let end = new Date(itemsFilter.to);
-        return date >= end && date <= start;
+        return date >= start && date <= end;
       });
       setFilteredItems([...filteredByDate]);
     }
@@ -55,8 +54,8 @@ const Content = () => {
 
   const renderRows = () => {
     if (
-      !itemsFilter.from &&
-      !itemsFilter.to &&
+      (!itemsFilter.from ||
+      !itemsFilter.to) &&
       jobPostHistoryItems &&
       jobPostHistoryItems.length > 0
     ) {
@@ -122,10 +121,19 @@ const Content = () => {
       return filteredItems.map((item, index) => (
         <tr key={index}>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.JobNo}
+            <JobPreview
+              id={item.id}
+              jobNumber={item.JobNo}
+              setIsJobPreviewOpen={setIsJobPreviewOpen}
+            />
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <span>{item.jobTitle}</span>
+            <SetJob
+              item={item}
+              id={item.id}
+              jobTitle={item.jobTitle}
+              setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
+            />
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.jobType}
@@ -152,11 +160,8 @@ const Content = () => {
       return (
         <tr>
           <td colSpan={7}>
-            <h4 className="text-center text-gray-300 text-sm mt-4">
+            <h4 className="text-center text-gray-300 text-sm my-4">
               There{`'`}s no data yet.
-            </h4>
-            <h4 className="text-center text-gray-300 text-sm">
-              Please click create to add separtion of employee.
             </h4>
           </td>
         </tr>
@@ -297,37 +302,6 @@ const Content = () => {
         isOpen={isSetJobInactiveModalOpen}
         setIsOpen={setIsSetJobInactiveModalOpen}
       />
-      {/* <AddSeparationModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        isOpen={isAddSeparationModalOpen}
-        setIsOpen={setIsAddSeparationModalOpen}
-      />
-      <LetterModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        type={isLetterModalOpen?.type}
-        isOpen={isLetterModalOpen}
-        setIsOpen={setIsLetterModalOpen}
-      />
-      <SignDocumentsModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        isOpen={isDocumentModalOpen}
-        setIsOpen={setIsDocumentModalOpen}
-      />
-      <ConfirmModal
-        message="Are you sure the employee’s Last Pay has been released?"
-        isOpen={!!isLastPayModalOpen}
-        setIsOpen={updateReleaseModal}
-        confirmAction={releaseLastPay}
-      />
-      <QuitclaimModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        isOpen={isQuitclaimModalOpen}
-        setIsOpen={setIsQuitclaimModalOpen}
-      /> */}
     </>
   );
 };

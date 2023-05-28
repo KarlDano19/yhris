@@ -26,7 +26,7 @@ const menus = [
   {
     icon: <OrientLogo/>,
     text: "Orient",
-    link: "/orient"
+    link: "/hired-applicants"
   },
   {
     icon: <ManageLogo/>,
