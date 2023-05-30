@@ -6,80 +6,81 @@ import { VideoIcon, WhiteVideoIcon } from "@/svg/VideoIcon"
 import { useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
 import { ScheduleInterviewPropTypes as PropTypes } from "../../types"
+import { initialActionState } from "../../lib/initialActionState"
+import { useForm } from "react-hook-form"
+
+const formatTypes = [
+  {
+    title: "Video",
+    name: "type",
+    id: "video",
+    icon: <VideoIcon />,
+    whiteIcon: <WhiteVideoIcon />,
+    borderStyle: "rounded-tl-md rounded-bl-md",
+  },
+  {
+    title: "Phone",
+    name: "type",
+    id: "phone",
+    icon: <PhoneIcon />,
+    whiteIcon: <WhitePhoneIcon />,
+    borderStyle: "",
+  },
+  {
+    title: "In-person",
+    name: "type",
+    id: "inPerson",
+    icon: <LocationIcon />,
+    whiteIcon: <WhiteLocationIcon />,
+    borderStyle: "rounded-tr-md rounded-br-md",
+  },
+]
+const platforms = [
+  {
+    title: "Zoom",
+    name: "platform",
+    id: "zoom",
+    value: "zoom",
+  },
+  {
+    title: "Google Meet",
+    name: "platform",
+    id: "googleMeet",
+    value: "google meet",
+  },
+  {
+    title: "Microsoft Teams",
+    name: "platform",
+    id: "microsoftTeams",
+    value: "microsoft teams",
+  },
+]
 
 export default function ScheduleInterview({
   title,
-  id,
-  setId,
-  handleSubmit,
+  setActionState,
+  handleFormSubmit,
 }: PropTypes) {
+  const { register, handleSubmit } = useForm()
+  const [isOpen, setIsOpen] = useState(false)
   const [selectionId, setSelectionId] = useState("video")
 
-  const formatTypes = [
-    {
-      title: "Video",
-      name: "type",
-      id: "video",
-      icon: <VideoIcon />,
-      whiteIcon: <WhiteVideoIcon />,
-      borderStyle: "rounded-tl-md rounded-bl-md",
-    },
-    {
-      title: "Phone",
-      name: "type",
-      id: "phone",
-      icon: <PhoneIcon />,
-      whiteIcon: <WhitePhoneIcon />,
-      borderStyle: "",
-    },
-    {
-      title: "In-person",
-      name: "type",
-      id: "inPerson",
-      icon: <LocationIcon />,
-      whiteIcon: <WhiteLocationIcon />,
-      borderStyle: "rounded-tr-md rounded-br-md",
-    },
-  ]
-
-  const platforms = [
-    {
-      title: "Zoom",
-      name: "platform",
-      id: "zoom",
-      value: "zoom",
-    },
-    {
-      title: "Google Meet",
-      name: "platform",
-      id: "googleMeet",
-      value: "google meet",
-    },
-    {
-      title: "Microsoft Teams",
-      name: "platform",
-      id: "microsoftTeams",
-      value: "microsoft teams",
-    },
-  ]
-  const [isOpen, setIsOpen] = useState(false)
-
   useEffect(() => {
-    id && setIsOpen(true)
-  }, [id])
+    setIsOpen(true)
+  }, [])
   const handleClose = () => {
     setIsOpen(false)
-    setTimeout(() => setId(null), 400)
+    setTimeout(() => setActionState(initialActionState), 400)
   }
-  const handleOnSubmit = (e: any) => {
-    e.preventDefault()
+  const onSubmit = (data: any) => {
+    console.log(data)
     setIsOpen(false)
-    setTimeout(() => handleSubmit(), 400)
+    setTimeout(() => handleFormSubmit(data), 400)
   }
 
   return (
     <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
-      <form onSubmit={handleOnSubmit}>
+      <form onSubmit={handleSubmit((data) => onSubmit(data))}>
         <div className="p-8">
           <div className="flex items-center gap-3 flex-wrap mb-8">
             <div className="text-indigo-dye flex-grow">
@@ -88,9 +89,9 @@ export default function ScheduleInterview({
               </label>
               <div className="border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4">
                 <input
+                  {...register("date")}
                   type="date"
                   name="date"
-                  id="date"
                   className="focus:none outline-none"
                 />
                 <CalendarIcon className="w-7 h-7" />
@@ -105,7 +106,7 @@ export default function ScheduleInterview({
                 <input
                   type="time"
                   id="startTime"
-                  name="start-time"
+                  {...register("startTime")}
                   className="focus:none outline-none"
                 />
               </div>
@@ -117,7 +118,7 @@ export default function ScheduleInterview({
 
               <div className="border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]">
                 <select
-                  name="duration"
+                  {...register("duration")}
                   id="duration"
                   className="w-full py-2 px-4 focus:none outline-none rounded-full"
                 >
@@ -158,7 +159,6 @@ export default function ScheduleInterview({
                   <input
                     type="radio"
                     id={item.id}
-                    name={item.name}
                     className="py-3 opacity-0"
                     onChange={(e) => setSelectionId(e.target.id)}
                     checked={hasSelected}
@@ -167,15 +167,19 @@ export default function ScheduleInterview({
               )
             })}
           </div>
-
           {selectionId === "video" && (
             <div className="flex items-center justify-between px-12 mb-8 text-indigo-dye text-[15px]">
               {platforms.map((item, index) => {
-                const { title, ...rest } = item
+                const { title, name, ...rest } = item
 
                 return (
                   <div key={index} className="flex items-center gap-2">
-                    <input type="radio" {...rest} className="w-5 h-5" />
+                    <input
+                      type="radio"
+                      {...rest}
+                      {...register(name)}
+                      className="w-5 h-5"
+                    />
                     <label htmlFor={item.id}>{item.title}</label>
                   </div>
                 )
@@ -191,7 +195,7 @@ export default function ScheduleInterview({
               <input
                 type="tel"
                 id="phoneNumber"
-                name="phoneNumber"
+                {...register("phoneNumber")}
                 className="border border-[#ACB9CB] rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]"
               />
             </div>
@@ -205,7 +209,7 @@ export default function ScheduleInterview({
               <input
                 type="text"
                 id="address"
-                name="address"
+                {...register("address")}
                 className="border border-[#ACB9CB] rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]"
               />
             </div>
@@ -220,7 +224,7 @@ export default function ScheduleInterview({
               additional information.
             </p>
             <textarea
-              name="message"
+              {...register("message")}
               id="message"
               rows={4}
               placeholder="Enter message..."
@@ -238,7 +242,7 @@ export default function ScheduleInterview({
             <input
               type="text"
               id="email"
-              name="email"
+              {...register("message")}
               className="border border-[#ACB9CB] rounded-md py-2 px-6 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]"
             />
           </div>

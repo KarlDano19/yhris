@@ -8,20 +8,28 @@ import {
 import Image from "next/image"
 import { PersonPropTypes as PropTypes } from "../types"
 import CheckListIcon from "@/svg/CheckListIcon"
+import { initialActionState } from "../lib/initialActionState"
 
 const menuList = [
   {
     id: 1,
+    whichModal: "CHECKLIST",
+    modalTitle: "Checklist",
     name: "Checklist",
     icon: <CheckListIcon className="w-4 h-4" />,
   },
   {
     id: 2,
+    whichModal: "SEND_EMAIL",
+    modalTitle: "Send an Email to Applicant",
+
     name: "Send Email",
     icon: <EnvelopeIcon className="w-4 h-4" />,
   },
   {
     id: 3,
+    whichModal: "SCHEDULE_INTERVIEW",
+    modalTitle: "Schedule Interview",
     name: "Schedule Interview",
     icon: <CalendarIcon className="w-4 h-4" />,
   },
@@ -29,10 +37,10 @@ const menuList = [
 
 export default function Person({
   applicant,
-  stageId,
   isOpenMenu,
   setOpenMenuId,
-  setPersonMenu,
+  setActionState,
+  stage,
 }) {
   const { image, name, id } = applicant
 
@@ -66,12 +74,17 @@ export default function Person({
       {isOpenMenu && (
         <ul className="absolute left-0 top-6 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md">
           {menuList.map((list) => {
-            const { id, icon, name } = list
+            const { id, icon, name, whichModal, modalTitle } = list
             return (
               <li key={id}>
                 <button
                   onClick={() =>
-                    setPersonMenu({ whichStage: stageId, whichModal: list.id })
+                    setActionState({
+                      ...initialActionState,
+                      applicantId: applicant.id,
+                      stageId: stage.id,
+                      modal: { whichModal, isOpen: true, title: modalTitle },
+                    })
                   }
                   className="flex items-center gap-3 w-full"
                 >

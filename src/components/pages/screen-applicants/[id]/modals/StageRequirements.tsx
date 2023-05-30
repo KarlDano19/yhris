@@ -3,13 +3,13 @@ import { StageRequirementsTypes as PropTypes } from "../../types"
 import { useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
 import useTagInput from "../../hooks/useTagInput"
+import { initialActionState } from "../../lib/initialActionState"
 
 export default function StageRequirements({
   title,
-  id,
-  setId,
   requirements,
-  handleSubmit,
+  setActionState,
+  handleFormSubmit,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
@@ -20,16 +20,16 @@ export default function StageRequirements({
   )
 
   useEffect(() => {
-    id !== null && setIsOpen(true)
-  }, [id])
+    setIsOpen(true)
+  }, [])
   const handleClose = () => {
     setIsOpen(false)
-    setTimeout(() => setId(null), 400)
+    setTimeout(() => setActionState(initialActionState), 400)
   }
   const handleOnSubmit = (e: any) => {
     e.preventDefault()
     setIsOpen(false)
-    setTimeout(() => handleSubmit(id, tags), 400)
+    setTimeout(() => handleFormSubmit(tags), 400)
   }
 
   return (

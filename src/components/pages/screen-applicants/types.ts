@@ -1,25 +1,10 @@
 import React, { Dispatch, SetStateAction } from "react"
 
-export type ApplicantType = {
-  id: number
-  image: string
-  name: string
-}
-
-export type ApplicantsType = [] | ApplicantType[]
-
 export type JobType = {
   id: number
   title: string
   address: string
   applicants: ApplicantsType
-}
-
-export type StageType = {
-  id: number
-  applicants: ApplicantsType
-  title: string
-  requirements: string[]
 }
 
 export type BlockPropTypes = {
@@ -37,15 +22,6 @@ export type WrapperPropTypes = {
   title: string
 }
 
-export type StagePropTypes = {
-  stage: StageType
-  stageDropdownId: number
-  setStageDropdownId: Dispatch<SetStateAction<number | null>>
-  setStageRequirementsId: Dispatch<SetStateAction<number | null>>
-  stages: StageType[]
-  setStages: Dispatch<SetStateAction<{}[]>>
-}
-
 export type PersonPropTypes = {
   applicant: ApplicantType
   isOpenMenu: boolean
@@ -60,23 +36,70 @@ export type ModalLayoutTypes = {
 
 export type StageRequirementsTypes = {
   title: string
-  id: number
-  setId: Dispatch<SetStateAction<number | null>>
   requirements: string[]
-  handleSubmit: any
+  setActionState: any
+  handleFormSubmit: any
 }
 
 export type ScheduleInterviewPropTypes = {
   title: string
-  id: number
-  setId: Dispatch<SetStateAction<number | null>>
-  handleSubmit: any
+  setActionState: any
+  handleFormSubmit: any
+}
+
+export type SendEmailPropTypes = {
+  title: string
+  setActionState: any
+  handleFormSubmit: any
+}
+
+export type SuccessPropTypes = {
+  title: string
+  setActionState: any
 }
 
 export type ChecklistPropTypes = {
   title: string
-  id: number
-  setId: Dispatch<SetStateAction<number | null>>
   requirements: string[]
-  handleSubmit: any
+  setActionState: any
+  handleFormSubmit: any
+}
+
+export type ConfirmationPropTypes = {
+  actionState: any
+  setActionState: any
+  dispatch: any
+}
+
+export type ApplicantType = {
+  id: number
+  image: string
+  name: string
+}
+
+export type ApplicantsType = [] | ApplicantType[]
+
+export type StageType = {
+  id: number
+  title: string
+  requirements: string[]
+  applicants: ApplicantsType
+}
+
+export type ActionStateType = {
+  modal: {
+    whichModal: null | string
+    isOpen: boolean
+    title: string
+  }
+  stageId: number | null
+  applicantId: number | null
+}
+
+export type StagePropTypes = {
+  stage: StageType
+  state: StageType[]
+  stageDropdownId: number
+  setStageDropdownId: number
+  setActionState: any
 }

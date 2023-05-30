@@ -9,7 +9,7 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   ...draggableStyle,
 })
 
-export default function Block({ index, stage, setPersonMenu }: PropTypes) {
+export default function Block({ index, stage, setActionState }) {
   const [openMenuId, setOpenMenuId] = useState(null)
   const { id, applicants } = stage
 
@@ -31,11 +31,11 @@ export default function Block({ index, stage, setPersonMenu }: PropTypes) {
               return (
                 <Person
                   key={applicant.id}
-                  stageId={id}
                   applicant={applicant}
                   isOpenMenu={openMenuId === applicant.id}
                   setOpenMenuId={setOpenMenuId}
-                  setPersonMenu={setPersonMenu}
+                  setActionState={setActionState}
+                  stage={stage}
                 />
               )
             })

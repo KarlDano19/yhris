@@ -1,27 +1,25 @@
 import SelectChevronDown from "@/svg/SelectChevronDownDummy"
 import { PencilIcon } from "@heroicons/react/24/outline"
-import { StagePropTypes as PropTypes } from "../types"
+import { StagePropTypes as PropTypes, StageType } from "../types"
+import { initialActionState } from "../lib/initialActionState"
 
 export default function Stage({
   stage,
+  state,
   stageDropdownId,
   setStageDropdownId,
-  setStageRequirementsId,
-  stages,
-  setStages,
+  setActionState,
 }: PropTypes) {
+  const stageTitle = state?.find(
+    (item: StageType) => item.id === stage.id
+  ).title
+
   const handleOpenDropdown = () => {
     if (stageDropdownId === stage.id) {
       setStageDropdownId(null)
       return
     }
     setStageDropdownId(stage.id)
-  }
-
-  const handleRemoveStage = () => {
-    // modal appears
-    const newStages = stages.filter((item) => item.id !== stage.id)
-    setStages(newStages)
   }
 
   return (
@@ -44,7 +42,17 @@ export default function Stage({
       {stageDropdownId === stage.id && (
         <div className="grid absolute left-0 right-0 bg-white text-indigo-dye border border-[#ACB9CB] top-full z-20 p-4 gap-3 shadow-md">
           <button
-            onClick={() => setStageRequirementsId(stage.id)}
+            onClick={() =>
+              setActionState({
+                ...initialActionState,
+                stageId: stage.id,
+                modal: {
+                  title: `Set-up Stage Requirements: ${stageTitle}`,
+                  whichModal: "STAGE_REQUIREMENTS",
+                  isOpen: true,
+                },
+              })
+            }
             type="button"
             className="text-left"
           >
@@ -52,7 +60,17 @@ export default function Stage({
           </button>
           {stage.id !== 1 && (
             <button
-              onClick={handleRemoveStage}
+              onClick={() =>
+                setActionState({
+                  ...initialActionState,
+                  stageId: stage.id,
+                  modal: {
+                    title: `Are you sure you want to remove stage? This process cannot be undone.`,
+                    whichModal: "WARNING",
+                    isOpen: true,
+                  },
+                })
+              }
               type="button"
               className="text-left"
             >

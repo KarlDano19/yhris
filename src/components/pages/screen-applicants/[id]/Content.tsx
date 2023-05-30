@@ -2,8 +2,8 @@
 
 import Wrapper from "@/components/pages/screen-applicants/Wrapper"
 import Block from "./Block"
-import { SetStateAction, useState } from "react"
-import { DragDropContext, DropResult } from "react-beautiful-dnd"
+import { useReducer, useState } from "react"
+import { DragDropContext } from "react-beautiful-dnd"
 import { StrictModeDroppable } from "./StrictModeDroppable"
 import Stage from "./Stage"
 import "../styles.css"
@@ -11,121 +11,114 @@ import { job } from "../testData"
 import StageRequirements from "./modals/StageRequirements"
 import Checklist from "./modals/Checklist"
 import ScheduleInterview from "./modals/ScheduleInterview"
+import SendEmail from "./modals/SendEmail"
+import Confirmation from "./modals/Confirmation"
+import Success from "./modals/Success"
+import { INITIAL_STATE, stageReducer } from "../reducers/stageReducer"
+import { initialActionState } from "../lib/initialActionState"
+import { StageType } from "../types"
 
 export default function Content() {
-  const [stages, setStages] = useState([
-    {
-      id: 1,
-      title: "Recommended Applicants",
-      requirements: [],
-      applicants: job.applicants,
-    },
-    {
-      id: 2,
-      title: "Initial Interview",
-      requirements: [],
-      applicants: [],
-    },
-    {
-      id: 3,
-      title: "Manager Interview",
-      requirements: [],
-      applicants: [],
-    },
-    {
-      id: 4,
-      title: "Panel Interview",
-      requirements: [],
-      applicants: [],
-    },
-    {
-      id: 5,
-      title: "Final Interview",
-      requirements: [],
-      applicants: [],
-    },
-  ])
+  const [state, dispatch] = useReducer(stageReducer, INITIAL_STATE)
+  const [actionState, setActionState] = useState(initialActionState)
   const [stageDropdownId, setStageDropdownId] = useState(null)
-  const [stageRequirementsId, setStageRequirementsId] = useState(null)
-  const [personMenu, setPersonMenu] = useState(null)
 
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result
-    if (!destination) return
-
-    const applicants = stages.map((stage) => [...stage.applicants])
-    const [movedApplicants] = applicants.splice(source.index, 1)
-    applicants.splice(destination.index, 0, movedApplicants)
-    const newArr = stages.map((item, index) => ({
-      ...item,
-      applicants: applicants[index],
-    }))
-    setStages(newArr)
+  const handleFormSubmit = (data: any) => {
+    switch (actionState.modal.whichModal) {
+      case "STAGE_REQUIREMENTS":
+        dispatch({
+          type: "SET_REQUIREMENTS",
+          payload: {
+            actionState,
+            setActionState,
+            requirements: data,
+          },
+        })
+        break
+      case "CHECKLIST":
+        dispatch({
+          type: "CHECKLIST",
+          payload: {
+            actionState,
+            setActionState,
+            formData: data,
+          },
+        })
+        break
+      case "SEND_EMAIL":
+        dispatch({
+          type: "SEND_EMAIL",
+          payload: {
+            actionState,
+            setActionState,
+            formData: data,
+          },
+        })
+        break
+      case "SCHEDULE_INTERVIEW":
+        dispatch({
+          type: "SCHEDULE_INTERVIEW",
+          payload: {
+            actionState,
+            setActionState,
+            formData: data,
+          },
+        })
+        break
+      default:
+        setActionState(initialActionState)
+    }
   }
 
-  const handleStateRequirementsSubmit = (
-    id: number,
-    requirements: string[]
-  ) => {
-    const newStages = stages.map((stage) => {
-      if (stage.id === id) {
-        return { ...stage, requirements }
-      } else return stage
-    })
-    setStages(newStages)
-    setStageRequirementsId(null)
-  }
+  const { whichModal, isOpen, title } = actionState.modal
+  const requirements =
+    state.find((item: StageType) => item.id === actionState.stageId)
+      ?.requirements || null
+  const gridCols = { gridTemplateColumns: `repeat(${state.length}, 300px)` }
 
-  const handleChecklistSubmit = () => {
-    setPersonMenu(null)
-  }
-
-  const handleSchedInterviewSubmit = () => {
-    setPersonMenu(null)
-  }
-
-  const gridCols = { gridTemplateColumns: `repeat(${stages.length}, 300px)` }
-  console.log()
   return (
     <Wrapper
       maxWidth="max-w-[1700px]"
       title={`Screen Applicants / ${job.title}`}
     >
-      {stageRequirementsId !== null &&
-        (() => {
-          const { title, requirements } = stages.find(
-            (stage) => stage.id === stageRequirementsId
-          )
-          return (
-            <StageRequirements
-              title={`Set-up Stage Requirements ${title}`}
-              id={stageRequirementsId}
-              setId={setStageRequirementsId}
-              requirements={requirements}
-              handleSubmit={handleStateRequirementsSubmit}
-            />
-          )
-        })()}
-
-      {personMenu?.whichModal === 1 && (
-        <Checklist
-          title="Checklist"
-          id={personMenu}
-          setId={setPersonMenu}
-          requirements={
-            stages.find((stage) => stage.id === personMenu.whichStage)
-              .requirements
-          }
-          handleSubmit={handleChecklistSubmit}
+      {whichModal === "STAGE_REQUIREMENTS" && (
+        <StageRequirements
+          title={title}
+          requirements={requirements}
+          setActionState={setActionState}
+          handleFormSubmit={handleFormSubmit}
         />
       )}
-
-      {personMenu?.whichModal === 3 && (
+      {whichModal === "CHECKLIST" && (
+        <Checklist
+          title={title}
+          requirements={requirements}
+          setActionState={setActionState}
+          handleFormSubmit={handleFormSubmit}
+        />
+      )}
+      {whichModal === "SEND_EMAIL" && (
+        <SendEmail
+          title={title}
+          setActionState={setActionState}
+          handleFormSubmit={handleFormSubmit}
+        />
+      )}
+      {whichModal === "SCHEDULE_INTERVIEW" && (
         <ScheduleInterview
-          title="Schedule Interview"
-          id={personMenu}
-          setId={setPersonMenu}
-          handleSubmit={handleSchedInterviewSubmit}
+          title={title}
+          setActionState={setActionState}
+          handleFormSubmit={handleFormSubmit}
+        />
+      )}
+      {whichModal === "SUCCESS" && (
+        <Success title={title} setActionState={setActionState} />
+      )}
+      {whichModal === "WARNING" && (
+        <Confirmation
+          actionState={actionState}
+          setActionState={setActionState}
+          dispatch={dispatch}
         />
       )}
 
@@ -137,20 +130,23 @@ export default function Content() {
 
       <div className="overflow-x-auto">
         <div className={`grid gap-5 mb-4`} style={gridCols}>
-          {stages?.map((stage) => (
+          {state.map((stage: StageType) => (
             <Stage
               key={stage.id}
               stage={stage}
+              state={state}
               stageDropdownId={stageDropdownId}
               setStageDropdownId={setStageDropdownId}
-              setStageRequirementsId={setStageRequirementsId}
-              stages={stages}
-              setStages={setStages}
+              setActionState={setActionState}
             />
           ))}
         </div>
 
-        <DragDropContext onDragEnd={onDragEnd}>
+        <DragDropContext
+          onDragEnd={(result) =>
+            dispatch({ type: "DRAG_BLOCK", payload: result })
+          }
+        >
           <StrictModeDroppable droppableId="stage" direction="horizontal">
             {(provided) => (
               <section
@@ -159,13 +155,13 @@ export default function Content() {
                 className={`grid gap-5 mb-4`}
                 style={gridCols}
               >
-                {stages.map((stage, index) => {
+                {state.map((stage: StageType, index: number) => {
                   return (
                     <Block
                       key={stage.id}
                       index={index}
                       stage={stage}
-                      setPersonMenu={setPersonMenu}
+                      setActionState={setActionState}
                     />
                   )
                 })}

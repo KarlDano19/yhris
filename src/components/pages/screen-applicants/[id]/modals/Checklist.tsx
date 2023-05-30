@@ -1,58 +1,60 @@
 import { useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
 import { ChecklistPropTypes as PropTypes } from "../../types"
+import { initialActionState } from "../../lib/initialActionState"
+import { useForm } from "react-hook-form"
+import { camelize } from "../../lib/camelize"
+
+const status = [
+  {
+    id: "ongoing",
+    value: "ongoing",
+    title: "Ongoing",
+  },
+  {
+    id: "passed",
+    value: "passed",
+    title: "Passed",
+  },
+  {
+    id: "withdrawn",
+    value: "withdrawn",
+    title: "Withdrawn",
+  },
+  {
+    id: "rejected",
+    value: "rejected",
+    title: "Rejected",
+  },
+]
 
 export default function Checklist({
   title,
-  id,
-  setId,
   requirements,
-  handleSubmit,
+  setActionState,
+  handleFormSubmit,
 }: PropTypes) {
-  const [isOpen, setIsOpen] = useState(false)
-  const status = [
-    {
-      id: "ongoing",
-      name: "status",
-      title: "Ongoing",
-    },
-    {
-      id: "passed",
-      name: "status",
-      title: "Passed",
-    },
-    {
-      id: "withdrawn",
-      name: "status",
-      title: "Withdrawn",
-    },
-    {
-      id: "rejected",
-      name: "status",
-      title: "Rejected",
-    },
-  ]
-
+  const { register, handleSubmit } = useForm()
   const titleCase = (str: any) => str.charAt(0).toUpperCase() + str.slice(1)
+  const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    id && setIsOpen(true)
-  }, [id])
+    setIsOpen(true)
+  }, [])
   const handleClose = () => {
     setIsOpen(false)
-    setTimeout(() => setId(null), 400)
+    setTimeout(() => setActionState(initialActionState), 400)
   }
-  const handleOnSubmit = (e: any) => {
-    e.preventDefault()
+  const onSubmit = (data: any) => {
     setIsOpen(false)
-    setTimeout(() => handleSubmit(), 400)
+    setTimeout(() => handleFormSubmit(data), 400)
   }
 
   return (
     <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
-      <form onSubmit={handleOnSubmit}>
+      <form onSubmit={handleSubmit((data) => onSubmit(data))}>
         <div className="p-8">
-          {requirements.length > 0 && (
+          {requirements?.length > 0 && (
             <div className="grid gap-4 mb-8">
               {requirements.map((item) => {
                 return (
@@ -60,25 +62,35 @@ export default function Checklist({
                     key={item}
                     className="flex items-center gap-4 text-indigo-dye text-[15px]"
                   >
-                    <input type="checkbox" id={item} className="w-5 h-5" />
+                    <input
+                      type="checkbox"
+                      {...register(camelize(item))}
+                      id={item}
+                      className="w-5 h-5"
+                    />
                     <label htmlFor={item}>{titleCase(item)}</label>
                   </div>
                 )
               })}
             </div>
           )}
-
           <div className="grid gap-4">
             <p className="font-medium">Status</p>
             {status.map((item) => {
-              const { title, ...rest } = item
+              const { title, id, value } = item
               return (
                 <div
-                  key={item.id}
+                  key={id}
                   className="flex items-center gap-4 text-indigo-dye text-[15px]"
                 >
-                  <input type="radio" {...rest} className="w-5 h-5" />
-                  <label htmlFor={item.id}>{title}</label>
+                  <input
+                    {...register("status")}
+                    type="radio"
+                    id={id}
+                    value={value}
+                    className="w-5 h-5"
+                  />
+                  <label htmlFor={id}>{title}</label>
                 </div>
               )
             })}
