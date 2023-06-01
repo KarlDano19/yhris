@@ -16,7 +16,7 @@ const Content = () => {
                 <div className="mt-6 grid grid-cols-3 items-center gap-6">
                     <div className="p-4 h-44 rounded-lg shadow-sm bg-white flex flex-col gap-2 items-center justify-center">
                         <h3 className="text-lg">Accounting Officer</h3>
-                        <button type="button" className="bg-[#EAC645] text-[#2C3F58] font-semibold px-8 py-2 rounded-md hover:bg-opacity-90">2 Hired Applicant/s</button>
+                        <Link href="/orient/accounting-officer" className="bg-[#EAC645] text-[#2C3F58] font-semibold px-8 py-2 rounded-md hover:bg-opacity-90">2 Hired Applicant/s</Link>
                     </div>
                     <div className="p-4 h-44 rounded-lg bg-[#EBF3FF] shadow-sm">
                         

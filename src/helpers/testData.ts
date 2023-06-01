@@ -210,9 +210,11 @@ export const orientItems = [
   {
     id: 1,
     date: "04/12/2023",
+    position: "Accounting Officer",
+    email: "malinawon.henry19@gmail.com",
     name: "Juan Dela Cruz",
     sendContract: {
-      template: "",
+      template: "Please Sign & Comply: ABBA-YAHSHUA Employee Contract & Documents",
       to: "",
       message: "",
     },

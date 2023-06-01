@@ -46,7 +46,6 @@ export default function CreateJobModal({
   const cancelButtonRef = useRef(null);
 
   const onSubmit = handleSubmit((data: T_CreateJob) => {
-    console.log('dataToBeAdded', data);
     setPageNumber(1);
     setIsOpen(false);
     setIsSalaryRangeModalOpen(false);

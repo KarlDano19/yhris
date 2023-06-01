@@ -1,9 +1,9 @@
-import Content from "@/components/pages/orient/Content";
+import Content from "@/components/pages/hired-applicants/Content";
 import React from "react";
 
 export const metadata = {
   title: "Orient",
-  description: "Orient",
+  description: "Hired Applicants",
 };
 
 const Orient = async () => {
