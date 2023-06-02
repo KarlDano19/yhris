@@ -1,16 +1,20 @@
 import { PlusIcon } from "@heroicons/react/24/outline"
 import { Draggable } from "react-beautiful-dnd"
-import { BlockPropTypes as PropTypes } from "../types"
-import { useState } from "react"
 import Person from "./Person"
+import { BlockPropTypes as PropTypes } from "../types"
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   boxShadow: `${isDragging ? "rgba(149, 157, 165, 0.2) 0px 8px 24px" : "none"}`,
   ...draggableStyle,
 })
 
-export default function Block({ index, stage, setActionState }) {
-  const [openMenuId, setOpenMenuId] = useState(null)
+export default function Block({
+  index,
+  stage,
+  setActionState,
+  openMenuId,
+  setOpenMenuId,
+}: PropTypes) {
   const { id, applicants } = stage
 
   return (

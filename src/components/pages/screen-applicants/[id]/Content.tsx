@@ -2,32 +2,53 @@
 
 import Wrapper from "@/components/pages/screen-applicants/Wrapper"
 import Block from "./Block"
-import { useReducer, useState } from "react"
+import { useEffect, useReducer, useRef, useState } from "react"
 import { DragDropContext } from "react-beautiful-dnd"
-import { StrictModeDroppable } from "./StrictModeDroppable"
+import { StrictModeDroppable } from "../layouts/StrictModeDroppable"
 import Stage from "./Stage"
 import "../styles.css"
 import { job } from "../testData"
-import StageRequirements from "./modals/StageRequirements"
-import Checklist from "./modals/Checklist"
-import ScheduleInterview from "./modals/ScheduleInterview"
-import SendEmail from "./modals/SendEmail"
-import Confirmation from "./modals/Confirmation"
-import Success from "./modals/Success"
+import StageRequirements from "../modals/StageRequirements"
+import Checklist from "../modals/Checklist"
+import ScheduleInterview from "../modals/ScheduleInterview"
+import SendEmail from "../modals/SendEmail"
+import Confirmation from "../modals/Confirmation"
+import Success from "../modals/Success"
 import { INITIAL_STATE, stageReducer } from "../reducers/stageReducer"
 import { initialActionState } from "../lib/initialActionState"
 import { StageType } from "../types"
+import actionTypes from "../lib/actionTypes"
 
 export default function Content() {
   const [state, dispatch] = useReducer(stageReducer, INITIAL_STATE)
   const [actionState, setActionState] = useState(initialActionState)
   const [stageDropdownId, setStageDropdownId] = useState(null)
+  const [openMenuId, setOpenMenuId] = useState(null)
+  const containerRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    // closes dropdowns & menus after showing modals
+    setStageDropdownId(null)
+    setOpenMenuId(null)
+  }, [actionState.modal.isOpen])
+
+  const handleAddStage = () => {
+    const { current: element } = containerRef
+    dispatch({ type: "ADD_STAGE" })
+    setTimeout(() => {
+      if (element !== null) element.scrollLeft = element.scrollWidth
+    }, 10)
+  }
 
   const handleFormSubmit = (data: any) => {
+    if (!actionState.modal.whichModal) return
+    const { SET_REQUIREMENTS, CHECKLIST, SEND_EMAIL, SCHEDULE_INTERVIEW } =
+      actionTypes
+
     switch (actionState.modal.whichModal) {
       case "STAGE_REQUIREMENTS":
         dispatch({
-          type: "SET_REQUIREMENTS",
+          type: SET_REQUIREMENTS,
           payload: {
             actionState,
             setActionState,
@@ -37,7 +58,7 @@ export default function Content() {
         break
       case "CHECKLIST":
         dispatch({
-          type: "CHECKLIST",
+          type: CHECKLIST,
           payload: {
             actionState,
             setActionState,
@@ -47,7 +68,7 @@ export default function Content() {
         break
       case "SEND_EMAIL":
         dispatch({
-          type: "SEND_EMAIL",
+          type: SEND_EMAIL,
           payload: {
             actionState,
             setActionState,
@@ -57,7 +78,7 @@ export default function Content() {
         break
       case "SCHEDULE_INTERVIEW":
         dispatch({
-          type: "SCHEDULE_INTERVIEW",
+          type: SCHEDULE_INTERVIEW,
           payload: {
             actionState,
             setActionState,
@@ -71,16 +92,13 @@ export default function Content() {
   }
 
   const { whichModal, isOpen, title } = actionState.modal
-  const requirements =
-    state.find((item: StageType) => item.id === actionState.stageId)
-      ?.requirements || null
-  const gridCols = { gridTemplateColumns: `repeat(${state.length}, 300px)` }
+  const gridCols = { gridTemplateColumns: `repeat(${state?.length}, 300px)` }
+  const requirements = state.find(
+    (item: StageType) => item.id === actionState.stageId
+  )?.requirements
 
   return (
-    <Wrapper
-      maxWidth="max-w-[1700px]"
-      title={`Screen Applicants / ${job.title}`}
-    >
+    <Wrapper title={`Screen Applicants / ${job.title} Applications`}>
       {whichModal === "STAGE_REQUIREMENTS" && (
         <StageRequirements
           title={title}
@@ -123,54 +141,57 @@ export default function Content() {
       )}
 
       <div className="flex justify-end">
-        <button className="rounded-lg bg-[#65c979] hover:bg-[#5cb86f] text-white py-2 px-6 font-bold text-[15px] my-8">
+        <button
+          onClick={handleAddStage}
+          className="rounded-lg bg-[#65c979] hover:bg-[#5cb86f] text-white py-2 px-6 font-bold text-[15px] my-6"
+        >
           ADD STAGE
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className={`grid gap-5 mb-4`} style={gridCols}>
-          {state.map((stage: StageType) => (
-            <Stage
-              key={stage.id}
-              stage={stage}
-              state={state}
-              stageDropdownId={stageDropdownId}
-              setStageDropdownId={setStageDropdownId}
-              setActionState={setActionState}
-            />
-          ))}
-        </div>
-
-        <DragDropContext
-          onDragEnd={(result) =>
-            dispatch({ type: "DRAG_BLOCK", payload: result })
-          }
-        >
-          <StrictModeDroppable droppableId="stage" direction="horizontal">
-            {(provided) => (
-              <section
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className={`grid gap-5 mb-4`}
-                style={gridCols}
-              >
-                {state.map((stage: StageType, index: number) => {
-                  return (
-                    <Block
-                      key={stage.id}
-                      index={index}
-                      stage={stage}
-                      setActionState={setActionState}
-                    />
-                  )
-                })}
-                {provided.placeholder}
-              </section>
-            )}
-          </StrictModeDroppable>
-        </DragDropContext>
-      </div>
+      <DragDropContext
+        onDragEnd={(result) =>
+          dispatch({ type: actionTypes.DRAG_BLOCK, payload: result })
+        }
+      >
+        <StrictModeDroppable droppableId="stage" direction="horizontal">
+          {(provided) => (
+            <section
+              {...provided.droppableProps}
+              className="grid gap-5 mb-4 overflow-auto"
+              style={gridCols}
+              ref={(el) => {
+                provided.innerRef(el)
+                containerRef.current = el
+              }}
+            >
+              {state.map((stage: StageType) => (
+                <Stage
+                  key={stage.id}
+                  stage={stage}
+                  stageDropdownId={stageDropdownId}
+                  setStageDropdownId={setStageDropdownId}
+                  setActionState={setActionState}
+                  dispatch={dispatch}
+                />
+              ))}
+              {state.map((stage: StageType, index: number) => {
+                return (
+                  <Block
+                    key={stage.id}
+                    index={index}
+                    stage={stage}
+                    setActionState={setActionState}
+                    openMenuId={openMenuId}
+                    setOpenMenuId={setOpenMenuId}
+                  />
+                )
+              })}
+              {provided.placeholder}
+            </section>
+          )}
+        </StrictModeDroppable>
+      </DragDropContext>
     </Wrapper>
   )
 }

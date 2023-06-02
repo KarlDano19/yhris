@@ -1,5 +1,3 @@
-"use client"
-
 import {
   CalendarIcon,
   EllipsisVerticalIcon,
@@ -41,7 +39,7 @@ export default function Person({
   setOpenMenuId,
   setActionState,
   stage,
-}) {
+}: PropTypes) {
   const { image, name, id } = applicant
 
   const handleOpenMenu = () => {

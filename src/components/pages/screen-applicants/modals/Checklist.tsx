@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
-import { ChecklistPropTypes as PropTypes } from "../../types"
-import { initialActionState } from "../../lib/initialActionState"
+import { ChecklistPropTypes as PropTypes } from "../types"
+import { initialActionState } from "../lib/initialActionState"
 import { useForm } from "react-hook-form"
-import { camelize } from "../../lib/camelize"
+import { camelize } from "../lib/camelize"
+import ModalFooterLayout from "../layouts/ModalFooterLayout"
 
 const status = [
   {
@@ -97,13 +98,13 @@ export default function Checklist({
           </div>
         </div>
         <hr />
-        <div className="flex items-center gap-2 text-[15px] font-bold justify-end px-8 py-4">
+        <ModalFooterLayout>
           <button
             onClick={handleClose}
             type="button"
             className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
           >
-            Cancel
+            Close
           </button>
           <button
             type="submit"
@@ -111,7 +112,7 @@ export default function Checklist({
           >
             Update
           </button>
-        </div>
+        </ModalFooterLayout>
       </form>
     </ModalLayout>
   )

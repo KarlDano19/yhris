@@ -1,11 +1,9 @@
-import { useEffect, useReducer, useState } from "react"
-import ModalLayout from "./ModalLayout"
+import { useEffect, useState } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { Fragment, useRef } from "react"
-import { ConfirmationPropTypes as PropTypes } from "../../types"
+import { ConfirmationPropTypes as PropTypes } from "../types"
 import Warning from "@/svg/Warning"
-import { INITIAL_STATE, stageReducer } from "../../reducers/stageReducer"
-import { initialActionState } from "../../lib/initialActionState"
+import { initialActionState } from "../lib/initialActionState"
 
 export default function Confirmation({
   actionState,

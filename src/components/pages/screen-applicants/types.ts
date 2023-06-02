@@ -8,17 +8,16 @@ export type JobType = {
 }
 
 export type BlockPropTypes = {
-  key: number
-  applicants: ApplicantsType
-  draggableId: string
   index: number
   stage: StageType
-  setPersonMenu: Dispatch<SetStateAction<object | null>>
+  setActionState: any
+  openMenuId: null | number
+  setOpenMenuId: any
 }
 
 export type WrapperPropTypes = {
   children: React.ReactNode
-  maxWidth: string
+  maxWidth?: string
   title: string
 }
 
@@ -26,6 +25,8 @@ export type PersonPropTypes = {
   applicant: ApplicantType
   isOpenMenu: boolean
   setOpenMenuId: any
+  setActionState: any
+  stage: StageType
 }
 
 export type ModalLayoutTypes = {
@@ -82,6 +83,7 @@ export type ApplicantsType = [] | ApplicantType[]
 export type StageType = {
   id: number
   title: string
+  isNewStage: boolean
   requirements: string[]
   applicants: ApplicantsType
 }
@@ -98,8 +100,8 @@ export type ActionStateType = {
 
 export type StagePropTypes = {
   stage: StageType
-  state: StageType[]
-  stageDropdownId: number
-  setStageDropdownId: number
+  stageDropdownId: number | null
+  setStageDropdownId: any
   setActionState: any
+  dispatch: any
 }

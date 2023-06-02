@@ -1,10 +1,10 @@
 import { useState } from "react"
 
-export default function useTagInput(input, setInput, requirements) {
+export default function useTagInput(input: string, setInput: any, requirements: string[]) {
   const [tags, setTags] = useState(requirements)
 
   const handleKeyDown = (event: any) => {
-    if (event.key === "Enter" || event.key === "Tab") {
+    if (event.key === "Enter" || event.key === "Tab" || event.key === ",") {
       event.preventDefault()
       const newTag = input.trim()
       if (

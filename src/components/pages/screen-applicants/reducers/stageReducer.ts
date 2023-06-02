@@ -1,41 +1,52 @@
+import actionTypes from "../lib/actionTypes"
 import { initialActionState } from "../lib/initialActionState"
 import { job } from "../testData"
-import { ApplicantType, StageType } from "../types"
+import { StageType } from "../types"
 
-export const ACTION_TYPES = {
-  FETCH_START: "FETCH_START",
-  FETCH_SUCCESS: "FETCH_SUCCESS",
-  FETCH_FAILED: "FETCH_FAILED",
-}
+const {
+  SET_REQUIREMENTS,
+  CHECKLIST,
+  SEND_EMAIL,
+  SCHEDULE_INTERVIEW,
+  DRAG_BLOCK,
+  SET_TITLE,
+  REMOVE_STAGE,
+  ADD_STAGE,
+} = actionTypes
 
 export const INITIAL_STATE = [
   {
     id: 1,
-    title: "Recommended Applicants",
+    title: "Recommended Applicant",
+    isNewStage: false,
     requirements: [],
     applicants: job.applicants,
   },
   {
     id: 2,
     title: "Initial Interview",
+    isNewStage: false,
     requirements: [],
     applicants: [],
   },
   {
     id: 3,
     title: "Manager Interview",
+    isNewStage: false,
     requirements: [],
     applicants: [],
   },
   {
     id: 4,
     title: "Panel Interview",
+    isNewStage: false,
     requirements: [],
     applicants: [],
   },
   {
     id: 5,
     title: "Final Interview",
+    isNewStage: false,
     requirements: [],
     applicants: [],
   },
@@ -43,9 +54,12 @@ export const INITIAL_STATE = [
 
 export const stageReducer = (state: any, action: any) => {
   switch (action.type) {
-    case "DRAG_BLOCK": {
+    case DRAG_BLOCK: {
       const { source, destination } = action.payload
-      if (!destination) return
+      console.log({ source, destination })
+      if (!destination) {
+        return state
+      }
       const applicants = state.map((item: StageType) => [...item.applicants])
       const [movedApplicants] = applicants.splice(source.index, 1)
       applicants.splice(destination.index, 0, movedApplicants)
@@ -55,7 +69,17 @@ export const stageReducer = (state: any, action: any) => {
       }))
       return newState
     }
-    case "SET_REQUIREMENTS": {
+    case SET_TITLE: {
+      const { title, stageId } = action.payload
+      console.log({ title, stageId })
+      const newState = state.map((item: StageType) => {
+        if (item.id === stageId) {
+          return { ...item, title }
+        } else return item
+      })
+      return newState
+    }
+    case SET_REQUIREMENTS: {
       const { actionState, setActionState, requirements } = action.payload
       const newState = state.map((item: StageType) => {
         if (item.id === actionState.stageId) {
@@ -72,13 +96,24 @@ export const stageReducer = (state: any, action: any) => {
       })
       return newState
     }
-    case "REMOVE_STAGE": {
+    case ADD_STAGE: {
+      const newState = [...state]
+      newState.push({
+        id: Date.now(),
+        title: "Untitled",
+        isNewStage: true,
+        requirements: [],
+        applicants: [],
+      })
+      return newState
+    }
+    case REMOVE_STAGE: {
       const { stageId, setActionState } = action.payload
       const newState = state.filter((item: StageType) => item.id !== stageId)
       setActionState(initialActionState)
       return newState
     }
-    case "CHECKLIST": {
+    case CHECKLIST: {
       const { actionState, setActionState, formData } = action.payload
       // checklist logic here...
       setActionState({
@@ -92,9 +127,10 @@ export const stageReducer = (state: any, action: any) => {
       return state
     }
 
-    case "SEND_EMAIL": {
+    case SEND_EMAIL: {
       const { actionState, setActionState, formData } = action.payload
       // send email logic here...
+      console.log(formData)
       setActionState({
         ...actionState,
         modal: {
@@ -105,7 +141,7 @@ export const stageReducer = (state: any, action: any) => {
       })
       return state
     }
-    case "SCHEDULE_INTERVIEW": {
+    case SCHEDULE_INTERVIEW: {
       const { actionState, setActionState, formData } = action.payload
       // schedule interview logic here...
       setActionState({
@@ -113,12 +149,12 @@ export const stageReducer = (state: any, action: any) => {
         modal: {
           whichModal: "SUCCESS",
           isOpen: true,
-          title: "You have successfully sent an email.",
+          title: "You have successfully sent interview request.",
         },
       })
       return state
     }
     default:
-      state
+      return state
   }
 }

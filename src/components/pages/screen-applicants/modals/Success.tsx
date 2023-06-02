@@ -1,10 +1,22 @@
-import { Fragment, useRef } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, Transition } from "@headlessui/react"
-import { XCircleIcon } from "@heroicons/react/24/solid"
-import { ModalLayoutTypes as PropTypes } from "../../types"
+import { Fragment, useRef } from "react"
+import Confetti from "@/svg/Confetti"
+import { initialActionState } from "../lib/initialActionState"
+import { SuccessPropTypes as PropTypes } from "../types"
 
-export default function ModalLayout({ children, title, isOpen, handleClose }) {
+export default function Success({ title, setActionState }: PropTypes) {
+  const [isOpen, setIsOpen] = useState(false)
   const cancelButtonRef = useRef(null)
+
+  useEffect(() => {
+    setIsOpen(true)
+  }, [])
+
+  const handleClose = () => {
+    setIsOpen(false)
+    setTimeout(() => setActionState(initialActionState), 400)
+  }
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -36,17 +48,23 @@ export default function ModalLayout({ children, title, isOpen, handleClose }) {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
-                <div className="flex bg-savoy-blue p-2 items-center">
-                  <h3 className="flex-1 text-white ml-2 font-semibold">
-                    {title}
-                  </h3>
-                  <XCircleIcon
-                    className="w-8 h-8 text-white cursor-pointer"
-                    onClick={handleClose}
-                  />
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:my-8 sm:w-[460px] sm:max-w-4xl p-10 text-center">
+                <div className="flex justify-center mb-4">
+                  <Confetti />
                 </div>
-                {children}
+                <h3 className="text-center font-bold text-3xl text-green-600 mb-6">
+                  Awesome!
+                </h3>
+                <h5 className="text-xl font-bold text-indigo-dye mb-12">
+                  {title}
+                </h5>
+                <button
+                  type="button"
+                  className="text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all"
+                  onClick={handleClose}
+                >
+                  CONTINUE
+                </button>
               </Dialog.Panel>
             </Transition.Child>
           </div>

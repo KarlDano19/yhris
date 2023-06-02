@@ -18,3 +18,10 @@ select {
 input[type="radio"] {
   accent-color: #355fd0;
 }
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hidden-scrollbar {
+  resize: none;
+}

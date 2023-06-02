@@ -5,9 +5,10 @@ import SelectChevronDown from "@/svg/SelectChevronDownDummy"
 import { VideoIcon, WhiteVideoIcon } from "@/svg/VideoIcon"
 import { useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
-import { ScheduleInterviewPropTypes as PropTypes } from "../../types"
-import { initialActionState } from "../../lib/initialActionState"
+import { ScheduleInterviewPropTypes as PropTypes } from "../types"
+import { initialActionState } from "../lib/initialActionState"
 import { useForm } from "react-hook-form"
+import ModalFooterLayout from "../layouts/ModalFooterLayout"
 
 const formatTypes = [
   {
@@ -81,7 +82,7 @@ export default function ScheduleInterview({
   return (
     <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
       <form onSubmit={handleSubmit((data) => onSubmit(data))}>
-        <div className="p-8">
+        <div className="p-4">
           <div className="flex items-center gap-3 flex-wrap mb-8">
             <div className="text-indigo-dye flex-grow">
               <label htmlFor="date" className="block mb-2">
@@ -249,21 +250,21 @@ export default function ScheduleInterview({
         </div>
 
         <hr />
-        <div className="flex items-center gap-2 text-[15px] font-bold justify-end px-8 py-4">
+        <ModalFooterLayout>
           <button
             onClick={handleClose}
             type="button"
-            className="border border-[#355FD0] rounded-lg py-3 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
+            className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-lg py-3 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]"
+            className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]"
           >
             Send Interview Request
           </button>
-        </div>
+        </ModalFooterLayout>
       </form>
     </ModalLayout>
   )

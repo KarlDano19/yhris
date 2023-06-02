@@ -1,13 +1,14 @@
 import SelectChevronDown from "@/svg/SelectChevronDownDummy"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ModalLayout from "./ModalLayout"
-import { SendEmailPropTypes as PropTypes } from "../../types"
+import { SendEmailPropTypes as PropTypes } from "../types"
 import dynamic from "next/dynamic"
 import ReactQuill from "react-quill"
 import "react-quill/dist/quill.snow.css"
-import { QUILL_FORMATS, QUILL_MODULES } from "./helpers/constants"
+import { QUILL_FORMATS, QUILL_MODULES, BODY_TEMPLATE } from "../lib/constants"
 import { useForm } from "react-hook-form"
-import { initialActionState } from "../../lib/initialActionState"
+import { initialActionState } from "../lib/initialActionState"
+import ModalFooterLayout from "../layouts/ModalFooterLayout"
 
 export default function SendEmail({
   title,
@@ -21,8 +22,16 @@ export default function SendEmail({
     () => dynamic(() => import("react-quill"), { ssr: false }),
     [isOpen]
   )
-  const [value, setValue] = useState("")
-  const { register, handleSubmit } = useForm()
+  // const [value, setValue] = useState("")
+  const { register, handleSubmit, setValue, getValues } = useForm({
+    defaultValues: {
+      bcc: "",
+      cc: "",
+      email: "",
+      template: "Application Journey",
+      message: BODY_TEMPLATE.message,
+    },
+  })
 
   useEffect(() => {
     setIsOpen(true)
@@ -32,10 +41,9 @@ export default function SendEmail({
     setTimeout(() => setActionState(initialActionState), 400)
   }
   const handleOnSubmit = (data: any) => {
-    const formData = { ...data, message: value }
     setIsOpen(false)
     // put data
-    setTimeout(() => handleFormSubmit(formData), 400)
+    setTimeout(() => handleFormSubmit(data), 400)
   }
 
   return (
@@ -55,7 +63,7 @@ export default function SendEmail({
                 id="template"
                 className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
               >
-                <option value="">Select...</option>
+                <option value="Application Journey">Application Journey</option>
                 <option>Notice to explain</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
@@ -82,8 +90,10 @@ export default function SendEmail({
               </div>
               <button
                 type="button"
-                className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                  isCCOpen && "bg-savoy-blue text-white hover:bg-blue-700"
+                className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                  isCCOpen
+                    ? "bg-savoy-blue text-white hover:bg-blue-700"
+                    : "hover:bg-gray-50"
                 }`}
                 onClick={() => setIsCCOPen(!isCCOpen)}
               >
@@ -91,8 +101,10 @@ export default function SendEmail({
               </button>
               <button
                 type="button"
-                className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                  isBCCOpen && "bg-savoy-blue text-white hover:bg-blue-700"
+                className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                  isBCCOpen
+                    ? "bg-savoy-blue text-white hover:bg-blue-700"
+                    : "hover:bg-gray-50"
                 }`}
                 onClick={() => setIsBCCOpen(!isBCCOpen)}
               >
@@ -146,39 +158,39 @@ export default function SendEmail({
               Message<span className="text-red-600">*</span>
             </label>
             <div className="mt-2 h-72 mb-12">
-              {/* <textarea
+              <textarea
                 {...register("message", { required: true })}
                 rows={4}
                 id="message"
                 hidden
-              /> */}
+              />
               <ReactQuill
-                onChange={(value) => setValue(value)}
+                onChange={(value) => setValue("message", value)}
                 formats={QUILL_FORMATS}
                 modules={QUILL_MODULES}
                 style={{ height: "100%" }}
-                value={value}
+                defaultValue={getValues("message")}
               />
             </div>
           </div>
         </div>
 
         <hr />
-        <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
+        <ModalFooterLayout>
           <button
-            type="submit"
-            className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-          >
-            Send
-          </button>
-          <button
-            type="button"
-            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
             onClick={handleClose}
+            type="button"
+            className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
           >
             Close
           </button>
-        </div>
+          <button
+            type="submit"
+            className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]"
+          >
+            Send
+          </button>
+        </ModalFooterLayout>
       </form>
     </ModalLayout>
   )
