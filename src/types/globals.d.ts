@@ -26,6 +26,46 @@ export type T_Separation = {
   reason: string;
 };
 
+export type T_JobPreviewModal = {
+  isOpen: boolean;
+  id: number;
+};
+
+// Post a Job
+
+export type T_CreateJob = {
+  id: number;
+  JobNo: string;
+  country: string;
+  isActive: boolean;
+  language: string;
+  jobTitle: string;
+  placeAdvertise: string;
+  jobType: string;
+  schedule: string;
+  hireCount: number;
+  hireDate: string;
+  salary: {
+    salaryType: string;
+    salaryValue: string;
+  };
+  rate: string;
+  benefits: string[];
+  jobDescription: string;
+  jobDescriptionFile: File;
+  postAs: string;
+  postAsUpload: File;
+  postIn: string[];
+};
+
+export type T_Separation = {
+  date: string;
+  name: string;
+  position: string;
+  department: string;
+  reason: string;
+};
+
 export type T_SendNTEModal = {
   isOpen: boolean;
   id: number;
