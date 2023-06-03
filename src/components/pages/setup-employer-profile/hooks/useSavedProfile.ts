@@ -24,7 +24,7 @@ async function saveProfile(profile: T_EmployerProfile) {
     data.append('language', profile.language);
     data.append('currency', profile.currency);
     if (profile.companyLogo) {
-      data.append('img', profile.companyLogo);
+      data.append('logo_file', profile.companyLogo);
     }
     const config = {
       method: 'POST',

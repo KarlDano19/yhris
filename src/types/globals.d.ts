@@ -42,68 +42,60 @@ export type T_InvestigationModal = {
 };
 
 export type T_DesignBenefitsModal = {
-    isOpen: boolean,
-    id: number,
-}
+  isOpen: boolean;
+  id: number;
+};
 
 export type T_Separation = {
-    date: string;
-    name: string;
-    position: string;
-    department: string;
-    reason: string;
+  date: string;
+  name: string;
+  position: string;
+  department: string;
+  reason: string;
 };
 
 export type T_SeparationEmail = {
   id: string;
-  type: string;
+  actionType: string;
+  emailType: string;
   separationLetter: any;
   signDocuments: any;
-  quitclaim: any;
+  quitClaim: any;
+  dateReceived: any;
 };
 
 export type T_Login = {
-    email: string;
-    password: string;
-}
+  email: string;
+  password: string;
+};
 
 export type T_Register = {
-    accountType: string;
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-}
+  accountType: string;
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export type T_EmployerProfile = {
-    companyName: string;
-    companyLogo: Blob;
-    companyDescription: string;
-    typeOfIndustry: string;
-    noOfEmployees: string;
-    workSetUp: string;
-    email: string;
-    mobileNumber: string;
-    landlineNumber: string;
-    building: string;
-    street: string;
-    locality: string;
-    city: string;
-    zipCode: string;
-    country: string;
-    language: string;
-    currency: string;
-    imagePath: any;
-}
-export type T_Investigation = {
-  date: string;
-  presider: string;
-  witness: string;
-  decision: string;
-  other: string;
-  isAttendHearing: string;
-  briefBackground: string;
-  attachment: File;
+  companyName: string;
+  companyLogo: Blob;
+  companyDescription: string;
+  typeOfIndustry: string;
+  noOfEmployees: string;
+  workSetUp: string;
+  email: string;
+  mobileNumber: string;
+  landlineNumber: string;
+  building: string;
+  street: string;
+  locality: string;
+  city: string;
+  zipCode: string;
+  country: string;
+  language: string;
+  currency: string;
+  imagePath: any;
 };
 
 export type T_IncidentReport = {
@@ -115,26 +107,39 @@ export type T_IncidentReport = {
   briefBackground: string;
 };
 
-export type T_CreateMemo = {
+export type T_IncidentReportEmail = {
+  id: string;
+  actionType: string;
+  emailType: string;
+  issueNTE: any;
+  sendDecision: any;
+  dateReceived: any;
+};
+
+export type T_Investigation = {
+  employee_issue: string;
   date: string;
+  presider: string;
+  witness: string;
+  resultOfInvestigation: string;
+  decision: string;
+  other: string;
+  isAttendHearing: string;
+  briefBackground: string;
+  attachments: File;
+};
+
+export type T_Directive = {
   type: string;
   title: string;
   email: string;
+  withResponse: boolean;
+  file: Array;
   body: string;
   name: string;
   position: string;
   signature: string | File;
-  qrCode: string | File;
-  file: string | File;
-  withResponse: boolean;
-};
-
-export type T_CreatePolicy = {
-  date: string;
-  type: string;
-  title: string;
-  email: string;
-  file: string | File;
+  qrCode: any;
   purpose: string;
   policy: string;
   procedure: string;
@@ -142,7 +147,15 @@ export type T_CreatePolicy = {
   application: string;
   coverage: string;
   termination: string;
-  createPolicyFile: string | File;
-  withResponse: boolean;
 };
 
+export type T_Benefit = {
+  title: string;
+  email: string;
+  purpose: string;
+  benefits: string;
+  coverage: string;
+  eligibility: string;
+  cc: string;
+  bcc: string;
+};

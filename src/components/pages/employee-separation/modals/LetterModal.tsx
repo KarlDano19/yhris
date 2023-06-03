@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { T_LetterModal } from '@/types/globals';
@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import CustomToast from '@/components/CustomToast';
 import DateCalendar from '@/svg/DateCalendar';
-import useSendSeparationEmail from '../hooks/useSendSeparationEmail';
+import usePatchSeparationItem from '../hooks/usePatchSeparationItem';
 
 type FormValues = {
   date: string;
@@ -28,7 +28,7 @@ export default function LetterModal({
   isOpen: T_LetterModal | null;
   setIsOpen: Dispatch<T_LetterModal | null>;
 }) {
-  const { mutate, isLoading } = useSendSeparationEmail();
+  const { mutate, isLoading } = usePatchSeparationItem();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
   const dateInputRef = useRef(null);
@@ -41,7 +41,8 @@ export default function LetterModal({
       );
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       separationItemsCopy[itemIndex].id = isOpen.id;
-      separationItemsCopy[itemIndex].type = 'letters';
+      separationItemsCopy[itemIndex].actionType = 'sending';
+      separationItemsCopy[itemIndex].emailType = 'letters';
       separationItemsCopy[itemIndex].separationLetter.date = data.date;
       separationItemsCopy[itemIndex].separationLetter.to = data.email;
       separationItemsCopy[itemIndex].separationLetter.message = data.message;
@@ -64,6 +65,7 @@ export default function LetterModal({
           () => <CustomToast message={data.message} type='success' />,
           { duration: 5000 }
         );
+        setIsConfirmModalOpen(!isConfirmModalOpen);
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -80,6 +82,19 @@ export default function LetterModal({
       reset();
     }
   };
+
+  useEffect(() => {
+    if (isOpen && isOpen.id) {
+      const itemIndex = separationItems.findIndex(
+        (item: any) => item.id === isOpen.id
+      );
+      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
+      if (separationItemsCopy[itemIndex]) {
+        setValue('email', separationItemsCopy[itemIndex].employee_dict.email);
+      }
+    }
+  }, [isOpen]);
+
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
@@ -218,6 +233,7 @@ export default function LetterModal({
         isOpen={isConfirmModalOpen}
         setIsOpen={updateConfirmModal}
         confirmAction={saveData}
+        isLoading={isLoading}
       />
     </>
   );
