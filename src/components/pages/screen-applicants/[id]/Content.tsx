@@ -98,7 +98,7 @@ export default function Content() {
   )?.requirements
 
   return (
-    <Wrapper title={`Screen Applicants / ${job.title} Applications`}>
+    <Wrapper title={`Screen Applicants / ${job.title} Applications`} backLink="/screen-applicants" backText="Screen Applicants">
       {whichModal === "STAGE_REQUIREMENTS" && (
         <StageRequirements
           title={title}

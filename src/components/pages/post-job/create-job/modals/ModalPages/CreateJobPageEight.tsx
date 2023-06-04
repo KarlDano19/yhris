@@ -1,17 +1,16 @@
 import { Dispatch, Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import Confetti from "@/svg/Confetti";
+
 export default function CreateJobPageEight({
-  onSubmit,
   isOpen,
   setIsOpen,
 }: {
-  onSubmit: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-
+  
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -50,14 +49,14 @@ export default function CreateJobPageEight({
                 <h3 className="text-center font-semibold text-3xl text-green-600">
                   Awesome!
                 </h3>
-                <h5 className="text-xl font-bold text-indigo-dye">
+                <h5 className="text-xl font-bold text-indigo-dye text-center">
                   You have successfully set-up your company.
                 </h5>
                 <button
                   type="button"
                   className="text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all"
                   onClick={() => {
-                    onSubmit();
+                    setIsOpen(false);
                   }}
                 >
                   CONTINUE

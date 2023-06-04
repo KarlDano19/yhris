@@ -20,6 +20,8 @@
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
     "autoprefixer": "10.4.14",
+    "axios": "^1.4.0",
+    "cookies-next": "^2.1.1",
     "eslint": "8.38.0",
     "eslint-config-next": "13.3.0",
     "next": "^13.3.1",
@@ -28,14 +30,19 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.7.4",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.43.9",
     "react-hot-toast": "^2.4.1",
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.10.0",
+    "react-signature-canvas": "^1.0.6",
+    "sharp": "^0.32.1",
     "tailwindcss": "^3.3.2",
     "typescript": "5.0.4"
   },
   "devDependencies": {
-    "@types/react-beautiful-dnd": "^13.1.4"
+    "@types/react-beautiful-dnd": "^13.1.4",
+    "@tanstack/react-query-devtools": "^4.29.7",
+    "@types/react-signature-canvas": "^1.0.2"
   }
 }

@@ -1,0 +1,376 @@
+import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { T_Directive } from '@/types/globals';
+import SignatureModal from './SignatureModal';
+import Image from 'next/image';
+import CustomToast from '@/components/CustomToast';
+import DragDrop from '@/components/DragDrop';
+import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
+import { useQueryClient } from '@tanstack/react-query';
+
+export default function CreateMemoModal({
+  setCreateMemoPolicyItems,
+  createMemoPolicyItems,
+  isOpen,
+  setIsOpen,
+}: {
+  setCreateMemoPolicyItems: any;
+  createMemoPolicyItems: any;
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
+}) {
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useAddDirectivesItems();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    watch,
+    formState: { errors },
+    getValues,
+  } = useForm<T_Directive>();
+  const cancelButtonRef = useRef(null);
+
+  const [signatureUrl, setSignatureUrl] = useState('');
+  const [signatureModalOpen, setSignatureModalOpen] = useState(false);
+  const [attachmentExist, setAttachmentExist] = useState(false);
+  const [qrCodeExist, setQrCodeExist] = useState(false);
+  const [toSaveData, setToSaveData] = useState<any>(null);
+
+  const onSubmit = handleSubmit((data) => {
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(
+          () => <CustomToast message={data.message} type='success' />,
+          { duration: 5000 }
+        );
+        setIsOpen(false);
+        queryClient.refetchQueries({ queryKey: ['directivesItemCache'] });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    data['type'] = 'memo';
+    mutate({ ...toSaveData, ...data }, callbackReq);
+    reset();
+  });
+  const uploadOnChange = ({ target }: { target: any }) => {
+    const file = target.files[0];
+    if (!file) return;
+    if (file.size <= 5000000) {
+      setToSaveData({ ...toSaveData, qrCode: file });
+      setQrCodeExist(true);
+    } else {
+      toast.custom(
+        () => (
+          <CustomToast message={'Maximum file size is 5mb.'} type='error' />
+        ),
+        {
+          duration: 2000,
+        }
+      );
+    }
+  };
+  useEffect(() => {
+    if (signatureUrl) {
+      setValue('signature', signatureUrl);
+    } else {
+      setSignatureUrl('');
+    }
+  }, [signatureUrl, setValue]);
+  if (!isOpen && signatureUrl) {
+    setSignatureUrl('');
+  }
+  return (
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog
+        as='div'
+        className='relative z-10'
+        initialFocus={cancelButtonRef}
+        onClose={setIsOpen}
+      >
+        <Transition.Child
+          as={Fragment}
+          enter='ease-out duration-300'
+          enterFrom='opacity-0'
+          enterTo='opacity-100'
+          leave='ease-in duration-200'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0'
+        >
+          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+        </Transition.Child>
+
+        <div className='fixed inset-0 z-10 overflow-y-auto'>
+          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+            <Transition.Child
+              as={Fragment}
+              enter='ease-out duration-300'
+              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              enterTo='opacity-100 translate-y-0 sm:scale-100'
+              leave='ease-in duration-200'
+              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+            >
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                <div className='flex bg-savoy-blue p-2 items-center'>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>
+                    Create Memo
+                  </h3>
+                  <XCircleIcon
+                    className='w-8 h-8 text-white cursor-pointer'
+                    onClick={() => setIsOpen(false)}
+                  />
+                </div>
+                <form onSubmit={onSubmit}>
+                  <div className='px-4 pt-4 pb-6'>
+                    <div className='sm:col-span-4'>
+                      <label
+                        htmlFor='title'
+                        className='block text-sm font-medium leading-6 text-gray-900'
+                      >
+                        Title<span className='text-red-600'>*</span>
+                      </label>
+                      <div className='mt-2'>
+                        <input
+                          id='title'
+                          {...register('title', { required: true })}
+                          type='text'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        />
+                      </div>
+                    </div>
+                    <div className='sm:col-span-4 flex ml-4 mt-4'>
+                      <input
+                        id='withResponse'
+                        type='checkbox'
+                        {...register('withResponse')}
+                        className='form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white'
+                      />
+                      <label
+                        htmlFor='withResponse'
+                        className='block text-sm font-medium leading-6 text-gray-900 ml-2'
+                      >
+                        With Response
+                      </label>
+                    </div>
+                    <div className='sm:col-span-4 mt-4'>
+                      <label
+                        htmlFor='email'
+                        className='block text-sm font-medium leading-6 text-gray-900'
+                      >
+                        To<span className='text-red-600'>*</span>
+                      </label>
+                      <div className='mt-2'>
+                        <input
+                          id='email'
+                          {...register('email', { required: true })}
+                          type='email'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        />
+                      </div>
+                    </div>
+                    <div className='sm:col-span-4 mt-4'>
+                      <label
+                        htmlFor='body'
+                        className='block text-sm font-medium leading-6 text-gray-900'
+                      >
+                        Body
+                      </label>
+                      <div className='mt-2'>
+                        <textarea
+                          rows={4}
+                          {...register('body', { required: true })}
+                          id='body'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        />
+                      </div>
+                    </div>
+
+                    <p className='font-bold my-4'>Signatory</p>
+                    <div className='sm:col-span-4'>
+                      <label
+                        htmlFor='name'
+                        className='block text-sm font-medium leading-6 text-gray-900'
+                      >
+                        Name
+                      </label>
+                      <div className='mt-2'>
+                        <input
+                          id='name'
+                          {...register('name')}
+                          type='text'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        />
+                      </div>
+                    </div>
+                    <div className='sm:col-span-4 mt-4'>
+                      <label
+                        htmlFor='position'
+                        className='block text-sm font-medium leading-6 text-gray-900'
+                      >
+                        Position
+                      </label>
+                      <div className='mt-2'>
+                        <input
+                          id='position'
+                          {...register('position')}
+                          type='text'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        />
+                      </div>
+                    </div>
+                    <p className='my-4 block text-sm font-medium leading-6 text-gray-900'>
+                      Signature
+                    </p>
+                    <div className='flex flex-col md:flex-row items-start gap-6 mt-4'>
+                      <div className='flex-1'>
+                        <label
+                          htmlFor='draw'
+                          className='block text-sm font-medium leading-6 text-gray-900'
+                        >
+                          Draw
+                        </label>
+                        <div className='mt-2'>
+                          <button
+                            id='draw'
+                            type='button'
+                            className={`block w-full text-savoy-blue font-bold rounded-md border border-savoy-blue py-1.5 px-3 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
+                              signatureUrl ? 'bg-savoy-blue text-white ' : ''
+                            }`}
+                            onClick={() => {
+                              setSignatureModalOpen(true);
+                              // setSignatureUrl("");
+                            }}
+                          >
+                            Draw
+                          </button>
+                        </div>
+                      </div>
+                      <p className='text-center mt-10'>or</p>
+                      <div className='flex-1'>
+                        <label
+                          htmlFor='signature'
+                          className='block text-sm font-medium leading-6 text-gray-900'
+                        >
+                          Attachment
+                        </label>
+                        <div className='mt-2'>
+                          <input
+                            id='signature'
+                            {...register('signature')}
+                            onChange={(e) => {
+                              e.target.value ? setSignatureUrl('') : null;
+                              e.target.value ? setAttachmentExist(true) : null;
+                            }}
+                            type='file'
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                          />
+                          {attachmentExist ? (
+                            <button
+                              type='button'
+                              className='underline text-savoy-blue text-sm mt-1'
+                              onClick={() => {
+                                setValue('signature', '');
+                                setAttachmentExist(false);
+                              }}
+                            >
+                              Remove Attachment
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                    {signatureUrl !== '' && (
+                      <div className='mt-4'>
+                        <Image
+                          className='border-0 ring-1 ring-inset ring-gray-300 m-auto'
+                          src={signatureUrl}
+                          width={500}
+                          height={200}
+                          alt='signatureImage'
+                        />
+                      </div>
+                    )}
+                    <div className='sm:col-span-4 mt-4'>
+                      <label
+                        htmlFor='qrCode'
+                        className='block text-sm font-medium leading-6 text-gray-900'
+                      >
+                        Qr Code
+                      </label>
+                      <div className='mt-2'>
+                        <input
+                          id='qrCode'
+                          type='file'
+                          onChange={uploadOnChange}
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                        />
+                        {qrCodeExist ? (
+                          <button
+                            type='button'
+                            className='underline text-savoy-blue text-sm mt-1'
+                            onClick={() => {
+                              delete toSaveData.qrCode;
+                              setToSaveData({ ...toSaveData });
+                              setQrCodeExist(false);
+                            }}
+                          >
+                            Remove QR Code
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className='sm:col-span-4 mt-4'>
+                      <label
+                        htmlFor='file'
+                        className='block text-sm font-medium leading-6 text-gray-900 mb-2'
+                      >
+                        Upload File (Optional)
+                      </label>
+                      <DragDrop
+                        setValue={(value: any) => setValue('file', value)}
+                      />
+                      <p className='text-xs mt-1 text-gray-400'>
+                        Maximum file size: 10mb
+                      </p>
+                    </div>
+                  </div>
+                  <hr />
+                  <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
+                    <button
+                      type='submit'
+                      className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
+                    >
+                      Create
+                    </button>
+                    <button
+                      type='button'
+                      className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                      onClick={() => setIsOpen(false)}
+                      ref={cancelButtonRef}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </form>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+        <SignatureModal
+          setSignatureUrl={setSignatureUrl}
+          isOpen={signatureModalOpen}
+          setIsOpen={setSignatureModalOpen}
+        />
+      </Dialog>
+    </Transition.Root>
+  );
+}

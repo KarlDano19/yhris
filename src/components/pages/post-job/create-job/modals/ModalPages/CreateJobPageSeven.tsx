@@ -14,6 +14,7 @@ export default function CreateJobPageSeven({
   setPageNumber,
   setIsCreateJobPageEightModalOpen,
   setParentOpen,
+  onSubmit,
 }: {
   watch: any;
   setValue: any;
@@ -21,12 +22,12 @@ export default function CreateJobPageSeven({
   setPageNumber: Dispatch<number>;
   setIsCreateJobPageEightModalOpen: Dispatch<boolean>;
   setParentOpen: Dispatch<boolean>;
+  onSubmit: any;
 }) {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [manualInputFocus, setManualInputFocus] = useState(false);
 
   const handleRadioChange = (value: string) => {
-    console.log(value);
-
     setSelectedOptions((prevOptions) => {
       // Check if the value already exists in the array
       if (prevOptions.includes(value)) {
@@ -39,28 +40,27 @@ export default function CreateJobPageSeven({
     });
   };
 
-  console.log(watch("postIn"));
-
   useEffect(() => {
     if (selectedOptions.length > 0) {
       setValue("postIn", selectedOptions);
     }
-  }, [selectedOptions]);
+  }, [selectedOptions, setValue]);
   return (
     <>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pb-6">
         {/* start */}
         <div className="sm:col-span-4 mt-4">
           <label className="block text-sm font-medium leading-6 text-gray-900">
             Post in (you may select multiple platforms):
           </label>
-          <div className="flex flex-col space-y-2 ml-2 mt-2">
+          <div className={`flex flex-col space-y-2 ml-2 mt-2 ${ manualInputFocus ? "border-2 border-blue-700" : ""}`}>
             <label className="inline-flex items-center mr-4">
               <input
                 type="radio"
                 className="form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900"
                 name="linkedIn"
                 onChange={() => handleRadioChange("LinkedIn")}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="flex items-center ml-2 text-sm font-medium leading-6 text-gray-900">
                 <LinkedIn /> <span className="ml-2">LinkedIn</span>
@@ -73,6 +73,7 @@ export default function CreateJobPageSeven({
                 className="form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900"
                 name="facebook"
                 onChange={() => handleRadioChange("Facebook")}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="flex items-center ml-2 text-sm font-medium leading-6 text-gray-900">
                 <Facebook />
@@ -86,6 +87,7 @@ export default function CreateJobPageSeven({
                 className="form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900"
                 name="instagram"
                 onChange={() => handleRadioChange("Instagram")}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="flex items-center ml-2 text-sm font-medium leading-6 text-gray-900">
                 <Instagram />
@@ -98,6 +100,7 @@ export default function CreateJobPageSeven({
                 className="form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900"
                 name="twitter"
                 onChange={() => handleRadioChange("Twitter")}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="flex items-center ml-2 text-sm font-medium leading-6 text-gray-900">
                 <Twitter />
@@ -110,6 +113,7 @@ export default function CreateJobPageSeven({
                 className="form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900"
                 name="indeed"
                 onChange={() => handleRadioChange("Indeed")}
+                onClick={() => setManualInputFocus(false)}
               />
               <span className="flex items-center ml-2 text-sm font-medium leading-6 text-gray-900">
                 <Indeed />
@@ -122,11 +126,16 @@ export default function CreateJobPageSeven({
       <hr />
       <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4">
         <button
-          type="button"
+          type="submit"
           className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
           onClick={() => {
-            setParentOpen(false);
-            setIsCreateJobPageEightModalOpen(true);
+            if(selectedOptions.length > 0) {
+              setParentOpen(false);
+              setIsCreateJobPageEightModalOpen(true);
+              onSubmit();
+            } else {
+              setManualInputFocus(true);
+            }
           }}
         >
           Share

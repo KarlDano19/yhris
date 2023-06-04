@@ -56,7 +56,6 @@ export const stageReducer = (state: any, action: any) => {
   switch (action.type) {
     case DRAG_BLOCK: {
       const { source, destination } = action.payload
-      console.log({ source, destination })
       if (!destination) {
         return state
       }
@@ -71,7 +70,6 @@ export const stageReducer = (state: any, action: any) => {
     }
     case SET_TITLE: {
       const { title, stageId } = action.payload
-      console.log({ title, stageId })
       const newState = state.map((item: StageType) => {
         if (item.id === stageId) {
           return { ...item, title }
@@ -130,7 +128,6 @@ export const stageReducer = (state: any, action: any) => {
     case SEND_EMAIL: {
       const { actionState, setActionState, formData } = action.payload
       // send email logic here...
-      console.log(formData)
       setActionState({
         ...actionState,
         modal: {

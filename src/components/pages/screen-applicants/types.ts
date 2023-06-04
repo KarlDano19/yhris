@@ -19,6 +19,8 @@ export type WrapperPropTypes = {
   children: React.ReactNode
   maxWidth?: string
   title: string
+  backText?: string
+  backLink?: string
 }
 
 export type PersonPropTypes = {

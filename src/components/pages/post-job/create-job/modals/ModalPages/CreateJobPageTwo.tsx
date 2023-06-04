@@ -1,4 +1,4 @@
-import { Dispatch, useState } from "react";
+import { Dispatch, useRef, useState } from "react";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 import DateCalendarDummy from "@/svg/DateCalendarDummy";
 
@@ -8,23 +8,31 @@ export default function CreateJobPageTwo({
   setValue,
   setPageNumber,
   setIsSalaryRangeModalOpen,
+  trigger,
+  getValues,
+  setFocus,
 }: {
   register: any;
   setValue: any;
   watch: any;
   setPageNumber: Dispatch<number>;
   setIsSalaryRangeModalOpen: Dispatch<boolean>;
+  trigger: any;
+  getValues: any;
+  setFocus: any;
 }) {
   const [otherJobType, setOtherJobType] = useState(false);
   const [otherSchedule, setOtherSchedule] = useState(false);
+  const [manualInputFocus, setManualInputFocus] = useState({ jobType: false, schedule: false, hireDate: false });
+  const dateInputRef = useRef(null);
 
   // getting the value of JobType
   const handleJobType = (option: string) => {
-    return setValue("jobType", option, { shouldValidate: true });
+    return setValue("jobType", option);
   };
   // getting the value of Schedule
   const handleSchedule = (option: string) => {
-    return setValue("schedule", option, { shouldValidate: true });
+    return setValue("schedule", option);
   };
 
   const JobType = [
@@ -41,8 +49,8 @@ export default function CreateJobPageTwo({
     { name: "Night Shift", item: "nightShift" },
   ];
   return (
-    <>
-      <div className="px-4 pt-4 pb-6">
+    <div onClick={() => setManualInputFocus({ jobType: false, schedule: false, hireDate: false })}>
+      <div className="px-4 pb-6">
         <div className="sm:col-span-4 mt-4">
           <label
             htmlFor="language"
@@ -51,7 +59,7 @@ export default function CreateJobPageTwo({
             What is the job type?
             <span className="text-red-600">*</span>
           </label>
-          <div className="flex flex-wrap mt-2  space-x-2 md:space-y-0 md:space-x-6">
+          <div className={`flex flex-wrap mt-2  space-x-2 md:space-y-0 md:space-x-6 ${ manualInputFocus.jobType ? "border-2 border-blue-700" : ""}`}>
             {JobType.map((job, index) => {
               return (
                 <button
@@ -63,6 +71,7 @@ export default function CreateJobPageTwo({
                   onClick={() => {
                     handleJobType(job.item);
                     setOtherJobType(false);
+                    setManualInputFocus({ jobType: false, schedule: false, hireDate: false });
                   }}
                 >
                   {watch("jobType") == job.item ? "✓" : "+"} {job.name}
@@ -75,7 +84,10 @@ export default function CreateJobPageTwo({
               className={`mt-2 md:mt-0 flex-grow text-sm font-medium leading-6 text-gray-900 shadow-sm ring-1 border-0 ring-inset ring-gray-300 py-3 px-6 rounded-md transition-all ${
                 otherJobType ? "bg-slate-400" : ""
               }`}
-              onClick={() => setOtherJobType(!otherJobType)}
+              onClick={() => { 
+                setOtherJobType(!otherJobType);
+                setManualInputFocus({ jobType: false, schedule: false, hireDate: false });
+              }}
             >
               {otherJobType ? "✓" : "+"}
               Other
@@ -113,7 +125,7 @@ export default function CreateJobPageTwo({
             What is the schedule for this job?
             <span className="text-red-600">*</span>
           </label>
-          <div className="flex flex-wrap mt-2 space-x-2 md:space-y-0 md:space-x-6">
+          <div className={`flex flex-wrap mt-2 space-x-2 md:space-y-0 md:space-x-6 ${ manualInputFocus.schedule ? "border-2 border-blue-700" : ""}`}>
             {Schedule.map((sched, index) => {
               return (
                 <button
@@ -125,6 +137,7 @@ export default function CreateJobPageTwo({
                   onClick={() => {
                     handleSchedule(sched.item);
                     setOtherSchedule(false);
+                    setManualInputFocus({ jobType: false, schedule: false, hireDate: false });
                   }}
                 >
                   {watch("schedule") == sched.item ? "✓" : "+"} {sched.name}
@@ -137,7 +150,10 @@ export default function CreateJobPageTwo({
               className={`mt-2 md:mt-0 flex-grow text-sm font-medium leading-6 text-gray-900 shadow-sm ring-1 border-0 ring-inset ring-gray-300 py-3 px-6 rounded-md transition-all ${
                 otherSchedule ? "bg-slate-400" : ""
               }`}
-              onClick={() => setOtherSchedule(!otherSchedule)}
+              onClick={() => {
+                setOtherSchedule(!otherSchedule)
+                setManualInputFocus({ jobType: false, schedule: false, hireDate: false });
+              }}
             >
               {otherSchedule ? "✓" : "+"}
               Other
@@ -183,6 +199,7 @@ export default function CreateJobPageTwo({
                   required: true,
                 })}
                 type="number"
+                onClick={() => setManualInputFocus({ jobType: false, schedule: false, hireDate: false })}
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
               />
             </div>
@@ -200,11 +217,24 @@ export default function CreateJobPageTwo({
             <div className="relative mt-2">
               <input
                 type="date"
-                {...register("hireDate", { required: true })}
+                onChange={(e) =>
+                  setValue(
+                    'hireDate',
+                    Intl.DateTimeFormat('en-US').format(
+                      new Date(e.target.value)
+                    )
+                  )
+                }
                 id="date"
-                className="appearance-none bg-white block w-full rounded-md py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                className={`appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 ${ manualInputFocus.hireDate ? "border-2 border-blue-700" : ""}`}
                 placeholder="you@example.com"
                 aria-describedby="email-optional"
+                ref={dateInputRef}
+                onClick={() => { 
+                  // @ts-expect-error
+                  dateInputRef.current.showPicker();
+                  setManualInputFocus({ jobType: false, schedule: false, hireDate: false });
+                }}
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                 <DateCalendarDummy />
@@ -219,7 +249,25 @@ export default function CreateJobPageTwo({
         <button
           type="button"
           className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-          onClick={() => setIsSalaryRangeModalOpen(true)}
+          onClick={async () => {
+            const hireCount = await trigger("hireCount");
+            if(!hireCount) {
+              setFocus("hireCount");
+            }
+            const hireDate = getValues("hireDate");
+            const jobType = getValues("jobType");
+            const schedule = getValues("schedule");
+            setManualInputFocus({
+              hireDate: !!!hireDate,
+              jobType: !!!jobType,
+              schedule: !!!schedule
+            })
+            const results = [hireCount, !!hireDate, !!jobType, !!schedule];
+            const incomplete = results.some((item: boolean) => !item);
+            if (!incomplete) {
+              setIsSalaryRangeModalOpen(true);
+            }
+          }}
         >
           Next
         </button>
@@ -231,6 +279,6 @@ export default function CreateJobPageTwo({
           Back
         </button>
       </div>
-    </>
+    </div>
   );
 }

@@ -74,7 +74,6 @@ export default function ScheduleInterview({
     setTimeout(() => setActionState(initialActionState), 400)
   }
   const onSubmit = (data: any) => {
-    console.log(data)
     setIsOpen(false)
     setTimeout(() => handleFormSubmit(data), 400)
   }

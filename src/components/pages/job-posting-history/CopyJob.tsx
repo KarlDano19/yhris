@@ -31,24 +31,26 @@ function CopyJob({
       postIn,
     } = item;
 
-    const mergedData = `Job Id: ${id}
-Job Number: ${JobNo}
-Hire Date: ${hireDate}
-Active: ${isActive}
-Country: ${country}
-Language: ${language}
-Job Title: ${jobTitle}
-Place of Advertise: ${placeAdvertise}
-Job Type: ${jobType}
-Job Schedule: ${schedule}
-Hire Count: ${hireCount}
-Salary Type: ${salary.salaryType}
-Salary Value: ${salary.salaryValue}
-Rate: ${rate}
-Job Description: ${jobDescription}
-Salary Benefits: ${benefits.join(", ")}
-postAs: ${postAs}
-postIn: ${postIn.join(", ")}`;
+    const mergedData = `
+      Job Id: ${id}
+      Job Number: ${JobNo}
+      Hire Date: ${hireDate}
+      Active: ${isActive}
+      Country: ${country}
+      Language: ${language}
+      Job Title: ${jobTitle}
+      Place of Advertise: ${placeAdvertise}
+      Job Type: ${jobType}
+      Job Schedule: ${schedule}
+      Hire Count: ${hireCount}
+      Salary Type: ${salary.salaryType}
+      Salary Value: ${salary.salaryValue}
+      Rate: ${rate}
+      Job Description: ${jobDescription}
+      Salary Benefits: ${benefits.join(", ")}
+      postAs: ${postAs}
+      postIn: ${postIn.join(", ")}
+    `;
 
     navigator.clipboard.writeText(mergedData);
     setIsCopied(true);

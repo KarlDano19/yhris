@@ -4,6 +4,7 @@ import Link from "next/link";
 import CreateJob from "@/svg/CreateJob";
 import JobPostingHistory from "@/svg/JobPostingHistory";
 import CreateJobModal from "./create-job/modals/CreateJobModal";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 const menus = [
   {
@@ -18,7 +19,13 @@ const Content = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="p-2 md:p-8 lg:p-4">
+      <div className="flex p-4">
+        <Link href="/" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+          <ArrowLeftIcon className="h-5 w-5" />
+          <h4>Home</h4>
+        </Link>
+      </div>
+      <div className="px-2 md:px-8 lg:px-4">
         <h2 className="text-xl font-bold text-indigo-dye">Post a Job</h2>
         <div className="grid grid-cols-5 gap-6 mt-6">
           <button

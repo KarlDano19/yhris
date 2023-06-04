@@ -1,0 +1,66 @@
+import { useMutation } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
+
+import { T_Directive } from '@/types/globals';
+
+async function addDirective(directive: T_Directive) {
+  try {
+    const token = getCookie('token');
+    const data = new FormData();
+    data.append('directive_type', directive.type);
+    data.append('title', directive.title);
+    data.append('to', directive.email);
+    for (const [index, file] of directive.file.entries()) {
+      data.append(`file${index}`, file);
+    }
+    if (directive.type === 'memo') {
+      data.append('response', directive.withResponse ? 'yes' : 'no');
+      data.append('body', directive.body);
+      data.append('name', directive.name);
+      data.append('position', directive.position);
+      if (directive.signature) {
+        data.append('signature_file', directive.signature);
+      }
+      if (directive.qrCode) {
+        data.append('qr_code_file', directive.qrCode);
+      }
+    } else {
+      data.append('response', directive.withResponse ? 'yes' : 'no');
+      data.append('purpose', directive.purpose);
+      data.append('policy', directive.policy);
+      data.append('procedure', directive.procedure);
+      data.append('eligibility', directive.eligibility);
+      data.append('application', directive.application);
+      data.append('coverage', directive.coverage);
+      data.append('termination', directive.termination);
+    }
+    const config = {
+      method: 'POST',
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+      body: data,
+    };
+    const res = await fetch(`${process.env.hostName}/api/directives/`, config);
+    if (res.ok) {
+      return res.json();
+    }
+    throw res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
+  }
+}
+
+function useAddDirectivesItems() {
+  const query = useMutation((directive: T_Directive) =>
+    addDirective(directive)
+  );
+
+  return query;
+}
+
+export default useAddDirectivesItems;
