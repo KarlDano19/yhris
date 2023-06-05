@@ -1,0 +1,27 @@
+/* hides calendar icon in input="date" */
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+/* hides clock icon in input='time" */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  background: none;
+}
+
+/* hides down arrow icon in selection */
+select {
+  appearance: none;
+}
+
+input[type="radio"] {
+  accent-color: #355fd0;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hidden-scrollbar {
+  resize: none;
+}
