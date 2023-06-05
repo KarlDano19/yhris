@@ -14,18 +14,18 @@ async function addDirective(directive: T_Directive) {
       data.append(`file${index}`, file);
     }
     if (directive.type === 'memo') {
-      data.append('response', directive.withResponse ? 'yes' : 'no');
+      data.append('is_responded', directive.withResponse ? 'yes' : 'no');
       data.append('body', directive.body);
       data.append('name', directive.name);
       data.append('position', directive.position);
-      if (directive.signature) {
+      if (directive.signature.length) {
         data.append('signature_file', directive.signature);
       }
       if (directive.qrCode) {
         data.append('qr_code_file', directive.qrCode);
       }
     } else {
-      data.append('response', directive.withResponse ? 'yes' : 'no');
+      data.append('is_responded', directive.withResponse ? 'yes' : 'no');
       data.append('purpose', directive.purpose);
       data.append('policy', directive.policy);
       data.append('procedure', directive.procedure);
