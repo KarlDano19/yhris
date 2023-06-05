@@ -34,7 +34,8 @@ export type PersonPropTypes = {
 export type ModalLayoutTypes = {
   children: React.ReactNode
   title: string
-  setModal: Dispatch<SetStateAction<number | null>>
+  isOpen: boolean
+  handleClose: any
 }
 
 export type StageRequirementsTypes = {

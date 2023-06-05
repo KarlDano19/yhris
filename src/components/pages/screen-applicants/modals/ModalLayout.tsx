@@ -3,7 +3,7 @@ import { Dialog, Transition } from "@headlessui/react"
 import { XCircleIcon } from "@heroicons/react/24/solid"
 import { ModalLayoutTypes as PropTypes } from "../types"
 
-export default function ModalLayout({ children, title, isOpen, handleClose }: {children: any, title: any, isOpen: any, handleClose: any}) {
+export default function ModalLayout({ children, title, isOpen, handleClose }: PropTypes) {
   const cancelButtonRef = useRef(null)
 
   return (
