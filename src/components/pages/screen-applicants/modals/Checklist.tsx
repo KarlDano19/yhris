@@ -3,7 +3,7 @@ import ModalLayout from "./ModalLayout"
 import { ChecklistPropTypes as PropTypes } from "../types"
 import { initialActionState } from "../lib/initialActionState"
 import { useForm } from "react-hook-form"
-import { camelize } from "../lib/camelize"
+import { camelize } from "@/helpers/camelize"
 import ModalFooterLayout from "../layouts/ModalFooterLayout"
 
 const status = [

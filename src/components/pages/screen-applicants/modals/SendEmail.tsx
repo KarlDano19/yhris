@@ -5,7 +5,7 @@ import { SendEmailPropTypes as PropTypes } from "../types"
 import dynamic from "next/dynamic"
 import ReactQuill from "react-quill"
 import "react-quill/dist/quill.snow.css"
-import { QUILL_FORMATS, QUILL_MODULES, BODY_TEMPLATE } from "../lib/constants"
+import { QUILL_FORMATS, QUILL_MODULES, SCREEN_TEMPLATE } from "@/helpers/constants"
 import { useForm } from "react-hook-form"
 import { initialActionState } from "../lib/initialActionState"
 import ModalFooterLayout from "../layouts/ModalFooterLayout"
@@ -29,7 +29,7 @@ export default function SendEmail({
       cc: "",
       email: "",
       template: "Application Journey",
-      message: BODY_TEMPLATE.message,
+      message: SCREEN_TEMPLATE.message,
     },
   })
 
