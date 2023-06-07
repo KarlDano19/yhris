@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
 import { ChecklistPropTypes as PropTypes } from "../types"
 import { initialActionState } from "../lib/initialActionState"
@@ -13,11 +13,6 @@ const status = [
     title: "Ongoing",
   },
   {
-    id: "passed",
-    value: "passed",
-    title: "Passed",
-  },
-  {
     id: "withdrawn",
     value: "withdrawn",
     title: "Withdrawn",
@@ -26,6 +21,11 @@ const status = [
     id: "rejected",
     value: "rejected",
     title: "Rejected",
+  },
+  {
+    id: "passed",
+    value: "passed",
+    title: "Passed",
   },
 ]
 
@@ -38,6 +38,16 @@ export default function Checklist({
   const { register, handleSubmit } = useForm()
   const titleCase = (str: any) => str.charAt(0).toUpperCase() + str.slice(1)
   const [isOpen, setIsOpen] = useState(false)
+  const [checks, setChecks] = useState<string[]>([])
+  const [isDisabled, setIsDisabled] = useState(true)
+
+
+  useEffect(() => {
+    if (requirements.length === checks.length) 
+      setIsDisabled(false)
+    else 
+      setIsDisabled(true)
+  }, [checks.length, requirements.length])
 
   useEffect(() => {
     setIsOpen(true)
@@ -50,7 +60,15 @@ export default function Checklist({
     setIsOpen(false)
     setTimeout(() => handleFormSubmit(data), 400)
   }
-
+  const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setChecks(prev => [...prev, e.target.id])
+    } else {
+      const newChecks = checks.filter(item => item !== e.target.id)
+      setChecks(newChecks)
+    }
+  }
+  
   return (
     <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
       <form onSubmit={handleSubmit((data) => onSubmit(data))}>
@@ -65,7 +83,9 @@ export default function Checklist({
                   >
                     <input
                       type="checkbox"
-                      {...register(camelize(item))}
+                      {...register(camelize(item), {
+                        onChange: handleCheckbox,
+                      })}
                       id={item}
                       className="w-5 h-5"
                     />
@@ -79,10 +99,11 @@ export default function Checklist({
             <p className="font-medium">Status</p>
             {status.map((item) => {
               const { title, id, value } = item
+              const disabled = id === "passed" && isDisabled
               return (
                 <div
                   key={id}
-                  className="flex items-center gap-4 text-indigo-dye text-[15px]"
+                  className={`${disabled && "opacity-75"} flex items-center gap-4 text-indigo-dye text-[15px]`}
                 >
                   <input
                     {...register("status")}
@@ -90,6 +111,8 @@ export default function Checklist({
                     id={id}
                     value={value}
                     className="w-5 h-5"
+                    disabled={disabled}
+                    checked={disabled ? false : undefined}
                   />
                   <label htmlFor={id}>{title}</label>
                 </div>

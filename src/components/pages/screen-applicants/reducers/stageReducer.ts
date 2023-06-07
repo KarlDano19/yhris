@@ -114,6 +114,7 @@ export const stageReducer = (state: any, action: any) => {
     case CHECKLIST: {
       const { actionState, setActionState, formData } = action.payload
       // checklist logic here...
+      console.log(formData)
       setActionState({
         ...actionState,
         modal: {
