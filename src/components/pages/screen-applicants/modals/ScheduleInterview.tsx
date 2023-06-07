@@ -85,16 +85,16 @@ export default function ScheduleInterview({
           <div className="flex items-center gap-3 flex-wrap mb-8">
             <div className="text-indigo-dye flex-grow">
               <label htmlFor="date" className="block mb-2">
-                Date<span className="text-[#D65846]">*</span>
+                Dates<span className="text-[#D65846]">*</span>
               </label>
-              <div className="border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4">
+              <div className="border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative">
                 <input
                   {...register("date")}
                   type="date"
                   name="date"
-                  className="focus:none outline-none"
+                  className="w-full focus:none outline-none"
                 />
-                <CalendarIcon className="w-7 h-7" />
+                <CalendarIcon className="w-6 h-6 absolute right-4 pointer-events-none" />
               </div>
             </div>
             <div className="text-indigo-dye flex-grow">
