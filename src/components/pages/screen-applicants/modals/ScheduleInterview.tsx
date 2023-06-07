@@ -9,6 +9,8 @@ import { ScheduleInterviewPropTypes as PropTypes } from "../types"
 import { initialActionState } from "../lib/initialActionState"
 import { useForm } from "react-hook-form"
 import ModalFooterLayout from "../layouts/ModalFooterLayout"
+import useTagInput from "../hooks/useTagInput"
+import { XMarkIcon } from "@heroicons/react/24/outline"
 
 const formatTypes = [
   {
@@ -65,6 +67,11 @@ export default function ScheduleInterview({
   const { register, handleSubmit } = useForm()
   const [isOpen, setIsOpen] = useState(false)
   const [selectionId, setSelectionId] = useState("video")
+  const [input, setInput] = useState("")
+  const { tags, handleKeyDown, handleRemoveTag } = useTagInput(
+    input,
+    setInput,
+  )
 
   useEffect(() => {
     setIsOpen(true)
@@ -74,6 +81,7 @@ export default function ScheduleInterview({
     setTimeout(() => setActionState(initialActionState), 400)
   }
   const onSubmit = (data: any) => {
+    data.emails = tags
     setIsOpen(false)
     setTimeout(() => handleFormSubmit(data), 400)
   }
@@ -239,12 +247,28 @@ export default function ScheduleInterview({
             <p className="mb-1 text-[#6F829B]">
               Enter emails separated by comma.
             </p>
-            <input
-              type="text"
-              id="email"
-              {...register("message")}
-              className="border border-[#ACB9CB] rounded-md py-2 px-6 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]"
-            />
+
+            <div className="border border-[#ACB9CB] p-2 rounded-md flex items-center gap-3 flex-wrap">
+              {tags.map((tag: string) => (
+                <div
+                  key={tag}
+                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-1 px-4 text-left justify-start"
+                >
+                  <button type="button" onClick={() => handleRemoveTag(tag)}>
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                  <p>{tag}</p>
+                </div>
+              ))}
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                type="text"
+                id="email"
+                className="focus:none outline-none py-1 px-2 grow"
+              />
+            </div>
           </div>
         </div>
 
