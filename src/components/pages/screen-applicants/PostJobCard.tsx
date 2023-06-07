@@ -4,7 +4,7 @@ export default function PostJobCard() {
   return (
     <button
       type="button"
-      className="rounded-lg px-8 py-24 shadow-sm text-[#CCE0FF] bg-[#EBF3FF] flex"
+      className="rounded-lg px-8 py-24 shadow-md text-[#CCE0FF] bg-[#EBF3FF] flex"
     >
       <div className="m-auto flex items-center gap-2">
         <PlusIcon className="h-8 w-8 font-bold" />
