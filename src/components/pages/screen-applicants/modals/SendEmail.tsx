@@ -1,7 +1,7 @@
 import SelectChevronDown from "@/svg/SelectChevronDownDummy"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import ModalLayout from "./ModalLayout"
-import { SendEmailPropTypes as PropTypes } from "../types"
+import { ContextTypes, SendEmailPropTypes as PropTypes } from "../types"
 import dynamic from "next/dynamic"
 import ReactQuill from "react-quill"
 import "react-quill/dist/quill.snow.css"
@@ -9,12 +9,13 @@ import { QUILL_FORMATS, QUILL_MODULES, SCREEN_TEMPLATE } from "@/helpers/constan
 import { useForm } from "react-hook-form"
 import { initialActionState } from "../lib/initialActionState"
 import ModalFooterLayout from "../layouts/ModalFooterLayout"
+import StateContext from "../contexts/StateContext"
 
 export default function SendEmail({
   title,
-  setActionState,
   handleFormSubmit,
 }: PropTypes) {
+  const {setActionState}: ContextTypes = useContext(StateContext) as ContextTypes
   const [isOpen, setIsOpen] = useState(false)
   const [isCCOpen, setIsCCOPen] = useState(false)
   const [isBCCOpen, setIsBCCOpen] = useState(false)
@@ -22,7 +23,6 @@ export default function SendEmail({
     () => dynamic(() => import("react-quill"), { ssr: false }),
     [isOpen]
   )
-  // const [value, setValue] = useState("")
   const { register, handleSubmit, setValue, getValues } = useForm({
     defaultValues: {
       bcc: "",

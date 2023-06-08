@@ -3,14 +3,15 @@ import { LocationIcon, WhiteLocationIcon } from "@/svg/LocationIcon"
 import { PhoneIcon, WhitePhoneIcon } from "@/svg/PhoneIcon"
 import SelectChevronDown from "@/svg/SelectChevronDownDummy"
 import { VideoIcon, WhiteVideoIcon } from "@/svg/VideoIcon"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
-import { ScheduleInterviewPropTypes as PropTypes } from "../types"
+import { ContextTypes, ScheduleInterviewPropTypes as PropTypes } from "../types"
 import { initialActionState } from "../lib/initialActionState"
 import { useForm } from "react-hook-form"
 import ModalFooterLayout from "../layouts/ModalFooterLayout"
 import useTagInput from "../hooks/useTagInput"
 import { XMarkIcon } from "@heroicons/react/24/outline"
+import StateContext from "../contexts/StateContext"
 
 const formatTypes = [
   {
@@ -61,9 +62,9 @@ const platforms = [
 
 export default function ScheduleInterview({
   title,
-  setActionState,
   handleFormSubmit,
 }: PropTypes) {
+  const {setActionState}: ContextTypes = useContext(StateContext) as ContextTypes
   const { register, handleSubmit } = useForm()
   const [isOpen, setIsOpen] = useState(false)
   const [selectionId, setSelectionId] = useState("video")

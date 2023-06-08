@@ -1,11 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react"
 
-export type JobType = {
-  id: number
-  title: string
-  address: string
-  applicants: ApplicantsType
-}
+export type StateType = StageType[]
 
 export type BlockPropTypes = {
   index: number
@@ -41,19 +36,16 @@ export type ModalLayoutTypes = {
 export type StageRequirementsTypes = {
   title: string
   requirements: string[]
-  setActionState: any
   handleFormSubmit: any
 }
 
 export type ScheduleInterviewPropTypes = {
   title: string
-  setActionState: any
   handleFormSubmit: any
 }
 
 export type SendEmailPropTypes = {
   title: string
-  setActionState: any
   handleFormSubmit: any
 }
 
@@ -65,20 +57,15 @@ export type SuccessPropTypes = {
 export type ChecklistPropTypes = {
   title: string
   requirements: string[]
-  setActionState: any
   handleFormSubmit: any
-}
-
-export type ConfirmationPropTypes = {
-  actionState: any
-  setActionState: any
-  dispatch: any
 }
 
 export type ApplicantType = {
   id: number
   image: string
   name: string
+  checklists: string[]
+  status: "ongoing" | "withdrawn" | "rejected" | "passed" | null | undefined
 }
 
 export type ApplicantsType = [] | ApplicantType[]
@@ -107,4 +94,11 @@ export type StagePropTypes = {
   setStageDropdownId: any
   setActionState: any
   dispatch: any
+}
+
+export type ContextTypes = {
+  state: StateType
+  dispatch: any
+  actionState: any
+  setActionState: any
 }
