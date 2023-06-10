@@ -108,7 +108,7 @@ export default function Content() {
 
   const handleAddStage = () => {
     const { current: element } = containerRef
-    dispatch({ type: ADD_STAGE })
+    dispatch({ type: ADD_STAGE, payload: { addType: "last" } })
     setTimeout(() => {
       if (element !== null) element.scrollLeft = element.scrollWidth
     }, 10)

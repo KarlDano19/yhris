@@ -4,6 +4,7 @@ export type StateType = StageType[]
 
 export type BlockPropTypes = {
   stage: StageType
+  index: number
   provided: any
   snapshot: any
 }
@@ -144,6 +145,7 @@ export type StageHeaderTypes = {
 
 export type StageBlockTypes = {
   stage: StageType
+  index: number
   openMenuId: number | null
   setOpenMenuId: any
 }

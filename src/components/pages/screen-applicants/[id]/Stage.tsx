@@ -8,7 +8,7 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   ...draggableStyle,
 })
 
-export default function Stage({ stage, provided, snapshot }: PropTypes) {
+export default function Stage({ stage, index, provided, snapshot }: PropTypes) {
   const { actionState }: ContextTypes = useContext(StateContext) as ContextTypes
   const [stageDropdownId, setStageDropdownId] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
@@ -34,6 +34,7 @@ export default function Stage({ stage, provided, snapshot }: PropTypes) {
       />
       <StageBlock
         stage={stage}
+        index={index}
         openMenuId={openMenuId}
         setOpenMenuId={setOpenMenuId}
       />

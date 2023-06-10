@@ -42,6 +42,7 @@ export default function DragAndDrop({ containerRef, gridCols }: PropTypes) {
                 {(provided, snapshot) => (
                   <Stage
                     stage={stage}
+                    index={index}
                     provided={provided}
                     snapshot={snapshot}
                   />

@@ -67,7 +67,7 @@ export const stageReducer = (state: any, action: any) => {
     case STAGE_REQUIREMENTS: 
       return setRequirements(state, action)
     case ADD_STAGE: 
-      return addStage(state)
+      return addStage(state, action)
     case REMOVE_STAGE: 
       return removeStage(state, action)
     case CHECKLIST: 
