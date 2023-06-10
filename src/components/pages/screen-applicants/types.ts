@@ -1,13 +1,11 @@
-import React, { Dispatch, SetStateAction } from "react"
+import React, { Dispatch, ReactNode, SetStateAction } from "react"
 
 export type StateType = StageType[]
 
 export type BlockPropTypes = {
-  index: number
   stage: StageType
-  setActionState: any
-  openMenuId: null | number
-  setOpenMenuId: any
+  provided: any
+  snapshot: any
 }
 
 export type WrapperPropTypes = {
@@ -22,7 +20,6 @@ export type PersonPropTypes = {
   applicant: ApplicantType
   isOpenMenu: boolean
   setOpenMenuId: any
-  setActionState: any
   stage: StageType
 }
 
@@ -51,7 +48,6 @@ export type SendEmailPropTypes = {
 
 export type SuccessPropTypes = {
   title: string
-  setActionState: any
 }
 
 export type ChecklistPropTypes = {
@@ -101,4 +97,53 @@ export type ContextTypes = {
   dispatch: any
   actionState: any
   setActionState: any
+}
+
+export type ModalTypes = {
+  STAGE_REQUIREMENTS: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  CHECKLIST: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  SEND_EMAIL: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  SCHEDULE_INTERVIEW: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  SUCCESS: {
+    component: ReactNode
+  }
+  CONFIRMATION: {
+    component: ReactNode
+  }
+}
+
+export type StageHeaderTypes = {
+  stage: StageType
+  stageDropdownId: number | null
+  setStageDropdownId: any
+}
+
+export type StageBlockTypes = {
+  stage: StageType
+  openMenuId: number | null
+  setOpenMenuId: any
 }

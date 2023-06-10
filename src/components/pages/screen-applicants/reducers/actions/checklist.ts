@@ -30,7 +30,9 @@ export default function checklist(state: any, action: any) {
     const addedApplicant = removedApplicant.map((stage: StageType, index: number) => {
       const isTheNextStage = index === stageIndex + 1
       if (isTheNextStage) {
+        
         // reset applicant's status first
+        applicant.checklists = formData.checklists
         applicant.status = null
         return {...stage, applicants: [...stage.applicants, applicant]}
       } else {

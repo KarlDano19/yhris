@@ -10,7 +10,7 @@ import setRequirements from "./actions/setRequirements"
 import setTitle from "./actions/setTitle"
 
 const {
-  SET_REQUIREMENTS,
+  STAGE_REQUIREMENTS,
   CHECKLIST,
   SEND_EMAIL,
   SCHEDULE_INTERVIEW,
@@ -64,7 +64,7 @@ export const stageReducer = (state: any, action: any) => {
       return dragBlock(state, action)
     case SET_TITLE: 
       return setTitle(state, action)
-    case SET_REQUIREMENTS: 
+    case STAGE_REQUIREMENTS: 
       return setRequirements(state, action)
     case ADD_STAGE: 
       return addStage(state)

@@ -1,11 +1,15 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { Fragment, useRef } from "react"
 import Confetti from "@/svg/Confetti"
 import { initialActionState } from "../lib/initialActionState"
-import { SuccessPropTypes as PropTypes } from "../types"
+import { ContextTypes, SuccessPropTypes as PropTypes } from "../types"
+import StateContext from "../contexts/StateContext"
 
-export default function Success({ title, setActionState }: PropTypes) {
+export default function Success({ title }: PropTypes) {
+  const { setActionState }: ContextTypes = useContext(
+    StateContext
+  ) as ContextTypes
   const [isOpen, setIsOpen] = useState(false)
   const cancelButtonRef = useRef(null)
 

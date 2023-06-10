@@ -1,10 +1,10 @@
 import { StageType } from "../../types"
 
 export default function setRequirements(state: any, action: any) {
-  const { actionState, setActionState, requirements } = action.payload
+  const { actionState, setActionState, formData } = action.payload
     const newState = state.map((item: StageType) => {
       if (item.id === actionState.stageId) {
-        return { ...item, requirements }
+        return { ...item, requirements: formData }
       } else return item
     })
     setActionState({
