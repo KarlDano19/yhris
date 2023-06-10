@@ -10,7 +10,7 @@ export default function StageBlock({
   const { applicants } = stage
 
   return (
-    <div className="bg-[#EBF3FF] rounded-2xl px-7 py-2 h-[500px] relative">
+    <div className="bg-[#EBF3FF] rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto">
       {applicants.length ? (
         applicants.map((applicant) => {
           return (
