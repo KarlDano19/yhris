@@ -28,6 +28,7 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
+    domains: ["139.59.118.36"]
   },
 }
 
