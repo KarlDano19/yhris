@@ -51,7 +51,7 @@ export default function SalaryRangeModal({
                 </div>
                 <p className="text-xl font-bold text-gray-900 text-center">
                   Would you like to indicate the possible salary (the range or
-                  the starting amount ) and benfits?
+                  the starting amount ) and benefits?
                 </p>
                 <p className="text-xl font-bold text-gray-900 text-center">
                   <span>Fun Fact 👇:</span>

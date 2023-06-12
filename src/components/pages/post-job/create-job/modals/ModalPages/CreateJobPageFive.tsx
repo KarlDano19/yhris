@@ -66,7 +66,7 @@ export default function CreateJobPageFive({
                 Poster
                 <span className="block mt-0 font-normal text-gray-400">
                   Please make sure that you have set-up your hiring poster
-                  template in the brand kit.
+                  template in the Employee Kit.
                 </span>
               </span>
             </label>
