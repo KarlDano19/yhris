@@ -27,6 +27,7 @@ export default function CreateJobPageOne({
             <select
               id="country"
               {...register("country", { required: true })}
+              required
               className="appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             >
               <option>Philippines</option>
@@ -49,6 +50,7 @@ export default function CreateJobPageOne({
             <select
               id="language"
               {...register("language", { required: true })}
+              required
               className="appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             >
               <option>English</option>
@@ -71,6 +73,7 @@ export default function CreateJobPageOne({
               <input
                 id="jobTitle"
                 {...register("jobTitle", { required: true })}
+                required
                 type="text"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
               />
@@ -92,6 +95,7 @@ export default function CreateJobPageOne({
                 {...register("placeAdvertise", {
                   required: true,
                 })}
+                required
                 type="text"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
               />

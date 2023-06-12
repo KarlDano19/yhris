@@ -33,6 +33,11 @@ export default function CreateJobPageFive({
             Post as
             <span className="text-red-600">*</span>
           </label>
+          {!getValues("postAs") && (
+            <span className="text-red-600 text-sm mt-2">
+              This field is required
+            </span>
+          )}
           <div className={`flex flex-col space-y-2 ml-2 mt-2 ${ manualInputFocus ? "border-2 border-blue-700" : ""}`}>
             <label className="inline-flex items-center mr-4">
               <input

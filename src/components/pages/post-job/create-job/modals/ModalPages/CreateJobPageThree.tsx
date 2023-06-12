@@ -126,6 +126,7 @@ export default function CreateJobPageThree({
                     id="minimum"
                     required
                     value={salaryRange.minimum}
+                    defaultValue={0}
                     onChange={(e) =>
                       setSalaryRange({
                         ...salaryRange,
@@ -140,6 +141,11 @@ export default function CreateJobPageThree({
                     <p>PHP</p>
                   </div>
                 </div>
+                {!salaryRange.minimum && (
+                  <span className="text-red-600 text-sm mt-2">
+                    This field is required
+                  </span>
+                )}
               </div>
               <p className="flex-none text-center mt-7">
                 to
@@ -157,6 +163,7 @@ export default function CreateJobPageThree({
                     id="maximum"
                     required
                     value={salaryRange.maximum}
+                    defaultValue={0}
                     onChange={(e) =>
                       setSalaryRange({
                         ...salaryRange,
@@ -171,6 +178,11 @@ export default function CreateJobPageThree({
                     <p>PHP</p>
                   </div>
                 </div>
+                {!salaryRange.maximum && (
+                  <span className="text-red-600 text-sm mt-2">
+                    This field is required
+                  </span>
+                )}
               </div>
             </>
           ) : (
@@ -236,6 +248,11 @@ export default function CreateJobPageThree({
             Do you offer any of the following benefits?
             <span className="text-red-600">*</span>
           </label>
+          {manualInputFocus.benefits && (
+            <span className="text-red-600 text-sm mt-2">
+              This field is required
+            </span>
+          )}
           <div className={`flex flex-wrap mt-2 gap-4 ${manualInputFocus.benefits ? "border-2 border-blue-700" : ""}`}>
             {ListOfBenefits.map((benefit, index) => {
               return (
