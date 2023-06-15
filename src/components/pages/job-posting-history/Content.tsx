@@ -211,6 +211,7 @@ const Content = () => {
                   ref={date2InputRef}
                   // @ts-expect-error
                   onClick={() => date2InputRef.current.showPicker()}
+                  min={!itemsFilter?.from ? null : itemsFilter.from}
                 />
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                   <DateCalendar />
