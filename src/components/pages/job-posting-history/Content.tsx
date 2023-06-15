@@ -80,6 +80,7 @@ const Content = () => {
               id={item.id}
               jobTitle={item.jobTitle}
               setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
+              setIsJobPreviewOpen={setIsJobPreviewOpen}
             />
           </td>
           <td
