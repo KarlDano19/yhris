@@ -1,6 +1,7 @@
 import { Dispatch, useRef, useState } from "react"
 import SelectChevronDown from "@/svg/SelectChevronDownDummy"
 import DateCalendarDummy from "@/svg/DateCalendarDummy"
+import getMinDate from "@/helpers/getMinDate"
 
 export default function CreateJobPageTwo({
   register,
@@ -32,11 +33,15 @@ export default function CreateJobPageTwo({
 
   // getting the value of JobType
   const handleJobType = (option: string) => {
-    return setValue("jobType", option)
+    let jobType = getValues("jobType");
+    jobType = jobType ? jobType : [];
+    return setValue("jobType", [...jobType, option])
   }
   // getting the value of Schedule
   const handleSchedule = (option: string) => {
-    return setValue("schedule", option)
+    let schedule = getValues("schedule");
+    schedule = schedule ? schedule : [];
+    return setValue("schedule", [...schedule, option])
   }
 
   const JobType = [
@@ -52,6 +57,7 @@ export default function CreateJobPageTwo({
     { name: "12 Hours", item: "12 hours" },
     { name: "Night Shift", item: "nightShift" },
   ]
+
   return (
     <div
       onClick={() =>
@@ -77,12 +83,13 @@ export default function CreateJobPageTwo({
             }`}
           >
             {JobType.map((job, index) => {
+              const jobTypes = getValues("jobType");
               return (
                 <button
                   key={index}
                   type="button"
                   className={`mt-2 md:mt-0 flex-grow text-sm font-medium leading-6 text-gray-900 shadow-sm ring-1 border-0 ring-inset ring-gray-300 py-3 px-6 rounded-md transition-all ${
-                    watch("jobType") == job.item ? "bg-slate-400" : ""
+                    jobTypes?.includes(job.item)? "bg-slate-400" : ""
                   }`}
                   onClick={() => {
                     handleJobType(job.item)
@@ -94,7 +101,7 @@ export default function CreateJobPageTwo({
                     })
                   }}
                 >
-                  {watch("jobType") == job.item ? "✓" : "+"} {job.name}
+                  {jobTypes?.includes(job.item) ? "✓" : "+"} {job.name}
                 </button>
               )
             })}
@@ -161,12 +168,13 @@ export default function CreateJobPageTwo({
             }`}
           >
             {Schedule.map((sched, index) => {
+              const schedules = getValues("schedule");
               return (
                 <button
                   key={index}
                   type="button"
                   className={`mt-2 md:mt-0 flex-grow text-sm font-medium leading-6 text-gray-900 shadow-sm ring-1 border-0 ring-inset ring-gray-300 py-3 px-6 rounded-md transition-all ${
-                    watch("schedule") == sched.item ? "bg-slate-400" : ""
+                    schedules?.includes(sched.item) ? "bg-slate-400" : ""
                   }`}
                   onClick={() => {
                     handleSchedule(sched.item)
@@ -178,7 +186,7 @@ export default function CreateJobPageTwo({
                     })
                   }}
                 >
-                  {watch("schedule") == sched.item ? "✓" : "+"} {sched.name}
+                  {schedules?.includes(sched.item) ? "✓" : "+"} {sched.name}
                 </button>
               )
             })}
@@ -284,7 +292,6 @@ export default function CreateJobPageTwo({
                 className={`appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
                   manualInputFocus.hireDate ? "border-2 border-blue-700" : ""
                 }`}
-                placeholder="you@example.com"
                 aria-describedby="email-optional"
                 ref={dateInputRef}
                 onClick={() => {
@@ -296,6 +303,7 @@ export default function CreateJobPageTwo({
                     hireDate: false,
                   })
                 }}
+                min={getMinDate(new Intl.DateTimeFormat('en-US').format(new Date()))}
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                 <DateCalendarDummy />

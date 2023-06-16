@@ -16,6 +16,7 @@ import SetJob from "./SetJob";
 import SetJobInactiveModal from "./modals/SetJobInactiveModal";
 import Link from "next/link";
 import DateCalendar from "@/svg/DateCalendar";
+import getMinDate from "@/helpers/getMinDate";
 
 type ComponentMap = {
   [key: string]: React.ElementType;
@@ -134,6 +135,7 @@ const Content = () => {
               id={item.id}
               jobTitle={item.jobTitle}
               setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
+              setIsJobPreviewOpen={setIsJobPreviewOpen}
             />
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
@@ -171,7 +173,7 @@ const Content = () => {
   };
 
   return (
-    <div className="bg-white">
+    <div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex p-4">
           <Link href="/post-job" className="flex-none flex gap-3 items-center hover:bg-gray-200">
@@ -211,14 +213,14 @@ const Content = () => {
                   ref={date2InputRef}
                   // @ts-expect-error
                   onClick={() => date2InputRef.current.showPicker()}
-                  min={!itemsFilter?.from ? null : itemsFilter.from}
+                  min={!itemsFilter?.from ? getMinDate() : getMinDate(itemsFilter.from)}
                 />
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                   <DateCalendar />
                 </div>
               </div>
             </div>
-            <div className="flex-none">
+            <div className="flex-none lg:w-72">
               <div className="relative flex items-center">
                 <input
                   type="text"
@@ -295,7 +297,7 @@ const Content = () => {
         </div>
       </div>
       <JobPreviewModal
-        id={isJobPreviewOpen?.id}
+        id={isJobPreviewOpen?.id ? isJobPreviewOpen?.id : null}
         jobPostHistoryItems={jobPostHistoryItems}
         isOpen={isJobPreviewOpen}
         setIsOpen={setIsJobPreviewOpen}
