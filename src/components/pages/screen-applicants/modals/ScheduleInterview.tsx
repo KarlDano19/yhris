@@ -3,7 +3,7 @@ import { LocationIcon, WhiteLocationIcon } from "@/svg/LocationIcon"
 import { PhoneIcon, WhitePhoneIcon } from "@/svg/PhoneIcon"
 import SelectChevronDown from "@/svg/SelectChevronDownDummy"
 import { VideoIcon, WhiteVideoIcon } from "@/svg/VideoIcon"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState, useRef } from "react"
 import ModalLayout from "./ModalLayout"
 import { ContextTypes, ScheduleInterviewPropTypes as PropTypes } from "../types"
 import { initialActionState } from "../lib/initialActionState"
@@ -73,6 +73,8 @@ export default function ScheduleInterview({
     input,
     setInput,
   )
+  const dateRef = useRef<HTMLInputElement>(null)
+  const timeRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setIsOpen(true)
@@ -98,7 +100,9 @@ export default function ScheduleInterview({
               </label>
               <div className="border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative">
                 <input
+                  onClick={() => dateRef.current.showPicker()}
                   {...register("date")}
+                  ref={dateRef}
                   type="date"
                   name="date"
                   className="w-full focus:none outline-none"
@@ -113,9 +117,11 @@ export default function ScheduleInterview({
 
               <div className="border border-[#ACB9CB] rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]">
                 <input
+                  onClick={() => timeRef.current.showPicker()}
+                  {...register("startTime")}
+                  ref={timeRef}
                   type="time"
                   id="startTime"
-                  {...register("startTime")}
                   className="focus:none outline-none"
                 />
               </div>
