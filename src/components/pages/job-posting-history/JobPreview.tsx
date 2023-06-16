@@ -15,17 +15,7 @@ const JobPreview = ({
   return (
     <div className="flex flex-col gap-2">
       <div>
-        <button
-          className="underline"
-          onClick={() =>
-            setIsJobPreviewOpen({
-              isOpen: true,
-              id,
-            })
-          }
-        >
-          {jobNumber}
-        </button>
+        <span>{jobNumber}</span>
       </div>
     </div>
   );

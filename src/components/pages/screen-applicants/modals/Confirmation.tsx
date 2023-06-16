@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { Fragment, useRef } from "react"
-import { ConfirmationPropTypes as PropTypes } from "../types"
 import Warning from "@/svg/Warning"
 import { initialActionState } from "../lib/initialActionState"
+import StateContext from "../contexts/StateContext"
+import { ContextTypes } from "../types"
 
-export default function Confirmation({
-  actionState,
-  setActionState,
-  dispatch,
-}: PropTypes) {
+export default function Confirmation() {
+  const {actionState, setActionState, dispatch}: ContextTypes = useContext(StateContext) as ContextTypes
   const [isOpen, setIsOpen] = useState(false)
   const cancelButtonRef = useRef(null)
 

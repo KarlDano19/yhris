@@ -60,7 +60,7 @@ const Content = () => {
       jobPostHistoryItems.length > 0
     ) {
       return jobPostHistoryItems.map((item, index) => (
-        <tr key={index}>
+        <tr key={index} className="text-center">
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${item.isActive ? "text-red-500" : "text-gray-500"
               }`}
@@ -80,6 +80,7 @@ const Content = () => {
               id={item.id}
               jobTitle={item.jobTitle}
               setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
+              setIsJobPreviewOpen={setIsJobPreviewOpen}
             />
           </td>
           <td
@@ -100,7 +101,7 @@ const Content = () => {
           >
             {item.hireCount}
           </td>
-          <td className="flex space-x-2 whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+          <td className="flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.postIn.map((item, index) => {
               const DynamicComponent = componentMap[item];
               return (
@@ -170,7 +171,7 @@ const Content = () => {
   };
 
   return (
-    <>
+    <div className="bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex p-4">
           <Link href="/post-job" className="flex-none flex gap-3 items-center hover:bg-gray-200">
@@ -210,6 +211,7 @@ const Content = () => {
                   ref={date2InputRef}
                   // @ts-expect-error
                   onClick={() => date2InputRef.current.showPicker()}
+                  min={!itemsFilter?.from ? null : itemsFilter.from}
                 />
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                   <DateCalendar />
@@ -240,40 +242,40 @@ const Content = () => {
                     }`}
                 >
                   <thead>
-                    <tr>
+                    <tr className="text-center">
                       <th
                         scope="col"
-                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                        className="py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0"
                       >
                         Job No.
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
                         Job Title
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
                         Job Type
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
                         Job Schedule
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
                         No. of Hires Needed
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
                         Platform/s Posted
                       </th>
@@ -302,7 +304,7 @@ const Content = () => {
         isOpen={isSetJobInactiveModalOpen}
         setIsOpen={setIsSetJobInactiveModalOpen}
       />
-    </>
+    </div>
   );
 };
 

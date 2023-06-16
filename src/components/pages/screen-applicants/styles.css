@@ -1,8 +1,8 @@
 /* hides calendar icon in input="date" */
 input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-calendar-picker-indicator {
-  display: none;
-  -webkit-appearance: none;
+  display: block;
+  opacity: 0;
 }
 
 /* hides clock icon in input='time" */

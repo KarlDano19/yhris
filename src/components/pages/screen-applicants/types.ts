@@ -1,18 +1,12 @@
-import React, { Dispatch, SetStateAction } from "react"
+import React, { Dispatch, ReactNode, SetStateAction } from "react"
 
-export type JobType = {
-  id: number
-  title: string
-  address: string
-  applicants: ApplicantsType
-}
+export type StateType = StageType[]
 
 export type BlockPropTypes = {
-  index: number
   stage: StageType
-  setActionState: any
-  openMenuId: null | number
-  setOpenMenuId: any
+  index: number
+  provided: any
+  snapshot: any
 }
 
 export type WrapperPropTypes = {
@@ -27,7 +21,6 @@ export type PersonPropTypes = {
   applicant: ApplicantType
   isOpenMenu: boolean
   setOpenMenuId: any
-  setActionState: any
   stage: StageType
 }
 
@@ -41,44 +34,35 @@ export type ModalLayoutTypes = {
 export type StageRequirementsTypes = {
   title: string
   requirements: string[]
-  setActionState: any
   handleFormSubmit: any
 }
 
 export type ScheduleInterviewPropTypes = {
   title: string
-  setActionState: any
   handleFormSubmit: any
 }
 
 export type SendEmailPropTypes = {
   title: string
-  setActionState: any
   handleFormSubmit: any
 }
 
 export type SuccessPropTypes = {
   title: string
-  setActionState: any
 }
 
 export type ChecklistPropTypes = {
   title: string
   requirements: string[]
-  setActionState: any
   handleFormSubmit: any
-}
-
-export type ConfirmationPropTypes = {
-  actionState: any
-  setActionState: any
-  dispatch: any
 }
 
 export type ApplicantType = {
   id: number
   image: string
   name: string
+  checklists: string[]
+  status: "ongoing" | "withdrawn" | "rejected" | "passed" | null | undefined
 }
 
 export type ApplicantsType = [] | ApplicantType[]
@@ -107,4 +91,61 @@ export type StagePropTypes = {
   setStageDropdownId: any
   setActionState: any
   dispatch: any
+}
+
+export type ContextTypes = {
+  state: StateType
+  dispatch: any
+  actionState: any
+  setActionState: any
+}
+
+export type ModalTypes = {
+  STAGE_REQUIREMENTS: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  CHECKLIST: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  SEND_EMAIL: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  SCHEDULE_INTERVIEW: {
+    component: ReactNode
+    dispatch?: {
+      type: string
+      payload?: any
+    }
+  }
+  SUCCESS: {
+    component: ReactNode
+  }
+  CONFIRMATION: {
+    component: ReactNode
+  }
+}
+
+export type StageHeaderTypes = {
+  stage: StageType
+  stageDropdownId: number | null
+  setStageDropdownId: any
+}
+
+export type StageBlockTypes = {
+  stage: StageType
+  index: number
+  openMenuId: number | null
+  setOpenMenuId: any
 }

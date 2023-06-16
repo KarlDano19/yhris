@@ -4,9 +4,11 @@ import {
   EnvelopeIcon,
 } from "@heroicons/react/24/outline"
 import Image from "next/image"
-import { PersonPropTypes as PropTypes } from "../types"
+import { ContextTypes, PersonPropTypes as PropTypes } from "../types"
 import CheckListIcon from "@/svg/CheckListIcon"
 import { initialActionState } from "../lib/initialActionState"
+import { useContext } from "react"
+import StateContext from "../contexts/StateContext"
 
 const menuList = [
   {
@@ -37,9 +39,11 @@ export default function Person({
   applicant,
   isOpenMenu,
   setOpenMenuId,
-  setActionState,
   stage,
 }: PropTypes) {
+  const { setActionState }: ContextTypes = useContext(
+    StateContext
+  ) as ContextTypes
   const { image, name, id } = applicant
 
   const handleOpenMenu = () => {
