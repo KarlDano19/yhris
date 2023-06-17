@@ -44,10 +44,10 @@ export default function Checklist({
   const { getValues, setValue } = useForm()
   const [isOpen, setIsOpen] = useState(false)
   const [isDisabled, setIsDisabled] = useState(true)
-  let applicant: ApplicantType | null = null
+  let applicant: ApplicantType | undefined
   state.forEach(stage => {
     if (stage.id === actionState.stageId) {
-      applicant = stage.applicants.find(applicant => applicant.id === actionState.applicantId)!
+      applicant = stage.applicants.find(applicant => applicant.id === actionState.applicantId)
     }
   })
   const [checks, setChecks] = useState<string[]>(applicant?.checklists || [])

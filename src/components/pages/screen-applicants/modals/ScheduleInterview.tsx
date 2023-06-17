@@ -100,7 +100,7 @@ export default function ScheduleInterview({
               </label>
               <div className="border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative">
                 <input
-                  onClick={() => dateRef.current.showPicker()}
+                  onClick={() => dateRef.current?.showPicker()}
                   {...register("date")}
                   ref={dateRef}
                   type="date"
@@ -117,7 +117,7 @@ export default function ScheduleInterview({
 
               <div className="border border-[#ACB9CB] rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]">
                 <input
-                  onClick={() => timeRef.current.showPicker()}
+                  onClick={() => timeRef.current?.showPicker()}
                   {...register("startTime")}
                   ref={timeRef}
                   type="time"
