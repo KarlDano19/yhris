@@ -1,5 +1,6 @@
 import MainHeader from '@/components/MainHeader';
 import './globals.css';
+import "./quill-tooltips.css"
 import { Toaster } from 'react-hot-toast';
 import ReactQueryWrapper from './reactQueryWrapper';
 

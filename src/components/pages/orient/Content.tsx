@@ -217,7 +217,7 @@ const Content = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-none">
+                        <div className="flex-none lg:w-1/4">
                             <div className="relative flex items-center">
                                 <input
                                     type="text"

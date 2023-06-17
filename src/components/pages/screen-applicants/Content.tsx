@@ -14,7 +14,7 @@ export default function Content() {
             <Link
               href={`screen-applicants/${item.id}`}
               key={item.id}
-              className="rounded-lg p-8 shadow-sm text-indigo-dye text-center bg-white"
+              className="rounded-lg p-8 shadow text-indigo-dye text-center bg-white"
             >
               <h2 className="font-semibold text-xl">{title}</h2>
               <p className="text-[15px] mb-8">{address}</p>

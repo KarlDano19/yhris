@@ -28,7 +28,7 @@ export type T_Separation = {
 
 export type T_JobPreviewModal = {
   isOpen: boolean;
-  id: number;
+  id: number | null;
 };
 
 // Post a Job
@@ -41,8 +41,8 @@ export type T_CreateJob = {
   language: string;
   jobTitle: string;
   placeAdvertise: string;
-  jobType: string;
-  schedule: string;
+  jobType: string[];
+  schedule: string[];
   hireCount: number;
   hireDate: string;
   salary: {

@@ -1,7 +1,7 @@
 import { useState } from "react"
 
-export default function useTagInput(input: string, setInput: any, requirements: string[]) {
-  const [tags, setTags] = useState(requirements)
+export default function useTagInput(input: string, setInput: any, arr: string[] = []) {
+  const [tags, setTags] = useState(arr)
 
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" || event.key === "Tab" || event.key === ",") {

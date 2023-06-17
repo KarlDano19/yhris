@@ -11,18 +11,18 @@ export default function JobPreviewModal({
 }: {
   isOpen: T_JobPreviewModal | null;
   setIsOpen: Dispatch<T_JobPreviewModal | null>;
-  id: number | undefined;
+  id: number | null;
   jobPostHistoryItems: any;
 }) {
   const cancelButtonRef = useRef(null);
 
   return (
-    <Transition.Root show={isOpen ? true : false} as={Fragment}>
+    <Transition.Root show={isOpen?.isOpen ? true : false} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => setIsOpen(null)}
+        onClose={() => setIsOpen({ id: isOpen?.id ? isOpen?.id : null, isOpen: false })}
       >
         <Transition.Child
           as={Fragment}
@@ -54,7 +54,7 @@ export default function JobPreviewModal({
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
-                    onClick={() => setIsOpen(null)}
+                    onClick={() => setIsOpen({ id: isOpen?.id ? isOpen?.id : null, isOpen: false })}
                   />
                 </div>
                 {jobPostHistoryItems &&
@@ -93,7 +93,7 @@ export default function JobPreviewModal({
                   <button
                     type="button"
                     className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-                    onClick={() => setIsOpen(null)}
+                    onClick={() => setIsOpen({ id: isOpen?.id ? isOpen?.id : null, isOpen: false })}
                     ref={cancelButtonRef}
                   >
                     Close

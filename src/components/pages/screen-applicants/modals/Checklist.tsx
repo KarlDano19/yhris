@@ -1,21 +1,22 @@
-import { useEffect, useState } from "react"
+import { ChangeEvent, ChangeEventHandler, FormEventHandler, useContext, useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
-import { ChecklistPropTypes as PropTypes } from "../types"
+import { ApplicantType, ContextTypes, ChecklistPropTypes as PropTypes, StateType } from "../types"
 import { initialActionState } from "../lib/initialActionState"
 import { useForm } from "react-hook-form"
-import { camelize } from "@/helpers/camelize"
 import ModalFooterLayout from "../layouts/ModalFooterLayout"
+import StateContext from "../contexts/StateContext"
+import titleCase from "@/helpers/titleCase"
 
-const status = [
+type DataTypes = {
+  checklists: string[],
+  status: string
+}
+
+const statuses = [
   {
     id: "ongoing",
     value: "ongoing",
     title: "Ongoing",
-  },
-  {
-    id: "passed",
-    value: "passed",
-    title: "Passed",
   },
   {
     id: "withdrawn",
@@ -27,49 +28,81 @@ const status = [
     value: "rejected",
     title: "Rejected",
   },
+  {
+    id: "passed",
+    value: "passed",
+    title: "Passed",
+  },
 ]
 
 export default function Checklist({
   title,
   requirements,
-  setActionState,
   handleFormSubmit,
 }: PropTypes) {
-  const { register, handleSubmit } = useForm()
-  const titleCase = (str: any) => str.charAt(0).toUpperCase() + str.slice(1)
+  const {state, actionState, setActionState}: ContextTypes = useContext(StateContext) as ContextTypes
+  const { getValues, setValue } = useForm()
   const [isOpen, setIsOpen] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(true)
+  let applicant: ApplicantType | undefined
+  state.forEach(stage => {
+    if (stage.id === actionState.stageId) {
+      applicant = stage.applicants.find(applicant => applicant.id === actionState.applicantId)
+    }
+  })
+  const [checks, setChecks] = useState<string[]>(applicant?.checklists || [])
 
   useEffect(() => {
-    setIsOpen(true)
-  }, [])
+    // determining if all checklists are checked in the form
+    setIsDisabled(requirements.length !== checks.filter(check => requirements.includes(check)).length)
+  }, [checks.length, requirements.length])
+
+  useEffect(() => { setIsOpen(true) }, [])
+
   const handleClose = () => {
     setIsOpen(false)
     setTimeout(() => setActionState(initialActionState), 400)
   }
-  const onSubmit = (data: any) => {
+
+  const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault()
+
+    const data: DataTypes = {} as DataTypes
+    data.checklists = checks
+    data.status = getValues("status") || applicant?.status
     setIsOpen(false)
     setTimeout(() => handleFormSubmit(data), 400)
   }
 
+  const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setChecks(prev => [...prev, e.target.id])
+    } else {
+      const newChecks = checks.filter(item => item !== e.target.id)
+      setChecks(newChecks)
+    }
+  }
+  
   return (
     <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
-      <form onSubmit={handleSubmit((data) => onSubmit(data))}>
+      <form onSubmit={onSubmit}>
         <div className="p-8">
           {requirements?.length > 0 && (
             <div className="grid gap-4 mb-8">
-              {requirements.map((item) => {
+              {requirements.map((requirement) => {
                 return (
                   <div
-                    key={item}
+                    key={requirement}
                     className="flex items-center gap-4 text-indigo-dye text-[15px]"
                   >
                     <input
+                      checked={checks.some(check => check === requirement)}
+                      onChange={handleCheckbox}
+                      id={requirement}
                       type="checkbox"
-                      {...register(camelize(item))}
-                      id={item}
                       className="w-5 h-5"
                     />
-                    <label htmlFor={item}>{titleCase(item)}</label>
+                    <label htmlFor={requirement}>{titleCase(requirement)}</label>
                   </div>
                 )
               })}
@@ -77,18 +110,23 @@ export default function Checklist({
           )}
           <div className="grid gap-4">
             <p className="font-medium">Status</p>
-            {status.map((item) => {
-              const { title, id, value } = item
+            {statuses.map((status) => {
+              const { title, id } = status
+              const disabled = id === "passed" && isDisabled
+              
               return (
                 <div
                   key={id}
-                  className="flex items-center gap-4 text-indigo-dye text-[15px]"
+                  className={`${disabled && "opacity-75"} flex items-center gap-4 text-indigo-dye text-[15px]`}
                 >
                   <input
-                    {...register("status")}
-                    type="radio"
+                    onChange={e => setValue("status", e.target.id)}
+                    defaultChecked={applicant?.status === id}
+                    checked={disabled ? false : getValues("status") === id ? true : undefined}
+                    disabled={disabled}
                     id={id}
-                    value={value}
+                    type="radio"
+                    name="status"
                     className="w-5 h-5"
                   />
                   <label htmlFor={id}>{title}</label>

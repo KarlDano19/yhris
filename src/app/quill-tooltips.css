@@ -1,0 +1,151 @@
+/* Button tooltips on react-quill */
+
+.ql-formats button, .ql-formats > span {
+  position: relative;
+
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      background: #0d1e42;
+      color: white;
+      padding: 0.5em;
+      border-radius: 0.4em;
+      top: -120%;
+      left: -10px;
+      z-index: 999999;
+      position: absolute;
+      font-size: 12px;
+
+  }
+}
+
+.ql-bold {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Bold";
+  }
+}
+.ql-italic {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Italic";
+  }
+}
+.ql-underline {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Underline";
+  }
+}
+.ql-strike {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Strikeout";
+  }
+}
+.ql-link {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Hyperlink";
+  }
+}
+.ql-blockquote {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Quote";
+  }
+}
+.ql-list[value="bullet"] {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Bulleted List";
+      top: -200%;
+  }
+}
+.ql-list[value="ordered"] {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Numbered List";
+      top: -200%;
+  }
+}
+.ql-header[value="1"] {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Header";
+      top: -200%;
+  }
+}
+.ql-header[value="2"] {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Sub Header";
+      top: -200%;
+  }
+}
+.ql-font {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Font";
+      top: -200%;
+  }
+}
+.ql-size {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Font Size";
+      top: -200%;
+  }
+}
+.ql-indent[value="-1"] {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Indent";
+      top: -200%;
+  }
+}
+.ql-indent[value="+1"] {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Unindent";
+      top: -200%;
+  }
+}
+.ql-image {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Image";
+      top: -200%;
+  }
+}
+.ql-video {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Video";
+      top: -200%;
+  }
+}
+.ql-clean {
+  &:hover::after,
+  &:active::after,
+  &:focus::after {
+      content: "Clean";
+      top: -200%;
+  }
+}

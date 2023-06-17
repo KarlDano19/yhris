@@ -1,7 +1,7 @@
 import { PlusIcon } from "@heroicons/react/24/outline"
 import { Draggable } from "react-beautiful-dnd"
 import Person from "./Person"
-import { BlockPropTypes as PropTypes } from "../types"
+import { ApplicantType, BlockPropTypes as PropTypes } from "../types"
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   boxShadow: `${isDragging ? "rgba(149, 157, 165, 0.2) 0px 8px 24px" : "none"}`,
@@ -11,10 +11,9 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
 export default function Block({
   index,
   stage,
-  setActionState,
   openMenuId,
   setOpenMenuId,
-}: PropTypes) {
+}: any) {
   const { id, applicants } = stage
 
   return (
@@ -31,14 +30,13 @@ export default function Block({
           className="bg-[#EBF3FF] rounded-2xl px-7 py-2 h-[500px] relative"
         >
           {applicants.length ? (
-            applicants.map((applicant) => {
+            applicants.map((applicant: ApplicantType) => {
               return (
                 <Person
                   key={applicant.id}
                   applicant={applicant}
                   isOpenMenu={openMenuId === applicant.id}
                   setOpenMenuId={setOpenMenuId}
-                  setActionState={setActionState}
                   stage={stage}
                 />
               )

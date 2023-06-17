@@ -1,5 +1,7 @@
-import { useState, Dispatch } from "react";
+import { Dispatch } from "react";
 import { T_CreateJob } from "@/types/globals";
+import toast from 'react-hot-toast';
+import CustomToast from "@/components/CustomToast";
 
 function CopyJob({
   item,
@@ -8,7 +10,6 @@ function CopyJob({
   item: T_CreateJob;
   setIsOpen: Dispatch<boolean>;
 }) {
-  const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = () => {
     const {
@@ -51,10 +52,11 @@ function CopyJob({
       postAs: ${postAs}
       postIn: ${postIn.join(", ")}
     `;
-
     navigator.clipboard.writeText(mergedData);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 1500); // Reset the "copied" state after a delay
+    toast.custom(
+      () => <CustomToast message={`Job ${jobTitle} was copied!`} type="success" />,
+      { duration: 1000 }
+    );
     setIsOpen(false);
   };
 
@@ -64,7 +66,7 @@ function CopyJob({
       onClick={handleCopy}
       data-id={item.id} // Add the ID as a data attribute
     >
-      {isCopied ? "Copied!" : "Copy a Job"}
+      Copy a Job
     </button>
   );
 }

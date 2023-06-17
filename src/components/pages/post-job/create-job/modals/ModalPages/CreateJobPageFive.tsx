@@ -1,4 +1,4 @@
-import { Dispatch, useState } from "react";
+import { Dispatch, useRef, useState } from "react";
 
 export default function CreateJobPageFive({
   watch,
@@ -21,6 +21,17 @@ export default function CreateJobPageFive({
     fileSize?: number;
   }>({});
 
+  const handleSelection = (e: any) => {
+    const {value} = e.target
+    setManualInputFocus(false)
+
+    if (value !== "upload") {
+      setValue("postAsUpload", null);
+      setFileProps({});
+    }
+
+  }
+  
   return (
     <>
       <div className="px-4 pb-6">
@@ -33,6 +44,11 @@ export default function CreateJobPageFive({
             Post as
             <span className="text-red-600">*</span>
           </label>
+          {!getValues("postAs") && (
+            <span className="text-red-600 text-sm mt-2">
+              This field is required
+            </span>
+          )}
           <div className={`flex flex-col space-y-2 ml-2 mt-2 ${ manualInputFocus ? "border-2 border-blue-700" : ""}`}>
             <label className="inline-flex items-center mr-4">
               <input
@@ -41,7 +57,7 @@ export default function CreateJobPageFive({
                 value="text"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
-                onClick={() => setManualInputFocus(false)}
+                onChange={handleSelection}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Text
@@ -55,13 +71,13 @@ export default function CreateJobPageFive({
                 value="poster"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
-                onClick={() => setManualInputFocus(false)}
+                onChange={handleSelection}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Poster
                 <span className="block mt-0 font-normal text-gray-400">
                   Please make sure that you have set-up your hiring poster
-                  template in the brand kit.
+                  template in the Employee Kit.
                 </span>
               </span>
             </label>
@@ -73,7 +89,7 @@ export default function CreateJobPageFive({
                 value="upload"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
-                onClick={() => setManualInputFocus(false)}
+                onChange={handleSelection}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Upload
@@ -119,7 +135,6 @@ export default function CreateJobPageFive({
                 if (file) {
                   const fileName = e.target.files?.[0].name;
                   const fileSize = e.target.files?.[0].size;
-
                   setFileProps({
                     fileName: fileName,
                     fileSize: fileSize,

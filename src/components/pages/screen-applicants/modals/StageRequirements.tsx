@@ -1,17 +1,18 @@
 import { XMarkIcon } from "@heroicons/react/24/outline"
-import { StageRequirementsTypes as PropTypes } from "../types"
-import { useEffect, useState } from "react"
+import { ContextTypes, StageRequirementsTypes as PropTypes } from "../types"
+import { useContext, useEffect, useState } from "react"
 import ModalLayout from "./ModalLayout"
 import useTagInput from "../hooks/useTagInput"
 import { initialActionState } from "../lib/initialActionState"
 import ModalFooterLayout from "../layouts/ModalFooterLayout"
+import StateContext from "../contexts/StateContext"
 
 export default function StageRequirements({
   title,
   requirements,
-  setActionState,
   handleFormSubmit,
 }: PropTypes) {
+  const {setActionState}: ContextTypes = useContext(StateContext) as ContextTypes
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const { tags, handleKeyDown, handleRemoveTag } = useTagInput(
