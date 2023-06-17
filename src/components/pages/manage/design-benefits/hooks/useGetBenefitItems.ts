@@ -13,7 +13,7 @@ async function getBenefitItems() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.hostName}/api/benefits/`,
+        `${process.env.API_URL}/api/benefits/`,
         config
       );
       if (res.ok) {

@@ -13,7 +13,7 @@ async function getEmployeeIssueItems() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.hostName}/api/employee-issues/`,
+        `${process.env.API_URL}/api/employee-issues/`,
         config
       );
       if (res.ok) {

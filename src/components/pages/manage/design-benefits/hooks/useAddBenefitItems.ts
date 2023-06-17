@@ -24,7 +24,7 @@ async function addBenefit(benefit: T_Benefit) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.hostName}/api/benefits/`, config);
+    const res = await fetch(`${process.env.API_URL}/api/benefits/`, config);
     if (res.ok) {
       return res.json();
     }

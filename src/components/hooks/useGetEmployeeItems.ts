@@ -12,7 +12,7 @@ async function getEmployeeItems() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.hostName}/api/employees/`, config);
+      const res = await fetch(`${process.env.API_URL}/api/employees/`, config);
       if (res.ok) {
         return res.json();
       }

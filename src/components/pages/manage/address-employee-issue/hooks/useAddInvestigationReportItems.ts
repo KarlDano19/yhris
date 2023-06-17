@@ -25,7 +25,7 @@ async function addInvestigationReport(investigation: T_Investigation) {
       body: data,
     };
     const res = await fetch(
-      `${process.env.hostName}/api/investigation-reports/`,
+      `${process.env.API_URL}/api/investigation-reports/`,
       config
     );
     if (res.ok) {

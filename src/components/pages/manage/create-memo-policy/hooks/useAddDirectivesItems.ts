@@ -41,7 +41,7 @@ async function addDirective(directive: T_Directive) {
       },
       body: data,
     };
-    const res = await fetch(`${process.env.hostName}/api/directives/`, config);
+    const res = await fetch(`${process.env.API_URL}/api/directives/`, config);
     if (res.ok) {
       return res.json();
     }
