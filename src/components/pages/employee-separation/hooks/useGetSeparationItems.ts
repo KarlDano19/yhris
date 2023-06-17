@@ -14,7 +14,7 @@ async function getSeparationItems(filters: any) {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.hostName}/api/separations/?${searchParams}`,
+        `${process.env.API_URL}/api/separations/?${searchParams}`,
         config
       );
       if (res.ok) {

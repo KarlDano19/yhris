@@ -13,7 +13,7 @@ async function getProfile() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.hostName}/api/employer-profile/`,
+        `${process.env.API_URL}/api/employer-profile/`,
         config
       );
       if (res.ok) {

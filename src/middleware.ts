@@ -22,15 +22,19 @@ export async function middleware(request: NextRequest) {
           Authorization: `Token ${token}`,
         },
       };
-      const res = await (
-        await fetch(`${process.env.hostName}/api/employer-profile/`, config)
-      ).json();
-      if (Object.hasOwn(res, 'profile')) {
-        if (!Object.keys(res.profile).length) {
-          return NextResponse.redirect(
-            new URL('/setup-employer-profile', request.url)
-          );
+      try {
+        const res = await (
+          await fetch(`${process.env.API_URL}/api/employer-profile/`, config)
+        ).json();
+        if (Object.hasOwn(res, 'profile')) {
+          if (!Object.keys(res.profile).length) {
+            return NextResponse.redirect(
+              new URL('/setup-employer-profile', request.url)
+            );
+          }
         }
+      } catch(err) {
+        return NextResponse.next();
       }
     }
   } else {

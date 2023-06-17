@@ -13,7 +13,7 @@ async function getDirectivesItems() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.hostName}/api/directives/`,
+        `${process.env.API_URL}/api/directives/`,
         config
       );
       if (res.ok) {

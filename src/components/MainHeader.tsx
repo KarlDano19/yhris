@@ -21,25 +21,27 @@ import Timer from './Timer';
 import { deleteCookie } from 'cookies-next';
 const MainHeader = () => {
   const pathname = usePathname();
+  const { mutate, isLoading: isLogoutLoading } = useLogout();
   const [profile, setProfile] = useState<any>({});
   const showHeader = ['/login', '/register'].includes(pathname) ? false : true;
-  const { data, isLoading } = useGetProfile();
+  const { data, isLoading: isProfileLoading } = useGetProfile();
   const logout = () => {
-    const response = useLogout();
-    response
-      .then((data: any) => {
+    const callbackReq = {
+      onSuccess: (data: any) => {
         toast.custom(
           () => <CustomToast message={data.message} type='success' />,
           { duration: 4000 }
         );
         deleteCookie('token');
         location.href = '/login';
-      })
-      .catch((err: any) => {
+      },
+      onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 4000,
         });
-      });
+      },
+    };
+    mutate({}, callbackReq);
   };
   const userNavigation = [
     { name: 'Your Profile', href: '#', onClick: void 0 },
@@ -100,13 +102,13 @@ const MainHeader = () => {
                       <div>
                         <Menu.Button className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
                           <span className='sr-only'>Open user menu</span>
-                          {!isLoading && profile ? (
+                          {!isProfileLoading && profile ? (
                             profile.logo ? (
                               <Image
                                 className='rounded-full mx-auto'
                                 width='29'
                                 height='29'
-                                src={`${process.env.hostName}${profile.logo}`}
+                                src={`${process.env.IMG_URL}${profile.logo}`}
                                 alt='profile logo'
                               />
                             ) : (
@@ -115,7 +117,7 @@ const MainHeader = () => {
                           ) : (
                             <AccountLogo />
                           )}
-                          {!isLoading && (
+                          {!isProfileLoading && (
                             <div className=''>
                               <h3 className='text-sm font-bold'>
                                 {profile ? profile.name : '...'}
@@ -125,7 +127,7 @@ const MainHeader = () => {
                               </p>
                             </div>
                           )}
-                          {isLoading && (
+                          {isProfileLoading && (
                             <div
                               role='status'
                               className='max-w-sm animate-pulse'

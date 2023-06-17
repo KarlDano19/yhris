@@ -58,7 +58,7 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
       body: JSON.stringify(data),
     };
     const res = await fetch(
-      `${process.env.hostName}/api/separation/${separationEmail.id}/`,
+      `${process.env.API_URL}/api/separation/${separationEmail.id}/`,
       config
     );
     if (res.ok) {

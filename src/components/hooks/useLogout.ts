@@ -1,6 +1,8 @@
+import { useMutation } from '@tanstack/react-query';
+
 import { getCookie } from 'cookies-next';
 
-async function useLogout() {
+async function logout() {
   try {
     const token = getCookie('token');
     const config = {
@@ -10,7 +12,7 @@ async function useLogout() {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.hostName}/api/logout/`, config);
+    const res = await fetch(`${process.env.API_URL}/api/logout/`, config);
     if (res.ok) {
       return res.json();
     }
@@ -22,6 +24,11 @@ async function useLogout() {
     }
     throw errStringify.message;
   }
+}
+
+function useLogout() {
+  const query = useMutation((data: any) => logout());
+  return query;
 }
 
 export default useLogout;

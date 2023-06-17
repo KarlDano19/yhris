@@ -11,7 +11,7 @@ async function login(credentials: T_Login) {
       },
       body: JSON.stringify(credentials),
     };
-    const res = await fetch(`${process.env.hostName}/api/login/`, config);
+    const res = await fetch(`${process.env.API_URL}/api/login/`, config);
     if (res.ok) {
       return res.json();
     }

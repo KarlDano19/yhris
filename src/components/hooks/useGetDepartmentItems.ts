@@ -13,7 +13,7 @@ async function getDepartmentItems() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.hostName}/api/departments/`,
+        `${process.env.API_URL}/api/departments/`,
         config
       );
       if (res.ok) {

@@ -1,15 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    hostName: 'http://139.59.118.36:8000',
+    API_URL: 'http://127.0.0.1:8000',
+    IMG_URL: 'http://django-app:8000'
   },
   images: {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: '139.59.118.36',
+        hostname: 'django-app',
         port: '8000',
         pathname: '**',
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
@@ -18,16 +25,6 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        port: "",
-        pathname: "/**",
-      },
-    ],
   },
 }
 

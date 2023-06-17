@@ -23,7 +23,7 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReport) {
       body: JSON.stringify(data),
     };
     const res = await fetch(
-      `${process.env.hostName}/api/employee-issues/`,
+      `${process.env.API_URL}/api/employee-issues/`,
       config
     );
     if (res.ok) {

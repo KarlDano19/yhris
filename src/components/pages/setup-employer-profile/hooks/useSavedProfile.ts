@@ -34,7 +34,7 @@ async function saveProfile(profile: T_EmployerProfile) {
       body: data,
     };
     const res = await fetch(
-      `${process.env.hostName}/api/employer-profile/`,
+      `${process.env.API_URL}/api/employer-profile/`,
       config
     );
     if (res.ok) {

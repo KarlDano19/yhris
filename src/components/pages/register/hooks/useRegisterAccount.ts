@@ -18,7 +18,7 @@ async function register(user: T_Register) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.hostName}/api/register/`, config);
+    const res = await fetch(`${process.env.API_URL}/api/register/`, config);
     if (res.ok) {
       return res.json();
     }

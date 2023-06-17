@@ -21,7 +21,7 @@ async function addSeparation(separation: T_Separation) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.hostName}/api/separations/`, config);
+    const res = await fetch(`${process.env.API_URL}/api/separations/`, config);
     if (res.ok) {
       return res.json();
     }

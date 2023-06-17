@@ -12,7 +12,7 @@ async function getPositionItems() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.hostName}/api/positions/`, config);
+      const res = await fetch(`${process.env.API_URL}/api/positions/`, config);
       if (res.ok) {
         return res.json();
       }
