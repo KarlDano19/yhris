@@ -7,6 +7,7 @@ export type BlockPropTypes = {
   index: number
   provided: any
   snapshot: any
+  setActionState: any
 }
 
 export type WrapperPropTypes = {
