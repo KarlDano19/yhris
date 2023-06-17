@@ -7,8 +7,6 @@ export type BlockPropTypes = {
   index: number
   provided: any
   snapshot: any
-  openMenuId: any
-  setOpenMenuId: any
 }
 
 export type WrapperPropTypes = {
@@ -103,39 +101,12 @@ export type ContextTypes = {
 }
 
 export type ModalTypes = {
-  STAGE_REQUIREMENTS: {
+  [key: string]: {
     component: ReactNode
     dispatch?: {
       type: string
       payload?: any
     }
-  }
-  CHECKLIST: {
-    component: ReactNode
-    dispatch?: {
-      type: string
-      payload?: any
-    }
-  }
-  SEND_EMAIL: {
-    component: ReactNode
-    dispatch?: {
-      type: string
-      payload?: any
-    }
-  }
-  SCHEDULE_INTERVIEW: {
-    component: ReactNode
-    dispatch?: {
-      type: string
-      payload?: any
-    }
-  }
-  SUCCESS: {
-    component: ReactNode
-  }
-  CONFIRMATION: {
-    component: ReactNode
   }
 }
 
