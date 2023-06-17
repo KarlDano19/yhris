@@ -1,4 +1,4 @@
-import { Dispatch, useState } from "react";
+import { Dispatch, useRef, useState } from "react";
 
 export default function CreateJobPageFive({
   watch,
@@ -21,6 +21,17 @@ export default function CreateJobPageFive({
     fileSize?: number;
   }>({});
 
+  const handleSelection = (e: any) => {
+    const {value} = e.target
+    setManualInputFocus(false)
+
+    if (value !== "upload") {
+      setValue("postAsUpload", null);
+      setFileProps({});
+    }
+
+  }
+  
   return (
     <>
       <div className="px-4 pb-6">
@@ -46,7 +57,7 @@ export default function CreateJobPageFive({
                 value="text"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
-                onClick={() => setManualInputFocus(false)}
+                onChange={handleSelection}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Text
@@ -60,7 +71,7 @@ export default function CreateJobPageFive({
                 value="poster"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
-                onClick={() => setManualInputFocus(false)}
+                onChange={handleSelection}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Poster
@@ -78,7 +89,7 @@ export default function CreateJobPageFive({
                 value="upload"
                 name="radioGroup"
                 {...register("postAs", { required: true })}
-                onClick={() => setManualInputFocus(false)}
+                onChange={handleSelection}
               />
               <span className="ml-2 text-sm font-medium leading-6 text-gray-900">
                 Upload
@@ -124,7 +135,6 @@ export default function CreateJobPageFive({
                 if (file) {
                   const fileName = e.target.files?.[0].name;
                   const fileSize = e.target.files?.[0].size;
-
                   setFileProps({
                     fileName: fileName,
                     fileSize: fileSize,
