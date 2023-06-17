@@ -54,3 +54,7 @@ export const NTE_TEMPLATE = [
         message: "<p>A blessed day!</p><p><br></p><p>Thank you for you contribution in AABA-YAHSHUA.</p><p><br></p><p>To move forward with your separation, please sign the ABBA-YASHUA offboard documents attached on or before 5:30 PM today.</p><p><br></p><p>Let us know if you have any questions.</p><p>Thank you and GOD bless.</p><p><br></p><p>--</p>",
     },
 ];
+export const SCREEN_TEMPLATE = {
+  message:
+    "<p>A blessed day, Mr. Malinawon!</p><p><br></p><p>Thank you for taking our call today.</p><p>As discussed, please take the following to move forward with your application:</p><ol><li>Operational Test</li><li>Personality Test</li></ol><p><br></p><p>Thank you and GOD bless,</p><p>--</p>",
+}
