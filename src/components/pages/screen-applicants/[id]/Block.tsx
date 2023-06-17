@@ -11,7 +11,6 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
 export default function Block({
   index,
   stage,
-  setActionState,
   openMenuId,
   setOpenMenuId,
 }: PropTypes) {
@@ -38,7 +37,6 @@ export default function Block({
                   applicant={applicant}
                   isOpenMenu={openMenuId === applicant.id}
                   setOpenMenuId={setOpenMenuId}
-                  setActionState={setActionState}
                   stage={stage}
                 />
               )
