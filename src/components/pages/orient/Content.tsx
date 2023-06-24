@@ -13,6 +13,7 @@ import SendContractModal from "./modals/SendContractModal";
 import SuccessModal from "./modals/SuccessModal";
 import NoticeModal from "./modals/NoticeModal";
 import IntroduceModal from "./modals/IntroduceModal";
+import getMinDate from "@/helpers/getMinDate";
 
 const Content = () => {
     const [orientItems, setOrientItems] = useState(testData);
@@ -65,14 +66,16 @@ const Content = () => {
             return orientItems.map((item, index) => (
                 <tr key={index}>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        {item.date}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        <div className="flex gap-2">
-                            <span>{item.name}</span>{" "}
+                        <div className="flex justify-center">
+                            {item.date}
                         </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                        <div className="flex gap-2 justify-center">
+                            <span>{item.name}</span>{" "}
+                        </div>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 flex justify-center">
                         <SendContract
                             isContractSent={item.isContractSent}
                             isContractReceived={item.isContractReceived}
@@ -80,7 +83,7 @@ const Content = () => {
                             setIsSendContractModalOpen={setIsSendContractModalOpen}
                         />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 flex justify-center">
                         <Orient
                             isOrientSent={item.isOrientationSent}
                             isOriented={item.isNewHireOriented}
@@ -89,16 +92,20 @@ const Content = () => {
                         />
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        <IntroduceToTeam
-                            isIntroduced={item.isIntroduceSent}
-                            setIsIntroducedModalOpen={setIsIntroducedModalOpen}
-                        />
+                        <div className="flex justify-center">
+                            <IntroduceToTeam
+                                isIntroduced={item.isIntroduceSent}
+                                setIsIntroducedModalOpen={setIsIntroducedModalOpen}
+                            />
+                        </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        <EnrollToPayroll
-                            isEnrolled={item.isNewHireEnrolled}
-                            setIsEnrollModalOpen={setIsSignInPayrollModalOpen}
-                        />
+                        <div className="flex justify-center">
+                            <EnrollToPayroll
+                                isEnrolled={item.isNewHireEnrolled}
+                                setIsEnrollModalOpen={setIsSignInPayrollModalOpen}
+                            />
+                        </div>
                     </td>
                 </tr>
             ));
@@ -109,7 +116,7 @@ const Content = () => {
             filteredItems.length > 0
         ) {
             return filteredItems.map((item, index) => (
-                <tr key={index}>
+                <tr key={index} className="text-center">
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                         {item.date}
                     </td>
@@ -211,13 +218,14 @@ const Content = () => {
                                     ref={date2InputRef}
                                     // @ts-expect-error
                                     onClick={() => date2InputRef.current.showPicker()}
+                                    min={!itemsFilter?.from ? getMinDate() : getMinDate(itemsFilter.from)}
                                 />
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                                     <DateCalendar />
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-none lg:w-1/4">
+                        <div className="flex-none lg:w-1/3">
                             <div className="relative flex items-center">
                                 <input
                                     type="text"
@@ -243,40 +251,40 @@ const Content = () => {
                                         }`}
                                 >
                                     <thead>
-                                        <tr>
+                                        <tr className="text-center">
                                             <th
                                                 scope="col"
-                                                className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                                                className="py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0"
                                             >
                                                 Date
                                             </th>
                                             <th
                                                 scope="col"
-                                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                                                className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                                             >
                                                 Name
                                             </th>
                                             <th
                                                 scope="col"
-                                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                                                className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                                             >
                                                 Send Contract
                                             </th>
                                             <th
                                                 scope="col"
-                                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                                                className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                                             >
                                                 Orient
                                             </th>
                                             <th
                                                 scope="col"
-                                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                                                className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                                             >
                                                 Introduce to the team
                                             </th>
                                             <th
                                                 scope="col"
-                                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                                                className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                                             >
                                                 Enroll to YAHSHUA Payroll
                                             </th>

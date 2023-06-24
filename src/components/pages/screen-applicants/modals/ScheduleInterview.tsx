@@ -12,6 +12,18 @@ import ModalFooterLayout from "../layouts/ModalFooterLayout"
 import useTagInput from "../hooks/useTagInput"
 import { XMarkIcon } from "@heroicons/react/24/outline"
 import StateContext from "../contexts/StateContext"
+import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import { Marker } from '@react-google-maps/api';
+
+const containerStyle = {
+  width: 'auto',
+  height: '400px'
+};
+
+const center = {
+  lat: 14.5995124,
+  lng: 120.9842195
+};
 
 const formatTypes = [
   {
@@ -64,7 +76,7 @@ export default function ScheduleInterview({
   title,
   handleFormSubmit,
 }: PropTypes) {
-  const {setActionState}: ContextTypes = useContext(StateContext) as ContextTypes
+  const { setActionState }: ContextTypes = useContext(StateContext) as ContextTypes
   const { register, handleSubmit } = useForm()
   const [isOpen, setIsOpen] = useState(false)
   const [selectionId, setSelectionId] = useState("video")
@@ -159,13 +171,11 @@ export default function ScheduleInterview({
               return (
                 <div
                   key={index}
-                  className={`${
-                    hasSelected
-                      ? "bg-[#355FD0] text-white border-[#355FD0]"
-                      : "border-[#ACB9CB]"
-                  } ${
-                    item.borderStyle
-                  } flex items-center gap-2 border grow px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]`}
+                  className={`${hasSelected
+                    ? "bg-[#355FD0] text-white border-[#355FD0]"
+                    : "border-[#ACB9CB]"
+                    } ${item.borderStyle
+                    } flex items-center gap-2 border grow px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]`}
                 >
                   <div>{hasSelected ? item.whiteIcon : item.icon}</div>
                   <label htmlFor={item.id} className="grow py-3">
@@ -217,17 +227,38 @@ export default function ScheduleInterview({
           )}
 
           {selectionId === "inPerson" && (
-            <div className="mb-8 text-indigo-dye text-[15px]">
-              <label htmlFor="address" className="block mb-2">
-                Address
-              </label>
-              <input
-                type="text"
-                id="address"
-                {...register("address")}
-                className="border border-[#ACB9CB] rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]"
-              />
+            <div className="mb-8">
+              <div className="text-indigo-dye text-[15px] mb-4">
+                <label htmlFor="address" className="block mb-2">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  {...register("address")}
+                  className="border border-[#ACB9CB] rounded-md grow px-6 py-2 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]"
+                />
+              </div>
+              <LoadScript
+                googleMapsApiKey={process.env.GOOGLE_KEY ? process.env.GOOGLE_KEY : ""}
+              >
+                <GoogleMap
+                  mapContainerStyle={containerStyle}
+                  center={center}
+                  zoom={10}
+                >
+                  <Marker
+                    draggable
+                    position={center}
+                    onDragEnd={(e) => { 
+                      console.log('lat', e.latLng?.lat())
+                      console.log('lng', e.latLng?.lng())
+                    }}
+                  />
+                </GoogleMap>
+              </LoadScript>
             </div>
+
           )}
 
           <div className="mb-6">
