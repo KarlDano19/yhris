@@ -18,7 +18,7 @@ const Content = () => {
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen">
+    <div className="bg-white min-h-screen">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex p-4">
           <Link href="/" className="flex-none flex gap-3 items-center hover:bg-gray-200">
