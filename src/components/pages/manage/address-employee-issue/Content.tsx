@@ -302,7 +302,7 @@ const Content = () => {
                 </div>
               </div>
             </div>
-            <div className='flex-1 lg:w-1/3'>
+            <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
                 <input
                   type='text'
