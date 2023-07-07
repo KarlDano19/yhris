@@ -12,7 +12,6 @@ export const QUILL_FORMATS = [
   "indent",
   "link",
   "image",
-  "video",
 ];
 export const QUILL_MODULES = {
   toolbar: [
@@ -25,7 +24,7 @@ export const QUILL_MODULES = {
       { indent: "-1" },
       { indent: "+1" },
     ],
-    ["link", "image", "video"],
+    ["link", "image", {"attach-files": "Attach Files"}],
     ["clean"],
   ],
   clipboard: {
