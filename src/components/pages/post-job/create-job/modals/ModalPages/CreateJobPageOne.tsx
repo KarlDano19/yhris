@@ -1,128 +1,116 @@
-import { Dispatch } from "react";
+import { Dispatch } from 'react';
 
-import SelectChevronDown from "@/svg/SelectChevronDownDummy";
+import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
 export default function CreateJobPageOne({
   register,
+  handleSubmit,
   setPageNumber,
-  trigger,
 }: {
   register: any;
+  handleSubmit: any;
   setPageNumber: Dispatch<number>;
-  trigger: any;
 }) {
+  const onSubmit = () => {
+    setPageNumber(2);
+  }
   return (
-    <>
-      <div className="px-4 pb-6">
-        {/* start */}
-        <div className="sm:col-span-4 mt-4">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className='px-4 pb-6'>
+        <div className='sm:col-span-4 mt-4'>
           <label
-            htmlFor="country"
-            className="block text-sm font-medium leading-6 text-gray-900"
+            htmlFor='country'
+            className='block text-sm font-medium leading-6 text-gray-900'
           >
             Country
-            <span className="text-red-600">*</span>
+            <span className='text-red-600'>*</span>
           </label>
-          <div className="relative mt-2">
+          <div className='relative mt-2'>
             <select
-              id="country"
-              {...register("country", { required: true })}
-              required
-              className="appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+              id='country'
+              {...register('country', { required: true })}
+              className='appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
             >
               <option>Philippines</option>
               <option>Indonesia</option>
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+            <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
               <SelectChevronDown />
             </div>
           </div>
         </div>
-        <div className="sm:col-span-4 mt-4">
+        <div className='sm:col-span-4 mt-4'>
           <label
-            htmlFor="language"
-            className="block text-sm font-medium leading-6 text-gray-900"
+            htmlFor='language'
+            className='block text-sm font-medium leading-6 text-gray-900'
           >
             Language
-            <span className="text-red-600">*</span>
+            <span className='text-red-600'>*</span>
           </label>
-          <div className="relative mt-2">
+          <div className='relative mt-2'>
             <select
-              id="language"
-              {...register("language", { required: true })}
-              required
-              className="appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+              id='language'
+              {...register('language', { required: true })}
+              className='appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
             >
               <option>English</option>
               <option>Chinese</option>
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+            <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
               <SelectChevronDown />
             </div>
           </div>
         </div>
-        <div className="sm:col-span-4 mt-4">
+        <div className='sm:col-span-4 mt-4'>
           <div>
             <label
-              htmlFor="jobTitle"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              htmlFor='jobTitle'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Job Title<span className="text-red-600">*</span>
+              Job Title<span className='text-red-600'>*</span>
             </label>
-            <div className="mt-2">
+            <div className='mt-2'>
               <input
-                id="jobTitle"
-                {...register("jobTitle", { required: true })}
-                required
-                type="text"
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                id='jobTitle'
+                {...register('jobTitle', { required: true })}
+                type='text'
+                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
               />
             </div>
           </div>
         </div>
-        <div className="sm:col-span-4 mt-4">
+        <div className='sm:col-span-4 mt-4'>
           <div>
             <label
-              htmlFor="placeAdvertise"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              htmlFor='placeAdvertise'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
               Where would you like to advertise this job?
-              <span className="text-red-600">*</span>
+              <span className='text-red-600'>*</span>
             </label>
-            <div className="mt-2">
+            <div className='mt-2'>
               <input
-                id="placeAdvertise"
-                {...register("placeAdvertise", {
+                id='placeAdvertise'
+                {...register('placeAdvertise', {
                   required: true,
                 })}
-                required
-                type="text"
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+                type='text'
+                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
               />
             </div>
           </div>
         </div>
       </div>
       <hr />
-      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
+      <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
         <button
-          type="submit"
-          className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
-          onClick={async () => {
-            const country = await trigger("country");
-            const language = await trigger("language");
-            const jobTitle = await trigger("jobTitle");
-            const placeAdvertise = await trigger("placeAdvertise");
-            const results = [country, language, jobTitle, placeAdvertise];
-            const incomplete = results.some((item: boolean) => !item);
-            if (!incomplete) {
-              setPageNumber(2)
-            }
-          }}
+          id='pageOneNextBtn'
+          type='submit'
+          className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
         >
           Next
         </button>
       </div>
-    </>
+    </form>
   );
 }

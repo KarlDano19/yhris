@@ -9,7 +9,7 @@ const Quitclaim = ({
   isQuitclaimReceived,
   quitclaimReceivedDate,
   setIsQuitclaimModalOpen,
-  setReleased,
+  setReceived,
   isLoading,
 }: {
   id: number;
@@ -17,7 +17,7 @@ const Quitclaim = ({
   isQuitclaimReceived: boolean;
   quitclaimReceivedDate?: string;
   setIsQuitclaimModalOpen: Dispatch<T_QuitclaimModal>;
-  setReleased: any;
+  setReceived: any;
   isLoading: boolean;
 }) => {
   return (
@@ -50,7 +50,7 @@ const Quitclaim = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isQuitclaimSigned || isQuitclaimReceived || isLoading}
-          onClick={() => setReleased(id, 'quit claim')}
+          onClick={() => setReceived(id, 'quit claim')}
         >
           {isLoading && (
             <div role='status'>

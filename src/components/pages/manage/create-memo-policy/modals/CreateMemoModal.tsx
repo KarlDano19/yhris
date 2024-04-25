@@ -16,11 +16,13 @@ export default function CreateMemoModal({
   createMemoPolicyItems,
   isOpen,
   setIsOpen,
+  refetch
 }: {
   setCreateMemoPolicyItems: any;
   createMemoPolicyItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  refetch: any;
 }) {
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useAddDirectivesItems();
@@ -32,6 +34,7 @@ export default function CreateMemoModal({
     watch,
     formState: { errors },
     getValues,
+    trigger,
   } = useForm<T_Directive>();
   const cancelButtonRef = useRef(null);
 
@@ -45,11 +48,20 @@ export default function CreateMemoModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
-          () => <CustomToast message={data.message} type='success' />,
+          () => (
+            <CustomToast
+              message={'Successfully created a memo'}
+              type='success'
+            />
+          ),
+
           { duration: 5000 }
         );
         setIsOpen(false);
-        queryClient.refetchQueries({ queryKey: ['directivesItemCache'] });
+        // queryClient.refetchQueries({ queryKey: ['directivesItemCache'] });
+        refetch();
+        reset();
+        
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -59,7 +71,6 @@ export default function CreateMemoModal({
     };
     data['type'] = 'memo';
     mutate({ ...toSaveData, ...data }, callbackReq);
-    reset();
   });
   const uploadOnChange = ({ target }: { target: any }) => {
     const file = target.files[0];
@@ -131,6 +142,25 @@ export default function CreateMemoModal({
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
+                    <div
+                      className={`
+                         hidden rounded-md bg-red-50 p-4 mb-3`}
+                    >
+                      <div className='flex'>
+                        <div className='flex-shrink-0'>
+                          <XCircleIcon
+                            className='h-5 w-5 text-red-400'
+                            aria-hidden='true'
+                          />
+                        </div>
+                        <div className='ml-3'>
+                          <h3 className='text-sm font-medium text-red-800'>
+                            You cannot proceed due to incomplete fields. Please
+                            review.
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
                     <div className='sm:col-span-4'>
                       <label
                         htmlFor='title'
@@ -346,6 +376,29 @@ export default function CreateMemoModal({
                   <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                     <button
+                      onClick={async () => {
+                        const title = await trigger('title');
+                        const email = await trigger('email');
+                        const results = [title, email];
+                        const incomplete = results.some(
+                          (item: boolean) => !item
+                        );
+                        if (incomplete) {
+                          toast.custom(
+                            () => (
+                              <CustomToast
+                                message={
+                                  'You cannot proceed due to incomplete fields. Please review.'
+                                }
+                                type='error'
+                              />
+                            ),
+                            {
+                              duration: 4000,
+                            }
+                          );
+                        }
+                      }}
                       type='submit'
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                     >

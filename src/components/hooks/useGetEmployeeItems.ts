@@ -3,6 +3,8 @@ import { getCookie } from 'cookies-next';
 
 async function getEmployeeItems() {
   try {
+    let newFilters = { view_type: 'select' };
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -12,11 +14,11 @@ async function getEmployeeItems() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.API_URL}/api/employees/`, config);
-      if (res.ok) {
-        return res.json();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/?${searchParams}`, config);
+      if (!res.ok) {
+        throw res.json();
       }
-      throw res.json();
+      return res.json();
     }
     return {};
   } catch (err: any) {
@@ -29,7 +31,8 @@ async function getEmployeeItems() {
 }
 
 function useGetEmployeeItems() {
-  const query = useQuery(['employeesItemCache'], () => getEmployeeItems(), {
+  const query = useQuery(['employeeItemsCache'], () => getEmployeeItems(), {
+    refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 

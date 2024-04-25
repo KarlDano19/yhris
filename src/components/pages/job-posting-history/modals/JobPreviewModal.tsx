@@ -2,6 +2,7 @@ import { Dispatch, Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { T_JobPreviewModal } from "@/types/globals";
 import { XCircleIcon } from "@heroicons/react/24/solid";
+import * as DOMPurify from 'dompurify';
 
 export default function JobPreviewModal({
   isOpen,
@@ -60,7 +61,7 @@ export default function JobPreviewModal({
                 {jobPostHistoryItems &&
                   jobPostHistoryItems.map((item: any, index: number) => {
                     if (item.id == id) {
-                      const markup = { __html: item.jobDescription };
+                      const markup = { __html: DOMPurify.sanitize(item.jobDescription) };
 
                       return (
                         <div key={index} className="px-4 pb-6">
@@ -75,7 +76,7 @@ export default function JobPreviewModal({
                                 The ABBA Initiative -{" "}
                                 <span>{item.placeAdvertise}</span>
                               </p>
-                              <span className="absolute top-20 left-0 w-full border" />
+                              <span className="top-20 left-0 w-full border" />
                               <div>
                                 <p
                                   className="mt-8"

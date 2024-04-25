@@ -3,7 +3,10 @@ import { getCookie } from 'cookies-next';
 
 async function getSeparationItems(filters: any) {
   try {
-    const searchParams = new URLSearchParams(filters);
+    let newFilters = {...filters};
+    if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
+    if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -14,13 +17,13 @@ async function getSeparationItems(filters: any) {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.API_URL}/api/separations/?${searchParams}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/separations/?${searchParams}`,
         config
       );
-      if (res.ok) {
-        return res.json();
+      if (!res.ok) {
+        throw res.json();
       }
-      throw res.json();
+      return res.json();
     }
     return {};
   } catch (err: any) {
@@ -34,9 +37,10 @@ async function getSeparationItems(filters: any) {
 
 function useGetSeparationItems(filters: any) {
   const query = useQuery(
-    ['separationsItemCache', filters],
+    ['separationsItemCache'],
     () => getSeparationItems(filters),
     {
+      enabled: false,
       keepPreviousData: true,
     }
   );

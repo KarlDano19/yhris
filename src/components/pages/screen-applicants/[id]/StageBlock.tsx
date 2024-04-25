@@ -1,9 +1,14 @@
 import { PlusIcon } from "@heroicons/react/24/outline"
 import Person from "./Person"
+import { useParams } from "next/navigation";
 import { ContextTypes, StageBlockTypes as PropTypes } from "../types"
 import { useContext } from "react"
 import StateContext from "../contexts/StateContext"
 import actionTypes from "../lib/actionTypes"
+import toast from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
+import useAddStage from "../hooks/useAddStage";
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function StageBlock({
   stage,
@@ -11,15 +16,34 @@ export default function StageBlock({
   openMenuId,
   setOpenMenuId,
 }: PropTypes) {
+  const params = useParams();
+  const queryClient = useQueryClient();
+  const { mutate: addMutate, isLoading: isAddLoading } = useAddStage();
   const { actionState, dispatch }: ContextTypes = useContext(
     StateContext
   ) as ContextTypes
   const { applicants } = stage
   const handleAddStage = () => {
-    dispatch({
-      type: actionTypes.ADD_STAGE,
-      payload: { addType: "adjacent", index },
-    })
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        dispatch({
+          type: actionTypes.ADD_STAGE,
+          payload: { id: data.job_stage_id, addType: "adjacent", index },
+        })
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    const data: any = {
+      title: "Untitled",
+      job_posting: params.id,
+      order_by: index,
+      add_type: "adjacent"
+    }
+    addMutate(data, callbackReq);
   }
 
   return (

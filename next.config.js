@@ -1,32 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    API_URL: 'http://139.59.118.36:8000',
-    IMG_URL: 'http://django-app:8000',
-    GOOGLE_KEY: 'ADD_YOUR_KEY_HERE'
-  },
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'django-app',
-        port: '8000',
-        pathname: '**',
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        port: "",
-        pathname: "/**",
+        protocol: process.env.NEXT_REMOTE_PATTERNS_PROTOCOL,
+        hostname: process.env.NEXT_REMOTE_PATTERNS_HOSTNAME,
+        port: process.env.NEXT_REMOTE_PATTERNS_PORT,
+        pathname: '/**',
       },
     ],
   },
-  experimental: {
-    appDir: true,
-  },
+  reactStrictMode: false,
+  experimental: {},
   eslint: {
     ignoreDuringBuilds: true,
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

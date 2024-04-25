@@ -1,11 +1,11 @@
 import { Dispatch, Fragment, useRef } from 'react';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { T_Separation } from '@/types/globals';
 import SelectChevronDown from '@/svg/SelectChevronDown';
-import DateCalendar from '@/svg/DateCalendar';
 import useAddSeparationItems from '../hooks/useAddSeparationItems';
 import CustomToast from '@/components/CustomToast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -18,6 +18,7 @@ export default function AddSeparationModal({
   setSeparationItems,
   isOpen,
   setIsOpen,
+  refetch,
 }: {
   separationItems: any;
   departmentItems: any;
@@ -26,21 +27,23 @@ export default function AddSeparationModal({
   setSeparationItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  refetch: any;
 }) {
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit, setValue, reset } = useForm<T_Separation>();
+  const { register, handleSubmit, control, reset, trigger } = useForm<T_Separation>();
   const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type='success' />,
-          { duration: 5000 }
-        );
+        toast.custom(() => <CustomToast message={'Create separation successfully'} type='success' />, {
+          duration: 5000,
+        });
         setIsOpen(false);
-        queryClient.refetchQueries({ queryKey: ['separationsItemCache'] });
+        // queryClient.refetchQueries({ queryKey: ["separationsItemCache"] });
+        refetch();
+        reset();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -49,17 +52,11 @@ export default function AddSeparationModal({
       },
     };
     mutate(data, callbackReq);
-    reset();
   });
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog
-        as='div'
-        className='relative z-10'
-        initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
-      >
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -85,45 +82,38 @@ export default function AddSeparationModal({
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>
-                    Separate
-                  </h3>
-                  <XCircleIcon
-                    className='w-8 h-8 text-white cursor-pointer'
-                    onClick={() => setIsOpen(false)}
-                  />
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Separate</h3>
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
                     <div className='sm:col-span-4'>
-                      <label
-                        htmlFor='email'
-                        className='block text-sm font-medium leading-6 text-gray-900'
-                      >
+                      <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                         Date of Separation
                         <span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
-                        <input
-                          type='date'
-                          onChange={(e) => setValue('date', e.target.value)}
-                          required
-                          id='date'
-                          className='block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
-                          ref={dateInputRef}
-                          // @ts-expect-error
-                          onClick={() => dateInputRef.current.showPicker()}
+                        <Controller
+                          control={control}
+                          name='date'
+                          render={({ field }) => (
+                            <CustomDatePicker
+                              name={'date'}
+                              selected={field.value}
+                              pickerOnChange={field.onChange}
+                              className={
+                                'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
+                              }
+                              inputOnChange={field.onChange}
+                              placeholder={'mm/dd/yyyy'}
+                              required={true}
+                            />
+                          )}
                         />
-                        <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                          <DateCalendar />
-                        </div>
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
-                      <label
-                        htmlFor='email'
-                        className='block text-sm font-medium leading-6 text-gray-900'
-                      >
+                      <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                         Employee Name<span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
@@ -133,14 +123,11 @@ export default function AddSeparationModal({
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
                           <option value=''>Select...</option>
-                          {employeeItems.map((item: any) => {
+                          {/* {employeeItems?.map((item: any) => {
                             return (
-                              <option
-                                key={item.id}
-                                value={item.id}
-                              >{`${item.firstname} ${item.lastname}`}</option>
+                              <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
                             );
-                          })}
+                          })} */}
                         </select>
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <SelectChevronDown />
@@ -148,14 +135,11 @@ export default function AddSeparationModal({
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
-                      <label
-                        htmlFor='position'
-                        className='block text-sm font-medium leading-6 text-gray-900'
-                      >
+                      <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
                         Position<span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
-                        <select
+                        {/* <select
                           id='position'
                           {...register('position', { required: true })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
@@ -171,18 +155,21 @@ export default function AddSeparationModal({
                         </select>
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <SelectChevronDown />
-                        </div>
+                        </div> */}
+                        <input
+                          id='position'
+                          {...register('position', { required: true })}
+                          type='text'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        />
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
-                      <label
-                        htmlFor='department'
-                        className='block text-sm font-medium leading-6 text-gray-900'
-                      >
+                      <label htmlFor='department' className='block text-sm font-medium leading-6 text-gray-900'>
                         Department<span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
-                        <select
+                        {/* <select
                           id='department'
                           {...register('department', { required: true })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
@@ -198,14 +185,17 @@ export default function AddSeparationModal({
                         </select>
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <SelectChevronDown />
-                        </div>
+                        </div> */}
+                        <input
+                          id='department'
+                          {...register('department', { required: true })}
+                          type='text'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        />
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
-                      <label
-                        htmlFor='reason'
-                        className='block text-sm font-medium leading-6 text-gray-900'
-                      >
+                      <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                         Reason of Leaving<span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
@@ -215,10 +205,10 @@ export default function AddSeparationModal({
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
                           <option value=''>Select...</option>
-                          <option>Resignation</option>
-                          <option>Absence Without Leave (AWoL)</option>
-                          <option>Layoff</option>
-                          <option>Termination</option>
+                          <option value='Resignation'>Resignation</option>
+                          <option value='Absence Without Leave (AWoL)'>Absence Without Leave (AWoL)</option>
+                          <option value='Layoff'>Layoff</option>
+                          <option value='Termination'>Termination</option>
                         </select>
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <SelectChevronDown />
@@ -230,6 +220,27 @@ export default function AddSeparationModal({
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                     <button
                       type='submit'
+                      onClick={async () => {
+                        const reason = await trigger('reason');
+                        const name = await trigger('name');
+                        const department = await trigger('department');
+                        const position = await trigger('position');
+                        const results = [reason, name, department, position];
+                        const incomplete = results.some((item: boolean) => !item);
+                        if (incomplete) {
+                          toast.custom(
+                            () => (
+                              <CustomToast
+                                message={'You cannot proceed due to incomplete fields. Please review.'}
+                                type='error'
+                              />
+                            ),
+                            {
+                              duration: 7000,
+                            }
+                          );
+                        }
+                      }}
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                       disabled={isLoading}
                     >

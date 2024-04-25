@@ -1,13 +1,24 @@
+import { cookies } from 'next/headers';
+
+import { getIronSession } from 'iron-session';
+
 import Content from "@/components/pages/post-job/Content";
-import React from "react";
+
+import { SessionData, sessionOptions } from '@/session/lib';
 
 export const metadata = {
-  title: "Post a Job",
-  description: "Post a Job",
+  title: "Job Posting - Yahshua HRIS",
 };
 
+async function getSession() {
+  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  return session;
+}
+
 const PostJob = async () => {
-  return <Content />;
+  const session = await getSession();
+  const hasActiveSubscription = session.hasActiveSubscription;
+  return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
 export default PostJob;

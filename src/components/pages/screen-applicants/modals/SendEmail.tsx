@@ -41,9 +41,7 @@ export default function SendEmail({
     setTimeout(() => setActionState(initialActionState), 400)
   }
   const handleOnSubmit = (data: any) => {
-    setIsOpen(false)
-    // put data
-    setTimeout(() => handleFormSubmit(data), 400)
+    handleFormSubmit(data, setIsOpen)
   }
 
   return (

@@ -1,16 +1,15 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Fragment } from 'react';
-import { Menu, Popover, Transition } from '@headlessui/react';
-import classNames from '@/helpers/classNames';
-import {
-  Bars3Icon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import Link from 'next/link';
+
+import React, { useEffect, useState, Fragment } from 'react';
+
+import { deleteCookie } from 'cookies-next';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+
+import { Menu, Popover, Transition } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import classNames from '@/helpers/classNames';
 import MainLogo from '@/svg/MainLogo';
 import AccountLogo from '@/svg/AccountLogo';
 import useGetProfile from './hooks/useGetProfile';
@@ -18,12 +17,26 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useLogout from './hooks/useLogout';
 import Timer from './Timer';
-import { deleteCookie } from 'cookies-next';
+
 const MainHeader = () => {
-  const pathname = usePathname();
+  const pathName = usePathname();
+  const listPathname = pathName.split('/');
+  const slicePaths = listPathname.slice(1);
+  const firstRoute = slicePaths[0];
   const { mutate, isLoading: isLogoutLoading } = useLogout();
   const [profile, setProfile] = useState<any>({});
-  const showHeader = ['/login', '/register'].includes(pathname) ? false : true;
+  const isAllowHeader = !![
+    'manage-subscriptions',
+    'checkout',
+    'dashboard',
+    'setup-employer-profile',
+    'post-job',
+    'screen-applicants',
+    'orient',
+    'manage',
+    'employee-separation',
+    'admin'
+  ].includes(firstRoute);
   const { data, isLoading: isProfileLoading } = useGetProfile();
   const logout = () => {
     const callbackReq = {
@@ -44,27 +57,27 @@ const MainHeader = () => {
     mutate({}, callbackReq);
   };
   const userNavigation = [
-    { name: 'Your Profile', href: '#', onClick: void 0 },
+    { name: 'My Profile', href: '/a', onClick: void 0 },
+    { name: 'Subscriptions', href: '/manage-subscriptions', onClick: void 0 },
     { name: 'Settings', href: '#', onClick: void 0 },
     { name: 'Sign out', href: void 0, onClick: logout },
   ];
 
   useEffect(() => {
     if (data) {
-      setProfile(data.profile);
+      setProfile(data);
     }
-  }, [data])
-  
+  }, [data]);
 
   return (
     <>
-      {showHeader && (
+      {isAllowHeader && (
         <Popover
           as='header'
           className={({ open }) =>
             classNames(
               open ? 'fixed inset-0 z-40 overflow-y-auto' : '',
-              'bg-white shadow-sm lg:static lg:overflow-y-visible'
+              'bg-white shadow-md relative'
             )
           }
         >
@@ -74,7 +87,7 @@ const MainHeader = () => {
                 <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                   <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
                     <div className='flex flex-shrink-0 items-center'>
-                      <Link href='/'>
+                      <Link href='/dashboard'>
                         <MainLogo />
                       </Link>
                     </div>
@@ -104,11 +117,9 @@ const MainHeader = () => {
                           <span className='sr-only'>Open user menu</span>
                           {!isProfileLoading && profile ? (
                             profile.logo ? (
-                              <Image
-                                className='rounded-full mx-auto'
-                                width='29'
-                                height='29'
-                                src={`${process.env.IMG_URL}${profile.logo}`}
+                              <img
+                                className='rounded-full mx-auto w-[29px] h-[29px]'
+                                src={`${process.env.NEXT_PUBLIC_IMG_URL}${profile.logo}`}
                                 alt='profile logo'
                               />
                             ) : (
@@ -122,7 +133,7 @@ const MainHeader = () => {
                               <h3 className='text-sm font-bold'>
                                 {profile ? profile.name : '...'}
                               </h3>
-                              <p className='text-xs w-32'>
+                              <p className='text-left text-xs w-32'>
                                 <Timer />
                               </p>
                             </div>
@@ -181,6 +192,7 @@ const MainHeader = () => {
                       className={classNames(
                         'block rounded-md py-2 px-3 text-base font-medium hover:bg-gray-50'
                       )}
+                      onClick={item.onClick}
                     >
                       {item.name}
                     </a>

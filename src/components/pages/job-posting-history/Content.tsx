@@ -1,37 +1,30 @@
-"use client";
-import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import React, { useEffect, useRef, useState } from "react";
-import { T_JobPreviewModal } from "@/types/globals";
-import JobPreview from "./JobPreview";
-import {
-  Facebook,
-  Indeed,
-  LinkedIn,
-  Instagram,
-  Twitter,
-} from "@/svg/SocialMedia";
-import { jobPostHistory as testData } from "@/helpers/testData";
-import JobPreviewModal from "./modals/JobPreviewModal";
-import SetJob from "./SetJob";
-import SetJobInactiveModal from "./modals/SetJobInactiveModal";
-import Link from "next/link";
-import DateCalendar from "@/svg/DateCalendar";
-import getMinDate from "@/helpers/getMinDate";
+'use client';
+
+import React, { useEffect, useState } from 'react';
+
+import Link from 'next/link';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
+import JobPreview from './JobPreview';
+import JobPreviewModal from './modals/JobPreviewModal';
+import SetJob from './SetJob';
+import RightClickMenu from '@/components/RightClickMenu';
+import SetJobInactiveModal from './modals/SetJobInactiveModal';
+import useGetJobPostItems from './hooks/useGetJobPostItems';
+import useUpdateJobPostItems from './hooks/useUpdateJobPostItems';
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
+
+import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
+import { T_JobPreviewModal } from '@/types/globals';
 
 type ComponentMap = {
   [key: string]: React.ElementType;
 };
-const Content = () => {
-  const [jobPostHistoryItems, setJobPostHistoryItems] = useState(testData);
-  const [filteredItems, setFilteredItems] = useState(testData);
-  const [itemsFilter, setItemsFilter] = useState({ from: "", to: "", search: "" });
-  const [isJobPreviewOpen, setIsJobPreviewOpen] =
-    useState<T_JobPreviewModal | null>(null);
-  const [isSetJobInactiveModalOpen, setIsSetJobInactiveModalOpen] =
-    useState(false);
-  const date1InputRef = useRef(null);
-  const date2InputRef = useRef(null);
 
+const Content = () => {
   const componentMap: ComponentMap = {
     Facebook,
     Indeed,
@@ -41,117 +34,182 @@ const Content = () => {
     // Add other components here if needed
   };
 
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [selectedJobId, setSelectedJobId] = useState<any>();
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuOptions, setContextMenuOptions] = useState<any>([]);
+  const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
+  const [itemsFilter, setItemsFilter] = useState({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [isJobPreviewOpen, setIsJobPreviewOpen] = useState<T_JobPreviewModal | null>(null);
+  const [isSetJobInactiveModalOpen, setIsSetJobInactiveModalOpen] = useState(false);
+  const { data: dataJobPost, isLoading: isGetJobPostLoading, refetch } = useGetJobPostItems(itemsFilter);
+  const { mutate, isLoading } = useUpdateJobPostItems();
+
+  const handleRightClick = (event: any, jobId: any) => {
+    event.preventDefault();
+    setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    setShowContextMenu(true);
+    setSelectedJobId(jobId);
+  };
+
+  const handleCloseContextMenu = () => {
+    setShowContextMenu(false);
+  };
+
   useEffect(() => {
-    if (itemsFilter.from && itemsFilter.to) {
-      const filteredByDate = jobPostHistoryItems.filter((item) => {
-        let date = new Date(item.hireDate);
-        let start = new Date(itemsFilter.from);
-        let end = new Date(itemsFilter.to);
-        return date >= start && date <= end;
+    if (dataJobPost) {
+      let menuOptions: any = {};
+      dataJobPost.map((jobPost: any) => {
+        jobPost['jobTitle'] = jobPost['job_title'];
+        jobPost['jobType'] = jobPost['job_type'];
+        jobPost['jobDescription'] = jobPost['job_description'];
+        jobPost['placeAdvertise'] = jobPost['advertise_to'];
+        jobPost['schedule'] = jobPost['job_schedule'];
+        jobPost['hireCount'] = jobPost['required_slot'];
+        jobPost['postIn'] = jobPost['shared_to'].split(',');
+        
+        let rightClickItemLabel = 'Set as inactive'
+        let successMessage = 'Successfully set job as inactive.';
+        if (!jobPost['is_active']) {
+          rightClickItemLabel = 'Set as active';
+          successMessage = 'Successfully set job as active.';
+        }
+        menuOptions['label'] = rightClickItemLabel;
+        menuOptions['action'] = (jobId: any) => {
+          let data: any = {};
+          data["jobId"] = jobId;
+          data["is_active"] = !jobPost['is_active'];
+          const callbackReq = {
+            onSuccess: () => {
+              refetch();
+              toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+                duration: 5000,
+              });
+            },
+            onError: (err: any) => {
+              toast.custom(() => <CustomToast message={err} type='error' />, {
+                duration: 7000,
+              });
+            },
+          };
+          mutate(data, callbackReq);
+        };
       });
-      setFilteredItems([...filteredByDate]);
+      setContextMenuOptions([menuOptions]);
+      setJobPostHistoryItems(dataJobPost);
     }
-  }, [itemsFilter, jobPostHistoryItems]);
+  }, [dataJobPost]);
+
+  const socialMediaShare = (social: string, og_url: string) => {
+    const encoded_url = encodeURIComponent(og_url);
+    if (social === 'Facebook') {
+      og_url = `${encoded_url}%3Fsource%3Dfacebook`;
+      shareFb(og_url);
+      return;
+    }
+    if (social === 'LinkedIn') {
+      og_url = `${encoded_url}%3Fsource%3Dfacebook`;
+      shareLinkedIn(og_url);
+      return;
+    }
+  };
+
+  const shareFb = (og_url: string) => {
+    const FBSharer = `https://www.facebook.com/sharer/sharer.php?u=${og_url}`;
+    window.open(FBSharer);
+  };
+
+  const shareLinkedIn = (og_url: string) => {
+    const LinkedInSharer = `https://www.linkedin.com/sharing/share-offsite/?url=${og_url}`;
+    window.open(LinkedInSharer);
+  };
 
   const renderRows = () => {
-    if (
-      (!itemsFilter.from ||
-      !itemsFilter.to) &&
-      jobPostHistoryItems &&
-      jobPostHistoryItems.length > 0
-    ) {
-      return jobPostHistoryItems.map((item, index) => (
-        <tr key={index} className="text-center">
-          <td
-            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${item.isActive ? "text-red-500" : "text-gray-500"
-              }`}
-          >
-            <JobPreview
-              id={item.id}
-              jobNumber={item.JobNo}
-              setIsJobPreviewOpen={setIsJobPreviewOpen}
-            />
-          </td>
-          <td
-            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${item.isActive ? "text-red-500" : "text-gray-500"
-              }`}
-          >
-            <SetJob
-              item={item}
-              id={item.id}
-              jobTitle={item.jobTitle}
-              setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
-              setIsJobPreviewOpen={setIsJobPreviewOpen}
-            />
-          </td>
-          <td
-            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${item.isActive ? "text-red-500" : "text-gray-500"
-              }`}
-          >
-            {item.jobType}
-          </td>
-          <td
-            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${item.isActive ? "text-red-500" : "text-gray-500"
-              }`}
-          >
-            {item.schedule}
-          </td>
-          <td
-            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${item.isActive ? "text-red-500" : "text-gray-500"
-              }`}
-          >
-            {item.hireCount}
-          </td>
-          <td className="flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.postIn.map((item, index) => {
-              const DynamicComponent = componentMap[item];
-              return (
-                <span key={index}>
-                  <DynamicComponent />
-                </span>
-              );
-            })}
+    if (isGetJobPostLoading) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div role='status' className='py-5 text-center'>
+              <svg
+                aria-hidden='true'
+                className='inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400'
+                viewBox='0 0 100 101'
+                fill='none'
+                xmlns='http://www.w3.org/2000/svg'
+              >
+                <path
+                  d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                  fill='currentColor'
+                />
+                <path
+                  d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
+                  fill='currentFill'
+                />
+              </svg>
+              <span className='sr-only'>Loading...</span>
+            </div>
           </td>
         </tr>
-      ));
-    } else if (
-      itemsFilter.from &&
-      itemsFilter.to &&
-      filteredItems &&
-      filteredItems.length > 0
-    ) {
-      return filteredItems.map((item, index) => (
-        <tr key={index}>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            <JobPreview
-              id={item.id}
-              jobNumber={item.JobNo}
-              setIsJobPreviewOpen={setIsJobPreviewOpen}
-            />
+      );
+    }
+    if (jobPostHistoryItems && jobPostHistoryItems.length > 0) {
+      return jobPostHistoryItems.map((jobPost: any) => (
+        <tr onContextMenu={(event) => {handleRightClick(event, jobPost.id)}} key={jobPost.id} className='text-center'>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+            }`}
+          >
+            <JobPreview id={jobPost.id} jobNumber={jobPost.id} setIsJobPreviewOpen={setIsJobPreviewOpen} />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+            }`}
+          >
             <SetJob
-              item={item}
-              id={item.id}
-              jobTitle={item.jobTitle}
+              item={jobPost}
+              id={jobPost.id}
+              jobTitle={jobPost.jobTitle}
               setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
               setIsJobPreviewOpen={setIsJobPreviewOpen}
             />
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.jobType}
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+            }`}
+          >
+            {jobPost.jobType}
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.schedule}
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+            }`}
+          >
+            {jobPost.schedule}
           </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.hireCount}
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+            }`}
+          >
+            {jobPost.hireCount}
           </td>
-          <td className="flex space-x-2 whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.postIn.map((item, index) => {
-              const DynamicComponent = componentMap[item];
+          <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {jobPost.postIn.map((social: any) => {
+              const DynamicComponent = componentMap[social];
               return (
-                <span key={index}>
+                <span
+                  key={social}
+                  onClick={() => {
+                    socialMediaShare(social, jobPost.og_url);
+                  }}
+                >
                   <DynamicComponent />
                 </span>
               );
@@ -163,9 +221,7 @@ const Content = () => {
       return (
         <tr>
           <td colSpan={7}>
-            <h4 className="text-center text-gray-300 text-sm my-4">
-              There{`'`}s no data yet.
-            </h4>
+            <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
           </td>
         </tr>
       );
@@ -174,123 +230,91 @@ const Content = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex p-4">
-          <Link href="/post-job" className="flex-none flex gap-3 items-center hover:bg-gray-200">
-            <ArrowLeftIcon className="h-5 w-5" />
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+        <div className='flex p-4'>
+          <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+            <ArrowLeftIcon className='h-5 w-5' />
             <h4>Post Job</h4>
           </Link>
         </div>
-        <div className="px-2 md:px-8 lg:px-4">
-          <h2 className="text-xl font-bold text-indigo-dye">
-            Job Posting History
-          </h2>
-          <div className="mt-6 flex flex-col lg:flex-row items-center gap-16">
-            <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
-              <div className="relative">
-                <input
-                  type="date"
-                  name="to"
-                  id="to"
-                  className="appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, from: e.target.value })}
-                  ref={date1InputRef}
-                  // @ts-expect-error
-                  onClick={() => date1InputRef.current.showPicker()}
+        <div className='px-2 md:px-8 lg:px-4'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+            <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
+              <div className='relative'>
+                <CustomDatePicker
+                  name={'from'}
+                  selected={itemsFilter.from}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <DateCalendar />
-                </div>
               </div>
               <p>to</p>
-              <div className="relative">
-                <input
-                  type="date"
-                  name="from"
-                  id="from"
-                  className="appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, to: e.target.value })}
-                  ref={date2InputRef}
-                  // @ts-expect-error
-                  onClick={() => date2InputRef.current.showPicker()}
-                  min={!itemsFilter?.from ? getMinDate() : getMinDate(itemsFilter.from)}
+              <div className='relative'>
+                <CustomDatePicker
+                  name={'to'}
+                  selected={itemsFilter.to}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <DateCalendar />
-                </div>
               </div>
             </div>
-            <div className="flex-none lg:w-1/3">
-              <div className="relative flex items-center">
+            <div className='flex-none lg:w-1/3'>
+              <div className='relative flex items-center'>
                 <input
-                  type="text"
-                  name="search"
-                  id="search"
-                  className="block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                  type='text'
+                  name='search'
+                  id='search'
+                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                  placeholder="Search..."
+                  placeholder='Search...'
                 />
-                <div className="absolute inset-y-0 right-0 flex py-2 pr-2">
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
+                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-8 flow-root">
-            <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]">
-                <table
-                  className={`min-w-full divide-y divide-gray-300 ${jobPostHistoryItems.length === 0 && "mb-6"
-                    }`}
-                >
+          <div className='mt-8 flow-root'>
+            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+              <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]'>
+                <table className={`min-w-full divide-y divide-gray-300 ${jobPostHistoryItems.length === 0 && 'mb-6'}`}>
                   <thead>
-                    <tr className="text-center">
-                      <th
-                        scope="col"
-                        className="py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0"
-                      >
+                    <tr className='text-center'>
+                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0'>
                         Job No.
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Title
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Type
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Schedule
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Hires Needed
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Platform/s Posted
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {renderRows()}
-                  </tbody>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className="text-xs text-gray-500 mt-2">
-                  Total record/s: {jobPostHistoryItems.length}
-                </p>
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {jobPostHistoryItems.length}</p>
               </div>
             </div>
           </div>
@@ -302,10 +326,17 @@ const Content = () => {
         isOpen={isJobPreviewOpen}
         setIsOpen={setIsJobPreviewOpen}
       />
-      <SetJobInactiveModal
-        isOpen={isSetJobInactiveModalOpen}
-        setIsOpen={setIsSetJobInactiveModalOpen}
-      />
+      <SetJobInactiveModal isOpen={isSetJobInactiveModalOpen} setIsOpen={setIsSetJobInactiveModalOpen} />
+      {showContextMenu && (
+        <RightClickMenu
+          options={contextMenuOptions}
+          position={contextMenuPosition}
+          onClose={handleCloseContextMenu}
+          isOpen={showContextMenu}
+          setShowContextMenu={setShowContextMenu}
+          selectedJobId={selectedJobId}
+        />
+      )}
     </div>
   );
 };

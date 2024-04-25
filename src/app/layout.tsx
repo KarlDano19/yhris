@@ -1,25 +1,26 @@
-import MainHeader from '@/components/MainHeader';
-import './globals.css';
-import "./quill-tooltips.css"
+import { Suspense } from 'react';
+
 import { Toaster } from 'react-hot-toast';
-import ReactQueryWrapper from './reactQueryWrapper';
+
+import ReactQueryWrapper from '@/app/reactQueryWrapper';
+import Auth from '@/app/auth';
+
+import './quill-tooltips.css';
+import './globals.css';
 
 export const metadata = {
-  title: 'Home - Yahshua HRIS',
+  title: 'Yahshua HRIS',
   description: 'HRIS',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en'>
-      <body className="bg-gray-100">
+      <body className='bg-gray-100'>
         <ReactQueryWrapper>
-          <MainHeader />
-          {children}
+          <Suspense>
+            <Auth>{children}</Auth>
+          </Suspense>
         </ReactQueryWrapper>
         <Toaster position='top-right' />
       </body>

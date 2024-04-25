@@ -3,7 +3,6 @@ import Content from "@/components/pages/job-posting-history/Content";
 
 export const metadata = {
   title: "Job Posting History - Yahshua HRIS",
-  description: "HRIS",
 };
 
 const JobPostingHistoryPage = async () => {

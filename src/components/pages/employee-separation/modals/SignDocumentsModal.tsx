@@ -52,6 +52,7 @@ export default function SignDocumentsModal({
     register,
     handleSubmit,
     reset,
+    trigger,
     watch,
     formState: { isDirty },
     setValue,
@@ -73,6 +74,12 @@ export default function SignDocumentsModal({
       separationItemsCopy[itemIndex].emailType = 'sign documents';
       separationItemsCopy[itemIndex].signDocuments.template = data.template;
       separationItemsCopy[itemIndex].signDocuments.to = data.email;
+      if (data.cc) {
+        separationItemsCopy[itemIndex].signDocuments.cc = data.cc;
+      }
+      if (data.bcc) {
+        separationItemsCopy[itemIndex].signDocuments.bcc = data.bcc;
+      }
       separationItemsCopy[itemIndex].signDocuments.message = data.message;
       separationItemsCopy[itemIndex].isDocumentsSent = true;
       const callbackReq = {
@@ -90,6 +97,7 @@ export default function SignDocumentsModal({
           });
         },
       };
+      console.log(trigger)
       mutate(separationItemsCopy[itemIndex], callbackReq);
       reset();
     } else {
@@ -108,7 +116,7 @@ export default function SignDocumentsModal({
       );
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       if (separationItemsCopy[itemIndex]) {
-        setValue('email', separationItemsCopy[itemIndex].employee_dict.email);
+        setValue('email', separationItemsCopy[itemIndex].email);
       }
     }
   }, [isOpen]);
@@ -229,7 +237,7 @@ export default function SignDocumentsModal({
                       {isCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
                           <label
-                            htmlFor='email'
+                            htmlFor='cc'
                             className='block text-sm font-medium leading-6 text-gray-900'
                           >
                             CC
@@ -237,7 +245,7 @@ export default function SignDocumentsModal({
                           <div className='mt-2'>
                             <input
                               id='cc'
-                              {...register('cc')}
+                              {...register('cc',{required: true})}
                               type='cc'
                               autoComplete='email'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
@@ -256,7 +264,7 @@ export default function SignDocumentsModal({
                           <div className='mt-2'>
                             <input
                               id='bcc'
-                              {...register('bcc')}
+                              {...register('bcc',{required: true})}
                               type='bcc'
                               autoComplete='email'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
@@ -294,6 +302,66 @@ export default function SignDocumentsModal({
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                         disabled={isLoading}
+                        onClick={async(e)=>{
+                            const template = await trigger("template")
+                            const email = await trigger("email")
+                            const message = await trigger("message")
+                            const bcc = await trigger("bcc")
+                            const cc = await trigger("cc")
+                            let results = null
+                            if(isCCOpen && isBCCOpen){
+                              if(getValues().bcc.indexOf("@")<1 && getValues().cc.indexOf("@")<1){
+                                e.preventDefault()
+                                results = [template, email, message,false, false]
+                                setValue("bcc","Invalid")
+                                setValue("cc","Invalid")
+                              }else{
+                            results = [template, email, message,cc, bcc]
+                              }
+                            }else if(isCCOpen && !isBCCOpen){
+                              if(getValues().cc.indexOf("@")<1){
+                                e.preventDefault()
+                                results=[template, email, message,false]
+                                setValue("cc","Invalid")
+                              }else{
+                                results = [template, email, message,cc]
+                              }
+                            }else if(!isCCOpen && isBCCOpen){
+                              if(getValues().bcc.indexOf("@")<1){
+                                e.preventDefault()
+                                results=[template, email, message,false]
+                                setValue("bcc","Invalid")
+                              }else{
+                                results = [template, email, message,bcc]
+                              }
+                            }else{
+                              if(getValues().email.indexOf("@")<1){
+                                e.preventDefault()
+                                results = [template, false, message]
+                                setValue("email","Invalid")
+                              }else{
+                              results = [template, email, message]
+                              }
+                            }
+                            const incomplete = results?.some(
+                              (item: boolean) => !item
+                            );
+                            if (incomplete) {
+                              toast.custom(
+                                () => (
+                                  <CustomToast
+                                    message={
+                                      "You cannot proceed due to incomplete fields. Please review."
+                                    }
+                                    type="error"
+                                  />
+                                ),
+                                {
+                                  duration: 7000,
+                                }
+                              );
+                            }
+                        }}
                       >
                         {isLoading && (
                           <div role='status'>

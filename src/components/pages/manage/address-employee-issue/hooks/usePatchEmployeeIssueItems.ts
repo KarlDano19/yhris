@@ -18,18 +18,18 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         context: '',
       };
       if (employeeIssue.emailType === 'nte') {
-        data.subject = employeeIssue.sendDecision.template;
-        data.to = employeeIssue.issueNTE.to;
-        data.cc = employeeIssue.issueNTE.cc;
-        data.bcc = employeeIssue.issueNTE.bcc;
-        data.context = employeeIssue.issueNTE.message;
+        data.subject = employeeIssue.issueNTEForm.template;
+        data.to = employeeIssue.issueNTEForm.to;
+        data.cc = employeeIssue.issueNTEForm.cc;
+        data.bcc = employeeIssue.issueNTEForm.bcc;
+        data.context = employeeIssue.issueNTEForm.message;
       }
       if (employeeIssue.emailType === 'decision') {
-        data.subject = employeeIssue.sendDecision.template;
-        data.to = employeeIssue.sendDecision.to;
-        data.cc = employeeIssue.sendDecision.cc;
-        data.bcc = employeeIssue.sendDecision.bcc;
-        data.context = employeeIssue.sendDecision.message;
+        data.subject = employeeIssue.sendDecisionForm.template;
+        data.to = employeeIssue.sendDecisionForm.to;
+        data.cc = employeeIssue.sendDecisionForm.cc;
+        data.bcc = employeeIssue.sendDecisionForm.bcc;
+        data.context = employeeIssue.sendDecisionForm.message;
       }
     } else {
       data = {
@@ -47,13 +47,13 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
       body: JSON.stringify(data),
     };
     const res = await fetch(
-      `${process.env.API_URL}/api/employee-issues/${employeeIssue.id}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/employee-issues/${employeeIssue.id}/`,
       config
     );
-    if (res.ok) {
-      return res.json();
+    if (!res.ok) {
+      throw res.json();
     }
-    throw res.json();
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {

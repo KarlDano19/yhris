@@ -4,7 +4,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid"
 
 export default function Wrapper({ children, maxWidth = "max-w-7xl", title, backText, backLink }: PropTypes) {
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen">
       <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
         {backLink && backText ? (
           <div className="flex px-4 pt-4 pb-2">

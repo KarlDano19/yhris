@@ -77,7 +77,7 @@ export default function SignatureModal({
                   >
                     Clear
                   </button>
-                  <div className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 mt-2">
+                  <div id="memo-canvas" className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 mt-2">
                     <SignatureCanvas
                       ref={signatureCanvasRef}
                       canvasProps={{

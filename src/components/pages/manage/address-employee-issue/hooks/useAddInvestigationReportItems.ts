@@ -16,7 +16,6 @@ async function addInvestigationReport(investigation: T_Investigation) {
     data.append('decision', investigation.decision);
     data.append('custom_decision', investigation.other);
     data.append('attachments_file', investigation.attachments);
-    debugger;
     const config = {
       method: 'POST',
       headers: {
@@ -25,13 +24,13 @@ async function addInvestigationReport(investigation: T_Investigation) {
       body: data,
     };
     const res = await fetch(
-      `${process.env.API_URL}/api/investigation-reports/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/investigation-reports/`,
       config
     );
-    if (res.ok) {
-      return res.json();
+    if (!res.ok) {
+      throw res.json();
     }
-    throw res.json();
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {

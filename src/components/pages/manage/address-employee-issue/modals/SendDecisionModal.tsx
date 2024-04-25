@@ -81,9 +81,11 @@ export default function SendDecisionModal({
       employeeIssueItemsCopy[itemIndex].id = isOpen.id;
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'decision';
-      employeeIssueItemsCopy[itemIndex].sendDecision.template = data.template;
-      employeeIssueItemsCopy[itemIndex].sendDecision.to = data.email;
-      employeeIssueItemsCopy[itemIndex].sendDecision.message = data.message;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = data.template;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.to = data.email;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.cc = data.cc;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.bcc = data.bcc;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = data.message;
       employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
       const callbackReq = {
         onSuccess: (data: any) => {
@@ -93,6 +95,7 @@ export default function SendDecisionModal({
             () => <CustomToast message={data.message} type='success' />,
             { duration: 5000 }
           );
+          reset();
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -101,7 +104,6 @@ export default function SendDecisionModal({
         },
       };
       mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
-      reset();
     } else {
       toast.custom(
         () => <CustomToast message='Incomplete information.' type='error' />,

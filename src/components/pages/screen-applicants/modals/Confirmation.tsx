@@ -5,8 +5,12 @@ import Warning from "@/svg/Warning"
 import { initialActionState } from "../lib/initialActionState"
 import StateContext from "../contexts/StateContext"
 import { ContextTypes } from "../types"
+import toast from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
+import useDeleteStage from "../hooks/useDeleteStage"
 
 export default function Confirmation() {
+  const { mutate: deleteMutate, isLoading: isDeleteLoading } = useDeleteStage();
   const {actionState, setActionState, dispatch}: ContextTypes = useContext(StateContext) as ContextTypes
   const [isOpen, setIsOpen] = useState(false)
   const cancelButtonRef = useRef(null)
@@ -22,12 +26,27 @@ export default function Confirmation() {
 
   const handleConfirmation = () => {
     setIsOpen(false)
-    setTimeout(() => {
-      dispatch({
-        type: "REMOVE_STAGE",
-        payload: { stageId: actionState.stageId, setActionState },
-      })
-    }, 400)
+    removeStage();
+  }
+
+  const removeStage = () => {
+    const callbackReq = {
+      onSuccess: () => {
+        dispatch({
+          type: "REMOVE_STAGE",
+          payload: { stageId: actionState.stageId, setActionState },
+        })
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    let postData = {
+      stage_id: actionState.stageId,
+    }
+    deleteMutate(postData, callbackReq);
   }
 
   return (

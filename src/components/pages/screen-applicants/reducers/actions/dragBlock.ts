@@ -8,5 +8,9 @@ export default function dragBlock(state: any, action: any) {
   const result = Array.from(state)
   const [removed] = result.splice(source.index, 1)
   result.splice(destination.index, 0, removed)
+  result.map((item: any, index: any) => {
+    item.orderBy = index;
+    return item;
+  })
   return result
 }

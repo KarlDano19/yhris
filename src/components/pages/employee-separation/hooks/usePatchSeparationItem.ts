@@ -58,13 +58,13 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
       body: JSON.stringify(data),
     };
     const res = await fetch(
-      `${process.env.API_URL}/api/separation/${separationEmail.id}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationEmail.id}/`,
       config
     );
-    if (res.ok) {
-      return res.json();
+    if (!res.ok) {
+      throw res.json();
     }
-    throw res.json();
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {

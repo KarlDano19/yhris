@@ -1,8 +1,8 @@
 'use client';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import React, { useEffect, useState, useRef, Fragment } from 'react';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import ClipIcon from '@/svg/ClipIcon';
-import DateCalendar from '@/svg/DateCalendar';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import CreateMemoChevronLogo from '@/svg/CreateMemoChevronLogo';
@@ -18,8 +18,6 @@ import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 
 const Content = () => {
   const { mutate, isLoading } = useDeleteDirectivesItem();
-  const { data: dataDirectives, isLoading: isGetDirectivesLoading } =
-    useGetDirectivesItems();
   const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState<any>([]);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [idToDelete, setIdToDelete] = useState<number | null>(null);
@@ -28,11 +26,20 @@ const Content = () => {
     to: '',
     search: '',
   });
+  const {
+    data: dataDirectives,
+    isLoading: isGetDirectivesLoading,
+    refetch,
+  } = useGetDirectivesItems(itemsFilter);
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
   const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   useEffect(() => {
     if (dataDirectives) {
@@ -176,6 +183,43 @@ const Content = () => {
       );
     }
   };
+
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(
+        () => <CustomToast message='Invalid date to.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(
+        () => <CustomToast message='Invalid date from.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => (
+          <CustomToast
+            message='You have entered an invalid date range. Please select again.'
+            type='error'
+          />
+        ),
+        {
+          duration: 5000,
+        }
+      );
+    }
+    refetch();
+  };
+
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -195,40 +239,38 @@ const Content = () => {
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='to'
-                  id='to'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, to: e.target.value })
+                <CustomDatePicker
+                  name={'from'}
+                  selected={itemsFilter.from}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  ref={date1InputRef}
-                  // @ts-expect-error
-                  onClick={() => date1InputRef.current.showPicker()}
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
               <p>to</p>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='from'
-                  id='from'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, from: e.target.value })
+                <CustomDatePicker
+                  name={'to'}
+                  selected={itemsFilter.to}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  ref={date2InputRef}
-                  // @ts-expect-error
-                  onClick={() => date2InputRef.current.showPicker()}
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={checkIfDateIsValid}
+              >
+                <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
             </div>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
@@ -369,12 +411,14 @@ const Content = () => {
         setIsOpen={setIsCreateMemoModalOpen}
         setCreateMemoPolicyItems={setCreateMemoPolicyItems}
         createMemoPolicyItems={createMemoPolicyItems}
+        refetch={refetch}
       />
       <CreatePolicyModal
         setCreateMemoPolicyItems={setCreateMemoPolicyItems}
         createMemoPolicyItems={createMemoPolicyItems}
         isOpen={isCreatePolicyModalOpen}
         setIsOpen={setIsCreatePolicyModalOpen}
+        refetch={refetch}
       />
       <ConfirmModal
         message='Are you sure you want to delete this memo/policy?'

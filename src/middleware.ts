@@ -1,49 +1,111 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+
+import { getIronSession } from 'iron-session';
+
+import { sessionOptions, SessionData } from './session/lib';
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
-  if (token) {
-    if (
-      request.nextUrl.pathname.startsWith('/login') ||
-      request.nextUrl.pathname.startsWith('/register')
-    ) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-    if (
-      request.nextUrl.pathname === '/' ||
-      request.nextUrl.pathname.startsWith('/employee-separation') ||
-      request.nextUrl.pathname.startsWith('/manage')
-    ) {
-      const config = {
-        method: 'GET',
-        headers: {
-          'content-type': 'application/json',
-          Authorization: `Token ${token}`,
-        },
-      };
-      try {
-        const res = await (
-          await fetch(`${process.env.API_URL}/api/employer-profile/`, config)
-        ).json();
-        if (Object.hasOwn(res, 'profile')) {
-          if (!Object.keys(res.profile).length) {
-            return NextResponse.redirect(
-              new URL('/setup-employer-profile', request.url)
-            );
+  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  const listPathname = request.nextUrl.pathname.split('/');
+  const slicePaths = listPathname.slice(1);
+  const firstRoute = slicePaths[0];
+
+  const isLoggedIn = session.isLoggedIn;
+  const accountType = session.accountType;
+  const hasProfile = session.hasProfile;
+  const hasPendingTransaction = session.hasPendingTransaction;
+
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'verify'];
+  const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
+  const employerRoutes: any = [
+    'manage-subscriptions',
+    'checkout',
+    'sso',
+    'dashboard',
+    'post-job',
+    'screen-applicants',
+    'orient',
+    'manage',
+    'employee-separation',
+    'setup-employer-profile',
+    'admin'
+  ];
+  const applicantRoutes: any = [
+    'application-tracker',
+    'apply-for-a-job',
+    'edit-profile',
+    'notification',
+    'setup-applicant-profile',
+  ];
+
+  if (bypassRoutes.includes(firstRoute)) {
+    return NextResponse.next();
+  }
+  if (isLoggedIn) {
+    if (accountType === 'employer') {
+      if (unAuthRoutes.includes(firstRoute)) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+      if (employerRoutes.includes(firstRoute)) {
+        if (
+          firstRoute === 'dashboard' ||
+          firstRoute === 'employee-separation' ||
+          firstRoute === 'manage' ||
+          firstRoute === 'post-job' ||
+          firstRoute === 'screen-applicants' ||
+          firstRoute === 'orient' ||
+          firstRoute === 'checkout' ||
+          firstRoute === 'setup-employer-profile'
+        ) {
+          if (hasProfile) {
+            if (firstRoute === 'setup-employer-profile') {
+              return NextResponse.redirect(new URL('/dashboard', request.url));
+            }
+            if (firstRoute === 'checkout' && hasPendingTransaction) {
+              return NextResponse.redirect(new URL('/manage-subscriptions', request.url));
+            }
+          }
+          if (!hasProfile) {
+            if (firstRoute !== 'setup-employer-profile') {
+              return NextResponse.redirect(new URL('/setup-employer-profile', request.url));
+            }
           }
         }
-      } catch(err) {
-        return NextResponse.next();
+      } else {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
+    if (accountType === 'applicant') {
+      if (unAuthRoutes.includes(firstRoute)) {
+        return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
+      }
+      if (applicantRoutes.includes(firstRoute)) {
+        if (
+          firstRoute === 'application-tracker' ||
+          firstRoute === 'apply-for-a-job' ||
+          firstRoute === 'edit-profile' ||
+          firstRoute === 'notification' ||
+          firstRoute === 'setup-applicant-profile'
+        ) {
+          if (hasProfile) {
+            if (firstRoute === 'setup-applicant-profile') {
+              return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
+            }
+          }
+          if (!hasProfile) {
+            if (firstRoute !== 'setup-applicant-profile') {
+              return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+            }
+          }
+        }
+      } else {
+        return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
       }
     }
   } else {
-    if (
-      request.nextUrl.pathname === '/' ||
-      request.nextUrl.pathname.startsWith('/employee-separation') ||
-      request.nextUrl.pathname.startsWith('/manage') ||
-      request.nextUrl.pathname.startsWith('/setup-employer-profile')
-    ) {
+    const sessionRoutes = [...employerRoutes, ...applicantRoutes];
+    if (sessionRoutes.includes(firstRoute)) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }

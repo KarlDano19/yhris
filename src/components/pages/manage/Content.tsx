@@ -1,9 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
 import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
+
+import { ArrowLeftIcon, UsersIcon } from '@heroicons/react/24/solid';
 import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import BenefitsLogo from '@/svg/BenefitsLogo';
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import EmployeeLogo from '@/svg/EmployeeLogo';
 
 const menus = [
   {
@@ -21,15 +23,20 @@ const menus = [
     text: "Design Benefits",
     link: "/manage/design-benefits"
   },
+  {
+    icon: <EmployeeLogo />,
+    text: "Employees",
+    link: "/manage/employees"
+  },
 ];
 
 const Content = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="flex p-4">
-        <Link href="/" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+        <Link href="/dashboard" className="flex-none flex gap-3 items-center hover:bg-gray-200">
           <ArrowLeftIcon className="h-5 w-5" />
-          <h4>Home</h4>
+          <h4>Dashboard</h4>
         </Link>
       </div>
       <div className="px-2 md:px-8 lg:px-4">

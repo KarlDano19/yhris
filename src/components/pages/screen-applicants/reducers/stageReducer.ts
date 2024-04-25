@@ -1,5 +1,5 @@
 import actionTypes from "../lib/actionTypes"
-import { job } from "../testData"
+import setOnboarding from "./actions/setOnboarding"
 import addStage from "./actions/addStage"
 import checklist from "./actions/checklist"
 import dragBlock from "./actions/dragBlock"
@@ -8,8 +8,11 @@ import scheduleInterview from "./actions/scheduleInterview"
 import sendEmail from "./actions/sendEmail"
 import setRequirements from "./actions/setRequirements"
 import setTitle from "./actions/setTitle"
+import setApplicant from "./actions/setApplicant"
+import clearStage from "./actions/clearStage";
 
 const {
+  CLEAR_STAGE,
   STAGE_REQUIREMENTS,
   CHECKLIST,
   SEND_EMAIL,
@@ -18,48 +21,20 @@ const {
   SET_TITLE,
   REMOVE_STAGE,
   ADD_STAGE,
+  SET_ONBOARDING,
+  SET_APPLICANT,
 } = actionTypes
 
-export const INITIAL_STATE = [
-  {
-    id: 1,
-    title: "Recommended Applicants",
-    isNewStage: false,
-    requirements: [],
-    applicants: job.applicants,
-  },
-  {
-    id: 2,
-    title: "Initial Interview",
-    isNewStage: false,
-    requirements: [],
-    applicants: [], 
-  },
-  {
-    id: 3,
-    title: "Manager Interview",
-    isNewStage: false,
-    requirements: [],
-    applicants: [],
-  },
-  {
-    id: 4,
-    title: "Panel Interview",
-    isNewStage: false,
-    requirements: [],
-    applicants: [],
-  },
-  {
-    id: 5,
-    title: "Final Interview",
-    isNewStage: false,
-    requirements: [],
-    applicants: [],
-  },
-]
+export const INITIAL_STATE = []
 
 export const stageReducer = (state: any, action: any) => {
   switch (action.type) {
+    case CLEAR_STAGE:
+      return clearStage()
+    case SET_ONBOARDING:
+      return setOnboarding(action)
+    case SET_APPLICANT:
+      return setApplicant(state, action)
     case DRAG_BLOCK: 
       return dragBlock(state, action)
     case SET_TITLE: 
@@ -68,7 +43,7 @@ export const stageReducer = (state: any, action: any) => {
       return setRequirements(state, action)
     case ADD_STAGE: 
       return addStage(state, action)
-    case REMOVE_STAGE: 
+    case REMOVE_STAGE:
       return removeStage(state, action)
     case CHECKLIST: 
       return checklist(state, action)

@@ -1,11 +1,11 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { T_Investigation, T_InvestigationModal } from '@/types/globals';
 import SelectChevronDown from '@/svg/SelectChevronDown';
-import DateCalendar from '@/svg/DateCalendar';
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
 import useAddInvestigationReportItems from '../hooks/useAddInvestigationReportItems';
@@ -22,7 +22,7 @@ export default function InvestigationModal({
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
   const { mutate, isLoading } = useAddInvestigationReportItems();
-  const { register, handleSubmit, reset, setValue } =
+  const { register, handleSubmit, reset, control, setValue } =
     useForm<T_Investigation>();
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -40,26 +40,25 @@ export default function InvestigationModal({
       const employeeIssueItemsCopy = JSON.parse(
         JSON.stringify(employeeIssueItems)
       );
-      employeeIssueItemsCopy[itemIndex].investigate.employee_issue = isOpen.id;
-      employeeIssueItemsCopy[itemIndex].investigate.date = data.date;
-      employeeIssueItemsCopy[itemIndex].investigate.witness = data.witness;
-      employeeIssueItemsCopy[itemIndex].investigate.presider = data.presider;
-      employeeIssueItemsCopy[itemIndex].investigate.isAttendHearing =
+      employeeIssueItemsCopy[itemIndex].investigateForm.employee_issue = isOpen.id;
+      employeeIssueItemsCopy[itemIndex].investigateForm.date = data.date;
+      employeeIssueItemsCopy[itemIndex].investigateForm.witness = data.witness;
+      employeeIssueItemsCopy[itemIndex].investigateForm.presider = data.presider;
+      employeeIssueItemsCopy[itemIndex].investigateForm.isAttendHearing =
         data.isAttendHearing;
-      employeeIssueItemsCopy[itemIndex].investigate.resultOfInvestigation =
+      employeeIssueItemsCopy[itemIndex].investigateForm.resultOfInvestigation =
         data.resultOfInvestigation;
-      employeeIssueItemsCopy[itemIndex].investigate.decision = data.decision;
-      employeeIssueItemsCopy[itemIndex].investigate.other = data.other;
-      employeeIssueItemsCopy[itemIndex].investigate.attachments =
+      employeeIssueItemsCopy[itemIndex].investigateForm.decision = data.decision;
+      employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other;
+      employeeIssueItemsCopy[itemIndex].investigateForm.attachments =
         toSaveData.attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
       employeeIssueItemsCopy[itemIndex].investigatedRawDate = currentDate;
       employeeIssueItemsCopy[itemIndex].investigatedDate =
         Intl.DateTimeFormat('en-US').format(currentDate);
-      const copySaveData = employeeIssueItemsCopy[itemIndex].investigate;
+      const copySaveData = employeeIssueItemsCopy[itemIndex].investigateForm;
       setToSaveData({ ...toSaveData, ...copySaveData });
       setToAddData([...employeeIssueItemsCopy]);
-      setIsOpen(null);
       setIsConfirmModalOpen(true);
     } else {
       toast.custom(
@@ -77,15 +76,17 @@ export default function InvestigationModal({
           { duration: 5000 }
         );
         setIsConfirmModalOpen(false);
+        setIsOpen(null);
+        reset();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 7000,
         });
+        setIsConfirmModalOpen(false);
       },
     };
     mutate(toSaveData, callbackReq);
-    reset();
   };
   const updateConfirmModal = (value: boolean) => {
     if (!value) {
@@ -162,21 +163,23 @@ export default function InvestigationModal({
                           <span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                          <input
-                            type='date'
-                            name='dateOfInvestigation'
-                            id='dateOfInvestigation'
-                            className='block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
-                            aria-describedby='email-optional'
-                            onChange={(e) => setValue('date', e.target.value)}
-                            ref={InvestigationDateInputRef}
-                            onClick={() =>
-                              InvestigationDateInputRef.current?.showPicker()
-                            }
+                        <Controller
+                            control={control}
+                            name='date'
+                            render={({ field }) => (
+                              <CustomDatePicker
+                                name={'dateOfInvestigation'}
+                                selected={field.value}
+                                pickerOnChange={field.onChange}
+                                className={
+                                  'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
+                                }
+                                inputOnChange={field.onChange}
+                                placeholder={'mm/dd/yyyy'}
+                                required={true}
+                              />
+                            )}
                           />
-                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                            <DateCalendar />
-                          </div>
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>

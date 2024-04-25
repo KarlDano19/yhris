@@ -12,11 +12,11 @@ async function getPositionItems() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.API_URL}/api/positions/`, config);
-      if (res.ok) {
-        return res.json();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/positions/`, config);
+      if (!res.ok) {
+        throw res.json();
       }
-      throw res.json();
+      return res.json();
     }
     return {};
   } catch (err: any) {
@@ -29,7 +29,8 @@ async function getPositionItems() {
 }
 
 function useGetEmployeeItems() {
-  const query = useQuery(['positionsItemCache'], () => getPositionItems(), {
+  const query = useQuery(['positionItemsCache'], () => getPositionItems(), {
+    refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 

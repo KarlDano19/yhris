@@ -1,14 +1,12 @@
 'use client';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import React, { useEffect, useState, useRef } from 'react';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import {
   T_SendNTEModal,
   T_SendDecisionModal,
   T_InvestigationModal,
 } from '@/types/globals';
-import { InformationCircleIcon } from '@heroicons/react/24/outline';
-import { employeeIssueItems as testData } from '@/helpers/testData';
-import DateCalendar from '@/svg/DateCalendar';
 import IncidentReportModal from './modals/IncidentReportModal';
 import SendNTEModal from './modals/SendNTEModal';
 import SendNTE from './SendNTE';
@@ -30,7 +28,7 @@ const Content = () => {
   const [departmentItems, setDepartmentItems] = useState<any>([]);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [positionItems, setPositionItems] = useState<any>([]);
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -46,14 +44,14 @@ const Content = () => {
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
-  const { data: dataEmployeeIssues, isLoading: isGetEmployeeIssuesLoading } =
-    useGetEmployeeIssueItems();
-  const { data: dataDepartment, isLoading: isGetDepartmentLoading } =
-    useGetDepartmentItems();
-  const { data: dataEmployee, isLoading: isGetEmployeeLoading } =
-    useGetEmployeeItems();
-  const { data: dataPosition, isLoading: isGetPositionLoading } =
-    useGetPositionItems();
+  const {
+    data: dataEmployeeIssues,
+    isLoading: isGetEmployeeIssuesLoading,
+    refetch,
+  } = useGetEmployeeIssueItems(itemsFilter);
+  const { data: dataDepartment } = useGetDepartmentItems();
+  const { data: dataEmployee } = useGetEmployeeItems();
+  const { data: dataPosition } = useGetPositionItems();
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex(
@@ -70,12 +68,20 @@ const Content = () => {
     if (emailType === 'nte') {
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
       employeeIssueItemsCopy[itemIndex].incidentReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(currentDate);
+        new Intl.DateTimeFormat('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric',
+        }).format(currentDate);
     }
     if (emailType === 'decision') {
       employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
       employeeIssueItemsCopy[itemIndex].decisionReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(currentDate);
+        new Intl.DateTimeFormat('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric',
+        }).format(currentDate);
     }
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -95,11 +101,15 @@ const Content = () => {
   };
 
   useEffect(() => {
+    refetch();
+  }, []);
+
+  useEffect(() => {
     if (dataDepartment) {
       setDepartmentItems(dataDepartment.departments);
     }
     if (dataEmployee) {
-      setEmployeeItems(dataEmployee.employees);
+      setEmployeeItems(dataEmployee);
     }
     if (dataPosition) {
       setPositionItems(dataPosition.positions);
@@ -107,34 +117,42 @@ const Content = () => {
     if (dataEmployeeIssues) {
       dataEmployeeIssues.employee_issues.map((employeeIssue: any) => {
         const employee = employeeIssue.employee_dict;
-        employeeIssue.incidentDate = Intl.DateTimeFormat('en-US').format(
-          new Date(employeeIssue.incident_date)
-        );
+        employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric',
+        }).format(new Date(employeeIssue.incident_date));
         employeeIssue['name'] = `${employee.firstname} ${employee.lastname}`;
         employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
         employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
         employeeIssue['incidentReceivedDate'] =
           employeeIssue.incident_received_date &&
-          new Intl.DateTimeFormat('en-US').format(
-            new Date(employeeIssue.incident_received_date)
-          );
+          new Intl.DateTimeFormat('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+          }).format(new Date(employeeIssue.incident_received_date));
         employeeIssue['isInvestigated'] = employeeIssue.investigate
           ? true
           : false;
         employeeIssue['investigatedDate'] = employeeIssue.investigate
-          ? Intl.DateTimeFormat('en-US').format(
-              new Date(employeeIssue.investigate.date_of_investigation)
-            )
+          ? Intl.DateTimeFormat('en-US', {
+              month: '2-digit',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(employeeIssue.investigate.date_of_investigation))
           : '';
         employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
         employeeIssue['isDecisionReceived'] =
           employeeIssue.is_decision_received;
         employeeIssue['decisionReceivedDate'] =
           employeeIssue.decision_received_date &&
-          new Intl.DateTimeFormat('en-US').format(
-            new Date(employeeIssue.decision_received_date)
-          );
-        employeeIssue['investigate'] = employeeIssue.investigate || {
+          new Intl.DateTimeFormat('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+          }).format(new Date(employeeIssue.decision_received_date));
+        employeeIssue['investigateForm'] = employeeIssue.investigate || {
           date: '',
           witness: '',
           presider: '',
@@ -142,12 +160,12 @@ const Content = () => {
           decision: '',
           attachments: '',
         };
-        employeeIssue['issueNTE'] = {
+        employeeIssue['issueNTEForm'] = {
           template: '',
           to: '',
           message: '',
         };
-        employeeIssue['sendDecision'] = {
+        employeeIssue['sendDecisionForm'] = {
           template: '',
           to: '',
           message: '',
@@ -156,7 +174,43 @@ const Content = () => {
       });
       setEmployeeIssueItems(dataEmployeeIssues.employee_issues);
     }
-  }, [dataEmployeeIssues]);
+  }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition]);
+
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(
+        () => <CustomToast message='Invalid date to.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(
+        () => <CustomToast message='Invalid date from.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => (
+          <CustomToast
+            message='You have entered an invalid date range. Please select again.'
+            type='error'
+          />
+        ),
+        {
+          duration: 5000,
+        }
+      );
+    }
+    refetch();
+  };
 
   const renderRows = () => {
     if (isGetEmployeeIssuesLoading) {
@@ -267,40 +321,38 @@ const Content = () => {
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='to'
-                  id='to'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, to: e.target.value })
+                <CustomDatePicker
+                  name={'from'}
+                  selected={itemsFilter.from}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  ref={date1InputRef}
-                  // @ts-expect-error
-                  onClick={() => date1InputRef.current.showPicker()}
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
               <p>to</p>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='from'
-                  id='from'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, from: e.target.value })
+                <CustomDatePicker
+                  name={'to'}
+                  selected={itemsFilter.to}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  ref={date2InputRef}
-                  // @ts-expect-error
-                  onClick={() => date2InputRef.current.showPicker()}
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={checkIfDateIsValid}
+              >
+                <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
             </div>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
@@ -387,6 +439,7 @@ const Content = () => {
         setEmployeeIssueItems={setEmployeeIssueItems}
         isOpen={isIncidentReportModalOpen}
         setIsOpen={setIsIncidentReportModalOpen}
+        refetch={refetch}
       />
       <SendNTEModal
         isOpen={isSendNTEModalOpen}

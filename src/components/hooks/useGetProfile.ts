@@ -1,9 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie, deleteCookie } from 'cookies-next';
 
+import { generateKey, decryptToken } from '@/helpers/tokenEncryption';
+
 async function getProfile() {
   try {
+    // const key = await generateKey();
     const token = getCookie('token');
+    // const secret = getCookie('secret');
+    // const decryptedToken = await decryptToken(token, secret, key);
     const config = {
       method: 'GET',
       headers: {
@@ -13,13 +18,13 @@ async function getProfile() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.API_URL}/api/employer-profile/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/employer-profile/`,
         config
       );
-      if (res.ok) {
-        return res.json();
+      if (!res.ok) {
+        throw res.json();
       }
-      throw res.json();
+      return res.json();
     }
     return {};
   } catch (err: any) {
@@ -39,8 +44,8 @@ async function getProfile() {
 
 function useGetProfile() {
   const query = useQuery(['profileCache'], () => getProfile(), {
-    keepPreviousData: true,
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
   return query;

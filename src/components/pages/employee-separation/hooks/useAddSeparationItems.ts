@@ -21,11 +21,11 @@ async function addSeparation(separation: T_Separation) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.API_URL}/api/separations/`, config);
-    if (res.ok) {
-      return res.json();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separations/`, config);
+    if (!res.ok) {
+      throw res.json();
     }
-    throw res.json();
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {

@@ -13,13 +13,13 @@ async function getDepartmentItems() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.API_URL}/api/departments/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/departments/`,
         config
       );
-      if (res.ok) {
-        return res.json();
+      if (!res.ok) {
+        throw res.json();
       }
-      throw res.json();
+      return res.json();
     }
     return {};
   } catch (err: any) {
@@ -32,7 +32,8 @@ async function getDepartmentItems() {
 }
 
 function useGetDepartmentItems() {
-  const query = useQuery(['departmentsItemCache'], () => getDepartmentItems(), {
+  const query = useQuery(['departmentItemsCache'], () => getDepartmentItems(), {
+    refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 

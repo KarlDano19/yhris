@@ -34,7 +34,10 @@ export const QUILL_MODULES = {
 };
 
 export const CREATEJOB_TEMPLATE = [
-  "<p><strong>Ensuring the accounts of the company are accurate and free of error.</strong></p><p><br></p><ul><li>Must have at least 2 years of experience in accounting.</li><li>Any graduate of business course</li><li>Must have attention to details and a good communicator</li></ul>",
+  "<p>Ensuring the accounts of the company are accurate and free of error.</p>",
+];
+export const QUALIFICATION_TEMPLATE = [
+  "<ul><li>Must have at least 2 years of experience in accounting.</li><li>Any graduate of business course</li><li>Must have attention to details and a good communicator</li></ul>",
 ];
 
 export const SEPARATION_TEMPLATE = [

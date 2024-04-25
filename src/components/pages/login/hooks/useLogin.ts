@@ -11,11 +11,11 @@ async function login(credentials: T_Login) {
       },
       body: JSON.stringify(credentials),
     };
-    const res = await fetch(`${process.env.API_URL}/api/login/`, config);
-    if (res.ok) {
-      return res.json();
+    const res = await fetch(`/api/login/`, config);
+    if (!res.ok) {
+      throw res.json();
     }
-    throw res.json();
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {

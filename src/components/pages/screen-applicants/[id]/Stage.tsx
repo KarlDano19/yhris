@@ -8,7 +8,7 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   ...draggableStyle,
 })
 
-export default function Stage({ stage, index, provided, snapshot }: PropTypes) {
+export default function Stage({ stage, index, provided, snapshot, jobPostDetailsRefetch, appliedApplicantRefetch }: PropTypes) {
   const { actionState }: ContextTypes = useContext(StateContext) as ContextTypes
   const [stageDropdownId, setStageDropdownId] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
@@ -31,6 +31,8 @@ export default function Stage({ stage, index, provided, snapshot }: PropTypes) {
         stage={stage}
         stageDropdownId={stageDropdownId}
         setStageDropdownId={setStageDropdownId}
+        jobPostDetailsRefetch={jobPostDetailsRefetch}
+        appliedApplicantRefetch={appliedApplicantRefetch}
       />
       <StageBlock
         stage={stage}

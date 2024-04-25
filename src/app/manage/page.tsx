@@ -2,8 +2,7 @@ import Content from '@/components/pages/manage/Content'
 import React from 'react'
 
 export const metadata = {
-    title: 'Manage',
-    description: 'Manage',
+    title: 'Manage - Yahshua HRIS',
 }
 
 const ManagePage = async () => {

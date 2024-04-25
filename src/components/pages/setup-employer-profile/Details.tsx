@@ -43,10 +43,7 @@ const Details = ({
 
   return (
     <>
-      <form
-        onSubmit={onSubmit}
-        style={{ display: isDetails ? 'block' : 'none' }}
-      >
+      <form onSubmit={onSubmit} style={{ display: isDetails ? 'block' : 'none' }}>
         <div className='flex flex-row my-10'>
           <div className='basis-44 mr-10'>
             <Image
@@ -61,11 +58,8 @@ const Details = ({
           </div>
           <div className='basis-1/3 mr-10'>
             <div>
-              <label
-                htmlFor='companyName'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                Company Name<span>*</span>
+              <label htmlFor='companyName' className='block mb-2 text-sm font-medium text-gray-900'>
+                Company Name<span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
@@ -75,10 +69,7 @@ const Details = ({
               />
             </div>
             <div className='mt-5'>
-              <label
-                htmlFor='companyLogo'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
+              <label htmlFor='companyLogo' className='block mb-2 text-sm font-medium text-gray-900'>
                 Company Logo
               </label>
               <input
@@ -102,18 +93,13 @@ const Details = ({
               {...register('companyDescription', { required: false })}
               className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 h-5/6'
             />
-            <label className='text-sm text-gray-500 mt-5 ml-2'>
-              Maximum words: 500
-            </label>
+            <label className='text-sm text-gray-500 mt-5 ml-2'>Maximum words: 500</label>
           </div>
         </div>
         <div className='flex flex-row my-10'>
           <div className='basis-1/3 mr-10'>
-            <label
-              htmlFor='typeOfIndustry'
-              className='block mb-2 text-sm font-medium text-gray-900'
-            >
-              Type of Industry<span>*</span>
+            <label htmlFor='typeOfIndustry' className='block mb-2 text-sm font-medium text-gray-900'>
+              Type of Industry<span className='text-red-500'>*</span>
             </label>
             <input
               type='text'
@@ -122,25 +108,8 @@ const Details = ({
               className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
             />
           </div>
-          <div className='basis-1/3 mr-10'>
-            <label
-              htmlFor='noOfEmployees'
-              className='block mb-2 text-sm font-medium text-gray-900'
-            >
-              No. of Employees<span>*</span>
-            </label>
-            <input
-              type='text'
-              id='noOfEmployees'
-              {...register('noOfEmployees', { required: true })}
-              className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-            />
-          </div>
           <div className='basis-1/3'>
-            <label
-              htmlFor='workSetUp'
-              className='block mb-2 text-sm font-medium text-gray-900'
-            >
+            <label htmlFor='workSetUp' className='block mb-2 text-sm font-medium text-gray-900'>
               Work Set-up
             </label>
             <input
@@ -157,25 +126,8 @@ const Details = ({
           </label>
           <div className='flex flex-row mt-2'>
             <div className='basis-1/3 mr-10'>
-              <label
-                htmlFor='email'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                Email<span>*</span>
-              </label>
-              <input
-                type='text'
-                id='email'
-                {...register('email', { required: true })}
-                className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-              />
-            </div>
-            <div className='basis-1/3 mr-10'>
-              <label
-                htmlFor='mobileNumber'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                Mobile No.<span>*</span>
+              <label htmlFor='mobileNumber' className='block mb-2 text-sm font-medium text-gray-900'>
+                Mobile No.<span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
@@ -184,11 +136,8 @@ const Details = ({
                 className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
               />
             </div>
-            <div className='basis-1/3'>
-              <label
-                htmlFor='landlineNumber'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
+            <div className='basis-1/3 mr-10'>
+              <label htmlFor='landlineNumber' className='block mb-2 text-sm font-medium text-gray-900'>
                 Landline No.
               </label>
               <input
@@ -198,6 +147,9 @@ const Details = ({
                 className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
               />
             </div>
+            <div className='basis-1/3'>
+              
+            </div>
           </div>
         </div>
         <div className='my-10'>
@@ -206,10 +158,7 @@ const Details = ({
           </label>
           <div className='flex flex-row mt-2 mb-5'>
             <div className='basis-1/3 mr-10'>
-              <label
-                htmlFor='building'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
+              <label htmlFor='building' className='block mb-2 text-sm font-medium text-gray-900'>
                 House No./Bldg./Apartment/Suite, etc.
               </label>
               <input
@@ -220,11 +169,8 @@ const Details = ({
               />
             </div>
             <div className='basis-1/3 mr-10'>
-              <label
-                htmlFor='street'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                Street<span>*</span>
+              <label htmlFor='street' className='block mb-2 text-sm font-medium text-gray-900'>
+                Street<span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
@@ -234,11 +180,8 @@ const Details = ({
               />
             </div>
             <div className='basis-1/3'>
-              <label
-                htmlFor='locality'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                Town/Brgy<span>*</span>
+              <label htmlFor='locality' className='block mb-2 text-sm font-medium text-gray-900'>
+                Town/Brgy<span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
@@ -250,11 +193,8 @@ const Details = ({
           </div>
           <div className='flex flex-row'>
             <div className='basis-1/3 mr-10'>
-              <label
-                htmlFor='city'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                City<span>*</span>
+              <label htmlFor='city' className='block mb-2 text-sm font-medium text-gray-900'>
+                City<span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
@@ -264,11 +204,8 @@ const Details = ({
               />
             </div>
             <div className='basis-1/3 mr-10'>
-              <label
-                htmlFor='zipCode'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                Zip Code<span>*</span>
+              <label htmlFor='zipCode' className='block mb-2 text-sm font-medium text-gray-900'>
+                Zip Code<span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
@@ -278,11 +215,8 @@ const Details = ({
               />
             </div>
             <div className='basis-1/3'>
-              <label
-                htmlFor='country'
-                className='block mb-2 text-sm font-medium text-gray-900'
-              >
-                Country<span>*</span>
+              <label htmlFor='country' className='block mb-2 text-sm font-medium text-gray-900'>
+                Country<span className='text-red-500'>*</span>
               </label>
               <select
                 id='country'
@@ -294,12 +228,14 @@ const Details = ({
             </div>
           </div>
         </div>
-        <button
-          type='submit'
-          className='w-52 float-right uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
-        >
-          Next
-        </button>
+        <div className='flex justify-end'>
+          <button
+            type='submit'
+            className='w-52 uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
+          >
+            Next
+          </button>
+        </div>
       </form>
     </>
   );

@@ -9,7 +9,7 @@ const SignDocuments = ({
   isDocumentsReceived,
   documentReceivedDate,
   setIsDocumentModalOpen,
-  setReleased,
+  setReceived,
   isLoading,
 }: {
   id: number;
@@ -17,7 +17,7 @@ const SignDocuments = ({
   isDocumentsReceived: boolean;
   documentReceivedDate?: string;
   setIsDocumentModalOpen: Dispatch<T_DocumentsModal>;
-  setReleased: any;
+  setReceived: any;
   isLoading: boolean;
 }) => {
   return (
@@ -50,7 +50,7 @@ const SignDocuments = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isDocumentsSent || isDocumentsReceived || isLoading}
-          onClick={() => setReleased(id, 'sign documents')}
+          onClick={() => setReceived(id, 'sign documents')}
         >
           {isLoading && (
               <div role='status'>

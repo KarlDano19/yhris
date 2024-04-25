@@ -73,6 +73,12 @@ export default function QuitclaimModal({
       separationItemsCopy[itemIndex].emailType = 'quit claim';
       separationItemsCopy[itemIndex].quitClaim.template = data.template;
       separationItemsCopy[itemIndex].quitClaim.to = data.email;
+      if (data.cc) {
+        separationItemsCopy[itemIndex].quitClaim.cc = data.cc;
+      }
+      if (data.bcc) {
+        separationItemsCopy[itemIndex].quitClaim.bcc = data.bcc;
+      }
       separationItemsCopy[itemIndex].quitClaim.message = data.message;
       separationItemsCopy[itemIndex].isQuitclaimSigned = true;
       const callbackReq = {
@@ -108,7 +114,7 @@ export default function QuitclaimModal({
       );
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       if (separationItemsCopy[itemIndex]) {
-        setValue('email', separationItemsCopy[itemIndex].employee_dict.email);
+        setValue('email', separationItemsCopy[itemIndex].email);
       }
     }
   }, [isOpen]);

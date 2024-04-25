@@ -1,13 +1,9 @@
 'use client';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import React, { useEffect, useState, useRef } from 'react';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import SeparationLetter from './SeparationLetter';
-import {
-  T_DocumentsModal,
-  T_LastPayModal,
-  T_LetterModal,
-  T_QuitclaimModal,
-} from '@/types/globals';
+import { T_DocumentsModal, T_LastPayModal, T_LetterModal, T_QuitclaimModal } from '@/types/globals';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
 import Quitclaim from './Quitclaim';
@@ -18,7 +14,6 @@ import ConfirmModal from '../../ConfirmModal';
 import toast from 'react-hot-toast';
 import QuitclaimModal from './modals/QuitclaimModal';
 import CustomToast from '@/components/CustomToast';
-import DateCalendar from '@/svg/DateCalendar';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
@@ -26,7 +21,7 @@ import useGetSeparationItems from './hooks/useGetSeparationItems';
 import usePatchSeparationItem from './hooks/usePatchSeparationItem';
 import Link from 'next/link';
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
   const [departmentItems, setDepartmentItems] = useState<any>([]);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -36,48 +31,31 @@ const Content = () => {
     to: '',
     search: '',
   });
-  const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] =
-    useState(false);
-  const [isLetterModalOpen, setIsLetterModalOpen] =
-    useState<T_LetterModal | null>(null);
-  const [isDocumentModalOpen, setIsDocumentModalOpen] =
-    useState<T_DocumentsModal | null>(null);
-  const [isLastPayModalOpen, setIsLastPayModalOpen] =
-    useState<T_LastPayModal | null>(null);
-  const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] =
-    useState<T_QuitclaimModal | null>(null);
+  const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
+  const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
+  const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
+  const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
+  const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
   const { mutate, isLoading } = usePatchSeparationItem();
-  const date1InputRef = useRef(null);
-  const date2InputRef = useRef(null);
-  const { data: dataSeparation, isLoading: isGetSeparationLoading } =
-    useGetSeparationItems(itemsFilter);
-  const { data: dataDepartment, isLoading: isGetDepartmentLoading } =
-    useGetDepartmentItems();
-  const { data: dataEmployee, isLoading: isGetEmployeeLoading } =
-    useGetEmployeeItems();
-  const { data: dataPosition, isLoading: isGetPositionLoading } =
-    useGetPositionItems();
+  const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems(itemsFilter);
+  const { data: dataDepartment } = useGetDepartmentItems();
+  const { data: dataEmployee } = useGetEmployeeItems();
+  const { data: dataPosition } = useGetPositionItems();
 
   const releaseLastPay = () => {
     if (isLastPayModalOpen && isLastPayModalOpen.id) {
-      const itemIndex = separationItems.findIndex(
-        (item: any) => item.id === isLastPayModalOpen.id
-      );
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isLastPayModalOpen.id);
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       separationItemsCopy[itemIndex].id = isLastPayModalOpen.id;
       separationItemsCopy[itemIndex].actionType = 'sending';
       separationItemsCopy[itemIndex].emailType = 'last pay';
       separationItemsCopy[itemIndex].isLastPayReleased = true;
-      separationItemsCopy[itemIndex].lastPay.to =
-        separationItemsCopy[itemIndex].employee_dict.email;
+      separationItemsCopy[itemIndex].lastPay.to = separationItemsCopy[itemIndex].email;
       const callbackReq = {
         onSuccess: (data: any) => {
           setSeparationItems([...separationItemsCopy]);
           setIsLastPayModalOpen(null);
-          toast.custom(
-            () => <CustomToast message={data.message} type='success' />,
-            { duration: 5000 }
-          );
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -87,10 +65,7 @@ const Content = () => {
       };
       mutate(separationItemsCopy[itemIndex], callbackReq);
     } else {
-      toast.custom(
-        () => <CustomToast message='Incomplete information.' type='error' />,
-        { duration: 4000 }
-      );
+      toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   };
 
@@ -100,7 +75,7 @@ const Content = () => {
     }
   };
 
-  const setReleased = (id: string, emailType: string) => {
+  const setReceived = (id: string, emailType: string) => {
     const itemIndex = separationItems.findIndex((item: any) => item.id === id);
     const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
     const currentDate = new Date();
@@ -110,26 +85,20 @@ const Content = () => {
     separationItemsCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'letters') {
       separationItemsCopy[itemIndex].isLetterReceived = true;
-      separationItemsCopy[itemIndex].letterReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].letterReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
     }
     if (emailType === 'sign documents') {
       separationItemsCopy[itemIndex].isDocumentsReceived = true;
-      separationItemsCopy[itemIndex].documentReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].documentReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
     }
     if (emailType === 'quit claim') {
       separationItemsCopy[itemIndex].isQuitclaimReceived = true;
-      separationItemsCopy[itemIndex].quitclaimReceivedDate =
-        new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].quitclaimReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
     }
     const callbackReq = {
       onSuccess: (data: any) => {
         setSeparationItems([...separationItemsCopy]);
-        toast.custom(
-          () => <CustomToast message={data.message} type='success' />,
-          { duration: 5000 }
-        );
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -141,45 +110,40 @@ const Content = () => {
   };
 
   useEffect(() => {
+    refetch();
+  }, []);
+
+  useEffect(() => {
     if (dataDepartment) {
       setDepartmentItems(dataDepartment.departments);
     }
     if (dataEmployee) {
-      setEmployeeItems(dataEmployee.employees);
+      setEmployeeItems(dataEmployee);
     }
     if (dataPosition) {
       setPositionItems(dataPosition.positions);
     }
     if (dataSeparation) {
-      dataSeparation.separations.map((separation: any) => {
-        const employee = separation.employee_dict;
-        separation['separationDate'] = Intl.DateTimeFormat('en-US').format(
-          new Date(separation.date_of_separation)
-        );
-        separation['name'] = `${employee.firstname} ${employee.lastname}`;
+      dataSeparation.separations?.map((separation: any) => {
+        separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+        separation['name'] = separation.name;
         separation['reasonForLeaving'] = separation.reason_of_leaving;
         separation['isLetterSent'] = separation.is_letter_sent;
         separation['isLetterReceived'] = separation.is_letter_received;
         separation['letterReceivedDate'] =
           separation.letter_received_date &&
-          new Intl.DateTimeFormat('en-US').format(
-            new Date(separation.letter_received_date)
-          );
+          new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
         separation['isDocumentsSent'] = separation.is_documents_sent;
         separation['isDocumentsReceived'] = separation.is_documents_received;
         separation['documentReceivedDate'] =
           separation.documents_received_date &&
-          new Intl.DateTimeFormat('en-US').format(
-            new Date(separation.documents_received_date)
-          );
+          new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
         separation['isLastPayReleased'] = separation.is_last_pay_released;
         separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
         separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
         separation['quitclaimReceivedDate'] =
           separation.quit_claim_received_date &&
-          new Intl.DateTimeFormat('en-US').format(
-            new Date(separation.quit_claim_received_date)
-          );
+          new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
         separation['separationLetter'] = {
           date: '',
           to: '',
@@ -242,17 +206,13 @@ const Content = () => {
     if (separationItems && separationItems.length > 0) {
       return separationItems.map((item: any) => (
         <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.separationDate}
-          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.separationDate}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex gap-2'>
               <span>{item.name}</span>
             </div>
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.reasonForLeaving}
-          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.reasonForLeaving}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
             <SeparationLetter
               id={item.id}
@@ -260,7 +220,7 @@ const Content = () => {
               isLetterReceived={item.isLetterReceived}
               letterReceivedDate={item.letterReceivedDate}
               setIsLetterModalOpen={setIsLetterModalOpen}
-              setReleased={setReleased}
+              setReceived={setReceived}
               isLoading={isLoading}
             />
           </td>
@@ -271,7 +231,7 @@ const Content = () => {
               isDocumentsReceived={item.isDocumentsReceived}
               documentReceivedDate={item.documentReceivedDate}
               setIsDocumentModalOpen={setIsDocumentModalOpen}
-              setReleased={setReleased}
+              setReceived={setReceived}
               isLoading={isLoading}
             />
           </td>
@@ -289,7 +249,7 @@ const Content = () => {
               isQuitclaimReceived={item.isQuitclaimReceived}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
               setIsQuitclaimModalOpen={setIsQuitclaimModalOpen}
-              setReleased={setReleased}
+              setReceived={setReceived}
               isLoading={isLoading}
             />
           </td>
@@ -309,58 +269,70 @@ const Content = () => {
     }
   };
 
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    refetch();
+  };
+
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link
-            href='/'
-            className='flex-none flex gap-3 items-center hover:bg-gray-200'
-          >
+          <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Home</h4>
+            <h4>Dashboard</h4>
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>
-            Employee Separation
-          </h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Employee Separation</h2>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='to'
-                  id='to'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, from: e.target.value })
+                <CustomDatePicker
+                  name={'from'}
+                  selected={itemsFilter.from}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  ref={date1InputRef}
-                  // @ts-expect-error
-                  onClick={() => date1InputRef.current.showPicker()}
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
               <p>to</p>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='from'
-                  id='from'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, to: e.target.value })
+                <CustomDatePicker
+                  name={'to'}
+                  selected={itemsFilter.to}
+                  pickerOnChange={setItemsFilter}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  ref={date2InputRef}
-                  // @ts-expect-error
-                  onClick={() => date2InputRef.current.showPicker()}
+                  objectFilter={itemsFilter}
+                  inputOnChange={setItemsFilter}
+                  placeholder={'mm/dd/yyyy'}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
             </div>
             <div className='flex-none lg:w-1/3'>
@@ -370,20 +342,22 @@ const Content = () => {
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, search: e.target.value })
-                  }
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-                </div>
               </div>
             </div>
+            <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={checkIfDateIsValid}
+              >
+                <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
+                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsAddSeparationModalOpen(true)}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>
@@ -401,52 +375,30 @@ const Content = () => {
                       >
                         Date of Separation
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
                         Name
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
                         Reason of Leaving
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
                         Letter of Separation
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
                         Sign Documents
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
                         Last Pay
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
                         Quitclaim
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='divide-y divide-gray-200'>
-                    {renderRows()}
-                  </tbody>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>
-                  Total record/s: {separationItems.length}
-                </p>
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {separationItems?.length}</p>
               </div>
             </div>
           </div>
@@ -460,6 +412,7 @@ const Content = () => {
         setSeparationItems={setSeparationItems}
         isOpen={isAddSeparationModalOpen}
         setIsOpen={setIsAddSeparationModalOpen}
+        refetch={refetch}
       />
       <LetterModal
         separationItems={separationItems}

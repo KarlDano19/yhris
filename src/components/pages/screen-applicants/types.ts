@@ -7,6 +7,8 @@ export type BlockPropTypes = {
   index: number
   provided: any
   snapshot: any
+  jobPostDetailsRefetch: any
+  appliedApplicantRefetch: any
 }
 
 export type WrapperPropTypes = {
@@ -40,6 +42,7 @@ export type StageRequirementsTypes = {
 export type ScheduleInterviewPropTypes = {
   title: string
   handleFormSubmit: any
+  isSendInterviewScheduleLoading: any
 }
 
 export type SendEmailPropTypes = {
@@ -59,10 +62,12 @@ export type ChecklistPropTypes = {
 
 export type ApplicantType = {
   id: number
+  applicationId: number
   image: string
   name: string
   checklists: string[]
-  status: "ongoing" | "withdrawn" | "rejected" | "passed" | null | undefined
+  status: "ongoing" | "withdrawn" | "rejected" | "passed" | "hired" | null | undefined
+  stagePosition: number
 }
 
 export type ApplicantsType = [] | ApplicantType[]
@@ -73,6 +78,7 @@ export type StageType = {
   isNewStage: boolean
   requirements: string[]
   applicants: ApplicantsType
+  orderBy: number
 }
 
 export type ActionStateType = {
@@ -83,6 +89,7 @@ export type ActionStateType = {
   }
   stageId: number | null
   applicantId: number | null
+  isFinalStage: boolean
 }
 
 export type StagePropTypes = {
@@ -114,6 +121,8 @@ export type StageHeaderTypes = {
   stage: StageType
   stageDropdownId: number | null
   setStageDropdownId: any
+  jobPostDetailsRefetch: any
+  appliedApplicantRefetch: any
 }
 
 export type StageBlockTypes = {

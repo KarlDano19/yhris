@@ -1,3 +1,5 @@
+import { type } from "os";
+
 export type T_LetterModal = {
   type: acceptance | separation;
   id: number;
@@ -52,6 +54,7 @@ export type T_CreateJob = {
   rate: string;
   benefits: string[];
   jobDescription: string;
+  qualifications: string;
   jobDescriptionFile: File;
   postAs: string;
   postAsUpload: File;
@@ -104,6 +107,16 @@ export type T_SeparationEmail = {
   dateReceived: any;
 };
 
+export type T_ApplicantOrientEmail = {
+  id?: string;
+  is_contract_sent?:boolean,
+  is_contract_received?:boolean,
+  contract_received_date?:string,
+  is_orientation_completed?:boolean,
+  is_introduction_sent?:boolean,
+  is_enrolled?: boolean
+};
+
 export type T_Login = {
   email: string;
   password: string;
@@ -151,8 +164,8 @@ export type T_IncidentReportEmail = {
   id: string;
   actionType: string;
   emailType: string;
-  issueNTE: any;
-  sendDecision: any;
+  issueNTEForm: any;
+  sendDecisionForm: any;
   dateReceived: any;
 };
 
@@ -180,14 +193,20 @@ export type T_Directive = {
   position: string;
   signature: string | File;
   qrCode: any;
-  purpose: string;
-  policy: string;
-  procedure: string;
+  policyField: T_PolicyField[]
   eligibility: string;
   application: string;
   coverage: string;
   termination: string;
+  purpose: string;
+  policy: string;
+  procedure: string;
 };
+
+export type T_PolicyField ={
+  inputLabel: string;
+  inputName: string
+}
 
 export type T_Benefit = {
   title: string;
@@ -199,3 +218,29 @@ export type T_Benefit = {
   cc: string;
   bcc: string;
 };
+
+export type T_UserPassword = {
+  password: string;
+  confirmPassword: string;
+  code: string;
+};
+
+export type T_ApplyJob = {
+  applicantId: number;
+  jobStageId: number;
+  status: string;
+};
+
+export type T_Payment = {
+  users: string,
+  path: string,
+  url: string,
+  additional_employees: number,
+  plan_id: number,
+  payment_id: number,
+  subscription_type: string,
+  periodicity: string,
+  periodicity_duration: string,
+  voucher_code: string,
+}
+

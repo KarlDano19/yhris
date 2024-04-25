@@ -1,11 +1,11 @@
 import { StageType } from "../../types"
 
 export default function addStage(state: any, action: any) {
-  const { addType } = action.payload
+  const { id, addType } = action.payload
 
   let newState
   const newStage = {
-    id: Date.now(),
+    id: id,
     title: "Untitled",
     isNewStage: true,
     requirements: [],

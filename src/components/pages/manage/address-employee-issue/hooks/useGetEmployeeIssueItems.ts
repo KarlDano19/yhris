@@ -1,8 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getEmployeeIssueItems() {
+async function getEmployeeIssueItems(filters: any) {
   try {
+    let newFilters = {...filters};
+    if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
+    if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -13,13 +17,13 @@ async function getEmployeeIssueItems() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.API_URL}/api/employee-issues/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/employee-issues/?${searchParams}`,
         config
       );
-      if (res.ok) {
-        return res.json();
+      if (!res.ok) {
+        throw res.json();
       }
-      throw res.json();
+      return res.json();
     }
     return {};
   } catch (err: any) {
@@ -31,15 +35,15 @@ async function getEmployeeIssueItems() {
   }
 }
 
-function useGetEmployeeIssueItems() {
+function useGetEmployeeIssueItems(filters: any) {
   const query = useQuery(
     ['employeeIssueItemCache'],
-    () => getEmployeeIssueItems(),
+    () => getEmployeeIssueItems(filters),
     {
+      enabled: false,
       keepPreviousData: true,
     }
   );
-
   return query;
 }
 

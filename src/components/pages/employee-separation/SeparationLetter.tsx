@@ -16,7 +16,7 @@ export default function SeparationLetter({
   isLetterReceived,
   letterReceivedDate,
   setIsLetterModalOpen,
-  setReleased,
+  setReceived,
   isLoading,
 }: {
   id: number;
@@ -24,7 +24,7 @@ export default function SeparationLetter({
   isLetterReceived: boolean;
   letterReceivedDate?: string;
   setIsLetterModalOpen: Dispatch<T_LetterModal>;
-  setReleased: any;
+  setReceived: any;
   isLoading: boolean;
 }) {
   return (
@@ -103,7 +103,7 @@ export default function SeparationLetter({
                 'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
               )}
               disabled={!isLetterSent || isLetterReceived || isLoading}
-              onClick={() => setReleased(id, 'letters')}
+              onClick={() => setReceived(id, 'letters')}
             >
               {isLoading && (
                 <div role='status'>

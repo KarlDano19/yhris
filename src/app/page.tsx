@@ -1,10 +1,9 @@
 import React from 'react'
-import Home from '../components/Home'
 
-const HomePage = async () => {
-  return (
-    <Home/>
-  )
-}
+import Content from "@/components/pages/(applicant-side)/(un-auth)/landing-page/Content";
 
-export default HomePage
+const LandingPage = () => {
+  return <Content />;
+};
+
+export default LandingPage;

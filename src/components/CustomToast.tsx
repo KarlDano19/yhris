@@ -2,6 +2,7 @@ import React from 'react';
 import toast from 'react-hot-toast';
 import { XMarkIcon, CheckCircleIcon, InformationCircleIcon, HandRaisedIcon } from '@heroicons/react/20/solid';
 import classNames from '@/helpers/classNames';
+import CircleXmarkIcon from '@/svg/CircleXmarkIcon';
 
 const CustomToast = ({ message, type }: { message: string, type: 'success' | 'error' | 'info' | 'warning' }) => {
 
@@ -10,7 +11,7 @@ const CustomToast = ({ message, type }: { message: string, type: 'success' | 'er
         if(type === "success") {
             return <CheckCircleIcon className={className} aria-hidden="true" />
         } else if(type === "error") {
-            return <XMarkIcon className={className} aria-hidden="true" />
+            return <CircleXmarkIcon aria-hidden="true" />
         } else if(type === "info") {
             return <InformationCircleIcon className={className} aria-hidden="true" />
         } else if(type === "warning") {

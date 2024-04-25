@@ -5,12 +5,20 @@ import actionTypes from "../lib/actionTypes"
 import { PencilIcon } from "@heroicons/react/24/outline"
 import { initialActionState } from "../lib/initialActionState"
 import { ContextTypes, StageHeaderTypes as PropTypes } from "../types"
+import toast from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
+import useUpdateStage from "../hooks/useUpdateStage"
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function StageHeader({
   stage,
   stageDropdownId,
   setStageDropdownId,
+  jobPostDetailsRefetch,
+  appliedApplicantRefetch,
 }: PropTypes) {
+  const queryClient = useQueryClient();
+  const { mutate: updateMutate, isLoading: isUpdateLoading } = useUpdateStage();
   const { dispatch, setActionState }: ContextTypes = useContext(
     StateContext
   ) as ContextTypes
@@ -26,12 +34,31 @@ export default function StageHeader({
     } else {
       stageTitle = title.split("\n").join("")
     }
-
+    updateStageTitle(stageTitle);
     dispatch({
       type: actionTypes.SET_TITLE,
       payload: { title: stageTitle, stageId: stage.id },
     })
     setIsEditing(false)
+  }
+
+  const updateStageTitle = (stageTitle: any) => {
+    const callbackReq = {
+      onSuccess: () => {
+        jobPostDetailsRefetch();
+        appliedApplicantRefetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    let postData = {
+      stage_id: stage.id,
+      title: stageTitle
+    }
+    updateMutate(postData, callbackReq);
   }
 
   useEffect(() => {
