@@ -123,10 +123,10 @@ const Content = ({ isLoggedIn }: any) => {
         <div className='flex justify-center flex-sm-wrap'>{renderPlans()}</div>
       </div>
       <div className='absolute top-[2.7rem] z-[-1]'>
-        <img src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/turning-globe.png`} alt='turning-globe' />
+        <img src={`/static/assets/turning-globe.png`} alt='turning-globe' />
       </div>
       <div className='absolute right-0 bottom-[-44px] z-[-1] flex'>
-        <img src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/rocket-fly.png`} alt='rocket-fly' />
+        <img src={`/static/assets/rocket-fly.png`} alt='rocket-fly' />
       </div>
     </div>
   );

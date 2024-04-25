@@ -65,7 +65,7 @@ const Content = () => {
                 <div
                   className='image-container lg:w-40 bg-gray-300 h-[150px] rounded-md float-right'
                   style={{
-                    backgroundImage: `url(${process.env.NEXT_PUBLIC_BACKGROUND_IMG_URL}${jobDetailData.company_logo})`,
+                    backgroundImage: `url(${jobDetailData.company_logo})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',

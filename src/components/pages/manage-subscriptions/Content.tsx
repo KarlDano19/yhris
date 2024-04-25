@@ -82,7 +82,7 @@ const Content = ({ hasActiveSubscription }: any) => {
                 </div>
                 <div className='flex mx-3 mt-5'>
                   <div>
-                    <img src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/yahshua-hris.png`} alt='yahshua-hris' />
+                    <img src={`/static/assets/yahshua-hris.png`} alt='yahshua-hris' />
                   </div>
                   <div className='mx-4 mb-3'>
                     <span className='text-[20px] font-bold leading-[26px] tracking-[0.02em]'>{activePlans.plan}</span>
@@ -96,7 +96,7 @@ const Content = ({ hasActiveSubscription }: any) => {
                         return (
                           <div key={index} className='flex mb-[0.8rem]'>
                             <img
-                              src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/check-icon.png`}
+                              src={`/static/assets/check-icon.png`}
                               alt='check-icon'
                             />
                             <span className='ml-3 text-[15px]'>{feature}</span>
@@ -157,7 +157,7 @@ const Content = ({ hasActiveSubscription }: any) => {
               <div className='px-2 py-4 shadow-custom grow'>
                 <div className='flex mx-1 mb-4'>
                   <div>
-                    <img src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/building.png`} alt='building' />
+                    <img src={`/static/assets/building.png`} alt='building' />
                   </div>
                   <div className='mx-4'>
                     <h2 className='font-bold'>My Account</h2>

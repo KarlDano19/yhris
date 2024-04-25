@@ -7,7 +7,7 @@ const CustomImg = styled.img`
 `;
 
 const DragonpayLogo = () => {
-  return <CustomImg src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/dragonpay-logo.png`} alt='dragonpay-logo' />;
+  return <CustomImg src={`/static/assets/dragonpay-logo.png`} alt='dragonpay-logo' />;
 };
 
 export default DragonpayLogo;

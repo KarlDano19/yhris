@@ -99,7 +99,7 @@ export default function Content() {
         let newData = {
           id: item.applicant.id,
           applicationId: item.id,
-          image: `${process.env.NEXT_PUBLIC_IMG_URL}${item.applicant.photo}`,
+          image: `${item.applicant.photo}`,
           name: item.applicant.name,
           checklists: [],
           status: item.status,

@@ -176,13 +176,13 @@ const PlanCard = ({
                 <main key={index}>
                   {index + 1 != features.length && (
                     <PlanFeatureDiv key={index} className='flex ml-2'>
-                      <img src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/check-icon.png`} alt='check-icon' />
+                      <img src={`/static/assets/check-icon.png`} alt='check-icon' />
                       <span className='ml-3 text-[13px]'>{feature}</span>
                     </PlanFeatureDiv>
                   )}
                   {index + 1 == features.length && (
                     <PlanFeatureDiv key={index} className='flex ml-2 mb-0'>
-                      <img src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/check-icon.png`} alt='check-icon' />
+                      <img src={`/static/assets/check-icon.png`} alt='check-icon' />
                       <span className='ml-3 text-[13px]'>{feature}</span>
                     </PlanFeatureDiv>
                   )}
@@ -235,7 +235,7 @@ const PlanCard = ({
           </div>
           <VatLabel className='flex justify-center align-items-center pt-2 pb-8'>
             <img
-              src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/toggle-icon.png`}
+              src={`/static/assets/toggle-icon.png`}
               width={30}
               alt='toggle-icon'
             />

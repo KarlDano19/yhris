@@ -158,7 +158,7 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
         <i>Please note that the subscription fee and related services are final and non-refundable.</i>
       </div>
       <div className='flex justify-center mt-12'>
-        <img src={`${process.env.NEXT_PUBLIC_IMG_URL}/static/assets/walking-person.png`} alt='walking-person' />
+        <img src={`/static/assets/walking-person.png`} alt='walking-person' />
       </div>
     </div>
   );

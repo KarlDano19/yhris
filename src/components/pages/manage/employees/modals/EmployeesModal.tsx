@@ -43,7 +43,7 @@ export default function EmployeesModal({
       const splitCVFile = (employeeDetailData.cv || '').split('/');
       setCVFileDetail({
         filename: splitCVFile[splitCVFile.length - 1],
-        file: `${process.env.NEXT_PUBLIC_BACKGROUND_IMG_URL}${employeeDetailData.cv}`,
+        file: `${employeeDetailData.cv}`,
       });
       if (employeeDetailData.work_experience.length !== 0) {
         for (let exp of employeeDetailData.work_experience) {
@@ -222,7 +222,7 @@ export default function EmployeesModal({
                                 <div
                                   className='image-container bg-gray-300 h-40 w-1/2 md:w-44 lg:w-full rounded-md mx-auto lg:mx-0 flex items-center justify-center'
                                   style={{
-                                    backgroundImage: `url(${process.env.NEXT_PUBLIC_BACKGROUND_IMG_URL}${employeeDetailData.photo})`,
+                                    backgroundImage: `url(${employeeDetailData.photo})`,
                                     backgroundRepeat: 'no-repeat',
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',

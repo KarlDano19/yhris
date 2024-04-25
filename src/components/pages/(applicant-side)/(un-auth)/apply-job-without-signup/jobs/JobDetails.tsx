@@ -57,7 +57,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           <div
             className='image-container lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md'
             style={{
-              backgroundImage: `url(${process.env.NEXT_PUBLIC_BACKGROUND_IMG_URL}${jobDetailData.company_logo})`,
+              backgroundImage: `url(${jobDetailData.company_logo})`,
               backgroundRepeat: 'no-repeat',
               backgroundSize: 'cover',
               backgroundPosition: 'center',

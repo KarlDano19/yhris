@@ -46,7 +46,7 @@ export default function ApplicantForm({ title }: PropTypes) {
             <div
               className='bg-gray-300 h-48 w-36 rounded-md mx-auto lg:mx-0 flex items-center justify-center'
               style={{
-                backgroundImage: `url(${process.env.NEXT_PUBLIC_BACKGROUND_IMG_URL}${applicantProfile.photo})`,
+                backgroundImage: `url(${applicantProfile.photo})`,
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -130,7 +130,7 @@ export default function ApplicantForm({ title }: PropTypes) {
       <>
         <iframe
           className='w-full h-[43rem]'
-          src={`${process.env.NEXT_PUBLIC_BACKGROUND_IMG_URL}${applicantProfile.cv}#toolbar=0`}
+          src={`${applicantProfile.cv}#toolbar=0`}
         ></iframe>
       </>
     );

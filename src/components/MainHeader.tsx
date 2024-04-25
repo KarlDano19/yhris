@@ -119,7 +119,7 @@ const MainHeader = () => {
                             profile.logo ? (
                               <img
                                 className='rounded-full mx-auto w-[29px] h-[29px]'
-                                src={`${process.env.NEXT_PUBLIC_IMG_URL}${profile.logo}`}
+                                src={`${profile.logo}`}
                                 alt='profile logo'
                               />
                             ) : (
