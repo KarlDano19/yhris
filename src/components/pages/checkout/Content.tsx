@@ -79,7 +79,7 @@ const Content = () => {
           window.open(data.checkout_url, 'popupWindow', 'width=720,height=720');
           setTimeout(() => {
             window.location.replace(data.callback_url);
-          }, 500);
+          }, 1000);
         }, 500);
       },
       onError: (err: any) => {
