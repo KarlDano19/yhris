@@ -73,13 +73,13 @@ const Content = () => {
       payloads['payment_id'] = getPaymentId('paymongo');
     }
     const callbackReq = {
-      onSuccess: (data: any) => {
+      onSuccess: async (data: any) => {
+        await updateSession({ hasPendingTransaction: true });
         setTimeout(() => {
-          updateSession({ hasPendingTransaction: true });
           window.open(data.checkout_url, 'popupWindow', 'width=720,height=720');
           setTimeout(() => {
             window.location.replace(data.callback_url);
-          }, 1000);
+          }, 250);
         }, 500);
       },
       onError: (err: any) => {

@@ -66,7 +66,7 @@ const Content = ({ isLoggedIn }: any) => {
   };
 
   return (
-    <div className='relative h-full'>
+    <div className='relative h-screen'>
       <div className='py-12'>
         <div className='text-center mb-3'>
           <h1 className='font-bold text-[30px] leading-[39px] tracking-[0.02em] text-[#2c3f58]'>Subscription Plan</h1>
@@ -104,7 +104,7 @@ const Content = ({ isLoggedIn }: any) => {
                 {periodicity === 'yearly' && (
                   <YearlyInput
                     type='number'
-                    className='text-[black] text-[20px] w-[6rem] text-center border-0 rounded-[5px] p-5 font-semibold'
+                    className='text-[black] text-[20px] w-[6rem] text-center border-0 rounded-[5px] py-2 px-2 font-semibold'
                     value={periodicityDuration}
                     onChange={({ target }) => {
                       let value = parseInt(target.value);
@@ -123,10 +123,10 @@ const Content = ({ isLoggedIn }: any) => {
         <div className='flex justify-center flex-sm-wrap'>{renderPlans()}</div>
       </div>
       <div className='absolute top-[2.7rem] z-[-1]'>
-        <img src={`/static/assets/turning-globe.png`} alt='turning-globe' />
+        <img src={`/assets/turning-globe.png`} alt='turning-globe' />
       </div>
       <div className='absolute right-0 bottom-[-44px] z-[-1] flex'>
-        <img src={`/static/assets/rocket-fly.png`} alt='rocket-fly' />
+        <img src={`/assets/rocket-fly.png`} alt='rocket-fly' />
       </div>
     </div>
   );

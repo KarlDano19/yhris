@@ -163,7 +163,7 @@ const Content = () => {
                       </button>
                     </div>
                   </div>
-                  <div className='mb-2'>
+                  <div className='mb-4'>
                     <label htmlFor='confirm-password' className='text-sm text-indigo-dye leading-6 text-gray-900'>
                       Confirm Password
                       <span className='text-red-500'>*</span>
@@ -241,6 +241,14 @@ const Content = () => {
                         'Sign up'
                       )}
                     </button>
+                    <h6 className='text-center'>
+                    <Link
+                      href='/login'
+                      className='font-semibold text-blue-600 hover:underline'
+                    >
+                      Back to Sign In
+                    </Link>
+                  </h6>
                   </div>
                 </form>
               </div>

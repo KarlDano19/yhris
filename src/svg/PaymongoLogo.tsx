@@ -9,7 +9,7 @@ const CustomImg = styled.img`
 `;
 
 const PaymongoLogo = () => {
-  return <CustomImg src={`/static/assets/paymongo-logo.png`} alt='paymongo_logo' />;
+  return <CustomImg src={`/assets/paymongo-logo.png`} alt='paymongo_logo' />;
 };
 
 export default PaymongoLogo;

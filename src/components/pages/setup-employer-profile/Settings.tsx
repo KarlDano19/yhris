@@ -24,12 +24,10 @@ const Settings = ({
   const { register, handleSubmit } = useForm<T_EmployerProfile>();
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        updateSession({ hasProfile: true });
+      onSuccess: async (data: any) => {
+        await updateSession({ hasProfile: true });
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setTimeout(() => {
-          location.href = '/dashboard';
-        }, 1000);
+        location.href = '/dashboard';
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });

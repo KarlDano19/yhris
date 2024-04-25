@@ -18,8 +18,8 @@ const CancelConfirmModal: React.FC<CancelConfirmModalProps> = ({ referenceId, re
 
   const handleConfirm = () => {
     const callbackReq = {
-      onSuccess: () => {
-        updateSession({ hasPendingTransaction: false });
+      onSuccess: async () => {
+        await updateSession({ hasPendingTransaction: false });
         refetch();
         onClose();
       },

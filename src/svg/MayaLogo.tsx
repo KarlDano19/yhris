@@ -9,7 +9,7 @@ const CustomImg = styled.img`
 `;
 
 const MayaLogo = () => {
-  return <CustomImg src={`/static/assets/maya-logo.png`} alt='maya-logo' />;
+  return <CustomImg src={`/assets/maya-logo.png`} alt='maya-logo' />;
 };
 
 export default MayaLogo;
