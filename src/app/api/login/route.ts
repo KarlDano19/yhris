@@ -31,8 +31,10 @@ export async function POST(request: NextRequest) {
       session["hasProfile"] = data.has_profile;
       await session.save();
       await sleep(250);
+      return NextResponse.json(data, { status: 200 });
+    } else {
+      return NextResponse.json({is_valid: false}, { status: 200 });
     }
-    return NextResponse.json(data, { status: 200 });
   } catch (err: any) {
     return NextResponse.json(err, { status: 500 });
   }
