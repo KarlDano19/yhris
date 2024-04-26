@@ -7,16 +7,6 @@ import MayaLogo from '@/svg/MayaLogo';
 import DragonpayLogo from '@/svg/DragonpayLogo';
 import PaymongoLogo from '@/svg/PaymongoLogo'
 
-const PaymentsDiv = styled.div`
-  display: inline-flex;
-  align-items: center;
-  height: 50px;
-`;
-const DivSpacer = styled.div`
-  display: block;
-  height: 100px;
-`;
-
 const PaymentOption = ({
   payments,
   errors,
@@ -42,7 +32,7 @@ const PaymentOption = ({
       return (
         <div className='ml-4' key={item.id}>
           {item.is_active && (
-            <PaymentsDiv>
+            <div className='inline-flex items-center h-[50px]'>
               <input
                 id={item.payment_type}
                 type='radio'
@@ -56,11 +46,11 @@ const PaymentOption = ({
                 {item.payment_type === 'dragonpay' && <DragonpayLogo />}
                 {item.payment_type === 'paymongo' && <PaymongoLogo />}
               </label>
-            </PaymentsDiv>
+            </div>
           )}
           {!item.is_active && (
             <>
-              <PaymentsDiv
+              <div className='inline-flex items-center h-[50px]'
                 data-tooltip-id='payment-tooltip'
                 data-tooltip-content='Not available right now.'
                 data-tooltip-place='right'
@@ -78,7 +68,7 @@ const PaymentOption = ({
                   {item.payment_type === 'dragonpay' && <DragonpayLogo />}
                   {item.payment_type === 'paymongo' && <PaymongoLogo />}
                 </label>
-              </PaymentsDiv>
+              </div>
               <Tooltip id='payment-tooltip' />
             </>
           )}
@@ -91,7 +81,7 @@ const PaymentOption = ({
     <form className='mb-5 pt-4' onSubmit={onSubmit}>
       <p className='mb-8 font-semibold text-[18px] leading-[20px] tracking-[0.02em] text-[#373530]'>Payment Method</p>
       {renderPayments()}
-      <DivSpacer />
+      <div className='block h-[100px]' />
       <button
         className='w-full h-[50px] rounded-lg bg-[#2757ed] text-white text-[18px] leading-[26px] tracking-[0.02em] hover:bg-[#4f80ff] focus:outline-none'
         type='submit'

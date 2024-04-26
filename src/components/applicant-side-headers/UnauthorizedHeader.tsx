@@ -56,14 +56,14 @@ const UnauthorizedHeader = () => {
                   </div>
                   <div className='hidden lg:flex lg:items-center lg:justify-end lg:space-x-8'>
                     <Link
-                      href='/apply-for-a-job'
+                      href='/features'
                       className={`${
-                        pathName === '/apply-for-a-job' ? 'text-savoy-blue' : 'text-indigo-dye'
+                        pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'
                       } flex items-center font-semibold`}
                     >
                       <StarIcon
                         className={`${
-                          pathName === '/apply-for-a-job' ? 'text-savoy-blue' : 'text-indigo-dye'
+                          pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'
                         } h-4 w-4 mr-2.5`}
                       />
                       Features
@@ -123,14 +123,14 @@ const UnauthorizedHeader = () => {
                 <div className='mx-auto max-w-3xl space-y-1 px-6 pb-3 pt-2 sm:px-14'>
                   <div className='shadow rounded-md'>
                     <Link
-                      href='/apply-for-a-job'
+                      href='/features'
                       className={`${
-                        pathName === '/apply-for-a-job' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
+                        pathName === '/features' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
                       } flex items-center font-semibold px-4 py-4`}
                     >
                       <StarIcon
                         className={`${
-                          pathName === '/apply-for-a-job' ? 'text-savoy-blue' : 'text-indigo-dye'
+                          pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'
                         } h-4 w-4 mr-2.5`}
                       />
                       Features
