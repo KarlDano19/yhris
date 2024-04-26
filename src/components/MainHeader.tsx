@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 
-import { deleteCookie } from 'cookies-next';
+import { getCookie, deleteCookie } from 'cookies-next';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
@@ -11,7 +11,6 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
 import MainLogo from '@/svg/MainLogo';
-import AccountLogo from '@/svg/AccountLogo';
 import useGetProfile from './hooks/useGetProfile';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
@@ -35,16 +34,14 @@ const MainHeader = () => {
     'orient',
     'manage',
     'employee-separation',
-    'admin'
+    'admin',
   ].includes(firstRoute);
   const { data, isLoading: isProfileLoading } = useGetProfile();
+
   const logout = () => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type='success' />,
-          { duration: 4000 }
-        );
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         deleteCookie('token');
         location.href = '/login';
       },
@@ -56,11 +53,12 @@ const MainHeader = () => {
     };
     mutate({}, callbackReq);
   };
+
   const userNavigation = [
-    { name: 'My Profile', href: '/a', onClick: void 0 },
-    { name: 'Subscriptions', href: '/manage-subscriptions', onClick: void 0 },
-    { name: 'Settings', href: '#', onClick: void 0 },
-    { name: 'Sign out', href: void 0, onClick: logout },
+    { name: 'My Profile', href: void 0, onClick: void 0, isDisabled: true },
+    { name: 'Subscriptions', href: '/manage-subscriptions', onClick: void 0, isDisabled: false },
+    { name: 'Settings', href: void 0, onClick: void 0, isDisabled: true },
+    { name: 'Sign out', href: void 0, onClick: logout, isDisabled: false },
   ];
 
   useEffect(() => {
@@ -69,16 +67,20 @@ const MainHeader = () => {
     }
   }, [data]);
 
+  useEffect(() => {
+    const token = getCookie('token');
+    if (!token) {
+      logout();
+    }
+  }, []);
+
   return (
     <>
       {isAllowHeader && (
         <Popover
           as='header'
           className={({ open }) =>
-            classNames(
-              open ? 'fixed inset-0 z-40 overflow-y-auto' : '',
-              'bg-white shadow-md relative'
-            )
+            classNames(open ? 'fixed inset-0 z-40 overflow-y-auto' : '', 'bg-white shadow-md relative')
           }
         >
           {({ open }) => (
@@ -97,15 +99,9 @@ const MainHeader = () => {
                     <Popover.Button className='-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500'>
                       <span className='sr-only'>Open menu</span>
                       {open ? (
-                        <XMarkIcon
-                          className='block h-6 w-6'
-                          aria-hidden='true'
-                        />
+                        <XMarkIcon className='block h-6 w-6' aria-hidden='true' />
                       ) : (
-                        <Bars3Icon
-                          className='block h-6 w-6'
-                          aria-hidden='true'
-                        />
+                        <Bars3Icon className='block h-6 w-6' aria-hidden='true' />
                       )}
                     </Popover.Button>
                   </div>
@@ -123,26 +119,21 @@ const MainHeader = () => {
                                 alt='profile logo'
                               />
                             ) : (
-                              <AccountLogo />
+                              <img src={`/assets/no-photo.png`} alt='no-photo' />
                             )
                           ) : (
-                            <AccountLogo />
+                            <img src={`/assets/no-photo.png`} alt='no-photo' />
                           )}
                           {!isProfileLoading && (
                             <div className=''>
-                              <h3 className='text-sm font-bold'>
-                                {profile ? profile.name : '...'}
-                              </h3>
+                              <h3 className='text-sm font-bold'>{profile ? profile.name : '...'}</h3>
                               <p className='text-left text-xs w-32'>
                                 <Timer />
                               </p>
                             </div>
                           )}
                           {isProfileLoading && (
-                            <div
-                              role='status'
-                              className='max-w-sm animate-pulse'
-                            >
+                            <div role='status' className='max-w-sm animate-pulse'>
                               <div className='h-3 bg-gray-200 rounded-full w-32 mt-1 mb-2'></div>
                               <div className='h-3 bg-gray-200 rounded-full w-32'></div>
                             </div>
@@ -163,15 +154,16 @@ const MainHeader = () => {
                           {userNavigation.map((item) => (
                             <Menu.Item key={item.name}>
                               {({ active }) => (
-                                <a
-                                  href={item.href}
-                                  className={classNames(
-                                    active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm text-gray-700'
-                                  )}
-                                  onClick={item.onClick}
-                                >
-                                  {item.name}
+                                <a key={item.name} href={item.href} onClick={item.onClick}>
+                                  <div
+                                    className={classNames(
+                                      'block rounded-md py-2 px-3 text-base font-medium',
+                                      item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
+                                      active ? 'bg-gray-100' : ''
+                                    )}
+                                  >
+                                    {item.name}
+                                  </div>
                                 </a>
                               )}
                             </Menu.Item>
@@ -186,15 +178,15 @@ const MainHeader = () => {
               <Popover.Panel as='nav' className='lg:hidden' aria-label='Global'>
                 <div className='mx-auto max-w-3xl space-y-1 px-2 pb-3 pt-2 sm:px-4'>
                   {userNavigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className={classNames(
-                        'block rounded-md py-2 px-3 text-base font-medium hover:bg-gray-50'
-                      )}
-                      onClick={item.onClick}
-                    >
-                      {item.name}
+                    <a key={item.name} href={item.href} onClick={item.onClick}>
+                      <div
+                        className={classNames(
+                          'block rounded-md py-2 px-3 text-base font-medium',
+                          item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50'
+                        )}
+                      >
+                        {item.name}
+                      </div>
                     </a>
                   ))}
                 </div>

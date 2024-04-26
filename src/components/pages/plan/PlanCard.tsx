@@ -22,9 +22,6 @@ const SeparatorDiv = styled.div`
   border-top: 1px solid #878787;
   margin-bottom: 1rem;
 `;
-const PlanNameHeader = styled.h2`
-  font-weight: 700;
-`;
 const PlanFeaturesDiv = styled.div`
   height: 85px;
   overflow: hidden;
@@ -144,28 +141,16 @@ const PlanCard = ({
     return customPrice;
   };
 
-  const PlanLogo = () => {
-    return (
-      <svg width='76' height='82' viewBox='0 0 76 82' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        <rect width='76' height='82' rx='10' fill='#4F80FF' />
-        <path
-          d='M32 59C32 60.1 32.9 61 34 61H42C43.1 61 44 60.1 44 59V57H32V59ZM38 21C30.28 21 24 27.28 24 35C24 39.76 26.38 43.94 30 46.48V51C30 52.1 30.9 53 32 53H44C45.1 53 46 52.1 46 51V46.48C49.62 43.94 52 39.76 52 35C52 27.28 45.72 21 38 21ZM43.7 43.2L42 44.4V49H34V44.4L32.3 43.2C29.6 41.32 28 38.26 28 35C28 29.48 32.48 25 38 25C43.52 25 48 29.48 48 35C48 38.26 46.4 41.32 43.7 43.2Z'
-          fill='white'
-        />
-      </svg>
-    );
-  };
-
   return (
     <div className='mt-12 mx-8'>
       <GradientBorderDiv>
         <ParentCardDiv className='py-4 px-3'>
           <div className='flex mx-1'>
-            <div>
-              <PlanLogo />
+            <div className='h-[65px]'>
+              <img src={`/assets/bulb.png`} alt='bulb' />
             </div>
-            <div className='mx-4'>
-              <PlanNameHeader className='text-[24px] mb-[0.5rem] leading-[1.2]'>{name}</PlanNameHeader>
+            <div className='ml-4 w-[14rem]'>
+              <span className='text-[24px] mb-[0.5rem] leading-[1.2] font-bold'>{name}</span>
               <p className='text-[13px] mb-[1rem]'>{description}</p>
             </div>
           </div>
@@ -234,11 +219,7 @@ const PlanCard = ({
             <PlanPeriodicitySpan>/{renderPeriodicity()}</PlanPeriodicitySpan>
           </div>
           <VatLabel className='flex justify-center align-items-center pt-2 pb-8'>
-            <img
-              src={`/assets/toggle-icon.png`}
-              width={30}
-              alt='toggle-icon'
-            />
+            <img src={`/assets/toggle-icon.png`} width={30} alt='toggle-icon' />
             <span className='pl-2'>*VAT Exclusive</span>
           </VatLabel>
           <SubscribeBtn
@@ -264,8 +245,8 @@ const PlanCard = ({
                 }
                 let searchParams = new URLSearchParams(params);
                 let redirectParams: any = {
-                  redirect: (`/checkout/${slug}/?${searchParams}`).toString(),
-                }
+                  redirect: `/checkout/${slug}/?${searchParams}`.toString(),
+                };
                 let redirectSearchParams = new URLSearchParams(redirectParams);
                 router.push(`/login?${redirectSearchParams}`);
               }

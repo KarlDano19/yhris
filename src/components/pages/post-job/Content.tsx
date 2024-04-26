@@ -15,7 +15,7 @@ const menus = [
   },
 ];
 
-const Content = ({ hasActiveSubscription }: any) => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
 
   return (

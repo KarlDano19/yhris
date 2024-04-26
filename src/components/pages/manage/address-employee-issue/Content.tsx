@@ -23,7 +23,7 @@ import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
   const [departmentItems, setDepartmentItems] = useState<any>([]);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -373,8 +373,9 @@ const Content = () => {
             </div>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
+                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsIncidentReportModalOpen(true)}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>

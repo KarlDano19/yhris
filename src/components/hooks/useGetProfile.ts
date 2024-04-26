@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getCookie, deleteCookie } from 'cookies-next';
+import { getCookie } from 'cookies-next';
 
 import { generateKey, decryptToken } from '@/helpers/tokenEncryption';
 
@@ -17,10 +17,7 @@ async function getProfile() {
       },
     };
     if (token) {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/employer-profile/`,
-        config
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employer-profile/`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -31,12 +28,6 @@ async function getProfile() {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
       throw errStringify.response.data.message;
-    }
-    if (Object.hasOwn(errStringify, 'detail')) {
-      if (errStringify.detail.includes('Invalid token.')) {
-        deleteCookie('token');
-        location.href = '/login';
-      }
     }
     throw errStringify.message;
   }

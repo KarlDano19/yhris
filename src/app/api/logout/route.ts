@@ -6,8 +6,8 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions, sleep, SessionData } from '@/session/lib';
 
 export async function POST(request: NextRequest) {
+  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
   try {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
     const token = session.token;
     const config = {
       method: 'POST',
@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
     await sleep(250);
     return NextResponse.json(data, { status: 200 });
   } catch (err: any) {
-    console.log(err)
+    session.destroy();
+    await sleep(250);
     return NextResponse.json(err, { status: 500 });
   }
 }

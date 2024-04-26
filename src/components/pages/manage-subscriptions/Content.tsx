@@ -15,7 +15,7 @@ const CancelledLabel = styled.p`
   color: red;
 `;
 
-const Content = ({ hasActiveSubscription }: any) => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activePlans, setActivePlans] = useState<any>({});
   const [transactionHistory, setTransactionHistory] = useState<any>([]);
   const { data, isLoading, refetch } = useGetSubscriptions();
@@ -45,7 +45,9 @@ const Content = ({ hasActiveSubscription }: any) => {
     if (transactionHistory.length === 0) {
       return (
         <tr>
-          <td className='border w-1/8 px-4 py-2'>No transaction history</td>
+          <td colSpan={8} className='border px-4 py-2 text-center'>
+            No transaction history
+          </td>
         </tr>
       );
     }
@@ -60,7 +62,14 @@ const Content = ({ hasActiveSubscription }: any) => {
           <td className='border w-1/8 px-4 py-2'>{transaction.payment}</td>
           <td className='border w-1/8 px-4 py-2'>{formatPrice(transaction.amount)}</td>
           <td className='border w-1/8 px-4 py-2'>
-            <button className='border px-4 py-2'>View Receipt</button>
+            {transaction.status === 'Paid' && (
+              <Link href={`/manage-subscriptions/receipt/${transaction.reference_id}`}>
+                <div className='bg-[#FFC107] text-white rounded-md py-1.5 w-32 text-center'>View Receipt</div>
+              </Link>
+            )}
+            {transaction.status !== 'Paid' && (
+              <div className='bg-[#FFC107] text-white rounded-md py-1.5 w-32 opacity-50 text-center'>View Receipt</div>
+            )}
           </td>
         </tr>
       );
@@ -82,7 +91,7 @@ const Content = ({ hasActiveSubscription }: any) => {
                 </div>
                 <div className='flex mx-3 mt-5'>
                   <div>
-                    <img src={`/assets/yahshua-hris.png`} alt='yahshua-hris' />
+                    <img src={`/assets/bulb.png`} alt='bulb' />
                   </div>
                   <div className='mx-4 mb-3'>
                     <span className='text-[20px] font-bold leading-[26px] tracking-[0.02em]'>{activePlans.plan}</span>
@@ -95,10 +104,7 @@ const Content = ({ hasActiveSubscription }: any) => {
                       {activePlans.plan_features.map((feature: any, index: any) => {
                         return (
                           <div key={index} className='flex mb-[0.8rem]'>
-                            <img
-                              src={`/assets/check-icon.png`}
-                              alt='check-icon'
-                            />
+                            <img src={`/assets/check-icon.png`} alt='check-icon' />
                             <span className='ml-3 text-[15px]'>{feature}</span>
                           </div>
                         );

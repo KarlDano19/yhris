@@ -12,7 +12,7 @@ import useGetEmployeeDetails from './hooks/useGetEmployeeDetails';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [selectedId, setSelectedId] = useState('');
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean | null>(null);
