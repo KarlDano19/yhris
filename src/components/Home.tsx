@@ -97,7 +97,7 @@ const Home = () => {
   return (
     <>
       {/* <FloatingEmployeeProgress /> */}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 backdrop-blur relative'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
           <div className='grid grid-cols-5 gap-6 mt-6 relative'>

@@ -88,7 +88,7 @@ const Content = () => {
                     type="text"
                     name="what"
                     id="what"
-                    className="bg-gray-100 w-56 mx-3 md:px-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[22px]"
+                    className=" w-56 mx-3 md:px-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[22px]"
                     placeholder="Enter job title, company, or keywords"
                     required
                   />
@@ -105,7 +105,7 @@ const Content = () => {
                     type="text"
                     name="where"
                     id="where"
-                    className="bg-gray-100 w-56 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[22px] ml-3 md:ml-0"
+                    className=" w-56 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[22px] ml-3 md:ml-0"
                     placeholder="Town, City, Province, Country"
                     required
                   />

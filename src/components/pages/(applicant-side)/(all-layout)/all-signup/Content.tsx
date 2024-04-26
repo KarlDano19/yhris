@@ -15,8 +15,6 @@ import { T_Register } from '@/types/globals';
 import useRegisterAccount from './hooks/useRegisterAccount';
 import { useRouter } from 'next/navigation';
 
-
-
 const Content = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -78,9 +76,7 @@ const Content = () => {
       }
       right={
         <>
-          <div
-            className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}
-          >
+          <div className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}>
             <div className='w-full rounded-lg md:mt-0 sm:max-w-md xl:p-0'>
               <div className='p-6 space-y-4 md:space-y-5 sm:p-8'>
                 <h1 className='text-2xl font-bold leading-none tracking-tight text-indigo-dye lg:text-3xl'>
@@ -96,9 +92,10 @@ const Content = () => {
                       id='role'
                       {...register('accountType', { required: true })}
                       className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-                      defaultValue='Select...'
+                      defaultValue=''
+                      placeholder='Select...'
                     >
-                      <option disabled className='text-gray-400'>
+                      <option value='' disabled className='text-gray-400'>
                         Select...
                       </option>
                       <option value={'Employer'}>Employer</option>
@@ -242,13 +239,10 @@ const Content = () => {
                       )}
                     </button>
                     <h6 className='text-center'>
-                    <Link
-                      href='/login'
-                      className='font-semibold text-blue-600 hover:underline'
-                    >
-                      Back to Sign In
-                    </Link>
-                  </h6>
+                      <Link href='/login' className='font-semibold text-blue-600 hover:underline'>
+                        Back to Sign In
+                      </Link>
+                    </h6>
                   </div>
                 </form>
               </div>

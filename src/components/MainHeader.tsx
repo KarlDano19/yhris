@@ -36,7 +36,7 @@ const MainHeader = () => {
     'employee-separation',
     'admin',
   ].includes(firstRoute);
-  const { data, isLoading: isProfileLoading } = useGetProfile();
+  const { data, isLoading: isProfileLoading, error } = useGetProfile();
 
   const logout = () => {
     const callbackReq = {
@@ -49,6 +49,7 @@ const MainHeader = () => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 4000,
         });
+        location.href = '/login';
       },
     };
     mutate({}, callbackReq);

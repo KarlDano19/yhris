@@ -74,23 +74,11 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
     mutate(payloads, callbackReq);
   };
 
-  const PlanLogo = () => {
-    return (
-      <svg width='76' height='82' viewBox='0 0 76 82' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        <rect width='76' height='82' rx='10' fill='#4F80FF' />
-        <path
-          d='M32 59C32 60.1 32.9 61 34 61H42C43.1 61 44 60.1 44 59V57H32V59ZM38 21C30.28 21 24 27.28 24 35C24 39.76 26.38 43.94 30 46.48V51C30 52.1 30.9 53 32 53H44C45.1 53 46 52.1 46 51V46.48C49.62 43.94 52 39.76 52 35C52 27.28 45.72 21 38 21ZM43.7 43.2L42 44.4V49H34V44.4L32.3 43.2C29.6 41.32 28 38.26 28 35C28 29.48 32.48 25 38 25C43.52 25 48 29.48 48 35C48 38.26 46.4 41.32 43.7 43.2Z'
-          fill='white'
-        />
-      </svg>
-    );
-  };
-
   return (
     <div className='p-8 grow shadow-custom'>
       <div className='flex mb-8'>
         <div className='mr-5'>
-          <PlanLogo />
+          <img className='h-[65px]' src={`/assets/bulb.png`} alt='bulb' />
         </div>
         <div className='block'>
           <span className='font-bold text-[20px] tracking-[0.02em] text-[#373530]'>{title}</span>
@@ -120,7 +108,11 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
             }
           }}
         />
-        <button className='w-1/4 h-12 rounded-md bg-[#2757ed] text-lg leading-6 tracking-wider text-white enabled:hover:bg-[#4f80ff] disabled:opacity-50' disabled={!inputtedCode} onClick={() => availDiscount()}>
+        <button
+          className='w-1/4 h-12 rounded-md bg-[#2757ed] text-lg leading-6 tracking-wider text-white enabled:hover:bg-[#4f80ff] disabled:opacity-50'
+          disabled={!inputtedCode}
+          onClick={() => availDiscount()}
+        >
           Apply
         </button>
       </div>
@@ -151,7 +143,9 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
         </div>
         <div className='flex justify-between'>
           <h3 className='text-[15px] font-semibold text-[#2757ed]'>Total</h3>
-          <h3 className='text-[15px] font-semibold text-[#2757ed]'>PHP {formatPrice(getNetOfDiscount() * (1 + 12 / 100))}</h3>
+          <h3 className='text-[15px] font-semibold text-[#2757ed]'>
+            PHP {formatPrice(getNetOfDiscount() * (1 + 12 / 100))}
+          </h3>
         </div>
       </div>
       <div className='text-[0.9vw] tracking-[0.02em] text-[#f15353]'>
