@@ -38,10 +38,16 @@ const MainHeader = () => {
   ].includes(firstRoute);
   const { data, isLoading: isProfileLoading, error } = useGetProfile();
 
-  const logout = () => {
+  const logout = (isExpired: boolean) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        if (isExpired) {
+          toast.custom(() => <CustomToast message={'Session is expired.'} type='error' />, {
+            duration: 4000,
+          });
+        } else {
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        }
         deleteCookie('token');
         location.href = '/login';
       },
@@ -52,14 +58,19 @@ const MainHeader = () => {
         location.href = '/login';
       },
     };
-    mutate({}, callbackReq);
+    mutate(void 0, callbackReq);
   };
 
   const userNavigation = [
     { name: 'My Profile', href: void 0, onClick: void 0, isDisabled: true },
     { name: 'Subscriptions', href: '/manage-subscriptions', onClick: void 0, isDisabled: false },
     { name: 'Settings', href: void 0, onClick: void 0, isDisabled: true },
-    { name: 'Sign out', href: void 0, onClick: logout, isDisabled: false },
+    {
+      name: 'Sign out',
+      href: void 0,
+      onClick: () => logout(false),
+      isDisabled: false,
+    },
   ];
 
   useEffect(() => {
@@ -71,7 +82,7 @@ const MainHeader = () => {
   useEffect(() => {
     const token = getCookie('token');
     if (!token) {
-      logout();
+      logout(true);
     }
   }, []);
 

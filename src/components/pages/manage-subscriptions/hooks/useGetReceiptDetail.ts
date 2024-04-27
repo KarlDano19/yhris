@@ -27,7 +27,8 @@ async function getReceiptDetail(reference_id: string) {
 }
 
 function useGetReceiptDetail(reference_id: string) {
-  const query = useQuery(['receiptDetailsCache', {}], () => getReceiptDetail(reference_id), {
+  const query = useQuery(['receiptDetailsCache'], () => getReceiptDetail(reference_id), {
+    enabled: false,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

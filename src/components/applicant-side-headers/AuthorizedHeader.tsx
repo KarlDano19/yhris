@@ -42,7 +42,7 @@ const AuthorizedHeader = () => {
         });
       },
     };
-    mutate({}, callbackReq);
+    mutate(void 0, callbackReq);
   };
   return (
     <>

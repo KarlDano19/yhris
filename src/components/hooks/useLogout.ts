@@ -23,7 +23,7 @@ export async function logout() {
 }
 
 function useLogout() {
-  const query = useMutation((data: any) => logout());
+  const query = useMutation(() => logout());
   return query;
 }
 

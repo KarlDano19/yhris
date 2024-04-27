@@ -21,7 +21,7 @@ const Details = ({
   const { register, handleSubmit } = useForm<T_EmployerProfile>();
   const onSubmit = handleSubmit((data) => {
     setIsDetails(false);
-    setProgressBar(100);
+    setProgressBar(2);
     setForm({ ...form, ...data });
   });
 
