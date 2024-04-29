@@ -3,15 +3,16 @@ import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import { sessionOptions, sleep, SessionData } from '@/session/lib';
+import { sessionOptions, sleep } from '@/session/lib';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getIronSession<any>(cookies() as any, sessionOptions);
     const data = await request.json();
     for (const [key, value] of Object.entries(data)) {
-      console.log(key.toString(), value)
-      session[key.toString()] = value;
+      if (["hasProfile", "hasPendingTransaction", "hasActiveSubscription"].includes(key)) {
+        session[key.toString()] = value;
+      }
     }
     await session.save();
     await sleep(250);

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import PurchaseStatusCard from './PurchaseStatusCard';
 import ReceiptViewModal from './modal/ReceiptViewModal';
 import classNames from '@/helpers/classNames';
 import formatPrice from '@/helpers/currencyFormat';
@@ -21,7 +22,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isReceiptViewModalOpen, setIsReceiptViewModalOpen] = useState<boolean | null>(null);
   const [transactionHistory, setTransactionHistory] = useState<any>([]);
   const [selectedReferenceId, setSelectedReferenceId] = useState<any>('');
-  const [currentTab, setCurrentTab] = useState(1);
+  const [currentTab, setCurrentTab] = useState('');
   const [itemsFilter, setItemsFilter] = useState({
     from: '',
     to: '',
@@ -33,6 +34,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isReceiptDetailLoading,
     refetch: receiptDetailRefetch,
   } = useGetReceiptDetail(selectedReferenceId);
+
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = 'active-plans';
+    }
+    setCurrentTab(window.location.hash);
+  }, []);
 
   useEffect(() => {
     if (data && Object.keys(data).length !== 0 && !isLoading) {
@@ -55,10 +63,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsReceiptViewModalOpen(true);
     }
   }, [receiptDetailData]);
-
-  const changeTab = (tab: number) => {
-    setCurrentTab(tab);
-  };
 
   const lockInPeriod = () => {
     let periodicity = 'Monthly';
@@ -145,7 +149,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatPrice(transaction.amount)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             {transaction.status === 'Paid' && (
-              <button onClick={() => setSelectedReferenceId(transaction.reference_id)}>
+              <button
+                onClick={() => {
+                  if (selectedReferenceId && selectedReferenceId == transaction.reference_id) {
+                    setIsReceiptViewModalOpen(true);
+                  } else {
+                    setSelectedReferenceId(transaction.reference_id);
+                  }
+                }}
+              >
                 <div className='flex justify-center rounded-md py-1 text-center border-2 w-[3rem]'>
                   <img src={`/assets/receipt.png`} alt='receipt' />
                 </div>
@@ -171,29 +183,35 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <li
               className={classNames(
                 'cursor-pointer w-[12rem] text-center py-3 font-semibold list-none flex flex-col items-center',
-                currentTab === 1
+                currentTab === '#active-plans'
                   ? 'text-[#2d4faf] border-b-2 border-b-[#355FD0] hover:text-[#3a66e0] hoverfocus:border-b-[#3a66e0]'
                   : 'text-gray-500'
               )}
-              onClick={() => changeTab(1)}
+              onClick={() => {
+                window.location.hash = 'active-plans';
+                setCurrentTab('#active-plans');
+              }}
             >
               Active Plans
             </li>
             <li
               className={classNames(
                 'cursor-pointer w-[12rem] text-center py-3 font-semibold list-none flex flex-col items-center',
-                currentTab === 2
+                currentTab === '#transactions-history'
                   ? 'text-[#2d4faf] border-b-2 border-b-[#355FD0] hover:text-[#3a66e0] hoverfocus:border-b-[#3a66e0]'
                   : 'text-gray-500'
               )}
-              onClick={() => changeTab(2)}
+              onClick={() => {
+                window.location.hash = 'transactions-history';
+                setCurrentTab('#transactions-history');
+              }}
             >
               Transactions
             </li>
           </nav>
-          {currentTab === 1 && (
+          {currentTab === '#active-plans' && (
             <>
-              {Object.keys(activePlans).length !== 0 && (
+              {(!isLoading && Object.keys(activePlans).length !== 0) && (
                 <div>
                   <p className='font-semibold mb-8'>Current Plan</p>
                   <div className='flex mb-10'>
@@ -210,15 +228,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         </p>
                       </div>
                     </div>
-                    <div className='flex py-6 px-12 border-2 rounded-[2rem] items-center w-[30rem]'>
-                      <div>
-                        <img className='h-[70px]' src={`/assets/restart.png`} alt='restart' />
+                    {activePlans.is_used && (
+                      <div className='flex py-6 px-12 border-2 rounded-[2rem] items-center w-[30rem]'>
+                        <div>
+                          <img className='h-[70px]' src={`/assets/restart.png`} alt='restart' />
+                        </div>
+                        <div className='ml-4'>
+                          <p>Renew at</p>
+                          <span className='mb-[0.5rem] font-bold'>{activePlans.end_date}</span>
+                        </div>
                       </div>
-                      <div className='ml-4'>
-                        <p>Renew at</p>
-                        <span className='mb-[0.5rem] font-bold'>{activePlans.end_date}</span>
-                      </div>
-                    </div>
+                    )}
+                    {!activePlans.is_used && (
+                      <PurchaseStatusCard refetch={refetch} plan={activePlans} />
+                    )}
                   </div>
                   <p className='font-semibold mb-8'>Plan Privileges</p>
                   <div className='flex'>
@@ -228,7 +251,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           <div className='flex mx-auto mb-2 justify-center'>
                             <img className='h-[35px]' src={`/assets/check-icon.png`} alt='check-icon' />
                           </div>
-                          <div className='ml-4'>
+                          <div>
                             <span className='mb-[0.5rem] font-bold'>{feature}</span>
                           </div>
                         </div>
@@ -237,7 +260,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                 </div>
               )}
-              {Object.keys(activePlans).length === 0 && (
+              {(!isLoading && Object.keys(activePlans).length === 0) && (
                 <div className='w-full flex justify-center'>
                   <div className='w-1/4 border-2 border-dashed rounded-[2rem] mt-8 px-8 py-12 text-center'>
                     <p className='mb-4 font-semibold'>You’re not subscribed to any plans yet.</p>
@@ -249,7 +272,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               )}
             </>
           )}
-          {currentTab === 2 && (
+          {currentTab === '#transactions-history' && (
             <>
               <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
                 <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
@@ -337,7 +360,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <ReceiptViewModal
           receiptDetailData={receiptDetailData}
           isOpen={isReceiptViewModalOpen}
-          onClose={() => setIsReceiptViewModalOpen(false)}
+          setIsOpen={setIsReceiptViewModalOpen}
         />
       )}
     </>

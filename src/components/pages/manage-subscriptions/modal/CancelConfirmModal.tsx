@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import toast from 'react-hot-toast';
@@ -6,14 +6,17 @@ import CustomToast from '@/components/CustomToast';
 import updateSession from '@/helpers/updateSession';
 import useCancelTransaction from '../hooks/useCancelTransaction';
 
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
 type CancelConfirmModalProps = {
   referenceId: string;
   refetch: () => void;
   isOpen: boolean;
-  onClose: () => void;
+  setIsOpen: Dispatch<boolean | null>;
 };
 
-const CancelConfirmModal: React.FC<CancelConfirmModalProps> = ({ referenceId, refetch, isOpen, onClose }) => {
+const CancelConfirmModal: React.FC<CancelConfirmModalProps> = ({ referenceId, refetch, isOpen, setIsOpen }) => {
+  const cancelButtonRef = useRef(null);
   const { mutate, isLoading } = useCancelTransaction();
 
   const handleConfirm = () => {
@@ -21,7 +24,7 @@ const CancelConfirmModal: React.FC<CancelConfirmModalProps> = ({ referenceId, re
       onSuccess: async () => {
         await updateSession({ hasPendingTransaction: false });
         refetch();
-        onClose();
+        setIsOpen(null);
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -33,64 +36,63 @@ const CancelConfirmModal: React.FC<CancelConfirmModalProps> = ({ referenceId, re
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='fixed inset-0 z-50 overflow-y-auto' onClose={onClose}>
-        <div className='flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0'>
-          <Transition.Child
-            as={Fragment}
-            enter='ease-out duration-300'
-            enterFrom='opacity-0'
-            enterTo='opacity-100'
-            leave='ease-in duration-200'
-            leaveFrom='opacity-100'
-            leaveTo='opacity-0'
-          >
-            <Dialog.Overlay className='fixed inset-0 bg-black bg-opacity-30' />
-          </Transition.Child>
+    <Transition.Root show={isOpen ? true : false} as={Fragment}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Transition.Child
+          as={Fragment}
+          enter='ease-out duration-300'
+          enterFrom='opacity-0'
+          enterTo='opacity-100'
+          leave='ease-in duration-200'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0'
+        >
+          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+        </Transition.Child>
 
-          <span className='hidden sm:inline-block sm:align-middle sm:h-screen' aria-hidden='true'>
-            &#8203;
-          </span>
-
-          <Transition.Child
-            as={Fragment}
-            enter='ease-out duration-300'
-            enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-            enterTo='opacity-100 translate-y-0 sm:scale-100'
-            leave='ease-in duration-200'
-            leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-            leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-          >
-            <div className='inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6'>
-              <div>
-                {/* Modal content goes here */}
-                <Dialog.Title as='h3' className='text-lg font-medium leading-6 text-gray-900'>
-                  Cancel Confirmation
-                </Dialog.Title>
-                <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Are you sure you want to cancel?</p>
+        <div className='fixed inset-0 z-10 overflow-y-auto'>
+          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+            <Transition.Child
+              as={Fragment}
+              enter='ease-out duration-300'
+              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              enterTo='opacity-100 translate-y-0 sm:scale-100'
+              leave='ease-in duration-200'
+              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+            >
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+                <div className='flex bg-savoy-blue p-2 items-center text-left'>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Confirmation</h3>
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                 </div>
-              </div>
-
-              <div className='mt-4'>
-                <button
-                  type='button'
-                  className='inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500'
-                  onClick={onClose}
-                >
-                  Cancel
-                </button>
-                <button
-                  type='button'
-                  className='inline-flex justify-center px-4 py-2 ml-3 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500'
-                  onClick={handleConfirm}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Confirming...' : 'Confirm'}
-                </button>
-              </div>
-            </div>
-          </Transition.Child>
+                <div className='text-center'>
+                  <div>
+                    <div className='mt-2'>
+                      <p className='text-sm text-gray-500'>Are you sure you want to cancel?</p>
+                    </div>
+                  </div>
+                  <div className='mt-4'>
+                    <button
+                      type='button'
+                      className='inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500'
+                      onClick={() => setIsOpen(null)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type='button'
+                      className='inline-flex justify-center px-4 py-2 ml-3 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500'
+                      onClick={handleConfirm}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Confirming...' : 'Confirm'}
+                    </button>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
         </div>
       </Dialog>
     </Transition.Root>

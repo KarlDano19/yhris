@@ -16,8 +16,9 @@ export async function middleware(request: NextRequest) {
   const hasProfile = session.hasProfile;
   const hasPendingTransaction = session.hasPendingTransaction;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'verify'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'verify', 'dragonpay-callback'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
+  const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
     'manage-subscriptions',
     'checkout',
@@ -29,7 +30,7 @@ export async function middleware(request: NextRequest) {
     'manage',
     'employee-separation',
     'setup-employer-profile',
-    'admin'
+    'admin',
   ];
   const applicantRoutes: any = [
     'application-tracker',
@@ -43,6 +44,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   if (isLoggedIn) {
+    if (accountType === 'admin') {
+      if (unAuthRoutes.includes(firstRoute)) {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+    }
     if (accountType === 'employer') {
       if (unAuthRoutes.includes(firstRoute)) {
         return NextResponse.redirect(new URL('/dashboard', request.url));

@@ -1,4 +1,4 @@
-import { useRef, Fragment } from 'react';
+import { Dispatch, useRef, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -6,15 +6,15 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 type ReceiptViewModalProps = {
   receiptDetailData: any;
   isOpen: boolean;
-  onClose: () => void;
+  setIsOpen: Dispatch<boolean | null>;
 };
 
-const ReceiptViewModal: React.FC<ReceiptViewModalProps> = ({ receiptDetailData, isOpen, onClose }) => {
+const ReceiptViewModal: React.FC<ReceiptViewModalProps> = ({ receiptDetailData, isOpen, setIsOpen }) => {
   const cancelButtonRef = useRef(null);
 
   return (
     <Transition.Root show={isOpen ? true : false} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={onClose}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -41,7 +41,7 @@ const ReceiptViewModal: React.FC<ReceiptViewModalProps> = ({ receiptDetailData, 
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Receipt - {receiptDetailData?.reference_id}</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => onClose} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                 </div>
                 <div
                   style={{

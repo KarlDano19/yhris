@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import CancelConfirmModal from './modal/CancelConfirmModal';
 
 const PurchaseStatusCard = ({ refetch, plan }: any) => {
-  const [showCancelConfirmModal, setCancelConfirmModal] = React.useState(false);
+  const [showCancelConfirmModal, setCancelConfirmModal] = useState<boolean | null>(null);
 
   return (
-    <div className='text-center border-1 border-[#4f80ff] rounded-[10px] p-5 mt-8'>
+    <div className='py-6 px-12 border-2 rounded-[2rem] items-center w-[30rem]'>
       {plan.status === 'Processing' ? (
         <h4 className='text-[15px] font-medium tracking-[0.02em]'>
           You're almost there! waiting for the payment to success.
@@ -45,12 +45,14 @@ const PurchaseStatusCard = ({ refetch, plan }: any) => {
           </h4>
         </>
       ) : null}
-      <CancelConfirmModal
-        referenceId={plan.reference_id}
-        refetch={refetch}
-        isOpen={showCancelConfirmModal}
-        onClose={() => setCancelConfirmModal(false)}
-      />
+      {showCancelConfirmModal && (
+        <CancelConfirmModal
+          referenceId={plan.reference_id}
+          refetch={refetch}
+          isOpen={showCancelConfirmModal}
+          setIsOpen={setCancelConfirmModal}
+        />
+      )}
     </div>
   );
 };
