@@ -46,7 +46,10 @@ export async function middleware(request: NextRequest) {
   if (isLoggedIn) {
     if (accountType === 'admin') {
       if (unAuthRoutes.includes(firstRoute)) {
-        return NextResponse.redirect(new URL('/admin', request.url));
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
+      if (!adminRoutes.includes(firstRoute)) {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       }
     }
     if (accountType === 'employer') {

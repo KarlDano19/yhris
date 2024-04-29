@@ -10,17 +10,17 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
 import MainLogo from '@/svg/MainLogo';
-import useGetEmployerProfile from './hooks/useGetEmployerProfile';
+import useGetAdminProfile from '@/components/hooks/useGetAdminProfile';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
-import useLogout from './hooks/useLogout';
-import Timer from './Timer';
+import useLogout from '@/components/hooks/useLogout';
+import Timer from '@/components/Timer';
 
-const MainHeader = () => {
+const AdminHeader = () => {
   const { mutate, isLoading: isLogoutLoading } = useLogout();
   const [profile, setProfile] = useState<any>({});
 
-  const { data, isLoading: isProfileLoading, error } = useGetEmployerProfile();
+  const { data, isLoading: isProfileLoading, error } = useGetAdminProfile();
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -46,8 +46,6 @@ const MainHeader = () => {
   };
 
   const userNavigation = [
-    { name: 'My Profile', href: '', onClick: void 0, isDisabled: true },
-    { name: 'Subscriptions', href: '/manage-subscriptions#active-plans', onClick: void 0, isDisabled: false },
     { name: 'Settings', href: '', onClick: void 0, isDisabled: true },
     {
       name: 'Sign out',
@@ -242,4 +240,4 @@ const MainHeader = () => {
   );
 };
 
-export default MainHeader;
+export default AdminHeader;

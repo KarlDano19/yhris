@@ -97,7 +97,6 @@ export default function SignDocumentsModal({
           });
         },
       };
-      console.log(trigger)
       mutate(separationItemsCopy[itemIndex], callbackReq);
       reset();
     } else {

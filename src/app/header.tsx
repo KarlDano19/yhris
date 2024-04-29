@@ -1,18 +1,20 @@
 'use client';
 
-import { usePathname  } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
+import AdminHeader from '@/components/AdminHeader';
 import MainHeader from '@/components/MainHeader';
 import UnauthorizedHeader from '@/components/applicant-side-headers/UnauthorizedHeader';
 import AuthorizedHeader from '@/components/applicant-side-headers/AuthorizedHeader';
 
 function Header({ type }: { type: string }) {
-  const pathname  = usePathname();
+  const pathname = usePathname();
   const listPathname = pathname.split('/');
   const slicePaths = listPathname.slice(1);
   const firstRoute = slicePaths[0];
 
   const unAuthRoutes: any = ['', 'jobs', 'job-app-form', 'pricing'];
+  const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
     'manage-subscriptions',
     'checkout',
@@ -36,9 +38,10 @@ function Header({ type }: { type: string }) {
 
   return (
     <>
-      {(!type && unAuthRoutes.includes(firstRoute)) && <UnauthorizedHeader />}
-      {(type === 'employer' && employerRoutes.includes(firstRoute)) && <MainHeader />}
-      {(type === 'applicant' && applicantRoutes.includes(firstRoute)) && <AuthorizedHeader />}
+      {!type && unAuthRoutes.includes(firstRoute) && <UnauthorizedHeader />}
+      {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
+      {type === 'employer' && employerRoutes.includes(firstRoute) && <MainHeader />}
+      {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader />}
     </>
   );
 }

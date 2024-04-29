@@ -33,8 +33,8 @@ async function getProfile() {
   }
 }
 
-function useGetProfile() {
-  const query = useQuery(['profileCache'], () => getProfile(), {
+function useGetEmployerProfile() {
+  const query = useQuery(['employerProfileCache'], () => getProfile(), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
@@ -42,4 +42,4 @@ function useGetProfile() {
   return query;
 }
 
-export default useGetProfile;
+export default useGetEmployerProfile;

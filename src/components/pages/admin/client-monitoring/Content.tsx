@@ -4,9 +4,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
-import useClientItems from '@/components/pages/admin/client-monitoring/hooks/useGetClientItems'
+import useClientItems from '@/components/pages/admin/client-monitoring/hooks/useGetClientItems';
 import Link from 'next/link';
-import Image from "next/image";
+import Image from 'next/image';
 import MoreIcon from '@/svg/MoreIcon';
 import ClientGoalModal from './modal/ClientGoalModal';
 
@@ -21,8 +21,10 @@ const Content = () => {
   const { data: dataClient, isLoading: isGetClientLoading, refetch } = useClientItems();
 
   useEffect(() => {
-    refetch();
-  }, []);
+    if (dataClient && !isGetClientLoading) {
+      setClientItems(dataClient);
+    }
+  }, [dataClient]);
 
   const renderRows = () => {
     if (isGetClientLoading) {
@@ -55,11 +57,14 @@ const Content = () => {
     if (clientItems && clientItems.length > 0) {
       return clientItems.map((item: any) => (
         <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.client}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.contact}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.registration_date}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.payment_status} <span>{item.subsciption_type}</span></td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile_number}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <p>{item.payment_status}</p>
+            <p>{item.end_date}</p>
+          </td>
         </tr>
       ));
     } else {
@@ -111,7 +116,7 @@ const Content = () => {
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <div className='mt-6 flex flex gap-16 space-x-20'>
+          <div className='mt-6 flex gap-16 space-x-20'>
             <div className='flex-none lg:w-1/2 space-y-14'>
               <h2 className='text-xl font-bold text-indigo-dye'>Client Monitoring</h2>
               <div className='relative flex items-center'>
@@ -124,25 +129,25 @@ const Content = () => {
                   placeholder='All Company'
                 />
                 <div className='flex-1 flex justify-end ml-4'>
-                    <button
-                        className='bg-green-500 w-max rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
-                        onClick={() => setIsClientGoalModalOpen(true)}
-                    >
-                        Client Analytics
-                    </button>
+                  <button
+                    className='bg-green-500 w-max rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
+                    onClick={() => setIsClientGoalModalOpen(true)}
+                  >
+                    Client Analytics
+                  </button>
                 </div>
               </div>
             </div>
             <div className='flex-none lg:w-1/2'>
-              <div className="flex justify-between gap-3 px-5 py-5 font-semibold whitespace-nowrap rounded-xl border border-solid border-slate-400 max-w-[318px]">
-                <div className="flex flex-col my-auto text-base tracking-wide text-slate-700">
+              <div className='flex justify-between gap-3 px-5 py-5 font-semibold whitespace-nowrap rounded-xl border border-solid border-slate-400 max-w-[318px]'>
+                <div className='flex flex-col my-auto text-base tracking-wide text-slate-700'>
                   <div>TOTAL</div>
-                  <div className="mt-3.5">client</div>
+                  <div className='mt-3.5'>client</div>
                 </div>
-                <div className="justify-center items-center px-16 py-6 text-3xl tracking-wide text-center text-blue-700 bg-indigo-50 rounded-md border border-violet-200 border-solid">
+                <div className='justify-center items-center px-16 py-6 text-3xl tracking-wide text-center text-blue-700 bg-indigo-50 rounded-md border border-violet-200 border-solid'>
                   {clientItems.length}
                 </div>
-                <MoreIcon/>
+                <MoreIcon />
               </div>
             </div>
           </div>
@@ -184,10 +189,7 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <ClientGoalModal
-        isOpen={isClientGoalModalOpen}
-        setIsOpen={setIsClientGoalModalOpen}
-      />
+      <ClientGoalModal isOpen={isClientGoalModalOpen} setIsOpen={setIsClientGoalModalOpen} />
     </>
   );
 };

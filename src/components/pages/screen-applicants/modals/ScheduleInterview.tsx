@@ -83,7 +83,7 @@ const platforms = [
 
 export default function ScheduleInterview({ title, handleFormSubmit, isSendInterviewScheduleLoading }: PropTypes) {
   const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['profileCache']);
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const broadcastChannel = new BroadcastChannel('integration-channel');
   const [integration, setIntegration] = useState<any>([]);
   const { isLoaded } = useJsApiLoader({
@@ -140,7 +140,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
     broadcastChannel.onmessage = (event) => {
       if (event.data.isGranted) {
         setIntegration([...integration, event.data.provider]);
-        queryClient.refetchQueries({ queryKey: ["profileCache"] });
+        queryClient.refetchQueries({ queryKey: ["employerProfileCache"] });
       }
     };
     return () => {

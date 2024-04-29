@@ -18,7 +18,6 @@ export async function POST(request: NextRequest) {
     await sleep(250);
     return NextResponse.json({ message: 'Session updated' }, { status: 200 });
   } catch (err: any) {
-    console.log(err)
     return NextResponse.json(err, { status: 500 });
   }
 }

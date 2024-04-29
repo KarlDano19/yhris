@@ -1,9 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getClientItems() {
+import { generateKey, decryptToken } from '@/helpers/tokenEncryption';
+
+async function getProfile() {
   try {
+    // const key = await generateKey();
     const token = getCookie('token');
+    // const secret = getCookie('secret');
+    // const decryptedToken = await decryptToken(token, secret, key);
     const config = {
       method: 'GET',
       headers: {
@@ -12,7 +17,7 @@ async function getClientItems() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employers/`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin-profile/`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -28,8 +33,8 @@ async function getClientItems() {
   }
 }
 
-function useClientItems() {
-  const query = useQuery(['clientsDataCache'], () => getClientItems(), {
+function useGetAdminProfile() {
+  const query = useQuery(['adminProfileCache'], () => getProfile(), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
@@ -37,4 +42,4 @@ function useClientItems() {
   return query;
 }
 
-export default useClientItems;
+export default useGetAdminProfile;
