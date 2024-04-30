@@ -22,7 +22,7 @@ async function getApplicantOrient(id: number, filters: any) {
       }
       return res.json();
     }
-    return {};
+    return [];
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {

@@ -14,7 +14,7 @@ async function sendLink(data: any) {
       },
     };
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/forgot-password/`,
+      `https://api.yahshuahris.com/api/forgot-password/`,
       config
     );
     if (!res.ok) {

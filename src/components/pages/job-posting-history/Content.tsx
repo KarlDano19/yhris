@@ -61,7 +61,7 @@ const Content = () => {
   };
 
   useEffect(() => {
-    if (dataJobPost) {
+    if (dataJobPost && !isGetJobPostLoading) {
       let menuOptions: any = {};
       dataJobPost.map((jobPost: any) => {
         jobPost['jobTitle'] = jobPost['job_title'];
