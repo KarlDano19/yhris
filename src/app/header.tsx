@@ -38,7 +38,7 @@ function Header({ type }: { type: string }) {
 
   return (
     <>
-      {!type && unAuthRoutes.includes(firstRoute) && <UnauthorizedHeader />}
+      {unAuthRoutes.includes(firstRoute) && <UnauthorizedHeader />}
       {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
       {type === 'employer' && employerRoutes.includes(firstRoute) && <MainHeader />}
       {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader />}
