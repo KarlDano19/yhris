@@ -32,6 +32,7 @@ const CustomDatePicker = ({
     return regexGoodDate.test(date);
   };
 
+  // eslint-disable-next-line react/display-name
   const CustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
     <>
       <input
