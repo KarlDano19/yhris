@@ -3,12 +3,18 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import FloatingEmployeeProgress from '../FloatingEmployeeProgress';
 import PersonSearchLogo from '@/svg/PersonSearchLogo';
+import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
 
 const menus = [
   {
     icon: <PersonSearchLogo/>,
     text: "Client Monitoring",
     link: "/admin/client-monitoring"
+  },
+  {
+    icon: <AccountBalanceLogo/>,
+    text: "Management",
+    link: "/admin/management"
   },
 ];
 
