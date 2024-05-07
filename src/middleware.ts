@@ -16,13 +16,12 @@ export async function middleware(request: NextRequest) {
   const hasProfile = session.hasProfile;
   const hasPendingTransaction = session.hasPendingTransaction;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'verify', 'dragonpay-callback'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
   const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
     'manage-subscriptions',
     'checkout',
-    'sso',
     'dashboard',
     'post-job',
     'screen-applicants',

@@ -2,10 +2,10 @@
 
 import { usePathname } from 'next/navigation';
 
-import AdminHeader from '@/components/AdminHeader';
-import MainHeader from '@/components/MainHeader';
-import UnauthorizedHeader from '@/components/applicant-side-headers/UnauthorizedHeader';
-import AuthorizedHeader from '@/components/applicant-side-headers/AuthorizedHeader';
+import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
+import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
+import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
+import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader';
 
 function Header({ type }: { type: string }) {
   const pathname = usePathname();
