@@ -1,14 +1,13 @@
 'use client';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import React, { useEffect, useState, useRef } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import Link from 'next/link';
-import useGetBenefitItems from '@/components/pages/manage/design-benefits/hooks/useGetBenefitItems';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
+import useGetBenefitItems from '@/components/pages/(auth)/employer/manage/design-benefits/hooks/useGetBenefitItems';
 
 const Content = () => {
   const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
