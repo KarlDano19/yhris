@@ -13,7 +13,7 @@ export const metadata = {
   description: 'HRIS',
 };
 
-const golos_text = Golos_Text({ subsets: ['latin'] });
+const golos_text = Golos_Text({ subsets: ['latin'], display: 'swap', adjustFontFallback: false });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
