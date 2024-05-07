@@ -1,12 +1,14 @@
 import { Dispatch, Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import { EditIconLarge } from '@/svg/EditIcon';
+import DescriptionLogo from '@/svg/DescriptionLogo';
+import CreateEvaluationTemplateModal from './CreateEvaluationTemplateModal';
 
 export default function SelectionModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
   const cancelButtonRef = useRef(null);
+  const [isCreateEvaluationTemplateOpen, setIsCreateEvaluationTemplateOpen] = useState(false)
 
   return (
     <>
@@ -35,10 +37,40 @@ export default function SelectionModal({ isOpen, setIsOpen }: { isOpen: boolean;
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                  <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'></h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
+                  <div className='flex bg-white p-2 items-center pr-4'>
+                    <h3 className='flex-1 text-white ml-2 font-semibold py-9'></h3>
+                    <XCircleIcon className='w-8 h-8 text-[#ACB9CB] cursor-pointer' onClick={() => setIsOpen(false)} />
+                  </div>
+                  <div>
+                    <h3 className='flex-1 ml-2 font-bold text-2xl text-center pb-6'>What do you want to do?</h3>
+                    <div className='flex flex-row justify-center space-x-10 px-10 pb-6'>
+                        <div 
+                          className='py-8 px-10 border-[#ACB9CB] border-2 rounded-2xl shadow-sm hover:border-[#355FD0] hover:cursor-pointer'
+                          onClick={()=>setIsCreateEvaluationTemplateOpen(true)}
+                        >
+                          <div className='flex justify-center'>
+                            <EditIconLarge/>
+                          </div>
+                          <h1 className='py-2 text-center font-bold mt-2'>
+                            Start from scratch
+                          </h1>
+                          <h1 className='py-2 text-center'>
+                            Begin with a blank page, or copy and paste a template you’ve written.
+                          </h1>
+                        </div>
+                        <div className='py-8 px-10 border-[#ACB9CB] border-2 rounded-2xl shadow-sm hover:border-[#355FD0] hover:cursor-pointer'>
+                          <div className='flex justify-center'>
+                            <DescriptionLogo />
+                          </div>
+                          <h1 className='py-2 text-center font-bold mt-2'>
+                            Start with a template
+                          </h1>
+                          <h1 className='py-2 text-center'>
+                            Begin with a blank page, or copy and paste a template you’ve written.
+                          </h1>
+                        </div>
+                    </div>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
@@ -46,6 +78,10 @@ export default function SelectionModal({ isOpen, setIsOpen }: { isOpen: boolean;
           </div>
         </Dialog>
       </Transition.Root>
+      <CreateEvaluationTemplateModal
+        isOpen={isCreateEvaluationTemplateOpen}
+        setIsOpen={setIsCreateEvaluationTemplateOpen}
+      />
     </>
   );
 }

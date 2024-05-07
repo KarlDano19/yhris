@@ -7,7 +7,7 @@ import CreateVoucherModal from './modal/CreateVoucherModal';
 import { vouchers } from '@/helpers/voucherCode';
 import RedemptionCountModal from './modal/RedemptionCountModal';
 import EditVoucherModal from './modal/EditVoucherModal';
-import EditIcon from '@/svg/EditIcon';
+import { EditIcon } from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import DeleteVoucherModal from './modal/DeleteVoucherModal';
 
