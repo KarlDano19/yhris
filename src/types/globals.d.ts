@@ -244,3 +244,20 @@ export type T_Payment = {
   voucher_code: string,
 }
 
+export type Voucher = {
+  id: number;
+  code: string;
+  discount: string;
+  applied_plan: string,
+  no_of_employees: string;
+  redeemed: boolean;
+  redemption_count: {
+    id: number;
+    name: string;
+    plan: string;
+    date: string;
+  }[];
+  redemption_from: string;
+  redemption_to: string;
+  prepared_by: string;
+}

@@ -9,8 +9,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getIronSession<any>(cookies() as any, sessionOptions);
     const data = await request.json();
+    const expectedKeys = ['hasProfile', 'hasPendingTransaction', 'hasActiveSubscription'];
     for (const [key, value] of Object.entries(data)) {
-      if (["hasProfile", "hasPendingTransaction", "hasActiveSubscription"].includes(key)) {
+      if (expectedKeys.includes(key)) {
         session[key.toString()] = value;
       }
     }
