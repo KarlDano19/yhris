@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function addVoucher(data: any) {
+async function addEvaluation(data: any) {
   try {
     const token = getCookie('token');
     const config = {
@@ -12,7 +12,7 @@ async function addVoucher(data: any) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/vouchers/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluations/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -26,9 +26,9 @@ async function addVoucher(data: any) {
   }
 }
 
-function useAddVoucher() {
-  const query = useMutation((data: any) => addVoucher(data));
+function useAddEvaluation() {
+  const query = useMutation((data: any) => addEvaluation(data));
   return query;
 }
 
-export default useAddVoucher;
+export default useAddEvaluation;
