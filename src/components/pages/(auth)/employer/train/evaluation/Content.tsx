@@ -15,7 +15,6 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
 import IOSToggleButton from '@/components/buttons/IosToggleButton';
-import DeleteIcon from '@/svg/DeleteIcon';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 
 const Content = () => {
