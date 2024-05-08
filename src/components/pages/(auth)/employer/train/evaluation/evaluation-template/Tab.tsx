@@ -5,6 +5,11 @@ import IOSToggleButton from '@/components/buttons/IosToggleButton';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
+import DuplicateIcon from "@/svg/DuplicateIcon";
+import AddCircleIcon from "@/svg/AddCircleIcon";
+import FontSizeIcon from "@/svg/FontSizeIcon";
+import CategoryIcon from "@/svg/CategoryIcon";
+import MoveIcon from "@/svg/MoveIcon";
 
 const Tab = () => {
   const [totalScore, setTotalScoreGoal] = useState(0);
@@ -31,7 +36,10 @@ const Tab = () => {
           <div className='px-2 md:px-8 lg:px-4'>
             <div className='mt-8 flow-root'>
               <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-                <div className='min-w-full py-2 sm:px-6 lg:px-8 space-y-6'>
+                <div className='min-w-full flex py-2 sm:px-6 lg:px-8 space-y-6 space-x-4'>
+                    <div className="pt-6">
+                    <MoveIcon />
+                    </div>
                   <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
                     <input
                       id='position'
@@ -60,27 +68,19 @@ const Tab = () => {
                         <label className="text-slate-700 text-sm">How many points is this criteria?</label>
                       </div>
                       <div className='flex space-x-4'>
+                        <DuplicateIcon />
                         <DeleteIconNoBorder/>
                       </div>
                     </div>
                   </div>
+                    <div className="flex flex-col h-fit border rounded-xl border-[#ACB9CB] py-4 px-2 space-y-2">
+                        <AddCircleIcon />
+                        <FontSizeIcon />
+                        <CategoryIcon />
+                    </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className='flex space-x-9 pt-4 justify-between'>
-            <button
-              type='button'
-              className='mt-3 inline-flex w-full justify-center rounded-md bg-[#355FD0] px-10 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-[#355FD0]  hover:bg-[#294264] sm:mt-0 sm:w-auto'
-            >
-              Back
-            </button>
-            <button
-              type='button'
-              className='mt-3 inline-flex w-full justify-center rounded-md bg-[#355FD0] px-10 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-[#355FD0]  hover:bg-[#294264] sm:mt-0 sm:w-auto'
-            >
-              Next
-            </button>
           </div>
         </div>
     </>

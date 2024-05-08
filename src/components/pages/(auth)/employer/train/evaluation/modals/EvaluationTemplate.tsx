@@ -16,7 +16,7 @@ export default function CreateEvaluationTabModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [currentTab, setCurrentTab] = useState(1);
+  const [currentTab, setCurrentTab] = useState(2);
   const {mutate, isLoading} = useSaveApplicantProfile();
 
   const renderButtons=()=>(
@@ -101,7 +101,7 @@ export default function CreateEvaluationTabModal({
                     ) : (
                         <>
                             <EvalutaionTemplateTab />
-                            {renderButtons}
+                            {renderButtons()}
                         </>
                     )}
                 </div>
