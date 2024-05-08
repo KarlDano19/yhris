@@ -16,9 +16,11 @@ import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
 import IOSToggleButton from '@/components/buttons/IosToggleButton';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
+import CreateEvaluationTabModal from './modals/EvaluationTemplate';
 
 const Content = () => {
   const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
+  const [isModalOpen, setIsModalOpen] = useState(true)
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false)
   const [totalScore, setTotalScoreGoal] = useState(0);
   const [totalPassingScore, setTotalPassingScore] = useState(0)
@@ -72,7 +74,7 @@ const Content = () => {
 
   useEffect(() => {
     if (dataBenefits) {
-      dataBenefits.benefits.map((benefit: any) => {
+      dataBenefits.benefits?.map((benefit: any) => {
         benefit.date = Intl.DateTimeFormat('en-US').format(
           new Date(benefit.date)
         );
@@ -111,7 +113,7 @@ const Content = () => {
       );
     }
     if (designBenefitsItems && designBenefitsItems.length > 0) {
-      return designBenefitsItems.map((item: any) => (
+      return designBenefitsItems?.map((item: any) => (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             {item.date}
@@ -312,6 +314,10 @@ const Content = () => {
         <SelectionModal
           isOpen={isSelectionModalOpen}
           setIsOpen={setIsSelectionModalOpen}
+        />
+        <CreateEvaluationTabModal
+          isOpen={isModalOpen}
+          setIsOpen={setIsModalOpen}
         />
       </>
     )}

@@ -12,19 +12,7 @@ export default function CreateEvaluationModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
-  const queryClient = useQueryClient();
   const cancelButtonRef = useRef(null);
-  const [totalClientGoal, setTotalClientGoal] = React.useState(0);
-
-  const handleMinusClick = () => {
-    if (totalClientGoal > 0) {
-      setTotalClientGoal(totalClientGoal - 1);
-    }
-  };
-
-  const handlePlusClick = () => {
-    setTotalClientGoal(totalClientGoal + 1);
-  };
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -162,7 +150,7 @@ export default function CreateEvaluationModal({
                     <div className='ml-4'>
                         <button
                         type='button'
-                        className='mt-3 inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                        className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                         onClick={() => setIsOpen(false)}
                         ref={cancelButtonRef}
                         >

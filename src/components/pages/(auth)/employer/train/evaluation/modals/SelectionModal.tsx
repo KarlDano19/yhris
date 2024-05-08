@@ -1,10 +1,11 @@
 import { Dispatch, Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
+import CreateEvaluationModal from './CreateEvaluationModal';
+
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import DescriptionLogo from '@/svg/DescriptionLogo';
 import EditIconLarge from '@/svg/EditLogoLarge';
-import CreateEvaluationModal from './CreateEvaluationModal';
 
 export default function SelectionModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
   const cancelButtonRef = useRef(null);
