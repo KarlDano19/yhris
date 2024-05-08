@@ -4,7 +4,6 @@ import Link from "next/link";
 import Training from "@/svg/TrainingsLogo";
 import Evaluation from "@/svg/EvaluationLgo";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
-import FloatingEmployeeProgress from "../FloatingEmployeeProgress";
 
 const menus = [
   {
@@ -24,7 +23,6 @@ const Content = () => {
 
   return (
     <>
-      <FloatingEmployeeProgress />
       <div className="min-h-screen">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex p-4">

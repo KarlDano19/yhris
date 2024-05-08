@@ -2,9 +2,9 @@ import { Dispatch, Fragment, useCallback, useEffect, useRef, useState } from 're
 
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { EditIconLarge } from '@/svg/EditIcon';
 import DescriptionLogo from '@/svg/DescriptionLogo';
-import CreateEvaluationTemplateModal from './CreateEvaluationTemplateModal';
+import EditIconLarge from '@/svg/EditLogoLarge';
+import CreateEvaluationModal from './CreateEvaluationModal';
 
 export default function SelectionModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
   const cancelButtonRef = useRef(null);
@@ -78,7 +78,7 @@ export default function SelectionModal({ isOpen, setIsOpen }: { isOpen: boolean;
           </div>
         </Dialog>
       </Transition.Root>
-      <CreateEvaluationTemplateModal
+      <CreateEvaluationModal
         isOpen={isCreateEvaluationTemplateOpen}
         setIsOpen={setIsCreateEvaluationTemplateOpen}
       />

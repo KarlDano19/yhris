@@ -5,7 +5,7 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 
-export default function CreateEvaluationTemplateModal({
+export default function CreateEvaluationModal({
   isOpen,
   setIsOpen,
 }: {
