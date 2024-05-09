@@ -4,9 +4,13 @@ import { useState } from "react";
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
+import { useFormContext } from "react-hook-form";
 const Tab = () => {
   const [totalScore, setTotalScoreGoal] = useState(0);
   const [totalPassingScore, setTotalPassingScore] = useState(0)
+  const [remarks, setRemarks] = useState(false)
+  const [commentCriteria, setCommentCriteria] = useState(false)
+  const{register} = useFormContext()
 
   const handleMinusTotalScoreClick = () => {
     if (totalScore > 0) {
@@ -40,8 +44,9 @@ const Tab = () => {
                             Description<span className='text-red-600'>*</span>
                         </label>
                             <input
-                            id='position'
+                            id='description'
                             type='text'
+                            {...register('description', {required: true})}
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                         />
                     </div>
@@ -51,7 +56,9 @@ const Tab = () => {
                         </label>
                         <div className='relative mt-2'>
                             <select
-                            id='reason'
+                            id='scoring_rating'
+                            defaultValue=''
+                            {...register('scoring_rating', {required:true})}
                             className='appearance-none block w-full py-2 pl-3 text-gray-900 border-b-2 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             >
                             <option value=''>Select...</option>
@@ -113,7 +120,7 @@ const Tab = () => {
                                 </button>
                                 <button
                                 type='button'
-                                className='mt-3 inline-flex w-full justify-center rounded-md bg-[#2C3F58] px-10 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-[#2C3F58] hover:bg-[#294264] sm:mt-0 sm:w-auto'
+                                className='mt-3 inline-flex w-full justify-center rounded-md bg-[#FFFFFF] px-10 py-2 text-sm text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB] hover:bg-gray-50 sm:mt-0 sm:w-auto'
                                 >
                                 Yes
                                 </button>
@@ -132,7 +139,7 @@ const Tab = () => {
                             </button>
                             <button
                                 type='button'
-                                className='mt-3 inline-flex w-full justify-center rounded-md bg-[#2C3F58] px-10 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-[#2C3F58]  hover:bg-[#294264] sm:mt-0 sm:w-auto'
+                                className='mt-3 inline-flex w-full justify-center rounded-md bg-[#FFFFFF] px-10 py-2 text-sm text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                             >
                                 Yes
                             </button>
