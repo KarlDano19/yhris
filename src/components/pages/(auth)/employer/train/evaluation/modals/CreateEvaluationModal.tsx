@@ -9,9 +9,12 @@ import useAddEvaluation from '../hooks/useAddEvaluation';
 import DetailsTab from '../evaluation-details/Tab'
 import FormTab from '../evaluation-form/Tab'
 import TemplateTab from '../evaluation-template/Tab'
+import ViewTab from '../evaluation-view/Tab'
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import EditIcon from '@/svg/EditIcon';
+import EditIconNoBorder from '@/svg/EditIconNoBorder';
 
 export default function CreateEvaluationModal({
   isOpen,
@@ -29,8 +32,13 @@ export default function CreateEvaluationModal({
   const [evalTemplate, setEvalTemplate] = useState(false)
   const [openEvalTemplateModal, setOpenEvalTemplateModal] = useState(false)
 
-  const [currentTab, setCurrentTab] = useState(1);
+  const [currentTab, setCurrentTab] = useState(0);
   const { mutate, isLoading } = useAddEvaluation();
+  const [name, setName] = useState('');
+
+  const handleNameChange = (newName: any) => {
+        setName(newName);
+    };
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -60,6 +68,15 @@ export default function CreateEvaluationModal({
     console.log(data)
   }
 
+  const submitTemplateForm = (data:any) => {
+    if (currentTab === 3 && evalTemplate === false) {
+      setOpenEvalTemplateModal(true)
+    }else{
+      setCurrentTab(currentTab + 1)
+    }
+    console.log(data)
+  }
+
   const finalSubmit = (data:any) => {
     console.log(data)
     const callBackReq = {
@@ -81,13 +98,13 @@ export default function CreateEvaluationModal({
     (
       <div
         className={`${
-          currentTab <= 1 ? "justify-end" : "justify-between"
+          currentTab <= 0 ? "justify-end" : "justify-between"
         } md:flex mt-10 md:mt-12 mb-7`}
       >
         <button
           type="button"
           className={`${
-            currentTab <= 1 ? "hidden" : ""
+            currentTab <= 0 ? "hidden" : ""
           } w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
           onClick={prevTab}
         >
@@ -108,14 +125,14 @@ export default function CreateEvaluationModal({
                 <span className="sr-only">Loading...</span>
               </div>
             ) : (
-              "Submit"
+              "Save"
             )
           )}
         </button>
       </div>
     )
   const prevTab = () => {
-    if (currentTab > 1) {
+    if (currentTab > 0) {
       setCurrentTab(currentTab - 1);
     }
   };
@@ -152,26 +169,53 @@ export default function CreateEvaluationModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Evaluation Template</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
+                {currentTab > 0 && 
+                <>
+                  <div className='flex bg-white py-2 justify-between'>
+                    <div className='flex space-x-4'>
+                      <h3 className='ml-7 py-2 font-semibold text-2xl'>{name}</h3>
+                      <div className='flex items-center'>
+                        <EditIconNoBorder />
+                      </div>
+                    </div>
+                    <div className='flex items-center pr-4'>
+                      <button
+                        className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
+                      >
+                        Preview
+                      </button>
+                    </div>
+                  </div>
+                  <hr/>
+                </>
+                }
                 {/* <form onSubmit={onSubmit}> */}
                   <div className='px-4 pt-4 pb-6'>
-                    {currentTab === 2 ? (
+                    {currentTab === 1 ? (
                       <FormProvider {...method}>
                         <form onSubmit={method.handleSubmit(submitEvalForm)}>
                           <FormTab />
                           {renderButtons()}
                         </form>
                       </FormProvider>
+                    ) : currentTab === 2 ? (
+                      <FormProvider {...method}>
+                        <form onSubmit={method.handleSubmit(submitTemplateForm)}>
+                          <TemplateTab />
+                          {renderButtons()}
+                        </form>
+                      </FormProvider>
                     ) : currentTab === 3 ? (
                       <FormProvider {...method}>
                         <form onSubmit={method.handleSubmit(finalSubmit)}>
-                          <TemplateTab />
+                          <ViewTab />
                           {renderButtons()}
                         </form>
                       </FormProvider>
                     ) : (
                       <FormProvider {...method}>
                         <form onSubmit={method.handleSubmit(submitEvalDetails)}>
-                          <DetailsTab />
+                          <DetailsTab onNameChange={handleNameChange} />
                           {renderButtons()}
                         </form>
                       </FormProvider>

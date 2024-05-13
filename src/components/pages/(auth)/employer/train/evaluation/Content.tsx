@@ -107,7 +107,7 @@ const Content = () => {
         </tr>
       );
     }
-    if (designBenefitsItems && designBenefitsItems.length > 0) {
+    if (designBenefitsItems && designBenefitsItems?.length > 0) {
       return designBenefitsItems?.map((item: any) => (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
