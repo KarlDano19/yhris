@@ -6,81 +6,87 @@ import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 
+import useGetEvaluationItems from './hooks/useGetEvaluationItems';
+import useGetEvaluationDetails from './hooks/useGetEvaluationDetails';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import SelectionModal from './modals/SelectionModal';
-import CreateEvaluationTabModal from './modals/EvaluationTemplate';
-import useGetBenefitItems from '../../manage/design-benefits/hooks/useGetBenefitItems';
+import DeleteEvaluationModal from './modals/DeleteEvaluationModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import SelectChevronDown from '@/svg/SelectChevronDown';
-import MinusIcon from '@/svg/MinusIcon';
-import PlusIcon from '@/svg/PlusIcon';
-import IOSToggleButton from '@/components/buttons/IosToggleButton';
-import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 const Content = () => {
-  const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [evaluationItems, setEvaluationItems] = useState<any>([]);
+  const [actionType, setActionType] = useState<string>('');
+  const [selectedEvaluationId, setSelectedEvaluationId] = useState<number | null>(null);
+  const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
+  const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState(false);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
-  const [totalScore, setTotalScoreGoal] = useState(0);
-  const [totalPassingScore, setTotalPassingScore] = useState(0);
-  const [currentTab, setCurrentTab] = useState('');
-  const [isChecked, setIsChecked] = useState(false);
   const [itemsFilter, setItemsFilter] = useState({
     from: '',
     to: '',
     search: '',
   });
-  const { data: dataBenefits, isLoading: isGetBenefitsLoading, refetch } = useGetBenefitItems(itemsFilter);
-
-  const handleMinusTotalScoreClick = () => {
-    if (totalScore > 0) {
-      setTotalScoreGoal(totalScore - 1);
-    }
-  };
-
-  const handlePlusTotalScoreClick = () => {
-    setTotalScoreGoal(totalScore + 1);
-  };
-
-  const handleMinusPassingScoreClick = () => {
-    if (totalPassingScore > 0) {
-      setTotalPassingScore(totalPassingScore - 1);
-    }
-  };
-
-  const handlePlusPassingScoreClick = () => {
-    setTotalPassingScore(totalPassingScore + 1);
-  };
-
-  const handleToggleChange = () => {
-    setIsChecked(!isChecked);
-  };
+  const {
+    data: dataEvaluation,
+    isLoading: isGetEvaluationLoading,
+    refetch: refetchEvaluation,
+  } = useGetEvaluationItems(itemsFilter);
+  const {
+    data: dataEvaluationDetail,
+    isLoading: isGetEvaluationDetailLoading,
+    refetch: refetchEvaluationDetail,
+  } = useGetEvaluationDetails(selectedEvaluationId);
 
   useEffect(() => {
-    refetch();
+    refetchEvaluation();
   }, []);
 
   useEffect(() => {
-    if (!window.location.hash) {
-      window.location.hash = 'evaluation-table';
+    if (dataEvaluation) {
+      setEvaluationItems(dataEvaluation);
     }
-    setCurrentTab(window.location.hash);
-  }, []);
+  }, [dataEvaluation]);
 
   useEffect(() => {
-    if (dataBenefits) {
-      dataBenefits.benefits?.map((benefit: any) => {
-        benefit.date = Intl.DateTimeFormat('en-US').format(new Date(benefit.date));
-        return benefit;
-      });
-      setDesignBenefitsItems(dataBenefits.benefits);
+    if (selectedEvaluationId) {
+      refetchEvaluationDetail();
     }
-  }, [dataBenefits]);
+  }, [selectedEvaluationId]);
+
+  useEffect(() => {
+    if (dataEvaluationDetail && Object.keys(dataEvaluationDetail).length && !isGetEvaluationDetailLoading) {
+      if (actionType === 'edit') {
+        setIsEditEvaluationModalOpen(true);
+      }
+      if (actionType === 'delete') {
+        setIsDeleteEvaluationModalOpen(true);
+      }
+    }
+  }, [dataEvaluationDetail]);
+
+  const openEditEvaluationModal = (evaluationDetails: any) => {
+    setActionType('edit');
+    if (selectedEvaluationId && selectedEvaluationId === evaluationDetails.id) {
+      setIsEditEvaluationModalOpen(true);
+    } else {
+      setSelectedEvaluationId(evaluationDetails.id);
+    }
+  }
+
+  const openDeleteEvaluationModal = (evaluationDetails: any) => {
+    setActionType('delete');
+    if (selectedEvaluationId && selectedEvaluationId === evaluationDetails.id) {
+      setIsDeleteEvaluationModalOpen(true);
+    } else {
+      setSelectedEvaluationId(evaluationDetails.id);
+    }
+  };
 
   const renderRows = () => {
-    if (isGetBenefitsLoading) {
+    if (isGetEvaluationLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -107,12 +113,22 @@ const Content = () => {
         </tr>
       );
     }
-    if (designBenefitsItems && designBenefitsItems?.length > 0) {
-      return designBenefitsItems?.map((item: any) => (
+    if (evaluationItems && evaluationItems?.length > 0) {
+      return evaluationItems?.map((item: any) => (
         <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.title}</td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.purpose}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_type}</td>
+          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
+          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
+            <div className='flex justify-center space-x-2'>
+              <button onClick={() => openEditEvaluationModal(item)}>
+                <EditIcon />
+              </button>
+              <button onClick={() => openDeleteEvaluationModal(item)}>
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
         </tr>
       ));
     } else {
@@ -159,7 +175,7 @@ const Content = () => {
         }
       );
     }
-    refetch();
+    refetchEvaluation();
   };
 
   return (
@@ -173,7 +189,7 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -202,12 +218,6 @@ const Content = () => {
                   placeholder={'mm/dd/yyyy'}
                 />
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
@@ -224,6 +234,12 @@ const Content = () => {
                 </div>
               </div>
             </div>
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
             <div className='flex-1 flex justify-end'>
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
@@ -236,22 +252,19 @@ const Content = () => {
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300'>
+                <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
-                      <th
-                        scope='col'
-                        className='py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0'
-                      >
+                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900'>
                         Name
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Type
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Frequency
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
                       </th>
                     </tr>
@@ -259,14 +272,19 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {designBenefitsItems.length}</p>
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {evaluationItems.length}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
       <SelectionModal isOpen={isSelectionModalOpen} setIsOpen={setIsSelectionModalOpen} />
-      <CreateEvaluationTabModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <DeleteEvaluationModal
+        refetch={refetchEvaluation}
+        isOpen={isDeleteEvaluationModalOpen}
+        setIsOpen={setIsDeleteEvaluationModalOpen}
+        evaluationDetails={dataEvaluationDetail}
+      />
     </>
   );
 };

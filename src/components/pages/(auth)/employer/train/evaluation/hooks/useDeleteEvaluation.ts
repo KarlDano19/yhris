@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function deleteVoucher(voucher_id: number | null) {
+async function deleteEvaluation(evaluation_id: number | null) {
   try {
     const token = getCookie('token');
     const config = {
@@ -11,7 +11,7 @@ async function deleteVoucher(voucher_id: number | null) {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/vouchers/${voucher_id}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluations/${evaluation_id}/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -25,9 +25,9 @@ async function deleteVoucher(voucher_id: number | null) {
   }
 }
 
-function useDeleteVoucher() {
-  const query = useMutation((voucher_id: number | null) => deleteVoucher(voucher_id));
+function useDeleteEvaluation() {
+  const query = useMutation((evaluation_id: number | null) => deleteEvaluation(evaluation_id));
   return query;
 }
 
-export default useDeleteVoucher;
+export default useDeleteEvaluation;

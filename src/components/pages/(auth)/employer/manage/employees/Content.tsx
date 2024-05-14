@@ -21,15 +21,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
-  const { data: employeeListData, isLoading: isEmployeeListLoading, refetch: employeeListRefetch } = useGetEmployeeItems(itemsFilter);
-  const { data: employeeDetailData, isLoading: isEmployeeDetailLoading, refetch: employeeDetailRefetch } = useGetEmployeeDetails(selectedId);
+  const {
+    data: employeeListData,
+    isLoading: isEmployeeListLoading,
+    refetch: employeeListRefetch,
+  } = useGetEmployeeItems(itemsFilter);
+  const {
+    data: employeeDetailData,
+    isLoading: isEmployeeDetailLoading,
+    refetch: employeeDetailRefetch,
+  } = useGetEmployeeDetails(selectedId);
 
   useEffect(() => {
     if (employeeListData) {
       employeeListData.map((employee: any) => {
-        employee.date = Intl.DateTimeFormat('en-US').format(
-          new Date(employee.date)
-        );
+        employee.date = Intl.DateTimeFormat('en-US').format(new Date(employee.date));
         return employee;
       });
       setEmployeeItems(employeeListData);
@@ -40,13 +46,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (selectedId) {
       employeeDetailRefetch();
     }
-  }, [selectedId])
+  }, [selectedId]);
 
   useEffect(() => {
     if (employeeDetailData && Object.keys(employeeDetailData).length && !isEmployeeDetailLoading) {
       setIsEmployeesModalOpen(true);
     }
-  }, [employeeDetailData])
+  }, [employeeDetailData]);
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -188,13 +194,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
           </div>
-          
+
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
@@ -233,7 +239,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      {isEmployeesModalOpen && <EmployeesModal employeeDetailData={employeeDetailData} isOpen={isEmployeesModalOpen} setIsOpen={setIsEmployeesModalOpen} />}
+      {isEmployeesModalOpen && (
+        <EmployeesModal
+          employeeDetailData={employeeDetailData}
+          isOpen={isEmployeesModalOpen}
+          setIsOpen={setIsEmployeesModalOpen}
+        />
+      )}
     </>
   );
 };

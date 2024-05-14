@@ -1,15 +1,15 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useAddEvaluation from '../hooks/useAddEvaluation';
 
-import DetailsTab from '../evaluation-details/Tab'
-import FormTab from '../evaluation-form/Tab'
-import TemplateTab from '../evaluation-template/Tab'
-import ViewTab from '../evaluation-view/Tab'
+import DetailsTab from '../evaluation-details/Tab';
+import FormTab from '../evaluation-form/Tab';
+import TemplateTab from '../evaluation-template/Tab';
+import ViewTab from '../evaluation-view/Tab';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -24,23 +24,35 @@ export default function CreateEvaluationModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset } = useForm<any>();
-  const [evalDetails, setEvalDetails] = useState(false)
-  const [openEvalDetailsModal, setOpenEvalDetailsModal] = useState(false)
-  const [evalForm, setEvalForm] = useState(false)
-  const [openEvalFormModal, setOpenEvalFormModal] = useState(false)
-  const [evalTemplate, setEvalTemplate] = useState(false)
-  const [openEvalTemplateModal, setOpenEvalTemplateModal] = useState(false)
-
-  const [currentTab, setCurrentTab] = useState(0);
-  const { mutate, isLoading } = useAddEvaluation();
+  const { handleSubmit, reset, control } = useForm<any>({
+    defaultValues: {
+      evaluation_criterion: [
+        {
+          criterion: [
+            {
+              title: '',
+              max_score: 0,
+              is_show_comment: false,
+            },
+          ],
+        },
+      ],
+    },
+  });
+  const { fields, append, update, move, remove } = useFieldArray({
+    control,
+    name: 'evaluation_criterion',
+  });
+  const method = useForm();
+  const [currentTab, setCurrentTab] = useState(1);
   const [name, setName] = useState('');
+  const { mutate, isLoading } = useAddEvaluation();
 
   const handleNameChange = (newName: any) => {
-        setName(newName);
-    };
+    setName(newName);
+  };
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = (data: any) => {
     const callbackReq = {
       onSuccess: async (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
@@ -52,91 +64,57 @@ export default function CreateEvaluationModal({
       },
     };
     mutate(data, callbackReq);
-  });
+  };
 
-  const submitEvalDetails = (data:any) => {
+  const submitEvalDetails = () => {
     setCurrentTab(currentTab + 1);
-    console.log(data)
-  }
+  };
 
-  const submitEvalForm = (data:any) => {
-    if (currentTab === 2 && evalForm === false) {
-      setOpenEvalFormModal(true)
-    }else{
-      setCurrentTab(currentTab + 1)
-    }
-    console.log(data)
-  }
+  const submitEvalForm = () => {
+    setCurrentTab(currentTab + 1);
+  };
 
-  const submitTemplateForm = (data:any) => {
-    if (currentTab === 3 && evalTemplate === false) {
-      setOpenEvalTemplateModal(true)
-    }else{
-      setCurrentTab(currentTab + 1)
-    }
-    console.log(data)
-  }
+  const submitTemplateForm = () => {
+    setCurrentTab(currentTab + 1);
+  };
 
-  const finalSubmit = (data:any) => {
-    console.log(data)
-    const callBackReq = {
-      onSuccess: (data:any) => {
-        if(!data.error){
-          toast.success("Evaluation Template Successfully Created")
-        }
-      },
-      onError: (err: any) => {
-        toast.error("error")
-      }
-    }
-    mutate(data,callBackReq)
-  }
-
-  const method = useForm();
-
-  const renderButtons= () =>
-    (
-      <div
+  const renderButtons = () => (
+    <div className={`${currentTab <= 1 ? 'justify-end' : 'justify-between'} md:flex mt-10 md:mt-12 mb-7`}>
+      <button
+        type='button'
         className={`${
-          currentTab <= 0 ? "justify-end" : "justify-between"
-        } md:flex mt-10 md:mt-12 mb-7`}
+          currentTab <= 1 ? 'hidden' : ''
+        } w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+        onClick={prevTab}
       >
-        <button
-          type="button"
-          className={`${
-            currentTab <= 0 ? "hidden" : ""
-          } w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
-          onClick={prevTab}
-        >
-          BACK
-        </button>
-        <button
-          type="submit"
-          className="w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          // onClick={nextTab}
-        >
-          {currentTab < 3 ? "NEXT" : (
-            isLoading ? (
-              <div
-                className="animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-white rounded-full my-1 mx-2"
-                role="status"
-                aria-label="loading"
-              >
-                <span className="sr-only">Loading...</span>
-              </div>
-            ) : (
-              "Save"
-            )
-          )}
-        </button>
-      </div>
-    )
+        BACK
+      </button>
+      <button
+        type='submit'
+        className='w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+      >
+        {currentTab < 4 ? (
+          'NEXT'
+        ) : isLoading ? (
+          <div
+            className='animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-white rounded-full my-1 mx-2'
+            role='status'
+            aria-label='loading'
+          >
+            <span className='sr-only'>Loading...</span>
+          </div>
+        ) : (
+          'Save'
+        )}
+      </button>
+    </div>
+  );
+
   const prevTab = () => {
     if (currentTab > 0) {
       setCurrentTab(currentTab - 1);
     }
   };
-
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -164,63 +142,69 @@ export default function CreateEvaluationModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className='relative overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Evaluation Template</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
-                {currentTab > 0 && 
-                <>
-                  <div className='flex bg-white py-2 justify-between'>
-                    <div className='flex space-x-4'>
-                      <h3 className='ml-7 py-2 font-semibold text-2xl'>{name}</h3>
-                      <div className='flex items-center'>
-                        <EditIconNoBorder />
+                {currentTab > 0 && (
+                  <>
+                    <div className='flex bg-white py-2 justify-between'>
+                      <div className='flex space-x-4'>
+                        <h3 className='ml-7 py-2 font-semibold text-2xl'>{name}</h3>
+                        <div className='flex items-center'>
+                          <EditIconNoBorder />
+                        </div>
+                      </div>
+                      <div className='flex items-center pr-4'>
+                        <button className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'>
+                          Preview
+                        </button>
                       </div>
                     </div>
-                    <div className='flex items-center pr-4'>
-                      <button
-                        className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
-                      >
-                        Preview
-                      </button>
-                    </div>
-                  </div>
-                  <hr/>
-                </>
-                }
-                {/* <form onSubmit={onSubmit}> */}
-                  <div className='px-4 pt-4 pb-6'>
-                    {currentTab === 1 ? (
-                      <FormProvider {...method}>
-                        <form onSubmit={method.handleSubmit(submitEvalForm)}>
-                          <FormTab />
-                          {renderButtons()}
-                        </form>
-                      </FormProvider>
-                    ) : currentTab === 2 ? (
-                      <FormProvider {...method}>
-                        <form onSubmit={method.handleSubmit(submitTemplateForm)}>
-                          <TemplateTab />
-                          {renderButtons()}
-                        </form>
-                      </FormProvider>
-                    ) : currentTab === 3 ? (
-                      <FormProvider {...method}>
-                        <form onSubmit={method.handleSubmit(finalSubmit)}>
-                          <ViewTab />
-                          {renderButtons()}
-                        </form>
-                      </FormProvider>
-                    ) : (
-                      <FormProvider {...method}>
-                        <form onSubmit={method.handleSubmit(submitEvalDetails)}>
-                          <DetailsTab onNameChange={handleNameChange} />
-                          {renderButtons()}
-                        </form>
-                      </FormProvider>
-                    )}
-                  </div>
+                    <hr />
+                  </>
+                )}
+                <div className='px-4 pt-4 pb-6'>
+                  {currentTab === 1 ? (
+                    <FormProvider {...method}>
+                      <form onSubmit={method.handleSubmit(submitEvalDetails)}>
+                        <DetailsTab onNameChange={handleNameChange} />
+                        {renderButtons()}
+                      </form>
+                    </FormProvider>
+                  ) : currentTab === 2 ? (
+                    <FormProvider {...method}>
+                      <form onSubmit={method.handleSubmit(submitEvalForm)}>
+                        <FormTab />
+                        {renderButtons()}
+                      </form>
+                    </FormProvider>
+                  ) : currentTab === 3 ? (
+                    <FormProvider {...method}>
+                      <form onSubmit={method.handleSubmit(submitTemplateForm)}>
+                        <TemplateTab
+                          {...{
+                            control,
+                            fields,
+                            update,
+                            remove,
+                            append,
+                            move,
+                          }}
+                        />
+                        {renderButtons()}
+                      </form>
+                    </FormProvider>
+                  ) : (
+                    <FormProvider {...method}>
+                      <form onSubmit={method.handleSubmit(onSubmit)}>
+                        <ViewTab />
+                        {renderButtons()}
+                      </form>
+                    </FormProvider>
+                  )}
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>

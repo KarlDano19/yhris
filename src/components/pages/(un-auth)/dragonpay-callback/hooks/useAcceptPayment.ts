@@ -14,7 +14,7 @@ async function acceptPayment(data: DataType) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dragonpay-accept-payment/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/dragonpay/accept/`, config);
     if (!res.ok) {
       throw res.json();
     }

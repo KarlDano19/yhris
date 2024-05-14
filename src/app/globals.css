@@ -12,6 +12,11 @@ input[type='date']::-webkit-calendar-picker-indicator {
   display: none;
   -webkit-appearance: none;
 }
+input#max-score::-webkit-outer-spin-button,
+input#max-score::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
 div.inactive-toggle-periodicity {
   border-radius: 10px;

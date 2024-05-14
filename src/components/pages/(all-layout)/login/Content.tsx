@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 
-import { setCookie } from 'cookies-next';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
+import { setCookie } from 'cookies-next';
+import { useForm } from 'react-hook-form';
 import { generateKey, encryptToken } from '@/helpers/tokenEncryption';
+import toast from 'react-hot-toast';
 import EmailVerificationModal from './modal/EmailVerificationModal';
 import useLogin from '@/components/pages/(all-layout)/login/hooks/useLogin';
 import CustomToast from '@/components/CustomToast';
@@ -24,7 +24,7 @@ import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 
 import { T_Login } from '@/types/globals';
 
-const Content = () => {
+function Content() {
   const searchParams = useSearchParams() as any;
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
@@ -132,7 +132,7 @@ const Content = () => {
                       />
                       <button
                         type='button'
-                        className='absolute inset-y-0 right-0 flex items-center px-4 text-gray-600 text-blue-400'
+                        className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
                         onClick={() => {
                           setShowPassword(!showPassword);
                         }}
@@ -212,6 +212,6 @@ const Content = () => {
       leftBG={SplitViewBg}
     />
   );
-};
+}
 
 export default Content;
