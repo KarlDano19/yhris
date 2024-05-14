@@ -49,3 +49,32 @@ div.remove-height {
   height: unset !important;
   overflow: unset !important;
 }
+
+/* Add this to your global styles or CSS module */
+.toggle-ios-label {
+  width: 36px;
+  height: 16px;
+  border-radius: 999px;
+  position: relative;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.toggle-ios-checkbox {
+  display: none;
+}
+
+.toggle-ios-handle {
+  top: 1px;
+  /* Adjust according to the size of the handle */
+  left: 1px;
+  /* Adjust according to the size of the handle */
+  width: 10px;
+  /* Adjust according to the size of the handle */
+  height: 10px;
+  /* Adjust according to the size of the handle */
+  border-radius: 999px;
+  position: absolute;
+  transition: transform 0.2s;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}

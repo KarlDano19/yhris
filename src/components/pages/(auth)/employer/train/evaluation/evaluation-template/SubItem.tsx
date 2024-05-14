@@ -102,7 +102,7 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
                         </div>
                         <hr />
                         <div className='flex pt-4 justify-between'>
-                          <div className='flex space-x-4'>
+                          <div className='flex space-x-4 mt-1 ml-4'>
                             <IOSToggleButton
                               checked={true}
                               onChange={(value) => {
