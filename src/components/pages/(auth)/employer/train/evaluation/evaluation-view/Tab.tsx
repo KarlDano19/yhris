@@ -28,6 +28,13 @@ const Tab = () => {
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8 space-y-6'>
                 <label className='font-semibold text-xl'>How do you want your sheet/form to look like?</label>
+                <div className='justify-center'>
+                  <div className='flex justify-end pr-4'>
+                    <button className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'>
+                      Preview
+                    </button>
+                  </div>
+                </div>
                 <div className='flex mt-2 w-full border rounded-xl border-[#ACB9CB] py-10 px-4 justify-center space-x-20'>
                   <div
                     onClick={() => handleClickViewStyle('default')}
