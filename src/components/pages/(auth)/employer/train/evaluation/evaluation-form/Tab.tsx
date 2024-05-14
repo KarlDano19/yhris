@@ -60,7 +60,7 @@ const Tab = () => {
 
   return (
     <>
-      <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-6'>
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
@@ -115,13 +115,35 @@ const Tab = () => {
                     <div className='flex flex-col px-5'>
                       <label className='text-slate-700 mt-2 text-sm'>How much is the total score?</label>
                       <div className='flex gap-4 items-center mt-4 text-center whitespace-nowrap text-slate-500'>
-                        <div className='hover:cursor-pointer' onClick={handleMinusTotalScoreClick}>
+                        <div
+                          className='hover:cursor-pointer p-2'
+                          onClick={() => {
+                            setTotalScoreGoal(totalScore - 1)
+                            setValue(
+                              `totalScore`,
+                              (totalScore - 1)
+                            );
+                          }}
+                        >
                           <MinusIcon />
                         </div>
-                        <div className='justify-center items-start self-stretch px-11 py-1 bg-white rounded-md border border-solid border-slate-400 max-md:px-5'>
-                          {totalScore}
-                        </div>
-                        <div className='hover:cursor-pointer' onClick={handlePlusTotalScoreClick}>
+                        <input
+                          id='max-score'
+                          type='number'
+                          className='justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
+                          defaultValue={totalScore}
+                          {...register(`totalScore`)}
+                        />
+                        <div
+                          className='hover:cursor-pointer p-2'
+                          onClick={() => {
+                            setTotalScoreGoal(totalScore + 1)
+                            setValue(
+                              `totalScore`,
+                              (totalScore + 1)
+                            );
+                          }}
+                        >
                           <PlusIcon />
                         </div>
                       </div>
@@ -131,13 +153,35 @@ const Tab = () => {
                     <div className='flex flex-col px-5'>
                       <label className='text-slate-700 mt-2 text-sm'>How much is the Passing score?</label>
                       <div className='flex gap-4 items-center mt-4 text-center whitespace-nowrap text-slate-500'>
-                        <div className='hover:cursor-pointer' onClick={handleMinusPassingScoreClick}>
+                        <div
+                          className='hover:cursor-pointer p-2'
+                          onClick={() => {
+                            setTotalPassingScore(totalPassingScore - 1)
+                            setValue(
+                              `totalPassingScore`,
+                              (totalPassingScore - 1)
+                            );
+                          }}
+                        >
                           <MinusIcon />
                         </div>
-                        <div className='justify-center items-start self-stretch px-11 py-1 bg-white rounded-md border border-solid border-slate-400 max-md:px-5'>
-                          {totalPassingScore}
-                        </div>
-                        <div className='hover:cursor-pointer' onClick={handlePlusPassingScoreClick}>
+                        <input
+                          id='max-score'
+                          type='number'
+                          className='justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
+                          defaultValue={totalPassingScore}
+                          {...register(`totalPassingScore`)}
+                        />
+                        <div
+                          className='hover:cursor-pointer p-2'
+                          onClick={() => {
+                            setTotalPassingScore(totalPassingScore + 1)
+                            setValue(
+                              `totalPassingScore`,
+                              (totalPassingScore + 1)
+                            );
+                          }}
+                        >
                           <PlusIcon />
                         </div>
                       </div>

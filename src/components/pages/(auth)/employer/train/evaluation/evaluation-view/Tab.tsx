@@ -22,7 +22,7 @@ const Tab = () => {
 
   return (
     <>
-      <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-6'>
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
