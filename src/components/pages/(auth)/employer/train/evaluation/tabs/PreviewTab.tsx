@@ -69,7 +69,7 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any, getValues:
                 />
               </div>
               <div className='w-full'>
-                <label htmlFor='employeeName'>2. Dave of Evaluation</label>
+                <label htmlFor='employeeName'>2. Date of Evaluation</label>
                 <CustomDatePicker
                   name={'from'}
                   selected={''}
