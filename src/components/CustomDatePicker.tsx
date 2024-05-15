@@ -59,14 +59,15 @@ const CustomDatePicker = ({
         ref={ref}
         required={required}
       />
-      <div
-        className='cursor-pointer absolute inset-y-0 right-0 flex items-center pr-3'
+      <button
+        className='cursor-pointer absolute inset-y-0 right-0 flex items-center pr-3 disabled:pointer-events-none disabled:opacity-50'
         onClick={() => {
           onClick();
         }}
+        disabled={disabled}
       >
         <DateCalendar />
-      </div>
+      </button>
     </>
   ));
 

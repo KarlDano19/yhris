@@ -29,7 +29,7 @@ export default function EditVoucherModal({
     from: '',
     to: '',
   });
-  const { register, setValue, handleSubmit, reset } = useForm<any>();
+  const { register, setValue, handleSubmit } = useForm<any>();
   const { mutate, isLoading } = useUpdateVoucher();
 
   useEffect(() => {

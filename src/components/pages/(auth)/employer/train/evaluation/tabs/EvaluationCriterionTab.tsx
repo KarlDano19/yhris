@@ -3,25 +3,26 @@
 import { useRef, useCallback } from 'react';
 
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { useFormContext } from 'react-hook-form';
-import SubItem from './SubItem';
+import { useFieldArray } from 'react-hook-form';
+import CritiriaSubItem from './CritiriaSubItem';
 
 import AddCircleIcon from '@/svg/AddCircleIcon';
-import FontSizeIcon from '@/svg/FontSizeIcon';
 import MoveIcon from '@/svg/MoveIcon';
 
-const Tab = ({ control, fields, append, update, move, remove }: any) => {
+const Tab = ({ control, register, watch, setValue }: any) => {
   const childrenRef = useRef<any>({});
-  const childrenOnClickRef = useRef<any>({});
-  const { register } = useFormContext();
+  const { fields, append, move } = useFieldArray({
+    control,
+    name: 'evaluation_criterion',
+  });
 
   const addSection = () => {
     append({
       criterion: [
         {
           title: '',
-          max_score: 0,
-          is_show_comment: false,
+          max_score: 1,
+          is_disable_comment: true,
         },
       ],
     });
@@ -53,6 +54,7 @@ const Tab = ({ control, fields, append, update, move, remove }: any) => {
   const getItemStyle = (isDragging: boolean, draggableStyle: any) => {
     const newStyle = {
       ...draggableStyle,
+      background: isDragging ? '#fafafa' : '',
       top: 'auto !important',
       left: 'auto !important',
     };
@@ -76,6 +78,7 @@ const Tab = ({ control, fields, append, update, move, remove }: any) => {
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
+                                className='relative border-2 rounded-md mb-4 pb-3'
                                 style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
                               >
                                 <div className='min-w-full flex py-2 sm:px-6 lg:px-8 space-y-6 space-x-4'>
@@ -83,34 +86,37 @@ const Tab = ({ control, fields, append, update, move, remove }: any) => {
                                     <MoveIcon />
                                   </div>
                                   <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
-                                    <p>Section {index + 1}</p>
                                     <input
                                       type='text'
                                       placeholder='Enter Section Title...'
-                                      className='block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                      className='bg-transparent block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400 sm:text-sm sm:leading-6 mb-6'
                                       defaultValue={item.section_title}
                                       {...register(`evaluation_criterion[${index}].section_title`)}
                                     />
                                     <input
                                       type='text'
                                       placeholder='Enter Section Description...'
-                                      className='block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                      className='bg-transparent block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400 sm:text-sm sm:leading-6 mb-4'
                                       defaultValue={item.section_description}
                                       {...register(`evaluation_criterion[${index}].section_description`)}
                                     />
                                   </div>
-                                  <div className='flex flex-col h-fit border rounded-xl border-[#ACB9CB] py-4 px-2 space-y-2'>
-                                    <button type='button' onClick={() => addSection()}>
+                                  <div className='flex flex-col'>
+                                    <div
+                                      className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
+                                      onClick={() => addSection()}
+                                    >
                                       <AddCircleIcon />
-                                    </button>
-                                    <FontSizeIcon />
+                                    </div>
                                   </div>
                                 </div>
-                                <SubItem
-                                  ref={childrenOnClickRef}
+                                <CritiriaSubItem
                                   control={control}
                                   sectionIndex={index}
                                   setReorder={setReorder}
+                                  register={register}
+                                  watch={watch}
+                                  setValue={setValue}
                                 />
                                 {provided.placeholder}
                               </div>

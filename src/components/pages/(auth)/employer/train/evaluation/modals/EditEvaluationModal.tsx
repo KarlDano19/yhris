@@ -5,7 +5,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
-import useAddEvaluation from '../hooks/useAddEvaluation';
+import useUpdateEvaluation from '../hooks/useUpdateEvaluation';
 
 import EvaluationInfoTab from '../tabs/EvaluationInfoTab';
 import EvaluationFormTab from '../tabs/EvaluationFormTab';
@@ -15,16 +15,21 @@ import PreviewTab from '../tabs/PreviewTab';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-export default function CreateEvaluationModal({
+export default function EditEvaluationModal({
+  refetch,
   isOpen,
   setIsOpen,
+  evaluationDetails,
 }: {
+  refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  evaluationDetails: any;
 }) {
+  const [evaluationId, setEvaluationId] = useState<number | null>(null);
   const [progressBar, setProgressBar] = useState(1);
   const cancelButtonRef = useRef(null);
-  const { register, setValue, getValues, watch, reset, control } = useForm<any>({
+  const { register, handleSubmit, setValue, getValues, watch, control } = useForm<any>({
     defaultValues: {
       criteria_rating_view_type: 'default',
       total_score: 1,
@@ -49,21 +54,41 @@ export default function CreateEvaluationModal({
   const method = useForm();
   const [currentTab, setCurrentTab] = useState(1);
   const [isPreview, setIsPreview] = useState(false);
-  const { mutate, isLoading } = useAddEvaluation();
+  const { mutate, isLoading } = useUpdateEvaluation();
 
-  const onSubmit = (data: any) => {
+  useEffect(() => {
+    if (evaluationDetails) {
+      setEvaluationId(evaluationDetails.id);
+      setValue('name', evaluationDetails.name);
+      setValue('evaluation_type', evaluationDetails.evaluation_type);
+      setValue('frequency', evaluationDetails.frequency);
+      setValue('evaluation_format', evaluationDetails.evaluation_format);
+      setValue('description', evaluationDetails.description);
+      setValue('rating_type', evaluationDetails.rating_type);
+      setValue('total_score', evaluationDetails.total_score);
+      setValue('passing_score', evaluationDetails.passing_score);
+      setValue('is_show_remarks', evaluationDetails.is_show_remarks);
+      setValue('is_show_criteria_comment', evaluationDetails.is_show_criteria_comment);
+      setValue('evaluation_criterion', evaluationDetails.evaluation_criterion);
+      setValue('criteria_rating_view_type', evaluationDetails.criteria_rating_view_type);
+    }
+  }, [evaluationDetails])
+
+  const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: async (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         setIsOpen(false);
-        reset();
+        setProgressBar(1);
+        setCurrentTab(1);
+        refetch();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(data, callbackReq);
-  };
+    mutate({evaluationId, data}, callbackReq);
+  });
 
   const submitEvalDetails = () => {
     setProgressBar(+1);
@@ -160,7 +185,7 @@ export default function CreateEvaluationModal({
                 }relative overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all`}
               >
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Create Evaluation Template</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Evaluation Template</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 {!isPreview && (
@@ -292,7 +317,7 @@ export default function CreateEvaluationModal({
                     <>
                       {!isPreview && (
                         <FormProvider {...method}>
-                          <form onSubmit={method.handleSubmit(onSubmit)}>
+                          <form onSubmit={onSubmit}>
                             <ViewModeTab
                               {...{
                                 setIsPreview,

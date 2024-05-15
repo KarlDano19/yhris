@@ -3,17 +3,16 @@
 import { useEffect } from 'react';
 
 import { Draggable, Droppable } from 'react-beautiful-dnd';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useFieldArray } from 'react-hook-form';
 
-import IOSToggleButton from '@/components/buttons/IosToggleButton';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
 import DuplicateIcon from '@/svg/DuplicateIcon';
 import MoveIcon from '@/svg/MoveIcon';
+import AddCircleIcon from '@/svg/AddCircleIcon';
 
-function SubItem({ control, sectionIndex, setReorder }: any) {
-  const { register, setValue } = useFormContext();
+function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, setValue }: any) {
   const { fields, append, move } = useFieldArray({
     control,
     name: `evaluation_criterion.${sectionIndex}.criterion`,
@@ -26,7 +25,7 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
   }, [sectionIndex, setReorder, move]);
 
   const addCriteria = () => {
-    append({ title: '', max_score: 0, is_show_comment: false });
+    append({ title: '', max_score: 1, is_disable_comment: true });
   };
 
   const getSubItemStyle = (isDragging: boolean, draggableStyle: any) => {
@@ -40,11 +39,14 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
 
   return (
     <Droppable droppableId={`child-${sectionIndex}`} type='childContainer'>
-      {(providedOther: any, snapshotOther: any) => (
+      {(providedOther: any) => (
         <div {...providedOther.droppableProps} ref={providedOther.innerRef}>
-          <button className='border rounded-md px-2 py-4' type='button' onClick={() => addCriteria()}>
-            Add question
-          </button>
+          <div
+            className='absolute mt-[1.5rem] right-[2rem] flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 cursor-pointer'
+            onClick={() => addCriteria()}
+          >
+            <AddCircleIcon />
+          </div>
           {(fields || []).map((item: any, index: number) => {
             return (
               <Draggable key={item.id} draggableId={item.id} index={index}>
@@ -54,15 +56,15 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
                     {...providedOther.draggableProps}
                     style={getSubItemStyle(snapshotOther.isDragging, providedOther.draggableProps.style)}
                   >
-                    <div className='min-w-full flex py-2 sm:px-6 lg:px-8 space-y-6 space-x-4'>
-                      <div {...providedOther.dragHandleProps} className='pt-6'>
+                    <div className='min-w-full flex py-2 sm:px-6 lg:px-8 space-y-4 space-x-4'>
+                      <div className='py-4' {...providedOther.dragHandleProps}>
                         <MoveIcon />
                       </div>
-                      <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
+                      <div className='sm:col-span-4 w-full border rounded-xl border-[#ACB9CB] py-6 px-4 bg-white'>
                         <input
                           type='text'
                           placeholder='Enter criteria...'
-                          className='block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          className='bg-transparent block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           defaultValue={item.title}
                           {...register(`evaluation_criterion[${sectionIndex}].criterion[${index}].title`)}
                         />
@@ -72,9 +74,14 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
                             <div
                               className='hover:cursor-pointer p-2'
                               onClick={() => {
+                                const currentMaxScore = watch(
+                                  `evaluation_criterion[${sectionIndex}].criterion[${index}].max_score`
+                                );
+                                // const totalScore = watch(`total_score`);
+                                // if (!(totalScore >= currentMaxScore && 1 < currentMaxScore)) return;
                                 setValue(
                                   `evaluation_criterion[${sectionIndex}].criterion[${index}].max_score`,
-                                  (item.max_score -= 1)
+                                  parseInt(currentMaxScore) - 1
                                 );
                               }}
                             >
@@ -83,16 +90,21 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
                             <input
                               id='max-score'
                               type='number'
-                              className='justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
+                              className='bg-transparent justify-center items-start self-stretch p-2 rounded-md border border-solid border-slate-400 w-[4rem] text-center'
                               defaultValue={item.max_score}
                               {...register(`evaluation_criterion[${sectionIndex}].criterion[${index}].max_score`)}
                             />
                             <div
                               className='hover:cursor-pointer p-2'
                               onClick={() => {
+                                const currentMaxScore = watch(
+                                  `evaluation_criterion[${sectionIndex}].criterion[${index}].max_score`
+                                );
+                                // const totalScore = watch(`total_score`);
+                                // if (!(totalScore > currentMaxScore && 0 < currentMaxScore)) return;
                                 setValue(
                                   `evaluation_criterion[${sectionIndex}].criterion[${index}].max_score`,
-                                  (item.max_score += 1)
+                                  parseInt(currentMaxScore) + 1
                                 );
                               }}
                             >
@@ -103,15 +115,16 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
                         <hr />
                         <div className='flex pt-4 justify-between'>
                           <div className='flex space-x-4 mt-1 ml-4'>
-                            <IOSToggleButton
-                              checked={true}
-                              onChange={(value) => {
-                                setValue(
-                                  `evaluation_criterion[${sectionIndex}].criterion[${index}].is_show_comment`,
-                                  value
-                                );
-                              }}
-                            />
+                            <div className='relative inline-block align-middle transition duration-200 ease-in'>
+                              <input
+                                id={`toggle-${index}`}
+                                type='checkbox'
+                                name={`toggle-${index}`}
+                                {...register(
+                                  `evaluation_criterion[${sectionIndex}].criterion[${index}].is_disable_comment`
+                                )}
+                              />
+                            </div>
                             <label className='text-slate-700 text-sm'>Disable comment for this criteria</label>
                           </div>
                           <div className='flex space-x-4'>
@@ -119,6 +132,8 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
                             <DeleteIconNoBorder />
                           </div>
                         </div>
+                      </div>
+                      <div className='w-[3rem]'>
                       </div>
                     </div>
                   </div>
@@ -133,4 +148,4 @@ function SubItem({ control, sectionIndex, setReorder }: any) {
   );
 }
 
-export default SubItem;
+export default CritiriaSubItem;

@@ -1,61 +1,36 @@
 'use client';
+
 import { useState } from 'react';
+
+import { Tooltip } from 'react-tooltip';
+import classNames from '@/helpers/classNames';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
-import { useFormContext } from 'react-hook-form';
-import classNames from '@/helpers/classNames';
-import { Tooltip } from 'react-tooltip';
-const Tab = () => {
-  const [totalScore, setTotalScoreGoal] = useState(0);
-  const [totalPassingScore, setTotalPassingScore] = useState(0);
-  const [remarks, setRemarks] = useState('');
-  const [commentCriteria, setCommentCriteria] = useState('');
-  const { register, setValue } = useFormContext();
 
-  const handleMinusTotalScoreClick = () => {
-    if (totalScore > 0) {
-      setTotalScoreGoal(totalScore - 1);
-      setValue('total_score', totalScore - 1);
-    }
-  };
-
-  const handlePlusTotalScoreClick = () => {
-    setTotalScoreGoal(totalScore + 1);
-    setValue('total_score', totalScore + 1);
-  };
-
-  const handleMinusPassingScoreClick = () => {
-    if (totalPassingScore > 0) {
-      setTotalPassingScore(totalPassingScore - 1);
-      setValue('passing_score', totalPassingScore - 1);
-    }
-  };
-
-  const handlePlusPassingScoreClick = () => {
-    setTotalPassingScore(totalPassingScore + 1);
-    setValue('passing_score', totalPassingScore + 1);
-  };
+const Tab = ({
+  register,
+  watch,
+  setValue,
+  getValues,
+}: {
+  register: any;
+  watch: any;
+  setValue: any;
+  getValues: any;
+}) => {
+  const [remarks, setRemarks] = useState<boolean | null>(getValues('is_show_remarks'));
+  const [commentCriteria, setCommentCriteria] = useState<boolean | null>(getValues('is_show_criteria_comment'));
 
   const handleClickRemarks = (value: any) => {
-    if (value === 'yes' || value === 'no') {
-      setRemarks(value);
-      setValue('is_show_remarks', value); // Update the value in the form context
-    } else {
-      // Handle invalid input, e.g., display an error message or log a warning
-      console.error('Invalid input for remarks. Expected "yes" or "no".');
-    }
+    setRemarks(value);
+    setValue('is_show_remarks', value);
   };
 
   const handleClickCommentCriteria = (value: any) => {
-    if (value === 'yes' || value === 'no') {
-      setCommentCriteria(value);
-      setValue('is_show_criteria_comment', value); // Update the value in the form context
-    } else {
-      // Handle invalid input, e.g., display an error message or log a warning
-      console.error('Invalid input for comment criteria. Expected "yes" or "no".');
-    }
+    setCommentCriteria(value);
+    setValue('is_show_criteria_comment', value);
   };
 
   return (
@@ -118,11 +93,9 @@ const Tab = () => {
                         <div
                           className='hover:cursor-pointer p-2'
                           onClick={() => {
-                            setTotalScoreGoal(totalScore - 1)
-                            setValue(
-                              `totalScore`,
-                              (totalScore - 1)
-                            );
+                            const currentTotalScore = watch('total_score');
+                            // if (1 >= currentTotalScore) return;
+                            setValue(`total_score`, parseInt(currentTotalScore) - 1);
                           }}
                         >
                           <MinusIcon />
@@ -131,17 +104,14 @@ const Tab = () => {
                           id='max-score'
                           type='number'
                           className='justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
-                          defaultValue={totalScore}
-                          {...register(`totalScore`)}
+                          defaultValue={1}
+                          {...register(`total_score`)}
                         />
                         <div
                           className='hover:cursor-pointer p-2'
                           onClick={() => {
-                            setTotalScoreGoal(totalScore + 1)
-                            setValue(
-                              `totalScore`,
-                              (totalScore + 1)
-                            );
+                            const currentTotalScore = watch('total_score');
+                            setValue(`total_score`, parseInt(currentTotalScore) + 1);
                           }}
                         >
                           <PlusIcon />
@@ -156,11 +126,10 @@ const Tab = () => {
                         <div
                           className='hover:cursor-pointer p-2'
                           onClick={() => {
-                            setTotalPassingScore(totalPassingScore - 1)
-                            setValue(
-                              `totalPassingScore`,
-                              (totalPassingScore - 1)
-                            );
+                            const currentPassingScore = watch('passing_score');
+                            // const currentTotalScore = watch('total_score');
+                            // if (!(currentTotalScore >= currentPassingScore && 1 < currentPassingScore)) return;
+                            setValue(`passing_score`, parseInt(currentPassingScore) - 1);
                           }}
                         >
                           <MinusIcon />
@@ -169,17 +138,16 @@ const Tab = () => {
                           id='max-score'
                           type='number'
                           className='justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
-                          defaultValue={totalPassingScore}
-                          {...register(`totalPassingScore`)}
+                          defaultValue={1}
+                          {...register(`passing_score`)}
                         />
                         <div
                           className='hover:cursor-pointer p-2'
                           onClick={() => {
-                            setTotalPassingScore(totalPassingScore + 1)
-                            setValue(
-                              `totalPassingScore`,
-                              (totalPassingScore + 1)
-                            );
+                            const currentPassingScore = watch('passing_score');
+                            // const currentTotalScore = watch('total_score');
+                            // if (!(currentTotalScore > currentPassingScore && 0 < currentPassingScore)) return;
+                            setValue(`passing_score`, parseInt(currentPassingScore) + 1);
                           }}
                         >
                           <PlusIcon />
@@ -198,11 +166,11 @@ const Tab = () => {
                         type='button'
                         className={classNames(
                           'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
-                          remarks === 'no'
+                          remarks === false
                             ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
                             : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                         )}
-                        onClick={() => handleClickRemarks('no')}
+                        onClick={() => handleClickRemarks(false)}
                       >
                         No
                       </button>
@@ -210,11 +178,11 @@ const Tab = () => {
                         type='button'
                         className={classNames(
                           'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
-                          remarks === 'yes'
+                          remarks === true
                             ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
                             : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                         )}
-                        onClick={() => handleClickRemarks('yes')}
+                        onClick={() => handleClickRemarks(true)}
                       >
                         Yes
                       </button>
@@ -229,11 +197,11 @@ const Tab = () => {
                         type='button'
                         className={classNames(
                           'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
-                          commentCriteria === 'no'
+                          commentCriteria === false
                             ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
                             : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                         )}
-                        onClick={() => handleClickCommentCriteria('no')}
+                        onClick={() => handleClickCommentCriteria(false)}
                       >
                         No
                       </button>
@@ -241,11 +209,11 @@ const Tab = () => {
                         type='button'
                         className={classNames(
                           'mt-3 inline-flex w-full justify-center rounded-md px-10 py-2 text-sm',
-                          commentCriteria === 'yes'
+                          commentCriteria === true
                             ? 'text-white bg-blue-600 shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto '
                             : 'text-[#6F829B] shadow-sm ring-1 ring-inset ring-[#ACB9CB]  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                         )}
-                        onClick={() => handleClickCommentCriteria('yes')}
+                        onClick={() => handleClickCommentCriteria(true)}
                       >
                         Yes
                       </button>

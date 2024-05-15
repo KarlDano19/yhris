@@ -1,17 +1,13 @@
 'use client';
 import { useState } from 'react';
 
-import SelectChevronDown from '@/svg/SelectChevronDown';
-import MinusIcon from '@/svg/MinusIcon';
-import PlusIcon from '@/svg/PlusIcon';
 import { useFormContext } from 'react-hook-form';
 import GearIcon from '@/svg/GearIcon';
 import classNames from '@/helpers/classNames';
 import DropdownIcon from '@/svg/DropdownIcon';
 import SliderIcon from '@/svg/SliderIcon';
-const Tab = () => {
-  const [viewStyle, setViewStyle] = useState('');
-  const { setValue } = useFormContext();
+const ViewModeTab = ({ setIsPreview, setValue, getValues }: { setIsPreview: any; setValue: any; getValues: any }) => {
+  const [viewStyle, setViewStyle] = useState(getValues('criteria_rating_view_type'));
 
   const handleClickViewStyle = (value: any) => {
     if (value === 'default' || value === 'dropdown' || value === 'slider') {
@@ -30,7 +26,10 @@ const Tab = () => {
                 <label className='font-semibold text-xl'>How do you want your sheet/form to look like?</label>
                 <div className='justify-center'>
                   <div className='flex justify-end pr-4'>
-                    <button className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'>
+                    <button
+                      onClick={() => setIsPreview(true)}
+                      className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
+                    >
                       Preview
                     </button>
                   </div>
@@ -76,4 +75,4 @@ const Tab = () => {
   );
 };
 
-export default Tab;
+export default ViewModeTab;

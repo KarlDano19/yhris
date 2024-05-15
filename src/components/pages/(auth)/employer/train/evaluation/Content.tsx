@@ -12,6 +12,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import SelectionModal from './modals/SelectionModal';
 import DeleteEvaluationModal from './modals/DeleteEvaluationModal';
+import EditEvaluationModal from './modals/EditEvaluationModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -74,7 +75,7 @@ const Content = () => {
     } else {
       setSelectedEvaluationId(evaluationDetails.id);
     }
-  }
+  };
 
   const openDeleteEvaluationModal = (evaluationDetails: any) => {
     setActionType('delete');
@@ -279,6 +280,12 @@ const Content = () => {
         </div>
       </div>
       <SelectionModal isOpen={isSelectionModalOpen} setIsOpen={setIsSelectionModalOpen} />
+      <EditEvaluationModal
+        refetch={refetchEvaluation}
+        isOpen={isEditEvaluationModalOpen}
+        setIsOpen={setIsEditEvaluationModalOpen}
+        evaluationDetails={dataEvaluationDetail}
+      />
       <DeleteEvaluationModal
         refetch={refetchEvaluation}
         isOpen={isDeleteEvaluationModalOpen}

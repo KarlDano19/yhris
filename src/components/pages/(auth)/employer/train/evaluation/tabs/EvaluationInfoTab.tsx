@@ -1,21 +1,11 @@
 'use client';
-import { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
-const Tab = ({ onNameChange }: any) => {
-  const { register, watch } = useFormContext();
-  const name = watch('name'); // Watch for changes in the name input
-
-  // Call the onNameChange callback whenever the name input changes
-  const handleNameChange = (event: any) => {
-    onNameChange(event.target.value);
-  };
-
+function EvaluationInfoTab({ register }: { register: any }) {
   return (
     <>
-      <div className='px-4 pt-4 pb-6'>
+      <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-6'>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
             Evaluation Name<span className='text-red-600'>*</span>
@@ -24,7 +14,6 @@ const Tab = ({ onNameChange }: any) => {
             id='name'
             type='text'
             {...register('name', { required: true })}
-            onChange={handleNameChange}
             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
           />
         </div>
@@ -102,6 +91,6 @@ const Tab = ({ onNameChange }: any) => {
       </div>
     </>
   );
-};
+}
 
-export default Tab;
+export default EvaluationInfoTab;
