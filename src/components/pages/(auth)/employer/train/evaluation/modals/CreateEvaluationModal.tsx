@@ -24,7 +24,7 @@ export default function CreateEvaluationModal({
 }) {
   const [progressBar, setProgressBar] = useState(1);
   const cancelButtonRef = useRef(null);
-  const { register, setValue, getValues, watch, reset, control } = useForm<any>({
+  const { register, handleSubmit, setValue, getValues, watch, reset, control } = useForm<any>({
     defaultValues: {
       criteria_rating_view_type: 'default',
       total_score: 1,
@@ -51,7 +51,7 @@ export default function CreateEvaluationModal({
   const [isPreview, setIsPreview] = useState(false);
   const { mutate, isLoading } = useAddEvaluation();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: async (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
@@ -63,7 +63,7 @@ export default function CreateEvaluationModal({
       },
     };
     mutate(data, callbackReq);
-  };
+  });
 
   const submitEvalDetails = () => {
     setProgressBar(+1);
@@ -292,7 +292,7 @@ export default function CreateEvaluationModal({
                     <>
                       {!isPreview && (
                         <FormProvider {...method}>
-                          <form onSubmit={method.handleSubmit(onSubmit)}>
+                          <form onSubmit={onSubmit}>
                             <ViewModeTab
                               {...{
                                 setIsPreview,
