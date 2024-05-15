@@ -27,6 +27,8 @@ function Header({ type }: { type: string }) {
     'employee-separation',
     'setup-employer-profile',
     'admin',
+    'train',
+    'settings',
   ];
   const applicantRoutes: any = [
     'application-tracker',

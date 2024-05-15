@@ -88,8 +88,8 @@ const menus = [
     icon: <SettingsLogo />,
     text: 'Settings',
     link: '/settings',
-    isAvailable: false,
-    isDisabled: true,
+    isAvailable: true,
+    isDisabled: false,
   },
 ];
 
