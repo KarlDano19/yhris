@@ -7,11 +7,11 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useUpdateEvaluation from '../hooks/useUpdateEvaluation';
 
-import EvaluationInfoTab from '../tabs/EvaluationInfoTab';
-import EvaluationFormTab from '../tabs/EvaluationFormTab';
-import EvaluationCriterionTab from '../tabs/EvaluationCriterionTab';
-import ViewModeTab from '../tabs/ViewModeTab';
-import PreviewTab from '../tabs/PreviewTab';
+import EvaluationInfoTab from '../edit-tabs/EvaluationInfoTab';
+import EvaluationFormTab from '../edit-tabs/EvaluationFormTab';
+import EvaluationCriterionTab from '../edit-tabs/EvaluationCriterionTab';
+import ViewModeTab from '../edit-tabs/ViewModeTab';
+import PreviewTab from '../edit-tabs/PreviewTab';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -72,7 +72,7 @@ export default function EditEvaluationModal({
       setValue('evaluation_criterion', evaluationDetails.evaluation_criterion);
       setValue('criteria_rating_view_type', evaluationDetails.criteria_rating_view_type);
     }
-  }, [evaluationDetails])
+  }, [evaluationDetails]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -87,7 +87,7 @@ export default function EditEvaluationModal({
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate({evaluationId, data}, callbackReq);
+    mutate({ evaluationId, data }, callbackReq);
   });
 
   const submitEvalDetails = () => {
@@ -206,9 +206,13 @@ export default function EditEvaluationModal({
                       </div>
                     </div>
 
-                    <nav className='-mb-px flex relative justify-between w-[90%] mx-auto mt-[-9px]' aria-label='Tabs'>
+                    <nav
+                      className='mb-px flex relative justify-between w-[90%] mx-auto mt-[-9px]'
+                      aria-label='edit-tabs'
+                    >
                       <li
-                        className={`text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue`}
+                        className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue cursor-pointer'
+                        onClick={() => setCurrentTab(1)}
                       >
                         <div className='bg-white px-2'>
                           <div
@@ -224,12 +228,13 @@ export default function EditEvaluationModal({
                     ${
                       currentTab >= 2 ? 'text-savoy-blue' : 'text-gray-500'
                     } text-center text-sm font-semibold list-none flex flex-col items-center`}
+                        onClick={() => setCurrentTab(2)}
                       >
                         <div className='bg-white px-2'>
                           <div
                             className={`${
                               currentTab >= 2 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
-                            } h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center`}
+                            } h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center cursor-pointer`}
                           >
                             <h1 className='text-white'>2</h1>
                           </div>
@@ -241,12 +246,13 @@ export default function EditEvaluationModal({
                     ${
                       currentTab >= 3 ? 'text-savoy-blue' : 'text-gray-500'
                     } text-center text-sm font-semibold list-none flex flex-col items-center`}
+                        onClick={() => setCurrentTab(3)}
                       >
                         <div className='bg-white px-2'>
                           <div
                             className={`${
                               currentTab >= 3 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
-                            }  h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center`}
+                            }  h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center cursor-pointer`}
                           >
                             <h1 className='text-white'>3</h1>
                           </div>
@@ -257,7 +263,8 @@ export default function EditEvaluationModal({
                         className={`
                     ${
                       currentTab >= 4 ? 'text-savoy-blue' : 'text-gray-500'
-                    } text-center text-sm font-semibold list-none flex flex-col items-center`}
+                    } text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer`}
+                    onClick={() => setCurrentTab(4)}
                       >
                         <div className='bg-white px-2'>
                           <div
@@ -293,7 +300,6 @@ export default function EditEvaluationModal({
                             register,
                             watch,
                             setValue,
-                            getValues,
                           }}
                         />
                         {renderButtons()}

@@ -1,12 +1,8 @@
 'use client';
 
-import { useFormContext } from 'react-hook-form';
-
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
-function EvaluationInfoTab() {
-  const { register } = useFormContext();
-
+function EvaluationInfoTab({ register }: { register: any }) {
   return (
     <>
       <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-6'>

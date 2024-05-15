@@ -29,8 +29,8 @@ export default function CreateEvaluationModal({
       criteria_rating_view_type: 'default',
       total_score: 1,
       passing_score: 1,
-      is_show_remarks: null,
-      is_show_criteria_comment: null,
+      is_show_remarks: false,
+      is_show_criteria_comment: false,
       evaluation_criterion: [
         {
           id: uuidv4(),
@@ -160,7 +160,10 @@ export default function CreateEvaluationModal({
                 }relative overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all`}
               >
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Create Evaluation Template</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>
+                    {!isPreview && "Create Evaluation Template"}
+                    {isPreview && "Preview"}
+                  </h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 {!isPreview && (
@@ -252,11 +255,7 @@ export default function CreateEvaluationModal({
                   {currentTab === 1 ? (
                     <FormProvider {...method}>
                       <form onSubmit={method.handleSubmit(submitEvalDetails)}>
-                        <EvaluationInfoTab
-                          {...{
-                            register,
-                          }}
-                        />
+                        <EvaluationInfoTab />
                         {renderButtons()}
                       </form>
                     </FormProvider>
@@ -265,10 +264,8 @@ export default function CreateEvaluationModal({
                       <form onSubmit={method.handleSubmit(submitEvalForm)}>
                         <EvaluationFormTab
                           {...{
-                            register,
                             watch,
                             setValue,
-                            getValues,
                           }}
                         />
                         {renderButtons()}

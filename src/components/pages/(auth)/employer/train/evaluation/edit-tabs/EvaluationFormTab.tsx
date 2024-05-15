@@ -3,21 +3,13 @@
 import { useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
-import { useFormContext } from 'react-hook-form';
 import classNames from '@/helpers/classNames';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
 
-const Tab = ({
-  watch,
-  setValue,
-}: {
-  watch: any;
-  setValue: any;
-}) => {
-  const { register } = useFormContext();
+const Tab = ({ register, watch, setValue }: { register: any; watch: any; setValue: any }) => {
   const [remarks, setRemarks] = useState<boolean | null>(watch('is_show_remarks'));
   const [commentCriteria, setCommentCriteria] = useState<boolean | null>(watch('is_show_criteria_comment'));
 
