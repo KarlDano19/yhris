@@ -1,14 +1,22 @@
 'use client';
 
-import { useFormContext } from 'react-hook-form';
-
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
-function EvaluationInfoTab() {
-  const { register } = useFormContext();
+function EvaluationInfoTab({
+  register,
+  handleSubmit,
+  setCurrentTab,
+}: {
+  register: any;
+  handleSubmit: any;
+  setCurrentTab: any;
+}) {
+  const onSubmit = handleSubmit(() => {
+    setCurrentTab(2);
+  });
 
   return (
-    <>
+    <form onSubmit={onSubmit}>
       <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-6'>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -84,7 +92,7 @@ function EvaluationInfoTab() {
               <option value='' disabled>
                 Select...
               </option>
-              <option value='sheet'>Sheet</option>
+              {/* <option value='sheet'>Sheet</option> */}
               <option value='form'>Form</option>
             </select>
             <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
@@ -93,7 +101,16 @@ function EvaluationInfoTab() {
           </div>
         </div>
       </div>
-    </>
+      <hr />
+      <div className='pt-4 px-4 text-right'>
+        <button
+          type='submit'
+          className='w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+        >
+          NEXT
+        </button>
+      </div>
+    </form>
   );
 }
 

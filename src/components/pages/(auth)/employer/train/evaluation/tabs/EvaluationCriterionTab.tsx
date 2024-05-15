@@ -9,11 +9,29 @@ import CritiriaSubItem from './CritiriaSubItem';
 import AddCircleIcon from '@/svg/AddCircleIcon';
 import MoveIcon from '@/svg/MoveIcon';
 
-const Tab = ({ control, register, watch, setValue }: any) => {
+function EvaluationCriterionTab({
+  control,
+  register,
+  watch,
+  setValue,
+  handleSubmit,
+  setCurrentTab,
+}: {
+  control: any;
+  register: any;
+  watch: any;
+  setValue: any;
+  handleSubmit: any;
+  setCurrentTab: any;
+}) {
   const childrenRef = useRef<any>({});
   const { fields, append, move } = useFieldArray({
     control,
     name: 'evaluation_criterion',
+  });
+
+  const onSubmit = handleSubmit(() => {
+    setCurrentTab(4);
   });
 
   const addSection = () => {
@@ -62,7 +80,7 @@ const Tab = ({ control, register, watch, setValue }: any) => {
   };
 
   return (
-    <>
+    <form onSubmit={onSubmit}>
       <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-6'>
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-8 flow-root'>
@@ -133,8 +151,24 @@ const Tab = ({ control, register, watch, setValue }: any) => {
           </div>
         </div>
       </div>
-    </>
+      <hr />
+      <div className='flex justify-between pt-4 px-4'>
+        <button
+          type='button'
+          className='w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+          onClick={() => setCurrentTab(2)}
+        >
+          BACK
+        </button>
+        <button
+          type='submit'
+          className='w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+        >
+          NEXT
+        </button>
+      </div>
+    </form>
   );
-};
+}
 
-export default Tab;
+export default EvaluationCriterionTab;

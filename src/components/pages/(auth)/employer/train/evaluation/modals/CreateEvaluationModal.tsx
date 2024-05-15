@@ -1,12 +1,11 @@
-import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useAddEvaluation from '../hooks/useAddEvaluation';
-
 import EvaluationInfoTab from '../tabs/EvaluationInfoTab';
 import EvaluationFormTab from '../tabs/EvaluationFormTab';
 import EvaluationCriterionTab from '../tabs/EvaluationCriterionTab';
@@ -16,21 +15,27 @@ import PreviewTab from '../tabs/PreviewTab';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 export default function CreateEvaluationModal({
+  refetch,
   isOpen,
   setIsOpen,
+  mainSetIsOpen,
 }: {
+  refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  mainSetIsOpen: Dispatch<boolean>;
 }) {
-  const [progressBar, setProgressBar] = useState(1);
+  const [currentTab, setCurrentTab] = useState(1);
+  const [isPreview, setIsPreview] = useState(false);
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, setValue, getValues, watch, reset, control } = useForm<any>({
+  const { register, handleSubmit, setValue, getValues, watch, control, reset } = useForm<any>({
     defaultValues: {
       criteria_rating_view_type: 'default',
       total_score: 1,
       passing_score: 1,
       is_show_remarks: false,
       is_show_criteria_comment: false,
+      rating_type: 'none',
       evaluation_criterion: [
         {
           id: uuidv4(),
@@ -46,17 +51,16 @@ export default function CreateEvaluationModal({
       ],
     },
   });
-  const method = useForm();
-  const [currentTab, setCurrentTab] = useState(1);
-  const [isPreview, setIsPreview] = useState(false);
   const { mutate, isLoading } = useAddEvaluation();
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
-      onSuccess: async (data: any) => {
+      onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         setIsOpen(false);
+        mainSetIsOpen(false);
         reset();
+        refetch();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
@@ -64,63 +68,6 @@ export default function CreateEvaluationModal({
     };
     mutate(data, callbackReq);
   });
-
-  const submitEvalDetails = () => {
-    setProgressBar(+1);
-    setCurrentTab(currentTab + 1);
-  };
-
-  const submitEvalForm = () => {
-    setProgressBar(+1);
-    setCurrentTab(currentTab + 1);
-  };
-
-  const submitTemplateForm = () => {
-    setProgressBar(+1);
-    setCurrentTab(currentTab + 1);
-  };
-
-  const renderButtons = () => (
-    <>
-      <hr />
-      <div className={`${currentTab <= 1 ? 'justify-end' : 'justify-between'} md:flex pt-4 px-4`}>
-        <button
-          type='button'
-          className={`${
-            currentTab <= 1 ? 'hidden' : ''
-          } w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
-          onClick={prevTab}
-        >
-          BACK
-        </button>
-        <button
-          type='submit'
-          className='w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-        >
-          {currentTab < 4 ? (
-            'NEXT'
-          ) : isLoading ? (
-            <div
-              className='animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-white rounded-full my-1 mx-2'
-              role='status'
-              aria-label='loading'
-            >
-              <span className='sr-only'>Loading...</span>
-            </div>
-          ) : (
-            'Save'
-          )}
-        </button>
-      </div>
-    </>
-  );
-
-  const prevTab = () => {
-    if (currentTab > 0) {
-      setProgressBar(progressBar - 1);
-      setCurrentTab(currentTab - 1);
-    }
-  };
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -161,8 +108,8 @@ export default function CreateEvaluationModal({
               >
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>
-                    {!isPreview && "Create Evaluation Template"}
-                    {isPreview && "Preview"}
+                    {!isPreview && 'Create Evaluation Template'}
+                    {isPreview && 'Preview'}
                   </h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
@@ -251,69 +198,62 @@ export default function CreateEvaluationModal({
                     </nav>
                   </div>
                 )}
-                <div>
-                  {currentTab === 1 ? (
-                    <FormProvider {...method}>
-                      <form onSubmit={method.handleSubmit(submitEvalDetails)}>
-                        <EvaluationInfoTab />
-                        {renderButtons()}
-                      </form>
-                    </FormProvider>
-                  ) : currentTab === 2 ? (
-                    <FormProvider {...method}>
-                      <form onSubmit={method.handleSubmit(submitEvalForm)}>
-                        <EvaluationFormTab
-                          {...{
-                            watch,
-                            setValue,
-                          }}
-                        />
-                        {renderButtons()}
-                      </form>
-                    </FormProvider>
-                  ) : currentTab === 3 ? (
-                    <FormProvider {...method}>
-                      <form onSubmit={method.handleSubmit(submitTemplateForm)}>
-                        <EvaluationCriterionTab
-                          {...{
-                            control,
-                            register,
-                            watch,
-                            setValue,
-                          }}
-                        />
-                        {renderButtons()}
-                      </form>
-                    </FormProvider>
-                  ) : (
-                    <>
-                      {!isPreview && (
-                        <FormProvider {...method}>
-                          <form onSubmit={onSubmit}>
-                            <ViewModeTab
-                              {...{
-                                setIsPreview,
-                                setValue,
-                                getValues,
-                              }}
-                            />
-                            {renderButtons()}
-                          </form>
-                        </FormProvider>
-                      )}
-                      {isPreview && (
-                        <FormProvider {...method}>
-                          <PreviewTab
-                            {...{
-                              setIsPreview,
-                              getValues,
-                            }}
-                          />
-                        </FormProvider>
-                      )}
-                    </>
-                  )}
-                </div>
+                {currentTab === 1 && (
+                  <EvaluationInfoTab
+                    {...{
+                      register,
+                      handleSubmit,
+                      setCurrentTab,
+                    }}
+                  />
+                )}
+                {currentTab === 2 && (
+                  <EvaluationFormTab
+                    {...{
+                      register,
+                      watch,
+                      setValue,
+                      handleSubmit,
+                      setCurrentTab,
+                    }}
+                  />
+                )}
+                {currentTab === 3 && (
+                  <EvaluationCriterionTab
+                    {...{
+                      control,
+                      register,
+                      watch,
+                      setValue,
+                      handleSubmit,
+                      setCurrentTab,
+                    }}
+                  />
+                )}
+                {currentTab === 4 && (
+                  <>
+                    {!isPreview && (
+                      <ViewModeTab
+                        {...{
+                          setIsPreview,
+                          setValue,
+                          getValues,
+                          onSubmit,
+                          setCurrentTab,
+                          isLoading,
+                        }}
+                      />
+                    )}
+                    {isPreview && (
+                      <PreviewTab
+                        {...{
+                          setIsPreview,
+                          getValues,
+                        }}
+                      />
+                    )}
+                  </>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>

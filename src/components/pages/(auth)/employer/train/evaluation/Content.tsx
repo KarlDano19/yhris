@@ -283,7 +283,7 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <SelectionModal isOpen={isSelectionModalOpen} setIsOpen={setIsSelectionModalOpen} />
+      <SelectionModal refetch={refetchEvaluation} isOpen={isSelectionModalOpen} setIsOpen={setIsSelectionModalOpen} />
       <EditEvaluationModal
         refetch={refetchEvaluation}
         isOpen={isEditEvaluationModalOpen}
