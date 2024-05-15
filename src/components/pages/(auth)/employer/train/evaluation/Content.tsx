@@ -117,6 +117,7 @@ const Content = () => {
     if (evaluationItems && evaluationItems?.length > 0) {
       return evaluationItems?.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_type}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
@@ -256,6 +257,9 @@ const Content = () => {
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
+                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900'>
+                        Date
+                      </th>
                       <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900'>
                         Name
                       </th>
