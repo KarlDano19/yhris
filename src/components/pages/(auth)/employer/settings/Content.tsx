@@ -1,25 +1,24 @@
 import React from 'react';
 import Link from 'next/link';
-import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
 
 import { ArrowLeftIcon, UsersIcon } from '@heroicons/react/24/solid';
-import CreateMemoLogo from '@/svg/CreateMemoLogo';
-import BenefitsLogo from '@/svg/BenefitsLogo';
-import EmployeeLogo from '@/svg/EmployeeLogo';
+import UserLogo from '@/svg/UserIcon';
+import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
+import CompanySettingsLogo from '@/svg/CompanySettingslogo';
 
 const menus = [
   {
-    icon: <AddressEmployeeIssueLogo />,
+    icon: <CompanySettingsLogo />,
     text: "Company Settings",
     link: "/settings/company-settings"
   },
   {
-    icon: <CreateMemoLogo />,
+    icon: <GeneralSettingsLogo />,
     text: "General Settings",
     link: "/settings/general-settings"
   },
   {
-    icon: <BenefitsLogo />,
+    icon: <UserLogo />,
     text: "Users",
     link: "/settings/users"
   },
@@ -31,7 +30,7 @@ const Content = () => {
       <div className="flex p-4">
         <Link href="/dashboard" className="flex-none flex gap-3 items-center hover:bg-gray-200">
           <ArrowLeftIcon className="h-5 w-5" />
-          <h4>Settings</h4>
+          <h4 className='font-semibold text-xl'>Settings</h4>
         </Link>
       </div>
       <div className="px-2 md:px-8 lg:px-4">
