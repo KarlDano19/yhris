@@ -22,7 +22,7 @@ export const defaultSession: SessionData = {
 
 export const sessionOptions: SessionOptions = {
   password: 'nI6xnF+V1OJj/GqGxaEwf6s1L48EBjclCu+TdQoFS6Y=',
-  cookieName: 'session_id',
+  cookieName: 'iron_session_id',
   cookieOptions: {
     // secure only works in `https` environments
     // if your localhost is not on `https`, then use: `secure: process.env.NODE_ENV === "production"`

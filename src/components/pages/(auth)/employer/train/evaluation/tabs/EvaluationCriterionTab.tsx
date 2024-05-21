@@ -7,6 +7,7 @@ import { useFieldArray } from 'react-hook-form';
 import CritiriaSubItem from './CritiriaSubItem';
 
 import AddCircleIcon from '@/svg/AddCircleIcon';
+import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MoveIcon from '@/svg/MoveIcon';
 
 function EvaluationCriterionTab({
@@ -25,7 +26,7 @@ function EvaluationCriterionTab({
   setCurrentTab: any;
 }) {
   const childrenRef = useRef<any>({});
-  const { fields, append, move } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'evaluation_criterion',
   });
@@ -44,6 +45,11 @@ function EvaluationCriterionTab({
         },
       ],
     });
+  };
+
+  const removeSection = (index: number) => {
+    if (fields.length === 1) return;
+    remove(index);
   };
 
   const reorder = (result: any) => {
@@ -125,6 +131,12 @@ function EvaluationCriterionTab({
                                       onClick={() => addSection()}
                                     >
                                       <AddCircleIcon />
+                                    </div>
+                                    <div
+                                      className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
+                                      onClick={() => removeSection(index)}
+                                    >
+                                      <DeleteIconNoBorder />
                                     </div>
                                   </div>
                                 </div>
