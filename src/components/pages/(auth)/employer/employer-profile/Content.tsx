@@ -1,30 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import Details from './Details';
 import Settings from './Settings';
-import useSavedProfile from './hooks/useSavedProfile';
+import useGetEmployerProfile from '../../../../hooks/useGetEmployerProfile';
+import useSavedProfile from './hooks/useUpdateProfile';
 import classNames from '@/helpers/classNames';
-import updateSession from '@/helpers/updateSession';
 
 import { T_EmployerProfile } from '@/types/globals';
 
-const Content = () => {
+function Content() {
+  const queryClient = useQueryClient(); 
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [progressBar, setProgressBar] = useState(0);
   const { register, setValue, watch, handleSubmit } = useForm<T_EmployerProfile>();
   const { mutate, isLoading } = useSavedProfile();
 
+  useEffect(() => {
+    if (cachedProfile) {
+      setTimeout(() => {
+        const cachedData: any = cachedProfile?.state?.data;
+        if (cachedData) {
+          setValue('companyName', cachedData.name);
+          setValue('companyDescription', cachedData.description);
+          setValue('typeOfIndustry', cachedData.type_of_industry);
+          setValue('workSetUp', cachedData.work_set_up);
+          setValue('email', cachedData.email);
+          setValue('mobileNumber', cachedData.mobile_number);
+          setValue('landlineNumber', cachedData.landline_number);
+          setValue('building', cachedData.building);  
+          setValue('street', cachedData.street);  
+          setValue('locality', cachedData.locality);  
+          setValue('city', cachedData.city);  
+          setValue('zipCode', cachedData.zip_code);  
+          setValue('country', cachedData.country);  
+          setValue('language', cachedData.language);  
+          setValue('currency', cachedData.currency);
+          setValue('imagePath', cachedData.logo);  
+        }
+      }, 250);
+    }
+  }, [cachedProfile]);
+
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
-      onSuccess: async (data: any) => {
-        await updateSession({ hasProfile: true });
+      onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        location.href = '/dashboard';
+        queryClient.refetchQueries({ queryKey: ['employerProfileCache'] });
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
@@ -35,8 +63,7 @@ const Content = () => {
 
   return (
     <>
-      <div className='container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-8'>
-        <h1>Tell us more about you!</h1>
+      <div className='container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-12 mb-8'>
         <div className='px-5 sm:px-7 lg:px-9'>
           <div className='mt-5'>
             <div className='sm:hidden'>
@@ -55,7 +82,8 @@ const Content = () => {
               <div className='border-t-4 border-gray-300 mx-24 w-auto mb-3 translate-y-[23px] hidden'></div>
               <nav className='-mb-px flex relative justify-between w-[90%] mx-auto' aria-label='Tabs'>
                 <li
-                  className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue'
+                  className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue cursor-pointer'
+                  onClick={() => setProgressBar(0)}
                 >
                   <div className='bg-white px-2'>
                     <div
@@ -68,9 +96,10 @@ const Content = () => {
                 </li>
                 <li
                   className={classNames(
-                    'text-center text-sm font-semibold list-none flex flex-col items-center',
+                    'text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer',
                     progressBar >= 1 ? 'text-savoy-blue' : 'text-gray-500'
                   )}
+                  onClick={() => setProgressBar(1)}
                 >
                   <div className='bg-white px-2'>
                     <div
@@ -93,21 +122,13 @@ const Content = () => {
             </div>
           </div>
           {progressBar === 0 && (
-            <Details
-              register={register}
-              handleSubmit={handleSubmit}
-              setValue={setValue}
-              watch={watch}
-              setProgressBar={setProgressBar}
-            />
+            <Details register={register} onSubmit={onSubmit} setValue={setValue} watch={watch} isLoading={isLoading} />
           )}
-          {progressBar === 1 && (
-            <Settings register={register} onSubmit={onSubmit} setProgressBar={setProgressBar} isLoading={isLoading} />
-          )}
+          {progressBar === 1 && <Settings register={register} onSubmit={onSubmit} isLoading={isLoading} />}
         </div>
       </div>
     </>
   );
-};
+}
 
 export default Content;

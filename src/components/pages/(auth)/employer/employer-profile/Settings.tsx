@@ -1,16 +1,6 @@
 'use client';
 
-const Settings = ({
-  register,
-  onSubmit,
-  setProgressBar,
-  isLoading,
-}: {
-  register: any;
-  onSubmit: any;
-  setProgressBar: any;
-  isLoading: any;
-}) => {
+function Settings({ register, onSubmit, isLoading }: { register: any; onSubmit: any; isLoading: any }) {
   return (
     <form onSubmit={onSubmit}>
       <div className='mt-10 mb-5'>
@@ -38,15 +28,6 @@ const Settings = ({
         </select>
       </div>
       <button
-        type='button'
-        className='w-52 float-left uppercase text-blue-600 hover:text-blue-700 border-2 border-blue-600 hover:border-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
-        onClick={() => {
-          setProgressBar(1);
-        }}
-      >
-        Back
-      </button>
-      <button
         type='submit'
         className='w-52 float-right uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
         disabled={isLoading}
@@ -72,10 +53,10 @@ const Settings = ({
             <span className='sr-only'>Loading...</span>
           </div>
         )}
-        {!isLoading && 'Submit'}
+        {!isLoading && 'Save'}
       </button>
     </form>
   );
-};
+}
 
 export default Settings;
