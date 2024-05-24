@@ -14,7 +14,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [selectedId, setSelectedId] = useState('');
+  const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean | null>(null);
   const [itemsFilter, setItemsFilter] = useState({
     from: '',
@@ -27,10 +27,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: employeeListRefetch,
   } = useGetEmployeeItems(itemsFilter);
   const {
-    data: employeeDetailData,
+    data: dataEmployeeDetail,
     isLoading: isEmployeeDetailLoading,
     refetch: employeeDetailRefetch,
-  } = useGetEmployeeDetails(selectedId);
+  } = useGetEmployeeDetails(selectedEmployeeId);
 
   useEffect(() => {
     if (employeeListData) {
@@ -43,16 +43,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [employeeListData]);
 
   useEffect(() => {
-    if (selectedId) {
+    if (selectedEmployeeId) {
       employeeDetailRefetch();
+      if (dataEmployeeDetail && Object.keys(dataEmployeeDetail).length && !isEmployeeDetailLoading) {
+        setIsEmployeesModalOpen(true);
+      }
     }
-  }, [selectedId]);
+  }, [selectedEmployeeId, dataEmployeeDetail]);
 
-  useEffect(() => {
-    if (employeeDetailData && Object.keys(employeeDetailData).length && !isEmployeeDetailLoading) {
+  useEffect(() => {}, []);
+
+  const openEditEmployeeModal = (employeeId: number) => {
+    if (selectedEmployeeId && selectedEmployeeId == employeeId) {
       setIsEmployeesModalOpen(true);
+    } else {
+      setselectedEmployeeId(employeeId);
     }
-  }, [employeeDetailData]);
+  };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -109,17 +116,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
-        <tr
-          key={item.id}
-          className='cursor-pointer'
-          onClick={() => {
-            if (selectedId && selectedId == item.id) {
-              setIsEmployeesModalOpen(true);
-            } else {
-              setSelectedId(item.id);
-            }
-          }}
-        >
+        <tr key={item.id} className='cursor-pointer' onClick={() => openEditEmployeeModal(item.id)}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
@@ -239,13 +236,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      {isEmployeesModalOpen && (
-        <EmployeesModal
-          employeeDetailData={employeeDetailData}
-          isOpen={isEmployeesModalOpen}
-          setIsOpen={setIsEmployeesModalOpen}
-        />
-      )}
+      <EmployeesModal
+        isOpen={isEmployeesModalOpen}
+        setIsOpen={setIsEmployeesModalOpen}
+        dataEmployeeDetail={dataEmployeeDetail}
+      />
     </>
   );
 };

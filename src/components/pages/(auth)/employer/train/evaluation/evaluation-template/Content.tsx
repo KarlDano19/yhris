@@ -54,19 +54,16 @@ const Content = () => {
   useEffect(() => {
     if (selectedEvaluationId) {
       refetchEvaluationDetail();
-    }
-  }, [selectedEvaluationId]);
-
-  useEffect(() => {
-    if (dataEvaluationDetail && Object.keys(dataEvaluationDetail).length && !isGetEvaluationDetailLoading) {
-      if (actionType === 'edit') {
-        setIsEditEvaluationModalOpen(true);
-      }
-      if (actionType === 'delete') {
-        setIsDeleteEvaluationModalOpen(true);
+      if (dataEvaluationDetail && Object.keys(dataEvaluationDetail).length && !isGetEvaluationDetailLoading) {
+        if (actionType === 'edit') {
+          setIsEditEvaluationModalOpen(true);
+        }
+        if (actionType === 'delete') {
+          setIsDeleteEvaluationModalOpen(true);
+        }
       }
     }
-  }, [dataEvaluationDetail]);
+  }, [selectedEvaluationId, dataEvaluationDetail]);
 
   const openEditEvaluationModal = (evaluationDetails: any) => {
     setActionType('edit');
@@ -139,15 +136,9 @@ const Content = () => {
           <tr>
             <td colSpan={7}>
               <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-              <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
-              <div className='text-center mb-4'>
-                <button
-                  className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
-                  onClick={() => setIsSelectionModalOpen(true)}
-                >
-                  CREATE
-                </button>
-              </div>
+              <h4 className='text-center text-gray-300 text-sm mb-4'>
+                Please click create to add evaluation template.
+              </h4>
             </td>
           </tr>
         </>

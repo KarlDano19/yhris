@@ -102,10 +102,10 @@ function EvaluationInfoTab({
         </div>
       </div>
       <hr />
-      <div className='pt-4 px-4 text-right'>
+      <div className='py-4 px-4 text-right'>
         <button
           type='submit'
-          className='w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+          className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
         >
           NEXT
         </button>

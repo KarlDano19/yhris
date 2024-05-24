@@ -20,7 +20,7 @@ const Details = ({
   setProgressBar: any;
 }) => {
   const onSubmit = handleSubmit(() => {
-    setProgressBar(2);
+    setProgressBar(1);
   });
 
   const uploadImgOnChange = ({ target }: { target: any }) => {

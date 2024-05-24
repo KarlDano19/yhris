@@ -53,7 +53,7 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
           className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
           onClick={() => setIsPreview(false)}
         >
-          Back to Editing
+          BACK TO EDITING
         </button>
       </div>
       {currentTab === 0 && (
@@ -91,12 +91,13 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
               </div>
             </div>
           </div>
-          <div className='w-full border-t-2 px-6 pt-4 relative text-right'>
+          <hr />
+          <div className='py-4 px-4 text-right'>
             <button
-              className='text-sm w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+              className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
               onClick={() => setCurrentTab(1)}
             >
-              Next
+              NEXT
             </button>
           </div>
         </>
@@ -159,29 +160,30 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
               );
             })}
           </div>
-          <div className='w-full border-t-2 px-6 pt-4 relative flex justify-between'>
+          <hr />
+          <div className='py-4 px-4 text-right'>
             {evaluationCriterionIndex == 0 && (
               <button
-                className='w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                 onClick={() => setCurrentTab(0)}
               >
-                Back
+                BACK
               </button>
             )}
             {evaluationCriterionIndex != 0 && (
               <button
-                className='w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                 onClick={() => setEvaluationCriterionIndex(evaluationCriterionIndex - 1)}
               >
-                Back
+                BACK
               </button>
             )}
             {evaluationCriterionIndex + 1 !== evaluationDetails.evaluation_criterion.length && (
               <button
-                className='text-sm w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 font-semibold text-sm text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                 onClick={() => setEvaluationCriterionIndex(evaluationCriterionIndex + 1)}
               >
-                Next
+                NEXT
               </button>
             )}
           </div>

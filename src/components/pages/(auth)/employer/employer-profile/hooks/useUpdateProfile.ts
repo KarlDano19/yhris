@@ -23,7 +23,7 @@ async function updateProfile(profile: T_EmployerProfile) {
     data.append('language', profile.language);
     data.append('currency', profile.currency);
     if (profile.companyLogo) {
-      data.append('logo_file', profile.companyLogo);
+      data.append('logo', profile.companyLogo);
     }
     const config = {
       method: 'PATCH',

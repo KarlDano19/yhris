@@ -7,13 +7,13 @@ import DateCalendar from '@/svg/DateCalendar';
 import DropDownArrow from '@/svg/DropDownArrow';
 
 export default function EmployeesModal({
-  employeeDetailData,
   isOpen,
   setIsOpen,
+  dataEmployeeDetail,
 }: {
-  employeeDetailData: any;
   isOpen: boolean | null;
   setIsOpen: Dispatch<boolean | null>;
+  dataEmployeeDetail: any;
 }) {
   const cancelButtonRef = useRef(null);
   const [cvFileDetail, setCVFileDetail] = useState<any>({
@@ -39,34 +39,34 @@ export default function EmployeesModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (employeeDetailData) {
-      const splitCVFile = (employeeDetailData.cv || '').split('/');
+    if (dataEmployeeDetail) {
+      const splitCVFile = (dataEmployeeDetail?.cv || '').split('/');
       setCVFileDetail({
         filename: splitCVFile[splitCVFile.length - 1],
-        file: `${employeeDetailData.cv}`,
+        file: `${dataEmployeeDetail?.cv}`,
       });
-      if (employeeDetailData.work_experience.length !== 0) {
-        for (let exp of employeeDetailData.work_experience) {
+      if (dataEmployeeDetail?.work_experience.length !== 0) {
+        for (let exp of dataEmployeeDetail?.work_experience) {
           append(exp);
         }
       }
-      if ((employeeDetailData?.setup_preference || []).includes('Work From Home')) {
+      if ((dataEmployeeDetail?.setup_preference || []).includes('Work From Home')) {
         setCheckWFH(true);
       }
-      if ((employeeDetailData?.setup_preference || []).includes('Work on Site')) {
+      if ((dataEmployeeDetail?.setup_preference || []).includes('Work on Site')) {
         setCheckWOS(true);
       }
-      setValue('firstName', employeeDetailData.firstname);
-      setValue('middleName', employeeDetailData.middlename);
-      setValue('lastName', employeeDetailData.lastname);
-      setValue('email', employeeDetailData.email);
-      setValue('mobileNo', employeeDetailData.mobile);
-      setValue('address', employeeDetailData.address);
-      setValue('nationality', employeeDetailData.nationality);
-      setValue('religion', employeeDetailData.religion);
-      setValue('portfolio', employeeDetailData.portfolio_url);
+      setValue('firstName', dataEmployeeDetail?.firstname);
+      setValue('middleName', dataEmployeeDetail?.middlename);
+      setValue('lastName', dataEmployeeDetail?.lastname);
+      setValue('email', dataEmployeeDetail?.email);
+      setValue('mobileNo', dataEmployeeDetail?.mobile);
+      setValue('address', dataEmployeeDetail?.address);
+      setValue('nationality', dataEmployeeDetail?.nationality);
+      setValue('religion', dataEmployeeDetail?.religion);
+      setValue('portfolio', dataEmployeeDetail?.portfolio_url);
     }
-  }, [employeeDetailData]);
+  }, [dataEmployeeDetail]);
 
   const profileSubmit = () => {
     setCurrentForm('experience');
@@ -86,9 +86,9 @@ export default function EmployeesModal({
     return fields.map((item, index) => {
       return (
         <div key={index} className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 lg:gap-x-5 gap-y-4 mt-7'>
-          <div className='grid grid-cols-1 md:grid-cols-2 md:grid-cols-3 md:col-span-2 lg:col-span-4 gap-x-5 gap-y-4'>
+          <div className='grid grid-cols-1 md:grid-cols-3 md:col-span-2 lg:col-span-4 gap-x-5 gap-y-4'>
             <div className='grid-item'>
-              <label htmlFor='position' className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'>
+              <label htmlFor='position' className='text-sm font-medium leading-6 text-gray-900'>
                 Position
               </label>
               <div className='mt-2'>
@@ -102,7 +102,7 @@ export default function EmployeesModal({
               </div>
             </div>
             <div className='grid-item'>
-              <label htmlFor='major-roles' className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'>
+              <label htmlFor='major-roles' className='text-sm font-medium leading-6 text-gray-900'>
                 Major Roles
               </label>
               <div className='mt-2'>
@@ -118,7 +118,7 @@ export default function EmployeesModal({
             <div className='grid-item'>
               <label
                 htmlFor='company-organization'
-                className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                className='text-sm font-medium leading-6 text-gray-900'
               >
                 Company Organization
               </label>
@@ -135,7 +135,7 @@ export default function EmployeesModal({
           </div>
           <div className='grid grid-cols-1 md:grid-cols-2 col-span-2 gap-x-5 gap-y-4 mb-4 lg:mb-0'>
             <div className='grid-item'>
-              <label htmlFor='date-from' className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'>
+              <label htmlFor='date-from' className='text-sm font-medium leading-6 text-gray-900'>
                 Date From
               </label>
               <div className='relative mt-2'>
@@ -152,7 +152,7 @@ export default function EmployeesModal({
               </div>
             </div>
             <div className='grid-item'>
-              <label htmlFor='date-to' className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'>
+              <label htmlFor='date-to' className='text-sm font-medium leading-6 text-gray-900'>
                 Date To
               </label>
               <div className='relative mt-2'>
@@ -204,7 +204,7 @@ export default function EmployeesModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-7xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
-                      Employee - {employeeDetailData.firstname} {employeeDetailData.lastname}
+                      Employee - {dataEmployeeDetail?.firstname} {dataEmployeeDetail?.lastname}
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
@@ -216,13 +216,13 @@ export default function EmployeesModal({
                       <>
                         {!viewCV && (
                           <div>
-                            <h5 className='text-xl text-indigo-dye font-semibold'>Profile</h5>
+                            <h5 className='text-xl font-semibold'>Profile</h5>
                             <div className='grid lg:grid-cols-7 gap-x-8 mt-7'>
                               <div className='lg:col-span-1'>
                                 <div
                                   className='image-container bg-gray-300 h-40 w-1/2 md:w-44 lg:w-full rounded-md mx-auto lg:mx-0 flex items-center justify-center'
                                   style={{
-                                    backgroundImage: `url(${employeeDetailData.photo})`,
+                                    backgroundImage: `url(${dataEmployeeDetail?.photo})`,
                                     backgroundRepeat: 'no-repeat',
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',
@@ -233,7 +233,7 @@ export default function EmployeesModal({
                                 <div className='grid-item'>
                                   <label
                                     htmlFor='first-name'
-                                    className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                    className='text-sm font-medium leading-6 text-gray-900'
                                   >
                                     First Name <span className='text-red-500'>*</span>
                                   </label>
@@ -250,7 +250,7 @@ export default function EmployeesModal({
                                 <div className='grid-item'>
                                   <label
                                     htmlFor='middle-name'
-                                    className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                    className='text-sm font-medium leading-6 text-gray-900'
                                   >
                                     Middle Name <span className='text-red-500'>*</span>
                                   </label>
@@ -267,7 +267,7 @@ export default function EmployeesModal({
                                 <div className='grid-item'>
                                   <label
                                     htmlFor='last-name'
-                                    className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                    className='text-sm font-medium leading-6 text-gray-900'
                                   >
                                     Last Name <span className='text-red-500'>*</span>
                                   </label>
@@ -284,7 +284,7 @@ export default function EmployeesModal({
                                 <div className='grid-item'>
                                   <label
                                     htmlFor='email'
-                                    className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                    className='text-sm font-medium leading-6 text-gray-900'
                                   >
                                     Email Address <span className='text-red-500'>*</span>
                                   </label>
@@ -301,7 +301,7 @@ export default function EmployeesModal({
                                 <div className='grid-item'>
                                   <label
                                     htmlFor='mobile-no'
-                                    className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                    className='text-sm font-medium leading-6 text-gray-900'
                                   >
                                     Mobile No. <span className='text-red-500'>*</span>
                                   </label>
@@ -318,7 +318,7 @@ export default function EmployeesModal({
                                 <div className='grid-item'>
                                   <label
                                     htmlFor='address'
-                                    className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                    className='text-sm font-medium leading-6 text-gray-900'
                                   >
                                     Address <span className='text-red-500'>*</span>
                                   </label>
@@ -338,7 +338,7 @@ export default function EmployeesModal({
                               <div className='grid-item'>
                                 <label
                                   htmlFor='nationality'
-                                  className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                  className='text-sm font-medium leading-6 text-gray-900'
                                 >
                                   Nationality <span className='text-red-500'>*</span>
                                 </label>
@@ -355,7 +355,7 @@ export default function EmployeesModal({
                               <div className='grid-item'>
                                 <label
                                   htmlFor='gender'
-                                  className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                  className='text-sm font-medium leading-6 text-gray-900'
                                 >
                                   Gender <span className='text-red-500'>*</span>
                                 </label>
@@ -378,7 +378,7 @@ export default function EmployeesModal({
                               <div className='grid-item'>
                                 <label
                                   htmlFor='religion'
-                                  className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                  className='text-sm font-medium leading-6 text-gray-900'
                                 >
                                   Religion <span className='text-red-500'>*</span>
                                 </label>
@@ -393,7 +393,7 @@ export default function EmployeesModal({
                                 </div>
                               </div>
                               {/* <div className='grid-item'>
-                                <h6 className='block text-indigo-dye text-sm font-medium leading-6 text-gray-900'>Curriculum Vitae/Resume</h6>
+                                <h6 className='block text-sm font-medium leading-6 text-gray-900'>Curriculum Vitae/Resume</h6>
                                 <div className='mt-2'>
                                   <div
                                     className={classNames(
@@ -408,7 +408,7 @@ export default function EmployeesModal({
                               <div className='grid-item'>
                                 <label
                                   htmlFor='portfolio'
-                                  className='text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                                  className='text-sm font-medium leading-6 text-gray-900'
                                 >
                                   Portfolio (Optional)
                                 </label>
@@ -458,7 +458,7 @@ export default function EmployeesModal({
                       </>
                     </form>
                     <form className={`second-form ${currentForm === 'experience' ? '' : 'hidden'}`}>
-                      <h5 className='text-xl text-indigo-dye font-semibold'>Experience</h5>
+                      <h5 className='text-xl font-semibold'>Experience</h5>
                       <div>{renderExpInputs()}</div>
                       {/* <button
                           type='button'
@@ -476,7 +476,7 @@ export default function EmployeesModal({
                           <PlusIcon className='h-5 w-5 mr-3' />
                           Add Experience
                         </button> */}
-                      <h6 className='text-sm text-indigo-dye font-semibold mt-16'>Work Set-up Preference</h6>
+                      <h6 className='text-sm font-semibold mt-16'>Work Set-up Preference</h6>
                       <div className='flex items-center mt-3'>
                         <label
                           className={`h-3.5 w-3.5 flex justify-center items-center cursor-pointer ${

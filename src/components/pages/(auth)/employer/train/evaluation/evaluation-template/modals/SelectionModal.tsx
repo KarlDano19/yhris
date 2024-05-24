@@ -77,18 +77,18 @@ export default function SelectionModal({
                       </div>
                     </div>
                   </div>
+                  <CreateEvaluationModal
+                    refetch={refetch}
+                    isOpen={isCreateEvaluationTemplateOpen}
+                    setIsOpen={setIsCreateEvaluationTemplateOpen}
+                    mainSetIsOpen={setIsOpen}
+                  />
                 </Dialog.Panel>
               </Transition.Child>
             </div>
           </div>
         </Dialog>
       </Transition.Root>
-      <CreateEvaluationModal
-        refetch={refetch}
-        isOpen={isCreateEvaluationTemplateOpen}
-        setIsOpen={setIsCreateEvaluationTemplateOpen}
-        mainSetIsOpen={setIsOpen}
-      />
     </>
   );
 }
