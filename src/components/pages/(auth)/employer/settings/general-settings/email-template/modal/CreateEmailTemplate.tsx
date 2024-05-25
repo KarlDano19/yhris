@@ -13,10 +13,12 @@ export default function EmailTemplateModal({
   isOpen,
   setIsOpen,
   refetch,
+  onSuccess,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
+  onSuccess: any;
 }) {
   const cancelButtonRef = useRef(null);
   const [showCc, setShowCc] = useState(false);
@@ -35,6 +37,7 @@ export default function EmailTemplateModal({
             setIsOpen(false);
             reset();
             refetch();
+            onSuccess();
         },
         onError: async (error: any) => {
             toast.custom(() => <CustomToast message={error.message} type='error' />);

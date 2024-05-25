@@ -11,6 +11,7 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import SuccessModal from './modal/SuccessModal';
+import { set } from 'react-hook-form';
 
 
 const Content = () => {
@@ -19,12 +20,17 @@ const Content = () => {
   });
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(true);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const {
     data: dataEmailTemplate,
     isLoading: isGetEmailTemplateLoading,
     refetch: refetchEmailTemplate,
-  } = getEmailTemplate(itemsFilter)
+  } = getEmailTemplate(itemsFilter);
+
+  const handleCreateTemplateSuccess = () => {
+    setIsSuccessModalOpen(true);
+  };
+
 
   useEffect(() => {
     refetchEmailTemplate()
@@ -163,8 +169,8 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <CreateEmailTemplateModal isOpen={isCreateModalOpen} setIsOpen={setIsCreateModalOpen} refetch={refetchEmailTemplate}/>
-      {/* <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}/> */}
+      <CreateEmailTemplateModal isOpen={isCreateModalOpen} setIsOpen={setIsCreateModalOpen} refetch={refetchEmailTemplate} onSuccess={handleCreateTemplateSuccess}/>
+      <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}/>
     </>
   );
 };
