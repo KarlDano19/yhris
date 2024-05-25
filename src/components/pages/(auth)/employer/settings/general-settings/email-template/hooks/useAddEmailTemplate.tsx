@@ -12,6 +12,7 @@ async function addEmailTemplate(emailTemplate: EmailTemplate) {
       cc: emailTemplate.cc,
       bcc: emailTemplate.bcc,
       body: emailTemplate.body,
+      attachment: emailTemplate.attachment,
     }
     const config = {
       method: 'POST',
