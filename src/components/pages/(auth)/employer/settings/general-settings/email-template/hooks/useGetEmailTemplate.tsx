@@ -1,14 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
 
-async function getEmailTemplate() {
+async function getEmailTemplate(filters: any) {
   try {
+    let newFilters = { ...filters };
+    if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
+    if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    const searchParams = new URLSearchParams(newFilters);
+    const token = getCookie('token');
     const config = {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
+        Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-template/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/?${searchParams}`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -22,8 +29,8 @@ async function getEmailTemplate() {
   }
 }
 
-function useGetEmailTemplate() {
-  const query = useQuery(['payments', {}], () => getEmailTemplate(), {
+function useGetEmailTemplate(filters: any) {
+  const query = useQuery(['emailTemplates', {}], () => getEmailTemplate(filters), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

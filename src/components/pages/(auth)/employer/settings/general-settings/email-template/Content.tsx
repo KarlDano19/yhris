@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 import Link from 'next/link';
+
+import getEmailTemplate from '@/components/pages/(auth)/employer/settings/general-settings/email-template/hooks/useGetEmailTemplate';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-// import EmailTemplateModal from './modal/CreateEmailTemplate';
+import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import SuccessModal from './modal/SuccessModal';
 
 
@@ -18,18 +20,22 @@ const Content = () => {
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(true);
+  const { data: emailTemplatesData, isLoading: isLoadingEmailTemplates } = getEmailTemplate(itemsFilter);
+
+  useEffect(() => {
+    if (emailTemplatesData && !isLoadingEmailTemplates) {
+      setEmailTemplatesItems(emailTemplatesData)
+    }
+  })
 
   const renderRows = () => {
     if (emailTemplatesItems && emailTemplatesItems.length > 0) {
       return emailTemplatesItems.map((item: any) => (
         <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.code}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex gap-2 text-center'>
-              <span>{item.plan}</span>
-            </div>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.discount}%</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.cc}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
         </tr>
       ));
     } else {
@@ -97,7 +103,7 @@ const Content = () => {
                 <table className='min-w-full divide-y divide-gray-300'>
                   <thead>
                     <tr>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0'>
+                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
                         Subject
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
@@ -120,7 +126,7 @@ const Content = () => {
           </div>
         </div>
       </div>
-      {/* <EmailTemplateModal isOpen={isCreateModalOpen} setIsOpen={setIsCreateModalOpen}/> */}
+      <CreateEmailTemplateModal isOpen={isCreateModalOpen} setIsOpen={setIsCreateModalOpen}/>
       <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}/>
     </>
   );

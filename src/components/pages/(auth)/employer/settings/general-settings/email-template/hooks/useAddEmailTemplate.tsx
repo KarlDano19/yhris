@@ -1,9 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function addEmailTemplate(data: any) {
+import { EmailTemplate } from '@/types/globals';
+
+async function addEmailTemplate(emailTemplate: EmailTemplate) {
   try {
     const token = getCookie('token');
+    const data = {
+      subject: emailTemplate.subject,
+      to: emailTemplate.to,
+      cc: emailTemplate.cc,
+      bcc: emailTemplate.bcc,
+      body: emailTemplate.body,
+    }
     const config = {
       method: 'POST',
       headers: {
@@ -27,7 +36,7 @@ async function addEmailTemplate(data: any) {
 }
 
 function useAddEmailTemplate() {
-  const query = useMutation((data: any) => addEmailTemplate(data));
+  const query = useMutation((emailTemplate: EmailTemplate) => addEmailTemplate(emailTemplate));
 
   return query;
 }

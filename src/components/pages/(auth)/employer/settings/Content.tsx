@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { ArrowLeftIcon, UsersIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
-import CompanySettingsLogo from '@/svg/CompanySettingslogo';
+// import CompanySettingsLogo from '@/svg/CompanySettingslogo';
 
 const menus = [
   {
-    icon: <CompanySettingsLogo />,
+    icon: <GeneralSettingsLogo />,
     text: "Company Settings",
     link: "/settings/company-settings"
   },
