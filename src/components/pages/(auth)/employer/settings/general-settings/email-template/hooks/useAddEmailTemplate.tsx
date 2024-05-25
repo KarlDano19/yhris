@@ -22,7 +22,7 @@ async function addEmailTemplate(emailTemplate: EmailTemplate) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-template`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/`, config);
     if (!res.ok) {
       throw res.json();
     }
