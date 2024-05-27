@@ -23,10 +23,10 @@ const Content = () => {
                   key={index}
                   className='p-4 h-44 rounded-lg shadow bg-white flex flex-col gap-2 items-center justify-center'
                 >
-                  <h3 className='text-lg'>{hiredApplicant.job_title}</h3>
+                  <h3 className='text-lg mb-6'>{hiredApplicant.job_title}</h3>
                   <Link
                     href={'/orient/' + hiredApplicant.id}
-                    className='bg-[#EAC645] text-[#2C3F58] font-semibold px-8 py-2 rounded-md hover:bg-opacity-90'
+                    className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
                   >
                     {hiredApplicant.hired_applicant_applied_no} Hired Applicant/s
                   </Link>

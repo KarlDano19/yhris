@@ -3,19 +3,19 @@ import { useMutation } from '@tanstack/react-query';
 async function submitApplication(data: any) {
   try {
     const finalData = {
-      "firstname": data.firstName,
-      "middlename": data.middleName,
-      "lastname": data.lastName,
-      "email": data.email,
-      "mobile": data.mobileNo,
-      "address": data.address,
-      "nationality": data.nationality,
-      "gender": data.gender,
-      "religion": data.religion,
-      "portfolio_url": data.portfolio,
-      "work_experience": data.exp,
-      "setup_preference": (data.setupPreference || '').join()
-    }
+      firstname: data.firstName,
+      middlename: data.middleName,
+      lastname: data.lastName,
+      email: data.email,
+      mobile: data.mobileNo,
+      address: data.address,
+      nationality: data.nationality,
+      gender: data.gender,
+      religion: data.religion,
+      portfolio_url: data.portfolio,
+      work_experience: data.exp,
+      setup_preference: (data.setupPreference || '').join(),
+    };
     const formData = new FormData();
     formData.append('applicant_form', JSON.stringify(finalData));
     formData.append('job_posting', data.jobPosting);
@@ -32,10 +32,7 @@ async function submitApplication(data: any) {
       headers: {},
       body: formData,
     };
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/applications/`,
-      config
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/`, config);
     if (!res.ok) {
       throw res.json();
     }

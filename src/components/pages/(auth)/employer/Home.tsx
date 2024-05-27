@@ -53,8 +53,8 @@ const menus = [
     icon: <TrainLogo />,
     text: 'Train',
     link: '/train',
-    isAvailable: false,
-    isDisabled: true,
+    isAvailable: true,
+    isDisabled: false,
   },
   {
     icon: <PayrollLogo />,

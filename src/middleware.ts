@@ -28,6 +28,7 @@ export async function middleware(request: NextRequest) {
     'orient',
     'manage',
     'employee-separation',
+    'employer-profile',
     'setup-employer-profile',
     'admin',
     'train',
@@ -66,6 +67,7 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'screen-applicants' ||
           firstRoute === 'orient' ||
           firstRoute === 'checkout' ||
+          firstRoute === 'employer-profile' ||
           firstRoute === 'setup-employer-profile' ||
           firstRoute === 'train' ||
           firstRoute === 'settings'
