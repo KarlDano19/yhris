@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_API_URL: process.env.NEXT_API_URL
+  },
   images: {
     remotePatterns: [
       {
-        protocol: process.env.NEXT_REMOTE_PATTERNS_PROTOCOL,
-        hostname: process.env.NEXT_REMOTE_PATTERNS_HOSTNAME,
-        port: process.env.NEXT_REMOTE_PATTERNS_PORT,
+        protocol: 'https',
+        hostname: 'yahshua-hris-bucket.s3.amazonaws.com',
+        port: '',
         pathname: '/**',
       },
     ],

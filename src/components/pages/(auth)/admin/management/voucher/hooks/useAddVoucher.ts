@@ -28,7 +28,6 @@ async function addVoucher(data: any) {
 
 function useAddVoucher() {
   const query = useMutation((data: any) => addVoucher(data));
-
   return query;
 }
 

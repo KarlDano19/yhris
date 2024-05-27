@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function updateVoucher(voucher_id: number | null) {
+async function deleteVoucher(voucher_id: number | null) {
   try {
     const token = getCookie('token');
     const config = {
@@ -25,9 +25,9 @@ async function updateVoucher(voucher_id: number | null) {
   }
 }
 
-function useUpdateVoucher() {
-  const query = useMutation((voucher_id: number | null) => updateVoucher(voucher_id));
+function useDeleteVoucher() {
+  const query = useMutation((voucher_id: number | null) => deleteVoucher(voucher_id));
   return query;
 }
 
-export default useUpdateVoucher;
+export default useDeleteVoucher;

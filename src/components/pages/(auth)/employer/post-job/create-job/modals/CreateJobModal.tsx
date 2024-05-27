@@ -176,19 +176,22 @@ export default function CreateJobModal({ isOpen, setIsOpen }: { isOpen: boolean;
                       onSubmit={onSubmit}
                     />
                   )}
+                  <CreateJobPageEight
+                    isOpen={isCreateJobPageEightModalOpen}
+                    setIsOpen={setIsCreateJobPageEightModalOpen}
+                  />
+                  <SalaryRangeModal
+                    setPageNumber={setPageNumber}
+                    isOpen={isSalaryRangeModalOpen}
+                    setIsOpen={setIsSalaryRangeModalOpen}
+                    setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
+                  />
                 </Dialog.Panel>
               </Transition.Child>
             </div>
           </div>
         </Dialog>
       </Transition.Root>
-      <CreateJobPageEight isOpen={isCreateJobPageEightModalOpen} setIsOpen={setIsCreateJobPageEightModalOpen} />
-      <SalaryRangeModal
-        setPageNumber={setPageNumber}
-        isOpen={isSalaryRangeModalOpen}
-        setIsOpen={setIsSalaryRangeModalOpen}
-        setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
-      />
     </>
   );
 }

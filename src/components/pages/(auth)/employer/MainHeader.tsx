@@ -2,19 +2,21 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 
-import { getCookie, deleteCookie } from 'cookies-next';
 import Link from 'next/link';
 
-import { Menu, Popover, Transition } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import classNames from '@/helpers/classNames';
-import MainLogo from '@/svg/MainLogo';
-import useGetEmployerProfile from '../../../hooks/useGetEmployerProfile';
+import { getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
+
+import { Menu, Popover, Transition } from '@headlessui/react';
+import classNames from '@/helpers/classNames';
+import useGetEmployerProfile from '../../../hooks/useGetEmployerProfile';
 import CustomToast from '@/components/CustomToast';
 import useLogout from '../../../hooks/useLogout';
 import Timer from '../../../Timer';
+
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import MainLogo from '@/svg/MainLogo';
 
 const MainHeader = () => {
   const { mutate, isLoading: isLogoutLoading } = useLogout();
@@ -46,7 +48,7 @@ const MainHeader = () => {
   };
 
   const userNavigation = [
-    { name: 'My Profile', href: '', onClick: void 0, isDisabled: true },
+    { name: 'My Profile', href: '/employer-profile', onClick: void 0, isDisabled: false },
     { name: 'Subscriptions', href: '/manage-subscriptions#active-plans', onClick: void 0, isDisabled: false },
     { name: 'Settings', href: '', onClick: void 0, isDisabled: true },
     {

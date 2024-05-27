@@ -2,13 +2,36 @@
 
 import { useState } from 'react';
 
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import Details from './Details';
 import Settings from './Settings';
+import useSavedProfile from './hooks/useSavedProfile';
+import classNames from '@/helpers/classNames';
+import updateSession from '@/helpers/updateSession';
+
+import { T_EmployerProfile } from '@/types/globals';
 
 const Content = () => {
-  const [isDetails, setIsDetails] = useState(true);
   const [progressBar, setProgressBar] = useState(0);
-  const [form, setForm] = useState({});
+  const { register, setValue, watch, handleSubmit } = useForm<T_EmployerProfile>();
+  const { mutate, isLoading } = useSavedProfile();
+
+  const onSubmit = handleSubmit((data) => {
+    const callbackReq = {
+      onSuccess: async (data: any) => {
+        await updateSession({ hasProfile: true });
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        location.href = '/dashboard';
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+      },
+    };
+    mutate(data, callbackReq);
+  });
 
   return (
     <>
@@ -18,45 +41,49 @@ const Content = () => {
           <div className='mt-5'>
             <div className='sm:hidden'>
               <h5 className='text-savoy-blue text-center text-lg font-semibold'>
-                {progressBar === 2 ? 'Account Settings' : 'Employeer Details'}
+                {progressBar === 1 ? 'Account Settings' : 'Employeer Details'}
               </h5>
             </div>
             <div className='hidden sm:block'>
               <div className='md:w-[76%] lg:w-[80%] mx-auto translate-y-[10px]'>
                 <div className='w-full bg-gray-200 rounded-full h-1'>
-                  <div className={`${progressBar === 2 ? 'w-[100%]' : 'w-0'} bg-blue-600 h-1 rounded-full`}></div>
+                  <div
+                    className={classNames('bg-blue-600 h-1 rounded-full', progressBar === 1 ? 'w-[100%]' : 'w-0')}
+                  ></div>
                 </div>
               </div>
               <div className='border-t-4 border-gray-300 mx-24 w-auto mb-3 translate-y-[23px] hidden'></div>
               <nav className='-mb-px flex relative justify-between w-[90%] mx-auto' aria-label='Tabs'>
                 <li
-                  className={`text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue`}
+                  className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue'
                 >
                   <div className='bg-white px-2'>
                     <div
-                      className={`h-4 w-4 bg-white border-2 mb-2 rounded-full flex justify-center items-center border-savoy-blue`}
+                      className='h-4 w-4 bg-white border-2 mb-2 rounded-full flex justify-center items-center border-savoy-blue'
                     >
-                      <div className={`h-2 w-2 rounded-full bg-savoy-blue`}></div>
+                      <div className='h-2 w-2 rounded-full bg-savoy-blue'></div>
                     </div>
                   </div>
                   Employeer Details
                 </li>
                 <li
-                  className={`
-                    ${
-                      progressBar >= 2 ? 'text-savoy-blue' : 'text-gray-500'
-                    } text-center text-sm font-semibold list-none flex flex-col items-center`}
+                  className={classNames(
+                    'text-center text-sm font-semibold list-none flex flex-col items-center',
+                    progressBar >= 1 ? 'text-savoy-blue' : 'text-gray-500'
+                  )}
                 >
                   <div className='bg-white px-2'>
                     <div
-                      className={`${
-                        progressBar >= 2 ? 'border-savoy-blue' : 'border-gray-300'
-                      } h-4 w-4 bg-white border-2 mb-2 rounded-full flex justify-center items-center`}
+                      className={classNames(
+                        'h-4 w-4 bg-white border-2 mb-2 rounded-full flex justify-center items-center',
+                        progressBar >= 1 ? 'border-savoy-blue' : 'border-gray-300'
+                      )}
                     >
                       <div
-                        className={`${
-                          progressBar >= 2 ? 'bg-savoy-blue' : 'bg-gray-300'
-                        } h-2 w-2 rounded-full`}
+                        className={classNames(
+                          'h-2 w-2 rounded-full',
+                          progressBar >= 1 ? 'bg-savoy-blue' : 'bg-gray-300'
+                        )}
                       ></div>
                     </div>
                   </div>
@@ -65,14 +92,18 @@ const Content = () => {
               </nav>
             </div>
           </div>
-          <Details
-            form={form}
-            isDetails={isDetails}
-            setIsDetails={setIsDetails}
-            setProgressBar={setProgressBar}
-            setForm={setForm}
-          />
-          <Settings form={form} isDetails={isDetails} setIsDetails={setIsDetails} setProgressBar={setProgressBar} />
+          {progressBar === 0 && (
+            <Details
+              register={register}
+              handleSubmit={handleSubmit}
+              setValue={setValue}
+              watch={watch}
+              setProgressBar={setProgressBar}
+            />
+          )}
+          {progressBar === 1 && (
+            <Settings register={register} onSubmit={onSubmit} setProgressBar={setProgressBar} isLoading={isLoading} />
+          )}
         </div>
       </div>
     </>

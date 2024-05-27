@@ -32,7 +32,7 @@ export default function DeleteVoucherModal({
 
   const onSubmit = () => {
     const callbackReq = {
-      onSuccess: async (data: any) => {
+      onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         setIsOpen(false);
         refetch();

@@ -28,8 +28,10 @@ export async function middleware(request: NextRequest) {
     'orient',
     'manage',
     'employee-separation',
+    'employer-profile',
     'setup-employer-profile',
     'admin',
+    'train'
   ];
   const applicantRoutes: any = [
     'application-tracker',
@@ -64,7 +66,9 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'screen-applicants' ||
           firstRoute === 'orient' ||
           firstRoute === 'checkout' ||
-          firstRoute === 'setup-employer-profile'
+          firstRoute === 'employer-profile' ||
+          firstRoute === 'setup-employer-profile' ||
+          firstRoute === 'train'
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {

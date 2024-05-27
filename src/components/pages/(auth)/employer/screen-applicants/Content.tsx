@@ -7,8 +7,7 @@ import useGetJobPostItems from './hooks/useGetJobPostItems';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
-  const { data: dataJobPost, isLoading: isGetJobPostLoading } =
-    useGetJobPostItems();
+  const { data: dataJobPost, isLoading: isGetJobPostLoading } = useGetJobPostItems();
 
   useEffect(() => {
     if (dataJobPost) {
@@ -31,27 +30,28 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
         {jobPostHistoryItems.map((item: any) => {
           return (
-            <Link
-              href={`screen-applicants/${item.id}`}
-              key={item.id}
-              className='rounded-lg p-8 shadow text-indigo-dye text-center bg-white'
-            >
+            <div key={item.id} className='rounded-lg p-8 shadow text-indigo-dye text-center bg-white'>
               <h2 className='font-semibold text-xl'>{item.jobTitle}</h2>
-              <p className='text-[15px] mb-8'>{item.placeAdvertise}</p>
-              <div className='bg-[#EAC645] rounded-lg font-semibold text-[15px] w-full py-4'>
-                <p>{item.applicantApplied} New Applicant/s</p>
-              </div>
-            </Link>
+              <p className='text-[15px] mb-12'>{item.placeAdvertise}</p>
+              <Link
+                href={`screen-applicants/${item.id}`}
+                className='bg-[#EAC645] rounded-lg font-semibold text-[15px] w-full px-10 py-4'
+              >
+                <span>{item.applicantApplied} New Applicant/s</span>
+              </Link>
+            </div>
           );
         })}
 
         {/* ensuring cards displayed are always six */}
-        {(jobPostHistoryItems.length <= 6) && Array.from({ length: 6 - jobPostHistoryItems.length }).map((_, index) => {
-          return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
-        })}
-        {(jobPostHistoryItems.length > 6) && Array.from({ length: 1 }).map((_, index) => {
-          return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
-        })}
+        {jobPostHistoryItems.length <= 6 &&
+          Array.from({ length: 6 - jobPostHistoryItems.length }).map((_, index) => {
+            return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
+          })}
+        {jobPostHistoryItems.length > 6 &&
+          Array.from({ length: 1 }).map((_, index) => {
+            return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
+          })}
       </div>
     </Wrapper>
   );

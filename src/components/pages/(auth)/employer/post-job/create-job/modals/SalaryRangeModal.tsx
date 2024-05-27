@@ -76,7 +76,7 @@ export default function SalaryRangeModal({
                   </button>
                   <button
                     id='salaryRangeNoBtn'
-                    type='submit'
+                    type='button'
                     className='text-lg block sm:flex m-auto font-bold leading-6 text-savoy-blue  shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all mt-3 sm:mt-0'
                     onClick={() => {
                       setPageNumber(4);
