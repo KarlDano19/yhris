@@ -1,13 +1,16 @@
+import React from 'react';
+
 import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
-import { XCircleIcon} from '@heroicons/react/24/solid';
-import React from 'react';
+import { useForm, Controller, set } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
 import dynamic from "next/dynamic"
 import 'react-quill/dist/quill.snow.css'
+
 import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
-import { toast } from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+
+import { XCircleIcon} from '@heroicons/react/24/solid';
 
 export default function EmailTemplateModal({
   isOpen,
@@ -69,6 +72,7 @@ export default function EmailTemplateModal({
     e.preventDefault();
     if (e.target.files) {
       setFile(e.target.files[0]);
+      setValue('attachment', e.target.files[0]);
       e.target.value = '';
     }
   };
@@ -201,44 +205,45 @@ export default function EmailTemplateModal({
                         Attachements<span className='text-red-600'></span>
                       </label>
                         <div className="">
-                            <div
-                                onDragEnter={handleDrag}
-                                onDragLeave={handleDrag}
-                                onDragOver={handleDrag}
-                                onDrop={handleDrop}
-                                className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
-                            >
-                                <label
-                                    className={`${file === null
-                                    ? "file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal"
-                                    : "hidden"
-                                    }`}>
-                                    Drop file to upload
-                                    <input
-                                    name="csvUpload"
-                                    id="csvUpload"
-                                    ref={inputRef}
-                                    type="file"
-                                    className="sr-only"
-                                    onChange={handleChange}
-                                    />
-                                </label>
-                                <div
-                                    className={`${file !== null ? "file-preview" : "hidden"
-                                    }`}>
-                                    <p className="text-sm text-slate-800 font-light">
-                                    {file?.name}
-                                    </p>
-                                    <p
-                                    className="underline text-blue-500 cursor-pointer"
-                                    onClick={() => setFile(null)}>
-                                    Remove File
-                                    </p>
-                                </div>
-                            </div>
-                            <h1 className="text-xs pl-2">Maximum file size: 10 mb</h1>
+                          <div
+                              onDragEnter={handleDrag}
+                              onDragLeave={handleDrag}
+                              onDragOver={handleDrag}
+                              onDrop={handleDrop}
+                              className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                          >
+                              <label
+                                  className={`${file === null
+                                  ? "file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal"
+                                  : "hidden"
+                                  }`}>
+                                  Drop file to upload
+                                  <input
+                                  {...register("attachment")}
+                                  name="attachment"
+                                  id="attachment"
+                                  ref={inputRef}
+                                  type="file"
+                                  className="sr-only"
+                                  onChange={handleChange}
+                                  />
+                              </label>
+                              <div
+                                  className={`${file !== null ? "file-preview" : "hidden"
+                                  }`}>
+                                  <p className="text-sm text-slate-800 font-light">
+                                  {file?.name}
+                                  </p>
+                                  <p
+                                  className="underline text-blue-500 cursor-pointer"
+                                  onClick={() => setFile(null)}>
+                                  Remove File
+                                  </p>
+                              </div>
+                          </div>
+                          <h1 className="text-xs pl-2">Maximum file size: 10 mb</h1>
                         </div>
-                </div>
+                    </div>
                 </div>
                 <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row px-4 justify-end space-x-4'>
