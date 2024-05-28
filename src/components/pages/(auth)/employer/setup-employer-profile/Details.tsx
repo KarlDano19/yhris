@@ -48,10 +48,9 @@ const Details = ({
             src={watch('imagePath') || NoUserPicture}
             width={143}
             height={164}
-            style={{ objectFit: 'cover', height: '100%', maxHeight: '164px' }}
             priority={true}
-            alt='Picture of new user'
-            className='rounded'
+            alt='employer logo'
+            className='rounded object-cover h-[164px] w-[143px]'
           />
         </div>
         <div className='basis-1/3 mr-10'>

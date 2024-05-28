@@ -13,7 +13,7 @@ const PaymentOption = ({
   setError,
   register,
   onSubmit,
-  isProcessing,
+  isLoading,
 }: any) => {
   const validation = (key: any, message: any) => (value: any) => {
     if (!value) {
@@ -85,9 +85,9 @@ const PaymentOption = ({
       <button
         className='w-full h-[50px] rounded-lg bg-[#2757ed] text-white text-[18px] leading-[26px] tracking-[0.02em] hover:bg-[#4f80ff] focus:outline-none'
         type='submit'
-        disabled={isProcessing}
+        disabled={isLoading}
       >
-        {isProcessing ? 'Processing...' : 'Pay Now'}
+        {isLoading ? 'Processing...' : 'Pay Now'}
       </button>
     </form>
   );

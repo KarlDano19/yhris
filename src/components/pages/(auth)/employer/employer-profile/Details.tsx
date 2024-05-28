@@ -46,7 +46,7 @@ function Details ({
             height={164}
             priority={true}
             alt='employer logo'
-            className='rounded object-cover h-auto w-auto'
+            className='rounded object-cover h-[164px] w-[143px]'
           />
         </div>
         <div className='basis-1/3 mr-10'>

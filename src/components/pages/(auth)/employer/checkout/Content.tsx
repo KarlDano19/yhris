@@ -22,7 +22,6 @@ const Content = () => {
   const [plan, SetPlan] = useState<any>({});
   const [payments, SetPayments] = useState([]);
   const [checkoutProgress, SetCheckoutProgress] = useState(1);
-  const [isProcessing, SetIsProcessing] = useState(false);
   const [subscriptionType, setSubscriptionType] = useState('new');
   const [voucherCode, setVoucherCode] = useState('');
   const {
@@ -138,7 +137,7 @@ const Content = () => {
             setError={setError}
             register={register}
             onSubmit={onSubmit}
-            isProcessing={isProcessing}
+            isLoading={isLoading}
           />
         )}
         <div className='font-normal text-gray-500 leading-4 tracking-wider text-[15px]'>
