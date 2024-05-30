@@ -14,19 +14,19 @@ function EvaluationFormTab({
   watch,
   setValue,
   handleSubmit,
-  setCurrentTab,
+  setSelectedTab,
 }: {
   register: any;
   watch: any;
   setValue: any;
   handleSubmit: any;
-  setCurrentTab: any;
+  setSelectedTab: any;
 }) {
   const [remarks, setRemarks] = useState<boolean | null>(watch('is_show_remarks'));
   const [commentCriteria, setCommentCriteria] = useState<boolean | null>(watch('is_show_criteria_comment'));
 
   const onSubmit = handleSubmit(() => {
-    setCurrentTab(3);
+    setSelectedTab(3);
   });
 
   const handleClickRemarks = (value: any) => {
@@ -110,7 +110,7 @@ function EvaluationFormTab({
                           <input
                             id='max-score'
                             type='number'
-                            className='justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
+                            className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
                             defaultValue={1}
                             {...register(`total_score`)}
                           />
@@ -144,7 +144,7 @@ function EvaluationFormTab({
                           <input
                             id='max-score'
                             type='number'
-                            className='justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
+                            className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
                             defaultValue={1}
                             {...register(`passing_score`)}
                           />
@@ -237,7 +237,7 @@ function EvaluationFormTab({
           <button
             type='button'
             className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-            onClick={() => setCurrentTab(1)}
+            onClick={() => setSelectedTab(1)}
           >
             BACK
           </button>

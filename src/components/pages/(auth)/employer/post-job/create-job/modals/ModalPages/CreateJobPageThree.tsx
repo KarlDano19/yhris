@@ -114,8 +114,8 @@ export default function CreateJobPageThree({
                     {...register('salary.salaryRangeMin', {
                       required: true,
                     })}
-                    type='text'
-                    className={`block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 ${
+                    type='number'
+                    className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 ${
                       manualInputFocus.range ? 'border-2 border-blue-700' : ''
                     }`}
                     onClick={() =>
@@ -143,8 +143,8 @@ export default function CreateJobPageThree({
                     {...register('salary.salaryRangeMax', {
                       required: true,
                     })}
-                    type='text'
-                    className={`block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
+                    type='number'
+                    className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
                       manualInputFocus.range ? 'border-2 border-blue-700' : ''
                     }`}
                     onClick={() =>
@@ -173,8 +173,8 @@ export default function CreateJobPageThree({
                   {...register('salary.salaryValue', {
                     required: true,
                   })}
-                  type='text'
-                  className={`block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 ${
+                  type='number'
+                  className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 ${
                     manualInputFocus.amount ? 'border-2 border-blue-700' : ''
                   }`}
                   onClick={() =>

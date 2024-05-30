@@ -99,7 +99,7 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
                             <input
                               id='max-score'
                               type='number'
-                              className='bg-transparent justify-center items-start self-stretch p-2 rounded-md border border-solid border-slate-400 w-[4rem] text-center'
+                              className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-transparent justify-center items-start self-stretch p-2 rounded-md border border-solid border-slate-400 w-[4rem] text-center'
                               defaultValue={item.max_score}
                               {...register(`evaluation_criterion[${sectionIndex}].criterion[${index}].max_score`)}
                             />
