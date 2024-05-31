@@ -1,10 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Tooltip } from 'react-tooltip';
 
 import Link from 'next/link';
 
+import { Tooltip } from 'react-tooltip';
+
+import FloatingProgress from '../../../FloatingProgress';
+
+import { XMarkIcon } from '@heroicons/react/20/solid';
 import AddPostLogo from '@/svg/AddPostLogo';
 import ScreenApplicantsLogo from '@/svg/ScreenApplicantsLogo';
 import OrientLogo from '@/svg/OrientLogo';
@@ -17,8 +21,6 @@ import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import SyncingIcon from '@/svg/SyncingIcon';
 import ExitIcon from '@/svg/ExitIcon';
-import { XMarkIcon } from '@heroicons/react/20/solid';
-import FloatingProgress from '../../../FloatingProgress';
 
 const menus = [
   {
@@ -26,70 +28,60 @@ const menus = [
     text: 'Post a Job',
     link: '/post-job',
     isAvailable: true,
-    isDisabled: false,
   },
   {
     icon: <ScreenApplicantsLogo />,
     text: 'Screen Applicants',
     link: '/screen-applicants',
     isAvailable: true,
-    isDisabled: false,
   },
   {
     icon: <OrientLogo />,
     text: 'Orient',
     link: '/orient',
     isAvailable: true,
-    isDisabled: false,
   },
   {
     icon: <ManageLogo />,
     text: 'Manage',
     link: '/manage',
     isAvailable: true,
-    isDisabled: false,
   },
   {
     icon: <TrainLogo />,
     text: 'Train',
     link: '/train',
     isAvailable: true,
-    isDisabled: false,
   },
   {
     icon: <PayrollLogo />,
     text: 'Payroll',
     link: '/payroll',
     isAvailable: false,
-    isDisabled: true,
   },
   {
     icon: <EmployeeSeparationLogo />,
     text: 'Employee Separation',
     link: '/employee-separation',
     isAvailable: true,
-    isDisabled: false,
   },
   {
     icon: <EmployeeKitLogo />,
     text: 'Employee Kit',
     link: '/branding-kit',
     isAvailable: false,
-    isDisabled: true,
   },
   {
     icon: <GetHelpLogo />,
     text: 'Get Help',
     link: '/get-help',
     isAvailable: false,
-    isDisabled: true,
   },
   {
     icon: <SettingsLogo />,
     text: 'Settings',
     link: '/settings',
     isAvailable: true,
-    isDisabled: false,
   },
 ];
 
