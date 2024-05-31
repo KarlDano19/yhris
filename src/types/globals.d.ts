@@ -261,3 +261,12 @@ export type Voucher = {
   redemption_to: string;
   prepared_by: string;
 }
+
+export type EmailTemplate = {
+  subject: string;
+  to: string;
+  cc: string;
+  bcc: string;
+  body: string;
+  attachment: string;
+}
