@@ -1,4 +1,4 @@
-import Content from '@/components/pages/(un-auth)/dragonpay-callback/Content'
+import Content from '@/components/pages/(un-auth)/(callbacks)/dragonpay-callback/Content'
 import React from 'react'
 
 export const metadata = {

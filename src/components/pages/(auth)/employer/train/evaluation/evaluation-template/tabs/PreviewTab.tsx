@@ -7,7 +7,7 @@ import PlusIcon from '@/svg/PlusIcon';
 
 function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues: any }) {
   const evaluationDetails = getValues();
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setSelectedTab] = useState(0);
   const [evaluationCriterionIndex, setEvaluationCriterionIndex] = useState(0);
   const [criterionSelected, setCriterionSelected] = useState<any>({});
 
@@ -53,7 +53,7 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
           className='bg-[#f3f4f6] border border-[#65C979] rounded-md py-2 px-8 text-[#65C979] text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80'
           onClick={() => setIsPreview(false)}
         >
-          BACK TO EDITING
+          Back to editing
         </button>
       </div>
       {currentTab === 0 && (
@@ -79,7 +79,7 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
               <div className='w-full'>
                 <label htmlFor='employeeName'>2. Date of Evaluation</label>
                 <CustomDatePicker
-                  name={'from'}
+                  name={'date_of_evaluation'}
                   selected={''}
                   pickerOnChange={''}
                   className={'block w-full border-0 py-1.5 px-6 text-gray-900 border-b-2 bg-transparent'}
@@ -95,9 +95,9 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
           <div className='py-4 px-4 text-right'>
             <button
               className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-              onClick={() => setCurrentTab(1)}
+              onClick={() => setSelectedTab(1)}
             >
-              NEXT
+              Next
             </button>
           </div>
         </>
@@ -161,13 +161,13 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
             })}
           </div>
           <hr />
-          <div className='py-4 px-4 text-right'>
+          <div className='py-4 px-4 flex justify-between'>
             {evaluationCriterionIndex == 0 && (
               <button
                 className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                onClick={() => setCurrentTab(0)}
+                onClick={() => setSelectedTab(0)}
               >
-                BACK
+                Back
               </button>
             )}
             {evaluationCriterionIndex != 0 && (
@@ -175,7 +175,7 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
                 className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                 onClick={() => setEvaluationCriterionIndex(evaluationCriterionIndex - 1)}
               >
-                BACK
+                Back
               </button>
             )}
             {evaluationCriterionIndex + 1 !== evaluationDetails.evaluation_criterion.length && (
@@ -183,7 +183,7 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
                 className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 font-semibold text-sm text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                 onClick={() => setEvaluationCriterionIndex(evaluationCriterionIndex + 1)}
               >
-                NEXT
+                Next
               </button>
             )}
           </div>

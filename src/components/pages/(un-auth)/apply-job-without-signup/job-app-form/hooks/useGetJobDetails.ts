@@ -8,10 +8,7 @@ async function getJobDetails(job_id: number) {
         'content-type': 'application/json',
       },
     };
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/${job_id}/`,
-      config
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/${job_id}/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -26,14 +23,10 @@ async function getJobDetails(job_id: number) {
 }
 
 function useGetJobDetails(job_id: number) {
-  const query = useQuery(
-    ['jobPostDetailCache', {}],
-    () => getJobDetails(job_id),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    }
-  );
+  const query = useQuery(['jobPostDetailPublicCache', {}], () => getJobDetails(job_id), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
 
   return query;
 }

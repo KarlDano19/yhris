@@ -1,42 +1,43 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
-import useAddEvaluation from '../hooks/useAddEvaluation';
 import EvaluationInfoTab from '../tabs/EvaluationInfoTab';
 import EvaluationFormTab from '../tabs/EvaluationFormTab';
 import EvaluationCriterionTab from '../tabs/EvaluationCriterionTab';
 import ViewModeTab from '../tabs/ViewModeTab';
 import PreviewTab from '../tabs/PreviewTab';
+import useUpdateEvaluationTemplate from '../hooks/useUpdateEvaluationTemplate';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-export default function CreateEvaluationModal({
+export default function EditEvaluationModal({
   refetch,
   isOpen,
   setIsOpen,
-  mainSetIsOpen,
+  evaluationDetails,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  mainSetIsOpen: Dispatch<boolean>;
+  evaluationDetails: any;
 }) {
-  const [currentTab, setCurrentTab] = useState(1);
-  const [isPreview, setIsPreview] = useState(false);
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, setValue, getValues, watch, control, reset } = useForm<any>({
+  const [evaluationId, setEvaluationId] = useState<number | null>(null);
+  const [selectedTab, setSelectedTab] = useState(1);
+  const [isPreview, setIsPreview] = useState(false);
+  const { register, handleSubmit, setValue, getValues, watch, control } = useForm<any>({
     defaultValues: {
       criteria_rating_view_type: 'default',
       total_score: 1,
       passing_score: 1,
-      is_show_remarks: false,
-      is_show_criteria_comment: false,
-      rating_type: 'none',
+      is_show_remarks: null,
+      is_show_criteria_comment: null,
       evaluation_criterion: [
         {
           id: uuidv4(),
@@ -52,22 +53,40 @@ export default function CreateEvaluationModal({
       ],
     },
   });
-  const { mutate, isLoading } = useAddEvaluation();
+  const { mutate, isLoading } = useUpdateEvaluationTemplate();
 
-  const onSubmit = handleSubmit((data) => {
+  useEffect(() => {
+    if (evaluationDetails) {
+      setSelectedTab(1);
+      setEvaluationId(evaluationDetails.id);
+      setValue('name', evaluationDetails.name);
+      setValue('evaluation_type', evaluationDetails.evaluation_type);
+      setValue('frequency', evaluationDetails.frequency);
+      setValue('evaluation_format', evaluationDetails.evaluation_format);
+      setValue('description', evaluationDetails.description);
+      setValue('rating_type', evaluationDetails.rating_type);
+      setValue('total_score', evaluationDetails.total_score);
+      setValue('passing_score', evaluationDetails.passing_score);
+      setValue('is_show_remarks', evaluationDetails.is_show_remarks);
+      setValue('is_show_criteria_comment', evaluationDetails.is_show_criteria_comment);
+      setValue('evaluation_criterion', evaluationDetails.evaluation_criterion);
+      setValue('criteria_rating_view_type', evaluationDetails.criteria_rating_view_type);
+    }
+  }, [evaluationDetails]);
+
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         setIsOpen(false);
-        mainSetIsOpen(false);
-        reset();
+        setSelectedTab(1);
         refetch();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(data, callbackReq);
+    mutate({ evaluationId, data }, callbackReq);
   });
 
   return (
@@ -99,17 +118,14 @@ export default function CreateEvaluationModal({
               <Dialog.Panel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
-                  currentTab === 1 && 'max-w-2xl',
-                  currentTab === 2 && 'max-w-4xl',
-                  currentTab === 3 && 'max-w-6xl',
-                  currentTab === 4 && 'max-w-4xl'
+                  selectedTab === 1 && 'max-w-2xl',
+                  selectedTab === 2 && 'max-w-4xl',
+                  selectedTab === 3 && 'max-w-6xl',
+                  selectedTab === 4 && 'max-w-4xl'
                 )}
               >
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>
-                    {!isPreview && 'Create Evaluation Template'}
-                    {isPreview && 'Preview'}
-                  </h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Evaluation Template</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 {!isPreview && (
@@ -119,10 +135,10 @@ export default function CreateEvaluationModal({
                         <div
                           className={classNames(
                             'bg-blue-600 h-1 rounded-full',
-                            currentTab === 1 && 'w-0',
-                            currentTab === 2 && 'w-[30%]',
-                            currentTab === 3 && 'w-[70%]',
-                            currentTab === 4 && 'w-[100%]',
+                            selectedTab === 1 && 'w-0',
+                            selectedTab === 2 && 'w-[30%]',
+                            selectedTab === 3 && 'w-[70%]',
+                            selectedTab === 4 && 'w-[100%]'
                           )}
                         ></div>
                       </div>
@@ -132,7 +148,8 @@ export default function CreateEvaluationModal({
                       aria-label='edit-tabs'
                     >
                       <li
-                        className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue'
+                        className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue cursor-pointer'
+                        onClick={() => setSelectedTab(1)}
                       >
                         <div className='bg-white px-2'>
                           <div
@@ -146,14 +163,15 @@ export default function CreateEvaluationModal({
                       <li
                         className={classNames(
                           'text-center text-sm font-semibold list-none flex flex-col items-center',
-                          currentTab >= 2 ? 'text-savoy-blue' : 'text-gray-500'
+                          selectedTab >= 2 ? 'text-savoy-blue' : 'text-gray-500'
                         )}
+                        onClick={() => setSelectedTab(2)}
                       >
                         <div className='bg-white px-2'>
                           <div
                             className={classNames(
-                              'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center',
-                              currentTab >= 2 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
+                              'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center cursor-pointer',
+                              selectedTab >= 2 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
                             )}
                           >
                             <h1 className='text-white'>2</h1>
@@ -164,14 +182,15 @@ export default function CreateEvaluationModal({
                       <li
                         className={classNames(
                           'text-center text-sm font-semibold list-none flex flex-col items-center',
-                          currentTab >= 3 ? 'text-savoy-blue' : 'text-gray-500'
+                          selectedTab >= 3 ? 'text-savoy-blue' : 'text-gray-500'
                         )}
+                        onClick={() => setSelectedTab(3)}
                       >
                         <div className='bg-white px-2'>
                           <div
                             className={classNames(
-                              'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center',
-                              currentTab >= 3 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
+                              'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center cursor-pointer',
+                              selectedTab >= 3 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
                             )}
                           >
                             <h1 className='text-white'>3</h1>
@@ -182,14 +201,15 @@ export default function CreateEvaluationModal({
                       <li
                         className={`
                     ${
-                      currentTab >= 4 ? 'text-savoy-blue' : 'text-gray-500'
-                    } text-center text-sm font-semibold list-none flex flex-col items-center`}
+                      selectedTab >= 4 ? 'text-savoy-blue' : 'text-gray-500'
+                    } text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer`}
+                        onClick={() => setSelectedTab(4)}
                       >
                         <div className='bg-white px-2'>
                           <div
                             className={classNames(
                               'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center',
-                              currentTab >= 4 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
+                              selectedTab >= 4 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
                             )}
                           >
                             <h1 className='text-white'>4</h1>
@@ -200,27 +220,27 @@ export default function CreateEvaluationModal({
                     </nav>
                   </div>
                 )}
-                {currentTab === 1 && (
+                {selectedTab === 1 && (
                   <EvaluationInfoTab
                     {...{
                       register,
                       handleSubmit,
-                      setCurrentTab,
+                      setSelectedTab,
                     }}
                   />
                 )}
-                {currentTab === 2 && (
+                {selectedTab === 2 && (
                   <EvaluationFormTab
                     {...{
                       register,
                       watch,
                       setValue,
                       handleSubmit,
-                      setCurrentTab,
+                      setSelectedTab,
                     }}
                   />
                 )}
-                {currentTab === 3 && (
+                {selectedTab === 3 && (
                   <EvaluationCriterionTab
                     {...{
                       control,
@@ -228,11 +248,11 @@ export default function CreateEvaluationModal({
                       watch,
                       setValue,
                       handleSubmit,
-                      setCurrentTab,
+                      setSelectedTab,
                     }}
                   />
                 )}
-                {currentTab === 4 && (
+                {selectedTab === 4 && (
                   <>
                     {!isPreview && (
                       <ViewModeTab
@@ -241,7 +261,7 @@ export default function CreateEvaluationModal({
                           setValue,
                           getValues,
                           onSubmit,
-                          setCurrentTab,
+                          setSelectedTab,
                           isLoading,
                         }}
                       />

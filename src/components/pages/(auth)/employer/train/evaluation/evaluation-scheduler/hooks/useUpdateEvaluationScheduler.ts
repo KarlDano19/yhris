@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function updateEvaluation(evaluation_id: string, data: any) {
+async function updateEvaluationScheduler(evaluation_scheduler_id: string, data: any) {
   try {
     const token = getCookie('token');
     const config = {
@@ -12,7 +12,7 @@ async function updateEvaluation(evaluation_id: string, data: any) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluations/${evaluation_id}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-schedulers/${evaluation_scheduler_id}/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -26,9 +26,9 @@ async function updateEvaluation(evaluation_id: string, data: any) {
   }
 }
 
-function useUpdateEvaluation() {
-  const query = useMutation((props: any) => updateEvaluation(props.evaluationId, props.data));
+function useUpdateEvaluationScheduler() {
+  const query = useMutation((props: any) => updateEvaluationScheduler(props.evaluationSchedulerId, props.data));
   return query;
 }
 
-export default useUpdateEvaluation;
+export default useUpdateEvaluationScheduler;

@@ -18,11 +18,19 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
 
+interface ErrorDetail {
+  detail: string;
+}
+
 const MainHeader = () => {
-  const { mutate, isLoading: isLogoutLoading } = useLogout();
+  const { mutate } = useLogout();
   const [profile, setProfile] = useState<any>({});
 
-  const { data, isLoading: isProfileLoading, error } = useGetEmployerProfile();
+  const {
+    data,
+    isLoading: isProfileLoading,
+    error,
+  } = useGetEmployerProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -38,7 +46,7 @@ const MainHeader = () => {
         location.href = '/login';
       },
       onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
+        toast.custom(() => <CustomToast message={err || 'Session is expired.'} type='error' />, {
           duration: 4000,
         });
         location.href = '/login';
@@ -63,7 +71,10 @@ const MainHeader = () => {
     if (data) {
       setProfile(data);
     }
-  }, [data]);
+    if (error && error.detail.includes('Invalid token')) {
+      logout(true);
+    }
+  }, [data, error]);
 
   useEffect(() => {
     const token = getCookie('token');

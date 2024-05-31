@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-async function findJobs(jobTitle: string, location: string) {
+async function getEvaluationEmployeeFormDetails(form_uuid: string | null) {
   try {
     const config = {
       method: 'GET',
@@ -9,7 +9,7 @@ async function findJobs(jobTitle: string, location: string) {
       },
     };
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/?job_title=${jobTitle}&location=${location}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/public/evaluation-employee-forms/${form_uuid}/`,
       config
     );
     if (!res.ok) {
@@ -25,13 +25,17 @@ async function findJobs(jobTitle: string, location: string) {
   }
 }
 
-function useFindJobs(jobTitle: string, location: string) {
-  const query = useQuery(['findJobsPublicCache'], () => findJobs(jobTitle, location), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+function useGetEvaluationEmployeeFormDetails(form_uuid: string | null) {
+  const query = useQuery(
+    ['evaluationEmployeeFormDetailsPublicCache'],
+    () => getEvaluationEmployeeFormDetails(form_uuid),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }
 
-export default useFindJobs;
+export default useGetEvaluationEmployeeFormDetails;

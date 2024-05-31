@@ -4,8 +4,6 @@ import Image from 'next/image';
 
 import toast from 'react-hot-toast';
 
-import NoUserPicture from '@/assets/no_user.png';
-
 function Details ({
   register,
   onSubmit,
@@ -41,12 +39,12 @@ function Details ({
       <div className='flex flex-row my-10'>
         <div className='basis-44 mr-10'>
           <Image
-            src={watch('imagePath') || NoUserPicture}
+            src={watch('imagePath') || '/assets/no-user.png'}
             width={143}
             height={164}
             priority={true}
             alt='employer logo'
-            className='rounded object-cover h-[164px] w-[143px]'
+            className='rounded object-cover max-w-[143px] max-h-[164px]'
           />
         </div>
         <div className='basis-1/3 mr-10'>

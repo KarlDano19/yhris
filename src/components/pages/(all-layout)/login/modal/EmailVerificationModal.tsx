@@ -24,7 +24,7 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({ email, 
     const callbackReq = {
       onSuccess: (data: any) => {
         setIsLinkSent(true);
-        toast.custom(() => <CustomToast message={data} type='success' />, {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 4000,
         });
       },

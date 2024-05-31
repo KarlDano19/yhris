@@ -1,4 +1,4 @@
-import Content from '@/components/pages/(un-auth)/sso/oauth/Content'
+import Content from '@/components/pages/(un-auth)/(callbacks)/sso/oauth/Content'
 import React from 'react'
 
 export const metadata = {

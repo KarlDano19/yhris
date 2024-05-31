@@ -1,18 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function addEvaluation(data: any) {
+async function deleteEvaluationScheduler(evaluation_template_id: number | null) {
   try {
     const token = getCookie('token');
     const config = {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
-      body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluations/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-schedulers/${evaluation_template_id}/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -26,9 +25,9 @@ async function addEvaluation(data: any) {
   }
 }
 
-function useAddEvaluation() {
-  const query = useMutation((data: any) => addEvaluation(data));
+function useDeleteEvaluationScheduler() {
+  const query = useMutation((evaluation_template_id: number | null) => deleteEvaluationScheduler(evaluation_template_id));
   return query;
 }
 
-export default useAddEvaluation;
+export default useDeleteEvaluationScheduler;

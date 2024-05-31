@@ -18,7 +18,7 @@ import useCreatePayment from './hooks/useCreatePayment';
 
 const Content = () => {
   const params = useParams();
-  const searchParams = useSearchParams() as any;
+  const searchParams = useSearchParams();
   const [plan, SetPlan] = useState<any>({});
   const [payments, SetPayments] = useState([]);
   const [checkoutProgress, SetCheckoutProgress] = useState(1);

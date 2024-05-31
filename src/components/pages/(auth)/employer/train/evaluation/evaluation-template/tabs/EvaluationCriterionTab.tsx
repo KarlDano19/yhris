@@ -16,14 +16,14 @@ function EvaluationCriterionTab({
   watch,
   setValue,
   handleSubmit,
-  setCurrentTab,
+  setSelectedTab,
 }: {
   control: any;
   register: any;
   watch: any;
   setValue: any;
   handleSubmit: any;
-  setCurrentTab: any;
+  setSelectedTab: any;
 }) {
   const childrenRef = useRef<any>({});
   const { fields, append, remove, move } = useFieldArray({
@@ -32,7 +32,7 @@ function EvaluationCriterionTab({
   });
 
   const onSubmit = handleSubmit(() => {
-    setCurrentTab(4);
+    setSelectedTab(4);
   });
 
   const addSection = () => {
@@ -168,15 +168,15 @@ function EvaluationCriterionTab({
         <button
           type='button'
           className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setCurrentTab(2)}
+          onClick={() => setSelectedTab(2)}
         >
-          BACK
+          Back
         </button>
         <button
           type='submit'
           className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
         >
-          NEXT
+          Next
         </button>
       </div>
     </form>

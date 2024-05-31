@@ -25,7 +25,7 @@ import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 import { T_Login } from '@/types/globals';
 
 function Content() {
-  const searchParams = useSearchParams() as any;
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
   const [showEmailVerificationModal, setEmailVerificationModal] = useState(false);
