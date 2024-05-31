@@ -29,6 +29,7 @@ function Header({ type }: { type: string }) {
     'setup-employer-profile',
     'admin',
     'train',
+    'settings',
   ];
   const applicantRoutes: any = [
     'application-tracker',
