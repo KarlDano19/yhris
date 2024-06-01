@@ -46,9 +46,9 @@ const Content = () => {
     }
   }, [dataPayment]);
 
-  const additionalEmployeeSlot = Math.abs(parseInt(searchParams.get('additional_employee_slot') || 0));
+  const additionalEmployeeSlot = Math.abs(parseInt(searchParams.get('additional_employee_slot') || '0'));
 
-  const duration = Math.abs(parseInt(searchParams.get('duration') || 0));
+  const duration = Math.abs(parseInt(searchParams.get('duration') || '0'));
 
   const onSubmit = handleSubmit((data) => {
     const paymentType = data.payment;
