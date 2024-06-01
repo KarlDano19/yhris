@@ -13,7 +13,6 @@ import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import SuccessModal from './modal/SuccessModal';
 import { set } from 'react-hook-form';
 
-
 const Content = () => {
   const [itemsFilter, setItemsFilter] = useState({
     search: '',
@@ -31,18 +30,15 @@ const Content = () => {
     setIsSuccessModalOpen(true);
   };
 
-
   useEffect(() => {
-    refetchEmailTemplate()
-  },[]);
+    refetchEmailTemplate();
+  }, []);
 
   useEffect(() => {
     if (dataEmailTemplate && !isGetEmailTemplateLoading) {
-      setEmailTemplatesItems(dataEmailTemplate)
+      setEmailTemplatesItems(dataEmailTemplate);
     }
-  }, [dataEmailTemplate])
-
-
+  }, [dataEmailTemplate]);
 
   const renderRows = () => {
     if (isGetEmailTemplateLoading) {
@@ -127,7 +123,7 @@ const Content = () => {
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-            //   onClick={() => refetchVouchers()}
+              //   onClick={() => refetchVouchers()}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
@@ -143,7 +139,7 @@ const Content = () => {
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
@@ -169,8 +165,13 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <CreateEmailTemplateModal isOpen={isCreateModalOpen} setIsOpen={setIsCreateModalOpen} refetch={refetchEmailTemplate} onSuccess={handleCreateTemplateSuccess}/>
-      <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}/>
+      <CreateEmailTemplateModal
+        isOpen={isCreateModalOpen}
+        setIsOpen={setIsCreateModalOpen}
+        refetch={refetchEmailTemplate}
+        onSuccess={handleCreateTemplateSuccess}
+      />
+      <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
     </>
   );
 };

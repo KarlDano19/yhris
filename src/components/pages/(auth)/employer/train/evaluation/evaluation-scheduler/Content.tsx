@@ -336,10 +336,10 @@ function Content() {
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Schedule Name
                       </th>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Template
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>

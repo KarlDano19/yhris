@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
+import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import SendContract from './SendContract';
 import Orient from './Orient';
@@ -315,10 +316,15 @@ const Content = () => {
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]'>
-                <table className={`min-w-full divide-y divide-gray-300 ${orientItems.length === 0 && 'mb-6'}`}>
+                <table
+                  className={classNames(
+                    'min-w-full divide-y divide-gray-300 text-center',
+                    orientItems.length === 0 && 'mb-6'
+                  )}
+                >
                   <thead>
-                    <tr className='text-center'>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0'>
+                    <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>

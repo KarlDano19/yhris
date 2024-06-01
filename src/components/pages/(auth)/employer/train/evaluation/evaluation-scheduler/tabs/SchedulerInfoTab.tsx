@@ -75,16 +75,18 @@ function SchedulerInfoTab({
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
             Evaluation Schedule<span className='text-red-600'>*</span>
           </label>
-          <div className='flex'>
-            <p>Every </p>
-            <input
-              id='frequency_value'
-              type='number'
-              {...register('frequency_value', { required: true })}
-              className='block w-20 rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-            />
-            <p>day of the</p>
-            <div className='relative mt-2 w-full'>
+          <div className='flex items-center'>
+            Every
+            <div className='relative mt-2 mx-3'>
+              <input
+                id='frequency_value'
+                type='number'
+                {...register('frequency_value', { required: true })}
+                className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-12 rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 text-center'
+              />
+            </div>
+            day of the
+            <div className='relative mt-2 mx-3 w-1/3'>
               <select
                 id='frequency_unit'
                 {...register('frequency_unit', { required: true })}

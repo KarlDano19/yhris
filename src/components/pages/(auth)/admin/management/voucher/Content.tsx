@@ -194,31 +194,31 @@ const Content = () => {
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Code
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Applied Plan
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Discount (%)
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Employees
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Max Redemption
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Redeemed Count
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Redemption Period
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Action
                       </th>
                     </tr>

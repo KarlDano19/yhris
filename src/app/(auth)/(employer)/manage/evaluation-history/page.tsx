@@ -15,10 +15,10 @@ async function getSession() {
   return session;
 }
 
-const DesignBenefitsPage = async () => {
+const EvaluationHistoryPage = async () => {
   const session = await getSession();
   const hasActiveSubscription = session.hasActiveSubscription;
   return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
-export default DesignBenefitsPage;
+export default EvaluationHistoryPage;

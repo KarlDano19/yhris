@@ -4,19 +4,21 @@ import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
+
+import classNames from '@/helpers/classNames';
+import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import RightClickMenu from '@/components/RightClickMenu';
+import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
-import SetJob from './SetJob';
-import RightClickMenu from '@/components/RightClickMenu';
 import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
 import useUpdateJobPostItems from './hooks/useUpdateJobPostItems';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 
-import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 
 import { T_JobPreviewModal } from '@/types/globals';
 
@@ -71,8 +73,8 @@ const Content = () => {
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
-        
-        let rightClickItemLabel = 'Set as inactive'
+
+        let rightClickItemLabel = 'Set as inactive';
         let successMessage = 'Successfully set job as inactive.';
         if (!jobPost['is_active']) {
           rightClickItemLabel = 'Set as active';
@@ -81,8 +83,8 @@ const Content = () => {
         menuOptions['label'] = rightClickItemLabel;
         menuOptions['action'] = (jobId: any) => {
           let data: any = {};
-          data["jobId"] = jobId;
-          data["is_active"] = !jobPost['is_active'];
+          data['jobId'] = jobId;
+          data['is_active'] = !jobPost['is_active'];
           const callbackReq = {
             onSuccess: () => {
               refetch();
@@ -158,7 +160,13 @@ const Content = () => {
     }
     if (jobPostHistoryItems && jobPostHistoryItems.length > 0) {
       return jobPostHistoryItems.map((jobPost: any) => (
-        <tr onContextMenu={(event) => {handleRightClick(event, jobPost.id)}} key={jobPost.id} className='text-center'>
+        <tr
+          onContextMenu={(event) => {
+            handleRightClick(event, jobPost.id);
+          }}
+          key={jobPost.id}
+          className='text-center'
+        >
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-red-500' : 'text-gray-500'
@@ -288,9 +296,14 @@ const Content = () => {
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]'>
-                <table className={`min-w-full divide-y divide-gray-300 ${jobPostHistoryItems.length === 0 && 'mb-6'}`}>
+                <table
+                  className={classNames(
+                    'min-w-full divide-y divide-gray-300 text-center',
+                    jobPostHistoryItems.length === 0 && 'mb-6'
+                  )}
+                >
                   <thead>
-                    <tr className='text-center'>
+                    <tr>
                       <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0'>
                         Job No.
                       </th>

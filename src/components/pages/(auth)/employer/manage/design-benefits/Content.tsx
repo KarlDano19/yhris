@@ -219,30 +219,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
                       <th
                         scope='col'
-                        className='py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0'
+                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
                       >
                         Date
                       </th>
                       <th
                         scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
+                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
                       >
                         Title
                       </th>
                       <th
                         scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
+                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
                       >
                         Purpose
                       </th>
                       <th
                         scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
+                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
                       >
                         Eligibility
                       </th>

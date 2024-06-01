@@ -20,17 +20,17 @@ export default function RedemptionCountModal({
     if (voucher && voucher.redemption_count && voucher.redemption_count.length > 0) {
       return voucher.redemption_count.map((item: any) => (
         <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>{item.name}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>{item.plan}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>{item.date}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.plan}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
         </tr>
       ));
     } else {
       return (
         <tr>
           <td colSpan={7}>
-            <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Voucher is not been redeemed yet.</h4>
+            <h4 className='text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
+            <h4 className='text-gray-300 text-sm mb-4'>Voucher is not been redeemed yet.</h4>
           </td>
         </tr>
       );
@@ -70,19 +70,16 @@ export default function RedemptionCountModal({
                 </div>
                 {/* <form onSubmit={onSubmit}> */}
                 <div className='px-4 pt-4 pb-6'>
-                  <table className='min-w-full divide-y divide-gray-300'>
+                  <table className='min-w-full divide-y divide-gray-300 text-center'>
                     <thead>
                       <tr>
-                        <th
-                          scope='col'
-                          className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0 text-center'
-                        >
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Name
                         </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Plan
                         </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Date
                         </th>
                       </tr>

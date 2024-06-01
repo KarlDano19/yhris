@@ -326,25 +326,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className='mt-8 flow-root'>
                 <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
                   <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                    <table className='min-w-full divide-y divide-gray-300'>
+                    <table className='min-w-full divide-y divide-gray-300 text-center'>
                       <thead className='divide-y divide-gray-200'>
                         <tr>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Reference No.</th>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Reference No.</th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Subscription Plan
                           </th>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Subscription Start Date
                           </th>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Subscription End Date
                           </th>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Subscription Status
                           </th>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Payment Type</th>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Total</th>
-                          <th className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Action</th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Payment Type</th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Total</th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Action</th>
                         </tr>
                       </thead>
                       <tbody>{renderTransactionHistory()}</tbody>

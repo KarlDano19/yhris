@@ -1,16 +1,16 @@
 'use client';
 import React, { useEffect, useState, useRef, use } from 'react';
-import toast from 'react-hot-toast';
 
 import Link from 'next/link';
 
-// import {evaluationHistoryItems} from '@/helpers/testData';
-import CustomDatePicker from '@/components/CustomDatePicker';
+import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import useGetEvaluationHistoryItems from './hooks/useGetEvaluationHistoryItems';
 
-
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import classNames from '@/helpers/classNames';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
@@ -36,6 +36,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetchEvaluationHistoryItems();
   }, []);
 
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    refetchEvaluationHistoryItems();
+  };
 
   const renderRows = () => {
     if (isLoadingEvaluationHistoryItems) {
@@ -68,29 +92,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (evaluationHistoryItems && evaluationHistoryItems.length > 0) {
       return evaluationHistoryItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.eval_date}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.eval_period}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.eval_form}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.status}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.overall_rating}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_evaluation}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_period}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_form}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-             <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
-              >
-                Enroll for Training
-              </button>
+            <span className={classNames('text-gray-500', item.form_total_score < item.passing_score && 'text-red-500')}>
+              {item.form_total_score}
+            </span>
+            /<span>{item.total_score}</span>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button
+              className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
+              disabled={!(item.form_total_score < item.passing_score)}
+            >
+              Enroll for Training
+            </button>
           </td>
         </tr>
       ));
-    } 
-    else 
-    {
+    } else {
       return (
         <tr>
           <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
           </td>
         </tr>
       );
@@ -152,7 +178,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-            //   onClick={checkIfDateIsValid}
+              onClick={checkIfDateIsValid}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
@@ -161,31 +187,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th
-                        scope='col'
-                        className='py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Employee
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Date
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Period
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Form
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
-                        Status
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Overall Rating
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Recommendation
                       </th>
                     </tr>
@@ -199,11 +219,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      {/* <EmployeesModal
-        isOpen={isEmployeesModalOpen}
-        setIsOpen={setIsEmployeesModalOpen}
-        dataEmployeeDetail={dataEmployeeDetail}
-      /> */}
     </>
   );
 };

@@ -4,6 +4,8 @@ import Select from 'react-select';
 
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
 interface Field {
   onChange: (value: any) => void;
   value: any;
@@ -56,6 +58,15 @@ function EmployeeAssigneeTab({
                 options={employeeItems}
                 value={employeeItems.find((item: any) => (value || []).includes(item.value))}
                 onChange={(val) => onChange(val.map((item: any) => item.value))}
+                components={{
+                  DropdownIndicator: () => (
+                    <div className='pointer-events-none px-2'>
+                      <SelectChevronDown />
+                    </div>
+                  ),
+                  IndicatorSeparator: () => null,
+                }}
+                isClearable={false}
                 isMulti
               />
             )}

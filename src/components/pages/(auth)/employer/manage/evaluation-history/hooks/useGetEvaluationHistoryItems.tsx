@@ -16,7 +16,7 @@ async function getEvaluationHistoryItems(filters: any) {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluations-history/?${searchParams}`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-histories/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -34,7 +34,7 @@ async function getEvaluationHistoryItems(filters: any) {
 
 function useGetEvaluationHistoryItems(filters: any) {
   const query = useQuery(['evaluationHistoryListItemsCache'], () => getEvaluationHistoryItems(filters), {
-    refetchOnWindowFocus: false,
+    enabled: false,
     keepPreviousData: true,
   });
 
