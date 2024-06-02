@@ -2,11 +2,7 @@
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import React, { useEffect, useState, useRef } from 'react';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import {
-  T_SendNTEModal,
-  T_SendDecisionModal,
-  T_InvestigationModal,
-} from '@/types/globals';
+import { T_SendNTEModal, T_SendDecisionModal, T_InvestigationModal } from '@/types/globals';
 import IncidentReportModal from './modals/IncidentReportModal';
 import SendNTEModal from './modals/SendNTEModal';
 import SendNTE from './SendNTE';
@@ -33,14 +29,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
-  const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] =
-    useState(false);
-  const [isSendNTEModalOpen, setIsSendNTEModalOpen] =
-    useState<T_SendNTEModal | null>(null);
-  const [isInvestigateModalOpen, setIsInvestigateModalOpen] =
-    useState<T_InvestigationModal | null>(null);
-  const [isSendDecisionModalOpen, setIsSendDecisionModalOpen] =
-    useState<T_SendDecisionModal | null>(null);
+  const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] = useState(false);
+  const [isSendNTEModalOpen, setIsSendNTEModalOpen] = useState<T_SendNTEModal | null>(null);
+  const [isInvestigateModalOpen, setIsInvestigateModalOpen] = useState<T_InvestigationModal | null>(null);
+  const [isSendDecisionModalOpen, setIsSendDecisionModalOpen] = useState<T_SendDecisionModal | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
@@ -54,12 +46,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataPosition } = useGetPositionItems();
 
   const setReleased = (id: string, emailType: string) => {
-    const itemIndex = employeeIssueItems.findIndex(
-      (item: any) => item.id === id
-    );
-    const employeeIssueItemsCopy = JSON.parse(
-      JSON.stringify(employeeIssueItems)
-    );
+    const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
+    const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
     const currentDate = new Date();
     employeeIssueItemsCopy[itemIndex].id = id;
     employeeIssueItemsCopy[itemIndex].actionType = 'received';
@@ -67,29 +55,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     employeeIssueItemsCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'nte') {
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
-      employeeIssueItemsCopy[itemIndex].incidentReceivedDate =
-        new Intl.DateTimeFormat('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric',
-        }).format(currentDate);
+      employeeIssueItemsCopy[itemIndex].incidentReceivedDate = new Intl.DateTimeFormat('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+      }).format(currentDate);
     }
     if (emailType === 'decision') {
       employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
-      employeeIssueItemsCopy[itemIndex].decisionReceivedDate =
-        new Intl.DateTimeFormat('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric',
-        }).format(currentDate);
+      employeeIssueItemsCopy[itemIndex].decisionReceivedDate = new Intl.DateTimeFormat('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+      }).format(currentDate);
     }
     const callbackReq = {
       onSuccess: (data: any) => {
         setEmployeeIssueItems([...employeeIssueItemsCopy]);
-        toast.custom(
-          () => <CustomToast message={data.message} type='success' />,
-          { duration: 5000 }
-        );
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -132,9 +115,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             day: '2-digit',
             year: 'numeric',
           }).format(new Date(employeeIssue.incident_received_date));
-        employeeIssue['isInvestigated'] = employeeIssue.investigate
-          ? true
-          : false;
+        employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
         employeeIssue['investigatedDate'] = employeeIssue.investigate
           ? Intl.DateTimeFormat('en-US', {
               month: '2-digit',
@@ -143,8 +124,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             }).format(new Date(employeeIssue.investigate.date_of_investigation))
           : '';
         employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
-        employeeIssue['isDecisionReceived'] =
-          employeeIssue.is_decision_received;
+        employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
         employeeIssue['decisionReceivedDate'] =
           employeeIssue.decision_received_date &&
           new Intl.DateTimeFormat('en-US', {
@@ -181,29 +161,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const dateTo = Date.parse(itemsFilter.to);
 
     if (dateFrom && !dateTo) {
-      return toast.custom(
-        () => <CustomToast message='Invalid date to.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
     }
     if (!dateFrom && dateTo) {
-      return toast.custom(
-        () => <CustomToast message='Invalid date from.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
     }
     if (dateFrom > dateTo) {
       return toast.custom(
-        () => (
-          <CustomToast
-            message='You have entered an invalid date range. Please select again.'
-            type='error'
-          />
-        ),
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
         {
           duration: 5000,
         }
@@ -247,9 +216,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           // onClick={() => alert('Clicked Employee Issue Item')}
           // className='hover:bg-gray-200/30 cursor-pointer'
         >
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.incidentDate}
-          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.incidentDate}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex gap-2'>
               <span>{item.name}</span>{' '}
@@ -291,12 +258,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return (
         <tr>
           <td colSpan={7}>
-            <h4 className='text-center text-gray-300 text-sm mt-4'>
-              There{`'`}s no data yet.
-            </h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>
-              Please click create to add incident report.
-            </h4>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
           </td>
         </tr>
       );
@@ -306,18 +269,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link
-            href='/manage'
-            className='flex-none flex gap-3 items-center hover:bg-gray-200'
-          >
+          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Manage</h4>
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>
-            Address Employee Issue
-          </h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Address Employee Issue</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
@@ -361,9 +319,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, search: e.target.value })
-                  }
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search...'
                 />
                 <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
@@ -384,49 +340,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th
-                        scope='col'
-                        className='py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Name
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Issue NTE
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Investigate
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Send Decision
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='divide-y divide-gray-200'>
-                    {renderRows()}
-                  </tbody>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>
-                  Total record/s: {employeeIssueItems.length}
-                </p>
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {employeeIssueItems.length}</p>
               </div>
             </div>
           </div>

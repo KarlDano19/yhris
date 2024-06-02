@@ -241,3 +241,24 @@ export const orientItems = [
     isNewHireEnrolled: false,
   }
 ];
+
+export const evaluationHistoryItems = [
+  {
+    id: 1,
+    employee: 'Heather Sakitsaulo',
+    eval_date: '05/10/2023',
+    eval_period: '2023',
+    eval_form: 'Performance Evaluation Form',
+    status: 'Completed',
+    overall_rating: '4.5',
+  },
+  {
+    id: 2,
+    employee: 'Heather Sakitsaulo',
+    eval_date: '05/10/2023',
+    eval_period: '2023',
+    eval_form: 'Performance Evaluation Form',
+    status: 'Completed',
+    overall_rating: '4.5',
+  }
+];

@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 
-import useGetEvaluationItems from './hooks/useGetEvaluationItems';
-import useGetEvaluationDetails from './hooks/useGetEvaluationDetails';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
-import SelectionModal from './modals/SelectionModal';
-import DeleteEvaluationModal from './modals/DeleteEvaluationModal';
-import EditEvaluationModal from './modals/EditEvaluationModal';
+import SelectionModal from './modals/SelectionTemplateModal';
+import DeleteEvaluationModal from './modals/DeleteEvaluationTemplateModal';
+import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
+import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
+import useGetEvaluationTemplateDetails from './hooks/useGetEvaluationTemplateDetails';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -21,7 +21,7 @@ import DeleteIcon from '@/svg/DeleteIcon';
 const Content = () => {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
-  const [selectedEvaluationId, setSelectedEvaluationId] = useState<number | null>(null);
+  const [selectedEvaluationTemplateId, setSelectedEvaluationTemplateId] = useState<number | null>(null);
   const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
   const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState(false);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
@@ -34,12 +34,12 @@ const Content = () => {
     data: dataEvaluation,
     isLoading: isGetEvaluationLoading,
     refetch: refetchEvaluation,
-  } = useGetEvaluationItems(itemsFilter);
+  } = useGetEvaluationTemplateItems(itemsFilter);
   const {
     data: dataEvaluationDetail,
     isLoading: isGetEvaluationDetailLoading,
     refetch: refetchEvaluationDetail,
-  } = useGetEvaluationDetails(selectedEvaluationId);
+  } = useGetEvaluationTemplateDetails(selectedEvaluationTemplateId);
 
   useEffect(() => {
     refetchEvaluation();
@@ -52,7 +52,7 @@ const Content = () => {
   }, [dataEvaluation]);
 
   useEffect(() => {
-    if (selectedEvaluationId) {
+    if (selectedEvaluationTemplateId) {
       refetchEvaluationDetail();
       if (dataEvaluationDetail && Object.keys(dataEvaluationDetail).length && !isGetEvaluationDetailLoading) {
         if (actionType === 'edit') {
@@ -63,23 +63,23 @@ const Content = () => {
         }
       }
     }
-  }, [selectedEvaluationId, dataEvaluationDetail]);
+  }, [selectedEvaluationTemplateId, dataEvaluationDetail]);
 
   const openEditEvaluationModal = (evaluationDetails: any) => {
     setActionType('edit');
-    if (selectedEvaluationId && selectedEvaluationId === evaluationDetails.id) {
+    if (selectedEvaluationTemplateId && selectedEvaluationTemplateId === evaluationDetails.id) {
       setIsEditEvaluationModalOpen(true);
     } else {
-      setSelectedEvaluationId(evaluationDetails.id);
+      setSelectedEvaluationTemplateId(evaluationDetails.id);
     }
   };
 
   const openDeleteEvaluationModal = (evaluationDetails: any) => {
     setActionType('delete');
-    if (selectedEvaluationId && selectedEvaluationId === evaluationDetails.id) {
+    if (selectedEvaluationTemplateId && selectedEvaluationTemplateId === evaluationDetails.id) {
       setIsDeleteEvaluationModalOpen(true);
     } else {
-      setSelectedEvaluationId(evaluationDetails.id);
+      setSelectedEvaluationTemplateId(evaluationDetails.id);
     }
   };
 
@@ -181,7 +181,7 @@ const Content = () => {
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Evaluation</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Template</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
@@ -248,10 +248,10 @@ const Content = () => {
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Name
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>

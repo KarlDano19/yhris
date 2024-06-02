@@ -12,14 +12,14 @@ function ViewModeTab({
   setValue,
   getValues,
   onSubmit,
-  setCurrentTab,
+  setSelectedTab,
   isLoading,
 }: {
   setIsPreview: any;
   setValue: any;
   getValues: any;
   onSubmit: any;
-  setCurrentTab: any;
+  setSelectedTab: any;
   isLoading: boolean;
 }) {
   const [viewStyle, setViewStyle] = useState(getValues('criteria_rating_view_type'));
@@ -91,9 +91,9 @@ function ViewModeTab({
         <button
           type='button'
           className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setCurrentTab(3)}
+          onClick={() => setSelectedTab(3)}
         >
-          BACK
+          Back
         </button>
         <button
           type='submit'

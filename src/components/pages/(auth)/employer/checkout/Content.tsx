@@ -18,7 +18,7 @@ import useCreatePayment from './hooks/useCreatePayment';
 
 const Content = () => {
   const params = useParams();
-  const searchParams = useSearchParams() as any;
+  const searchParams = useSearchParams();
   const [plan, SetPlan] = useState<any>({});
   const [payments, SetPayments] = useState([]);
   const [checkoutProgress, SetCheckoutProgress] = useState(1);
@@ -46,9 +46,9 @@ const Content = () => {
     }
   }, [dataPayment]);
 
-  const additionalEmployeeSlot = Math.abs(parseInt(searchParams.get('additional_employee_slot') || 0));
+  const additionalEmployeeSlot = Math.abs(parseInt(searchParams.get('additional_employee_slot') || '0'));
 
-  const duration = Math.abs(parseInt(searchParams.get('duration') || 0));
+  const duration = Math.abs(parseInt(searchParams.get('duration') || '0'));
 
   const onSubmit = handleSubmit((data) => {
     const paymentType = data.payment;

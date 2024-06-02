@@ -29,6 +29,9 @@ async function getProfile() {
     if (Object.hasOwn(errStringify, 'response')) {
       throw errStringify.response.data.message;
     }
+    if (Object.hasOwn(errStringify, 'detail')) {
+      throw errStringify;
+    }
     throw errStringify.message;
   }
 }

@@ -24,7 +24,7 @@ async function getPlanItems() {
 }
 
 function useGetPlanItems() {
-  const query = useQuery(['planItemsCache'], () => getPlanItems(), {
+  const query = useQuery(['planItemsPublicCache'], () => getPlanItems(), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

@@ -5,14 +5,14 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 function EvaluationInfoTab({
   register,
   handleSubmit,
-  setCurrentTab,
+  setSelectedTab,
 }: {
   register: any;
   handleSubmit: any;
-  setCurrentTab: any;
+  setSelectedTab: any;
 }) {
   const onSubmit = handleSubmit(() => {
-    setCurrentTab(2);
+    setSelectedTab(2);
   });
 
   return (
@@ -107,7 +107,7 @@ function EvaluationInfoTab({
           type='submit'
           className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
         >
-          NEXT
+          Next
         </button>
       </div>
     </form>

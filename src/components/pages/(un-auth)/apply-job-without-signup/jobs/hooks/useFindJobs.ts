@@ -26,14 +26,10 @@ async function findJobs(jobTitle: string, location: string) {
 }
 
 function useFindJobs(jobTitle: string, location: string) {
-  const query = useQuery(
-    ['findJobsCache'],
-    () => findJobs(jobTitle, location),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    }
-  );
+  const query = useQuery(['findJobsPublicCache'], () => findJobs(jobTitle, location), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
 
   return query;
 }

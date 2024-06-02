@@ -6,6 +6,7 @@ import { ArrowLeftIcon, UsersIcon } from '@heroicons/react/24/solid';
 import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import BenefitsLogo from '@/svg/BenefitsLogo';
 import EmployeeLogo from '@/svg/EmployeeLogo';
+import EvaluationHistoryLogo from '@/svg/EvalHistoryLogo';
 
 const menus = [
   {
@@ -27,6 +28,11 @@ const menus = [
     icon: <EmployeeLogo />,
     text: "Employees",
     link: "/manage/employees"
+  },
+  {
+    icon: <EvaluationHistoryLogo />,
+    text: "Evaluation History",
+    link: "/manage/evaluation-history"
   },
 ];
 

@@ -3,11 +3,11 @@ import { useEffect, useState, Dispatch, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
-import useDeleteEvaluation from '../hooks/useDeleteEvaluation';
+import useDeleteEvaluationScheduler from '../hooks/useDeleteEvaluationScheduler';
 
 import WarningRed from '@/svg/WarningRed';
 
-export default function DeleteEvaluationModal({
+export default function DeleteEvaluationModalScheduler({
   refetch,
   isOpen,
   setIsOpen,
@@ -20,7 +20,7 @@ export default function DeleteEvaluationModal({
 }) {
   const cancelButtonRef = useRef(null);
   const [evaluationId, setEvaluationId] = useState<number | null>(null);
-  const { mutate, isLoading } = useDeleteEvaluation();
+  const { mutate, isLoading } = useDeleteEvaluationScheduler();
 
   useEffect(() => {
     if (evaluationDetails) {
