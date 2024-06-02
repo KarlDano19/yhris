@@ -47,7 +47,6 @@ const Details = ({
             width={143}
             height={164}
             priority={true}
-            placeholder='blur'
             alt='employer-logo'
             className='rounded object-cover max-w-[143px] max-h-[164px]'
           />
