@@ -4,6 +4,8 @@ import React from 'react';
 
 import Link from 'next/link';
 
+import MenuItem from '../../MenuItem';
+
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import Training from '@/svg/TrainingsLogo';
 import Evaluation from '@/svg/EvaluationLogo';
@@ -14,16 +16,19 @@ const menus = [
     icon: <Training />,
     text: 'Training',
     link: '/train/training',
+    isAvailable: false,
   },
   {
     icon: <Evaluation />,
     text: 'Evaluation Template',
     link: '/train/evaluation-template',
+    isAvailable: true,
   },
   {
     icon: <EvaluationScheduler />,
     text: 'Evaluation Scheduler',
     link: '/train/evaluation-scheduler',
+    isAvailable: true,
   },
 ];
 
@@ -42,16 +47,7 @@ const Content = () => {
             <h2 className='text-xl font-bold text-indigo-dye'>Train</h2>
             <div className='grid grid-cols-5 gap-6 mt-6'>
               {menus.map((menu, index) => {
-                return (
-                  <Link
-                    href={menu.link}
-                    key={index}
-                    className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80'
-                  >
-                    {menu.icon}
-                    <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
-                  </Link>
-                );
+                return <MenuItem key={index} menu={menu} />;
               })}
             </div>
           </div>

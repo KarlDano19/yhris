@@ -1,11 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import Link from 'next/link';
-
-import { Tooltip } from 'react-tooltip';
-
+import MenuItem from '../MenuItem';
 import FloatingProgress from '../../../FloatingProgress';
 
 import { XMarkIcon } from '@heroicons/react/20/solid';
@@ -94,35 +91,7 @@ const Home = () => {
           <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
           <div className='grid grid-cols-5 gap-6 mt-6 relative'>
             {menus.map((menu, index) => {
-              return (
-                <div key={index} className='h-48 bg-white shadow rounded-lg hover:shadow-md focus:shadow-none'>
-                  {menu.isAvailable && (
-                    <Link
-                      href={menu.link}
-                      aria-disabled={true}
-                      className='flex flex-col gap-2 items-center justify-center px-4 py-8 mt-2 focus:opacity-80'
-                    >
-                      {menu.icon}
-                      <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
-                    </Link>
-                  )}
-                  {!menu.isAvailable && (
-                    <>
-                      <div
-                        data-tooltip-id='dashboard-item-tooltip'
-                        data-tooltip-content='Coming soon.'
-                        data-tooltip-place='bottom'
-                        aria-disabled={true}
-                        className='flex flex-col gap-2 items-center justify-center px-4 py-8 opacity-50'
-                      >
-                        {menu.icon}
-                        <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
-                      </div>
-                      <Tooltip id='dashboard-item-tooltip' />
-                    </>
-                  )}
-                </div>
-              );
+              return <MenuItem key={index} menu={menu} />;
             })}
           </div>
         </div>

@@ -104,10 +104,11 @@ const Content = () => {
         <div className='flex p-4'>
           <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
-            <h4 className='font-semibold text-xl'> Settings | General Settings | Email Template</h4>
+            <h4>General Settings</h4>
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
