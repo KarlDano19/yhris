@@ -5,7 +5,6 @@ async function addEvaluationScheduler(data: any) {
   try {
     const token = getCookie('token');
     const formData = new FormData();
-    formData.append('attachments', data.attachments[0]);
     formData.append('employee', JSON.stringify(data.employee));
     formData.append('evaluation_template', data.evaluation_template);
     formData.append('frequency_unit', data.frequency_unit);
@@ -13,6 +12,9 @@ async function addEvaluationScheduler(data: any) {
     formData.append('message', data.message);
     formData.append('name', data.name);
     formData.append('reminder_schedule', data.reminder_schedule);
+    if (data.attachments && data.attachments.length) {
+      formData.append('attachment', data.attachments[0]);
+    }
     const config = {
       method: 'POST',
       headers: {

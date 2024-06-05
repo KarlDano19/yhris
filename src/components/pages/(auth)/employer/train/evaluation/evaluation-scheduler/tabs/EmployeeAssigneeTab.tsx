@@ -5,6 +5,7 @@ import Select from 'react-select';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import Link from 'next/link';
 
 interface Field {
   onChange: (value: any) => void;
@@ -41,6 +42,10 @@ function EmployeeAssigneeTab({
     }
   }, [dataEmployee]);
 
+  const getFilename = (file: string) => {
+    return file.split('/').pop();
+  };
+
   return (
     <form onSubmit={onSubmit}>
       <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-6 pt-6 pb-8'>
@@ -56,8 +61,8 @@ function EmployeeAssigneeTab({
                 className='basic-multi-select'
                 classNamePrefix='select'
                 options={employeeItems}
-                value={employeeItems.find((item: any) => (value || []).includes(item.value))}
-                onChange={(val) => onChange(val.map((item: any) => item.value))}
+                value={employeeItems.filter((item: any) => value?.includes(item.value))}
+                onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
                 components={{
                   DropdownIndicator: () => (
                     <div className='pointer-events-none px-2'>
@@ -84,14 +89,22 @@ function EmployeeAssigneeTab({
         </div>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-            Attachments
+            Attachment
           </label>
           <input
-            id='attachments'
+            id='attachment'
             type='file'
-            {...register('attachments')}
+            {...register('attachment')}
             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
           />
+          {typeof watch('attachment') === 'string' && (
+            <div className='flex text-sm mt-1 ml-1'>
+              <p>Upload file:</p>&nbsp;
+              <Link href={watch('attachment')} className='text-blue-500' target='_blank'>
+                {getFilename(watch('attachment'))}
+              </Link>
+            </div>
+          )}
         </div>
       </div>
       <hr />

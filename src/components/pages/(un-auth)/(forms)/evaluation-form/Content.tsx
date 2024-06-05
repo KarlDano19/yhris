@@ -342,6 +342,24 @@ function Content() {
                               id={`comment-${evaluationCriterionIndex}-${index}`}
                               className='border rounded px-5 pt-4 pb-12 text-gray-400'
                               placeholder='Enter comment...'
+                              onChange={(event) => {
+                                setEvaluationForm((prevForm: any) => {
+                                  return prevForm.map((criterionItem: any, criterionIndex: number) => {
+                                    if (criterionIndex === evaluationCriterionIndex) {
+                                      return {
+                                        ...criterionItem,
+                                        criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
+                                          if (itemIndex === index) {
+                                            return { ...item, comment: event.target.value };
+                                          }
+                                          return item;
+                                        }),
+                                      };
+                                    }
+                                    return criterionItem;
+                                  });
+                                });
+                              }}
                             ></textarea>
                           )}
                           {index + 1 !== evaluationForm[evaluationCriterionIndex].criterion.length && (
