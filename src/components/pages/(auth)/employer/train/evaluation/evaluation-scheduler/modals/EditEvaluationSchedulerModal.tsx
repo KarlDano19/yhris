@@ -39,7 +39,7 @@ function CreateEvaluationSchedulerModal({
       setValue('reminder_schedule', evaluationSchedulerDetails.reminder_schedule);
       setValue('employee', evaluationSchedulerDetails.employee);
       setValue('message', evaluationSchedulerDetails.message);
-      setValue('attachments', evaluationSchedulerDetails.attachments);
+      setValue('attachment', evaluationSchedulerDetails.attachment);
     }
   }, [evaluationSchedulerDetails]);
 
