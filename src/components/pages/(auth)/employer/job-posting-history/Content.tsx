@@ -74,10 +74,10 @@ const Content = () => {
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
 
-        let rightClickItemLabel = 'Set as inactive';
+        let rightClickItemLabel = 'Set as Inactive';
         let successMessage = 'Successfully set job as inactive.';
         if (!jobPost['is_active']) {
-          rightClickItemLabel = 'Set as active';
+          rightClickItemLabel = 'Set as Active';
           successMessage = 'Successfully set job as active.';
         }
         menuOptions['label'] = rightClickItemLabel;
@@ -114,7 +114,7 @@ const Content = () => {
       return;
     }
     if (social === 'LinkedIn') {
-      og_url = `${encoded_url}%3Fsource%3Dfacebook`;
+      og_url = `${encoded_url}`;
       shareLinkedIn(og_url);
       return;
     }
@@ -126,7 +126,7 @@ const Content = () => {
   };
 
   const shareLinkedIn = (og_url: string) => {
-    const LinkedInSharer = `https://www.linkedin.com/sharing/share-offsite/?url=${og_url}`;
+    const LinkedInSharer = `https://www.linkedin.com/shareArticle?mini=true&url=${og_url}`;
     window.open(LinkedInSharer);
   };
 

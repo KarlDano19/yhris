@@ -19,10 +19,10 @@ async function addDirective(directive: T_Directive) {
       data.append('name', directive.name);
       data.append('position', directive.position);
       if (directive.signature.length) {
-        data.append('signature_file', directive.signature);
+        data.append('signature', directive.signature);
       }
       if (directive.qrCode) {
-        data.append('qr_code_file', directive.qrCode);
+        data.append('qr_code', directive.qrCode);
       }
     } else {
       data.append('is_responded', directive.withResponse ? 'yes' : 'no');

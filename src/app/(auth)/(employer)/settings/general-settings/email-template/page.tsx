@@ -1,12 +1,26 @@
-import Content from "@/components/pages/(auth)/employer/settings/general-settings/email-template/Content";
-import React from "react";
+import React from 'react';
+
+import { cookies } from 'next/headers';
+
+import { getIronSession } from 'iron-session';
+
+import Content from '@/components/pages/(auth)/employer/settings/general-settings/email-template/Content';
+
+import { SessionData, sessionOptions } from '@/session/lib';
 
 export const metadata = {
-  title: "Email Template - Yahshua HRIS",
+  title: 'Email Template - Yahshua HRIS',
 };
 
+async function getSession() {
+  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  return session;
+}
+
 const Train = async () => {
-  return <Content />;
+  const session = await getSession();
+  const hasActiveSubscription = session.hasActiveSubscription;
+  return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
 export default Train;

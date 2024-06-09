@@ -58,7 +58,6 @@ const MainHeader = () => {
   const userNavigation = [
     { name: 'My Profile', href: '/employer-profile', onClick: void 0, isDisabled: false },
     { name: 'Subscriptions', href: '/manage-subscriptions#active-plans', onClick: void 0, isDisabled: false },
-    { name: 'Settings', href: '', onClick: void 0, isDisabled: true },
     {
       name: 'Sign out',
       href: '',
