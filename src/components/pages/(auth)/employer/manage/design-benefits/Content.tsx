@@ -32,13 +32,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataBenefits) {
-      dataBenefits.benefits.map((benefit: any) => {
+      dataBenefits.map((benefit: any) => {
         benefit.date = Intl.DateTimeFormat('en-US').format(
           new Date(benefit.date)
         );
         return benefit;
       });
-      setDesignBenefitsItems(dataBenefits.benefits);
+      setDesignBenefitsItems(dataBenefits);
     }
   }, [dataBenefits]);
 

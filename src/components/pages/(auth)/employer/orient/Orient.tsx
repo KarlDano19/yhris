@@ -14,10 +14,10 @@ export default function Orient({
         <div>
           <button
             className={classNames(
-              'relative rounded-md px-5 py-2 focus:z-10 w-[7rem]',
+              'relative rounded-md px-5 py-2 focus:z-10 w-[7rem] disabled:opacity-80',
               isOriented
                 ? 'bg-red-500 border-[1px] border-red-500 text-white'
-                : 'border-[1px] border-red-500 text-red-500 disabled:opacity-80'
+                : 'border-[1px] border-red-500 text-red-500'
             )}
             onClick={() => setIsOrientFirstModalOpen(true)}
             disabled={isOriented}

@@ -118,9 +118,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               height={40}
               alt='round-photo'
               className={classNames(
-                'max-w-[40px] max-h-[40px] border-2 border-[#fff] rounded-full',
-                index === 0 ? 'z-0' : `relative -left-[${(25 * index).toString()}px] z-${index}0`
+                'w-[40px] h-[40px] border-2 border-[#fff] rounded-full',
+                index === 0 ? 'z-0' : `relative z-${index}`
               )}
+              style={{'left': `${-20 * index}px`}}
             />
           );
         })}
