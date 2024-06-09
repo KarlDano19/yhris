@@ -18,7 +18,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEvaluationTemplateId, setSelectedEvaluationTemplateId] = useState<number | null>(null);
@@ -235,8 +235,9 @@ const Content = () => {
             </button>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
+                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsSelectionModalOpen(true)}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>

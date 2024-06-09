@@ -15,12 +15,12 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
   if (Object.keys(response).length !== 0) {
     metaConfig = {
       'title': `${response.og_title} - Yahshua HRIS`,
-      'description': 'HRIS',
+      'description': 'HRISS',
       ['fb:app_id']: '592696726158737',
       ['og:url']: response.og_url,
       ['og:type']: response.og_type,
       ['og:title']: response.og_title,
-      ['og:description']: response.og_url,
+      ['og:description']: response.og_description,
       ['og:image']: response.og_image,
       ['og:image:width']: response.og_image_width,
       ['og:image:height']: response.og_image_height,

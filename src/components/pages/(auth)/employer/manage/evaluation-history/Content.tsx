@@ -116,7 +116,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return (
         <tr>
           <td colSpan={7}>
-            <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
+            <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
           </td>
         </tr>
       );

@@ -13,7 +13,7 @@ import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import SuccessModal from './modal/SuccessModal';
 import { set } from 'react-hook-form';
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState({
     search: '',
   });
@@ -83,15 +83,6 @@ const Content = () => {
           <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add Email Template.</h4>
-
-            <div className='flex-1 flex justify-center mb-4'>
-              <button
-                className='bg-white border-2 border-green-500 rounded-md py-2 px-8 text-green-500 text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
-                onClick={() => setIsCreateModalOpen(true)}
-              >
-                CREATE
-              </button>
-            </div>
           </td>
         </tr>
       );
@@ -132,6 +123,7 @@ const Content = () => {
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsCreateModalOpen(true)}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>

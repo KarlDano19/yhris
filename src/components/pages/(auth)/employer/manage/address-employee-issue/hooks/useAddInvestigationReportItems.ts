@@ -15,7 +15,7 @@ async function addInvestigationReport(investigation: T_Investigation) {
     data.append('results', investigation.resultOfInvestigation);
     data.append('decision', investigation.decision);
     data.append('custom_decision', investigation.other);
-    data.append('attachments_file', investigation.attachments);
+    data.append('attachments', investigation.attachments);
     const config = {
       method: 'POST',
       headers: {
