@@ -38,7 +38,7 @@ const Content = () => {
     <>
       {!!Object.keys(jobDetailData).length && (
         <div className='py-12'>
-          <div className='w-[600px] mx-auto border border-gray-950 rounded-[20px] p-8'>
+          <div className='w-[650px] mx-auto border border-gray-200 shadow-md rounded-[20px] py-8 px-10'>
             <div className='grid grid-cols-4 px-4 mt-5'>
               <div className='col-span-3 lg:col-span-2 flex'>
                 <span className='mt-1 ml-1'>
