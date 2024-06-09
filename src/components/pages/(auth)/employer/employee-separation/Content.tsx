@@ -115,16 +115,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataDepartment) {
-      setDepartmentItems(dataDepartment.departments);
+      setDepartmentItems(dataDepartment);
     }
     if (dataEmployee) {
       setEmployeeItems(dataEmployee);
     }
     if (dataPosition) {
-      setPositionItems(dataPosition.positions);
+      setPositionItems(dataPosition);
     }
     if (dataSeparation) {
-      dataSeparation.separations?.map((separation: any) => {
+      dataSeparation?.map((separation: any) => {
         separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
         separation['name'] = separation.name;
         separation['reasonForLeaving'] = separation.reason_of_leaving;
@@ -171,7 +171,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         };
         return separation;
       });
-      setSeparationItems(dataSeparation.separations);
+      setSeparationItems(dataSeparation);
     }
   }, [dataSeparation, dataDepartment, dataEmployee, dataPosition]);
 

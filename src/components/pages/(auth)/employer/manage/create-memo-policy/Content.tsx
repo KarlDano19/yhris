@@ -39,11 +39,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataDirectives) {
-      dataDirectives.directives.map((directive: any) => {
+      dataDirectives.map((directive: any) => {
         directive.date = Intl.DateTimeFormat('en-US').format(new Date(directive.date));
         return directive;
       });
-      setCreateMemoPolicyItems(dataDirectives.directives);
+      setCreateMemoPolicyItems(dataDirectives);
     }
   }, [dataDirectives]);
 

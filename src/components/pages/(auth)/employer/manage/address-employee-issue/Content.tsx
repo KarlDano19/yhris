@@ -89,16 +89,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataDepartment) {
-      setDepartmentItems(dataDepartment.departments);
+      setDepartmentItems(dataDepartment);
     }
     if (dataEmployee) {
       setEmployeeItems(dataEmployee);
     }
     if (dataPosition) {
-      setPositionItems(dataPosition.positions);
+      setPositionItems(dataPosition);
     }
     if (dataEmployeeIssues) {
-      dataEmployeeIssues.employee_issues.map((employeeIssue: any) => {
+      dataEmployeeIssues.map((employeeIssue: any) => {
         const employee = employeeIssue.employee_dict;
         employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
           month: '2-digit',
@@ -152,7 +152,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         };
         return employeeIssue;
       });
-      setEmployeeIssueItems(dataEmployeeIssues.employee_issues);
+      setEmployeeIssueItems(dataEmployeeIssues);
     }
   }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition]);
 
