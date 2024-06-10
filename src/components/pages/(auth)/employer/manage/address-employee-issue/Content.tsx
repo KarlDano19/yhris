@@ -99,13 +99,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     if (dataEmployeeIssues) {
       dataEmployeeIssues.map((employeeIssue: any) => {
-        const employee = employeeIssue.employee_dict;
+        const employee = employeeIssue.employee;
         employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
           month: '2-digit',
           day: '2-digit',
           year: 'numeric',
         }).format(new Date(employeeIssue.incident_date));
-        employeeIssue['name'] = `${employee.firstname} ${employee.lastname}`;
+        employeeIssue['name'] = employee.name;
         employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
         employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
         employeeIssue['incidentReceivedDate'] =
@@ -218,9 +218,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         >
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.incidentDate}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex gap-2'>
-              <span>{item.name}</span>{' '}
-            </div>
+            <span>{item.name}</span>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <SendNTE
@@ -276,7 +274,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Address Employee Issue</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -305,12 +303,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   placeholder={'mm/dd/yyyy'}
                 />
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
@@ -322,11 +314,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-                </div>
               </div>
             </div>
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
             <div className='flex-1 flex justify-end'>
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'

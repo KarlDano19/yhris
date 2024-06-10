@@ -22,8 +22,7 @@ export default function InvestigationModal({
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
   const { mutate, isLoading } = useAddInvestigationReportItems();
-  const { register, handleSubmit, reset, control, setValue } =
-    useForm<T_Investigation>();
+  const { register, handleSubmit, reset, control, setValue } = useForm<T_Investigation>();
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toAddData, setToAddData] = useState<any>(null);
@@ -34,48 +33,33 @@ export default function InvestigationModal({
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const currentDate = new Date();
-      const itemIndex = employeeIssueItems.findIndex(
-        (item: any) => item.id === isOpen.id
-      );
-      const employeeIssueItemsCopy = JSON.parse(
-        JSON.stringify(employeeIssueItems)
-      );
+      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
+      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       employeeIssueItemsCopy[itemIndex].investigateForm.employee_issue = isOpen.id;
       employeeIssueItemsCopy[itemIndex].investigateForm.date = data.date;
       employeeIssueItemsCopy[itemIndex].investigateForm.witness = data.witness;
       employeeIssueItemsCopy[itemIndex].investigateForm.presider = data.presider;
-      employeeIssueItemsCopy[itemIndex].investigateForm.isAttendHearing =
-        data.isAttendHearing;
-      employeeIssueItemsCopy[itemIndex].investigateForm.resultOfInvestigation =
-        data.resultOfInvestigation;
+      employeeIssueItemsCopy[itemIndex].investigateForm.isAttendHearing = data.isAttendHearing;
+      employeeIssueItemsCopy[itemIndex].investigateForm.resultOfInvestigation = data.resultOfInvestigation;
       employeeIssueItemsCopy[itemIndex].investigateForm.decision = data.decision;
       employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other;
-      employeeIssueItemsCopy[itemIndex].investigateForm.attachments =
-        toSaveData.attachments;
+      employeeIssueItemsCopy[itemIndex].investigateForm.attachments = toSaveData.attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
-      employeeIssueItemsCopy[itemIndex].investigatedRawDate = currentDate;
-      employeeIssueItemsCopy[itemIndex].investigatedDate =
-        Intl.DateTimeFormat('en-US').format(currentDate);
+      employeeIssueItemsCopy[itemIndex].investigatedDate = Intl.DateTimeFormat('en-US').format(currentDate);
       const copySaveData = employeeIssueItemsCopy[itemIndex].investigateForm;
       setToSaveData({ ...toSaveData, ...copySaveData });
       setToAddData([...employeeIssueItemsCopy]);
       setIsConfirmModalOpen(true);
     } else {
-      toast.custom(
-        () => <CustomToast message='Incomplete information.' type='error' />,
-        { duration: 4000 }
-      );
+      toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   });
   const saveData = () => {
+    setIsConfirmModalOpen(false);
     const callbackReq = {
       onSuccess: (data: any) => {
         setEmployeeIssueItems([...toAddData]);
-        toast.custom(
-          () => <CustomToast message={data.message} type='success' />,
-          { duration: 5000 }
-        );
-        setIsConfirmModalOpen(false);
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         setIsOpen(null);
         reset();
       },
@@ -100,25 +84,15 @@ export default function InvestigationModal({
     if (file.size <= 5000000) {
       setToSaveData({ ...toSaveData, attachments: file });
     } else {
-      toast.custom(
-        () => (
-          <CustomToast message={'Maximum file size is 5mb.'} type='error' />
-        ),
-        {
-          duration: 2000,
-        }
-      );
+      toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+        duration: 2000,
+      });
     }
   };
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog
-          as='div'
-          className='relative z-10'
-          initialFocus={cancelButtonRef}
-          onClose={() => setIsOpen(null)}
-        >
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -144,13 +118,8 @@ export default function InvestigationModal({
               >
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>
-                      Investigation Report Template
-                    </h3>
-                    <XCircleIcon
-                      className='w-8 h-8 text-white cursor-pointer'
-                      onClick={() => setIsOpen(null)}
-                    />
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Investigation Report Template</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
@@ -163,7 +132,7 @@ export default function InvestigationModal({
                           <span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                        <Controller
+                          <Controller
                             control={control}
                             name='date'
                             render={({ field }) => (
@@ -183,10 +152,7 @@ export default function InvestigationModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='witness'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='witness' className='block text-sm font-medium leading-6 text-gray-900'>
                           Witness<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
@@ -199,10 +165,7 @@ export default function InvestigationModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='presider'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='presider' className='block text-sm font-medium leading-6 text-gray-900'>
                           Presider<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
@@ -215,10 +178,7 @@ export default function InvestigationModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='isAttendHearing'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='isAttendHearing' className='block text-sm font-medium leading-6 text-gray-900'>
                           Did the employee attend the hearing
                           <span className='text-red-600'>*</span>
                         </label>
@@ -257,10 +217,7 @@ export default function InvestigationModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='decision'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='decision' className='block text-sm font-medium leading-6 text-gray-900'>
                           Decision <span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
@@ -284,10 +241,7 @@ export default function InvestigationModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='other'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='other' className='block text-sm font-medium leading-6 text-gray-900'>
                           If you selected other, please specify the decision.
                         </label>
                         <div className='mt-2'>
@@ -300,10 +254,7 @@ export default function InvestigationModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='attachment'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
                           Attachment<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
