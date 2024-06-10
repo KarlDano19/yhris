@@ -17,13 +17,10 @@ export default function CreateJobPageSeven({
 
   const handleRadioChange = (value: string) => {
     setSelectedOptions((prevOptions) => {
-      // Check if the value already exists in the array
       if (prevOptions.includes(value)) {
-        // Deselect the option by removing it from the array
-        return prevOptions.filter((option) => option !== value);
+        return prevOptions.filter((option) => option !== value); // Deselect the option by removing it from the array
       } else {
-        // Select the option by adding it to the array
-        return [...prevOptions, value];
+        return [...prevOptions.filter((option) => option !== value), value]; // Select the option by adding it to the array
       }
     });
   };
@@ -44,12 +41,14 @@ export default function CreateJobPageSeven({
           <div className={`flex flex-col space-y-2 ml-2 mt-2 ${manualInputFocus ? 'border-2 border-blue-700' : ''}`}>
             <label className='inline-flex items-center mr-4'>
               <input
-                id='linkedinRadioBtn'
-                type='radio'
-                className='form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900'
-                name='socialRadioGroup'
-                onChange={() => handleRadioChange('LinkedIn')}
-                onClick={() => setManualInputFocus(false)}
+                id='linkedinCheckbox'
+                type='checkbox'
+                className='form-checkbox h-5 w-5 ext-sm font-medium leading-6 text-gray-900'
+                name='socialLinkedin'
+                onChange={() => {
+                  handleRadioChange('LinkedIn');
+                  setManualInputFocus(false);
+                }}
               />
               <span className='flex items-center ml-2 text-sm font-medium leading-6 text-gray-900'>
                 <LinkedIn /> <span className='ml-2'>LinkedIn</span>
@@ -58,11 +57,13 @@ export default function CreateJobPageSeven({
             <label className='inline-flex items-start mr-4'>
               <input
                 id='facebookRadioBtn'
-                type='radio'
-                className='form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900'
-                name='socialRadioGroup'
-                onChange={() => handleRadioChange('Facebook')}
-                onClick={() => setManualInputFocus(false)}
+                type='checkbox'
+                className='form-checkbox h-5 w-5 ext-sm font-medium leading-6 text-gray-900'
+                name='socialFacebook'
+                onChange={() => {
+                  handleRadioChange('Facebook');
+                  setManualInputFocus(false);
+                }}
               />
               <span className='flex items-center ml-2 text-sm font-medium leading-6 text-gray-900'>
                 <Facebook />
