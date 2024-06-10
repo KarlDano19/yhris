@@ -8,7 +8,7 @@ async function addInvestigationReport(investigation: T_Investigation) {
     const token = getCookie('token');
     const data = new FormData();
     data.append('employee_issue', investigation.employee_issue);
-    data.append('date_of_investigation', investigation.date);
+    data.append('date_of_investigation', new Date(investigation.date).toISOString());
     data.append('witness', investigation.witness);
     data.append('presider', investigation.presider);
     data.append('has_attended_hearing', investigation.isAttendHearing);
@@ -23,10 +23,7 @@ async function addInvestigationReport(investigation: T_Investigation) {
       },
       body: data,
     };
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/investigation-reports/`,
-      config
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/investigation-reports/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -41,9 +38,7 @@ async function addInvestigationReport(investigation: T_Investigation) {
 }
 
 function useAddInvestigationReportItems() {
-  const query = useMutation((investigation: T_Investigation) =>
-    addInvestigationReport(investigation)
-  );
+  const query = useMutation((investigation: T_Investigation) => addInvestigationReport(investigation));
 
   return query;
 }
