@@ -110,7 +110,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <tr key={item.id}>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-                  <div className='flex gap-2'>
+                  <div className='flex gap-2 justify-center'>
                     <span>{item.title}</span> <ClipIcon />
                   </div>
                 </td>
@@ -127,7 +127,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     }}
                   />
                 </td>
-                <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top'>
+                <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
                   <p
                     className='font-bold hover:underline cursor-pointer'
                     onClick={() => alert('View responses clicked')}
@@ -135,16 +135,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     View Responses
                   </p>
                 </td>
-                <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
-                  <span
-                    className='cursor-pointer'
+                <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+                  <button
                     onClick={() => {
                       setIdToDelete(item.id);
                       setIsConfirmModalOpen(true);
                     }}
                   >
                     <DeleteMemoLogo />
-                  </span>
+                  </button>
                 </td>
               </tr>
             )
