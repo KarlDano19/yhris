@@ -110,7 +110,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <tr key={item.id}>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-                  <div className='flex gap-2'>
+                  <div className='flex gap-2 justify-center'>
                     <span>{item.title}</span> <ClipIcon />
                   </div>
                 </td>
@@ -127,7 +127,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     }}
                   />
                 </td>
-                <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue align-top'>
+                <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
                   <p
                     className='font-bold hover:underline cursor-pointer'
                     onClick={() => alert('View responses clicked')}
@@ -135,16 +135,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     View Responses
                   </p>
                 </td>
-                <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
-                  <span
-                    className='cursor-pointer'
+                <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+                  <button
                     onClick={() => {
                       setIdToDelete(item.id);
                       setIsConfirmModalOpen(true);
                     }}
                   >
                     <DeleteMemoLogo />
-                  </span>
+                  </button>
                 </td>
               </tr>
             )
@@ -199,7 +198,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Create Memo/Policy</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -228,12 +227,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   placeholder={'mm/dd/yyyy'}
                 />
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
@@ -245,20 +238,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-                </div>
               </div>
             </div>
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
             <div className='flex-1 flex justify-end relative'>
               <Menu as='div' className='relative inline-block'>
                 <div>
                   <Menu.Button
-                    className='inline-flex w-full justify-center gap-x-4 items-center rounded-md bg-green-500 px-5 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-green-500 enabled:hover:opacity-90 disabled:opacity-50'
+                    className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                     disabled={!hasActiveSubscription}
                   >
                     CREATE
-                    <CreateMemoChevronLogo />
                   </Menu.Button>
                 </div>
 
@@ -317,10 +312,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>

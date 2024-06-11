@@ -20,10 +20,14 @@ const Content = () => {
   const [hasJob, setJob] = useState(false);
   const [isJobView, setIsJobView] = useState(false);
   const [isJobModal, setJobModal] = useState(false);
+  const [itemsFilter, setItemsFilter] = useState({
+    job_title: '',
+    location: '',
+  });
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [jobsItems, setJobsItems] = useState<any>([]);
 
-  const { data: dataJobs, isLoading: isGetJobsLoading } = useFindJobs('', '');
+  const { data: dataJobs, isLoading: isGetJobsLoading, refetch } = useFindJobs(itemsFilter);
 
   useEffect(() => {
     if (dataJobs && dataJobs.length !== 0) {
@@ -32,6 +36,10 @@ const Content = () => {
       setSelectedJobId(dataJobs[0].id);
       setIsJobView(true);
       setJobModal(true);
+    } else {
+      setJobsItems([]);
+      setIsJobView(false);
+      setJobModal(false);
     }
   }, [dataJobs]);
 
@@ -63,7 +71,7 @@ const Content = () => {
               className=''
               onSubmit={(e) => {
                 e.preventDefault();
-                setJob(true);
+                refetch();
               }}
             >
               <div className='lg:flex lg:px-4 lg:justify-between md:mt-4'>
@@ -80,7 +88,7 @@ const Content = () => {
                     id='what'
                     className=' w-56 mx-3 md:px-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[23px]'
                     placeholder='Enter job title, company, or keywords'
-                    required
+                    onChange={(e) => setItemsFilter({ ...itemsFilter, job_title: e.target.value })}
                   />
                   <MagnifyingGlassIcon className='w-5 h-5 text-gray-400' />
                 </div>
@@ -97,7 +105,7 @@ const Content = () => {
                     id='where'
                     className=' w-56 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[23px] ml-3 md:ml-0'
                     placeholder='Town, City, Province, Country'
-                    required
+                    onChange={(e) => setItemsFilter({ ...itemsFilter, location: e.target.value })}
                   />
                   <MapPinIcon className='w-5 h-5 text-gray-400' />
                 </div>

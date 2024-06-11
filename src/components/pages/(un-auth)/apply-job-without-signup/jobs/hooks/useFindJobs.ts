@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 
-async function findJobs(jobTitle: string, location: string) {
+async function findJobs(itemsFilter: any) {
   try {
+    const jobTitle = itemsFilter.job_title;
+    const location = itemsFilter.location;
     const config = {
       method: 'GET',
       headers: {
@@ -25,8 +27,8 @@ async function findJobs(jobTitle: string, location: string) {
   }
 }
 
-function useFindJobs(jobTitle: string, location: string) {
-  const query = useQuery(['findJobsPublicCache'], () => findJobs(jobTitle, location), {
+function useFindJobs(itemsFilter: any) {
+  const query = useQuery(['findJobsPublicCache'], () => findJobs(itemsFilter), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
