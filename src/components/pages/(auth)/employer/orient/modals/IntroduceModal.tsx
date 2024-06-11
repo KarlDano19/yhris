@@ -58,16 +58,19 @@ export default function IntroduceModal({
     if (isOpen && selectedOrientId) {
       const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
       const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
+      console.log(data.template)
       orientItemCopy[itemIndex].isIntroduced = true;
-      const payload = {
-        id: selectedOrientId,
-        template: data.template,
-        to: data.email,
-        cc: data.cc,
-        bcc: data.bcc,
-        actionType: 'sending',
-        emailType: 'introduce',
-      };
+      orientItemCopy[itemIndex].introduceTeam.template = data.template;
+      orientItemCopy[itemIndex].introduceTeam.to = data.email;
+      orientItemCopy[itemIndex].introduceTeam.message = data.message;
+      if (data.cc) {
+        orientItemCopy[itemIndex].introduceTeam.cc = data.cc;
+      }
+      if (data.bcc) {
+        orientItemCopy[itemIndex].introduceTeam.bcc = data.bcc;
+      }
+      orientItemCopy[itemIndex].actionType = 'sending';
+      orientItemCopy[itemIndex].emailType = 'introduce';
       const callbackReq = {
         onSuccess: (data: any) => {
           reset();
@@ -81,7 +84,7 @@ export default function IntroduceModal({
           });
         },
       };
-      mutate(payload, callbackReq);
+      mutate(orientItemCopy[itemIndex], callbackReq);
     } else {
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }

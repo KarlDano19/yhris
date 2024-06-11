@@ -66,6 +66,13 @@ const Content = () => {
         );
         item['isIntroduced'] = item.is_introduction_sent;
         item['isOriented'] = item.is_orientation_completed;
+        item['introduceTeam'] = {
+          to: '',
+          template: '',
+          email: '',
+          cc: '',
+          bcc: '',
+        };
         item['sendContract'] = {
           to: '',
           template: '',

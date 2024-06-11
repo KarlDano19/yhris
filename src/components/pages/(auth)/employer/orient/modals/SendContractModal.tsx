@@ -56,21 +56,20 @@ export default function SendContractModal({
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const onSubmit = handleSubmit((data) => {
     if (isOpen && selectedOrientId) {
-      const currentDate = new Date();
       const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
       const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
       orientItemCopy[itemIndex].sendContract.template = data.template;
       orientItemCopy[itemIndex].sendContract.to = data.email;
       orientItemCopy[itemIndex].sendContract.message = data.message;
-      orientItemCopy[itemIndex].isContractSent = true;
-      orientItemCopy[itemIndex].actionType = 'sending';
-      orientItemCopy[itemIndex].emailType = 'contract';
       if (data.cc) {
         orientItemCopy[itemIndex].sendContract.cc = data.cc;
       }
       if (data.bcc) {
         orientItemCopy[itemIndex].sendContract.bcc = data.bcc;
       }
+      orientItemCopy[itemIndex].isContractSent = true;
+      orientItemCopy[itemIndex].actionType = 'sending';
+      orientItemCopy[itemIndex].emailType = 'contract';
       const callbackReq = {
         onSuccess: (data: any) => {
           setOrientItems(orientItemCopy);

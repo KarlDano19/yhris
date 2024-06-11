@@ -30,19 +30,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
         {jobPostHistoryItems.map((item: any) => {
           return (
-            <div key={item.id} className='rounded-lg p-8 shadow text-indigo-dye text-center bg-white'>
+            <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
               <h2 className='font-semibold text-xl'>{item.jobTitle}</h2>
               <p className='text-[15px] mb-12'>{item.placeAdvertise}</p>
               <Link
                 href={`screen-applicants/${item.id}`}
-                className='bg-[#EAC645] rounded-lg font-semibold text-[15px] w-full px-10 py-4'
+                className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
               >
-                <span>{item.applicantApplied} New Applicant/s</span>
+                {item.applicantApplied} New Applicant/s
               </Link>
             </div>
           );
         })}
-
         {/* ensuring cards displayed are always six */}
         {jobPostHistoryItems.length <= 6 &&
           Array.from({ length: 6 - jobPostHistoryItems.length }).map((_, index) => {

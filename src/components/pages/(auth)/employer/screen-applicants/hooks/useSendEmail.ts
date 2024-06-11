@@ -22,9 +22,9 @@ export async function sendEmail(data: any) {
     if (token) {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/applicants/send-email/`, config);
       if (!res.ok) {
-        return;
+        throw res.json();
       }
-      return res.json();
+      return;
     }
     return {};
   } catch (err: any) {

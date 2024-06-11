@@ -62,7 +62,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (receiptDetailData && Object.keys(receiptDetailData).length && !isReceiptDetailLoading) {
       setIsReceiptViewModalOpen(true);
     }
-  }, [receiptDetailData]);
+  }, [receiptDetailData, isReceiptDetailLoading]);
 
   const lockInPeriod = () => {
     let periodicity = 'Monthly';
@@ -211,7 +211,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </nav>
           {currentTab === '#active-plans' && (
             <>
-              {(!isLoading && Object.keys(activePlans).length !== 0) && (
+              {!isLoading && Object.keys(activePlans).length !== 0 && (
                 <div>
                   <p className='font-semibold mb-8'>Current Plan</p>
                   <div className='flex mb-10'>
@@ -239,9 +239,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         </div>
                       </div>
                     )}
-                    {!activePlans.is_used && (
-                      <PurchaseStatusCard refetch={refetch} plan={activePlans} />
-                    )}
+                    {!activePlans.is_used && <PurchaseStatusCard refetch={refetch} plan={activePlans} />}
                   </div>
                   <p className='font-semibold mb-8'>Plan Privileges</p>
                   <div className='flex'>
@@ -260,7 +258,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                 </div>
               )}
-              {(!isLoading && Object.keys(activePlans).length === 0) && (
+              {!isLoading && Object.keys(activePlans).length === 0 && (
                 <div className='w-full flex justify-center'>
                   <div className='w-1/4 border-2 border-dashed rounded-[2rem] mt-8 px-8 py-12 text-center'>
                     <p className='mb-4 font-semibold'>You’re not subscribed to any plans yet.</p>
@@ -330,18 +328,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <thead className='divide-y divide-gray-200'>
                         <tr>
                           <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Reference No.</th>
-                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                            Subscription Plan
-                          </th>
-                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                            Subscription Start Date
-                          </th>
-                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                            Subscription End Date
-                          </th>
-                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                            Subscription Status
-                          </th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Subscription Plan</th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Subscription Start Date</th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Subscription End Date</th>
+                          <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Subscription Status</th>
                           <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Payment Type</th>
                           <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Total</th>
                           <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>Action</th>
