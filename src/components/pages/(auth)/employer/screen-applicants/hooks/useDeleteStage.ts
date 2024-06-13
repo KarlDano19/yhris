@@ -16,7 +16,7 @@ async function deleteStage(data: any) {
     };
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/stages/${stage_id}/`, config);
     if (!res.ok) {
-      return res.json();
+      throw res.json();
     }
     return {};
   } catch (err: any) {

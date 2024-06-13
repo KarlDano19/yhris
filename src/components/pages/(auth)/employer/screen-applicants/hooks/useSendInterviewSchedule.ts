@@ -34,9 +34,9 @@ export async function sendInterviewSchedule(data: any) {
         config
       );
       if (!res.ok) {
-        return;
+        throw res.json();
       }
-      return res.json();
+      return;
     }
     return {};
   } catch (err: any) {

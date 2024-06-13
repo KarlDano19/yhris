@@ -138,14 +138,13 @@ export default function StageHeader({
           >
             Set-up Stage Requirements
           </button>
-          {stage.id !== 1 && (
-            <button
+          <button
               onClick={() =>
                 setActionState({
                   ...initialActionState,
                   stageId: stage.id,
                   modal: {
-                    title: `Are you sure you want to remove stage? This process cannot be undone.`,
+                    title: `Are you sure you want to remove stage ${title}?`,
                     whichModal: "CONFIRMATION",
                     isOpen: true,
                   },
@@ -156,7 +155,6 @@ export default function StageHeader({
             >
               Remove Stage
             </button>
-          )}
         </div>
       )}
     </div>

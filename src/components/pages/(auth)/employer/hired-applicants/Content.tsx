@@ -16,14 +16,15 @@ const Content = () => {
       </div>
       <div className='px-2 md:px-8 lg:px-4'>
         <h2 className='text-xl font-bold text-indigo-dye'>Hired Applicants</h2>
-        <div className='mt-6 grid grid-cols-3 items-center gap-6'>
+        <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
           {!isLoading && data
             ? data.map((hiredApplicant: any, index: number) => (
                 <div
                   key={index}
-                  className='p-4 h-44 rounded-lg shadow bg-white flex flex-col gap-2 items-center justify-center'
+                  className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'
                 >
-                  <h3 className='text-lg mb-6'>{hiredApplicant.job_title}</h3>
+                  <h2 className='font-semibold text-xl'>{hiredApplicant.job_title}</h2>
+                  <p className='text-[15px] mb-12'>{hiredApplicant.advertise_to}</p>
                   <Link
                     href={'/orient/' + hiredApplicant.id}
                     className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'

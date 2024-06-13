@@ -22,6 +22,13 @@ async function updateApplicantOrient(data: any) {
         payload.bcc = data.sendContract.bcc;
         payload.context = data.sendContract.message;
       }
+      if (data.emailType == 'introduce') {
+        payload.subject = data.introduceTeam.template;
+        payload.to = data.introduceTeam.to;
+        payload.cc = data.introduceTeam.cc;
+        payload.bcc = data.introduceTeam.bcc;
+        payload.context = data.introduceTeam.message;  
+      }
     } else if (data.actionType == 'received') {
       payload = {
         type_of_action: data.actionType,

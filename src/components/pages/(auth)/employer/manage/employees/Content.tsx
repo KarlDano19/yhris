@@ -51,8 +51,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [selectedEmployeeId, dataEmployeeDetail]);
 
-  useEffect(() => {}, []);
-
   const openEditEmployeeModal = (employeeId: number) => {
     if (selectedEmployeeId && selectedEmployeeId == employeeId) {
       setIsEmployeesModalOpen(true);
