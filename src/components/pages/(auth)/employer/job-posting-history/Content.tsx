@@ -51,11 +51,43 @@ const Content = () => {
   const { data: dataJobPost, isLoading: isGetJobPostLoading, refetch } = useGetJobPostItems(itemsFilter);
   const { mutate, isLoading } = useUpdateJobPostItems();
 
-  const handleRightClick = (event: any, jobId: any) => {
+  const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
+
+    let menuOptions: any = {};
+
+    let rightClickItemLabel = 'Set as Inactive';
+    let successMessage = 'Successfully set job as inactive.';
+    if (!jobPost['is_active']) {
+      rightClickItemLabel = 'Set as Active';
+      successMessage = 'Successfully set job as active.';
+    }
+
+    menuOptions['label'] = rightClickItemLabel;
+    menuOptions['action'] = (jobId: any) => {
+      let data: any = {};
+      data['jobId'] = jobId;
+      data['is_active'] = !jobPost['is_active'];
+      const callbackReq = {
+        onSuccess: () => {
+          refetch();
+          toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+            duration: 5000,
+          });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      };
+      mutate(data, callbackReq);
+    };
+
+    setContextMenuOptions([menuOptions]);
     setContextMenuPosition({ x: event.clientX, y: event.clientY });
     setShowContextMenu(true);
-    setSelectedJobId(jobId);
+    setSelectedJobId(jobPost.id);
   };
 
   const handleCloseContextMenu = () => {
@@ -63,8 +95,11 @@ const Content = () => {
   };
 
   useEffect(() => {
+    refetch();
+  }, []);
+
+  useEffect(() => {
     if (dataJobPost && !isGetJobPostLoading) {
-      let menuOptions: any = {};
       dataJobPost.map((jobPost: any) => {
         jobPost['jobTitle'] = jobPost['job_title'];
         jobPost['jobType'] = jobPost['job_type'];
@@ -73,35 +108,8 @@ const Content = () => {
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
-
-        let rightClickItemLabel = 'Set as Inactive';
-        let successMessage = 'Successfully set job as inactive.';
-        if (!jobPost['is_active']) {
-          rightClickItemLabel = 'Set as Active';
-          successMessage = 'Successfully set job as active.';
-        }
-        menuOptions['label'] = rightClickItemLabel;
-        menuOptions['action'] = (jobId: any) => {
-          let data: any = {};
-          data['jobId'] = jobId;
-          data['is_active'] = !jobPost['is_active'];
-          const callbackReq = {
-            onSuccess: () => {
-              refetch();
-              toast.custom(() => <CustomToast message={successMessage} type='success' />, {
-                duration: 5000,
-              });
-            },
-            onError: (err: any) => {
-              toast.custom(() => <CustomToast message={err} type='error' />, {
-                duration: 7000,
-              });
-            },
-          };
-          mutate(data, callbackReq);
-        };
+        jobPost['isActive'] = jobPost['is_active'];
       });
-      setContextMenuOptions([menuOptions]);
       setJobPostHistoryItems(dataJobPost);
     }
   }, [dataJobPost]);
@@ -162,21 +170,28 @@ const Content = () => {
       return jobPostHistoryItems.map((jobPost: any) => (
         <tr
           onContextMenu={(event) => {
-            handleRightClick(event, jobPost.id);
+            handleRightClick(event, jobPost);
           }}
           key={jobPost.id}
           className='text-center'
         >
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             <JobPreview id={jobPost.id} jobNumber={jobPost.id} setIsJobPreviewOpen={setIsJobPreviewOpen} />
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+            }`}
+          >
+            {jobPost.created_at}
+          </td>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             <SetJob
@@ -189,21 +204,21 @@ const Content = () => {
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.jobType}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.schedule}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-red-500' : 'text-gray-500'
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.hireCount}
@@ -214,6 +229,8 @@ const Content = () => {
               return (
                 <span
                   key={social}
+                  title={`Share to ${social}`}
+                  className='cursor-pointer'
                   onClick={() => {
                     socialMediaShare(social, jobPost.og_url);
                   }}
@@ -236,6 +253,31 @@ const Content = () => {
     }
   };
 
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    refetch();
+  };
+
   return (
     <div>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -247,7 +289,7 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -287,11 +329,14 @@ const Content = () => {
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-                </div>
               </div>
             </div>
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
           </div>
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
@@ -304,8 +349,11 @@ const Content = () => {
                 >
                   <thead>
                     <tr>
-                      <th scope='col' className='py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job No.
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Date Created
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Title
@@ -320,7 +368,7 @@ const Content = () => {
                         No. of Hires Needed
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Platform/s Posted
+                        Social Media Sharing
                       </th>
                     </tr>
                   </thead>

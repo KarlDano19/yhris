@@ -45,9 +45,9 @@ export default function SendContractModal({
     trigger,
   } = useForm<FormValues>({
     defaultValues: {
-      template: 'Please Sign & Comply: ABBA-YAHSHUA Employee Contract & Documents',
+      template: '',
       email: '',
-      message: SEPARATION_TEMPLATE[1].message,
+      message: '',
     },
   });
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
@@ -76,7 +76,9 @@ export default function SendContractModal({
           reset();
           setIsOpen(false);
           setSuccessModal(true);
-          toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, { duration: 5000 });
+          toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, {
+            duration: 5000,
+          });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -140,9 +142,10 @@ export default function SendContractModal({
                               setValue('message', currTemplate ? currTemplate?.message : '');
                             }}
                           >
-                            <option value=''>Select...</option>
-                            <option>Welcome our New Team Member!</option>
-                            <option>Please Sign & Comply: ABBA-YAHSHUA Employee Contract & Documents</option>
+                            <option value='' disabled>
+                              Select...
+                            </option>
+                            {/* Email Template Here */}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />

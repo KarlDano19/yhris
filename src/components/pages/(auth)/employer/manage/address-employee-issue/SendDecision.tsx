@@ -81,7 +81,7 @@ const SendDecision = ({
       </div>
       {isDecisionReceived ? (
         <div>
-          <div className='flex gap-1 items-center'>
+          <div className='flex gap-1 items-center justify-center'>
             <ClipIcon />
             <p className='ml-2 text-xs'>{decisionReceivedDate}</p>
           </div>

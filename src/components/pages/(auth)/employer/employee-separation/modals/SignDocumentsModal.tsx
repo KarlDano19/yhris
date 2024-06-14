@@ -1,11 +1,4 @@
-import {
-  Dispatch,
-  Fragment,
-  useRef,
-  useState,
-  useMemo,
-  useEffect,
-} from 'react';
+import { Dispatch, Fragment, useRef, useState, useMemo, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { T_DocumentsModal } from '@/types/globals';
@@ -15,11 +8,7 @@ import CustomToast from '@/components/CustomToast';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
-import {
-  QUILL_FORMATS,
-  QUILL_MODULES,
-  SEPARATION_TEMPLATE,
-} from '@/helpers/constants';
+import { QUILL_FORMATS, QUILL_MODULES, SEPARATION_TEMPLATE } from '@/helpers/constants';
 import usePatchSeparationItem from '../hooks/usePatchSeparationItem';
 
 type FormValues = {
@@ -44,10 +33,7 @@ export default function SignDocumentsModal({
   const { mutate, isLoading } = usePatchSeparationItem();
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const ReactQuill = useMemo(
-    () => dynamic(() => import('react-quill'), { ssr: false }),
-    [isOpen]
-  );
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const {
     register,
     handleSubmit,
@@ -59,15 +45,13 @@ export default function SignDocumentsModal({
     getValues,
   } = useForm<FormValues>({
     defaultValues: {
-      template: 'Please Sign: Offboarding Documents',
-      message: SEPARATION_TEMPLATE[0].message,
+      template: '',
+      message: '',
     },
   });
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
-      const itemIndex = separationItems.findIndex(
-        (item: any) => item.id === isOpen.id
-      );
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       separationItemsCopy[itemIndex].id = isOpen.id;
       separationItemsCopy[itemIndex].actionType = 'sending';
@@ -86,10 +70,7 @@ export default function SignDocumentsModal({
         onSuccess: (data: any) => {
           setSeparationItems([...separationItemsCopy]);
           setIsOpen(null);
-          toast.custom(
-            () => <CustomToast message={data.message} type='success' />,
-            { duration: 5000 }
-          );
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -100,19 +81,14 @@ export default function SignDocumentsModal({
       mutate(separationItemsCopy[itemIndex], callbackReq);
       reset();
     } else {
-      toast.custom(
-        () => <CustomToast message='Incomplete information.' type='error' />,
-        { duration: 4000 }
-      );
+      toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   });
   const cancelButtonRef = useRef(null);
 
   useEffect(() => {
     if (isOpen && isOpen.id) {
-      const itemIndex = separationItems.findIndex(
-        (item: any) => item.id === isOpen.id
-      );
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       if (separationItemsCopy[itemIndex]) {
         setValue('email', separationItemsCopy[itemIndex].email);
@@ -123,12 +99,7 @@ export default function SignDocumentsModal({
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog
-          as='div'
-          className='relative z-10'
-          initialFocus={cancelButtonRef}
-          onClose={() => setIsOpen(null)}
-        >
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -154,21 +125,13 @@ export default function SignDocumentsModal({
               >
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>
-                      Sign Documents via Email
-                    </h3>
-                    <XCircleIcon
-                      className='w-8 h-8 text-white cursor-pointer'
-                      onClick={() => setIsOpen(null)}
-                    />
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Sign Documents via Email</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
-                        <label
-                          htmlFor='reason'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                           Email Template<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
@@ -180,15 +143,13 @@ export default function SignDocumentsModal({
                               const currTemplate = SEPARATION_TEMPLATE.find(
                                 (template) => template.name === e.target.value
                               );
-                              setValue(
-                                'message',
-                                currTemplate ? currTemplate?.message : ''
-                              );
+                              setValue('message', currTemplate ? currTemplate?.message : '');
                             }}
                           >
-                            <option value=''>Select...</option>
-                            <option>Please Sign: Offboarding Documents</option>
-                            <option>Please Sign: Quitclaim</option>
+                            <option value='' disabled>
+                              Select...
+                            </option>
+                            {/* Email Template Here */}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />
@@ -196,10 +157,7 @@ export default function SignDocumentsModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='email'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
@@ -214,8 +172,7 @@ export default function SignDocumentsModal({
                           <button
                             type='button'
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isCCOpen &&
-                              'bg-savoy-blue text-white hover:bg-blue-700'
+                              isCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
                             }`}
                             onClick={() => setIsCCOPen(!isCCOpen)}
                           >
@@ -224,8 +181,7 @@ export default function SignDocumentsModal({
                           <button
                             type='button'
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isBCCOpen &&
-                              'bg-savoy-blue text-white hover:bg-blue-700'
+                              isBCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
                             }`}
                             onClick={() => setIsBCCOpen(!isBCCOpen)}
                           >
@@ -235,16 +191,13 @@ export default function SignDocumentsModal({
                       </div>
                       {isCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
-                          <label
-                            htmlFor='cc'
-                            className='block text-sm font-medium leading-6 text-gray-900'
-                          >
+                          <label htmlFor='cc' className='block text-sm font-medium leading-6 text-gray-900'>
                             CC
                           </label>
                           <div className='mt-2'>
                             <input
                               id='cc'
-                              {...register('cc',{required: true})}
+                              {...register('cc', { required: true })}
                               type='cc'
                               autoComplete='email'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
@@ -254,16 +207,13 @@ export default function SignDocumentsModal({
                       )}
                       {isBCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
-                          <label
-                            htmlFor='bcc'
-                            className='block text-sm font-medium leading-6 text-gray-900'
-                          >
+                          <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                             BCC
                           </label>
                           <div className='mt-2'>
                             <input
                               id='bcc'
-                              {...register('bcc',{required: true})}
+                              {...register('bcc', { required: true })}
                               type='bcc'
                               autoComplete='email'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
@@ -272,19 +222,11 @@ export default function SignDocumentsModal({
                         </div>
                       )}
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='message'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea
-                            rows={4}
-                            {...register('message', { required: true })}
-                            id='message'
-                            hidden
-                          />
+                          <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('message', value)}
                             formats={QUILL_FORMATS}
@@ -301,65 +243,61 @@ export default function SignDocumentsModal({
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                         disabled={isLoading}
-                        onClick={async(e)=>{
-                            const template = await trigger("template")
-                            const email = await trigger("email")
-                            const message = await trigger("message")
-                            const bcc = await trigger("bcc")
-                            const cc = await trigger("cc")
-                            let results = null
-                            if(isCCOpen && isBCCOpen){
-                              if(getValues().bcc.indexOf("@")<1 && getValues().cc.indexOf("@")<1){
-                                e.preventDefault()
-                                results = [template, email, message,false, false]
-                                setValue("bcc","Invalid")
-                                setValue("cc","Invalid")
-                              }else{
-                            results = [template, email, message,cc, bcc]
-                              }
-                            }else if(isCCOpen && !isBCCOpen){
-                              if(getValues().cc.indexOf("@")<1){
-                                e.preventDefault()
-                                results=[template, email, message,false]
-                                setValue("cc","Invalid")
-                              }else{
-                                results = [template, email, message,cc]
-                              }
-                            }else if(!isCCOpen && isBCCOpen){
-                              if(getValues().bcc.indexOf("@")<1){
-                                e.preventDefault()
-                                results=[template, email, message,false]
-                                setValue("bcc","Invalid")
-                              }else{
-                                results = [template, email, message,bcc]
-                              }
-                            }else{
-                              if(getValues().email.indexOf("@")<1){
-                                e.preventDefault()
-                                results = [template, false, message]
-                                setValue("email","Invalid")
-                              }else{
-                              results = [template, email, message]
-                              }
+                        onClick={async (e) => {
+                          const template = await trigger('template');
+                          const email = await trigger('email');
+                          const message = await trigger('message');
+                          const bcc = await trigger('bcc');
+                          const cc = await trigger('cc');
+                          let results = null;
+                          if (isCCOpen && isBCCOpen) {
+                            if (getValues().bcc.indexOf('@') < 1 && getValues().cc.indexOf('@') < 1) {
+                              e.preventDefault();
+                              results = [template, email, message, false, false];
+                              setValue('bcc', 'Invalid');
+                              setValue('cc', 'Invalid');
+                            } else {
+                              results = [template, email, message, cc, bcc];
                             }
-                            const incomplete = results?.some(
-                              (item: boolean) => !item
+                          } else if (isCCOpen && !isBCCOpen) {
+                            if (getValues().cc.indexOf('@') < 1) {
+                              e.preventDefault();
+                              results = [template, email, message, false];
+                              setValue('cc', 'Invalid');
+                            } else {
+                              results = [template, email, message, cc];
+                            }
+                          } else if (!isCCOpen && isBCCOpen) {
+                            if (getValues().bcc.indexOf('@') < 1) {
+                              e.preventDefault();
+                              results = [template, email, message, false];
+                              setValue('bcc', 'Invalid');
+                            } else {
+                              results = [template, email, message, bcc];
+                            }
+                          } else {
+                            if (getValues().email.indexOf('@') < 1) {
+                              e.preventDefault();
+                              results = [template, false, message];
+                              setValue('email', 'Invalid');
+                            } else {
+                              results = [template, email, message];
+                            }
+                          }
+                          const incomplete = results?.some((item: boolean) => !item);
+                          if (incomplete) {
+                            toast.custom(
+                              () => (
+                                <CustomToast
+                                  message={'You cannot proceed due to incomplete fields. Please review.'}
+                                  type='error'
+                                />
+                              ),
+                              {
+                                duration: 7000,
+                              }
                             );
-                            if (incomplete) {
-                              toast.custom(
-                                () => (
-                                  <CustomToast
-                                    message={
-                                      "You cannot proceed due to incomplete fields. Please review."
-                                    }
-                                    type="error"
-                                  />
-                                ),
-                                {
-                                  duration: 7000,
-                                }
-                              );
-                            }
+                          }
                         }}
                       >
                         {isLoading && (
