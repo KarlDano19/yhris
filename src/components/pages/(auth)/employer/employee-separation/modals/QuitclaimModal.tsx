@@ -1,11 +1,4 @@
-import {
-  Dispatch,
-  Fragment,
-  useRef,
-  useState,
-  useMemo,
-  useEffect,
-} from 'react';
+import { Dispatch, Fragment, useRef, useState, useMemo, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { T_DocumentsModal } from '@/types/globals';
@@ -15,11 +8,7 @@ import CustomToast from '@/components/CustomToast';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
-import {
-  QUILL_FORMATS,
-  QUILL_MODULES,
-  SEPARATION_TEMPLATE,
-} from '@/helpers/constants';
+import { QUILL_FORMATS, QUILL_MODULES, SEPARATION_TEMPLATE } from '@/helpers/constants';
 import usePatchSeparationItem from '../hooks/usePatchSeparationItem';
 
 type FormValues = {
@@ -52,21 +41,16 @@ export default function QuitclaimModal({
     getValues,
   } = useForm<FormValues>({
     defaultValues: {
-      template: 'Please Sign: Quitclaim',
-      message: SEPARATION_TEMPLATE[1].message,
+      template: '',
+      message: '',
     },
   });
-  const ReactQuill = useMemo(
-    () => dynamic(() => import('react-quill'), { ssr: false }),
-    [isOpen]
-  );
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
-      const itemIndex = separationItems.findIndex(
-        (item: any) => item.id === isOpen.id
-      );
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       separationItemsCopy[itemIndex].id = isOpen.id;
       separationItemsCopy[itemIndex].actionType = 'sending';
@@ -85,10 +69,7 @@ export default function QuitclaimModal({
         onSuccess: (data: any) => {
           setSeparationItems([...separationItemsCopy]);
           setIsOpen(null);
-          toast.custom(
-            () => <CustomToast message={data.message} type='success' />,
-            { duration: 5000 }
-          );
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -99,19 +80,14 @@ export default function QuitclaimModal({
       mutate(separationItemsCopy[itemIndex], callbackReq);
       reset();
     } else {
-      toast.custom(
-        () => <CustomToast message='Incomplete information.' type='error' />,
-        { duration: 4000 }
-      );
+      toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   });
   const cancelButtonRef = useRef(null);
 
   useEffect(() => {
     if (isOpen && isOpen.id) {
-      const itemIndex = separationItems.findIndex(
-        (item: any) => item.id === isOpen.id
-      );
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
       if (separationItemsCopy[itemIndex]) {
         setValue('email', separationItemsCopy[itemIndex].email);
@@ -122,12 +98,7 @@ export default function QuitclaimModal({
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog
-          as='div'
-          className='relative z-10'
-          initialFocus={cancelButtonRef}
-          onClose={() => setIsOpen(null)}
-        >
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -153,21 +124,13 @@ export default function QuitclaimModal({
               >
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>
-                      Send Documents via Email
-                    </h3>
-                    <XCircleIcon
-                      className='w-8 h-8 text-white cursor-pointer'
-                      onClick={() => setIsOpen(null)}
-                    />
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Send Documents via Email</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
-                        <label
-                          htmlFor='reason'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                           Email Template<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
@@ -179,15 +142,13 @@ export default function QuitclaimModal({
                               const currTemplate = SEPARATION_TEMPLATE.find(
                                 (template) => template.name === e.target.value
                               );
-                              setValue(
-                                'message',
-                                currTemplate ? currTemplate?.message : ''
-                              );
+                              setValue('message', currTemplate ? currTemplate?.message : '');
                             }}
                           >
-                            <option value=''>Select...</option>
-                            <option>Please Sign: Offboarding Documents</option>
-                            <option>Please Sign: Quitclaim</option>
+                            <option value='' disabled>
+                              Select...
+                            </option>
+                            {/* Email Template Here */}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />
@@ -195,10 +156,7 @@ export default function QuitclaimModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='email'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
@@ -213,8 +171,7 @@ export default function QuitclaimModal({
                           <button
                             type='button'
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isCCOpen &&
-                              'bg-savoy-blue text-white hover:bg-blue-700'
+                              isCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
                             }`}
                             onClick={() => setIsCCOPen(!isCCOpen)}
                           >
@@ -223,8 +180,7 @@ export default function QuitclaimModal({
                           <button
                             type='button'
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isBCCOpen &&
-                              'bg-savoy-blue text-white hover:bg-blue-700'
+                              isBCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
                             }`}
                             onClick={() => setIsBCCOpen(!isBCCOpen)}
                           >
@@ -234,10 +190,7 @@ export default function QuitclaimModal({
                       </div>
                       {isCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
-                          <label
-                            htmlFor='email'
-                            className='block text-sm font-medium leading-6 text-gray-900'
-                          >
+                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             CC
                           </label>
                           <div className='mt-2'>
@@ -253,10 +206,7 @@ export default function QuitclaimModal({
                       )}
                       {isBCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
-                          <label
-                            htmlFor='bcc'
-                            className='block text-sm font-medium leading-6 text-gray-900'
-                          >
+                          <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                             BCC
                           </label>
                           <div className='mt-2'>
@@ -271,19 +221,11 @@ export default function QuitclaimModal({
                         </div>
                       )}
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='message'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea
-                            rows={4}
-                            {...register('message', { required: true })}
-                            id='message'
-                            hidden
-                          />
+                          <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('message', value)}
                             formats={QUILL_FORMATS}

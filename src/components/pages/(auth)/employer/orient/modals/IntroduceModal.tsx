@@ -45,9 +45,9 @@ export default function IntroduceModal({
     getValues,
   } = useForm<FormValues>({
     defaultValues: {
-      template: 'Welcome our New Team Member!',
+      template: '',
       email: '',
-      message: SEPARATION_TEMPLATE[1].message,
+      message: '',
     },
   });
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
@@ -58,7 +58,7 @@ export default function IntroduceModal({
     if (isOpen && selectedOrientId) {
       const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
       const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
-      console.log(data.template)
+      console.log(data.template);
       orientItemCopy[itemIndex].isIntroduced = true;
       orientItemCopy[itemIndex].introduceTeam.template = data.template;
       orientItemCopy[itemIndex].introduceTeam.to = data.email;
@@ -140,9 +140,10 @@ export default function IntroduceModal({
                               setValue('message', currTemplate ? currTemplate?.message : '');
                             }}
                           >
-                            <option value=''>Select...</option>
-                            <option>Welcome our New Team Member!</option>
-                            <option>Please Sign & Comply: ABBA-YAHSHUA Employee Contract & Documents</option>
+                            <option value='' disabled>
+                              Select...
+                            </option>
+                            {/* Email Template Here */}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />
