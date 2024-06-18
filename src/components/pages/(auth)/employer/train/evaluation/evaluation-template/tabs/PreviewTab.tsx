@@ -79,11 +79,10 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
               <div className='w-full'>
                 <label htmlFor='employeeName'>2. Date of Evaluation</label>
                 <CustomDatePicker
-                  name={'date_of_evaluation'}
+                  id={'date_of_evaluation'}
                   selected={''}
                   pickerOnChange={''}
                   className={'block w-full border-0 py-1.5 px-6 text-gray-900 border-b-2 bg-transparent'}
-                  objectFilter={''}
                   inputOnChange={''}
                   placeholder={'mm/dd/yyyy'}
                   disabled={true}

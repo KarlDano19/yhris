@@ -10,19 +10,13 @@ import useGetBenefitItems from './hooks/useGetBenefitItems';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
   });
-  const {
-    data: dataBenefits,
-    isLoading: isGetBenefitsLoading,
-    refetch,
-  } = useGetBenefitItems(itemsFilter);
-  const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<
-    boolean | null
-  >(null);
+  const { data: dataBenefits, isLoading: isGetBenefitsLoading, refetch } = useGetBenefitItems(itemsFilter);
+  const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
 
@@ -33,9 +27,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (dataBenefits) {
       dataBenefits.map((benefit: any) => {
-        benefit.date = Intl.DateTimeFormat('en-US').format(
-          new Date(benefit.created_at)
-        );
+        benefit.date = Intl.DateTimeFormat('en-US').format(new Date(benefit.created_at));
         return benefit;
       });
       setDesignBenefitsItems(dataBenefits);
@@ -73,30 +65,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (designBenefitsItems && designBenefitsItems.length > 0) {
       return designBenefitsItems.map((item: any) => (
         <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.date}
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.title}
-          </td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
-            {item.purpose}
-          </td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
-            {item.eligibility}
-          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.title}</td>
+          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.purpose}</td>
+          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.eligibility}</td>
         </tr>
       ));
     } else {
       return (
         <tr>
           <td colSpan={7}>
-            <h4 className='text-center text-gray-300 text-sm mt-4'>
-              There{`'`}s no data yet.
-            </h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>
-              Please click create to add incident report.
-            </h4>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
           </td>
         </tr>
       );
@@ -108,29 +88,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const dateTo = Date.parse(itemsFilter.to);
 
     if (dateFrom && !dateTo) {
-      return toast.custom(
-        () => <CustomToast message='Invalid date to.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
     }
     if (!dateFrom && dateTo) {
-      return toast.custom(
-        () => <CustomToast message='Invalid date from.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
     }
     if (dateFrom > dateTo) {
       return toast.custom(
-        () => (
-          <CustomToast
-            message='You have entered an invalid date range. Please select again.'
-            type='error'
-          />
-        ),
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
         {
           duration: 5000,
         }
@@ -143,10 +112,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link
-            href='/manage'
-            className='flex-none flex gap-3 items-center hover:bg-gray-200'
-          >
+          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Manage</h4>
           </Link>
@@ -157,29 +123,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
-                  name={'from'}
-                  selected={itemsFilter.from}
-                  pickerOnChange={setItemsFilter}
+                  id='from-datepicker'
+                  placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  objectFilter={itemsFilter}
-                  inputOnChange={setItemsFilter}
-                  placeholder={'mm/dd/yyyy'}
+                  selected={itemsFilter.from}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      from: new Date(value),
+                    });
+                  }}
                 />
               </div>
               <p>to</p>
               <div className='relative'>
                 <CustomDatePicker
-                  name={'to'}
-                  selected={itemsFilter.to}
-                  pickerOnChange={setItemsFilter}
+                  id='to-datepicker'
+                  placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  objectFilter={itemsFilter}
-                  inputOnChange={setItemsFilter}
-                  placeholder={'mm/dd/yyyy'}
+                  selected={itemsFilter.to}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
+                    if (!itemsFilter) setItemsFilter(date);
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      to: new Date(value),
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -190,9 +169,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, search: e.target.value })
-                  }
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search...'
                 />
               </div>
@@ -219,40 +196,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Title
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Purpose
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Eligibility
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='divide-y divide-gray-200'>
-                    {renderRows()}
-                  </tbody>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>
-                  Total record/s: {designBenefitsItems.length}
-                </p>
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {designBenefitsItems.length}</p>
               </div>
             </div>
           </div>

@@ -15,7 +15,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 const Content = () => {
   const [clientItems, setClientItems] = useState<any>([]);
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',

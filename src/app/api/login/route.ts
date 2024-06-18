@@ -23,15 +23,29 @@ export async function POST(request: NextRequest) {
     }
     if (data.is_valid) {
       session['isLoggedIn'] = true;
-      session['token'] = data.token;
       session['email'] = credentials.email;
+      session['token'] = data.token;
       session['accountType'] = data.account_type;
       session['hasPendingTransaction'] = data.has_pending_transaction;
       session['hasActiveSubscription'] = data.has_active_subscription;
       session['hasProfile'] = data.has_profile;
+      cookies().set({
+        name: 'token',
+        value: data.token,
+        maxAge: 60 * 60 * 1,
+        sameSite: "strict",
+        httpOnly: false,
+        secure: true,
+      });
       await session.save();
       await sleep(250);
-      return NextResponse.json(data, { status: 200 });
+      const loginReturnData = {
+        is_valid: data.is_valid,
+        account_type: data.account_type,
+        has_profile: data.has_profile,
+        message: data.message,
+      };
+      return NextResponse.json(loginReturnData, { status: 200 });
     } else {
       return NextResponse.json({ is_valid: false }, { status: 200 });
     }
