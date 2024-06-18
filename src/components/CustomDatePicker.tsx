@@ -67,6 +67,7 @@ const CustomDatePicker = ({
 
   return (
     <DatePicker
+      wrapperClassName='w-full'
       popperClassName='!z-20'
       selected={selected}
       onChange={(date) => pickerOnChange(date)}
