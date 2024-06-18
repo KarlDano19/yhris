@@ -68,14 +68,14 @@ const Content = () => {
         item['isOriented'] = item.is_orientation_completed;
         item['introduceTeam'] = {
           to: '',
-          template: '',
+          template: 'Test',
           email: '',
           cc: '',
           bcc: '',
         };
         item['sendContract'] = {
           to: '',
-          template: '',
+          template: 'Test',
           email: '',
           cc: '',
           bcc: '',

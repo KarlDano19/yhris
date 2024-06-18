@@ -22,7 +22,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
       bcc: '',
       cc: '',
       email: '',
-      template: '',
+      template: 'Test',
       message: '',
     },
   });
@@ -48,7 +48,8 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
             </label>
             <div className='relative mt-2'>
               <select
-                {...register('template', { required: true })}
+                // {...register('template', { required: true })}
+                {...register('template')}
                 id='template'
                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
               >

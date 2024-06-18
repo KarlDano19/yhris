@@ -141,12 +141,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           attachments: '',
         };
         employeeIssue['issueNTEForm'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };
         employeeIssue['sendDecisionForm'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };
