@@ -161,17 +161,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           message: '',
         };
         separation['signDocuments'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };
         separation['lastPay'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };
         separation['quitClaim'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };

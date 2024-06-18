@@ -49,7 +49,7 @@ export default function SendDecisionModal({
     setValue,
   } = useForm<FormValues>({
     defaultValues: {
-      template: '',
+      template: 'Test',
       message: '',
     },
   });
@@ -129,7 +129,8 @@ export default function SendDecisionModal({
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            // {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(e) => {
                               const currTemplate = templates.find((template) => template.name === e.target.value);
