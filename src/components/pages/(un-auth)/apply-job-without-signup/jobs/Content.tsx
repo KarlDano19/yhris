@@ -20,7 +20,7 @@ const Content = () => {
   const [hasJob, setJob] = useState(false);
   const [isJobView, setIsJobView] = useState(false);
   const [isJobModal, setJobModal] = useState(false);
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     job_title: '',
     location: '',
   });
@@ -163,7 +163,7 @@ const Content = () => {
                                 <h6 className='text-indigo-dye text-sm'>
                                   {job.location}
                                 </h6>
-                                <Link href={`/jobs/${job.id}`}>
+                                <Link href={`/job-app-form/${job.id}`}>
                                   <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
                                     Apply Now!
                                   </button>

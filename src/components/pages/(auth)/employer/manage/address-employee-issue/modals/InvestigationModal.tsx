@@ -116,7 +116,7 @@ export default function InvestigationModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Investigation Report Template</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
@@ -137,14 +137,14 @@ export default function InvestigationModal({
                             name='date'
                             render={({ field }) => (
                               <CustomDatePicker
-                                name={'dateOfInvestigation'}
-                                selected={field.value}
-                                pickerOnChange={field.onChange}
+                                id='investigation-report-datepicker'
+                                placeholder={'mm/dd/yyyy'}
                                 className={
                                   'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
                                 }
-                                inputOnChange={field.onChange}
-                                placeholder={'mm/dd/yyyy'}
+                                selected={field.value}
+                                pickerOnChange={(date: any) => field.onChange(date)}
+                                inputOnChange={(value: any) => field.onChange(value)}
                                 required={true}
                               />
                             )}

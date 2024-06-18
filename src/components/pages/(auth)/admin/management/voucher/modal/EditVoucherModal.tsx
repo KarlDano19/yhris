@@ -63,7 +63,7 @@ export default function EditVoucherModal({
     };
     data['redemption_date_from'] = new Date(voucherDate.from).toISOString();
     data['redemption_date_to'] = new Date(voucherDate.to).toISOString();
-    mutate({voucherId, data}, callbackReq);
+    mutate({ voucherId, data }, callbackReq);
   });
 
   return (
@@ -92,7 +92,7 @@ export default function EditVoucherModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Voucher</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -203,29 +203,41 @@ export default function EditVoucherModal({
                           <div className='flex mt-2 space-x-2'>
                             <div className='relative w-1/2'>
                               <CustomDatePicker
-                                name={'from'}
-                                selected={voucherDate.from}
-                                pickerOnChange={setVoucherDate}
-                                className={
-                                  'appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                                }
-                                objectFilter={voucherDate}
-                                inputOnChange={setVoucherDate}
+                                id='from-datepicker'
                                 placeholder={'mm/dd/yyyy'}
+                                className={
+                                  'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                                }
+                                selected={voucherDate.from}
+                                pickerOnChange={(date: any) => {
+                                  if (voucherDate) setVoucherDate({ ...voucherDate, from: date });
+                                }}
+                                inputOnChange={(value: any) => {
+                                  setVoucherDate({
+                                    ...voucherDate,
+                                    from: new Date(value),
+                                  });
+                                }}
                               />
                             </div>
                             <p>to</p>
                             <div className='relative w-1/2'>
                               <CustomDatePicker
-                                name={'to'}
-                                selected={voucherDate.to}
-                                pickerOnChange={setVoucherDate}
-                                className={
-                                  'appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                                }
-                                objectFilter={voucherDate}
-                                inputOnChange={setVoucherDate}
+                                id='to-datepicker'
                                 placeholder={'mm/dd/yyyy'}
+                                className={
+                                  'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                                }
+                                selected={voucherDate.to}
+                                pickerOnChange={(date: any) => {
+                                  if (voucherDate) setVoucherDate({ ...voucherDate, to: date });
+                                }}
+                                inputOnChange={(value: any) => {
+                                  setVoucherDate({
+                                    ...voucherDate,
+                                    to: new Date(value),
+                                  });
+                                }}
                               />
                             </div>
                           </div>

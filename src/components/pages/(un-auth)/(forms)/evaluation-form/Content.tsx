@@ -191,13 +191,20 @@ function Content() {
                       <div className='w-full'>
                         <label htmlFor='employeeName'>2. Date of Evaluation</label>
                         <CustomDatePicker
-                          name={'date_of_evaluation'}
-                          selected={evaluationEmployeeFormDetails.date_of_evaluation}
-                          pickerOnChange={setEvaluationEmployeeFormDetails}
-                          className={'block w-full border-0 py-1.5 px-6 text-gray-900 border-b-2 bg-transparent'}
-                          objectFilter={evaluationEmployeeFormDetails}
-                          inputOnChange={setEvaluationEmployeeFormDetails}
+                          id='evalatuion-form-datepicker'
                           placeholder={'mm/dd/yyyy'}
+                          className={'block w-full border-0 py-1.5 px-6 text-gray-900 border-b-2 bg-transparent'}
+                          selected={evaluationEmployeeFormDetails.date_of_evaluation}
+                          pickerOnChange={(date: any) => {
+                            if (evaluationEmployeeFormDetails)
+                              setEvaluationEmployeeFormDetails({ ...evaluationEmployeeFormDetails, from: date });
+                          }}
+                          inputOnChange={(value: any) => {
+                            setEvaluationEmployeeFormDetails({
+                              ...evaluationEmployeeFormDetails,
+                              from: new Date(value),
+                            });
+                          }}
                         />
                       </div>
                     </div>

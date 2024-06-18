@@ -49,12 +49,12 @@ export default function CreateJobPageTwo({
     const hireDate = getValues('hireDate');
     let jobType = getValues('jobType');
     let schedule = getValues('schedule');
-    const otherJobTypeData = getValues('otherJobType')
+    const otherJobTypeData = getValues('otherJobType');
     if (otherJobType && otherJobTypeData) {
       jobType = getValues('jobType') || [];
       jobType = jobType.concat(otherJobTypeData);
     }
-    const otherScheduleData = getValues('otherSchedule') 
+    const otherScheduleData = getValues('otherSchedule');
     if (otherSchedule && otherScheduleData) {
       schedule = getValues('schedule') || [];
       schedule = schedule.concat(otherScheduleData);
@@ -72,16 +72,13 @@ export default function CreateJobPageTwo({
       setValue('jobType', jobType);
       setValue('schedule', schedule);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className='px-4 pb-6'>
         <div className='sm:col-span-4 mt-4'>
-          <label
-            htmlFor='language'
-            className='block text-sm font-medium leading-6 text-gray-900'
-          >
+          <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>
             What is the job type?
             <span className='text-red-600'>*</span>
           </label>
@@ -144,12 +141,8 @@ export default function CreateJobPageTwo({
         {otherJobType && (
           <div className='sm:col-span-4 mt-4'>
             <div>
-              <label
-                htmlFor='otherJobType'
-                className='block text-sm font-medium leading-6 text-gray-900'
-              >
-                If you selected other, please input the job type and add comma
-                if it&#39;s more than one.
+              <label htmlFor='otherJobType' className='block text-sm font-medium leading-6 text-gray-900'>
+                If you selected other, please input the job type and add comma if it&#39;s more than one.
               </label>
               <div className='mt-2'>
                 <input
@@ -165,10 +158,7 @@ export default function CreateJobPageTwo({
           </div>
         )}
         <div className='sm:col-span-4 mt-4'>
-          <label
-            htmlFor='language'
-            className='block text-sm font-medium leading-6 text-gray-900'
-          >
+          <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>
             What is the schedule for this job?
             <span className='text-red-600'>*</span>
           </label>
@@ -228,12 +218,8 @@ export default function CreateJobPageTwo({
         {otherSchedule && (
           <div className='sm:col-span-4 mt-4'>
             <div>
-              <label
-                htmlFor='otherSchedule'
-                className='block text-sm font-medium leading-6 text-gray-900'
-              >
-                If you selected other, please input the schedule and add comma
-                after the word if it&#39;s more than one.
+              <label htmlFor='otherSchedule' className='block text-sm font-medium leading-6 text-gray-900'>
+                If you selected other, please input the schedule and add comma after the word if it&#39;s more than one.
               </label>
               <div className='mt-2'>
                 <input
@@ -250,10 +236,7 @@ export default function CreateJobPageTwo({
         )}
         <div className='sm:col-span-4 mt-4'>
           <div>
-            <label
-              htmlFor='hireCount'
-              className='block text-sm font-medium leading-6 text-gray-900'
-            >
+            <label htmlFor='hireCount' className='block text-sm font-medium leading-6 text-gray-900'>
               How many people do you want to hire for this opening?
               <span className='text-red-600'>*</span>
             </label>
@@ -272,10 +255,7 @@ export default function CreateJobPageTwo({
         </div>
         <div className='sm:col-span-4 mt-4'>
           <div>
-            <label
-              htmlFor='email'
-              className='block text-sm font-medium leading-6 text-gray-900'
-            >
+            <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
               How soon do you need to hire?
               <span className='text-red-600'>*</span>
             </label>
@@ -285,15 +265,16 @@ export default function CreateJobPageTwo({
                 name='hireDate'
                 render={({ field }) => (
                   <CustomDatePicker
-                    name={'hireDate'}
-                    selected={field.value}
-                    pickerOnChange={field.onChange}
+                    id='investigation-report-datepicker'
+                    placeholder={'mm/dd/yyyy'}
                     className={classNames(
                       'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none',
-                      manualInputFocus.hireDate ? 'border-2 border-gray-900' : '',
-                  )}
-                    inputOnChange={field.onChange}
-                    placeholder={'mm/dd/yyyy'}
+                      manualInputFocus.hireDate ? 'border-2 border-gray-900' : ''
+                    )}
+                    selected={field.value}
+                    pickerOnChange={(date: any) => field.onChange(date)}
+                    inputOnChange={(value: any) => field.onChange(value)}
+                    required={true}
                   />
                 )}
               />
