@@ -101,21 +101,23 @@ export default function ApplicantForm({ title }: PropTypes) {
       <>
         {applicantProfile.work_experience.map((exp: any) => {
           return (
-            <div className='flex mt-8 h-[25rem] overflow-y-auto'>
-              <div className='mr-3'>
-                <StarIcon className='h-6 w-6 text-blue-700' />
-              </div>
-              <div>
-                <p className='font-semibold'>{exp.position}</p>
-                <p>
-                  {exp.dateFrom} - {exp.dateTo}
-                </p>
-                <p>{exp.companyOrg}</p>
-                <p className='font-semibold mt-4'>Major Roles:</p>
-                <div className='pl-7'>
-                  <ul className='list-disc'>
-                    <li>{exp.majorRole}</li>
-                  </ul>
+            <div key={exp.id}>
+              <div className='flex mt-8 overflow-y-auto'>
+                <div className='mr-3'>
+                  <StarIcon className='h-6 w-6 text-blue-700' />
+                </div>
+                <div>
+                  <p className='font-semibold'>{exp.position}</p>
+                  <p>
+                    {exp.dateFrom} - {exp.dateTo}
+                  </p>
+                  <p>{exp.companyOrg}</p>
+                  <p className='font-semibold mt-4'>Major Roles:</p>
+                  <div className='pl-7'>
+                    <ul className='list-disc'>
+                      <li>{exp.majorRole}</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -171,7 +173,7 @@ export default function ApplicantForm({ title }: PropTypes) {
                   <h3 className='flex-1 text-white ml-2 font-semibold'>{title}</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer self-start' onClick={handleClose} />
                 </div>
-                <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-[30rem]')}>
+                <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
                     <div className='w-full grid grid-cols-2'>
                       <div className='mr-5'>

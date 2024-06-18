@@ -55,7 +55,7 @@ const Content = () => {
                     {' '}
                     {!isLoading ? jobDetailData?.location : 'Loading location...'}
                   </h6>
-                  <p className='text-sm text-indigo-dye mt-4 lg:w-60'>
+                  <p className='text-sm text-indigo-dye mt-4 lg:w-60 text-justify' lang='en'>
                     Role:{' '}
                     {!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
                   </p>
