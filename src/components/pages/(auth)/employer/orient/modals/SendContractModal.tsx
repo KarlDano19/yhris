@@ -45,9 +45,9 @@ export default function SendContractModal({
     trigger,
   } = useForm<FormValues>({
     defaultValues: {
-      template: 'Please Sign & Comply: ABBA-YAHSHUA Employee Contract & Documents',
+      template: 'Test',
       email: '',
-      message: SEPARATION_TEMPLATE[1].message,
+      message: '',
     },
   });
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
@@ -76,7 +76,9 @@ export default function SendContractModal({
           reset();
           setIsOpen(false);
           setSuccessModal(true);
-          toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, { duration: 5000 });
+          toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, {
+            duration: 5000,
+          });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -117,7 +119,7 @@ export default function SendContractModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Send Contract via Email</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -131,7 +133,8 @@ export default function SendContractModal({
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            // {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(e) => {
                               const currTemplate = SEPARATION_TEMPLATE.find(
@@ -140,9 +143,10 @@ export default function SendContractModal({
                               setValue('message', currTemplate ? currTemplate?.message : '');
                             }}
                           >
-                            <option value=''>Select...</option>
-                            <option>Welcome our New Team Member!</option>
-                            <option>Please Sign & Comply: ABBA-YAHSHUA Employee Contract & Documents</option>
+                            <option value='' disabled>
+                              Select...
+                            </option>
+                            {/* Email Template Here */}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />

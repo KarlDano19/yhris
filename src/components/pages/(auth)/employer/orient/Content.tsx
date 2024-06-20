@@ -26,7 +26,7 @@ const Content = () => {
   const params = useParams();
   const [orientItems, setOrientItems] = useState<any>([]);
   const [selectedOrientId, setSelectedOrientId] = useState('');
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -68,14 +68,14 @@ const Content = () => {
         item['isOriented'] = item.is_orientation_completed;
         item['introduceTeam'] = {
           to: '',
-          template: '',
+          template: 'Test',
           email: '',
           cc: '',
           bcc: '',
         };
         item['sendContract'] = {
           to: '',
-          template: '',
+          template: 'Test',
           email: '',
           cc: '',
           bcc: '',
@@ -272,29 +272,42 @@ const Content = () => {
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
-                  name={'from'}
-                  selected={itemsFilter.from}
-                  pickerOnChange={setItemsFilter}
+                  id='from-datepicker'
+                  placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  objectFilter={itemsFilter}
-                  inputOnChange={setItemsFilter}
-                  placeholder={'mm/dd/yyyy'}
+                  selected={itemsFilter.from}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      from: new Date(value),
+                    });
+                  }}
                 />
               </div>
               <p>to</p>
               <div className='relative'>
                 <CustomDatePicker
-                  name={'to'}
-                  selected={itemsFilter.to}
-                  pickerOnChange={setItemsFilter}
+                  id='to-datepicker'
+                  placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  objectFilter={itemsFilter}
-                  inputOnChange={setItemsFilter}
-                  placeholder={'mm/dd/yyyy'}
+                  selected={itemsFilter.to}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
+                    if (!itemsFilter) setItemsFilter(date);
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      to: new Date(value),
+                    });
+                  }}
                 />
               </div>
               <button

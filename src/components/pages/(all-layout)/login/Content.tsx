@@ -7,7 +7,6 @@ import Link from 'next/link';
 
 import { setCookie } from 'cookies-next';
 import { useForm } from 'react-hook-form';
-import { generateKey, encryptToken } from '@/helpers/tokenEncryption';
 import toast from 'react-hot-toast';
 import EmailVerificationModal from './modal/EmailVerificationModal';
 import useLogin from '@/components/pages/(all-layout)/login/hooks/useLogin';
@@ -53,15 +52,6 @@ function Content() {
   });
 
   const setSession = async (data: any) => {
-    const token = data.token;
-    // const key = await generateKey();
-    // const { encryptedData, iv } = await encryptToken(token, key);
-    setCookie('token', token, {
-      maxAge: 60 * 60 * 8 * 1,
-    });
-    // setCookie('secret', iv, {
-    //   maxAge: 60 * 60 * 8 * 1,
-    // });
     if (data.account_type === 'employer') {
       if (data.has_profile) {
         const returnTo = searchParams.get('redirect') || '/dashboard';

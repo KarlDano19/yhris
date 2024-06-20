@@ -1,14 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { generateKey, decryptToken } from '@/helpers/tokenEncryption';
-
 async function getProfile() {
   try {
-    // const key = await generateKey();
     const token = getCookie('token');
-    // const secret = getCookie('secret');
-    // const decryptedToken = await decryptToken(token, secret, key);
     const config = {
       method: 'GET',
       headers: {

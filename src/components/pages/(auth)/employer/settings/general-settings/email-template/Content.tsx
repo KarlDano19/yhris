@@ -14,7 +14,7 @@ import SuccessModal from './modal/SuccessModal';
 import { set } from 'react-hook-form';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);

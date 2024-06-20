@@ -1,32 +1,38 @@
 'use client';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import React, { useEffect, useState, useRef } from 'react';
+
+import React, { useEffect, useState } from 'react';
+
+import Link from 'next/link';
+
+import toast from 'react-hot-toast';
+
 import CustomDatePicker from '@/components/CustomDatePicker';
-import SeparationLetter from './SeparationLetter';
-import { T_DocumentsModal, T_LastPayModal, T_LetterModal, T_QuitclaimModal } from '@/types/globals';
-import SignDocuments from './SignDocuments';
-import LastPay from './LastPay';
-import Quitclaim from './Quitclaim';
+import CustomToast from '@/components/CustomToast';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
+import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import AddSeparationModal from './modals/AddSeparationModal';
 import LetterModal from './modals/LetterModal';
 import SignDocumentsModal from './modals/SignDocumentsModal';
-import ConfirmModal from '../../../../ConfirmModal';
-import toast from 'react-hot-toast';
 import QuitclaimModal from './modals/QuitclaimModal';
-import CustomToast from '@/components/CustomToast';
-import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
-import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import usePatchSeparationItem from './hooks/usePatchSeparationItem';
-import Link from 'next/link';
+import SeparationLetter from './SeparationLetter';
+import SignDocuments from './SignDocuments';
+import ConfirmModal from '../../../../ConfirmModal';
+import LastPay from './LastPay';
+import Quitclaim from './Quitclaim';
+
+import { T_DocumentsModal, T_LastPayModal, T_LetterModal, T_QuitclaimModal } from '@/types/globals';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
   const [departmentItems, setDepartmentItems] = useState<any>([]);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [positionItems, setPositionItems] = useState<any>([]);
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -155,17 +161,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           message: '',
         };
         separation['signDocuments'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };
         separation['lastPay'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };
         separation['quitClaim'] = {
-          template: '',
+          template: 'Test',
           to: '',
           message: '',
         };
@@ -309,29 +315,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
-                  name={'from'}
-                  selected={itemsFilter.from}
-                  pickerOnChange={setItemsFilter}
+                  id='from-datepicker'
+                  placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  objectFilter={itemsFilter}
-                  inputOnChange={setItemsFilter}
-                  placeholder={'mm/dd/yyyy'}
+                  selected={itemsFilter.from}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      from: new Date(value),
+                    });
+                  }}
                 />
               </div>
               <p>to</p>
               <div className='relative'>
                 <CustomDatePicker
-                  name={'to'}
-                  selected={itemsFilter.to}
-                  pickerOnChange={setItemsFilter}
+                  id='to-datepicker'
+                  placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  objectFilter={itemsFilter}
-                  inputOnChange={setItemsFilter}
-                  placeholder={'mm/dd/yyyy'}
+                  selected={itemsFilter.to}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
+                    if (!itemsFilter) setItemsFilter(date);
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      to: new Date(value),
+                    });
+                  }}
                 />
               </div>
             </div>

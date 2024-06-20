@@ -3,7 +3,10 @@ import { getCookie } from 'cookies-next';
 
 async function getJobPostItems(filters: any) {
   try {
-    const searchParams = new URLSearchParams(filters);
+    let newFilters = { ...filters };
+    if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
+    if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -13,10 +16,7 @@ async function getJobPostItems(filters: any) {
       },
     };
     if (token) {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/?${searchParams}`,
-        config
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -33,14 +33,10 @@ async function getJobPostItems(filters: any) {
 }
 
 function useGetJobPostItems(filters: any) {
-  const query = useQuery(
-    ['jobPostItemCache', filters],
-    () => getJobPostItems(filters),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    }
-  );
+  const query = useQuery(['jobPostItemCache', filters], () => getJobPostItems(filters), {
+    enabled: false,
+    keepPreviousData: true,
+  });
 
   return query;
 }

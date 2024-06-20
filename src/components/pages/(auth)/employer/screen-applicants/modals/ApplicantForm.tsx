@@ -16,9 +16,9 @@ type PropTypes = {
 };
 export default function ApplicantForm({ title }: PropTypes) {
   const cancelButtonRef = useRef(null);
-  const { actionState, setActionState, dispatch }: ContextTypes = useContext(StateContext) as ContextTypes;
+  const { actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { data, isLoading } = useGetApplicantDetails(actionState.applicantId);
-  const [selectedTab, setSelectedTab] = useState<string>('profile');
+  const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +34,7 @@ export default function ApplicantForm({ title }: PropTypes) {
   }, [data]);
 
   const handleClose = () => {
+    setViewCV(false);
     setIsOpen(false);
     setTimeout(() => setActionState(initialActionState), 400);
   };
@@ -86,8 +87,10 @@ export default function ApplicantForm({ title }: PropTypes) {
         <div>
           <button
             type='button'
-            className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0]'
+            className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
             onClick={() => setViewCV(true)}
+            disabled={!!!applicantProfile.cv}
+            title={!!!applicantProfile.cv ? 'No CV/Resume Attached' : ''}
           >
             View Attached CV/Resume
           </button>
@@ -101,23 +104,22 @@ export default function ApplicantForm({ title }: PropTypes) {
       <>
         {applicantProfile.work_experience.map((exp: any) => {
           return (
-            <div key={exp.id}>
-              <div className='flex mt-8 overflow-y-auto'>
-                <div className='mr-3'>
-                  <StarIcon className='h-6 w-6 text-blue-700' />
-                </div>
-                <div>
-                  <p className='font-semibold'>{exp.position}</p>
-                  <p>
-                    {exp.dateFrom} - {exp.dateTo}
-                  </p>
-                  <p>{exp.companyOrg}</p>
-                  <p className='font-semibold mt-4'>Major Roles:</p>
-                  <div className='pl-7'>
-                    <ul className='list-disc'>
-                      <li>{exp.majorRole}</li>
-                    </ul>
-                  </div>
+            <div key={exp.id} className='flex mt-8 overflow-y-auto'>
+              <div className='mr-3'>
+                <StarIcon className='h-6 w-6 text-blue-700' />
+              </div>
+              <div>
+                <p className='font-semibold'>{exp.position}</p>
+                <p>
+                  {new Date(exp.dateFrom).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} -{' '}
+                  {new Date(exp.dateTo).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </p>
+                <p>{exp.companyOrg}</p>
+                <p className='font-semibold mt-4'>Major Roles:</p>
+                <div className='pl-7'>
+                  <ul className='list-disc'>
+                    <li>{exp.majorRole}</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -130,10 +132,7 @@ export default function ApplicantForm({ title }: PropTypes) {
   const renderResumeView = () => {
     return (
       <>
-        <iframe
-          className='w-full h-[43rem]'
-          src={`${applicantProfile.cv}#toolbar=0`}
-        ></iframe>
+        <iframe className='w-full h-[43rem]' src={`${applicantProfile.cv}#toolbar=0`}></iframe>
       </>
     );
   };
@@ -180,9 +179,9 @@ export default function ApplicantForm({ title }: PropTypes) {
                         <button
                           className={classNames(
                             'px-4 py-2 font-bold rounded-md w-full',
-                            selectedTab == 'profile' ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            currentTab == 1 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
                           )}
-                          onClick={() => setSelectedTab('profile')}
+                          onClick={() => setCurrentTab(1)}
                         >
                           Applicant Profile
                         </button>
@@ -191,17 +190,19 @@ export default function ApplicantForm({ title }: PropTypes) {
                         <button
                           className={classNames(
                             'px-4 py-2 font-bold rounded-md w-full',
-                            selectedTab == 'work' ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            currentTab == 2 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
                           )}
-                          onClick={() => setSelectedTab('work')}
+                          onClick={() => setCurrentTab(2)}
                         >
                           Job Experience
                         </button>
                       </div>
                     </div>
                   )}
-                  {!viewCV && selectedTab == 'profile' && renderProfileTab()}
-                  {!viewCV && selectedTab == 'work' && renderJobExpTab()}
+                  {!viewCV && currentTab == 1 && renderProfileTab()}
+                  {!viewCV && currentTab == 2 && (
+                    <div className='h-[28rem] overflow-y-auto'>{renderJobExpTab()}</div>
+                  )}
                   {viewCV && renderResumeView()}
                 </div>
                 {!viewCV && (

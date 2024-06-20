@@ -1,11 +1,4 @@
-import {
-  Dispatch,
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { T_SendDecisionModal } from '@/types/globals';
@@ -15,11 +8,7 @@ import CustomToast from '@/components/CustomToast';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
-import {
-  NTE_TEMPLATE,
-  QUILL_FORMATS,
-  QUILL_MODULES,
-} from '@/helpers/constants';
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
 
 type FormValues = {
@@ -60,24 +49,17 @@ export default function SendDecisionModal({
     setValue,
   } = useForm<FormValues>({
     defaultValues: {
-      template: 'Notice to explain',
-      message: templates[0].message,
+      template: 'Test',
+      message: '',
     },
   });
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const ReactQuill = useMemo(
-    () => dynamic(() => import('react-quill'), { ssr: false }),
-    [isOpen]
-  );
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex(
-        (item: any) => item.id === isOpen.id
-      );
-      const employeeIssueItemsCopy = JSON.parse(
-        JSON.stringify(employeeIssueItems)
-      );
+      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
+      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       employeeIssueItemsCopy[itemIndex].id = isOpen.id;
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'decision';
@@ -91,10 +73,7 @@ export default function SendDecisionModal({
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
           setIsOpen(null);
-          toast.custom(
-            () => <CustomToast message={data.message} type='success' />,
-            { duration: 5000 }
-          );
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           reset();
         },
         onError: (err: any) => {
@@ -105,22 +84,14 @@ export default function SendDecisionModal({
       };
       mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
     } else {
-      toast.custom(
-        () => <CustomToast message='Incomplete information.' type='error' />,
-        { duration: 4000 }
-      );
+      toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   });
   const cancelButtonRef = useRef(null);
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog
-          as='div'
-          className='relative z-10'
-          initialFocus={cancelButtonRef}
-          onClose={() => setIsOpen(null)}
-        >
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -144,42 +115,32 @@ export default function SendDecisionModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>
-                      Send Decision via Email
-                    </h3>
-                    <XCircleIcon
-                      className='w-8 h-8 text-white cursor-pointer'
-                      onClick={() => setIsOpen(null)}
-                    />
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Send Decision via Email</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
-                        <label
-                          htmlFor='reason'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                           Email Template<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            // {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(e) => {
-                              const currTemplate = templates.find(
-                                (template) => template.name === e.target.value
-                              );
-                              setValue(
-                                'message',
-                                currTemplate ? currTemplate?.message : ''
-                              );
+                              const currTemplate = templates.find((template) => template.name === e.target.value);
+                              setValue('message', currTemplate ? currTemplate?.message : '');
                             }}
                           >
-                            <option value=''>Select...</option>
-                            <option>Notice to explain</option>
+                            <option value='' disabled>
+                              Select...
+                            </option>
+                            {/* Email Template Here */}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />
@@ -187,10 +148,7 @@ export default function SendDecisionModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='email'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
@@ -205,8 +163,7 @@ export default function SendDecisionModal({
                           <button
                             type='button'
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isCCOpen &&
-                              'bg-savoy-blue text-white hover:bg-blue-700'
+                              isCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
                             }`}
                             onClick={() => setIsCCOPen(!isCCOpen)}
                           >
@@ -215,8 +172,7 @@ export default function SendDecisionModal({
                           <button
                             type='button'
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isBCCOpen &&
-                              'bg-savoy-blue text-white hover:bg-blue-700'
+                              isBCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
                             }`}
                             onClick={() => setIsBCCOpen(!isBCCOpen)}
                           >
@@ -226,10 +182,7 @@ export default function SendDecisionModal({
                       </div>
                       {isCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
-                          <label
-                            htmlFor='email'
-                            className='block text-sm font-medium leading-6 text-gray-900'
-                          >
+                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             CC
                           </label>
                           <div className='mt-2'>
@@ -245,10 +198,7 @@ export default function SendDecisionModal({
                       )}
                       {isBCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
-                          <label
-                            htmlFor='bcc'
-                            className='block text-sm font-medium leading-6 text-gray-900'
-                          >
+                          <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                             BCC
                           </label>
                           <div className='mt-2'>
@@ -263,19 +213,11 @@ export default function SendDecisionModal({
                         </div>
                       )}
                       <div className='sm:col-span-4 mt-4'>
-                        <label
-                          htmlFor='message'
-                          className='block text-sm font-medium leading-6 text-gray-900'
-                        >
+                        <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
-                          <textarea
-                            rows={4}
-                            {...register('message', { required: true })}
-                            id='message'
-                            hidden
-                          />
+                          <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('message', value)}
                             formats={QUILL_FORMATS}

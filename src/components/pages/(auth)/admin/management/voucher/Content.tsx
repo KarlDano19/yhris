@@ -17,7 +17,7 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 const Content = () => {
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
   const [vouchersItems, setVouchersItems] = useState<any>([]);

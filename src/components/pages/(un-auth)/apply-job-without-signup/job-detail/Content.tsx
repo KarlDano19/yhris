@@ -137,7 +137,7 @@ const Content = () => {
               </div>
               <div className='mt-8 w-full text-center'>
                 <button
-                  className='px-4 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-700'
+                  className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-1/3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                   onClick={() => {
                     location.href = `/job-app-form/${params.id}`;
                   }}

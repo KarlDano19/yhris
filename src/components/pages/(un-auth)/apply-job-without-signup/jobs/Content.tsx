@@ -20,7 +20,7 @@ const Content = () => {
   const [hasJob, setJob] = useState(false);
   const [isJobView, setIsJobView] = useState(false);
   const [isJobModal, setJobModal] = useState(false);
-  const [itemsFilter, setItemsFilter] = useState({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     job_title: '',
     location: '',
   });
@@ -134,7 +134,7 @@ const Content = () => {
             <div className='px-4 lg:px-5'>
               <div className='lg:flex'>
                 <div className='lg:w-[36%]'>
-                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-0 gap-y-6'>
+                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                     {!isGetJobsLoading
                       ? jobsItems.map((job: any) => (
                           <div
@@ -149,11 +149,11 @@ const Content = () => {
                             <span className='text-xs text-red-500'>
                               {job.isNew ? 'NEW' : ''}
                             </span>
-                            <div className='flex md:flex-col lg:flex-row mt-2'>
+                            <div className='flex flex-col'>
                               <span className='mt-1 ml-1'>
                                 <FileCaseIcon className='h-6 w-6' />
                               </span>
-                              <div className='ml-6 md:ml-0 lg:ml-6 mt-0 md:mt-2 lg:mt-0'>
+                              <div className='ml-0 mt-2'>
                                 <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>
                                   {job.title}
                                 </h5>
@@ -163,7 +163,7 @@ const Content = () => {
                                 <h6 className='text-indigo-dye text-sm'>
                                   {job.location}
                                 </h6>
-                                <Link href={`/jobs/${job.id}`}>
+                                <Link href={`/job-app-form/${job.id}`}>
                                   <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
                                     Apply Now!
                                   </button>
