@@ -1,15 +1,22 @@
 import { Dispatch, Fragment, useRef, useState, useMemo, useEffect } from 'react';
+
+import dynamic from 'next/dynamic';
+
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { T_DocumentsModal } from '@/types/globals';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
-import SelectChevronDown from '@/svg/SelectChevronDown';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-import { QUILL_FORMATS, QUILL_MODULES, SEPARATION_TEMPLATE } from '@/helpers/constants';
+import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchSeparationItem from '../hooks/usePatchSeparationItem';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import { T_DocumentsModal } from '@/types/globals';
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 type FormValues = {
   template: string;
@@ -30,24 +37,19 @@ export default function QuitclaimModal({
   isOpen: T_DocumentsModal | null;
   setIsOpen: Dispatch<T_DocumentsModal | null>;
 }) {
-  const { mutate, isLoading } = usePatchSeparationItem();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { isDirty },
-    setValue,
-    getValues,
-  } = useForm<FormValues>({
-    defaultValues: {
-      template: 'Test',
-      message: '',
-    },
-  });
+  const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
+  const { register, handleSubmit, reset, setValue, getValues } = useForm<FormValues>({
+    defaultValues: {
+      template: '',
+      message: '',
+    },
+  });
+  const { data: dataEmailTemplate } = useGetEmailTemplateItems();
+  const { mutate, isLoading } = usePatchSeparationItem();
+
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
@@ -70,6 +72,7 @@ export default function QuitclaimModal({
           setSeparationItems([...separationItemsCopy]);
           setIsOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          reset();
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -78,12 +81,10 @@ export default function QuitclaimModal({
         },
       };
       mutate(separationItemsCopy[itemIndex], callbackReq);
-      reset();
     } else {
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   });
-  const cancelButtonRef = useRef(null);
 
   useEffect(() => {
     if (isOpen && isOpen.id) {
@@ -124,7 +125,7 @@ export default function QuitclaimModal({
               >
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Send Documents via Email</h3>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Send Quitclaim</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
                   <form onSubmit={onSubmit}>
@@ -136,20 +137,17 @@ export default function QuitclaimModal({
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            // {...register('template', { required: true })}
-                            {...register('template')}
+                            {...register('template', { required: true })}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                            onChange={(e) => {
-                              const currTemplate = SEPARATION_TEMPLATE.find(
-                                (template) => template.name === e.target.value
-                              );
-                              setValue('message', currTemplate ? currTemplate?.message : '');
-                            }}
                           >
                             <option value='' disabled>
                               Select...
                             </option>
-                            {/* Email Template Here */}
+                            {(dataEmailTemplate || []).map((item: any) => (
+                              <option key={item.id} value={item.subject}>
+                                {item.subject}
+                              </option>
+                            ))}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />

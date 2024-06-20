@@ -18,14 +18,14 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         context: '',
       };
       if (employeeIssue.emailType === 'nte') {
-        data.subject = employeeIssue.issueNTEForm.template;
+        data.subject = `NTE | ${employeeIssue.issueNTEForm.template}`;
         data.to = employeeIssue.issueNTEForm.to;
         data.cc = employeeIssue.issueNTEForm.cc;
         data.bcc = employeeIssue.issueNTEForm.bcc;
         data.context = employeeIssue.issueNTEForm.message;
       }
       if (employeeIssue.emailType === 'decision') {
-        data.subject = employeeIssue.sendDecisionForm.template;
+        data.subject = `Decision | ${employeeIssue.sendDecisionForm.template}`;
         data.to = employeeIssue.sendDecisionForm.to;
         data.cc = employeeIssue.sendDecisionForm.cc;
         data.bcc = employeeIssue.sendDecisionForm.bcc;

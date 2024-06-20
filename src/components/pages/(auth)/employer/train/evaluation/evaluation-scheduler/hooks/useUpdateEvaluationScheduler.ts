@@ -12,8 +12,8 @@ async function updateEvaluationScheduler(evaluation_scheduler_id: string, data: 
     formData.append('message', data.message);
     formData.append('name', data.name);
     formData.append('reminder_schedule', data.reminder_schedule);
-    if (data.attachments && data.attachments.length) {
-      formData.append('attachment', data.attachments[0]);
+    if (data.attachment && data.attachment.length) {
+      formData.append('attachment', data.attachment[0]);
     }
     const config = {
       method: 'PATCH',

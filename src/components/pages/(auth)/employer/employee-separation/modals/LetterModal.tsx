@@ -1,13 +1,17 @@
 import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
+
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { T_LetterModal } from '@/types/globals';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
 import ConfirmModal from '@/components/ConfirmModal';
 import CustomToast from '@/components/CustomToast';
+
 import usePatchSeparationItem from '../hooks/usePatchSeparationItem';
+
+import { T_LetterModal } from '@/types/globals';
 
 type FormValues = {
   date: string;
@@ -17,24 +21,24 @@ type FormValues = {
 
 export default function LetterModal({
   separationItems,
-  setSeparationItems,
+  refetch,
   type,
   isOpen,
   setIsOpen,
 }: {
   separationItems: any;
-  setSeparationItems: any;
+  refetch: any;
   type?: 'Acceptance' | 'Separation';
   isOpen: T_LetterModal | null;
   setIsOpen: Dispatch<T_LetterModal | null>;
 }) {
+  const cancelButtonRef = useRef(null);
   const [letterType, setLetterType] = useState('');
-  const { mutate, isLoading } = usePatchSeparationItem();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
-  const dateInputRef = useRef(null);
-  const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, setValue, control, trigger } = useForm<FormValues>();
+  const { mutate, isLoading } = usePatchSeparationItem();
+
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
@@ -42,14 +46,14 @@ export default function LetterModal({
       separationItemsCopy[itemIndex].id = isOpen.id;
       separationItemsCopy[itemIndex].actionType = 'sending';
       separationItemsCopy[itemIndex].emailType = 'letters';
+      separationItemsCopy[itemIndex].separationLetter.type = type;
       separationItemsCopy[itemIndex].separationLetter.date = data.date;
       separationItemsCopy[itemIndex].separationLetter.to = data.email;
       separationItemsCopy[itemIndex].separationLetter.message = data.message;
       separationItemsCopy[itemIndex].isLetterSent = true;
-      setToSaveData([...separationItemsCopy]);
+      setToSaveData(separationItemsCopy[itemIndex]);
       setIsOpen(null);
-      // @ts-expect-error
-      setLetterType(type);
+      setLetterType(type || '');
       setIsConfirmModalOpen(true);
     } else {
       toast.custom(
@@ -58,12 +62,14 @@ export default function LetterModal({
       );
     }
   });
+
   const saveData = () => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        setSeparationItems([...toSaveData]);
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         setIsConfirmModalOpen(!isConfirmModalOpen);
+        refetch();
+        reset();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -71,9 +77,9 @@ export default function LetterModal({
         });
       },
     };
-    mutate(toSaveData[0], callbackReq);
-    reset();
+    mutate(toSaveData, callbackReq);
   };
+
   const updateConfirmModal = (value: boolean) => {
     if (!value) {
       setIsConfirmModalOpen(false);

@@ -1,31 +1,36 @@
 import { Dispatch, Fragment, useRef } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { T_Separation } from '@/types/globals';
-import SelectChevronDown from '@/svg/SelectChevronDown';
-import useAddSeparationItems from '../hooks/useAddSeparationItems';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import useAddSeparationItems from '../hooks/useAddSeparationItems';
+
+import { XCircleIcon } from '@heroicons/react/24/solid';
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import { T_Separation } from '@/types/globals';
 
 export default function AddSeparationModal({
-  employeeItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
-  employeeItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
 }) {
-  const { mutate, isLoading } = useAddSeparationItems();
-  const { register, handleSubmit, control, reset, trigger } = useForm<T_Separation>();
   const cancelButtonRef = useRef(null);
+  const { register, handleSubmit, control, reset, trigger } = useForm<T_Separation>();
+  const { data: dataEmployee } = useGetEmployeeItems();
+  const { mutate, isLoading } = useAddSeparationItems();
+
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
+      onSuccess: () => {
         toast.custom(() => <CustomToast message={'Create separation successfully'} type='success' />, {
           duration: 5000,
         });
@@ -111,7 +116,7 @@ export default function AddSeparationModal({
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
                           <option value=''>Select...</option>
-                          {employeeItems?.map((item: any) => {
+                          {(dataEmployee || []).map((item: any) => {
                             return (
                               <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
                             );

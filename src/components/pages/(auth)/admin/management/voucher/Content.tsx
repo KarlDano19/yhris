@@ -5,7 +5,6 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 
 import useGetVoucherItems from './hooks/useGetVoucherItems';
-import useGetVoucherDetails from './hooks/useGetVoucherDetails';
 import useGetPlanItems from './hooks/useGetPlanItems';
 import CreateVoucherModal from './modal/CreateVoucherModal';
 import RedemptionCountModal from './modal/RedemptionCountModal';
@@ -34,11 +33,6 @@ const Content = () => {
     isLoading: isGetVouchersLoading,
     refetch: refetchVouchers,
   } = useGetVoucherItems(itemsFilter);
-  const {
-    data: dataVoucherDetail,
-    isLoading: isGetVoucherDetailLoading,
-    refetch: refetchVoucherDetail,
-  } = useGetVoucherDetails(selectedVoucherId);
 
   useEffect(() => {
     refetchVouchers();
@@ -58,20 +52,17 @@ const Content = () => {
 
   useEffect(() => {
     if (selectedVoucherId) {
-      refetchVoucherDetail();
-    }
-  }, [selectedVoucherId]);
-
-  useEffect(() => {
-    if (dataVoucherDetail && Object.keys(dataVoucherDetail).length && !isGetVoucherDetailLoading) {
       if (actionType === 'edit') {
         setIsEditVoucherModalOpen(true);
       }
       if (actionType === 'delete') {
         setIsDeleteVoucherModalOpen(true);
       }
+      if (actionType === 'redemption') {
+        setIsRedemptionModalOpen(true);
+      }
     }
-  }, [dataVoucherDetail]);
+  }, [selectedVoucherId]);
 
   const openEditVoucherModal = (voucherDetails: any) => {
     setActionType('edit');
@@ -91,9 +82,13 @@ const Content = () => {
     }
   };
 
-  const openRedemptionModal = (voucherId: number) => {
-    setSelectedVoucherId(voucherId);
-    setIsRedemptionModalOpen(true);
+  const openRedemptionModal = (voucherDetails: any) => {
+    setActionType('redemption');
+    if (selectedVoucherId && selectedVoucherId === voucherDetails.id) {
+      setIsRedemptionModalOpen(true);
+    } else {
+      setSelectedVoucherId(voucherDetails.id);
+    }
   };
 
   const renderRows = () => {
@@ -112,7 +107,7 @@ const Content = () => {
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>{item.maximum_redemption}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-            <span onClick={() => openRedemptionModal(item.id)} className='cursor-pointer text-blue-600 underline'>
+            <span onClick={() => openRedemptionModal(item)} className='cursor-pointer text-blue-600 underline'>
               {item.redeem_count}
             </span>
           </td>
@@ -184,7 +179,7 @@ const Content = () => {
             </button>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
+                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateVoucherModalOpen(true)}
               >
                 CREATE
@@ -232,31 +227,39 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <CreateVoucherModal
-        refetch={refetchVouchers}
-        plans={plans}
-        isOpen={isCreateVoucherModalOpen}
-        setIsOpen={setIsCreateVoucherModalOpen}
-      />
-      <RedemptionCountModal
-        isOpen={isRedemptionModalOpen}
-        setIsOpen={setIsRedemptionModalOpen}
-        voucherId={selectedVoucherId}
-        vouchers={vouchersItems}
-      />
-      <EditVoucherModal
-        refetch={refetchVouchers}
-        plans={plans}
-        isOpen={isEditVoucherModalOpen}
-        setIsOpen={setIsEditVoucherModalOpen}
-        voucherDetails={dataVoucherDetail}
-      />
-      <DeleteVoucherModal
-        refetch={refetchVouchers}
-        isOpen={isDeleteVoucherModalOpen}
-        setIsOpen={setIsDeleteVoucherModalOpen}
-        voucherDetails={dataVoucherDetail}
-      />
+      {isCreateVoucherModalOpen && (
+        <CreateVoucherModal
+          refetch={refetchVouchers}
+          plans={plans}
+          isOpen={isCreateVoucherModalOpen}
+          setIsOpen={setIsCreateVoucherModalOpen}
+        />
+      )}
+      {isRedemptionModalOpen && (
+        <RedemptionCountModal
+          isOpen={isRedemptionModalOpen}
+          setIsOpen={setIsRedemptionModalOpen}
+          selectedVoucherId={selectedVoucherId}
+        />
+      )}
+      {isEditVoucherModalOpen && selectedVoucherId && (
+        <EditVoucherModal
+          refetch={refetchVouchers}
+          plans={plans}
+          isOpen={isEditVoucherModalOpen}
+          setIsOpen={setIsEditVoucherModalOpen}
+          selectedVoucherId={selectedVoucherId}
+        />
+      )}
+      {isDeleteVoucherModalOpen && selectedVoucherId && (
+        <DeleteVoucherModal
+          refetch={refetchVouchers}
+          isOpen={isDeleteVoucherModalOpen}
+          setIsOpen={setIsDeleteVoucherModalOpen}
+          selectedVoucherId={selectedVoucherId}
+          selectedVoucherCode={vouchersItems.find((item: any) => item.id === selectedVoucherId)?.code}
+        />
+      )}
     </>
   );
 };

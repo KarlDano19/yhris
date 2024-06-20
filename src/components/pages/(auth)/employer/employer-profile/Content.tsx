@@ -68,7 +68,7 @@ function Content() {
           <div className='mt-5'>
             <div className='sm:hidden'>
               <h5 className='text-savoy-blue text-center text-lg font-semibold'>
-                {progressBar === 1 ? 'Account Settings' : 'Employeer Details'}
+                {progressBar === 1 ? 'Account Settings' : 'Employer Details'}
               </h5>
             </div>
             <div className='hidden sm:block'>
@@ -92,7 +92,7 @@ function Content() {
                       <div className='h-2 w-2 rounded-full bg-savoy-blue'></div>
                     </div>
                   </div>
-                  Employeer Details
+                  Employer Details
                 </li>
                 <li
                   className={classNames(

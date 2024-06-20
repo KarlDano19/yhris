@@ -11,22 +11,15 @@ export default function ConfirmSendEmailEvaluationSchedulerModal({
   refetch,
   isOpen,
   setIsOpen,
-  evaluationDetails,
+  selectedEvaluationSchedulerId,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  evaluationDetails: any | null;
+  selectedEvaluationSchedulerId: number | null;
 }) {
   const cancelButtonRef = useRef(null);
-  const [evaluationId, setEvaluationId] = useState<number | null>(null);
   const { mutate, isLoading } = useSendEmailEvaluationScheduler();
-
-  useEffect(() => {
-    if (evaluationDetails) {
-      setEvaluationId(evaluationDetails.id);
-    }
-  }, [evaluationDetails]);
 
   const onSubmit = () => {
     const callbackReq = {
@@ -39,7 +32,7 @@ export default function ConfirmSendEmailEvaluationSchedulerModal({
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(evaluationId, callbackReq);
+    mutate(selectedEvaluationSchedulerId, callbackReq);
   };
 
   return (

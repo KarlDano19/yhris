@@ -32,7 +32,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
         </div>
       </div>
       <p className='text-sm text-indigo-dye px-[70px] mt-4'>
-        Role: {!isLoading ? data?.role : 'Loading role description...'}
+        Role:<br/>{!isLoading ? data?.role : 'Loading role description...'}
       </p>
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>

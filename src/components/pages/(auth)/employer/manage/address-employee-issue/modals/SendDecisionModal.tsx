@@ -1,15 +1,22 @@
 import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
+
+import dynamic from 'next/dynamic';
+
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { T_SendDecisionModal } from '@/types/globals';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
-import SelectChevronDown from '@/svg/SelectChevronDown';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import { T_SendDecisionModal } from '@/types/globals';
+
+import 'react-quill/dist/quill.snow.css';
 
 type FormValues = {
   template: string;
@@ -18,14 +25,6 @@ type FormValues = {
   cc: string;
   bcc: string;
 };
-
-const templates = [
-  {
-    name: 'Please Sign: Offboarding Documents',
-    message: `A blessed day, Hera! Based on the investigation, you are hereby put on probationary for 6 months. Let us know if you have questions and concerns. Thank you and God Bless,--
-        `,
-  },
-];
 
 export default function SendDecisionModal({
   employeeIssueItems,
@@ -38,24 +37,19 @@ export default function SendDecisionModal({
   isOpen: T_SendDecisionModal | null;
   setIsOpen: Dispatch<T_SendDecisionModal | null>;
 }) {
-  const { mutate, isLoading } = usePatchEmployeeIssueItems();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { isDirty },
-    getValues,
-    setValue,
-  } = useForm<FormValues>({
+  const cancelButtonRef = useRef(null);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const [isCCOpen, setIsCCOPen] = useState(false);
+  const [isBCCOpen, setIsBCCOpen] = useState(false);
+  const { register, handleSubmit, reset, getValues, setValue } = useForm<FormValues>({
     defaultValues: {
-      template: 'Test',
+      template: '',
       message: '',
     },
   });
-  const [isCCOpen, setIsCCOPen] = useState(false);
-  const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const { data: dataEmailTemplate } = useGetEmailTemplateItems();
+  const { mutate, isLoading } = usePatchEmployeeIssueItems();
+
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
@@ -87,7 +81,7 @@ export default function SendDecisionModal({
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   });
-  const cancelButtonRef = useRef(null);
+
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
@@ -117,7 +111,7 @@ export default function SendDecisionModal({
               >
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Send Decision via Email</h3>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Send Decision</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
                   <form onSubmit={onSubmit}>
@@ -129,18 +123,17 @@ export default function SendDecisionModal({
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            // {...register('template', { required: true })}
-                            {...register('template')}
+                            {...register('template', { required: true })}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                            onChange={(e) => {
-                              const currTemplate = templates.find((template) => template.name === e.target.value);
-                              setValue('message', currTemplate ? currTemplate?.message : '');
-                            }}
                           >
                             <option value='' disabled>
                               Select...
                             </option>
-                            {/* Email Template Here */}
+                            {(dataEmailTemplate || []).map((item: any) => (
+                              <option key={item.id} value={item.subject}>
+                                {item.subject}
+                              </option>
+                            ))}
                           </select>
                           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                             <SelectChevronDown />
@@ -216,7 +209,7 @@ export default function SendDecisionModal({
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
-                        <div className='mt-2'>
+                        <div className='mt-2 h-72 mb-12'>
                           <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('message', value)}

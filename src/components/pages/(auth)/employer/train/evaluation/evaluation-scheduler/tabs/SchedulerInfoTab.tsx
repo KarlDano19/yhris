@@ -60,7 +60,7 @@ function SchedulerInfoTab({
               </option>
               {evaluationItems.map((item: any, index: number) => {
                 return (
-                  <option key={index} value={item.id}>
+                  <option key={item.id} value={item.id}>
                     {item.name}
                   </option>
                 );
@@ -125,7 +125,6 @@ function SchedulerInfoTab({
               <option value='1 day'>1 day before</option>
               <option value='1 hour'>1 hour before</option>
               <option value='30 minutes'>30 minutes before</option>
-              <option value='custom'>Custom</option>
             </select>
             <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
               <SelectChevronDown />

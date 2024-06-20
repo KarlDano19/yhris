@@ -1,39 +1,48 @@
-import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import ModalLayout from './ModalLayout';
-import { ContextTypes, SendEmailPropTypes as PropTypes } from '../types';
+
 import dynamic from 'next/dynamic';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import { QUILL_FORMATS, QUILL_MODULES, SCREEN_TEMPLATE } from '@/helpers/constants';
+
 import { useForm } from 'react-hook-form';
+
 import { initialActionState } from '../lib/initialActionState';
+import ModalLayout from './ModalLayout';
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import StateContext from '../contexts/StateContext';
+import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
+
+import SelectChevronDown from '@/svg/SelectChevronDownDummy';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import { ContextTypes, SendEmailPropTypes as PropTypes } from '../types';
+
+import 'react-quill/dist/quill.snow.css';
 
 export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
-  const { setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const [isOpen, setIsOpen] = useState(false);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const { setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const { register, handleSubmit, setValue, getValues } = useForm({
     defaultValues: {
       bcc: '',
       cc: '',
       email: '',
-      template: 'Test',
+      template: '',
       message: '',
     },
   });
+  const { data: dataEmailTemplate } = useGetEmailTemplateItems();
 
   useEffect(() => {
     setIsOpen(true);
   }, []);
+
   const handleClose = () => {
     setIsOpen(false);
     setTimeout(() => setActionState(initialActionState), 400);
   };
+
   const handleOnSubmit = (data: any) => {
     handleFormSubmit(data, setIsOpen);
   };
@@ -48,15 +57,18 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
             </label>
             <div className='relative mt-2'>
               <select
-                // {...register('template', { required: true })}
-                {...register('template')}
+                {...register('template', { required: true })}
                 id='template'
                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
               >
                 <option value='' disabled>
                   Select...
                 </option>
-                {/* Email Template Here */}
+                {(dataEmailTemplate || []).map((item: any) => (
+                  <option key={item.id} value={item.subject}>
+                    {item.subject}
+                  </option>
+                ))}
               </select>
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />

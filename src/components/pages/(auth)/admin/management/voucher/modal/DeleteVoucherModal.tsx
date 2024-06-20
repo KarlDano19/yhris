@@ -1,4 +1,4 @@
-import { useEffect, useState, Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
@@ -7,28 +7,21 @@ import useDeleteVoucher from '../hooks/useDeleteVoucher';
 
 import WarningRed from '@/svg/WarningRed';
 
-import { Voucher } from '@/types/globals';
-
 export default function DeleteVoucherModal({
   refetch,
   isOpen,
   setIsOpen,
-  voucherDetails, // ID of the voucher being deleted
+  selectedVoucherId,
+  selectedVoucherCode,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  voucherDetails: Voucher | null;
+  selectedVoucherId: number | null;
+  selectedVoucherCode: string;
 }) {
   const cancelButtonRef = useRef(null);
-  const [voucherId, setVoucherId] = useState<number | null>(null);
   const { mutate, isLoading } = useDeleteVoucher();
-
-  useEffect(() => {
-    if (voucherDetails) {
-      setVoucherId(voucherDetails.id);
-    }
-  }, [voucherDetails]);
 
   const onSubmit = () => {
     const callbackReq = {
@@ -41,7 +34,7 @@ export default function DeleteVoucherModal({
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(voucherId, callbackReq);
+    mutate(selectedVoucherId, callbackReq);
   };
 
   return (
@@ -76,8 +69,7 @@ export default function DeleteVoucherModal({
                 </div>
                 <div className='text-xl px-20 text-center'>
                   <p className='text-xl text-gray-600 font-bold'>
-                    Are you sure you want to <span className='text-red-500'>delete</span> {voucherDetails?.code}{' '}
-                    Voucher?
+                    Are you sure you want to <span className='text-red-500'>delete</span> {selectedVoucherCode} Voucher?
                   </p>
                 </div>
                 <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
