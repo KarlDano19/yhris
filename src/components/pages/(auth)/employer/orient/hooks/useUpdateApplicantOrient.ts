@@ -16,14 +16,14 @@ async function updateApplicantOrient(data: any) {
         context: '',
       };
       if (data.emailType == 'contract') {
-        payload.subject = data.sendContract.template;
+        payload.subject = `Send Contract | ${data.sendContract.template}`;
         payload.to = data.sendContract.to;
         payload.cc = data.sendContract.cc;
         payload.bcc = data.sendContract.bcc;
         payload.context = data.sendContract.message;
       }
       if (data.emailType == 'introduce') {
-        payload.subject = data.introduceTeam.template;
+        payload.subject = `Introduce to the team | ${data.introduceTeam.template}`;
         payload.to = data.introduceTeam.to;
         payload.cc = data.introduceTeam.cc;
         payload.bcc = data.introduceTeam.bcc;

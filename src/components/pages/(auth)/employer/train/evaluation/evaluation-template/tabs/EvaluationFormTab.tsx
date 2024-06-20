@@ -84,7 +84,6 @@ function EvaluationFormTab({
                         <option value='individual'>Individual</option>
                         <option value='team'>Team</option>
                         <option value='manager'>Manager</option>
-                        <option value='custom'>Custom</option>
                       </select>
                       <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                         <SelectChevronDown />

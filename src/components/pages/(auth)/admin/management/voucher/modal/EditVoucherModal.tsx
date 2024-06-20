@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import useGetVoucherDetails from '../hooks/useGetVoucherDetails';
 import useUpdateVoucher from '../hooks/useUpdateVoucher';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -15,46 +16,60 @@ export default function EditVoucherModal({
   plans,
   isOpen,
   setIsOpen,
-  voucherDetails,
+  selectedVoucherId,
 }: {
   refetch: any;
   plans: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  voucherDetails: any;
+  selectedVoucherId: number | null;
 }) {
   const cancelButtonRef = useRef(null);
-  const [voucherId, setVoucherId] = useState<number | null>(null);
   const [voucherDate, setVoucherDate] = useState<any>({
     from: '',
     to: '',
   });
   const { register, setValue, handleSubmit } = useForm<any>();
+  const {
+    data: dataVoucherDetail,
+    refetch: refetchVoucherDetail,
+    remove: removeVoucherDetail,
+  } = useGetVoucherDetails(selectedVoucherId);
   const { mutate, isLoading } = useUpdateVoucher();
 
   useEffect(() => {
-    if (voucherDetails) {
-      setVoucherId(voucherDetails.id);
-      setValue('code', voucherDetails.code);
-      setValue('plan', voucherDetails.plan);
-      setValue('discount', voucherDetails.discount);
-      setValue('employees_slot_from', voucherDetails.employees_slot_from);
-      setValue('employees_slot_to', voucherDetails.employees_slot_to);
-      setValue('maximum_redemption', voucherDetails.maximum_redemption);
-      setValue('prepared_by', voucherDetails.prepared_by);
-      setValue('is_active', voucherDetails.is_active);
+    if (isOpen) {
+      refetchVoucherDetail();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (dataVoucherDetail) {
+      setValue('code', dataVoucherDetail.code);
+      setValue('plan', dataVoucherDetail.plan);
+      setValue('discount', dataVoucherDetail.discount);
+      setValue('employees_slot_from', dataVoucherDetail.employees_slot_from);
+      setValue('employees_slot_to', dataVoucherDetail.employees_slot_to);
+      setValue('maximum_redemption', dataVoucherDetail.maximum_redemption);
+      setValue('prepared_by', dataVoucherDetail.prepared_by);
+      setValue('is_active', dataVoucherDetail.is_active);
       setVoucherDate({
-        from: new Date(voucherDetails.redemption_date_from),
-        to: new Date(voucherDetails.redemption_date_to),
+        from: new Date(dataVoucherDetail.redemption_date_from),
+        to: new Date(dataVoucherDetail.redemption_date_to),
       });
     }
-  }, [voucherDetails]);
+  }, [dataVoucherDetail]);
+
+  const customCloseModal = () => {
+    removeVoucherDetail();
+    setIsOpen(false);
+  };
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setIsOpen(false);
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
@@ -63,12 +78,12 @@ export default function EditVoucherModal({
     };
     data['redemption_date_from'] = new Date(voucherDate.from).toISOString();
     data['redemption_date_to'] = new Date(voucherDate.to).toISOString();
-    mutate({ voucherId, data }, callbackReq);
+    mutate({ voucherId: selectedVoucherId, data: data }, callbackReq);
   });
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -95,7 +110,7 @@ export default function EditVoucherModal({
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Voucher</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
@@ -308,7 +323,7 @@ export default function EditVoucherModal({
                     <button
                       type='button'
                       className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => customCloseModal()}
                       ref={cancelButtonRef}
                     >
                       Close

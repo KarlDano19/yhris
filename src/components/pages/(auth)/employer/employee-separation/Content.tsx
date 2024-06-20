@@ -8,9 +8,6 @@ import toast from 'react-hot-toast';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
-import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
-import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import AddSeparationModal from './modals/AddSeparationModal';
 import LetterModal from './modals/LetterModal';
 import SignDocumentsModal from './modals/SignDocumentsModal';
@@ -29,9 +26,6 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
-  const [departmentItems, setDepartmentItems] = useState<any>([]);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [positionItems, setPositionItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -44,9 +38,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
   const { mutate, isLoading } = usePatchSeparationItem();
   const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems(itemsFilter);
-  const { data: dataDepartment } = useGetDepartmentItems();
-  const { data: dataEmployee } = useGetEmployeeItems();
-  const { data: dataPosition } = useGetPositionItems();
 
   const releaseLastPay = () => {
     if (isLastPayModalOpen && isLastPayModalOpen.id) {
@@ -57,6 +48,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       separationItemsCopy[itemIndex].emailType = 'last pay';
       separationItemsCopy[itemIndex].isLastPayReleased = true;
       separationItemsCopy[itemIndex].lastPay.to = separationItemsCopy[itemIndex].email;
+      debugger
       const callbackReq = {
         onSuccess: (data: any) => {
           setSeparationItems([...separationItemsCopy]);
@@ -120,15 +112,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, []);
 
   useEffect(() => {
-    if (dataDepartment) {
-      setDepartmentItems(dataDepartment);
-    }
-    if (dataEmployee) {
-      setEmployeeItems(dataEmployee);
-    }
-    if (dataPosition) {
-      setPositionItems(dataPosition);
-    }
     if (dataSeparation) {
       dataSeparation?.map((separation: any) => {
         separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
@@ -161,17 +144,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           message: '',
         };
         separation['signDocuments'] = {
-          template: 'Test',
+          template: '',
           to: '',
           message: '',
         };
         separation['lastPay'] = {
-          template: 'Test',
+          template: '',
           to: '',
           message: '',
         };
         separation['quitClaim'] = {
-          template: 'Test',
+          template: '',
           to: '',
           message: '',
         };
@@ -179,7 +162,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
       setSeparationItems(dataSeparation);
     }
-  }, [dataSeparation, dataDepartment, dataEmployee, dataPosition]);
+  }, [dataSeparation]);
 
   const renderRows = () => {
     if (isGetSeparationLoading) {
@@ -374,7 +357,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </button>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
+                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsAddSeparationModalOpen(true)}
                 disabled={!hasActiveSubscription}
               >
@@ -421,21 +404,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       <AddSeparationModal
-        employeeItems={employeeItems}
         isOpen={isAddSeparationModalOpen}
         setIsOpen={setIsAddSeparationModalOpen}
         refetch={refetch}
       />
       <LetterModal
         separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
+        refetch={refetch}
         type={isLetterModalOpen?.type}
         isOpen={isLetterModalOpen}
         setIsOpen={setIsLetterModalOpen}
       />
       <SignDocumentsModal
         separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
+        refetch={refetch}
         isOpen={isDocumentModalOpen}
         setIsOpen={setIsDocumentModalOpen}
       />

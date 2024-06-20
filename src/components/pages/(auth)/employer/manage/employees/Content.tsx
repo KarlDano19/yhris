@@ -1,5 +1,6 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import Link from 'next/link';
@@ -8,14 +9,13 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import EmployeesModal from './modals/EmployeesModal';
 import useGetEmployeeItems from './hooks/useGetEmployeeItems';
-import useGetEmployeeDetails from './hooks/useGetEmployeeDetails';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
-  const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean | null>(null);
+  const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -26,11 +26,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isEmployeeListLoading,
     refetch: employeeListRefetch,
   } = useGetEmployeeItems(itemsFilter);
-  const {
-    data: dataEmployeeDetail,
-    isLoading: isEmployeeDetailLoading,
-    refetch: employeeDetailRefetch,
-  } = useGetEmployeeDetails(selectedEmployeeId);
 
   useEffect(() => {
     if (employeeListData) {
@@ -43,13 +38,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [employeeListData]);
 
   useEffect(() => {
-    if (selectedEmployeeId) {
-      employeeDetailRefetch();
-      if (dataEmployeeDetail && Object.keys(dataEmployeeDetail).length && !isEmployeeDetailLoading) {
-        setIsEmployeesModalOpen(true);
-      }
-    }
-  }, [selectedEmployeeId, dataEmployeeDetail]);
+    setIsEmployeesModalOpen(true);
+  }, [selectedEmployeeId]);
 
   const openEditEmployeeModal = (employeeId: number) => {
     if (selectedEmployeeId && selectedEmployeeId == employeeId) {
@@ -244,11 +234,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <EmployeesModal
-        isOpen={isEmployeesModalOpen}
-        setIsOpen={setIsEmployeesModalOpen}
-        dataEmployeeDetail={dataEmployeeDetail}
-      />
+      {(isEmployeesModalOpen && selectedEmployeeId) && (
+        <EmployeesModal
+          selectedEmployeeId={selectedEmployeeId}
+          isOpen={isEmployeesModalOpen}
+          setIsOpen={setIsEmployeesModalOpen}
+        />
+      )}
     </>
   );
 };

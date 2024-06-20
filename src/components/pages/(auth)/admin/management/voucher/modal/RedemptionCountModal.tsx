@@ -1,24 +1,41 @@
-import { Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useRef, useEffect } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
+
+import useGetVoucherDetails from '../hooks/useGetVoucherDetails';
+
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 export default function RedemptionCountModal({
   isOpen,
   setIsOpen,
-  voucherId, // New prop to receive the id
-  vouchers, // New prop to receive the voucher data
+  selectedVoucherId,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  voucherId: number | null; // Define the type of id
-  vouchers: any; // Define the type of vouchers
+  selectedVoucherId: number | null;
 }) {
   const cancelButtonRef = useRef(null);
+  const {
+    data: dataVoucherDetail,
+    refetch: refetchVoucherDetail,
+    remove: removeVoucherDetail,
+  } = useGetVoucherDetails(selectedVoucherId);
+
+  useEffect(() => {
+    if (isOpen) {
+      refetchVoucherDetail();
+    }
+  }, [isOpen]);
+
+  const customCloseModal = () => {
+    removeVoucherDetail();
+    setIsOpen(false);
+  };
 
   const renderRows = () => {
-    const voucher = vouchers.find((voucher: any) => voucher.id === voucherId);
-    if (voucher && voucher.redemption_count && voucher.redemption_count.length > 0) {
-      return voucher.redemption_count.map((item: any) => (
+    if (dataVoucherDetail && dataVoucherDetail.redemption_count && dataVoucherDetail.redemption_count.length > 0) {
+      return dataVoucherDetail.redemption_count.map((item: any) => (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.plan}</td>
@@ -39,7 +56,7 @@ export default function RedemptionCountModal({
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -68,7 +85,6 @@ export default function RedemptionCountModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Redeemed History</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
-                {/* <form onSubmit={onSubmit}> */}
                 <div className='px-4 pt-4 pb-6'>
                   <table className='min-w-full divide-y divide-gray-300 text-center'>
                     <thead>
@@ -92,13 +108,12 @@ export default function RedemptionCountModal({
                   <button
                     type='button'
                     className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => customCloseModal()}
                     ref={cancelButtonRef}
                   >
                     Close
                   </button>
                 </div>
-                {/* </form> */}
               </Dialog.Panel>
             </Transition.Child>
           </div>

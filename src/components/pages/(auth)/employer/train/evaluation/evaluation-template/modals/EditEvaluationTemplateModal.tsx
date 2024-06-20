@@ -12,6 +12,7 @@ import EvaluationFormTab from '../tabs/EvaluationFormTab';
 import EvaluationCriterionTab from '../tabs/EvaluationCriterionTab';
 import ViewModeTab from '../tabs/ViewModeTab';
 import PreviewTab from '../tabs/PreviewTab';
+import useGetEvaluationTemplateDetails from '../hooks/useGetEvaluationTemplateDetails';
 import useUpdateEvaluationTemplate from '../hooks/useUpdateEvaluationTemplate';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -20,78 +21,69 @@ export default function EditEvaluationModal({
   refetch,
   isOpen,
   setIsOpen,
-  evaluationDetails,
+  selectedEvaluationTemplateId,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  evaluationDetails: any;
+  selectedEvaluationTemplateId: number | null;
 }) {
   const cancelButtonRef = useRef(null);
-  const [evaluationId, setEvaluationId] = useState<number | null>(null);
   const [selectedTab, setSelectedTab] = useState(1);
   const [isPreview, setIsPreview] = useState(false);
-  const { register, handleSubmit, setValue, getValues, watch, control } = useForm<any>({
-    defaultValues: {
-      criteria_rating_view_type: 'default',
-      total_score: 1,
-      passing_score: 1,
-      is_show_remarks: null,
-      is_show_criteria_comment: null,
-      evaluation_criterion: [
-        {
-          id: uuidv4(),
-          criterion: [
-            {
-              id: uuidv4(),
-              title: '',
-              max_score: 1,
-              is_disable_comment: true,
-            },
-          ],
-        },
-      ],
-    },
-  });
+  const { register, handleSubmit, setValue, getValues, watch, control } = useForm();
+  const {
+    data: dataEvaluationDetail,
+    refetch: refetchEvaluationDetail,
+    remove: evaluationTemplateDetailRemove,
+  } = useGetEvaluationTemplateDetails(selectedEvaluationTemplateId);
   const { mutate, isLoading } = useUpdateEvaluationTemplate();
 
   useEffect(() => {
-    if (evaluationDetails) {
-      setSelectedTab(1);
-      setEvaluationId(evaluationDetails.id);
-      setValue('name', evaluationDetails.name);
-      setValue('evaluation_type', evaluationDetails.evaluation_type);
-      setValue('frequency', evaluationDetails.frequency);
-      setValue('evaluation_format', evaluationDetails.evaluation_format);
-      setValue('description', evaluationDetails.description);
-      setValue('rating_type', evaluationDetails.rating_type);
-      setValue('total_score', evaluationDetails.total_score);
-      setValue('passing_score', evaluationDetails.passing_score);
-      setValue('is_show_remarks', evaluationDetails.is_show_remarks);
-      setValue('is_show_criteria_comment', evaluationDetails.is_show_criteria_comment);
-      setValue('evaluation_criterion', evaluationDetails.evaluation_criterion);
-      setValue('criteria_rating_view_type', evaluationDetails.criteria_rating_view_type);
+    if (isOpen) {
+      refetchEvaluationDetail();
     }
-  }, [evaluationDetails]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (dataEvaluationDetail) {
+      setValue('name', dataEvaluationDetail.name);
+      setValue('evaluation_type', dataEvaluationDetail.evaluation_type);
+      setValue('frequency', dataEvaluationDetail.frequency);
+      setValue('evaluation_format', dataEvaluationDetail.evaluation_format);
+      setValue('description', dataEvaluationDetail.description);
+      setValue('rating_type', dataEvaluationDetail.rating_type);
+      setValue('total_score', dataEvaluationDetail.total_score);
+      setValue('passing_score', dataEvaluationDetail.passing_score);
+      setValue('is_show_remarks', dataEvaluationDetail.is_show_remarks);
+      setValue('is_show_criteria_comment', dataEvaluationDetail.is_show_criteria_comment);
+      setValue('evaluation_criterion', dataEvaluationDetail.evaluation_criterion);
+      setValue('criteria_rating_view_type', dataEvaluationDetail.criteria_rating_view_type);
+    }
+  }, [dataEvaluationDetail]);
+
+  const customCloseModal = () => {
+    evaluationTemplateDetailRemove();
+    setIsOpen(false);
+  };
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setIsOpen(false);
-        setSelectedTab(1);
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate({ evaluationId, data }, callbackReq);
+    mutate({ evaluationId: selectedEvaluationTemplateId, data: data }, callbackReq);
   });
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -126,7 +118,7 @@ export default function EditEvaluationModal({
               >
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Evaluation Template</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 {!isPreview && (
                   <div className='hidden sm:block pt-10 px-10'>

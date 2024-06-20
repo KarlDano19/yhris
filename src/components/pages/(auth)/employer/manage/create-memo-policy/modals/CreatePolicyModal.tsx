@@ -84,7 +84,6 @@ export default function CreatePolicyModal({
           { duration: 5000 }
         );
         setIsOpen(false);
-        // queryClient.refetchQueries({ queryKey: ["directivesItemCache"] });
         refetch();
         reset();
       },

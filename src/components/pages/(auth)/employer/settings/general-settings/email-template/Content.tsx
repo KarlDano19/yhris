@@ -121,7 +121,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </button>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
+                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateModalOpen(true)}
                 disabled={!hasActiveSubscription}
               >
@@ -135,16 +135,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Subject
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         To
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Cc
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Bcc
                       </th>
                     </tr>
