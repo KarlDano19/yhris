@@ -248,7 +248,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      from: new Date(value),
+                      from: value,
                     });
                   }}
                 />
@@ -269,7 +269,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      to: new Date(value),
+                      to: value,
                     });
                   }}
                 />

@@ -284,7 +284,7 @@ const Content = () => {
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      from: new Date(value),
+                      from: value,
                     });
                   }}
                 />
@@ -305,7 +305,7 @@ const Content = () => {
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      to: new Date(value),
+                      to: value,
                     });
                   }}
                 />

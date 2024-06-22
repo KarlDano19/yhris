@@ -202,7 +202,7 @@ function Content() {
                           inputOnChange={(value: any) => {
                             setEvaluationEmployeeFormDetails({
                               ...evaluationEmployeeFormDetails,
-                              from: new Date(value),
+                              from: value,
                             });
                           }}
                         />

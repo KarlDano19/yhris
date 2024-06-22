@@ -195,7 +195,7 @@ export default function CreateVoucherModal({
                                 inputOnChange={(value: any) => {
                                   setVoucherDate({
                                     ...voucherDate,
-                                    from: new Date(value),
+                                    from: value,
                                   });
                                 }}
                               />
@@ -215,7 +215,7 @@ export default function CreateVoucherModal({
                                 inputOnChange={(value: any) => {
                                   setVoucherDate({
                                     ...voucherDate,
-                                    to: new Date(value),
+                                    to: value,
                                   });
                                 }}
                               />
