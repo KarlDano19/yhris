@@ -35,11 +35,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isGetEvaluationLoading,
     refetch: refetchEvaluation,
   } = useGetEvaluationTemplateItems(itemsFilter);
-  const {
-    data: dataEvaluationDetail,
-    isLoading: isGetEvaluationDetailLoading,
-    refetch: refetchEvaluationDetail,
-  } = useGetEvaluationTemplateDetails(selectedEvaluationTemplateId);
 
   useEffect(() => {
     refetchEvaluation();
@@ -53,17 +48,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (selectedEvaluationTemplateId) {
-      refetchEvaluationDetail();
-      if (dataEvaluationDetail && Object.keys(dataEvaluationDetail).length && !isGetEvaluationDetailLoading) {
-        if (actionType === 'edit') {
-          setIsEditEvaluationModalOpen(true);
-        }
-        if (actionType === 'delete') {
-          setIsDeleteEvaluationModalOpen(true);
-        }
+      if (actionType === 'edit') {
+        setIsEditEvaluationModalOpen(true);
+      }
+      if (actionType === 'delete') {
+        setIsDeleteEvaluationModalOpen(true);
       }
     }
-  }, [selectedEvaluationTemplateId, dataEvaluationDetail]);
+  }, [selectedEvaluationTemplateId]);
 
   const openEditEvaluationModal = (evaluationDetails: any) => {
     setActionType('edit');
@@ -248,7 +240,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </button>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
+                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsSelectionModalOpen(true)}
                 disabled={!hasActiveSubscription}
               >
@@ -288,19 +280,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <SelectionModal refetch={refetchEvaluation} isOpen={isSelectionModalOpen} setIsOpen={setIsSelectionModalOpen} />
-      <EditEvaluationModal
-        refetch={refetchEvaluation}
-        isOpen={isEditEvaluationModalOpen}
-        setIsOpen={setIsEditEvaluationModalOpen}
-        evaluationDetails={dataEvaluationDetail}
-      />
-      <DeleteEvaluationModal
-        refetch={refetchEvaluation}
-        isOpen={isDeleteEvaluationModalOpen}
-        setIsOpen={setIsDeleteEvaluationModalOpen}
-        evaluationDetails={dataEvaluationDetail}
-      />
+      {isSelectionModalOpen && (
+        <SelectionModal refetch={refetchEvaluation} isOpen={isSelectionModalOpen} setIsOpen={setIsSelectionModalOpen} />
+      )}
+      {isEditEvaluationModalOpen && selectedEvaluationTemplateId && (
+        <EditEvaluationModal
+          refetch={refetchEvaluation}
+          isOpen={isEditEvaluationModalOpen}
+          setIsOpen={setIsEditEvaluationModalOpen}
+          selectedEvaluationTemplateId={selectedEvaluationTemplateId}
+        />
+      )}
+      {isDeleteEvaluationModalOpen && selectedEvaluationTemplateId && (
+        <DeleteEvaluationModal
+          refetch={refetchEvaluation}
+          isOpen={isDeleteEvaluationModalOpen}
+          setIsOpen={setIsDeleteEvaluationModalOpen}
+          selectedEvaluationTemplateId={selectedEvaluationTemplateId}
+          selectedEvalationTemplateName={evaluationItems.find((item: any) => item.id === selectedEvaluationTemplateId)?.name}
+        />
+      )}
     </>
   );
 };

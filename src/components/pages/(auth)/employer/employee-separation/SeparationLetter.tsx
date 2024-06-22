@@ -30,8 +30,8 @@ export default function SeparationLetter({
   return (
     <div className='flex flex-col'>
       <div className='inline-flex'>
-        <Menu as='div' className='relative -ml-px'>
-          <Menu.Button className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-11 pr-3 py-2 text-white hover:bg-green-600 focus:z-10'>
+        <Menu as='div' className='relative'>
+          <Menu.Button className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-11 pr-3 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80' disabled={isLetterSent}>
             <span className='sr-only'>Open options</span>
             <div className='flex gap-4'>
               <span className='flex-1'>Create</span>

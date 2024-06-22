@@ -7,7 +7,7 @@ export async function sendEmail(data: any) {
     const payloads = {
       bcc: data.bcc,
       cc: data.cc,
-      subject: data.template,
+      subject: `Screen Applicants | ${data.template}`,
       to: data.email,
       context: data.message,
     };

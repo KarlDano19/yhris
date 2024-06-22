@@ -49,7 +49,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             </h6>
             <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
             <p className='text-sm text-indigo-dye mt-4 lg:w-60'>
-              Role: {!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
+              <p className='text-[1rem] font-semibold mb-1'>Role:</p>{!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
             </p>
           </div>
         </div>

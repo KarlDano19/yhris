@@ -105,6 +105,7 @@ export type T_SeparationEmail = {
   signDocuments: any;
   quitClaim: any;
   dateReceived: any;
+  lastPay: any;
 };
 
 export type T_ApplicantOrientEmail = {

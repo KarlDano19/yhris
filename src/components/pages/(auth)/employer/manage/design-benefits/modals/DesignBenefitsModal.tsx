@@ -44,7 +44,6 @@ export default function DesignBenefitsModal({
           { duration: 5000 }
         );
         setIsOpen(false);
-        // queryClient.refetchQueries({ queryKey: ["benefitsItemCache"] });
         reset();
         refetch()
         

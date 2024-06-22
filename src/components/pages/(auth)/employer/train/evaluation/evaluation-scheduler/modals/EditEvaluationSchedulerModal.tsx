@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import SchedulerInfoTab from '../tabs/SchedulerInfoTab';
 import EmployeeAssigneeTab from '../tabs/EmployeeAssigneeTab';
+import useGetEvaluationSchedulerDetails from '../hooks/useGetEvaluationSchedulerDetails';
 import useUpdateEvaluationScheduler from '../hooks/useUpdateEvaluationScheduler';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -15,53 +16,65 @@ function CreateEvaluationSchedulerModal({
   refetch,
   isOpen,
   setIsOpen,
-  evaluationSchedulerDetails,
+  selectedEvaluationSchedulerId,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  evaluationSchedulerDetails: any;
+  selectedEvaluationSchedulerId: number | null;
 }) {
   const cancelButtonRef = useRef(null);
-  const [evaluationSchedulerId, setEvaluationSchedulerId] = useState<number | null>(null);
   const [selectedTab, setSelectedTab] = useState(1);
-  const { register, setValue, watch, handleSubmit, reset, control } = useForm();
+  const { register, setValue, watch, handleSubmit, control } = useForm();
+  const {
+    data: dataEvaluationSchedulerDetails,
+    refetch: refetchEvaluationSchedulerDetails,
+    remove: evaluationSchedulerDetailRemove,
+  } = useGetEvaluationSchedulerDetails(selectedEvaluationSchedulerId);
   const { mutate, isLoading } = useUpdateEvaluationScheduler();
 
   useEffect(() => {
-    if (evaluationSchedulerDetails) {
-      setSelectedTab(1);
-      setEvaluationSchedulerId(evaluationSchedulerDetails.id);
-      setValue('name', evaluationSchedulerDetails.name);
-      setValue('evaluation_template', evaluationSchedulerDetails.evaluation_template);
-      setValue('frequency_value', evaluationSchedulerDetails.frequency_value);
-      setValue('frequency_unit', evaluationSchedulerDetails.frequency_unit);
-      setValue('reminder_schedule', evaluationSchedulerDetails.reminder_schedule);
-      setValue('employee', evaluationSchedulerDetails.employee);
-      setValue('message', evaluationSchedulerDetails.message);
-      setValue('attachment', evaluationSchedulerDetails.attachment);
+    if (isOpen) {
+      refetchEvaluationSchedulerDetails();
     }
-  }, [evaluationSchedulerDetails]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (dataEvaluationSchedulerDetails) {
+      setValue('name', dataEvaluationSchedulerDetails.name);
+      setValue('evaluation_template', dataEvaluationSchedulerDetails.evaluation_template);
+      setValue('frequency_value', dataEvaluationSchedulerDetails.frequency_value);
+      setValue('frequency_unit', dataEvaluationSchedulerDetails.frequency_unit);
+      setValue('reminder_schedule', dataEvaluationSchedulerDetails.reminder_schedule);
+      setValue('employee', dataEvaluationSchedulerDetails.employee);
+      setValue('message', dataEvaluationSchedulerDetails.message);
+      setValue('attachment', dataEvaluationSchedulerDetails.attachment);
+    }
+  }, [dataEvaluationSchedulerDetails]);
+
+  const customCloseModal = () => {
+    evaluationSchedulerDetailRemove();
+    setIsOpen(false);
+  };
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setIsOpen(false);
-        reset();
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate({ evaluationSchedulerId, data }, callbackReq);
+    mutate({ evaluationSchedulerId: selectedEvaluationSchedulerId, data: data }, callbackReq);
   });
 
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -88,7 +101,7 @@ function CreateEvaluationSchedulerModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Evaluation Scheduler</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   {selectedTab === 1 && (
                     <SchedulerInfoTab register={register} handleSubmit={handleSubmit} setSelectedTab={setSelectedTab} />

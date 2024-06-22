@@ -11,22 +11,17 @@ export default function DeleteEvaluationModalScheduler({
   refetch,
   isOpen,
   setIsOpen,
-  evaluationDetails,
+  selectedEvaluationSchedulerId,
+  selectedEvalationSchedulerName,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  evaluationDetails: any | null;
+  selectedEvaluationSchedulerId: number | null;
+  selectedEvalationSchedulerName: string;
 }) {
   const cancelButtonRef = useRef(null);
-  const [evaluationId, setEvaluationId] = useState<number | null>(null);
   const { mutate, isLoading } = useDeleteEvaluationScheduler();
-
-  useEffect(() => {
-    if (evaluationDetails) {
-      setEvaluationId(evaluationDetails.id);
-    }
-  }, [evaluationDetails]);
 
   const onSubmit = () => {
     const callbackReq = {
@@ -39,7 +34,7 @@ export default function DeleteEvaluationModalScheduler({
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(evaluationId, callbackReq);
+    mutate(selectedEvaluationSchedulerId, callbackReq);
   };
 
   return (
@@ -74,7 +69,7 @@ export default function DeleteEvaluationModalScheduler({
                 </div>
                 <div className='text-xl px-20 text-center'>
                   <p className='text-xl text-gray-600 font-bold'>
-                    Are you sure you want to <span className='text-red-500'>delete</span> {evaluationDetails?.name}{' '}
+                    Are you sure you want to <span className='text-red-500'>delete</span> {selectedEvalationSchedulerName}{' '}
                     Evaluation?
                   </p>
                 </div>

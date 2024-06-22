@@ -6,14 +6,16 @@ import { XCircleIcon, CheckIcon } from '@heroicons/react/24/solid';
 import DateCalendar from '@/svg/DateCalendar';
 import DropDownArrow from '@/svg/DropDownArrow';
 
+import useGetEmployeeDetails from '../hooks/useGetEmployeeDetails';
+
 export default function EmployeesModal({
+  selectedEmployeeId,
   isOpen,
   setIsOpen,
-  dataEmployeeDetail,
 }: {
-  isOpen: boolean | null;
-  setIsOpen: Dispatch<boolean | null>;
-  dataEmployeeDetail: any;
+  selectedEmployeeId: any;
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
   const [cvFileDetail, setCVFileDetail] = useState<any>({
@@ -26,15 +28,20 @@ export default function EmployeesModal({
   const [profilePhoto, setProfilePhoto] = useState<any>();
   const [isWFH, setCheckWFH] = useState(false);
   const [isWOS, setCheckWOS] = useState(false);
-  const { register, setValue, handleSubmit, control, reset } = useForm();
+  const { register, setValue, handleSubmit, control } = useForm();
   const { fields, append } = useFieldArray({
     control,
     name: 'exp',
   });
+  const {
+    data: dataEmployeeDetail,
+    refetch: employeeDetailRefetch,
+    remove: employeeDetailRemove,
+  } = useGetEmployeeDetails(selectedEmployeeId);
 
   useEffect(() => {
     if (isOpen) {
-      setCurrentTab(1);
+      employeeDetailRefetch();
     }
   }, [isOpen]);
 
@@ -172,9 +179,8 @@ export default function EmployeesModal({
   };
 
   const customCloseModal = () => {
-    setViewCV(false);
-    setIsOpen(null);
-    setCurrentTab(1);
+    employeeDetailRemove();
+    setIsOpen(false);
   };
 
   return (
@@ -204,7 +210,7 @@ export default function EmployeesModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-7xl'>
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-7xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
                       Employee - {dataEmployeeDetail?.firstname} {dataEmployeeDetail?.lastname}
@@ -518,7 +524,7 @@ export default function EmployeesModal({
                           <button
                             type='button'
                             className='rounded-md w-full my-4 md:my-0 md:w-auto bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                            onClick={() => setIsOpen(null)}
+                            onClick={() => customCloseModal()}
                           >
                             Close
                           </button>

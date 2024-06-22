@@ -3,6 +3,7 @@ import { useEffect, useState, Dispatch, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+
 import useDeleteEvaluationTemplate from '../hooks/useDeleteEvaluationTemplate';
 
 import WarningRed from '@/svg/WarningRed';
@@ -11,22 +12,17 @@ export default function DeleteEvaluationModal({
   refetch,
   isOpen,
   setIsOpen,
-  evaluationDetails,
+  selectedEvaluationTemplateId,
+  selectedEvalationTemplateName,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  evaluationDetails: any | null;
+  selectedEvaluationTemplateId: number | null;
+  selectedEvalationTemplateName: string;
 }) {
   const cancelButtonRef = useRef(null);
-  const [evaluationId, setEvaluationId] = useState<number | null>(null);
   const { mutate, isLoading } = useDeleteEvaluationTemplate();
-
-  useEffect(() => {
-    if (evaluationDetails) {
-      setEvaluationId(evaluationDetails.id);
-    }
-  }, [evaluationDetails]);
 
   const onSubmit = () => {
     const callbackReq = {
@@ -39,7 +35,7 @@ export default function DeleteEvaluationModal({
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(evaluationId, callbackReq);
+    mutate(selectedEvaluationTemplateId, callbackReq);
   };
 
   return (
@@ -74,7 +70,7 @@ export default function DeleteEvaluationModal({
                 </div>
                 <div className='text-xl px-20 text-center'>
                   <p className='text-xl text-gray-600 font-bold'>
-                    Are you sure you want to <span className='text-red-500'>delete</span> {evaluationDetails?.name}{' '}
+                    Are you sure you want to <span className='text-red-500'>delete</span> {selectedEvalationTemplateName}{' '}
                     Evaluation?
                   </p>
                 </div>

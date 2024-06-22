@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       cookies().set({
         name: 'token',
         value: data.token,
-        maxAge: 60 * 60 * 1,
+        maxAge: 60 * 60 * 3,
         sameSite: "strict",
         httpOnly: false,
         secure: true,
