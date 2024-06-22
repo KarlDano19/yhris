@@ -146,21 +146,21 @@ function EvaluationCriterionTab({
                                   <div className='flex flex-col'>
                                     <div
                                       className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
-                                      data-tooltip-id='add-section-tooltip'
-                                      data-tooltip-content='Add section'
-                                      data-tooltip-place='left'
+                                      // data-tooltip-id='add-section-tooltip'
+                                      // data-tooltip-content='Add section'
+                                      // data-tooltip-place='left'
+                                      title='Add section'
                                       onClick={() => addSection()}
                                     >
                                       <AddCircleIcon />
                                     </div>
-                                    <Tooltip id='add-section-tooltip' style={{ fontSize: '10px' }} />
+                                    {/* <Tooltip id='add-section-tooltip' style={{ fontSize: '10px' }} /> */}
                                     <div
                                       className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
                                       data-tooltip-id='delete-section-tooltip'
                                       data-tooltip-content='Delete section'
                                       data-tooltip-place='left'
                                       onClick={() => handleOpenModal(index)}
-                                      // onClick={() => removeSection(index)}
                                     >
                                       <DeleteIconNoBorder />
                                     </div>

@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getClientItems() {
+async function getClientItems(filters: any) {
   try {
+    let newFilters = { ...filters };
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -12,7 +14,7 @@ async function getClientItems() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/employers/`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/employers/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -28,8 +30,8 @@ async function getClientItems() {
   }
 }
 
-function useClientItems() {
-  const query = useQuery(['clientsDataCache'], () => getClientItems(), {
+function useClientItems(filters: any) {
+  const query = useQuery(['clientItemsCache'], () => getClientItems(filters), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
