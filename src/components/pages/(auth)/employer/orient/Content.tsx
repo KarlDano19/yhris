@@ -1,11 +1,15 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
-import classNames from '@/helpers/classNames';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import classNames from '@/helpers/classNames';
 import SendContract from './SendContract';
 import Orient from './Orient';
 import IntroduceToTeam from './IntroduceToTeam';
@@ -16,8 +20,6 @@ import SuccessModal from './modals/SuccessModal';
 import NoticeModal from './modals/NoticeModal';
 import IntroduceModal from './modals/IntroduceModal';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -325,7 +327,7 @@ const Content = () => {
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                  placeholder='Search...'
+                  placeholder='Search ...'
                 />
                 <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
                   <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />

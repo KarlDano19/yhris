@@ -3,25 +3,23 @@
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
-import useClientItems from '@/components/pages/(auth)/admin/client-monitoring/hooks/useGetClientItems';
-import ClientGoalModal from './modal/ClientGoalModal';
 
+import CustomToast from '@/components/CustomToast';
+import ClientGoalModal from './modal/ClientGoalModal';
+import useClientItems from './hooks/useGetClientItems';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import MoreIcon from '@/svg/MoreIcon';
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 const Content = () => {
   const [clientItems, setClientItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
-    from: '',
-    to: '',
     search: '',
   });
   const [isClientGoalModalOpen, setIsClientGoalModalOpen] = useState(false);
-  const { data: dataClient, isLoading: isGetClientLoading, refetch } = useClientItems();
+  const { data: dataClient, isLoading: isGetClientLoading, refetch } = useClientItems(itemsFilter);
 
   useEffect(() => {
     if (dataClient && !isGetClientLoading) {
@@ -73,7 +71,7 @@ const Content = () => {
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={5}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>
               Please click create to add separation of employee.
@@ -82,31 +80,6 @@ const Content = () => {
         </tr>
       );
     }
-  };
-
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetch();
   };
 
   return (
@@ -129,12 +102,19 @@ const Content = () => {
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                  placeholder='All Company'
+                  placeholder='Search ...'
                 />
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={() => refetch()}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
                 <div className='flex-1 flex justify-end ml-4'>
                   <button
-                    className='bg-green-500 w-max rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
+                    className='bg-green-500 w-max rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
                     onClick={() => setIsClientGoalModalOpen(true)}
+                    disabled={true}
                   >
                     Client Analytics
                   </button>
@@ -160,10 +140,7 @@ const Content = () => {
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Client
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -178,9 +155,9 @@ const Content = () => {
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Payment Status
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      {/* <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
-                      </th>
+                      </th> */}
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>

@@ -1,17 +1,19 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
-import getEmailTemplate from '@/components/pages/(auth)/employer/settings/general-settings/email-template/hooks/useGetEmailTemplate';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+import getEmailTemplate from './hooks/useGetEmailTemplate';
+import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
+import SuccessModal from './modal/SuccessModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
-import SuccessModal from './modal/SuccessModal';
-import { set } from 'react-hook-form';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -109,13 +111,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                  placeholder='Search...'
+                  placeholder='Search ...'
                 />
               </div>
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              //   onClick={() => refetchVouchers()}
+              onClick={() => refetchEmailTemplate()}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
