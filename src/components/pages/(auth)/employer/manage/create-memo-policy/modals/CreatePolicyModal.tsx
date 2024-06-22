@@ -89,7 +89,7 @@ export default function CreatePolicyModal({
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type="error" />, {
-          duration: 7000,
+          duration: 5000,
         });
       },
     };
@@ -398,7 +398,7 @@ export default function CreatePolicyModal({
                                 <CustomToast message={message} type="error" />
                               ),
                               {
-                                duration: 4000,
+                                duration: 5000,
                               }
                             );
                           }

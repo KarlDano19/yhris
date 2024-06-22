@@ -101,9 +101,9 @@ export default function CreateEvaluationModal({
               <Dialog.Panel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
-                  selectedTab === 1 && 'max-w-2xl',
+                  selectedTab === 1 && 'max-w-4xl',
                   selectedTab === 2 && 'max-w-4xl',
-                  selectedTab === 3 && 'max-w-6xl',
+                  selectedTab === 3 && 'max-w-4xl',
                   selectedTab === 4 && 'max-w-4xl'
                 )}
               >
