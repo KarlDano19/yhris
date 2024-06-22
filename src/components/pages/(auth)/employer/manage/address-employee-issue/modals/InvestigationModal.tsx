@@ -59,7 +59,7 @@ export default function InvestigationModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         setEmployeeIssueItems([...toAddData]);
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        toast.custom(() => <CustomToast message='Investigated succesfully.' type='success' />, { duration: 5000 });
         setIsOpen(null);
         reset();
       },

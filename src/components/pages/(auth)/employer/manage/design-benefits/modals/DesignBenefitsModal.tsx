@@ -37,11 +37,10 @@ export default function DesignBenefitsModal({
     setValue,
   } = useForm<T_Benefit>();
   const onSubmit = handleSubmit((data) => {
-    debugger
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
+          () => <CustomToast message={"Create benefit successfully"} type="success" />,
           { duration: 5000 }
         );
         setIsOpen(false);
