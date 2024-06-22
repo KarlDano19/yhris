@@ -27,6 +27,7 @@ const CustomDatePicker = ({
   required?: boolean;
 }) => {
   const isGoodDate = (date: any) => {
+    console.log(date)
     var regexGoodDate = /^(?:(0[1-9]|1[012])[\/.](0[1-9]|[12][0-9]|3[01])[\/.](19|20)[0-9]{2})$/;
     return regexGoodDate.test(date);
   };
@@ -40,8 +41,12 @@ const CustomDatePicker = ({
           onClick();
         }}
         onChange={(e) => {
-          if (!isGoodDate(e.target.value)) return;
-          inputOnChange(new Date(e.target.value));
+          if (e.target.value) {
+            if (!isGoodDate(e.target.value)) return;
+            inputOnChange(new Date(e.target.value));
+          } else {
+            inputOnChange('');
+          }
         }}
         id={id}
         type='text'

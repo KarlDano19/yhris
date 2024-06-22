@@ -310,7 +310,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      from: new Date(value),
+                      from: value,
                     });
                   }}
                 />
@@ -331,7 +331,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      to: new Date(value),
+                      to: value,
                     });
                   }}
                 />
