@@ -1,14 +1,16 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useFieldArray } from 'react-hook-form';
+import { Tooltip } from 'react-tooltip';
 import CritiriaSubItem from './CritiriaSubItem';
 
 import AddCircleIcon from '@/svg/AddCircleIcon';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MoveIcon from '@/svg/MoveIcon';
+import DeleteSectionModal from '../modals/DeleteSectionModal';
 
 function EvaluationCriterionTab({
   control,
@@ -35,6 +37,9 @@ function EvaluationCriterionTab({
     setSelectedTab(4);
   });
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
   const addSection = () => {
     append({
       criterion: [
@@ -45,6 +50,18 @@ function EvaluationCriterionTab({
         },
       ],
     });
+  };
+
+  const handleOpenModal = (index: number) => {
+    setSelectedIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    if (selectedIndex !== null && fields.length > 1) {
+      remove(selectedIndex);
+    }
+    setIsModalOpen(false);
   };
 
   const removeSection = (index: number) => {
@@ -91,6 +108,7 @@ function EvaluationCriterionTab({
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-8 flow-root'>
             <div className='mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+              <DeleteSectionModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} onConfirm={handleConfirm} />
               <DragDropContext onDragEnd={reorder}>
                 <Droppable droppableId='parent' type='parentContainer'>
                   {(provided: any) => (
@@ -128,16 +146,25 @@ function EvaluationCriterionTab({
                                   <div className='flex flex-col'>
                                     <div
                                       className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
+                                      data-tooltip-id='add-section-tooltip'
+                                      data-tooltip-content='Add section'
+                                      data-tooltip-place='left'
                                       onClick={() => addSection()}
                                     >
                                       <AddCircleIcon />
                                     </div>
+                                    <Tooltip id='add-section-tooltip' style={{ fontSize: '10px' }} />
                                     <div
                                       className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
-                                      onClick={() => removeSection(index)}
+                                      data-tooltip-id='delete-section-tooltip'
+                                      data-tooltip-content='Delete section'
+                                      data-tooltip-place='left'
+                                      onClick={() => handleOpenModal(index)}
+                                      // onClick={() => removeSection(index)}
                                     >
                                       <DeleteIconNoBorder />
                                     </div>
+                                    <Tooltip id='delete-section-tooltip' style={{ fontSize: '10px' }} />
                                   </div>
                                 </div>
                                 <CritiriaSubItem

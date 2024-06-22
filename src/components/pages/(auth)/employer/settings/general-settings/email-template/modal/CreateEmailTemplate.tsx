@@ -11,6 +11,7 @@ import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
 import CustomToast from '@/components/CustomToast';
 
 import { XCircleIcon} from '@heroicons/react/24/solid';
+import { QUILL_MODULES } from '@/helpers/constants';
 
 export default function EmailTemplateModal({
   isOpen,
@@ -199,6 +200,7 @@ export default function EmailTemplateModal({
                             onChange={(value) => setValue('body', value)}
                             style={{ height: '80%' }}
                             defaultValue={getValues('body')}
+                            modules={QUILL_MODULES}
                           />
                         </div>
                       <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>

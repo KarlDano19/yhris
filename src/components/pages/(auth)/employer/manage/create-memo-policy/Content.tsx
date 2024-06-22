@@ -65,7 +65,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
-            duration: 7000,
+            duration: 5000,
           });
         },
       };

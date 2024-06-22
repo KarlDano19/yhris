@@ -56,7 +56,7 @@ export default function CreateMemoModal({
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
+          duration: 5000,
         });
       },
     };
@@ -71,7 +71,7 @@ export default function CreateMemoModal({
       setQrCodeExist(true);
     } else {
       toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
-        duration: 2000,
+        duration: 5000,
       });
     }
   };
@@ -176,6 +176,7 @@ export default function CreateMemoModal({
                       </label>
                       <div className='mt-2'>
                         <textarea
+                          required
                           rows={4}
                           {...register('body')}
                           id='body'
@@ -316,7 +317,7 @@ export default function CreateMemoModal({
                               />
                             ),
                             {
-                              duration: 4000,
+                              duration: 5000,
                             }
                           );
                         }
