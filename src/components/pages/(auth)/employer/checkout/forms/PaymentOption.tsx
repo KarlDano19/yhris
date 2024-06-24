@@ -87,7 +87,7 @@ const PaymentOption = ({
         type='submit'
         disabled={isLoading}
       >
-        {isLoading ? 'Processing...' : 'Pay Now'}
+        {isLoading ? 'Processing...' : 'Next'}
       </button>
     </form>
   );

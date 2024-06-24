@@ -75,7 +75,7 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
   };
 
   return (
-    <div className='p-8 grow shadow-custom'>
+    <div className='p-8 grow shadow-custom flex-1'>
       <div className='flex mb-8'>
         <div className='mr-5'>
           <img className='h-[65px]' src={`/assets/bulb.png`} alt='bulb' />

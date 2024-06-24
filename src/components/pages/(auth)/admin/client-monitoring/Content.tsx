@@ -23,6 +23,9 @@ const Content = () => {
 
   useEffect(() => {
     if (dataClient && !isGetClientLoading) {
+      dataClient.map((item: any) => {
+        item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+      });
       setClientItems(dataClient);
     }
   }, [dataClient]);

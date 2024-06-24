@@ -1,31 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
-import SplitLayout from '@/components/SplitView';
-import SplitViewBg from '@/assets/split-view-bg.png';
+import { useState } from 'react';
+
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-import MainIconOnly from '@/svg/MainIconOnly';
-import { EyeSlashIcon } from '@heroicons/react/24/outline';
-import { EyeIcon } from '@heroicons/react/24/solid';
-import DropDownArrow from '@/svg/DropDownArrow';
 import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 import { useForm } from 'react-hook-form';
-import { T_Register } from '@/types/globals';
+
+import SplitLayout from '@/components/SplitView';
+import SplitViewBg from '@/assets/split-view-bg.png';
+import CustomToast from '@/components/CustomToast';
 import useRegisterAccount from './hooks/useRegisterAccount';
-import { useRouter } from 'next/navigation';
+
+import { EyeIcon } from '@heroicons/react/24/solid';
+import { EyeSlashIcon } from '@heroicons/react/24/outline';
+import DropDownArrow from '@/svg/DropDownArrow';
+import MainIconOnly from '@/svg/MainIconOnly';
+
+import { T_Register } from '@/types/globals';
 
 const Content = () => {
+  const router = useRouter();
+  const accountType = [
+    {
+      value: 'employer',
+      label: 'Employer',
+    },
+  ];
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register, handleSubmit, reset } = useForm<T_Register>();
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const router = useRouter();
-
+  const { register, handleSubmit, reset } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
+
   const onSubmit = (data: T_Register) => {
     if (password !== '' || conformPassword !== '') {
       if (password === conformPassword) {
@@ -85,7 +95,7 @@ const Content = () => {
                 </h1>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className='relative mb-2'>
-                    <label htmlFor='role' className='text-sm text-indigo-dye leading-6 text-gray-900'>
+                    <label htmlFor='role' className='text-sm leading-6 text-gray-900'>
                       Register As
                       <span className='text-red-500'>*</span>
                     </label>
@@ -107,7 +117,7 @@ const Content = () => {
                     </div>
                   </div>
                   <div className='mb-2'>
-                    <label htmlFor='email' className='text-sm text-indigo-dye leading-6 text-gray-900'>
+                    <label htmlFor='email' className='text-sm leading-6 text-gray-900'>
                       Email Address
                       <span className='text-red-500'>*</span>
                     </label>
@@ -120,7 +130,7 @@ const Content = () => {
                     />
                   </div>
                   <div className='mb-2'>
-                    <label htmlFor='name' className='text-sm text-indigo-dye leading-6 text-gray-900'>
+                    <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
                       Name
                       <span className='text-red-500'>*</span>
                     </label>
@@ -133,7 +143,7 @@ const Content = () => {
                     />
                   </div>
                   <div className='mb-2'>
-                    <label htmlFor='password' className='text-sm text-indigo-dye leading-6 text-gray-900'>
+                    <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
                       Password
                       <span className='text-red-500'>*</span>
                     </label>
@@ -148,21 +158,21 @@ const Content = () => {
                       />
                       <button
                         type='button'
-                        className='absolute inset-y-0 right-0 flex items-center px-4 text-gray-600 text-blue-400'
+                        className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
                         onClick={() => {
                           setShowPassword(!showPassword);
                         }}
                       >
                         {showPassword ? (
-                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                        ) : (
                           <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                        ) : (
+                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
                         )}
                       </button>
                     </div>
                   </div>
                   <div className='mb-4'>
-                    <label htmlFor='confirm-password' className='text-sm text-indigo-dye leading-6 text-gray-900'>
+                    <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
                       Confirm Password
                       <span className='text-red-500'>*</span>
                     </label>
@@ -177,15 +187,15 @@ const Content = () => {
                       />
                       <button
                         type='button'
-                        className='absolute inset-y-0 right-0 flex items-center px-4 text-gray-600 text-blue-400'
+                        className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
                         onClick={() => {
                           setShowConfirmPassword(!showConfirmPassword);
                         }}
                       >
                         {showConfirmPassword ? (
-                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                        ) : (
                           <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                        ) : (
+                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
                         )}
                       </button>
                     </div>

@@ -6,7 +6,7 @@ import { getIronSession } from 'iron-session';
 
 import Content from '@/components/pages/(auth)/employer/settings/general-settings/email-template/Content';
 
-import { SessionData, sessionOptions } from '@/session/lib';
+import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
   title: 'Email Template - Yahshua HRIS',
