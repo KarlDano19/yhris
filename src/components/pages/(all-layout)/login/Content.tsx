@@ -1,23 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-import { setCookie } from 'cookies-next';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import EmailVerificationModal from './modal/EmailVerificationModal';
+
 import useLogin from '@/components/pages/(all-layout)/login/hooks/useLogin';
 import CustomToast from '@/components/CustomToast';
 import SplitLayout from '@/components/SplitView';
-import SplitViewBg from '@/assets/split-view-bg.png';
-import MainIconOnly from '@/svg/MainIconOnly';
+import EmailVerificationModal from './modal/EmailVerificationModal';
 
 import { EnvelopeIcon, LockClosedIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { EyeIcon } from '@heroicons/react/24/solid';
+import SplitViewBg from '@/assets/split-view-bg.png';
 import GoogleIcon from '@/svg/GoogleIcon';
+import MainIconOnly from '@/svg/MainIconOnly';
 import FacebookRoundedIcon from '@/svg/FacebookRoundedIcon';
 import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 
@@ -128,9 +128,9 @@ function Content() {
                         }}
                       >
                         {showPassword ? (
-                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                        ) : (
                           <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                        ) : (
+                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
                         )}
                       </button>
                     </div>
@@ -184,10 +184,16 @@ function Content() {
                     YAHSHUA Payroll
                   </button>
                 </div>
-                <div>
-                  <Link href='#' className='underline flex justify-center mt-6 text-indigo-dye'>
+                <div className='text-sm'>
+                  By continuing, you agree to our{' '}
+                  <Link href='/terms-of-service' target='_blank' className='text-[#355FD0] underline'>
+                    Terms of Service
+                  </Link>
+                  , and{' '}
+                  <Link href='/privacy-notice' target='_blank' className='text-[#355FD0] underline'>
                     Privacy Notice
                   </Link>
+                  .
                 </div>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import { sessionOptions, sleep, SessionData } from '@/session/lib';
+import { sessionOptions, sleep, SessionData } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);

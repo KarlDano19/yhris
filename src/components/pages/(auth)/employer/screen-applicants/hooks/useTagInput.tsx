@@ -1,25 +1,30 @@
-import { useState } from "react"
+import { useState } from 'react';
 
 export default function useTagInput(input: string, setInput: any, arr: string[] = []) {
-  const [tags, setTags] = useState(arr)
+  const [tags, setTags] = useState(arr);
 
   const handleKeyDown = (event: any) => {
-    if (event.key === "Enter" || event.key === "Tab" || event.key === ",") {
-      event.preventDefault()
-      const newTag = input.trim()
-      if (
-        newTag !== "" &&
-        !tags.some((tag) => tag.toLowerCase() === newTag.toLowerCase())
-      ) {
-        setTags([...tags, newTag])
-        setInput("")
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const newTag = input.trim();
+      if (newTag !== '' && !tags.some((tag) => tag.toLowerCase() === newTag.toLowerCase())) {
+        setTags([...tags, newTag]);
+        setInput('');
       }
     }
-  }
+  };
+
+  const onClickAdd = () => {
+    const newTag = input.trim();
+    if (newTag !== '' && !tags.some((tag) => tag.toLowerCase() === newTag.toLowerCase())) {
+      setTags([...tags, newTag]);
+      setInput('');
+    }
+  };
 
   const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag))
-  }
+    setTags(tags.filter((t) => t !== tag));
+  };
 
-  return { tags, handleKeyDown, handleRemoveTag }
+  return { tags, handleKeyDown, onClickAdd, handleRemoveTag };
 }

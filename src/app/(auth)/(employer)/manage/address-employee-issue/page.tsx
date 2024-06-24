@@ -4,7 +4,7 @@ import { getIronSession } from 'iron-session';
 
 import Content from '@/components/pages/(auth)/employer/manage/address-employee-issue/Content';
 
-import { SessionData, sessionOptions } from '@/session/lib';
+import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
   title: 'Manage - Address Employee Issue - Yahshua HRIS',

@@ -4,7 +4,7 @@ import { getIronSession } from 'iron-session';
 
 import Content from '@/components/pages/(auth)/employer/manage/design-benefits/Content';
 
-import { SessionData, sessionOptions } from '@/session/lib';
+import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
   title: 'Manage - Design Benefits - Yahshua HRIS',
