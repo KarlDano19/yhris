@@ -105,7 +105,7 @@ export default function StageHeader({
         }}
         onChange={(e) => setTitle(e.target.value)}
         className={`${
-          isEditing ? "pointer-events-auto" : "pointer-events-none"
+          isEditing ? "pointer-events-auto border-b border-black" : "pointer-events-none"
         } outline-none bg-transparent hidden-scrollbar text-center font-semibold text-[15px] text-indigo-dye`}
       >
         {stage.title}

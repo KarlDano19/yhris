@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import CustomToast from '@/components/CustomToast';
 import Details from './Details';
 import Settings from './Settings';
@@ -63,9 +65,15 @@ function Content() {
 
   return (
     <>
-      <div className='container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-12 mb-8'>
+      <div className='container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-8'>
         <div className='px-5 sm:px-7 lg:px-9'>
-          <div className='mt-5'>
+          <div>
+            <div className='flex p-4'>
+              <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+                <ArrowLeftIcon className='h-5 w-5' />
+                <h4>Dashboard</h4>
+              </Link>
+            </div>
             <div className='sm:hidden'>
               <h5 className='text-savoy-blue text-center text-lg font-semibold'>
                 {progressBar === 1 ? 'Account Settings' : 'Employer Details'}
