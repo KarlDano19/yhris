@@ -102,12 +102,11 @@ export type T_SeparationEmail = {
   actionType: string;
   emailType: string;
   dateReceived?: any;
-  type?: string;
-  template?: string;
-  to?: any;
-  cc?: any;
-  bcc?: any;
-  context?: string;
+  separationLetter: any;
+  signDocuments: any;
+  quitClaim: any;
+  dateReceived: any;
+  lastPay: any;
 };
 
 export type T_ApplicantOrientEmail = {
