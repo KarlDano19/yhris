@@ -228,17 +228,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   placeholder='Search ...'
                 />
                 <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <div className='h-5 w-0.5 bg-gray-300 mr-2'></div>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400 hover:cursor-pointer' onClick={checkIfDateIsValid}/>
+                  {/* <div className='h-5 w-0.5 bg-gray-300 mr-2'></div> */}
+                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400'/>
                 </div>
               </div>
             </div>
-            {/* <button
+            <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
               onClick={checkIfDateIsValid}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
-            </button> */}
+            </button>
             <div className='flex-1 flex justify-end'>
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
