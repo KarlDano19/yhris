@@ -12,7 +12,10 @@ async function getEmailTemplateDetails(email_template_id: number | null) {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/${email_template_id}/`, config);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/${email_template_id}/`, 
+        config
+      );
       if (!res.ok) {
         throw res.json();
       }
@@ -29,12 +32,15 @@ async function getEmailTemplateDetails(email_template_id: number | null) {
 }
 
 function useGetEmailTemplateDetails(email_template_id: number | null) {
-  const query = useQuery(['emailTemplatesDetailsCache'], () => getEmailTemplateDetails(email_template_id), {
-    enabled: false,
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
-
+  const query = useQuery(
+    ['emailTemplatesDetailsCache'], 
+    () => getEmailTemplateDetails(email_template_id), 
+    {
+      enabled: false,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
   return query;
 }
 

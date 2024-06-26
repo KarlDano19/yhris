@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
@@ -7,26 +7,27 @@ import { toast } from 'react-hot-toast';
 import dynamic from "next/dynamic"
 import 'react-quill/dist/quill.snow.css'
 
-import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
+import useUpdateEmailTemplate from '../hooks/useUpdateEmailTemplate';
+import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails'
 import CustomToast from '@/components/CustomToast';
 import useTagCC from "../hooks/useTagCc";
 import useTagBcc from "../hooks/useTagBcc"
 import useTagTo from "../hooks/useTagTo"
 
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XCircleIcon} from '@heroicons/react/24/solid';
 import { QUILL_MODULES } from '@/helpers/constants';
 
-export default function EmailTemplateModal({
+export default function EditEmailTemplateModal({
   isOpen,
   setIsOpen,
   refetch,
-  onSuccess,
+  selectedEmailTemplateId,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
-  onSuccess: any;
+  selectedEmailTemplateId:  number | null
 }) {
   const cancelButtonRef = useRef(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
@@ -34,24 +35,53 @@ export default function EmailTemplateModal({
   const inputRef = useRef(null);
   const [file, setFile] = useState<File | null>(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }),[]);
-  const { register, handleSubmit, reset, setValue, getValues, } = useForm<any>();
-  const { control } = useForm<any>();
-  const { mutate, isLoading } = useAddEmailTemplate();
+  const { register, handleSubmit, setValue, getValues } = useForm<any>();
+  const {
+    data: dataEmailTemplateDetail,
+    refetch: refetchEmailTemplateDetail,
+    remove: removeEmailTemplateDetail,
+  } = useGetEmailTemplateDetails(selectedEmailTemplateId);
+  const { mutate, isLoading } = useUpdateEmailTemplate();
   const [input, setInput] = useState("")
   const [inputBcc, setInputBcc] = useState("")
   const [inputTo, setInputTo] = useState("")
-  const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(
+  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(
     input,
     setInput,
   )
-  const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(
+  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(
     inputBcc,
     setInputBcc,
   )
-  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
     inputTo,
     setInputTo
   )
+
+  const [body, setBody] = useState('');
+
+  useEffect(() => {
+    if(isOpen) {
+        refetchEmailTemplateDetail()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (dataEmailTemplateDetail) {
+        setValue('subject', dataEmailTemplateDetail.subject);
+        setTagsCc(dataEmailTemplateDetail.cc)
+        setTagsTo(dataEmailTemplateDetail.to)
+        setTagsBcc(dataEmailTemplateDetail.bcc)
+        setValue('body', dataEmailTemplateDetail.body)
+        setBody(dataEmailTemplateDetail.body);
+        console.log({dataEmailTemplateDetail})
+    }
+  }, [dataEmailTemplateDetail])
+
+  const customCloseModal = () => {
+    removeEmailTemplateDetail();
+    setIsOpen(false)
+  }
 
   const onSubmit = handleSubmit((data) => {
     data.to = tagsTo
@@ -60,18 +90,15 @@ export default function EmailTemplateModal({
 
     const callbackReq = {
         onSuccess: async (data: any) => {
-            console.log({data})
             toast.custom(() => <CustomToast message={data.message} type='success' />);
-            setIsOpen(false);
-            reset();
+            customCloseModal();
             refetch();
-            onSuccess();
         },
         onError: async (error: any) => {
             toast.custom(() => <CustomToast message={error.message} type='error' />);
         },
     }
-    mutate(data, callbackReq);
+    mutate({emailTemplateId: selectedEmailTemplateId, data: data}, callbackReq);
   })
 
   const handleDrag = function (e: React.DragEvent<HTMLDivElement>) {
@@ -132,7 +159,7 @@ export default function EmailTemplateModal({
                         Subject<span className='text-red-600'> *</span>
                       </label>
                       <input
-                        id='Subject'
+                        id='subject'
                         type='text'
                         {...register('subject', { required: true })}
                         className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
@@ -210,13 +237,6 @@ export default function EmailTemplateModal({
                                 className='focus:none outline-none px-2 py-1 grow'
                               />
                             </div>
-                            {/* <input
-                              id='cc'
-                              {...register('cc')}
-                              type='cc'
-                              autoComplete='email'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            /> */}
                           </div>
                         </div>
                       )}
@@ -246,13 +266,6 @@ export default function EmailTemplateModal({
                                 className='focus:none outline-none px-2 py-1 grow'
                               />
                             </div>
-                            {/* <input
-                              id='bcc'
-                              {...register('bcc')}
-                              type='bcc'
-                              autoComplete='email'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            /> */}
                           </div>
                         </div>
                       )}
@@ -267,9 +280,12 @@ export default function EmailTemplateModal({
                             hidden
                           />
                           <ReactQuill
-                            onChange={(value) => setValue('body', value)}
+                            value={body}
                             style={{ height: '80%' }}
-                            defaultValue={getValues('body')}
+                            onChange={(content) => {
+                              setBody(content);
+                              setValue('body', content);
+                            }}
                             modules={QUILL_MODULES}
                           />
                         </div>

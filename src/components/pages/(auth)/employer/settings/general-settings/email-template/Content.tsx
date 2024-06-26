@@ -10,6 +10,8 @@ import CustomToast from '@/components/CustomToast';
 import getEmailTemplate from './hooks/useGetEmailTemplate';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import SuccessModal from './modal/SuccessModal';
+import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal'
+import EditEmailTemplateModal from './modal/EditEmailTempalteModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -20,6 +22,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     search: '',
   });
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
+  const [actionType, setActionType] = useState<string>('');
+  const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
+  const [isEditEmailTemplateModalOpen, setIsEditEmailTemplateModalOpen] = useState(false);
+  const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const {
@@ -38,9 +44,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataEmailTemplate && !isGetEmailTemplateLoading) {
+      dataEmailTemplate.map((item: any) => {
+        item.date = Intl.DateTimeFormat(`en-Us`).format(new Date(item.created_at));
+        return item;
+      });
       setEmailTemplatesItems(dataEmailTemplate);
     }
   }, [dataEmailTemplate]);
+
+  useEffect(() => {
+    if (selectedEmailTemplateId) {
+      if (actionType === 'edit') {
+        setIsEditEmailTemplateModalOpen(true);
+      }
+      if (actionType === 'delete') {
+        setIsDeleteEmailTemplateModalOpen(true);
+      }
+    }
+  }, [selectedEmailTemplateId]);
+
+  const openEditEvaluationModal = (emailTemplateDetails: any) => {
+    setActionType('edit');
+    if (selectedEmailTemplateId && selectedEmailTemplateId === emailTemplateDetails.id) {
+      setIsEditEmailTemplateModalOpen(true);
+    } else {
+      setSelectedEmailTemplateId(emailTemplateDetails.id);
+    }
+  };
+
+  const openDeleteEvaluationModal = (emailTemplateDetails: any) => {
+    setActionType('delete');
+    if (selectedEmailTemplateId && selectedEmailTemplateId === emailTemplateDetails.id) {
+      setIsDeleteEmailTemplateModalOpen(true);
+    } else {
+      setSelectedEmailTemplateId(emailTemplateDetails.id);
+    }
+  };
 
   const renderRows = () => {
     if (isGetEmailTemplateLoading) {
@@ -74,9 +113,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return emailTemplatesItems.map((item: any) => (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.cc}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {item.cc && Array.isArray(item.cc) ? item.cc.join(', ').split(',').join(', ') : ''}
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {item.bcc && Array.isArray(item.bcc) ? item.bcc.join(', ').split(',').join(', ') : ''}
+          </td>
+          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
+            <div className='flex justify-center space-x-2'>
+              <button onClick={() => openEditEvaluationModal(item)}>
+                <EditIcon />
+              </button>
+              <button onClick={() => openDeleteEvaluationModal(item)}>
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
         </tr>
       ));
     } else {
@@ -141,6 +195,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Subject
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Date Created
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         To
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -148,6 +205,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Bcc
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -167,6 +227,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         onSuccess={handleCreateTemplateSuccess}
       />
       <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
+      {isDeleteEmailTemplateModalOpen && selectedEmailTemplateId && (
+        <DeleteEmailTemplateModal
+          refetch={refetchEmailTemplate}
+          isOpen={isDeleteEmailTemplateModalOpen}
+          setIsOpen={setIsDeleteEmailTemplateModalOpen}
+          selectedEmailTemplateId={selectedEmailTemplateId}
+          selectedEmailTemplateName={emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject}
+        />
+      )}
+      {isEditEmailTemplateModalOpen && selectedEmailTemplateId && (
+        <EditEmailTemplateModal
+          refetch={refetchEmailTemplate}
+          isOpen={isEditEmailTemplateModalOpen}
+          setIsOpen={setIsEditEmailTemplateModalOpen}
+          selectedEmailTemplateId={selectedEmailTemplateId}
+        />
+      )}
     </>
   );
 };

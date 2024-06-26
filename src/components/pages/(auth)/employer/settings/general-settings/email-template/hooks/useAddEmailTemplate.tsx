@@ -8,13 +8,22 @@ async function addEmailTemplate(emailTemplate: EmailTemplate) {
     const token = getCookie('token');
     const formData = new FormData();
     formData.append('subject', emailTemplate.subject);
-    formData.append('to', emailTemplate.to);
     formData.append('body', emailTemplate.body);
-    if (emailTemplate.cc) {
-      formData.append('cc', emailTemplate.cc);
+    if (emailTemplate.to && Array.isArray(emailTemplate.to)) {
+      emailTemplate.to.forEach((to) => {
+        formData.append('to', to)
+      });
     }
-    if (emailTemplate.bcc) {
-      formData.append('bcc', emailTemplate.bcc);
+    if (emailTemplate.cc && Array.isArray(emailTemplate.cc)) {
+      emailTemplate.cc.forEach((cc) => {
+        formData.append('cc', cc);
+      });
+    }
+
+    if (emailTemplate.bcc && Array.isArray(emailTemplate.bcc)) {
+      emailTemplate.bcc.forEach((bcc) => {
+        formData.append('bcc', bcc);
+      });
     }
     if (emailTemplate.attachment) {
       formData.append('attachment', emailTemplate.attachment);
