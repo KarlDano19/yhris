@@ -10,7 +10,7 @@ import CustomToast from '@/components/CustomToast';
 import getEmailTemplate from './hooks/useGetEmailTemplate';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import SuccessModal from './modal/SuccessModal';
-import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal'
+import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal';
 import EditEmailTemplateModal from './modal/EditEmailTempalteModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -113,14 +113,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.cc && Array.isArray(item.cc) ? item.cc.join(', ').split(',').join(', ') : ''}
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.bcc && Array.isArray(item.bcc) ? item.bcc.join(', ').split(',').join(', ') : ''}
-          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.cc}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
               <button onClick={() => openEditEvaluationModal(item)}>
@@ -198,9 +193,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Subject
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date Created
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         To
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -236,7 +228,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isDeleteEmailTemplateModalOpen}
           setIsOpen={setIsDeleteEmailTemplateModalOpen}
           selectedEmailTemplateId={selectedEmailTemplateId}
-          selectedEmailTemplateName={emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject}
+          selectedEmailTemplateName={
+            emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject
+          }
         />
       )}
       {isEditEmailTemplateModalOpen && selectedEmailTemplateId && (

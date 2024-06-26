@@ -6,21 +6,24 @@ import useGetVoucherDetails from '../hooks/useGetVoucherDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
+
 export default function RedemptionCountModal({
   isOpen,
   setIsOpen,
-  selectedVoucherId,
 }: {
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
-  selectedVoucherId: number | null;
+  isOpen: T_ModalData;
+  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
   const {
     data: dataVoucherDetail,
     refetch: refetchVoucherDetail,
     remove: removeVoucherDetail,
-  } = useGetVoucherDetails(selectedVoucherId);
+  } = useGetVoucherDetails(isOpen.id);
 
   useEffect(() => {
     if (isOpen) {
@@ -30,7 +33,7 @@ export default function RedemptionCountModal({
 
   const customCloseModal = () => {
     removeVoucherDetail();
-    setIsOpen(false);
+    setIsOpen(null);
   };
 
   const renderRows = () => {
@@ -55,7 +58,7 @@ export default function RedemptionCountModal({
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition.Root show={isOpen.open} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
@@ -83,7 +86,7 @@ export default function RedemptionCountModal({
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Redeemed History</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 <div className='px-4 pt-4 pb-6'>
                   <table className='min-w-full divide-y divide-gray-300 text-center'>

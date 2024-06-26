@@ -41,7 +41,7 @@ export default function SignDocumentsModal({
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const { register, handleSubmit, reset, trigger, setValue, getValues } = useForm<FormValues>({
+  const { register, handleSubmit, reset, trigger, setValue, getValues, watch } = useForm<FormValues>({
     defaultValues: {
       template: '',
       message: '',
@@ -54,10 +54,13 @@ export default function SignDocumentsModal({
     if (isOpen && isOpen.id) {
       const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
       const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
+      const template = dataEmailTemplate.find(
+        (item: any) => item.id === parseInt(data.template)
+      );
       separationItemsCopy[itemIndex].id = isOpen.id;
       separationItemsCopy[itemIndex].actionType = 'sending';
       separationItemsCopy[itemIndex].emailType = 'sign documents';
-      separationItemsCopy[itemIndex].signDocuments.template = data.template;
+      separationItemsCopy[itemIndex].signDocuments.template = template.subject;
       separationItemsCopy[itemIndex].signDocuments.to = data.email;
       if (data.cc) {
         separationItemsCopy[itemIndex].signDocuments.cc = data.cc;
@@ -69,10 +72,9 @@ export default function SignDocumentsModal({
       separationItemsCopy[itemIndex].isDocumentsSent = true;
       const callbackReq = {
         onSuccess: (data: any) => {
-          setIsOpen(null);
+          customCloseModal();
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           refetch();
-          reset();
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -86,20 +88,15 @@ export default function SignDocumentsModal({
     }
   });
 
-  useEffect(() => {
-    if (isOpen && isOpen.id) {
-      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
-      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
-      if (separationItemsCopy[itemIndex]) {
-        setValue('email', separationItemsCopy[itemIndex].email);
-      }
-    }
-  }, [isOpen]);
+  const customCloseModal = () => {
+    reset();
+    setIsOpen(null);
+  };
 
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -126,7 +123,7 @@ export default function SignDocumentsModal({
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Sign Documents</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
@@ -139,12 +136,21 @@ export default function SignDocumentsModal({
                             id='template'
                             {...register('template', { required: true })}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                            onChange={(event) => {
+                              const template = dataEmailTemplate.find(
+                                (item: any) => item.id === parseInt(event.target.value)
+                              );
+                              if (template) {
+                                setValue('email', template.to);
+                                setValue('message', template.body);
+                              }
+                            }}
                           >
                             <option value='' disabled>
                               Select...
                             </option>
                             {(dataEmailTemplate || []).map((item: any) => (
-                              <option key={item.id} value={item.subject}>
+                              <option key={item.id} value={item.id}>
                                 {item.subject}
                               </option>
                             ))}
@@ -230,7 +236,7 @@ export default function SignDocumentsModal({
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%' }}
-                            defaultValue={getValues('message')}
+                            value={watch('message')}
                           />
                         </div>
                       </div>
@@ -324,7 +330,7 @@ export default function SignDocumentsModal({
                       <button
                         type='button'
                         className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={() => setIsOpen(null)}
+                        onClick={() => customCloseModal()}
                         ref={cancelButtonRef}
                       >
                         Close

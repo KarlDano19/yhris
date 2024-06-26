@@ -4,17 +4,17 @@ import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller, set } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import dynamic from "next/dynamic"
-import 'react-quill/dist/quill.snow.css'
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
 
 import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
 import CustomToast from '@/components/CustomToast';
-import useTagCC from "../hooks/useTagCc";
-import useTagBcc from "../hooks/useTagBcc"
-import useTagTo from "../hooks/useTagTo"
+import useTagCC from '../hooks/useTagCc';
+import useTagBcc from '../hooks/useTagBcc';
+import useTagTo from '../hooks/useTagTo';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { QUILL_MODULES } from '@/helpers/constants';
 
 export default function EmailTemplateModal({
@@ -33,46 +33,37 @@ export default function EmailTemplateModal({
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const inputRef = useRef(null);
   const [file, setFile] = useState<File | null>(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }),[]);
-  const { register, handleSubmit, reset, setValue, getValues, } = useForm<any>();
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const { register, handleSubmit, reset, setValue, getValues } = useForm<any>();
   const { control } = useForm<any>();
   const { mutate, isLoading } = useAddEmailTemplate();
-  const [input, setInput] = useState("")
-  const [inputBcc, setInputBcc] = useState("")
-  const [inputTo, setInputTo] = useState("")
-  const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(
-    input,
-    setInput,
-  )
-  const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(
-    inputBcc,
-    setInputBcc,
-  )
-  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
-    inputTo,
-    setInputTo
-  )
+  const [input, setInput] = useState('');
+  const [inputBcc, setInputBcc] = useState('');
+  const [inputTo, setInputTo] = useState('');
+  const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(input, setInput);
+  const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
+  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
 
   const onSubmit = handleSubmit((data) => {
-    data.to = tagsTo
-    data.cc = tagsCc
-    data.bcc = tagsBcc
+    data.to = tagsTo;
+    data.cc = tagsCc;
+    data.bcc = tagsBcc;
 
     const callbackReq = {
-        onSuccess: async (data: any) => {
-            console.log({data})
-            toast.custom(() => <CustomToast message={data.message} type='success' />);
-            setIsOpen(false);
-            reset();
-            refetch();
-            onSuccess();
-        },
-        onError: async (error: any) => {
-            toast.custom(() => <CustomToast message={error.message} type='error' />);
-        },
-    }
+      onSuccess: async (data: any) => {
+        console.log({ data });
+        toast.custom(() => <CustomToast message={data.message} type='success' />);
+        setIsOpen(false);
+        reset();
+        refetch();
+        onSuccess();
+      },
+      onError: async (error: any) => {
+        toast.custom(() => <CustomToast message={error.message} type='error' />);
+      },
+    };
     mutate(data, callbackReq);
-  })
+  });
 
   const handleDrag = function (e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -126,7 +117,7 @@ export default function EmailTemplateModal({
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 <form onSubmit={onSubmit}>
-                <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto h-[750px]'>
+                  <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto h-[750px]'>
                     <div className='sm:col-span-4 mt-2 w-full space-y-2'>
                       <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                         Subject<span className='text-red-600'> *</span>
@@ -143,14 +134,14 @@ export default function EmailTemplateModal({
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full">
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
                                 >
-                                  <button type="button" onClick={() => handleRemoveTagTo(tagTo)}>
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tagTo}</p>
                                 </div>
@@ -166,8 +157,8 @@ export default function EmailTemplateModal({
                           </div>
                           <button
                             type='button'
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                              isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
                             onClick={() => setIsCCOPen(!isCCOpen)}
                           >
@@ -175,8 +166,8 @@ export default function EmailTemplateModal({
                           </button>
                           <button
                             type='button'
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isBCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                              isBCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
                             onClick={() => setIsBCCOpen(!isBCCOpen)}
                           >
@@ -190,14 +181,14 @@ export default function EmailTemplateModal({
                             CC
                           </label>
                           <div className='mt-2'>
-                            <div className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full">
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
                               {tagsCc.map((tag: string) => (
                                 <div
                                   key={tag}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
                                 >
-                                  <button type="button" onClick={() => handleRemoveTag(tag)}>
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTag(tag)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tag}</p>
                                 </div>
@@ -207,16 +198,9 @@ export default function EmailTemplateModal({
                                 value={input}
                                 onKeyDown={handleKeyDown}
                                 onChange={(e) => setInput(e.target.value)} // Add this line to update input state
-                                className='focus:none outline-none px-2 py-1 grow'
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                             </div>
-                            {/* <input
-                              id='cc'
-                              {...register('cc')}
-                              type='cc'
-                              autoComplete='email'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            /> */}
                           </div>
                         </div>
                       )}
@@ -226,14 +210,14 @@ export default function EmailTemplateModal({
                             BCC
                           </label>
                           <div className='mt-2'>
-                            <div className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full">
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
                               {tagsBcc.map((tagBcc: string) => (
                                 <div
                                   key={tagBcc}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
                                 >
-                                  <button type="button" onClick={() => handleRemoveTagBcc(tagBcc)}>
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tagBcc}</p>
                                 </div>
@@ -243,81 +227,69 @@ export default function EmailTemplateModal({
                                 value={inputBcc}
                                 onKeyDown={handleKeyDownBcc}
                                 onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
-                                className='focus:none outline-none px-2 py-1 grow'
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                             </div>
-                            {/* <input
-                              id='bcc'
-                              {...register('bcc')}
-                              type='bcc'
-                              autoComplete='email'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            /> */}
                           </div>
                         </div>
                       )}
-                      <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Body<span className='text-red-600'> *</span>
-                      </label>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Body<span className='text-red-600'> *</span>
+                        </label>
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea
-                            rows={4}
-                            {...register('body', { required: true })}
-                            id='body'
-                            hidden
-                          />
+                          <textarea rows={4} {...register('body', { required: true })} id='body' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('body', value)}
-                            style={{ height: '80%' }}
+                            style={{ height: '100%' }}
                             defaultValue={getValues('body')}
                             modules={QUILL_MODULES}
                           />
                         </div>
-                      <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Attachements<span className='text-red-600'></span>
-                      </label>
-                        <div className="">
+                      </div>
+                      <div className='sm:col-span-4'>
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachements<span className='text-red-600'></span>
+                        </label>
+                        <div>
                           <div
-                              onDragEnter={handleDrag}
-                              onDragLeave={handleDrag}
-                              onDragOver={handleDrag}
-                              onDrop={handleDrop}
-                              className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                            className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                           >
-                              <label
-                                  className={`${file === null
-                                  ? "file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal"
-                                  : "hidden"
-                                  }`}>
-                                  Drop file to upload
-                                  <input
-                                  {...register("attachment")}
-                                  name="attachment"
-                                  id="attachment"
-                                  ref={inputRef}
-                                  type="file"
-                                  className="sr-only"
-                                  onChange={handleChange}
-                                  />
-                              </label>
-                              <div
-                                  className={`${file !== null ? "file-preview" : "hidden"
-                                  }`}>
-                                  <p className="text-sm text-slate-800 font-light">
-                                  {file?.name}
-                                  </p>
-                                  <p
-                                  className="underline text-blue-500 cursor-pointer"
-                                  onClick={() => setFile(null)}>
-                                  Remove File
-                                  </p>
-                              </div>
+                            <label
+                              className={`${
+                                file === null
+                                  ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
+                                  : 'hidden'
+                              }`}
+                            >
+                              Drop file to upload
+                              <input
+                                {...register('attachment')}
+                                name='attachment'
+                                id='attachment'
+                                ref={inputRef}
+                                type='file'
+                                className='sr-only'
+                                onChange={handleChange}
+                              />
+                            </label>
+                            <div className={`${file !== null ? 'file-preview' : 'hidden'}`}>
+                              <p className='text-sm text-slate-800 font-light'>{file?.name}</p>
+                              <p className='underline text-blue-500 cursor-pointer' onClick={() => setFile(null)}>
+                                Remove File
+                              </p>
+                            </div>
                           </div>
-                          <h1 className="text-xs pl-2">Maximum file size: 10 mb</h1>
+                          <h1 className='text-xs pl-2'>Maximum file size: 10 mb</h1>
                         </div>
+                      </div>
                     </div>
-                </div>
-                <hr />
+                  </div>
+                  <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row px-4 justify-end space-x-4'>
                     <button
                       type='button'

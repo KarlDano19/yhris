@@ -3,21 +3,21 @@ import { useState, Dispatch, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import useAddVoucher from '../hooks/useAddVoucher';
+import useGetPlanItems from '../hooks/useGetPlanItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 export default function CreateVoucherModal({
   refetch,
-  plans,
   isOpen,
   setIsOpen,
 }: {
   refetch: any;
-  plans: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
 }) {
@@ -28,6 +28,7 @@ export default function CreateVoucherModal({
   });
   const { register, handleSubmit, reset } = useForm<any>();
   const { mutate, isLoading } = useAddVoucher();
+  const { data: dataPlans } = useGetPlanItems();
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -104,7 +105,7 @@ export default function CreateVoucherModal({
                           <option value='' disabled>
                             Select...
                           </option>
-                          {plans.map((plan: any) => {
+                          {(dataPlans || []).map((plan: any) => {
                             return (
                               <option key={plan.id} value={plan.id}>
                                 {plan.name}

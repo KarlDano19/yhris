@@ -3,26 +3,29 @@ import { useEffect, useState, Dispatch, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import useGetVoucherDetails from '../hooks/useGetVoucherDetails';
 import useUpdateVoucher from '../hooks/useUpdateVoucher';
+import useGetPlanItems from '../hooks/useGetPlanItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
+
 export default function EditVoucherModal({
   refetch,
-  plans,
   isOpen,
   setIsOpen,
-  selectedVoucherId,
 }: {
   refetch: any;
-  plans: any;
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
-  selectedVoucherId: number | null;
+  isOpen: T_ModalData;
+  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
   const [voucherDate, setVoucherDate] = useState<any>({
@@ -34,8 +37,9 @@ export default function EditVoucherModal({
     data: dataVoucherDetail,
     refetch: refetchVoucherDetail,
     remove: removeVoucherDetail,
-  } = useGetVoucherDetails(selectedVoucherId);
+  } = useGetVoucherDetails(isOpen.id);
   const { mutate, isLoading } = useUpdateVoucher();
+  const { data: dataPlans } = useGetPlanItems();
 
   useEffect(() => {
     if (isOpen) {
@@ -60,11 +64,6 @@ export default function EditVoucherModal({
     }
   }, [dataVoucherDetail]);
 
-  const customCloseModal = () => {
-    removeVoucherDetail();
-    setIsOpen(false);
-  };
-
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -78,11 +77,16 @@ export default function EditVoucherModal({
     };
     data['redemption_date_from'] = new Date(voucherDate.from).toISOString();
     data['redemption_date_to'] = new Date(voucherDate.to).toISOString();
-    mutate({ voucherId: selectedVoucherId, data: data }, callbackReq);
+    mutate({ voucherId: isOpen.id, data: data }, callbackReq);
   });
 
+  const customCloseModal = () => {
+    removeVoucherDetail();
+    setIsOpen(null);
+  };
+
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition.Root show={isOpen.open} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
@@ -139,7 +143,7 @@ export default function EditVoucherModal({
                           <option value='' disabled>
                             Select...
                           </option>
-                          {plans.map((plan: any) => {
+                          {(dataPlans || []).map((plan: any) => {
                             return (
                               <option key={plan.id} value={plan.id}>
                                 {plan.name}

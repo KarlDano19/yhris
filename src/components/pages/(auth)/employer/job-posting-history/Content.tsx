@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 
+import useStore from '@/lib/store';
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -35,7 +36,7 @@ const Content = () => {
     Twitter,
     // Add other components here if needed
   };
-
+  const { count, increment } = useStore();
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -49,7 +50,7 @@ const Content = () => {
   const [isJobPreviewOpen, setIsJobPreviewOpen] = useState<T_JobPreviewModal | null>(null);
   const [isSetJobInactiveModalOpen, setIsSetJobInactiveModalOpen] = useState(false);
   const { data: dataJobPost, isLoading: isGetJobPostLoading, refetch } = useGetJobPostItems(itemsFilter);
-  const { mutate, isLoading } = useUpdateJobPostItems();
+  const { mutate } = useUpdateJobPostItems();
 
   const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
@@ -109,6 +110,7 @@ const Content = () => {
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['isActive'] = jobPost['is_active'];
+        jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
       });
       setJobPostHistoryItems(dataJobPost);
     }

@@ -1,22 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { Dispatch, Fragment, useMemo, useRef, useState, useEffect } from 'react';
 
-import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller, set } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import dynamic from "next/dynamic"
-import 'react-quill/dist/quill.snow.css'
 
-import useUpdateEmailTemplate from '../hooks/useUpdateEmailTemplate';
-import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails'
 import CustomToast from '@/components/CustomToast';
-import useTagCC from "../hooks/useTagCc";
-import useTagBcc from "../hooks/useTagBcc"
-import useTagTo from "../hooks/useTagTo"
+import useUpdateEmailTemplate from '../hooks/useUpdateEmailTemplate';
+import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails';
+import useTagCC from '../hooks/useTagCc';
+import useTagBcc from '../hooks/useTagBcc';
+import useTagTo from '../hooks/useTagTo';
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { XCircleIcon} from '@heroicons/react/24/solid';
-import { QUILL_MODULES } from '@/helpers/constants';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 export default function EditEmailTemplateModal({
   isOpen,
@@ -27,79 +29,71 @@ export default function EditEmailTemplateModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
-  selectedEmailTemplateId:  number | null
+  selectedEmailTemplateId: number | null;
 }) {
   const cancelButtonRef = useRef(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const inputRef = useRef(null);
   const [file, setFile] = useState<File | null>(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }),[]);
-  const { register, handleSubmit, setValue, getValues } = useForm<any>();
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const { register, handleSubmit, setValue, watch } = useForm<any>();
   const {
     data: dataEmailTemplateDetail,
     refetch: refetchEmailTemplateDetail,
     remove: removeEmailTemplateDetail,
   } = useGetEmailTemplateDetails(selectedEmailTemplateId);
   const { mutate, isLoading } = useUpdateEmailTemplate();
-  const [input, setInput] = useState("")
-  const [inputBcc, setInputBcc] = useState("")
-  const [inputTo, setInputTo] = useState("")
-  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(
-    input,
-    setInput,
-  )
-  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(
-    inputBcc,
-    setInputBcc,
-  )
-  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
-    inputTo,
-    setInputTo
-  )
-
-  const [body, setBody] = useState('');
+  const [input, setInput] = useState('');
+  const [inputBcc, setInputBcc] = useState('');
+  const [inputTo, setInputTo] = useState('');
+  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(input, setInput);
+  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
 
   useEffect(() => {
-    if(isOpen) {
-        refetchEmailTemplateDetail()
+    if (isOpen) {
+      refetchEmailTemplateDetail();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   useEffect(() => {
     if (dataEmailTemplateDetail) {
-        setValue('subject', dataEmailTemplateDetail.subject);
-        setTagsCc(dataEmailTemplateDetail.cc)
-        setTagsTo(dataEmailTemplateDetail.to)
-        setTagsBcc(dataEmailTemplateDetail.bcc)
-        setValue('body', dataEmailTemplateDetail.body)
-        setBody(dataEmailTemplateDetail.body);
-        console.log({dataEmailTemplateDetail})
+      setValue('subject', dataEmailTemplateDetail.subject);
+      setTagsTo(dataEmailTemplateDetail.to);
+      setValue('body', dataEmailTemplateDetail.body);
+      if (dataEmailTemplateDetail.cc) {
+        setIsCCOPen(true);
+        setTagsCc(dataEmailTemplateDetail.cc);
+      }
+      if (dataEmailTemplateDetail.bcc) {
+        setIsBCCOpen(true);
+        setTagsBcc(dataEmailTemplateDetail.bcc);
+      }
     }
-  }, [dataEmailTemplateDetail])
+  }, [dataEmailTemplateDetail]);
 
   const customCloseModal = () => {
     removeEmailTemplateDetail();
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const onSubmit = handleSubmit((data) => {
-    data.to = tagsTo
-    data.cc = tagsCc
-    data.bcc = tagsBcc
-
+    data.to = tagsTo;
+    data.cc = tagsCc;
+    data.bcc = tagsBcc;
     const callbackReq = {
-        onSuccess: async (data: any) => {
-            toast.custom(() => <CustomToast message={data.message} type='success' />);
-            customCloseModal();
-            refetch();
-        },
-        onError: async (error: any) => {
-            toast.custom(() => <CustomToast message={error.message} type='error' />);
-        },
-    }
-    mutate({emailTemplateId: selectedEmailTemplateId, data: data}, callbackReq);
-  })
+      onSuccess: async (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />);
+        customCloseModal();
+        refetch();
+      },
+      onError: async (error: any) => {
+        toast.custom(() => <CustomToast message={error.message} type='error' />);
+      },
+    };
+    mutate({ emailTemplateId: selectedEmailTemplateId, data: data }, callbackReq);
+  });
 
   const handleDrag = function (e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -153,7 +147,7 @@ export default function EditEmailTemplateModal({
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 <form onSubmit={onSubmit}>
-                <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto h-[750px]'>
+                  <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto h-[750px]'>
                     <div className='sm:col-span-4 mt-2 w-full space-y-2'>
                       <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                         Subject<span className='text-red-600'> *</span>
@@ -170,14 +164,14 @@ export default function EditEmailTemplateModal({
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full">
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
                                 >
-                                  <button type="button" onClick={() => handleRemoveTagTo(tagTo)}>
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tagTo}</p>
                                 </div>
@@ -217,14 +211,14 @@ export default function EditEmailTemplateModal({
                             CC
                           </label>
                           <div className='mt-2'>
-                            <div className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full">
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
                               {tagsCc.map((tag: string) => (
                                 <div
                                   key={tag}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
                                 >
-                                  <button type="button" onClick={() => handleRemoveTag(tag)}>
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTag(tag)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tag}</p>
                                 </div>
@@ -246,14 +240,14 @@ export default function EditEmailTemplateModal({
                             BCC
                           </label>
                           <div className='mt-2'>
-                            <div className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full">
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
                               {tagsBcc.map((tagBcc: string) => (
                                 <div
                                   key={tagBcc}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
                                 >
-                                  <button type="button" onClick={() => handleRemoveTagBcc(tagBcc)}>
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tagBcc}</p>
                                 </div>
@@ -269,71 +263,64 @@ export default function EditEmailTemplateModal({
                           </div>
                         </div>
                       )}
-                      <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Body<span className='text-red-600'> *</span>
-                      </label>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Body<span className='text-red-600'> *</span>
+                        </label>
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea
-                            rows={4}
-                            {...register('body', { required: true })}
-                            id='body'
-                            hidden
-                          />
+                          <textarea rows={4} {...register('body', { required: true })} id='body' hidden />
                           <ReactQuill
-                            value={body}
-                            style={{ height: '80%' }}
-                            onChange={(content) => {
-                              setBody(content);
-                              setValue('body', content);
-                            }}
+                            onChange={(value) => setValue('body', value)}
+                            formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
+                            style={{ height: '100%' }}
+                            value={watch('body')}
                           />
                         </div>
-                      <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Attachements<span className='text-red-600'></span>
-                      </label>
-                        <div className="">
+                      </div>
+                      <div className='sm:col-span-4'>
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachements<span className='text-red-6000'></span>
+                        </label>
+                        <div>
                           <div
-                              onDragEnter={handleDrag}
-                              onDragLeave={handleDrag}
-                              onDragOver={handleDrag}
-                              onDrop={handleDrop}
-                              className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                            className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                           >
-                              <label
-                                  className={`${file === null
-                                  ? "file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal"
-                                  : "hidden"
-                                  }`}>
-                                  Drop file to upload
-                                  <input
-                                  {...register("attachment")}
-                                  name="attachment"
-                                  id="attachment"
-                                  ref={inputRef}
-                                  type="file"
-                                  className="sr-only"
-                                  onChange={handleChange}
-                                  />
-                              </label>
-                              <div
-                                  className={`${file !== null ? "file-preview" : "hidden"
-                                  }`}>
-                                  <p className="text-sm text-slate-800 font-light">
-                                  {file?.name}
-                                  </p>
-                                  <p
-                                  className="underline text-blue-500 cursor-pointer"
-                                  onClick={() => setFile(null)}>
-                                  Remove File
-                                  </p>
-                              </div>
+                            <label
+                              className={`${
+                                file === null
+                                  ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
+                                  : 'hidden'
+                              }`}
+                            >
+                              Drop file to upload
+                              <input
+                                {...register('attachment')}
+                                name='attachment'
+                                id='attachment'
+                                ref={inputRef}
+                                type='file'
+                                className='sr-only'
+                                onChange={handleChange}
+                              />
+                            </label>
+                            <div className={`${file !== null ? 'file-preview' : 'hidden'}`}>
+                              <p className='text-sm text-slate-800 font-light'>{file?.name}</p>
+                              <p className='underline text-blue-500 cursor-pointer' onClick={() => setFile(null)}>
+                                Remove File
+                              </p>
+                            </div>
                           </div>
-                          <h1 className="text-xs pl-2">Maximum file size: 10 mb</h1>
+                          <h1 className='text-xs pl-2'>Maximum file size: 10 mb</h1>
                         </div>
+                      </div>
                     </div>
-                </div>
-                <hr />
+                  </div>
+                  <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row px-4 justify-end space-x-4'>
                     <button
                       type='button'

@@ -36,7 +36,7 @@ export default function LetterModal({
   const [letterType, setLetterType] = useState('');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
-  const { register, handleSubmit, reset, setValue, control, trigger } = useForm<FormValues>();
+  const { register, handleSubmit, reset, control, trigger } = useForm<FormValues>();
   const { mutate, isLoading } = usePatchSeparationItem();
 
   const onSubmit = handleSubmit((data) => {
@@ -52,7 +52,7 @@ export default function LetterModal({
       separationItemsCopy[itemIndex].separationLetter.message = data.message;
       separationItemsCopy[itemIndex].isLetterSent = true;
       setToSaveData(separationItemsCopy[itemIndex]);
-      setIsOpen(null);
+      customCloseModal();
       setLetterType(type || '');
       setIsConfirmModalOpen(true);
     } else {
@@ -87,20 +87,15 @@ export default function LetterModal({
     }
   };
 
-  useEffect(() => {
-    if (isOpen && isOpen.id) {
-      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
-      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
-      if (separationItemsCopy[itemIndex]) {
-        setValue('email', separationItemsCopy[itemIndex].email);
-      }
-    }
-  }, [isOpen]);
+  const customCloseModal = () => {
+    reset();
+    setIsOpen(null);
+  };
 
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -127,7 +122,7 @@ export default function LetterModal({
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Letter of {type}</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
@@ -215,7 +210,7 @@ export default function LetterModal({
                       <button
                         type='button'
                         className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={() => setIsOpen(null)}
+                        onClick={() => customCloseModal()}
                         ref={cancelButtonRef}
                       >
                         Close
