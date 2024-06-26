@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState, useMemo } from 'react';
+import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -43,7 +43,7 @@ export default function SendContractModal({
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const { register, handleSubmit, reset, setValue, getValues } = useForm<FormValues>({
+  const { register, handleSubmit, reset, setValue, watch } = useForm<FormValues>({
     defaultValues: {
       template: '',
       email: '',
@@ -57,7 +57,10 @@ export default function SendContractModal({
     if (isOpen && selectedOrientId) {
       const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
       const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
-      orientItemCopy[itemIndex].sendContract.template = data.template;
+      const template = dataEmailTemplate.find(
+        (item: any) => item.id === parseInt(data.template)
+      );
+      orientItemCopy[itemIndex].sendContract.template = template.subject;
       orientItemCopy[itemIndex].sendContract.to = data.email;
       orientItemCopy[itemIndex].sendContract.message = data.message;
       if (data.cc) {
@@ -72,9 +75,8 @@ export default function SendContractModal({
       const callbackReq = {
         onSuccess: () => {
           setOrientItems(orientItemCopy);
-          setIsOpen(false);
+          customCloseModal();
           setSuccessModal(true);
-          reset();
           toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, {
             duration: 5000,
           });
@@ -91,11 +93,26 @@ export default function SendContractModal({
     }
   });
 
+  useEffect(() => {
+    if (isOpen && selectedOrientId) {
+      const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
+      const orientationItemsCopy = JSON.parse(JSON.stringify(orientItems));
+      if (orientationItemsCopy[itemIndex]) {
+        setValue('email', orientationItemsCopy[itemIndex].email);
+      }
+    }
+  }, [isOpen]);
+
+  const customCloseModal = () => {
+    reset();
+    setIsOpen(false);
+  };
+
   
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(false)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -122,7 +139,7 @@ export default function SendContractModal({
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Send Contract</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
@@ -135,12 +152,21 @@ export default function SendContractModal({
                             id='template'
                             {...register('template', { required: true })}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                            onChange={(event) => {
+                              const template = dataEmailTemplate.find(
+                                (item: any) => item.id === parseInt(event.target.value)
+                              );
+                              if (template) {
+                                setValue('email', template.to);
+                                setValue('message', template.body);
+                              }
+                            }}
                           >
                             <option value='' disabled>
                               Select...
                             </option>
                             {(dataEmailTemplate || []).map((item: any) => (
-                              <option key={item.id} value={item.subject}>
+                              <option key={item.id} value={item.id}>
                                 {item.subject}
                               </option>
                             ))}
@@ -226,7 +252,7 @@ export default function SendContractModal({
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%' }}
-                            defaultValue={getValues('message')}
+                            value={watch('message')}
                           />
                         </div>
                       </div>
@@ -253,7 +279,7 @@ export default function SendContractModal({
                       <button
                         type='button'
                         className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => customCloseModal()}
                         ref={cancelButtonRef}
                       >
                         Close

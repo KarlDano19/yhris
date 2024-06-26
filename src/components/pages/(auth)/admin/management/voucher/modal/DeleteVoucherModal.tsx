@@ -2,23 +2,26 @@ import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
 import useDeleteVoucher from '../hooks/useDeleteVoucher';
 
 import WarningRed from '@/svg/WarningRed';
 
+type T_ModalData = {
+  id: number;
+  open: boolean;
+  code?: string;
+};
+
 export default function DeleteVoucherModal({
   refetch,
   isOpen,
   setIsOpen,
-  selectedVoucherId,
-  selectedVoucherCode,
 }: {
   refetch: any;
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
-  selectedVoucherId: number | null;
-  selectedVoucherCode: string;
+  isOpen: T_ModalData;
+  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
   const { mutate, isLoading } = useDeleteVoucher();
@@ -27,19 +30,23 @@ export default function DeleteVoucherModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setIsOpen(false);
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(selectedVoucherId, callbackReq);
+    mutate(isOpen.id, callbackReq);
+  };
+
+  const customCloseModal = () => {
+    setIsOpen(null);
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(false)}>
+    <Transition.Root show={isOpen.open} as={Fragment}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -69,7 +76,7 @@ export default function DeleteVoucherModal({
                 </div>
                 <div className='text-xl px-20 text-center'>
                   <p className='text-xl text-gray-600 font-bold'>
-                    Are you sure you want to <span className='text-red-500'>delete</span> {selectedVoucherCode} Voucher?
+                    Are you sure you want to <span className='text-red-500'>delete</span> {isOpen.code} Voucher?
                   </p>
                 </div>
                 <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
@@ -77,7 +84,7 @@ export default function DeleteVoucherModal({
                     <button
                       type='button'
                       className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => customCloseModal()}
                     >
                       No
                     </button>

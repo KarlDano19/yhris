@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
 import useGetVoucherItems from './hooks/useGetVoucherItems';
-import useGetPlanItems from './hooks/useGetPlanItems';
 import CreateVoucherModal from './modal/CreateVoucherModal';
 import RedemptionCountModal from './modal/RedemptionCountModal';
 import EditVoucherModal from './modal/EditVoucherModal';
@@ -15,22 +14,24 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
+type T_ModalData = {
+  id: number;
+  open: boolean;
+  code?: string;
+};
+
 const Content = () => {
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
   const [vouchersItems, setVouchersItems] = useState<any>([]);
-  const [actionType, setActionType] = useState<string>('');
-  const [plans, SetPlans] = useState<any>([]);
   const [isCreateVoucherModalOpen, setIsCreateVoucherModalOpen] = useState(false);
-  const [isRedemptionModalOpen, setIsRedemptionModalOpen] = useState(false);
-  const [selectedVoucherId, setSelectedVoucherId] = useState<number | null>(null);
-  const [isEditVoucherModalOpen, setIsEditVoucherModalOpen] = useState(false);
-  const [isDeleteVoucherModalOpen, setIsDeleteVoucherModalOpen] = useState(false);
-  const { data: dataPlans, isLoading: isLoadingPlans } = useGetPlanItems();
+  const [isRedemptionModalOpen, setIsRedemptionModalOpen] = useState<T_ModalData | null>(null);
+  const [isEditVoucherModalOpen, setIsEditVoucherModalOpen] = useState<T_ModalData | null>(null);
+  const [isDeleteVoucherModalOpen, setIsDeleteVoucherModalOpen] = useState<T_ModalData | null>(null);
   const {
     data: dataVouchers,
-    isLoading: isGetVouchersLoading,
+    isLoading: isVouchersLoading,
     refetch: refetchVouchers,
   } = useGetVoucherItems(itemsFilter);
 
@@ -48,54 +49,34 @@ const Content = () => {
     }
   }, [dataVouchers]);
 
-  useEffect(() => {
-    if (dataPlans && !isLoadingPlans) {
-      SetPlans(dataPlans);
-    }
-  }, [dataPlans]);
-
-  useEffect(() => {
-    if (selectedVoucherId) {
-      if (actionType === 'edit') {
-        setIsEditVoucherModalOpen(true);
-      }
-      if (actionType === 'delete') {
-        setIsDeleteVoucherModalOpen(true);
-      }
-      if (actionType === 'redemption') {
-        setIsRedemptionModalOpen(true);
-      }
-    }
-  }, [selectedVoucherId]);
-
-  const openEditVoucherModal = (voucherDetails: any) => {
-    setActionType('edit');
-    if (selectedVoucherId && selectedVoucherId === voucherDetails.id) {
-      setIsEditVoucherModalOpen(true);
-    } else {
-      setSelectedVoucherId(voucherDetails.id);
-    }
-  };
-
-  const openDeleteVoucherModal = (voucherDetails: any) => {
-    setActionType('delete');
-    if (selectedVoucherId && selectedVoucherId === voucherDetails.id) {
-      setIsDeleteVoucherModalOpen(true);
-    } else {
-      setSelectedVoucherId(voucherDetails.id);
-    }
-  };
-
-  const openRedemptionModal = (voucherDetails: any) => {
-    setActionType('redemption');
-    if (selectedVoucherId && selectedVoucherId === voucherDetails.id) {
-      setIsRedemptionModalOpen(true);
-    } else {
-      setSelectedVoucherId(voucherDetails.id);
-    }
-  };
-
   const renderRows = () => {
+    if (isVouchersLoading) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div role='status' className='py-5 text-center'>
+              <svg
+                aria-hidden='true'
+                className='inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400'
+                viewBox='0 0 100 101'
+                fill='none'
+                xmlns='http://www.w3.org/2000/svg'
+              >
+                <path
+                  d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                  fill='currentColor'
+                />
+                <path
+                  d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
+                  fill='currentFill'
+                />
+              </svg>
+              <span className='sr-only'>Loading...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    }
     if (vouchersItems && vouchersItems.length > 0) {
       return vouchersItems.map((item: any) => (
         <tr key={item.id}>
@@ -111,7 +92,10 @@ const Content = () => {
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>{item.maximum_redemption}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-            <span onClick={() => openRedemptionModal(item)} className='cursor-pointer text-blue-600 underline'>
+            <span
+              onClick={() => setIsRedemptionModalOpen({ id: item.id, open: true })}
+              className='cursor-pointer text-blue-600 underline'
+            >
               {item.redeem_count}
             </span>
           </td>
@@ -120,10 +104,10 @@ const Content = () => {
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button onClick={() => openEditVoucherModal(item)}>
+              <button onClick={() => setIsEditVoucherModalOpen({ id: item.id, open: true })}>
                 <EditIcon />
               </button>
-              <button onClick={() => openDeleteVoucherModal(item)}>
+              <button onClick={() => setIsDeleteVoucherModalOpen({ id: item.id, open: true, code: item.name })}>
                 <DeleteIcon />
               </button>
             </div>
@@ -136,7 +120,6 @@ const Content = () => {
           <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add vouchers.</h4>
-
             <div className='flex-1 flex justify-center mb-4'>
               <button
                 className='bg-white border-2 border-green-500 rounded-md py-2 px-8 text-green-500 text-sm font-semibold hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
@@ -234,34 +217,25 @@ const Content = () => {
       {isCreateVoucherModalOpen && (
         <CreateVoucherModal
           refetch={refetchVouchers}
-          plans={plans}
           isOpen={isCreateVoucherModalOpen}
           setIsOpen={setIsCreateVoucherModalOpen}
         />
       )}
       {isRedemptionModalOpen && (
-        <RedemptionCountModal
-          isOpen={isRedemptionModalOpen}
-          setIsOpen={setIsRedemptionModalOpen}
-          selectedVoucherId={selectedVoucherId}
-        />
+        <RedemptionCountModal isOpen={isRedemptionModalOpen} setIsOpen={setIsRedemptionModalOpen} />
       )}
-      {isEditVoucherModalOpen && selectedVoucherId && (
+      {isEditVoucherModalOpen && (
         <EditVoucherModal
           refetch={refetchVouchers}
-          plans={plans}
           isOpen={isEditVoucherModalOpen}
           setIsOpen={setIsEditVoucherModalOpen}
-          selectedVoucherId={selectedVoucherId}
         />
       )}
-      {isDeleteVoucherModalOpen && selectedVoucherId && (
+      {isDeleteVoucherModalOpen && (
         <DeleteVoucherModal
           refetch={refetchVouchers}
           isOpen={isDeleteVoucherModalOpen}
           setIsOpen={setIsDeleteVoucherModalOpen}
-          selectedVoucherId={selectedVoucherId}
-          selectedVoucherCode={vouchersItems.find((item: any) => item.id === selectedVoucherId)?.code}
         />
       )}
     </>

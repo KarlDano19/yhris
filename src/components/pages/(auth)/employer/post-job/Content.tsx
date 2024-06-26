@@ -1,11 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+
 import Link from 'next/link';
-import CreateJob from '@/svg/CreateJob';
-import JobPostingHistory from '@/svg/JobPostingHistory';
+
+import useStore from '@/lib/store';
 import CreateJobModal from './create-job/modals/CreateJobModal';
+
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import JobPostingHistory from '@/svg/JobPostingHistory';
+import CreateJob from '@/svg/CreateJob';
 
 const menus = [
   {
@@ -16,6 +20,7 @@ const menus = [
 ];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const { count, increment } = useStore();
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
 
   return (

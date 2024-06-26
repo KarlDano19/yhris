@@ -23,7 +23,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const { setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const { register, handleSubmit, setValue, getValues } = useForm({
+  const { register, handleSubmit, setValue, getValues, watch } = useForm({
     defaultValues: {
       bcc: '',
       cc: '',
@@ -44,6 +44,10 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   };
 
   const handleOnSubmit = (data: any) => {
+    const template = dataEmailTemplate.find(
+      (item: any) => item.id === parseInt(data.template)
+    );
+    data.template = template.subject;
     handleFormSubmit(data, setIsOpen);
   };
 
@@ -60,12 +64,21 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 {...register('template', { required: true })}
                 id='template'
                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                onChange={(event) => {
+                  const template = dataEmailTemplate.find(
+                    (item: any) => item.id === parseInt(event.target.value)
+                  );
+                  if (template) {
+                    setValue('email', template.to);
+                    setValue('message', template.body);
+                  }
+                }}
               >
                 <option value='' disabled>
                   Select...
                 </option>
                 {(dataEmailTemplate || []).map((item: any) => (
-                  <option key={item.id} value={item.subject}>
+                  <option key={item.id} value={item.id}>
                     {item.subject}
                   </option>
                 ))}
@@ -152,7 +165,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 formats={QUILL_FORMATS}
                 modules={QUILL_MODULES}
                 style={{ height: '100%' }}
-                defaultValue={getValues('message')}
+                value={watch('message')}
               />
             </div>
           </div>
