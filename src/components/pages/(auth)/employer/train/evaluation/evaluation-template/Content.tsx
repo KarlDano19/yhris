@@ -42,6 +42,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataEvaluation) {
+      dataEvaluation.map((item: any) => {
+        item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+      });
       setEvaluationItems(dataEvaluation);
     }
   }, [dataEvaluation]);
@@ -256,7 +259,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date
+                        Date Created
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Name

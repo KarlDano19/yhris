@@ -39,7 +39,11 @@ const Content = () => {
   }, []);
 
   useEffect(() => {
-    if (dataVouchers && !isGetVouchersLoading) {
+    if (dataVouchers) {
+      dataVouchers.map((item: any) => {
+        item['redemption_date_from'] = Intl.DateTimeFormat('en-US').format(new Date(item.redemption_date_from));
+        item['redemption_date_to'] = Intl.DateTimeFormat('en-US').format(new Date(item.redemption_date_to));
+      });
       setVouchersItems(dataVouchers);
     }
   }, [dataVouchers]);

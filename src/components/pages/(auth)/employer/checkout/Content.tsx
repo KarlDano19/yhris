@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 
 import { useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import updateSession from '@/helpers/updateSession';
@@ -110,7 +112,7 @@ const Content = () => {
 
   return (
     <div className='flex h-screen'>
-      <div className='py-8 px-16 relative'>
+      <div className='py-8 px-16 relative flex-1'>
         <div className='text-center mb-4'>
           <h2 className='text-[30px] font-bold text-[#2C3F58]'>
             YAHSHUA <span className='text-[30px] font-bold text-[#FFC107]'>HRIS</span>
@@ -141,18 +143,14 @@ const Content = () => {
           />
         )}
         <div className='font-normal text-gray-500 leading-4 tracking-wider text-[15px]'>
-          By clicking Next, you agree to our{' '}
-          <a href='#' data-toggle='modal' data-target='#privacyModal' className='text-[#355FD0] text-sm underline'>
+          By continuing, you agree to our{' '}
+          <Link href='/terms-of-service' target='_blank' className='text-[#355FD0] text-sm underline'>
             Terms of Service
-          </a>
-          ,{' '}
-          <a href='#' data-toggle='modal' data-target='#privacyModal' className='text-[#355FD0] text-sm underline'>
-            Privacy Notice
-          </a>
+          </Link>
           , and{' '}
-          <a href='#' data-toggle='modal' data-target='#privacyModal' className='text-[#355FD0] text-sm underline'>
-            Personal Data Collection and Disclosure Policy
-          </a>
+          <Link href='/privacy-notice' target='_blank' className='text-[#355FD0] text-sm underline'>
+            Privacy Notice
+          </Link>
           .
         </div>
       </div>

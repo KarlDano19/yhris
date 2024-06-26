@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import { getIronSession } from 'iron-session';
 
-import { SessionData, sessionOptions } from '@/session/lib';
+import { SessionData, sessionOptions } from '@/lib/session';
 import Header from '@/app/header';
 
 async function getSession() {

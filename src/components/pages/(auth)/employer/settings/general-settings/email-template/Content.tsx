@@ -45,8 +45,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (dataEmailTemplate && !isGetEmailTemplateLoading) {
       dataEmailTemplate.map((item: any) => {
-        item.date = Intl.DateTimeFormat(`en-Us`).format(new Date(item.created_at));
-        return item;
+        item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
       });
       setEmailTemplatesItems(dataEmailTemplate);
     }
@@ -112,6 +111,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (emailTemplatesItems && emailTemplatesItems.length > 0) {
       return emailTemplatesItems.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
@@ -191,6 +191,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Date Created
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Subject
                       </th>

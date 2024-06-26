@@ -101,6 +101,7 @@ export type T_SeparationEmail = {
   id: string;
   actionType: string;
   emailType: string;
+  dateReceived?: any;
   separationLetter: any;
   signDocuments: any;
   quitClaim: any;

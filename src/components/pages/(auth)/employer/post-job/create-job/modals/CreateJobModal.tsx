@@ -1,11 +1,11 @@
 import { Dispatch, Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 
 import { Dialog, Transition } from '@headlessui/react';
+import { useForm, Controller } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
-import { XCircleIcon } from '@heroicons/react/24/solid';
-import { T_CreateJob } from '@/types/globals';
+
+import CustomToast from '@/components/CustomToast';
 import SalaryRangeModal from './SalaryRangeModal';
 import CreateJobPageOne from './ModalPages/CreateJobPageOne';
 import CreateJobPageTwo from './ModalPages/CreateJobPageTwo';
@@ -15,13 +15,15 @@ import CreateJobPageFive from './ModalPages/CreateJobPageFive';
 import CreateJobPageSix from './ModalPages/CreateJobPageSix';
 import CreateJobPageSeven from './ModalPages/CreateJobPageSeven';
 import CreateJobPageEight from './ModalPages/CreateJobPageEight';
-import CustomToast from '@/components/CustomToast';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
+
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
 import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
+import { T_CreateJob } from '@/types/globals';
 
 export default function CreateJobModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
-  const { mutate, isLoading } = useAddJobPostItems();
-  const { register, handleSubmit, watch, setValue, getValues, trigger, setFocus, control, reset } =
+  const { register, handleSubmit, watch, setValue, getValues, trigger, setFocus, reset, control } =
     useForm<T_CreateJob>({
       defaultValues: {
         salary: {
@@ -33,6 +35,7 @@ export default function CreateJobModal({ isOpen, setIsOpen }: { isOpen: boolean;
         qualifications: QUALIFICATION_TEMPLATE[0],
       },
     });
+  const { mutate, isLoading } = useAddJobPostItems();
 
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
@@ -116,7 +119,7 @@ export default function CreateJobModal({ isOpen, setIsOpen }: { isOpen: boolean;
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
                   {pageNumber == 1 && (
-                    <CreateJobPageOne register={register} handleSubmit={handleSubmit} setPageNumber={setPageNumber} />
+                    <CreateJobPageOne control={control} Controller={Controller} register={register} handleSubmit={handleSubmit} setPageNumber={setPageNumber} />
                   )}
                   {pageNumber == 2 && (
                     <CreateJobPageTwo

@@ -28,6 +28,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataEvaluationHistoryItems) {
+      dataEvaluationHistoryItems.map((item: any) => {
+        item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
+      });
       setEvaluationHistoryItems(dataEvaluationHistoryItems);
     }
   }, [dataEvaluationHistoryItems]);
