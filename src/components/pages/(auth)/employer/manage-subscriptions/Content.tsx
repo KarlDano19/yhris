@@ -5,17 +5,18 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import PurchaseStatusCard from './PurchaseStatusCard';
-import ReceiptViewModal from './modal/ReceiptViewModal';
 import classNames from '@/helpers/classNames';
 import formatPrice from '@/helpers/currencyFormat';
 import updateSession from '@/helpers/updateSession';
+import ReceiptViewModal from './modal/ReceiptViewModal';
+import PurchaseStatusCard from './PurchaseStatusCard';
 import useGetSubscriptions from './hooks/useGetSubscriptions';
 import useGetReceiptDetail from './hooks/useGetReceiptDetail';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activePlans, setActivePlans] = useState<any>({});
@@ -177,8 +178,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
-        <div className='p-2 md:p-8 lg:p-4 relative'>
-          <h2 className='text-2xl font-bold text-indigo-dye'>Subscription</h2>
+      <div className='flex p-4'>
+        <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+          <ArrowLeftIcon className='h-5 w-5' />
+          <h4>Dashboard</h4>
+        </Link>
+      </div>
+        <div className='px-2 md:px-8 lg:px-4'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Subscriptions</h2>
           <nav className='flex relative justify-start mx-auto my-6' aria-label='Tabs'>
             <li
               className={classNames(
