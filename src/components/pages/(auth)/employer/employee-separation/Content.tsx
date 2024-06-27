@@ -11,18 +11,26 @@ import CustomToast from '@/components/CustomToast';
 import AddSeparationModal from './modals/AddSeparationModal';
 import LetterModal from './modals/LetterModal';
 import SignDocumentsModal from './modals/SignDocumentsModal';
+import LastPayModal from './modals/LastPayModal';
 import QuitclaimModal from './modals/QuitclaimModal';
+import DeleteSeparationModal from './modals/DeleteSeparationModal';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
-import usePatchSeparationItem from './hooks/usePatchSeparationItem';
+import usePatchSeparation from './hooks/usePatchSeparation';
 import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
-import ConfirmModal from '../../../../ConfirmModal';
 import LastPay from './LastPay';
 import Quitclaim from './Quitclaim';
 
-import { T_DocumentsModal, T_LastPayModal, T_LetterModal, T_QuitclaimModal } from '@/types/globals';
-
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import DeleteIcon from '@/svg/DeleteIcon';
+
+import {
+  T_DocumentsModal,
+  T_LastPayModal,
+  T_LetterModal,
+  T_QuitclaimModal,
+  T_DeleteSepartionModal,
+} from '@/types/globals';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
@@ -36,42 +44,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
   const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
   const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
-  const { mutate, isLoading } = usePatchSeparationItem();
+  const [isDeleteSepartionModalOpen, setIsDeleteSepartionModalOpen] = useState<T_DeleteSepartionModal | null>(null);
+  const { mutate, isLoading } = usePatchSeparation();
   const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems(itemsFilter);
-
-  const releaseLastPay = () => {
-    if (isLastPayModalOpen && isLastPayModalOpen.id) {
-      const itemIndex = separationItems.findIndex((item: any) => item.id === isLastPayModalOpen.id);
-      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
-      separationItemsCopy[itemIndex].id = isLastPayModalOpen.id;
-      separationItemsCopy[itemIndex].actionType = 'sending';
-      separationItemsCopy[itemIndex].emailType = 'last pay';
-      separationItemsCopy[itemIndex].isLastPayReleased = true;
-      separationItemsCopy[itemIndex].lastPay.to = separationItemsCopy[itemIndex].email;
-      debugger
-      const callbackReq = {
-        onSuccess: (data: any) => {
-          setSeparationItems([...separationItemsCopy]);
-          setIsLastPayModalOpen(null);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={err} type='error' />, {
-            duration: 7000,
-          });
-        },
-      };
-      mutate(separationItemsCopy[itemIndex], callbackReq);
-    } else {
-      toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
-    }
-  };
-
-  const updateReleaseModal = (value: boolean) => {
-    if (!value) {
-      setIsLastPayModalOpen(null);
-    }
-  };
 
   const setReceived = (id: string, emailType: string) => {
     const itemIndex = separationItems.findIndex((item: any) => item.id === id);
@@ -113,7 +88,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataSeparation) {
-      dataSeparation?.map((separation: any) => {
+      dataSeparation.map((separation: any) => {
         separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
         separation['name'] = separation.name;
         separation['reasonForLeaving'] = separation.reason_of_leaving;
@@ -241,6 +216,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setReceived={setReceived}
               isLoading={isLoading}
             />
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
+            <div className='flex justify-center space-x-2'>
+              <button onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}>
+                <DeleteIcon />
+              </button>
+            </div>
           </td>
         </tr>
       ));
@@ -392,6 +374,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Quitclaim
                       </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
@@ -403,11 +388,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <AddSeparationModal
-        isOpen={isAddSeparationModalOpen}
-        setIsOpen={setIsAddSeparationModalOpen}
-        refetch={refetch}
-      />
+      <AddSeparationModal isOpen={isAddSeparationModalOpen} setIsOpen={setIsAddSeparationModalOpen} refetch={refetch} />
       <LetterModal
         separationItems={separationItems}
         refetch={refetch}
@@ -421,12 +402,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isDocumentModalOpen}
         setIsOpen={setIsDocumentModalOpen}
       />
-      <ConfirmModal
-        message='Are you sure the employee’s Last Pay has been released?'
-        isOpen={!!isLastPayModalOpen}
-        setIsOpen={updateReleaseModal}
-        confirmAction={releaseLastPay}
-        isLoading={isLoading}
+      <LastPayModal
+        separationItems={separationItems}
+        setSeparationItems={setSeparationItems}
+        isOpen={isLastPayModalOpen}
+        setIsOpen={setIsLastPayModalOpen}
       />
       <QuitclaimModal
         separationItems={separationItems}
@@ -434,6 +414,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isQuitclaimModalOpen}
         setIsOpen={setIsQuitclaimModalOpen}
       />
+      {isDeleteSepartionModalOpen && (
+        <DeleteSeparationModal
+          refetch={refetch}
+          isOpen={isDeleteSepartionModalOpen}
+          setIsOpen={setIsDeleteSepartionModalOpen}
+        />
+      )}
     </>
   );
 };

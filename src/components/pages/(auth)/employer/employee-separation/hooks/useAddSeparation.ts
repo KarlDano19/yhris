@@ -35,7 +35,7 @@ async function addSeparation(separation: T_Separation) {
   }
 }
 
-function useAddSeparationItems() {
+function useAddSeparation() {
   const query = useMutation((separation: T_Separation) =>
     addSeparation(separation)
   );
@@ -43,4 +43,4 @@ function useAddSeparationItems() {
   return query;
 }
 
-export default useAddSeparationItems;
+export default useAddSeparation;

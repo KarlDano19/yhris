@@ -3,4 +3,5 @@ export const initialActionState = {
   stageId: null,
   applicantId: null,
   isFinalStage: false,
+  email: null,
 }

@@ -7,9 +7,9 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
-import useTagTo from '@/components/hooks/useTagTo';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useUpdateApplicantOrient from '../hooks/useUpdateApplicantOrient';
 
