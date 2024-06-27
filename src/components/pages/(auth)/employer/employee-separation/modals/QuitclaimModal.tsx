@@ -50,6 +50,16 @@ export default function QuitclaimModal({
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchSeparationItem();
 
+  useEffect(() => {
+    if (isOpen && isOpen.id) {
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
+      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
+      if (separationItemsCopy[itemIndex]) {
+        setValue('email', separationItemsCopy[itemIndex].email);
+      }
+    }
+  }, [isOpen]);
+
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);

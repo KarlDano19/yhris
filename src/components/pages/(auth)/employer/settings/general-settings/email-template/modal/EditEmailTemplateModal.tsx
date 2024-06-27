@@ -7,11 +7,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import useTagCC from '@/components/hooks/useTagCc';
+import useTagBcc from '@/components/hooks/useTagBcc';
+import useTagTo from '@/components/hooks/useTagTo';
 import useUpdateEmailTemplate from '../hooks/useUpdateEmailTemplate';
 import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails';
-import useTagCC from '../hooks/useTagCc';
-import useTagBcc from '../hooks/useTagBcc';
-import useTagTo from '../hooks/useTagTo';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -31,10 +31,16 @@ export default function EditEmailTemplateModal({
   refetch: any;
   selectedEmailTemplateId: number | null;
 }) {
+  const inputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const inputRef = useRef(null);
+  const [inputTo, setInputTo] = useState('');
+  const [inputCc, setInputCc] = useState('');
+  const [inputBcc, setInputBcc] = useState('');
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
+  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   const [file, setFile] = useState<File | null>(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const { register, handleSubmit, setValue, watch } = useForm<any>();
@@ -44,12 +50,6 @@ export default function EditEmailTemplateModal({
     remove: removeEmailTemplateDetail,
   } = useGetEmailTemplateDetails(selectedEmailTemplateId);
   const { mutate, isLoading } = useUpdateEmailTemplate();
-  const [input, setInput] = useState('');
-  const [inputBcc, setInputBcc] = useState('');
-  const [inputTo, setInputTo] = useState('');
-  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(input, setInput);
-  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
 
   useEffect(() => {
     if (isOpen) {
@@ -164,7 +164,7 @@ export default function EditEmailTemplateModal({
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
@@ -187,8 +187,8 @@ export default function EditEmailTemplateModal({
                           </div>
                           <button
                             type='button'
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                              isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
                             onClick={() => setIsCCOPen(!isCCOpen)}
                           >
@@ -196,8 +196,8 @@ export default function EditEmailTemplateModal({
                           </button>
                           <button
                             type='button'
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isBCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                              isBCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
                             onClick={() => setIsBCCOpen(!isBCCOpen)}
                           >
@@ -211,7 +211,7 @@ export default function EditEmailTemplateModal({
                             CC
                           </label>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
                               {tagsCc.map((tag: string) => (
                                 <div
                                   key={tag}
@@ -225,10 +225,10 @@ export default function EditEmailTemplateModal({
                               ))}
                               <input
                                 type='cc'
-                                value={input}
+                                value={inputCc}
                                 onKeyDown={handleKeyDown}
-                                onChange={(e) => setInput(e.target.value)} // Add this line to update input state
-                                className='focus:none outline-none px-2 py-1 grow'
+                                onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                             </div>
                           </div>
@@ -240,7 +240,7 @@ export default function EditEmailTemplateModal({
                             BCC
                           </label>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
                               {tagsBcc.map((tagBcc: string) => (
                                 <div
                                   key={tagBcc}
@@ -257,7 +257,7 @@ export default function EditEmailTemplateModal({
                                 value={inputBcc}
                                 onKeyDown={handleKeyDownBcc}
                                 onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
-                                className='focus:none outline-none px-2 py-1 grow'
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                             </div>
                           </div>

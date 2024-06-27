@@ -1,21 +1,23 @@
-import React from 'react';
+import React, { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
 
-import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller, set } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
 
-import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
+import { Dialog, Transition } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
-import useTagCC from '../hooks/useTagCc';
-import useTagBcc from '../hooks/useTagBcc';
-import useTagTo from '../hooks/useTagTo';
+import useTagCC from '@/components/hooks/useTagCc';
+import useTagBcc from '@/components/hooks/useTagBcc';
+import useTagTo from '@/components/hooks/useTagTo';
+import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
 
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { QUILL_MODULES } from '@/helpers/constants';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 export default function EmailTemplateModal({
   isOpen,
@@ -28,21 +30,20 @@ export default function EmailTemplateModal({
   refetch: any;
   onSuccess: any;
 }) {
+  const inputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const inputRef = useRef(null);
+  const [inputTo, setInputTo] = useState('');
+  const [inputCc, setInputCc] = useState('');
+  const [inputBcc, setInputBcc] = useState('');
+  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
+  const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   const [file, setFile] = useState<File | null>(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const { register, handleSubmit, reset, setValue, getValues } = useForm<any>();
-  const { control } = useForm<any>();
   const { mutate, isLoading } = useAddEmailTemplate();
-  const [input, setInput] = useState('');
-  const [inputBcc, setInputBcc] = useState('');
-  const [inputTo, setInputTo] = useState('');
-  const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(input, setInput);
-  const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
 
   const onSubmit = handleSubmit((data) => {
     data.to = tagsTo;
@@ -195,9 +196,9 @@ export default function EmailTemplateModal({
                               ))}
                               <input
                                 type='cc'
-                                value={input}
+                                value={inputCc}
                                 onKeyDown={handleKeyDown}
-                                onChange={(e) => setInput(e.target.value)} // Add this line to update input state
+                                onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
                                 className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                             </div>
@@ -241,9 +242,10 @@ export default function EmailTemplateModal({
                           <textarea rows={4} {...register('body', { required: true })} id='body' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('body', value)}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
                             style={{ height: '100%' }}
                             defaultValue={getValues('body')}
-                            modules={QUILL_MODULES}
                           />
                         </div>
                       </div>
