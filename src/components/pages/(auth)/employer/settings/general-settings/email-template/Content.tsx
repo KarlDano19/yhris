@@ -11,7 +11,7 @@ import getEmailTemplate from './hooks/useGetEmailTemplate';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import SuccessModal from './modal/SuccessModal';
 import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal';
-import EditEmailTemplateModal from './modal/EditEmailTempalteModal';
+import EditEmailTemplateModal from './modal/EditEmailTemplateModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';

@@ -197,7 +197,7 @@ const Content = () => {
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex gap-2 justify-center'>
-              <span>{item?.applicant?.firstname + ' ' + item?.applicant?.lastname}</span>{' '}
+              <span>{item?.firstname + ' ' + item?.lastname}</span>{' '}
             </div>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -375,14 +375,16 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <SendContractModal
-        selectedOrientId={selectedOrientId}
-        orientItems={orientItems}
-        setOrientItems={setOrientItems}
-        setIsOpen={setIsSendContractModalOpen}
-        isOpen={isSendContractModalOpen}
-        setSuccessModal={setIsSuccessSendContractModalOpen}
-      />
+      {isSendContractModalOpen && (
+        <SendContractModal
+          selectedOrientId={selectedOrientId}
+          orientItems={orientItems}
+          setOrientItems={setOrientItems}
+          setIsOpen={setIsSendContractModalOpen}
+          isOpen={isSendContractModalOpen}
+          setSuccessModal={setIsSuccessSendContractModalOpen}
+        />
+      )}
       <OrientOptionModal
         selectedOrientId={selectedOrientId}
         orientItems={orientItems}
@@ -602,14 +604,16 @@ const Content = () => {
           </button>
         </div>
       </NoticeModal>
-      <IntroduceModal
-        selectedOrientId={selectedOrientId}
-        orientItems={orientItems}
-        setOrientItems={setOrientItems}
-        setIsOpen={setIsIntroducedModalOpen}
-        isOpen={isIntroducedModalOpen}
-        setSuccessModal={setSuccessIsIntroducedModalOpen}
-      />
+      {isIntroducedModalOpen && (
+        <IntroduceModal
+          selectedOrientId={selectedOrientId}
+          orientItems={orientItems}
+          setOrientItems={setOrientItems}
+          setIsOpen={setIsIntroducedModalOpen}
+          isOpen={isIntroducedModalOpen}
+          setSuccessModal={setSuccessIsIntroducedModalOpen}
+        />
+      )}
       <SuccessModal
         isOpen={isSuccessIntroducedModalOpen}
         setIsOpen={setSuccessIsIntroducedModalOpen}

@@ -62,13 +62,15 @@ export default function OrientOptionModal({
                     <p className='text-[1.4rem] mb-8 font-semibold'>How do you want to do your orientation?</p>
                     <div className='flex justify-center'>
                     <button
-                      className='flex flex-col items-center shadow-md border-[1px] border-savoy-blue rounded-[20px] py-5 mx-4 w-[150px]'
+                      className='flex flex-col items-center shadow-md border-[1px] border-savoy-blue rounded-[20px] py-5 mx-4 w-[150px] disabled:opacity-50'
+                      disabled={true}
                     >
                       <img className='w-11 h-12 m-2 cursor-pointer' src={`/assets/dolo.png`} />
                       <span className='text-[12px] font-semibold'>YAHSHUA DOLO<br/>Traning App</span>
                     </button>
                     <button
-                      className='flex flex-col items-center shadow-md border-[1px] border-savoy-blue rounded-[20px] py-5 mx-4 w-[150px]'
+                      className='flex flex-col items-center shadow-md border-[1px] border-savoy-blue rounded-[20px] py-5 mx-4 w-[150px] disabled:opacity-50'
+                      disabled={true}
                     >
                       <EllipsisHorizontalIcon className='w-14 h-14 text-savoy-blue cursor-pointer' />
                       <span className='text-[12px] font-semibold'>Other<br/>Platforms</span>
