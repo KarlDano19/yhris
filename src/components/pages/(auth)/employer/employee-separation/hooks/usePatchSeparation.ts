@@ -34,7 +34,7 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
       if (separationEmail.emailType === 'last pay') {
         data.subject = 'Last Pay Release';
         data.to = separationEmail.lastPay.to;
-        data.context = "Test last pay body";
+        data.context = 'Test last pay body';
       }
       if (separationEmail.emailType === 'quit claim') {
         data.subject = `Quit Claim | ${separationEmail.quitClaim.template}`;
@@ -58,10 +58,7 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationEmail.id}/`,
-      config
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationEmail.id}/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -75,12 +72,10 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
   }
 }
 
-function usePatchSeparationItem() {
-  const query = useMutation((separationEmail: T_SeparationEmail) =>
-    sendSeparationEmail(separationEmail)
-  );
+function usePatchSeparation() {
+  const query = useMutation((separationEmail: T_SeparationEmail) => sendSeparationEmail(separationEmail));
 
   return query;
 }
 
-export default usePatchSeparationItem;
+export default usePatchSeparation;

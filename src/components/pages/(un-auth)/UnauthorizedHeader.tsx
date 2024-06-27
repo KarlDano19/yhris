@@ -57,7 +57,7 @@ const UnauthorizedHeader = () => {
                     href='/features'
                     className={`${
                       pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    } flex items-center font-semibold`}
+                    } flex items-center font-semibold opacity-50 pointer-events-none`}
                   >
                     <StarIcon
                       className={`${pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'} h-4 w-4 mr-2.5`}
@@ -79,7 +79,7 @@ const UnauthorizedHeader = () => {
                     href='/demo'
                     className={`${
                       pathName === '/demo' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    } flex items-center font-semibold`}
+                    } flex items-center font-semibold opacity-50 pointer-events-none`}
                   >
                     <InformationCircleIcon
                       className={`${pathName === '/demo' ? 'text-savoy-blue' : 'text-indigo-dye'} h-5 w-5 mr-2.5`}
@@ -107,11 +107,11 @@ const UnauthorizedHeader = () => {
                       Sign In
                     </button>
                   </Link>
-                  <Link href='#'>
+                  {/* <Link href='#'>
                     <MagnifyingGlassIcon
                       className={`${pathName === '/search' ? 'text-savoy-blue' : 'text-indigo-dye'} h-6 w-6`}
                     />
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             </div>
@@ -175,7 +175,7 @@ const UnauthorizedHeader = () => {
                     />
                     Sign In
                   </Link>
-                  <Link
+                  {/* <Link
                     href='#'
                     className={`${
                       pathName === '/login' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
@@ -185,7 +185,7 @@ const UnauthorizedHeader = () => {
                       className={`${pathName === '/search' ? 'text-savoy-blue' : 'text-indigo-dye'} h-4 w-4 mr-2`}
                     />
                     Search
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             </Popover.Panel>

@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
-import useAddSeparationItems from '../hooks/useAddSeparationItems';
+import useAddSeparation from '../hooks/useAddSeparation';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -26,7 +26,7 @@ export default function AddSeparationModal({
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, control, reset, trigger } = useForm<T_Separation>();
   const { data: dataEmployee } = useGetEmployeeItems();
-  const { mutate, isLoading } = useAddSeparationItems();
+  const { mutate, isLoading } = useAddSeparation();
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {

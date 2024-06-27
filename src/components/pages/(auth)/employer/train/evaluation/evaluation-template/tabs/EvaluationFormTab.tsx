@@ -100,9 +100,8 @@ function EvaluationFormTab({
                             className='hover:cursor-pointer p-2'
                             onClick={() => {
                               const currentTotalScore = watch('total_score');
-                              // if (1 >= currentTotalScore) return;
-                              if (currentTotalScore > 0) {
-                                setValue('passing_score', currentTotalScore - 1);
+                              if (currentTotalScore > 1) {
+                                setValue('total_score', currentTotalScore - 1);
                               }
                             }}
                           >
@@ -145,7 +144,7 @@ function EvaluationFormTab({
                             className='hover:cursor-pointer p-2'
                             onClick={() => {
                               const currentPassingScore = parseInt(watch('passing_score'));
-                              if (currentPassingScore > 0) {
+                              if (currentPassingScore > 1) {
                                 setValue('passing_score', currentPassingScore - 1);
                               }
                             }}

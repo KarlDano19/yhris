@@ -100,6 +100,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
                       onClick={() =>
                         setActionState({
                           ...initialActionState,
+                          email: applicant.email,
                           applicantId: applicant.id,
                           stageId: stage.id,
                           modal: { whichModal, isOpen: true, title: modalTitle },

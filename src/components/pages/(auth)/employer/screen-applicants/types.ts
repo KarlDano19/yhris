@@ -1,133 +1,135 @@
-import React, { Dispatch, ReactNode, SetStateAction } from "react"
+import React, { Dispatch, ReactNode, SetStateAction } from 'react';
 
-export type StateType = StageType[]
+export type StateType = StageType[];
 
 export type BlockPropTypes = {
-  stage: StageType
-  index: number
-  provided: any
-  snapshot: any
-  jobPostDetailsRefetch: any
-  appliedApplicantRefetch: any
-}
+  stage: StageType;
+  index: number;
+  provided: any;
+  snapshot: any;
+  jobPostDetailsRefetch: any;
+  appliedApplicantRefetch: any;
+};
 
 export type WrapperPropTypes = {
-  children: React.ReactNode
-  maxWidth?: string
-  title: string
-  backText?: string
-  backLink?: string
-}
+  children: React.ReactNode;
+  maxWidth?: string;
+  title: string;
+  backText?: string;
+  backLink?: string;
+};
 
 export type PersonPropTypes = {
-  applicant: ApplicantType
-  isOpenMenu: boolean
-  setOpenMenuId: any
-  stage: StageType
-}
+  applicant: ApplicantType;
+  isOpenMenu: boolean;
+  setOpenMenuId: any;
+  stage: StageType;
+};
 
 export type ModalLayoutTypes = {
-  children: React.ReactNode
-  title: string
-  isOpen: boolean
-  handleClose: any
-}
+  children: React.ReactNode;
+  title: string;
+  isOpen: boolean;
+  handleClose: any;
+};
 
 export type StageRequirementsTypes = {
-  title: string
-  requirements: string[]
-  handleFormSubmit: any
-}
+  title: string;
+  requirements: string[];
+  handleFormSubmit: any;
+};
 
 export type ScheduleInterviewPropTypes = {
-  title: string
-  handleFormSubmit: any
-  isSendInterviewScheduleLoading: any
-}
+  title: string;
+  handleFormSubmit: any;
+  isSendInterviewScheduleLoading: any;
+};
 
 export type SendEmailPropTypes = {
-  title: string
-  handleFormSubmit: any
-}
+  title: string;
+  handleFormSubmit: any;
+};
 
 export type SuccessPropTypes = {
-  title: string
-}
+  title: string;
+};
 
 export type ChecklistPropTypes = {
-  title: string
-  requirements: string[]
-  handleFormSubmit: any
-}
+  title: string;
+  requirements: string[];
+  handleFormSubmit: any;
+};
 
 export type ApplicantType = {
-  id: number
-  applicationId: number
-  image: string
-  name: string
-  checklists: string[]
-  status: "ongoing" | "withdrawn" | "rejected" | "passed" | "hired" | null | undefined
-  stagePosition: number
-}
+  id: number;
+  email: string | null;
+  applicationId: number;
+  image: string;
+  name: string;
+  checklists: string[];
+  status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | null | undefined;
+  stagePosition: number;
+};
 
-export type ApplicantsType = [] | ApplicantType[]
+export type ApplicantsType = [] | ApplicantType[];
 
 export type StageType = {
-  id: number
-  title: string
-  isNewStage: boolean
-  requirements: string[]
-  applicants: ApplicantsType
-  orderBy: number
-}
+  id: number;
+  title: string;
+  isNewStage: boolean;
+  requirements: string[];
+  applicants: ApplicantsType;
+  orderBy: number;
+};
 
 export type ActionStateType = {
   modal: {
-    whichModal: null | string
-    isOpen: boolean
-    title: string
-  }
-  stageId: number | null
-  applicantId: number | null
-  isFinalStage: boolean
-}
+    whichModal: null | string;
+    isOpen: boolean;
+    title: string;
+  };
+  stageId: number | null;
+  applicantId: number | null;
+  isFinalStage: boolean;
+  email: string | null;
+};
 
 export type StagePropTypes = {
-  stage: StageType
-  stageDropdownId: number | null
-  setStageDropdownId: any
-  setActionState: any
-  dispatch: any
-}
+  stage: StageType;
+  stageDropdownId: number | null;
+  setStageDropdownId: any;
+  setActionState: any;
+  dispatch: any;
+};
 
 export type ContextTypes = {
-  state: StateType
-  dispatch: any
-  actionState: any
-  setActionState: any
-}
+  state: StateType;
+  dispatch: any;
+  actionState: any;
+  setActionState: any;
+};
 
 export type ModalTypes = {
   [key: string]: {
-    component: ReactNode
+    component: ReactNode;
     dispatch?: {
-      type: string
-      payload?: any
-    }
-  }
-}
+      type: string;
+      payload?: any;
+    };
+  };
+};
 
 export type StageHeaderTypes = {
-  stage: StageType
-  stageDropdownId: number | null
-  setStageDropdownId: any
-  jobPostDetailsRefetch: any
-  appliedApplicantRefetch: any
-}
+  stage: StageType;
+  stageDropdownId: number | null;
+  setStageDropdownId: any;
+  jobPostDetailsRefetch: any;
+  appliedApplicantRefetch: any;
+};
 
 export type StageBlockTypes = {
-  stage: StageType
-  index: number
-  openMenuId: number | null
-  setOpenMenuId: any
-}
+  stage: StageType;
+  index: number;
+  openMenuId: number | null;
+  setOpenMenuId: any;
+};

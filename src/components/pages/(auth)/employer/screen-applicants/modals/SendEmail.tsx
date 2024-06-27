@@ -5,11 +5,15 @@ import dynamic from 'next/dynamic';
 import { useForm } from 'react-hook-form';
 
 import { initialActionState } from '../lib/initialActionState';
+import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
+import useTagTo from '@/components/hooks/useTagTo';
+import useTagCc from '@/components/hooks/useTagCc';
+import useTagBcc from '@/components/hooks/useTagBcc';
 import ModalLayout from './ModalLayout';
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import StateContext from '../contexts/StateContext';
-import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
@@ -20,10 +24,16 @@ import 'react-quill/dist/quill.snow.css';
 export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const [isOpen, setIsOpen] = useState(false);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
-  const { setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
+  const { actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const { register, handleSubmit, setValue, getValues, watch } = useForm({
+  const [inputTo, setInputTo] = useState('');
+  const [inputCc, setInputCc] = useState('');
+  const [inputBcc, setInputBcc] = useState('');
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCc(inputCc, setInputCc);
+  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
+  const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       bcc: '',
       cc: '',
@@ -36,6 +46,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
 
   useEffect(() => {
     setIsOpen(true);
+    setTagsTo([actionState.email]);
   }, []);
 
   const handleClose = () => {
@@ -44,9 +55,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   };
 
   const handleOnSubmit = (data: any) => {
-    const template = dataEmailTemplate.find(
-      (item: any) => item.id === parseInt(data.template)
-    );
+    const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
     data.template = template.subject;
     handleFormSubmit(data, setIsOpen);
   };
@@ -65,11 +74,21 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 id='template'
                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                 onChange={(event) => {
-                  const template = dataEmailTemplate.find(
-                    (item: any) => item.id === parseInt(event.target.value)
-                  );
+                  const template = dataEmailTemplate.find((item: any) => item.id === parseInt(event.target.value));
                   if (template) {
-                    setValue('email', template.to);
+                    if (actionState.email) {
+                      setTagsTo([actionState.email, ...template.to]);
+                    } else {
+                      setTagsTo(template.to);
+                    }
+                    if (template.bcc) {
+                      setIsBCCOpen(true);
+                      setTagsBcc(template.bcc);
+                    }
+                    if (template.cc) {
+                      setIsCCOPen(true);
+                      setTagsCc(template.cc);
+                    }
                     setValue('message', template.body);
                   }
                 }}
@@ -88,24 +107,37 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
               </div>
             </div>
           </div>
-
           <div className='sm:col-span-4 mt-4'>
             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
               To<span className='text-red-600'>*</span>
             </label>
             <div className='mt-2 flex rounded-md shadow-sm'>
               <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                <input
-                  {...register('email', { required: true })}
-                  type='email'
-                  id='email'
-                  className='block w-full rounded-none rounded-l-md border-0 py-1.5 pl-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                />
+                <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                  {tagsTo.map((tagTo: string) => (
+                    <div
+                      key={tagTo}
+                      className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                    >
+                      <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                        <XMarkIcon className='w-4 h-4' />
+                      </button>
+                      <p>{tagTo}</p>
+                    </div>
+                  ))}
+                  <input
+                    type='cc'
+                    value={inputTo}
+                    onKeyDown={handleKeyDownTo}
+                    onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
+                    className='focus:none outline-none px-2 py-1 grow'
+                  />
+                </div>
               </div>
               <button
                 type='button'
                 className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
-                  isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'hover:bg-gray-50'
+                  isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                 }`}
                 onClick={() => setIsCCOPen(!isCCOpen)}
               >
@@ -114,7 +146,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
               <button
                 type='button'
                 className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
-                  isBCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'hover:bg-gray-50'
+                  isBCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                 }`}
                 onClick={() => setIsBCCOpen(!isBCCOpen)}
               >
@@ -128,13 +160,26 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 CC
               </label>
               <div className='mt-2'>
-                <input
-                  {...register('cc')}
-                  id='cc'
-                  type='cc'
-                  autoComplete='email'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                />
+                <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                  {tagsCc.map((tag: string) => (
+                    <div
+                      key={tag}
+                      className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                    >
+                      <button type='button' onClick={() => handleRemoveTag(tag)}>
+                        <XMarkIcon className='w-4 h-4' />
+                      </button>
+                      <p>{tag}</p>
+                    </div>
+                  ))}
+                  <input
+                    type='cc'
+                    value={inputCc}
+                    onKeyDown={handleKeyDown}
+                    onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
+                    className='focus:none outline-none px-2 py-1 grow rounded-md'
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -144,13 +189,26 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 BCC
               </label>
               <div className='mt-2'>
-                <input
-                  {...register('bcc')}
-                  id='bcc'
-                  type='bcc'
-                  autoComplete='email'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                />
+                <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                  {tagsBcc.map((tagBcc: string) => (
+                    <div
+                      key={tagBcc}
+                      className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                    >
+                      <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
+                        <XMarkIcon className='w-4 h-4' />
+                      </button>
+                      <p>{tagBcc}</p>
+                    </div>
+                  ))}
+                  <input
+                    type='bcc'
+                    value={inputBcc}
+                    onKeyDown={handleKeyDownBcc}
+                    onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
+                    className='focus:none outline-none px-2 py-1 grow rounded-md'
+                  />
+                </div>
               </div>
             </div>
           )}

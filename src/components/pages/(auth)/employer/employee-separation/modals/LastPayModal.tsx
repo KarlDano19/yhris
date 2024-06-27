@@ -1,38 +1,49 @@
-import React, { Dispatch, Fragment, useMemo, useRef, useState, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useState, useMemo, useEffect } from 'react';
 
 import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
-import useUpdateEmailTemplate from '../hooks/useUpdateEmailTemplate';
-import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails';
+import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
+import usePatchSeparationItem from '../hooks/usePatchSeparation';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 
+import { T_DocumentsModal } from '@/types/globals';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
 
-export default function EditEmailTemplateModal({
+type FormValues = {
+  template: string;
+  email: string;
+  message: string;
+  cc: string;
+  bcc: string;
+};
+
+export default function LastPayModal({
+  separationItems,
+  setSeparationItems,
   isOpen,
   setIsOpen,
-  refetch,
-  selectedEmailTemplateId,
 }: {
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
-  refetch: any;
-  selectedEmailTemplateId: number | null;
+  separationItems: any;
+  setSeparationItems: any;
+  isOpen: T_DocumentsModal | null;
+  setIsOpen: Dispatch<T_DocumentsModal | null>;
 }) {
-  const inputRef = useRef(null);
   const cancelButtonRef = useRef(null);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState('');
@@ -41,123 +52,146 @@ export default function EditEmailTemplateModal({
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const [file, setFile] = useState<File | null>(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
-  const { register, handleSubmit, setValue, watch } = useForm<any>();
-  const {
-    data: dataEmailTemplateDetail,
-    refetch: refetchEmailTemplateDetail,
-    remove: removeEmailTemplateDetail,
-  } = useGetEmailTemplateDetails(selectedEmailTemplateId);
-  const { mutate, isLoading } = useUpdateEmailTemplate();
+  const { register, handleSubmit, reset, setValue, watch } = useForm<FormValues>({
+    defaultValues: {
+      template: '',
+      message: '',
+    },
+  });
+  const { data: dataEmailTemplate } = useGetEmailTemplateItems();
+  const { mutate, isLoading } = usePatchSeparationItem();
 
   useEffect(() => {
-    if (isOpen) {
-      refetchEmailTemplateDetail();
+    if (isOpen && isOpen.id) {
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
+      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
+      if (separationItemsCopy[itemIndex]) {
+        setApplicantEmail(separationItemsCopy[itemIndex].email);
+        setTagsTo([separationItemsCopy[itemIndex].email]);
+      }
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (dataEmailTemplateDetail) {
-      setValue('subject', dataEmailTemplateDetail.subject);
-      setTagsTo(dataEmailTemplateDetail.to);
-      setValue('body', dataEmailTemplateDetail.body);
-      if (dataEmailTemplateDetail.cc) {
-        setIsCCOPen(true);
-        setTagsCc(dataEmailTemplateDetail.cc);
-      }
-      if (dataEmailTemplateDetail.bcc) {
-        setIsBCCOpen(true);
-        setTagsBcc(dataEmailTemplateDetail.bcc);
-      }
-    }
-  }, [dataEmailTemplateDetail]);
-
-  const customCloseModal = () => {
-    removeEmailTemplateDetail();
-    setIsOpen(false);
-  };
-
   const onSubmit = handleSubmit((data) => {
-    data.to = tagsTo;
-    data.cc = tagsCc;
-    data.bcc = tagsBcc;
-    const callbackReq = {
-      onSuccess: async (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />);
-        customCloseModal();
-        refetch();
-      },
-      onError: async (error: any) => {
-        toast.custom(() => <CustomToast message={error.message} type='error' />);
-      },
-    };
-    mutate({ emailTemplateId: selectedEmailTemplateId, data: data }, callbackReq);
+    if (isOpen && isOpen.id) {
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
+      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
+      const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
+      separationItemsCopy[itemIndex].id = isOpen.id;
+      separationItemsCopy[itemIndex].actionType = 'sending';
+      separationItemsCopy[itemIndex].emailType = 'last pay';
+      separationItemsCopy[itemIndex].lastPay.template = template.subject;
+      separationItemsCopy[itemIndex].lastPay.to = tagsTo;
+      if (tagsCc) {
+        separationItemsCopy[itemIndex].lastPay.cc = tagsCc;
+      }
+      if (tagsBcc) {
+        separationItemsCopy[itemIndex].lastPay.bcc = tagsBcc;
+      }
+      separationItemsCopy[itemIndex].lastPay.message = data.message;
+      separationItemsCopy[itemIndex].isLastPayReleased = true;
+      const callbackReq = {
+        onSuccess: (data: any) => {
+          setSeparationItems([...separationItemsCopy]);
+          customCloseModal();
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      };
+      mutate(separationItemsCopy[itemIndex], callbackReq);
+    } else {
+      toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
+    }
   });
 
-  const handleDrag = function (e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = function (e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    e.stopPropagation();
-    setFile(e?.dataTransfer?.files[0]);
-  };
-
-  const handleChange = function (e: React.ChangeEvent<HTMLInputElement>) {
-    e.preventDefault();
-    if (e.target.files) {
-      setFile(e.target.files[0]);
-      setValue('attachment', e.target.files[0]);
-      e.target.value = '';
-    }
+  const customCloseModal = () => {
+    reset();
+    setIsOpen(null);
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
-        <Transition.Child
-          as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
-        >
-          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+    <>
+      <Transition.Root show={isOpen ? true : false} as={Fragment}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          </Transition.Child>
 
-        <div className='fixed inset-0 z-10 overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
-              as={Fragment}
-              enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
-              leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-            >
-              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Create Email Template</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
-                </div>
-                <form onSubmit={onSubmit}>
-                  <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto h-[750px]'>
-                    <div className='sm:col-span-4 mt-2 w-full space-y-2'>
-                      <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Subject<span className='text-red-600'> *</span>
-                      </label>
-                      <input
-                        id='subject'
-                        type='text'
-                        {...register('subject', { required: true })}
-                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                      />
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300'
+                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200'
+                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                  <div className='flex bg-savoy-blue p-2 items-center'>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Send Last Pay</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
+                  </div>
+                  <form onSubmit={onSubmit}>
+                    <div className='px-4 pt-4 pb-6'>
+                      <div className='sm:col-span-4'>
+                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Email Template<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <select
+                            id='template'
+                            {...register('template', { required: true })}
+                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                            onChange={(event) => {
+                              const template = dataEmailTemplate.find(
+                                (item: any) => item.id === parseInt(event.target.value)
+                              );
+                              if (template) {
+                                if (applicantEmail) {
+                                  setTagsTo([applicantEmail, ...template.to]);
+                                } else {
+                                  setTagsTo(template.to);
+                                }
+                                if (template.bcc) {
+                                  setIsBCCOpen(true);
+                                  setTagsBcc(template.bcc);
+                                }
+                                if (template.cc) {
+                                  setIsCCOPen(true);
+                                  setTagsCc(template.cc);
+                                }
+                                setValue('message', template.body);
+                              }
+                            }}
+                          >
+                            <option value='' disabled>
+                              Select...
+                            </option>
+                            {(dataEmailTemplate || []).map((item: any) => (
+                              <option key={item.id} value={item.id}>
+                                {item.subject}
+                              </option>
+                            ))}
+                          </select>
+                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                            <SelectChevronDown />
+                          </div>
+                        </div>
+                      </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
@@ -211,7 +245,7 @@ export default function EditEmailTemplateModal({
                             CC
                           </label>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
                               {tagsCc.map((tag: string) => (
                                 <div
                                   key={tag}
@@ -240,7 +274,7 @@ export default function EditEmailTemplateModal({
                             BCC
                           </label>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
                               {tagsBcc.map((tagBcc: string) => (
                                 <div
                                   key={tagBcc}
@@ -264,73 +298,23 @@ export default function EditEmailTemplateModal({
                         </div>
                       )}
                       <div className='sm:col-span-4 mt-4'>
-                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Body<span className='text-red-600'> *</span>
+                        <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Message<span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea rows={4} {...register('body', { required: true })} id='body' hidden />
+                          <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
                           <ReactQuill
-                            onChange={(value) => setValue('body', value)}
+                            onChange={(value) => setValue('message', value)}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%' }}
-                            value={watch('body')}
+                            value={watch('message')}
                           />
                         </div>
                       </div>
-                      <div className='sm:col-span-4'>
-                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Attachements<span className='text-red-6000'></span>
-                        </label>
-                        <div>
-                          <div
-                            onDragEnter={handleDrag}
-                            onDragLeave={handleDrag}
-                            onDragOver={handleDrag}
-                            onDrop={handleDrop}
-                            className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
-                          >
-                            <label
-                              className={`${
-                                file === null
-                                  ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
-                                  : 'hidden'
-                              }`}
-                            >
-                              Drop file to upload
-                              <input
-                                {...register('attachment')}
-                                name='attachment'
-                                id='attachment'
-                                ref={inputRef}
-                                type='file'
-                                className='sr-only'
-                                onChange={handleChange}
-                              />
-                            </label>
-                            <div className={`${file !== null ? 'file-preview' : 'hidden'}`}>
-                              <p className='text-sm text-slate-800 font-light'>{file?.name}</p>
-                              <p className='underline text-blue-500 cursor-pointer' onClick={() => setFile(null)}>
-                                Remove File
-                              </p>
-                            </div>
-                          </div>
-                          <h1 className='text-xs pl-2'>Maximum file size: 10 mb</h1>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                  <hr />
-                  <div className='mt-5 sm:mt-4 sm:flex sm:flex-row px-4 justify-end space-x-4'>
-                    <button
-                      type='button'
-                      className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-5 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-100 sm:mt-0 sm:w-auto'
-                      onClick={() => setIsOpen(false)}
-                      ref={cancelButtonRef}
-                    >
-                      Close
-                    </button>
-                    <div className='ml-4'>
+                    <hr />
+                    <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                       <button
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
@@ -357,16 +341,24 @@ export default function EditEmailTemplateModal({
                             <span className='sr-only'>Loading...</span>
                           </div>
                         )}
-                        {!isLoading && 'Save'}
+                        {!isLoading && 'Send'}
+                      </button>
+                      <button
+                        type='button'
+                        className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                        onClick={() => customCloseModal()}
+                        ref={cancelButtonRef}
+                      >
+                        Close
                       </button>
                     </div>
-                  </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+        </Dialog>
+      </Transition.Root>
+    </>
   );
 }

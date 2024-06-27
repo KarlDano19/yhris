@@ -97,6 +97,7 @@ export default function Content() {
       dataAppliedApplicants.forEach((item: any) => {
         let newData = {
           id: item.applicant.id,
+          email: item.applicant.email,
           applicationId: item.id,
           image: `${item.applicant.photo}`,
           name: item.applicant.name,

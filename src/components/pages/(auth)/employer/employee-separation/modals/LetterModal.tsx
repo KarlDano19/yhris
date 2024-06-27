@@ -1,15 +1,17 @@
 import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
+import useTagTo from '@/components/hooks/useTagTo';
 import ConfirmModal from '@/components/ConfirmModal';
 import CustomToast from '@/components/CustomToast';
+import usePatchSeparationItem from '../hooks/usePatchSeparation';
 
-import usePatchSeparationItem from '../hooks/usePatchSeparationItem';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { T_LetterModal } from '@/types/globals';
 
@@ -33,11 +35,25 @@ export default function LetterModal({
   setIsOpen: Dispatch<T_LetterModal | null>;
 }) {
   const cancelButtonRef = useRef(null);
+  const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [letterType, setLetterType] = useState('');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
+  const [inputTo, setInputTo] = useState('');
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, reset, control, trigger } = useForm<FormValues>();
   const { mutate, isLoading } = usePatchSeparationItem();
+
+  useEffect(() => {
+    if (isOpen && isOpen.id) {
+      const itemIndex = separationItems.findIndex((item: any) => item.id === isOpen.id);
+      const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
+      if (separationItemsCopy[itemIndex]) {
+        setApplicantEmail(separationItemsCopy[itemIndex].email);
+        setTagsTo([separationItemsCopy[itemIndex].email]);
+      }
+    }
+  }, [isOpen]);
 
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
@@ -48,7 +64,7 @@ export default function LetterModal({
       separationItemsCopy[itemIndex].emailType = 'letters';
       separationItemsCopy[itemIndex].separationLetter.type = type;
       separationItemsCopy[itemIndex].separationLetter.date = data.date;
-      separationItemsCopy[itemIndex].separationLetter.to = data.email;
+      separationItemsCopy[itemIndex].separationLetter.to = tagsTo;
       separationItemsCopy[itemIndex].separationLetter.message = data.message;
       separationItemsCopy[itemIndex].isLetterSent = true;
       setToSaveData(separationItemsCopy[itemIndex]);
@@ -154,14 +170,29 @@ export default function LetterModal({
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
-                        <div className='mt-2'>
-                          <input
-                            id='email'
-                            {...register('email', { required: true })}
-                            type='email'
-                            autoComplete='email'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                          />
+                        <div className='mt-2 flex rounded-md shadow-sm'>
+                          <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'>
+                              {tagsTo.map((tagTo: string) => (
+                                <div
+                                  key={tagTo}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                >
+                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tagTo}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='cc'
+                                value={inputTo}
+                                onKeyDown={handleKeyDownTo}
+                                onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>

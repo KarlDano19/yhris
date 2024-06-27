@@ -20,6 +20,12 @@ export type T_QuitclaimModal = {
   id: number;
 };
 
+export type T_DeleteSepartionModal = {
+  open: boolean;
+  id: number;
+  name: string;
+};
+
 export type T_Separation = {
   date: string;
   name: string;
