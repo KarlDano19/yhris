@@ -18,20 +18,18 @@ import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const { mutate, isLoading } = useDeleteDirectivesItem();
-  const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState<any>([]);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [idToDelete, setIdToDelete] = useState<number | null>(null);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
   });
-  const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems(itemsFilter);
+  const [idToDelete, setIdToDelete] = useState<number | null>(null);
+  const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState<any>([]);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
   const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
-  const date1InputRef = useRef(null);
-  const date2InputRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
+  const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems(itemsFilter);
 
   useEffect(() => {
     refetch();
@@ -41,6 +39,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (dataDirectives) {
       dataDirectives.map((directive: any) => {
         directive.date = Intl.DateTimeFormat('en-US').format(new Date(directive.date));
+        directive.withResponse = directive.is_responded;
         return directive;
       });
       setCreateMemoPolicyItems(dataDirectives);
@@ -117,14 +116,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
                   <input
                     type='checkbox'
-                    defaultChecked={item.withResponse}
+                    checked={item.withResponse}
                     className={`form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white ${
                       !item.withResponse && 'opacity-30'
                     }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
                   />
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>

@@ -5,6 +5,7 @@ import { useRef, useCallback, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useFieldArray } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
+
 import CritiriaSubItem from './CritiriaSubItem';
 
 import AddCircleIcon from '@/svg/AddCircleIcon';
@@ -146,15 +147,14 @@ function EvaluationCriterionTab({
                                   <div className='flex flex-col'>
                                     <div
                                       className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
-                                      // data-tooltip-id='add-section-tooltip'
-                                      // data-tooltip-content='Add section'
-                                      // data-tooltip-place='left'
-                                      title='Add section'
+                                      data-tooltip-id='add-section-tooltip'
+                                      data-tooltip-content='Add section'
+                                      data-tooltip-place='left'
                                       onClick={() => addSection()}
                                     >
                                       <AddCircleIcon />
                                     </div>
-                                    {/* <Tooltip id='add-section-tooltip' style={{ fontSize: '10px' }} /> */}
+                                    <Tooltip id='add-section-tooltip' style={{ fontSize: '10px' }} />
                                     <div
                                       className='flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 mb-2 cursor-pointer'
                                       data-tooltip-id='delete-section-tooltip'

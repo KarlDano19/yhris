@@ -1,12 +1,13 @@
 import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
 
+import { useForm, useFieldArray } from 'react-hook-form';
 import { Dialog, Transition } from '@headlessui/react';
+
+import useGetEmployeeDetails from '../hooks/useGetEmployeeDetails';
+
 import { XCircleIcon, CheckIcon } from '@heroicons/react/24/solid';
 import DateCalendar from '@/svg/DateCalendar';
 import DropDownArrow from '@/svg/DropDownArrow';
-
-import useGetEmployeeDetails from '../hooks/useGetEmployeeDetails';
 
 export default function EmployeesModal({
   selectedEmployeeId,

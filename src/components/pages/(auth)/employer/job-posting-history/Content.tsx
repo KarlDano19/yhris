@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
+import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import useStore from '@/lib/store';
@@ -231,12 +232,15 @@ const Content = () => {
               return (
                 <span
                   key={social}
-                  title={`Share to ${social}`}
                   className='cursor-pointer'
                   onClick={() => {
                     socialMediaShare(social, jobPost.og_url);
                   }}
+                  data-tooltip-id='social-btn-tooltip'
+                  data-tooltip-content={`Share to ${social}`}
+                  data-tooltip-place='bottom'
                 >
+                  <Tooltip id='social-btn-tooltip' style={{ fontSize: '10px' }} />
                   <DynamicComponent />
                 </span>
               );

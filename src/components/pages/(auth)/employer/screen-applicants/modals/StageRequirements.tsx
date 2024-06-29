@@ -1,11 +1,16 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { ContextTypes, StageRequirementsTypes as PropTypes } from '../types';
 import { useContext, useEffect, useState } from 'react';
-import ModalLayout from './ModalLayout';
-import useTagInput from '../hooks/useTagInput';
+
+import { Tooltip } from 'react-tooltip';
+
 import { initialActionState } from '../lib/initialActionState';
+import ModalLayout from './ModalLayout';
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
+import useTagInput from '../hooks/useTagInput';
 import StateContext from '../contexts/StateContext';
+
+import { XMarkIcon } from '@heroicons/react/24/outline';
+
+import { ContextTypes, StageRequirementsTypes as PropTypes } from '../types';
 
 export default function StageRequirements({ title, requirements, handleFormSubmit }: PropTypes) {
   const { setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
@@ -43,8 +48,11 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
               name='requirements'
               placeholder='Enter requirement...'
               className='focus:none outline-none py-2 px-4 grow'
-              title='Press enter key or click add button to insert'
+              data-tooltip-id='stage-input-tooltip'
+              data-tooltip-content='Press enter key or click add button to insert'
+              data-tooltip-place='bottom'
             />
+            <Tooltip id='stage-input-tooltip' style={{ fontSize: '10px' }} />
             <button type='button' onClick={onClickAdd} className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'>
               ADD
             </button>
