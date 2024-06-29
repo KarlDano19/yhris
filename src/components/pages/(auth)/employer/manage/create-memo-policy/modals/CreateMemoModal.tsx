@@ -176,7 +176,6 @@ export default function CreateMemoModal({
                       </label>
                       <div className='mt-2'>
                         <textarea
-                          required
                           rows={4}
                           {...register('body')}
                           id='body'

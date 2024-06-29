@@ -32,9 +32,11 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         data.context = separationEmail.signDocuments.message;
       }
       if (separationEmail.emailType === 'last pay') {
-        data.subject = 'Last Pay Release';
+        data.subject = `Last Pay | ${separationEmail.lastPay.template}`;
         data.to = separationEmail.lastPay.to;
-        data.context = 'Test last pay body';
+        data.cc = separationEmail.lastPay.cc;
+        data.bcc = separationEmail.lastPay.bcc;
+        data.context = separationEmail.lastPay.message;
       }
       if (separationEmail.emailType === 'quit claim') {
         data.subject = `Quit Claim | ${separationEmail.quitClaim.template}`;

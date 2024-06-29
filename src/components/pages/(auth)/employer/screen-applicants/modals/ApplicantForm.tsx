@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext, Fragment, useRef } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
 
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';

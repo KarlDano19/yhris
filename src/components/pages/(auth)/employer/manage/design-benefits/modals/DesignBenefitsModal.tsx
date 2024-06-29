@@ -36,7 +36,7 @@ export default function DesignBenefitsModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
-          () => <CustomToast message={"Create benefit successfully"} type="success" />,
+          () => <CustomToast message={data.message} type="success" />,
           { duration: 5000 }
         );
         setIsOpen(false);
