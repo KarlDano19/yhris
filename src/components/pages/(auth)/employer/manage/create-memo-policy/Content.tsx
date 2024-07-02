@@ -348,20 +348,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <CreateMemoModal
-        isOpen={isCreateMemoModalOpen}
-        setIsOpen={setIsCreateMemoModalOpen}
-        setCreateMemoPolicyItems={setCreateMemoPolicyItems}
-        createMemoPolicyItems={createMemoPolicyItems}
-        refetch={refetch}
-      />
-      <CreatePolicyModal
-        setCreateMemoPolicyItems={setCreateMemoPolicyItems}
-        createMemoPolicyItems={createMemoPolicyItems}
-        isOpen={isCreatePolicyModalOpen}
-        setIsOpen={setIsCreatePolicyModalOpen}
-        refetch={refetch}
-      />
+      <CreateMemoModal isOpen={isCreateMemoModalOpen} setIsOpen={setIsCreateMemoModalOpen} refetch={refetch} />
+      <CreatePolicyModal isOpen={isCreatePolicyModalOpen} setIsOpen={setIsCreatePolicyModalOpen} refetch={refetch} />
       <ConfirmModal
         message='Are you sure you want to delete this memo/policy?'
         isOpen={isConfirmModalOpen}
