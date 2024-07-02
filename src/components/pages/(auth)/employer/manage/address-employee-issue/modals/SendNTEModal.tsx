@@ -1,16 +1,20 @@
-import { Dispatch, Fragment, useMemo, useRef, useState } from 'react';
+import { Dispatch, Fragment, useMemo, useRef, useEffect, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import useTagTo from '@/components/hooks/useTagTo';
+import useTagCC from '@/components/hooks/useTagCc';
+import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
 
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
@@ -39,9 +43,16 @@ export default function SendNTEModal({
 }) {
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
-  const { register, handleSubmit, reset, getValues, setValue, trigger } = useForm<FormValues>({
+  const [inputTo, setInputTo] = useState('');
+  const [inputCc, setInputCc] = useState('');
+  const [inputBcc, setInputBcc] = useState('');
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
+  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
+  const { register, handleSubmit, reset, watch, setValue, trigger } = useForm<FormValues>({
     defaultValues: {
       template: '',
       message: '',
@@ -50,17 +61,33 @@ export default function SendNTEModal({
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
 
+  useEffect(() => {
+    if (isOpen && isOpen.id) {
+      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
+      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
+      if (employeeIssueItemsCopy[itemIndex]) {
+        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
+        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+      }
+    }
+  }, [isOpen]);
+
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
+      const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
       employeeIssueItemsCopy[itemIndex].id = isOpen.id;
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'nte';
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = data.template;
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.to = data.email;
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = data.cc;
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = data.bcc;
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template.subject;
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.to = tagsTo;
+      if (tagsCc) {
+        employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = tagsCc;
+      }
+      if (tagsBcc) {
+        employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
+      }
       employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
       employeeIssueItemsCopy[itemIndex].isNTESent = true;
       const callbackReq = {
@@ -116,24 +143,6 @@ export default function SendNTEModal({
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
-                      <div
-                        className={`
-                         hidden rounded-md bg-red-50 p-4 mb-3`}
-                      >
-                        <div className='flex'>
-                          <div className='flex-shrink-0'>
-                            <XCircleIcon className='h-5 w-5 text-red-400' aria-hidden='true' />
-                          </div>
-                          <div className='ml-3'>
-                            {/* If incomplete fields */}
-                            <h3 className='text-sm font-medium text-red-800'>
-                              You cannot proceed due to incomplete fields. Please review.
-                            </h3>
-                            {/* If invalid email */}
-                            <h3 className='text-sm font-medium text-red-800'>Invalid email should not proceed.</h3>
-                          </div>
-                        </div>
-                      </div>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                           Email Template<span className='text-red-600'>*</span>
@@ -143,12 +152,33 @@ export default function SendNTEModal({
                             id='template'
                             {...register('template', { required: true })}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                            onChange={(event) => {
+                              const template = dataEmailTemplate.find(
+                                (item: any) => item.id === parseInt(event.target.value)
+                              );
+                              if (template) {
+                                if (applicantEmail) {
+                                  setTagsTo([applicantEmail, ...template.to]);
+                                } else {
+                                  setTagsTo(template.to);
+                                }
+                                if (template.bcc) {
+                                  setIsBCCOpen(true);
+                                  setTagsBcc(template.bcc);
+                                }
+                                if (template.cc) {
+                                  setIsCCOPen(true);
+                                  setTagsCc(template.cc);
+                                }
+                                setValue('message', template.body);
+                              }
+                            }}
                           >
                             <option value='' disabled>
                               Select...
                             </option>
                             {(dataEmailTemplate || []).map((item: any) => (
-                              <option key={item.id} value={item.subject}>
+                              <option key={item.id} value={item.id}>
                                 {item.subject}
                               </option>
                             ))}
@@ -164,17 +194,31 @@ export default function SendNTEModal({
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <input
-                              type='email'
-                              {...register('email', { required: true })}
-                              id='email'
-                              className='block w-full rounded-none rounded-l-md border-0 py-1.5 pl-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                            />
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                              {tagsTo.map((tagTo: string) => (
+                                <div
+                                  key={tagTo}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                >
+                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tagTo}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='cc'
+                                value={inputTo}
+                                onKeyDown={handleKeyDownTo}
+                                onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
+                                className='focus:none outline-none px-2 py-1 grow'
+                              />
+                            </div>
                           </div>
                           <button
                             type='button'
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                              isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
                             onClick={() => setIsCCOPen(!isCCOpen)}
                           >
@@ -182,8 +226,8 @@ export default function SendNTEModal({
                           </button>
                           <button
                             type='button'
-                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
-                              isBCCOpen && 'bg-savoy-blue text-white hover:bg-blue-700'
+                            className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                              isBCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
                             onClick={() => setIsBCCOpen(!isBCCOpen)}
                           >
@@ -197,13 +241,26 @@ export default function SendNTEModal({
                             CC
                           </label>
                           <div className='mt-2'>
-                            <input
-                              id='cc'
-                              {...register('cc')}
-                              type='cc'
-                              autoComplete='email'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            />
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                              {tagsCc.map((tag: string) => (
+                                <div
+                                  key={tag}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                >
+                                  <button type='button' onClick={() => handleRemoveTag(tag)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tag}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='cc'
+                                value={inputCc}
+                                onKeyDown={handleKeyDown}
+                                onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
@@ -213,13 +270,26 @@ export default function SendNTEModal({
                             BCC
                           </label>
                           <div className='mt-2'>
-                            <input
-                              id='bcc'
-                              {...register('bcc')}
-                              type='bcc'
-                              autoComplete='email'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            />
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
+                              {tagsBcc.map((tagBcc: string) => (
+                                <div
+                                  key={tagBcc}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                >
+                                  <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tagBcc}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='bcc'
+                                value={inputBcc}
+                                onKeyDown={handleKeyDownBcc}
+                                onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
@@ -234,7 +304,7 @@ export default function SendNTEModal({
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%' }}
-                            defaultValue={getValues('message')}
+                            value={watch('message')}
                           />
                         </div>
                       </div>

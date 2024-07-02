@@ -48,7 +48,7 @@ const Details = ({
             height={164}
             priority={true}
             alt='employer-logo'
-            className='rounded object-cover max-w-[143px] max-h-[164px]'
+            className='rounded object-cover max-w-[143px] h-[164px]'
           />
         </div>
         <div className='basis-1/3 mr-10'>

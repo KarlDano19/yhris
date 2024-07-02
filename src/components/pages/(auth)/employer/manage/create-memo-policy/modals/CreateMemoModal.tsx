@@ -1,50 +1,45 @@
 import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
+
+import Image from 'next/image';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { T_Directive } from '@/types/globals';
-import SignatureModal from './SignatureModal';
-import Image from 'next/image';
+
 import CustomToast from '@/components/CustomToast';
 import DragDrop from '@/components/DragDrop';
+import useTagTo from '@/components/hooks/useTagTo';
+import SignatureModal from './SignatureModal';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
 
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
+import { T_Directive } from '@/types/globals';
+
 export default function CreateMemoModal({
-  setCreateMemoPolicyItems,
-  createMemoPolicyItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
-  setCreateMemoPolicyItems: any;
-  createMemoPolicyItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
 }) {
-  const { mutate, isLoading } = useAddDirectivesItems();
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    watch,
-    formState: { errors },
-    getValues,
-    trigger,
-  } = useForm<T_Directive>();
   const cancelButtonRef = useRef(null);
-
-  const [signatureUrl, setSignatureUrl] = useState('');
+  const [signatureUrl, setSignatureUrl] = useState<string>('');
   const [signatureModalOpen, setSignatureModalOpen] = useState(false);
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [qrCodeExist, setQrCodeExist] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
+  const [inputTo, setInputTo] = useState('');
+  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const { register, handleSubmit, setValue, reset, trigger } = useForm<T_Directive>();
+  const { mutate, isLoading } = useAddDirectivesItems();
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
+      onSuccess: () => {
         toast.custom(
           () => <CustomToast message={'Successfully created a memo'} type='success' />,
 
@@ -60,9 +55,11 @@ export default function CreateMemoModal({
         });
       },
     };
+    data['email'] = tagsTo;
     data['type'] = 'memo';
     mutate({ ...toSaveData, ...data }, callbackReq);
   });
+
   const uploadOnChange = ({ target }: { target: any }) => {
     const file = target.files[0];
     if (!file) return;
@@ -75,16 +72,18 @@ export default function CreateMemoModal({
       });
     }
   };
+
   useEffect(() => {
     if (signatureUrl) {
       setValue('signature', signatureUrl);
     } else {
       setSignatureUrl('');
     }
+    if (!isOpen && signatureUrl) {
+      setSignatureUrl('');
+    }
   }, [signatureUrl, setValue]);
-  if (!isOpen && signatureUrl) {
-    setSignatureUrl('');
-  }
+
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
@@ -161,13 +160,29 @@ export default function CreateMemoModal({
                       <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                         To<span className='text-red-600'>*</span>
                       </label>
-                      <div className='mt-2'>
-                        <input
-                          id='email'
-                          {...register('email', { required: true })}
-                          type='email'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                        />
+                      <div className='mt-2 flex rounded-md shadow-sm'>
+                        <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                          <div className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'>
+                            {tagsTo.map((tagTo: string) => (
+                              <div
+                                key={tagTo}
+                                className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                              >
+                                <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                  <XMarkIcon className='w-4 h-4' />
+                                </button>
+                                <p>{tagTo}</p>
+                              </div>
+                            ))}
+                            <input
+                              type='cc'
+                              value={inputTo}
+                              onKeyDown={handleKeyDownTo}
+                              onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
+                              className='focus:none outline-none px-2 py-1 grow rounded-md'
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>

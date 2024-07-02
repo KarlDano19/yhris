@@ -45,6 +45,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
 
   useEffect(() => {
+    console.log(actionState)
     setIsOpen(true);
     setTagsTo([actionState.email]);
   }, []);

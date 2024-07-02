@@ -6,10 +6,11 @@ export default function addStage(state: any, action: any) {
   let newState
   const newStage = {
     id: id,
-    title: "Untitled",
+    title: "",
     isNewStage: true,
     requirements: [],
     applicants: [],
+    addType: addType,
   }
 
   if (addType === "adjacent") {

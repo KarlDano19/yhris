@@ -99,13 +99,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     if (dataEmployeeIssues) {
       dataEmployeeIssues.map((employeeIssue: any) => {
-        const employee = employeeIssue.employee;
         employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
           month: '2-digit',
           day: '2-digit',
           year: 'numeric',
         }).format(new Date(employeeIssue.incident_date));
-        employeeIssue['name'] = employee.name;
         employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
         employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
         employeeIssue['incidentReceivedDate'] =

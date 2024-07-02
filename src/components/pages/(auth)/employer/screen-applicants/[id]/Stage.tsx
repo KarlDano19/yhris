@@ -28,6 +28,7 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
       className="flex flex-col gap-2 bg-white p-3 rounded-2xl"
     >
       <StageHeader
+        index={index}
         stage={stage}
         stageDropdownId={stageDropdownId}
         setStageDropdownId={setStageDropdownId}

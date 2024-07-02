@@ -80,6 +80,7 @@ export type StageType = {
   requirements: string[];
   applicants: ApplicantsType;
   orderBy: number;
+  addType: string;
 };
 
 export type ActionStateType = {
@@ -120,6 +121,7 @@ export type ModalTypes = {
 };
 
 export type StageHeaderTypes = {
+  index: number;
   stage: StageType;
   stageDropdownId: number | null;
   setStageDropdownId: any;
