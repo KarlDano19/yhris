@@ -139,7 +139,6 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: Prof
             <input
               type='file'
               {...register('profilePicture', {
-                required: true,
                 onChange: (e: any) => {
                   const file = e.target.files[0];
                   if (file && file.size > 5 * 1024 * 1024) {
