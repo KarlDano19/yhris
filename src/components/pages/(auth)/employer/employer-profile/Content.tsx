@@ -13,6 +13,7 @@ import Details from './Details';
 import Settings from './Settings';
 import useSavedProfile from './hooks/useUpdateProfile';
 import classNames from '@/helpers/classNames';
+import ConfirmEditEmployerProfileModal from '../employer-profile/modal/ConfirmEditEmployerProfileModal'
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -23,6 +24,7 @@ function Content() {
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [progressBar, setProgressBar] = useState(0);
   const { register, setValue, watch, handleSubmit } = useForm<T_EmployerProfile>();
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const { mutate, isLoading } = useSavedProfile();
 
   useEffect(() => {
@@ -55,6 +57,7 @@ function Content() {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        setIsSuccessModalOpen(true);
         queryClient.refetchQueries({ queryKey: ['employerProfileCache'] });
       },
       onError: (err: any) => {
@@ -126,10 +129,11 @@ function Content() {
           </div>
         </div>
         {progressBar === 0 && (
-          <Details register={register} onSubmit={onSubmit} setValue={setValue} watch={watch} isLoading={isLoading} />
+          <Details register={register} handleSubmit={handleSubmit} setValue={setValue} watch={watch} setProgressBar={setProgressBar}/>
         )}
         {progressBar === 1 && <Settings register={register} onSubmit={onSubmit} isLoading={isLoading} />}
       </div>
+      <ConfirmEditEmployerProfileModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}/>
     </div>
   );
 }
