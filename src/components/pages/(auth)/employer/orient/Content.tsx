@@ -35,7 +35,6 @@ const Content = () => {
   });
   const {
     data: applicationOrient,
-    isLoading: applicationOrientIsLoading,
     refetch,
   } = useGetApplicantOrient(Number(params.position), itemsFilter);
   const { mutate, isLoading } = useUpdateApplicantOrient();
@@ -58,7 +57,7 @@ const Content = () => {
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
 
   useEffect(() => {
-    if (applicationOrient && applicationOrient.length !== 0) {
+    if (applicationOrient) {
       applicationOrient.map((item: any) => {
         item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
         item['isContractSent'] = item.is_contract_sent;
