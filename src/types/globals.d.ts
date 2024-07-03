@@ -193,9 +193,9 @@ export type T_Investigation = {
 export type T_Directive = {
   type: string;
   title: string;
-  email: string;
+  email: string[];
   withResponse: boolean;
-  file: Array;
+  file: Array | never;
   body: string;
   name: string;
   position: string;
@@ -218,13 +218,13 @@ export type T_PolicyField ={
 
 export type T_Benefit = {
   title: string;
-  email: string;
+  email: string[];
   purpose: string;
   benefits: string;
   coverage: string;
   eligibility: string;
-  cc: string;
-  bcc: string;
+  cc: string[];
+  bcc: string[];
 };
 
 export type T_UserPassword = {

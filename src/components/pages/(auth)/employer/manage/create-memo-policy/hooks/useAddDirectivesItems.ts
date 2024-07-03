@@ -9,7 +9,7 @@ async function addDirective(directive: T_Directive) {
     const data = new FormData();
     data.append('directive_type', directive.type);
     data.append('title', directive.title);
-    data.append('to', directive.email);
+    data.append('to', JSON.stringify(directive.email));
     // for (const [index, file] of directive.file.entries()) {
     //   data.append(`file${index}`, file);
     // }

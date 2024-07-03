@@ -220,8 +220,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       <DesignBenefitsModal
-        designBenefitsItems={designBenefitsItems}
-        setDesignBenefitsItems={setDesignBenefitsItems}
         isOpen={isDesignBenefitsModalOpen}
         setIsOpen={setIsDesignBenefitsModalOpen}
         refetch={refetch}

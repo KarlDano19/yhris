@@ -25,7 +25,6 @@ import DragAndDrop from './DragAndDrop';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
 import usetGetJobPostDetails from '../hooks/usetGetJobPostDetails';
 import useUpdateStage from '../hooks/useUpdateStage';
-import useAddStage from '../hooks/useAddStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
@@ -42,19 +41,15 @@ type ModalSelectedTypes = {
 
 export default function Content() {
   const params = useParams();
-  const { mutate: addMutate, isLoading: isAddLoading } = useAddStage();
-  const { mutate: updateMutate, isLoading: isUpdateLoading } = useUpdateStage();
-  const { mutate: updateStatusMutate, isLoading: isUpdateStatusLoading } = useUpdateStatus();
+  const { mutate: updateMutate } = useUpdateStage();
+  const { mutate: updateStatusMutate } = useUpdateStatus();
   const { mutate: sendInterviewScheduleMutate, isLoading: isSendInterviewScheduleLoading } = useSendInterviewSchedule();
   const {
     data: dataJobPostDetails,
     isLoading: isGetJobPostDetailsLoading,
     refetch: jobPostDetailsRefetch,
   } = usetGetJobPostDetails(params.id);
-  const {
-    data: dataAppliedApplicants,
-    refetch: appliedApplicantRefetch,
-  } = useGetAppliedApplicants(params.id);
+  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(params.id);
   const {
     CLEAR_STAGE,
     STAGE_REQUIREMENTS,
@@ -73,7 +68,7 @@ export default function Content() {
   const requirements = state.find((item: StageType) => {
     return item.id === actionState.stageId;
   })?.requirements;
-  const { mutate: emailMutate, isLoading: isEmailLoading } = useSendEmail();
+  const { mutate: emailMutate } = useSendEmail();
 
   useEffect(() => {
     if (dataJobPostDetails) {
@@ -229,25 +224,20 @@ export default function Content() {
 
   const handleAddStage = () => {
     const { current: element } = containerRef;
-    const callbackReq = {
-      onSuccess: (data: any) => {
-        dispatch({ type: ADD_STAGE, payload: { id: data.job_stage_id, addType: 'last' } });
-        setTimeout(() => {
-          if (element !== null) element.scrollLeft = element.scrollWidth;
-        }, 10);
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
-      },
-    };
-    const data: any = {
-      title: 'Untitled',
-      job_posting: params.id,
-      order_by: state.length,
-    };
-    addMutate(data, callbackReq);
+    const hasPendingStage = state.some((stage: any) => stage.isNewStage);
+    if (hasPendingStage) {
+      toast.custom(() => <CustomToast message='Cannot add yet, you still have pending stage.' type='error' />, {
+        duration: 7000,
+      });
+    } else {
+      dispatch({
+        type: ADD_STAGE,
+        payload: { id: new Date().getTime(), addType: 'last' },
+      });
+      setTimeout(() => {
+        if (element !== null) element.scrollLeft = element.scrollWidth;
+      }, 10);
+    }
   };
 
   return (

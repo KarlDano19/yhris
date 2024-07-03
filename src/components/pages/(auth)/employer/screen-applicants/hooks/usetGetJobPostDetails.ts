@@ -12,10 +12,7 @@ async function getJobPostDetails(jobId: any) {
       },
     };
     if (token) {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}/`,
-        config
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}/`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -32,11 +29,10 @@ async function getJobPostDetails(jobId: any) {
 }
 
 function usetGetJobPostDetails(jobId: any) {
-  const query = useQuery(
-    ['jobPostDetailsCache', {}],
-    () => getJobPostDetails(jobId)
-  );
-
+  const query = useQuery(['jobPostDetailsCache', {}], () => getJobPostDetails(jobId), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
   return query;
 }
 
