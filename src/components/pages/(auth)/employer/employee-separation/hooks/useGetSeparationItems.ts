@@ -34,7 +34,7 @@ async function getSeparationItems(filters: any) {
 
 function useGetSeparationItems(filters: any) {
   const query = useQuery(['separationsItemCache'], () => getSeparationItems(filters), {
-    enabled: false,
+    refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 
