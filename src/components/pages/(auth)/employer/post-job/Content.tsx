@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
-import useStore from '@/lib/store';
 import CreateJobModal from './create-job/modals/CreateJobModal';
+import ConfirmSocialShareModal from './create-job/modals/ConfirmSocialShareModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import JobPostingHistory from '@/svg/JobPostingHistory';
@@ -20,8 +20,68 @@ const menus = [
 ];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const { count, increment } = useStore();
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [socialType, setSocialType] = useState<string | null>(null);
+  const [socialOgUrl, setOgUrl] = useState<string>('');
+  const [isSocialShareModalOpen, setIsSocialShareModalOpen] = useState(false);
+  const [isSocialShareModalClosed, setIsSocialShareModalClosed] = useState(false);
+  const isSocialShareModalClosedRef = useRef(isSocialShareModalClosed);
+
+  useEffect(() => {
+    isSocialShareModalClosedRef.current = isSocialShareModalClosed;
+  }, [isSocialShareModalClosed]);
+
+  const openConfirmSocialShareModal = (social: string, og_url: string) => {
+    setOgUrl(og_url);
+
+    const openModalAndWait = async (social: string) => {
+      return new Promise<void>((resolve) => {
+        setSocialType(social);
+        setIsSocialShareModalOpen(true);
+        const interval = setInterval(() => {
+          if (isSocialShareModalClosedRef.current) {
+            clearInterval(interval);
+            setIsSocialShareModalClosed(false);
+            setIsSocialShareModalOpen(false);
+            resolve();
+          }
+        }, 100);
+      });
+    };
+
+    const splitSocial = social.split(',');
+    const processSocialShares = async () => {
+      for (const social of splitSocial) {
+        await openModalAndWait(social);
+      }
+    };
+
+    processSocialShares();
+  };
+
+  const socialMediaShare = () => {
+    const encoded_url = encodeURIComponent(socialOgUrl);
+    if (socialType === 'Facebook') {
+      const og_url = `${encoded_url}%3Fsource%3Dfacebook`;
+      shareFb(og_url);
+      return;
+    }
+    if (socialType === 'LinkedIn') {
+      const og_url = `${encoded_url}%3Fsource%3Dlinkedin`;
+      shareLinkedIn(og_url);
+      return;
+    }
+  };
+
+  const shareFb = (og_url: string) => {
+    const FBSharer = `https://www.facebook.com/sharer/sharer.php?u=${og_url}`;
+    window.open(FBSharer);
+  };
+
+  const shareLinkedIn = (og_url: string) => {
+    const LinkedInSharer = `https://www.linkedin.com/sharing/share-offsite/?url=${og_url}`;
+    window.open(LinkedInSharer);
+  };
 
   return (
     <div className='min-h-screen'>
@@ -57,7 +117,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             })}
           </div>
         </div>
-        <CreateJobModal isOpen={isCreateJobModalOpen} setIsOpen={setIsCreateJobModalOpen} />
+        {isCreateJobModalOpen && (
+          <CreateJobModal
+            isOpen={isCreateJobModalOpen}
+            setIsOpen={setIsCreateJobModalOpen}
+            openConfirmSocialShareModal={openConfirmSocialShareModal}
+          />
+        )}
+        {isSocialShareModalOpen && (
+          <ConfirmSocialShareModal
+            onSubmit={socialMediaShare}
+            socialType={socialType}
+            isOpen={isSocialShareModalOpen}
+            setIsOpen={setIsSocialShareModalOpen}
+            setIsSocialShareModalClosed={setIsSocialShareModalClosed}
+          />
+        )}
       </div>
     </div>
   );

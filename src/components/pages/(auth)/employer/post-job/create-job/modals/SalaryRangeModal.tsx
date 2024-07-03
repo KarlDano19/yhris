@@ -6,11 +6,13 @@ export default function SalaryRangeModal({
   isOpen,
   setIsOpen,
   setIsRangeBenefitsAdded,
+  onSubmit,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   setPageNumber: Dispatch<number>;
   setIsRangeBenefitsAdded: Dispatch<boolean>;
+  onSubmit: () => void;
 }) {
   const cancelButtonRef = useRef(null);
 
@@ -67,9 +69,9 @@ export default function SalaryRangeModal({
                     type='button'
                     className='text-lg block sm:flex m-auto font-bold leading-6 text-white bg-savoy-blue shadow-sm py-3 px-6 rounded-md transition-all'
                     onClick={() => {
-                      setPageNumber(3);
-                      setIsOpen(false);
                       setIsRangeBenefitsAdded(true);
+                      setIsOpen(false);
+                      onSubmit();
                     }}
                   >
                     YES, ADD THEM.

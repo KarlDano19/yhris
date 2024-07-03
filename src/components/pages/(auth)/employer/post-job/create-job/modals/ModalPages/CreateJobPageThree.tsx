@@ -10,6 +10,7 @@ export default function CreateJobPageThree({
   trigger,
   setFocus,
   getValues,
+  onSubmit,
 }: {
   watch: any;
   register: any;
@@ -18,6 +19,7 @@ export default function CreateJobPageThree({
   trigger: any;
   setFocus: any;
   getValues: any;
+  onSubmit: () => void;
 }) {
   const [selectedBenefitOptions, setSelectedBenefitOptions] = useState<string[]>([]);
   const [selectedOtherBenefit, setSelectedOtherBenefit] = useState<string[]>([]);
@@ -337,7 +339,7 @@ export default function CreateJobPageThree({
               ((salaryTypeValue === 'Range' && salaryRangeMinValue && salaryRangeMaxValue) ||
                 (salaryTypeValue !== 'Range' && salaryValueValue.trim() !== '-' && salaryValueValue))
             ) {
-              setPageNumber(4);
+              onSubmit();
             }
           }}
         >

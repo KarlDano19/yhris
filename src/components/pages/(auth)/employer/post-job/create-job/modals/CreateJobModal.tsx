@@ -1,9 +1,8 @@
-import { Dispatch, Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
-
 
 import CustomToast from '@/components/CustomToast';
 import SalaryRangeModal from './SalaryRangeModal';
@@ -14,44 +13,106 @@ import CreateJobPageFour from './ModalPages/CreateJobPageFour';
 import CreateJobPageFive from './ModalPages/CreateJobPageFive';
 import CreateJobPageSix from './ModalPages/CreateJobPageSix';
 import CreateJobPageSeven from './ModalPages/CreateJobPageSeven';
-import CreateJobPageEight from './ModalPages/CreateJobPageEight';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
-import { T_CreateJob } from '@/types/globals';
 
-export default function CreateJobModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
-  const { register, handleSubmit, watch, setValue, getValues, trigger, setFocus, reset, control } =
-    useForm<T_CreateJob>({
-      defaultValues: {
-        salary: {
-          salaryType: 'Range',
-        },
-        country: 'Philippines',
-        language: 'English',
-        jobDescription: CREATEJOB_TEMPLATE[0],
-        qualifications: QUALIFICATION_TEMPLATE[0],
-      },
-    });
-  const { mutate, isLoading } = useAddJobPostItems();
-
+export default function CreateJobModal({
+  isOpen,
+  setIsOpen,
+  openConfirmSocialShareModal,
+}: {
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
+  openConfirmSocialShareModal: (social: string, og_url: string) => void;
+}) {
+  const cancelButtonRef = useRef(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
-  const [isCreateJobPageEightModalOpen, setIsCreateJobPageEightModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
-  const cancelButtonRef = useRef(null);
+  const [combinedFormData, setCombinedFormData] = useState<any>({});
+  const firstForm = useForm<any>({
+    defaultValues: {
+      country: 'Philippines',
+      language: 'English',
+    },
+  });
+  const secondForm = useForm();
+  const thirdForm = useForm<any>({
+    defaultValues: {
+      salary: {
+        salaryType: 'Range',
+      },
+    },
+  });
+  const fourthForm = useForm<any>({
+    defaultValues: {
+      jobDescription: CREATEJOB_TEMPLATE[0],
+      qualifications: QUALIFICATION_TEMPLATE[0],
+    },
+  });
+  const fifthForm = useForm();
+  const sixthForm = useForm();
+  const seventhForm = useForm();
+  const { mutate, isLoading } = useAddJobPostItems();
 
-  const onSubmit = handleSubmit((data: T_CreateJob) => {
+  const customCloseModal = () => {
+    firstForm.reset();
+    secondForm.reset();
+    thirdForm.reset();
+    fourthForm.reset();
+    fifthForm.reset();
+    sixthForm.reset();
+    seventhForm.reset();
+    setIsOpen(false);
+  };
+
+  const firstFormSubmit = (data: any) => {
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setPageNumber(2);
+  };
+
+  const secondFormSubmit = () => {
+    const data = secondForm.getValues();
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setPageNumber(3);
+  };
+
+  const thirdFormSubmit = () => {
+    const data = thirdForm.getValues();
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setPageNumber(4);
+  };
+
+  const fourthFormSubmit = () => {
+    const data = fourthForm.getValues();
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setPageNumber(5);
+  };
+
+  const fifthFormSubmit = () => {
+    const data = fifthForm.getValues();
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setPageNumber(6);
+  };
+
+  const sixthFormSubmit = () => {
+    const data = sixthForm.getValues();
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setPageNumber(7);
+  };
+
+  const onSubmit = () => {
+    const data = seventhForm.getValues();
+    const finalData = { ...combinedFormData, ...data };
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-        setIsOpen(false);
+        customCloseModal();
         setIsSalaryRangeModalOpen(false);
-        socialMediaShare(data.job_post.shared_to, data.job_post.og_url);
-        reset();
-        setPageNumber(1);
+        openConfirmSocialShareModal(data.job_post.shared_to, data.job_post.og_url);
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -59,37 +120,13 @@ export default function CreateJobModal({ isOpen, setIsOpen }: { isOpen: boolean;
         });
       },
     };
-    mutate(data, callbackReq);
-  });
-
-  const socialMediaShare = (social: string, og_url: string) => {
-    const encoded_url = encodeURIComponent(og_url);
-    if (social === 'Facebook') {
-      og_url = `${encoded_url}%3Fsource%3Dfacebook`;
-      shareFb(og_url);
-      return;
-    }
-    if (social === 'LinkedIn') {
-      og_url = `${encoded_url}%3Fsource%3Dlinkedin`;
-      shareLinkedIn(og_url);
-      return;
-    }
-  };
-
-  const shareFb = (og_url: string) => {
-    const FBSharer = `https://www.facebook.com/sharer/sharer.php?u=${og_url}`;
-    window.open(FBSharer);
-  };
-
-  const shareLinkedIn = (og_url: string) => {
-    const LinkedInSharer = `https://www.linkedin.com/sharing/share-offsite/?url=${og_url}`;
-    window.open(LinkedInSharer);
+    mutate(finalData, callbackReq);
   };
 
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -116,78 +153,82 @@ export default function CreateJobModal({ isOpen, setIsOpen }: { isOpen: boolean;
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Job Form</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
-                  {pageNumber == 1 && (
-                    <CreateJobPageOne control={control} Controller={Controller} register={register} handleSubmit={handleSubmit} setPageNumber={setPageNumber} />
-                  )}
-                  {pageNumber == 2 && (
+                  <div style={{ display: pageNumber == 1 ? 'block' : 'none' }}>
+                    <CreateJobPageOne
+                      control={firstForm.control}
+                      Controller={Controller}
+                      register={firstForm.register}
+                      handleSubmit={firstForm.handleSubmit}
+                      setPageNumber={setPageNumber}
+                      onSubmit={firstFormSubmit}
+                    />
+                  </div>
+                  <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
                     <CreateJobPageTwo
-                      control={control}
+                      control={secondForm.control}
                       setIsSalaryRangeModalOpen={setIsSalaryRangeModalOpen}
-                      watch={watch}
-                      register={register}
-                      handleSubmit={handleSubmit}
-                      setValue={setValue}
+                      register={secondForm.register}
+                      handleSubmit={secondForm.handleSubmit}
+                      setValue={secondForm.setValue}
                       setPageNumber={setPageNumber}
-                      getValues={getValues}
+                      getValues={secondForm.getValues}
                     />
-                  )}
-                  {pageNumber == 3 && (
+                  </div>
+                  <div style={{ display: pageNumber == 3 ? 'block' : 'none' }}>
                     <CreateJobPageThree
-                      watch={watch}
-                      setValue={setValue}
-                      register={register}
-                      trigger={trigger}
+                      watch={thirdForm.watch}
+                      setValue={thirdForm.setValue}
+                      register={thirdForm.register}
+                      trigger={thirdForm.trigger}
                       setPageNumber={setPageNumber}
-                      setFocus={setFocus}
-                      getValues={getValues}
+                      setFocus={thirdForm.setFocus}
+                      getValues={thirdForm.getValues}
+                      onSubmit={thirdFormSubmit}
                     />
-                  )}
-                  {pageNumber == 4 && (
+                  </div>
+                  <div style={{ display: pageNumber == 4 ? 'block' : 'none' }}>
                     <CreateJobPageFour
-                      setValue={setValue}
-                      getValues={getValues}
-                      register={register}
+                      setValue={fourthForm.setValue}
+                      getValues={fourthForm.getValues}
+                      register={fourthForm.register}
                       setPageNumber={setPageNumber}
+                      onSubmit={fourthFormSubmit}
                     />
-                  )}
-                  {pageNumber == 5 && (
+                  </div>
+                  <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
                     <CreateJobPageFive
-                      setValue={setValue}
-                      watch={watch}
-                      register={register}
+                      setValue={fifthForm.setValue}
+                      register={fifthForm.register}
                       setPageNumber={setPageNumber}
-                      getValues={getValues}
+                      getValues={fifthForm.getValues}
                       isRangeBenefitsAdded={isRangeBenefitsAdded}
+                      onSubmit={fifthFormSubmit}
                     />
-                  )}
-                  {pageNumber == 6 && (
+                  </div>
+                  <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
                     <CreateJobPageSix
-                      getValues={getValues}
-                      setValue={setValue}
-                      watch={watch}
-                      register={register}
+                      firstFormGetValues={firstForm.getValues}
+                      fourthFormGetValues={fourthForm.getValues}
                       setPageNumber={setPageNumber}
+                      onSubmit={sixthFormSubmit}
                     />
-                  )}
-                  {pageNumber == 7 && (
+                  </div>
+                  <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
                     <CreateJobPageSeven
                       isLoading={isLoading}
-                      setValue={setValue}
+                      setValue={seventhForm.setValue}
                       setPageNumber={setPageNumber}
                       onSubmit={onSubmit}
                     />
-                  )}
-                  <CreateJobPageEight
-                    isOpen={isCreateJobPageEightModalOpen}
-                    setIsOpen={setIsCreateJobPageEightModalOpen}
-                  />
+                  </div>
                   <SalaryRangeModal
                     setPageNumber={setPageNumber}
                     isOpen={isSalaryRangeModalOpen}
                     setIsOpen={setIsSalaryRangeModalOpen}
                     setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
+                    onSubmit={secondFormSubmit}
                   />
                 </Dialog.Panel>
               </Transition.Child>
