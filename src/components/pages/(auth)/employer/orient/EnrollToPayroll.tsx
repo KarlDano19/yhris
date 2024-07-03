@@ -4,10 +4,12 @@ export default function EnrollToPayroll({
   id,
   isEnrolled,
   setEnrolled,
+  isLoading,
 }: {
   id: string;
   isEnrolled: boolean;
   setEnrolled: any;
+  isLoading: boolean;
 }) {
   return (
     <>
@@ -23,9 +25,9 @@ export default function EnrollToPayroll({
             onClick={() => {
               setEnrolled();
             }}
-            disabled={isEnrolled ? true : false}
+            disabled={isEnrolled ? true : isLoading}
           >
-            {!isEnrolled ? 'Enroll' : 'Enrolled'}
+            {isEnrolled ? 'Enrolled' : 'Enroll'}
           </button>
         </div>
       </div>

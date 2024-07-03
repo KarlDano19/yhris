@@ -325,7 +325,7 @@ export default function CreatePolicyModal({
                             Upload File (Optional)
                           </label>
                           <DragDrop setValue={(value: any) => setValue('file', value)} />
-                          <p className='text-xs mt-1 text-gray-400'>Maximum file size: 10mb</p>
+                          <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                         </div>
                       </div>
                     </div>

@@ -8,12 +8,14 @@ export default function SendContract({
   contractReceivedDate,
   setIsSendContractModalOpen,
   setReceived,
+  isLoading,
 }: {
   isContractSent: boolean;
   isContractReceived: boolean;
   contractReceivedDate?: string;
   setIsSendContractModalOpen: Dispatch<boolean>;
   setReceived: any;
+  isLoading: boolean;
 }) {
   return (
     <>
@@ -37,10 +39,10 @@ export default function SendContract({
             <button
               className={classNames(
                 !isContractSent ? 'bg-blue-200 text-gray-900' : isContractReceived ? 'bg-green-500 border-green-500 text-white' : 'bg-blue-200 text-gray-900 cursor-pointer',
-                'relative rounded-md px-5 py-2 focus:z-10 cursor-default w-[7rem] disabled:opacity-80'
+                'relative rounded-md px-5 py-2 focus:z-10 w-[7rem] disabled:opacity-80'
               )}
               onClick={() => setReceived()}
-              disabled={!isContractSent}
+              disabled={!isContractSent ? true : isContractReceived ? true : isLoading}
             >
               {isContractSent && isContractReceived ? 'Received' : 'Receive'}
             </button>

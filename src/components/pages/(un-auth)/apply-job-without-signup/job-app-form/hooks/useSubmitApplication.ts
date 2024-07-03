@@ -19,14 +19,12 @@ async function submitApplication(data: any) {
     const formData = new FormData();
     formData.append('applicant_form', JSON.stringify(finalData));
     formData.append('job_posting', data.jobPosting);
-
     if (data.profilePicture.length !== 0) {
       formData.append('photo', data.profilePicture[0]);
     }
     if (data.resume.length !== 0) {
       formData.append('resume', data.resume[0]);
     }
-
     const config = {
       method: 'POST',
       headers: {},
