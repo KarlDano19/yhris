@@ -52,6 +52,8 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
   };
 
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
+  const isRejected = applicant.status === 'rejected'
+  const isWithdrawn = applicant.status === 'withdrawn'
   const isPassedFinalInterview = applicant.status === 'hired';
 
   const capitalizeFirstLetter = (text: any) => {
@@ -78,6 +80,18 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
       <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
         {name}
         {isPassedFinalInterview && (
+          <span>
+            <br />
+            {capitalizeFirstLetter(applicant.status)}
+          </span>
+        )}
+        {isRejected && (
+          <span>
+            <br />
+            {capitalizeFirstLetter(applicant.status)}
+          </span>
+        )}
+        {isWithdrawn && (
           <span>
             <br />
             {capitalizeFirstLetter(applicant.status)}
