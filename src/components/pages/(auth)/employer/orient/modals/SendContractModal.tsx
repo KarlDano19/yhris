@@ -326,7 +326,7 @@ export default function SendContractModal({
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                       <button
                         type='submit'
-                        className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
+                        className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto disabled:opacity-50'
                         disabled={isLoading}
                       >
                         {isLoading ? (

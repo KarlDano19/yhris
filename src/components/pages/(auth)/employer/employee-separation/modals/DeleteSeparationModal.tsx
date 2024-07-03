@@ -89,7 +89,7 @@ export default function DeleteSeparationModal({
                   <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
                     <button
                       type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5 disabled:opacity-50'
                       onClick={() => onSubmit()}
                       disabled={isLoading}
                     >
