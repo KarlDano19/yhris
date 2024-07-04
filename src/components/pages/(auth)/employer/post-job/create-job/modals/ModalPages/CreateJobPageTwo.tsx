@@ -7,7 +7,6 @@ import classNames from '@/helpers/classNames';
 export default function CreateJobPageTwo({
   control,
   register,
-  watch,
   setValue,
   setPageNumber,
   setIsSalaryRangeModalOpen,
@@ -17,7 +16,6 @@ export default function CreateJobPageTwo({
   control: any;
   register: any;
   setValue: any;
-  watch: any;
   setPageNumber: Dispatch<number>;
   setIsSalaryRangeModalOpen: Dispatch<boolean>;
   handleSubmit: any;
@@ -32,6 +30,7 @@ export default function CreateJobPageTwo({
   });
   const JobType = ['Full Time', 'Part Time', 'Internship/OJT', 'Project-based'];
   const Schedule = ['Flexible', '8 Hours', '12 Hours', 'Night Shift'];
+
   const handleData = (action: string, option: string, type: string) => {
     let data = getValues(type);
     data = data ? data : [];
@@ -45,7 +44,8 @@ export default function CreateJobPageTwo({
     }
     return setValue(type, [...data, option]);
   };
-  const onSubmit = () => {
+
+  const secondFormSubmit = handleSubmit((data: any) => {
     const hireDate = getValues('hireDate');
     let jobType = getValues('jobType');
     let schedule = getValues('schedule');
@@ -72,10 +72,10 @@ export default function CreateJobPageTwo({
       setValue('jobType', jobType);
       setValue('schedule', schedule);
     }
-  };
+  });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={secondFormSubmit}>
       <div className='px-4 pb-6'>
         <div className='sm:col-span-4 mt-4'>
           <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>

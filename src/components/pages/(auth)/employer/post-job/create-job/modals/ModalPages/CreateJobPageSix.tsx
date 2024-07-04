@@ -1,20 +1,18 @@
 import { Dispatch, useState } from 'react';
 
 export default function CreateJobPageSix({
-  getValues,
-  watch,
-  setValue,
-  register,
+  firstFormGetValues,
+  fourthFormGetValues,
   setPageNumber,
+  onSubmit,
 }: {
-  getValues: any;
-  watch: any;
-  setValue: any;
-  register: any;
+  firstFormGetValues: any;
+  fourthFormGetValues: any;
   setPageNumber: Dispatch<number>;
+  onSubmit: () => void;
 }) {
-  const markup = { __html: getValues('jobDescription') };
-  const markup2 = { __html: getValues('qualifications') };
+  const markup = { __html: fourthFormGetValues('jobDescription') };
+  const markup2 = { __html: fourthFormGetValues('qualifications') };
 
   return (
     <>
@@ -25,9 +23,9 @@ export default function CreateJobPageSix({
             Preview
           </label>
           <div className='relative flex flex-col space-y-2 mt-2 text-sm font-medium leading-6 text-gray-900 rounded-md border-2 border-text-gray-400 px-2 py-3'>
-            <p className='font-bold'>{getValues('jobTitle')}</p>
+            <p className='font-bold'>{firstFormGetValues('jobTitle')}</p>
             <p>
-              The ABBA Initiative - <span>{getValues('placeAdvertise')}</span>
+              The ABBA Initiative - <span>{firstFormGetValues('placeAdvertise')}</span>
             </p>
             <span className='top-20 left-0 w-full border' />
             <div className='mt-[8rem]'>
@@ -47,7 +45,7 @@ export default function CreateJobPageSix({
           id='pageSixNextBtn'
           type='button'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-          onClick={() => setPageNumber(7)}
+          onClick={onSubmit}
         >
           Next
         </button>

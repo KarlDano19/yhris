@@ -15,12 +15,14 @@ export default function CreateJobPageOne({
   register,
   handleSubmit,
   setPageNumber,
+  onSubmit,
 }: {
   control: any;
   Controller: any;
   register: any;
   handleSubmit: any;
   setPageNumber: Dispatch<number>;
+  onSubmit: (data: any) => void;
 }) {
   const advertiseOptions = [
     {
@@ -337,11 +339,12 @@ export default function CreateJobPageOne({
     },
   ];
 
-  const onSubmit = () => {
-    setPageNumber(2);
-  };
+  const firstFormSubmit = handleSubmit((data: any) => {
+    onSubmit(data);
+  });
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={firstFormSubmit}>
       <div className='px-4 pb-6'>
         <div className='sm:col-span-4 mt-4'>
           <label htmlFor='country' className='block text-sm font-medium leading-6 text-gray-900'>

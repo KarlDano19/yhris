@@ -10,11 +10,13 @@ export default function CreateJobPageFour({
   getValues,
   register,
   setPageNumber,
+  onSubmit,
 }: {
   register: any;
   setValue: any;
   getValues: any;
   setPageNumber: Dispatch<number>;
+  onSubmit: () => void;
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -141,7 +143,7 @@ export default function CreateJobPageFour({
             ];
             const incomplete = results.every((item: boolean) => !item);
             if (!incomplete) {
-              setPageNumber(5);
+              onSubmit();
             } else {
               setManualInputFocus({
                 jobDescriptionFile: !!!jobDescriptionFile,
