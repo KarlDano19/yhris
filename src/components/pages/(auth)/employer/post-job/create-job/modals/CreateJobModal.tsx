@@ -77,7 +77,6 @@ export default function CreateJobModal({
   const secondFormSubmit = () => {
     const data = secondForm.getValues();
     setCombinedFormData((prev: any) => ({ ...prev, ...data }));
-    setPageNumber(3);
   };
 
   const thirdFormSubmit = () => {

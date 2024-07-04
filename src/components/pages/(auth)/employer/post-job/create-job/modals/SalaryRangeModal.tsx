@@ -72,6 +72,7 @@ export default function SalaryRangeModal({
                       setIsRangeBenefitsAdded(true);
                       setIsOpen(false);
                       onSubmit();
+                      setPageNumber(3);
                     }}
                   >
                     YES, ADD THEM.
@@ -81,8 +82,9 @@ export default function SalaryRangeModal({
                     type='button'
                     className='text-lg block sm:flex m-auto font-bold leading-6 text-savoy-blue  shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all mt-3 sm:mt-0'
                     onClick={() => {
-                      setPageNumber(4);
                       setIsOpen(false);
+                      onSubmit();
+                      setPageNumber(4);
                     }}
                   >
                     NO DON&#39;T ADD THEM.
