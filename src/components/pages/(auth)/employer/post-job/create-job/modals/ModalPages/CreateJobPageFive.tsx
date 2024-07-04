@@ -89,20 +89,6 @@ export default function CreateJobPageFive({
                 name='postAsRadioGroup'
                 {...register('postAs', {
                   required: true,
-                  onChange: (e: any) => {
-                    const file = e.target.files[0];
-                    if (file && file.size > 5 * 1024 * 1024) {
-                      toast.custom(
-                        () => (
-                          <CustomToast message='Curriculum Vitae/Resume size should not exceed 5 MB' type='error' />
-                        ),
-                        {
-                          duration: 7000,
-                        }
-                      );
-                      e.target.value = null;
-                    }
-                  },
                 })}
                 onChange={handleSelection}
               />
@@ -110,8 +96,8 @@ export default function CreateJobPageFive({
             </label>
             <label
               htmlFor='postAsUpload'
-              className={`block ml-7 text-sm font-normal text-gray-400 border w-fit p-2.5 border-gray-400 rounded-md cursor-pointer ${
-                !showInput ? 'opacity-75' : ''
+              className={`block ml-7 text-sm font-normal text-gray-400 border w-fit p-2.5 border-gray-400 rounded-md ${
+                !showInput ? 'opacity-75' : 'cursor-pointer'
               }`}
             >
               Upload Jpeg or PNG...
@@ -142,22 +128,29 @@ export default function CreateJobPageFive({
                 id='postAsUpload'
                 {...register('postAsUpload', {
                   required: false,
+                  onChange: (e: any) => {
+                    const file = e.target.files?.[0];
+                    if (file && file.size > 5 * 1024 * 1024) {
+                      toast.custom(() => <CustomToast message='Poster size should not exceed 5 MB' type='error' />, {
+                        duration: 7000,
+                      });
+                      e.target.value = null;
+                    } else {
+                      const fileName = file?.name;
+                      const fileSize = file?.size;
+                      setFileProps({
+                        fileName: fileName,
+                        fileSize: fileSize,
+                      });
+                      setValue('postAsUpload', file);
+                      setManualInputFocus(false);
+                    }
+                  },
                 })}
                 type='file'
                 className='hidden'
                 disabled={!showInput}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const fileName = e.target.files?.[0].name;
-                    const fileSize = e.target.files?.[0].size;
-                    setFileProps({
-                      fileName: fileName,
-                      fileSize: fileSize,
-                    });
-                    setValue('postAsUpload', file);
-                  }
-                }}
+                accept='image/png, image/jpeg, image/jpg'
               />
             </div>
           </div>
