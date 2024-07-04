@@ -32,9 +32,9 @@ export default function CreateJobPageFive({
 
     if (value !== 'upload') {
       setFileProps({});
-      setShowInput(!showInput);
+      setShowInput(false);
     } else {
-      setShowInput(!showInput);
+      setShowInput(true);
     }
   };
 
