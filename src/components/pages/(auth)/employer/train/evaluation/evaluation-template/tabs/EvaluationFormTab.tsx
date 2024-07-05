@@ -113,7 +113,10 @@ function EvaluationFormTab({
                             className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
                             defaultValue={1}
                             {...register('total_score', {
-                              validate: (value: any) => parseInt(value) >= 0 || "Score cannot be negative"
+                              validate: (value: any) => {
+                                debugger
+                                return parseInt(value) >= 0 || "Score cannot be negative";
+                              }
                             })}
                             onChange={e => {
                               const value = parseInt(e.target.value);
