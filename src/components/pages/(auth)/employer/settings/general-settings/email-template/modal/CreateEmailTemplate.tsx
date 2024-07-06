@@ -244,7 +244,7 @@ export default function EmailTemplateModal({
                             onChange={(value) => setValue('body', value)}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
-                            style={{ height: '100%' }}
+                            style={{ height: '100%', padding: '5px 8px !important' }}
                             defaultValue={getValues('body')}
                           />
                         </div>

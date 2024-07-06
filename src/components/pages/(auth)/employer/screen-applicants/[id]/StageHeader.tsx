@@ -119,7 +119,7 @@ export default function StageHeader({
 
   return (
     <div className='flex items-center justify-between gap-2 rounded-md border border-[#ACB9CB] relative'>
-      <button type='button' className='p-4' onClick={() => setIsEditing((prev) => !prev)}>
+      <button type='button' className='p-4 disabled:invisible' onClick={() => setIsEditing((prev) => !prev)} disabled={stage.isNewStage}>
         <PencilIcon className='w-5' />
       </button>
       <textarea
@@ -147,8 +147,7 @@ export default function StageHeader({
       <button
         onClick={handleOpenDropdown}
         type='button'
-        className='border border-[#ACB9CB] px-3 py-6 rounded-md disabled:opacity-50'
-        disabled={stage.isNewStage}
+        className='border border-[#ACB9CB] px-3 py-6 rounded-md'
       >
         <SelectChevronDown />
       </button>
@@ -169,7 +168,8 @@ export default function StageHeader({
               })
             }
             type='button'
-            className='text-left'
+            className='text-left disabled:opacity-50'
+            disabled={stage.isNewStage}
           >
             Set-up Stage Requirements
           </button>
@@ -178,6 +178,7 @@ export default function StageHeader({
               setActionState({
                 ...initialActionState,
                 stageId: stage.id,
+                isNewStage: stage.isNewStage,
                 modal: {
                   title: `Are you sure you want to remove stage ${title}?`,
                   whichModal: 'CONFIRMATION',

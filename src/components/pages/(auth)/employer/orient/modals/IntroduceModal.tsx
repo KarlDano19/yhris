@@ -310,7 +310,7 @@ export default function IntroduceModal({
                             onChange={(value) => setValue('message', value)}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
-                            style={{ height: '100%' }}
+                            style={{ height: '100%', padding: '5px 8px !important' }}
                             value={watch('message')}
                           />
                         </div>

@@ -7,7 +7,7 @@ import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroi
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
-import * as DOMPurify from 'dompurify';
+import 'react-quill/dist/quill.snow.css';
 
 interface JobDetailsProp {
   jobId: any;
@@ -24,13 +24,13 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
   }, [data]);
 
   const renderRoleDescription = (jobDescription: any) => {
-    const markup = { __html: DOMPurify.sanitize(jobDescription) };
-    return <span dangerouslySetInnerHTML={markup}></span>;
+    const markup = { __html: jobDescription };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   const renderQualificationsDescription = (qualifications: any) => {
-    const markup = { __html: DOMPurify.sanitize(qualifications) };
-    return <span dangerouslySetInnerHTML={markup}></span>;
+    const markup = { __html: qualifications };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
   return (
@@ -48,9 +48,9 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               {!isLoading ? jobDetailData?.company : 'Loading company name...'}
             </h6>
             <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
-            <p className='text-sm text-indigo-dye mt-4 lg:w-60'>
+            <div className='text-sm text-indigo-dye mt-4 lg:w-60'>
               <p className='text-[1rem] font-semibold mb-1'>Role:</p>{!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
-            </p>
+            </div>
           </div>
         </div>
         <div className='col-span-1 lg:col-span-2 px-1'>
@@ -73,11 +73,11 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             <CheckCircleIcon className='h-5 w-5 mr-1' />
             Qualifications
           </h6>
-          <ul className='text-[13px] text-indigo-dye mt-1 list-disc ml-6'>
+          <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
             {!isLoading
               ? renderQualificationsDescription(jobDetailData?.qualifications)
               : 'Loading qualifications...'}
-          </ul>
+          </div>
           {/* job type */}
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
             <BriefcaseIcon className='h-5 w-5 mr-1' />
@@ -121,7 +121,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
                 <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
                 Benefits
               </h6>
-              <ul className='text-[13px] text-indigo-dye mt-1 list-disc ml-6'>
+              <ul className='text-[13px] text-indigo-dye mt-1 ml-6'>
                 {!isLoading ? jobDetailData.offered_benefits : 'Loading benefits...'}
               </ul>
             </>

@@ -89,6 +89,7 @@ export type ActionStateType = {
     isOpen: boolean;
     title: string;
   };
+  isNewStage?: boolean;
   stageId: number | null;
   applicantId: number | null;
   isFinalStage: boolean;

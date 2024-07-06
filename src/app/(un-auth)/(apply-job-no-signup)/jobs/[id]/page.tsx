@@ -8,45 +8,58 @@ type Props = {
 };
 
 export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
-  const id = params.id;
-  const response = await fetch(`${process.env.NEXT_API_URL}/api/public/jobs/${id}/metadata/`).then((res) => res.json());
-
-  let metaConfig = {};
-  let openGraphConfig = {};
-  let metaData = {};
-  if (Object.keys(response).length !== 0) {
-    metaConfig = {
-      title: `${response.og_title} - Yahshua HRIS`,
-      description: 'HRISS',
+  try {
+    const id = params.id;
+    const config = {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+      },
     };
-    openGraphConfig = {
-      url: response.og_url,
-      type: response.og_type,
-      title: response.og_title,
-      description: response.og_description,
-      images: [
-        {
-          url: response.og_image,
-          width: response.og_image_width,
-          height: response.og_image_height,
-        },
-      ],
-    };
-    metaData = {
-      other: metaConfig,
-      openGraph: openGraphConfig,
-    };
-  } else {
-    metaConfig = {
-      title: `Job - Yahshua HRIS`,
-      description: 'HRIS',
-    };
-    metaData = {
-      other: metaConfig,
-    };
+    const res: any = await fetch(`${process.env.NEXT_API_URL}/api/public/jobs/${id}/metadata/`, config);
+    if (!res.ok) {
+      throw res.json();
+    }
+    let metaConfig = {};
+    let openGraphConfig = {};
+    let metaData = {};
+    if (Object.keys(res).length !== 0) {
+      metaConfig = {
+        title: `${res.og_title} - Yahshua HRIS`,
+        description: 'HRISS',
+      };
+      openGraphConfig = {
+        url: res.og_url,
+        type: res.og_type,
+        title: res.og_title,
+        description: res.og_description,
+        images: [
+          {
+            url: res.og_image,
+            width: res.og_image_width,
+            height: res.og_image_height,
+          },
+        ],
+      };
+      metaData = {
+        other: metaConfig,
+        openGraph: openGraphConfig,
+      };
+    } else {
+      metaConfig = {
+        title: `Job - Yahshua HRIS`,
+        description: 'HRIS',
+      };
+      metaData = {
+        other: metaConfig,
+      };
+    }
+    return metaData;
+  } catch (err: any) {
+    let errStringify = await err;
+    console.error(errStringify)
+    return {};
   }
-
-  return metaData;
 }
 
 const JobsDetail = ({ params, searchParams }: Props) => {

@@ -30,24 +30,31 @@ export default function Confirmation() {
   };
 
   const removeStage = () => {
-    const callbackReq = {
-      onSuccess: () => {
-        dispatch({
-          type: 'REMOVE_STAGE',
-          payload: { stageId: actionState.stageId, setActionState },
-        });
-      },
-      onError: (err: any) => {
-        setTimeout(() => setActionState(initialActionState), 400);
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
-      },
-    };
-    let postData = {
-      stage_id: actionState.stageId,
-    };
-    deleteMutate(postData, callbackReq);
+    if (actionState.isNewStage) {
+      dispatch({
+        type: 'REMOVE_STAGE',
+        payload: { stageId: actionState.stageId, setActionState },
+      });
+    } else {
+      const callbackReq = {
+        onSuccess: () => {
+          dispatch({
+            type: 'REMOVE_STAGE',
+            payload: { stageId: actionState.stageId, setActionState },
+          });
+        },
+        onError: (err: any) => {
+          setTimeout(() => setActionState(initialActionState), 400);
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      };
+      let postData = {
+        stage_id: actionState.stageId,
+      };
+      deleteMutate(postData, callbackReq);
+    }
   };
 
   return (
