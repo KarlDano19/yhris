@@ -1,4 +1,4 @@
-import { Dispatch, useState } from 'react';
+import { Dispatch } from 'react';
 
 export default function CreateJobPageSix({
   firstFormGetValues,
@@ -30,11 +30,11 @@ export default function CreateJobPageSix({
             <span className='top-20 left-0 w-full border' />
             <div className='mt-[8rem]'>
               Role:
-              <span dangerouslySetInnerHTML={markup}></span>
+              <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>
             </div>
             <div className='mt-8'>
               <p>Qualifications:</p>
-              <p dangerouslySetInnerHTML={markup2}></p>
+              <p className='ql-editor !p-0' dangerouslySetInnerHTML={markup2}></p>
             </div>
           </div>
         </div>

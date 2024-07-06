@@ -68,6 +68,7 @@ export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefe
                   key={stage.id}
                   draggableId={stage.id.toString()}
                   index={index}
+                  isDragDisabled={stage.isNewStage}
                 >
                   {(provided, snapshot) => (
                     <Stage
