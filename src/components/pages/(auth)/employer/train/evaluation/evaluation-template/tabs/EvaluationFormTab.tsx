@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 
-import SelectChevronDown from '@/svg/SelectChevronDown';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
 
@@ -114,7 +113,6 @@ function EvaluationFormTab({
                             defaultValue={1}
                             {...register('total_score', {
                               validate: (value: any) => {
-                                debugger
                                 return parseInt(value) >= 0 || "Score cannot be negative";
                               }
                             })}
