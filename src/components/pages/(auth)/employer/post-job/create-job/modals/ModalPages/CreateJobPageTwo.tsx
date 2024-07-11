@@ -274,6 +274,7 @@ export default function CreateJobPageTwo({
                     selected={field.value}
                     pickerOnChange={(date: any) => field.onChange(date)}
                     inputOnChange={(value: any) => field.onChange(value)}
+                    minDate={new Date()}
                     required={true}
                   />
                 )}

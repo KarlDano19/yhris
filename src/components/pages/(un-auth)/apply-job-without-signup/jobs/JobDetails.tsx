@@ -8,6 +8,7 @@ import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
 import * as DOMPurify from 'dompurify';
+import JobDetailsLocation from '@/svg/JobDetailLocation';
 
 interface JobDetailsProp {
   jobId: any;
@@ -68,6 +69,13 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
         <div className='details mx-5 mt-2'>
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
+            <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
+            Location
+          </h6>
+          <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
+            {!isLoading ? jobDetailData.advertise_to : 'Loading location...'}
+          </p>
           {/* qualifications */}
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
             <CheckCircleIcon className='h-5 w-5 mr-1' />
