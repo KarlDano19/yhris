@@ -16,28 +16,29 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
         'content-type': 'application/json',
       },
     };
-    const res: any = await fetch(`${process.env.NEXT_API_URL}/api/public/jobs/${id}/metadata/`, config);
+    const res = await fetch(`${process.env.NEXT_API_URL}/api/public/jobs/${id}/metadata/`, config);
     if (!res.ok) {
       throw res.json();
     }
+    const json_response = await res.json();
     let metaConfig = {};
     let openGraphConfig = {};
     let metaData = {};
-    if (Object.keys(res).length !== 0) {
+    if (Object.keys(json_response).length !== 0) {
       metaConfig = {
-        title: `${res.og_title} - Yahshua HRIS`,
+        title: `${json_response.og_title} - Yahshua HRIS`,
         description: 'HRISS',
       };
       openGraphConfig = {
-        url: res.og_url,
-        type: res.og_type,
-        title: res.og_title,
-        description: res.og_description,
+        url: json_response.og_url,
+        type: json_response.og_type,
+        title: json_response.og_title,
+        description: json_response.og_description,
         images: [
           {
-            url: res.og_image,
-            width: res.og_image_width,
-            height: res.og_image_height,
+            url: json_response.og_image,
+            width: json_response.og_image_width,
+            height: json_response.og_image_height,
           },
         ],
       };

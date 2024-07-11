@@ -176,7 +176,7 @@ export default function LetterModal({
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
                                     <XMarkIcon className='w-4 h-4' />
