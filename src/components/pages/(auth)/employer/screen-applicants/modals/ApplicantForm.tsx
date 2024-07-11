@@ -71,20 +71,6 @@ export default function ApplicantForm({ title }: PropTypes) {
             </div>
           </div>
         </div>
-        <div className='flex mt-8 mb-12'>
-          <div className='flex-1'>
-            <div className='font-semibold'>Nationality</div>
-            <div>{applicantProfile.nationality}</div>
-          </div>
-          <div className='flex-1'>
-            <div className='font-semibold'>Gender</div>
-            <div>{applicantProfile.gender}</div>
-          </div>
-          <div className='flex-1'>
-            <div className='font-semibold'>Religion</div>
-            <div>{applicantProfile.religion}</div>
-          </div>
-        </div>
         <div>
           <button
             type='button'

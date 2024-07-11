@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
-import useStore from '@/lib/store';
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -37,7 +36,6 @@ const Content = () => {
     Twitter,
     // Add other components here if needed
   };
-  const { count, increment } = useStore();
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [showContextMenu, setShowContextMenu] = useState(false);

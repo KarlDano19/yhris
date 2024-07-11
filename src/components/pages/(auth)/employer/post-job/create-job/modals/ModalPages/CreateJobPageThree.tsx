@@ -1,5 +1,9 @@
 import { Dispatch, ChangeEvent, useEffect, useState } from 'react';
 
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
 export default function CreateJobPageThree({
@@ -10,6 +14,7 @@ export default function CreateJobPageThree({
   trigger,
   setFocus,
   getValues,
+  onSubmit,
 }: {
   watch: any;
   register: any;
@@ -18,6 +23,7 @@ export default function CreateJobPageThree({
   trigger: any;
   setFocus: any;
   getValues: any;
+  onSubmit: () => void;
 }) {
   const [selectedBenefitOptions, setSelectedBenefitOptions] = useState<string[]>([]);
   const [selectedOtherBenefit, setSelectedOtherBenefit] = useState<string[]>([]);
@@ -330,6 +336,14 @@ export default function CreateJobPageThree({
               amount:
                 salaryTypeValue !== 'Range' && (salaryValueValue.trim() === '-' || !salaryValueValue) ? true : false,
             });
+            if (salaryTypeValue === 'Range') {
+              if (salaryRangeMinValue >= salaryRangeMaxValue) {
+                toast.custom(() => <CustomToast message={'Minimum salary cannot be greater than or equal to maximum salary.'} type='error' />, {
+                  duration: 7000,
+                });
+                return;
+              }
+            }
             const results = [salaryType, rate, benefits || isOtherBenefitOpen];
             const incomplete = results.some((item: boolean) => !item);
             if (
@@ -337,7 +351,7 @@ export default function CreateJobPageThree({
               ((salaryTypeValue === 'Range' && salaryRangeMinValue && salaryRangeMaxValue) ||
                 (salaryTypeValue !== 'Range' && salaryValueValue.trim() !== '-' && salaryValueValue))
             ) {
-              setPageNumber(4);
+              onSubmit();
             }
           }}
         >

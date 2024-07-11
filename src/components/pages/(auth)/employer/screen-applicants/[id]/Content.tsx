@@ -4,13 +4,13 @@ import React, { useReducer, useRef, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 
 import { INITIAL_STATE, stageReducer } from '../reducers/stageReducer';
 import { initialActionState } from '../lib/initialActionState';
 import { ModalTypes, StageType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
-import Wrapper from '@/components/pages/(auth)/employer/screen-applicants/Wrapper';
 import CustomToast from '@/components/CustomToast';
 import StageRequirements from '../modals/StageRequirements';
 import Checklist from '../modals/Checklist';
@@ -28,6 +28,8 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
+
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import '../styles.css';
 
@@ -244,24 +246,31 @@ export default function Content() {
     <>
       {!isGetJobPostDetailsLoading && (
         <StateContext.Provider value={{ state, dispatch, actionState, setActionState }}>
-          <Wrapper
-            title={`Screen Applicants / ${dataJobPostDetails?.job_title || ''} Applications`}
-            backLink='/screen-applicants'
-            backText='Screen Applicants'
-          >
-            {whichModal && modals[whichModal].component}
+          <div className='min-h-screen'>
+            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
+              <div className='flex px-4 pt-4 pb-2'>
+                <Link href='/screen-applicants' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+                  <ArrowLeftIcon className='h-5 w-5' />
+                  <h4>Screen Applicants</h4>
+                </Link>
+              </div>
+              <div className='p-2 md:px-8 lg:px-4'>
+                <h2 className='text-xl font-bold text-indigo-dye'>Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications</h2>
+                {whichModal && modals[whichModal].component}
 
-            <div className='flex justify-end'>
-              <AddStageBtn handleAddStage={handleAddStage} />
+                <div className='flex justify-end'>
+                  <AddStageBtn handleAddStage={handleAddStage} />
+                </div>
+
+                <DragAndDrop
+                  containerRef={containerRef}
+                  gridCols={gridCols}
+                  jobPostDetailsRefetch={jobPostDetailsRefetch}
+                  appliedApplicantRefetch={appliedApplicantRefetch}
+                />
+              </div>
             </div>
-
-            <DragAndDrop
-              containerRef={containerRef}
-              gridCols={gridCols}
-              jobPostDetailsRefetch={jobPostDetailsRefetch}
-              appliedApplicantRefetch={appliedApplicantRefetch}
-            />
-          </Wrapper>
+          </div>
         </StateContext.Provider>
       )}
     </>

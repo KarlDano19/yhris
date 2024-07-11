@@ -30,6 +30,7 @@ export default function CreateJobPageSeven({
       setValue('postIn', selectedOptions);
     }
   }, [selectedOptions, setValue]);
+  
   return (
     <>
       <div className='px-4 pb-6'>

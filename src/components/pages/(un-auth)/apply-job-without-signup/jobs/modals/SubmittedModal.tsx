@@ -17,7 +17,7 @@ const SubmittedModal = ({ open, onClose }: SubmittedModalProps) => {
       <Dialog
         as="div"
         className={`relative z-10 `}
-        onClose={onClose}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}

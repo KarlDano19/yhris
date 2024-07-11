@@ -29,7 +29,7 @@ const Tab = ({}) => {
                 <div className="grid-item">
                   <label
                     htmlFor="name"
-                    className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900"
                   >
                     Name <span className="text-red-500">*</span>
                   </label>
@@ -44,7 +44,7 @@ const Tab = ({}) => {
                   </div>
                 </div>
                 <div className="grid-item mt-5">
-                  <h6 className="block text-indigo-dye text-sm font-medium leading-6 text-gray-900">
+                  <h6 className="block text-sm font-medium leading-6 text-gray-900">
                     Profile Picture <span className="text-red-500">*</span>
                   </h6>
                   <div className="mt-2">
@@ -65,7 +65,7 @@ const Tab = ({}) => {
           <div className="col-2 md:col-span-2 lg:col-span-5 grid-item mt-5 md:mt-3 lg:mt-0">
             <label
               htmlFor="about-you"
-              className="block text-indigo-dye text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               About you
             </label>
@@ -88,7 +88,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="bday"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Birthday <span className="text-red-500">*</span>
             </label>
@@ -110,7 +110,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="age"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Age <span className="text-red-500">*</span>
             </label>
@@ -126,7 +126,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="gender"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Gender <span className="text-red-500">*</span>
             </label>
@@ -148,7 +148,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="religion"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Religion <span className="text-red-500">*</span>
             </label>
@@ -164,7 +164,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="nationality"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Nationality <span className="text-red-500">*</span>
             </label>
@@ -180,7 +180,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="civil-status"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Civil Status <span className="text-red-500">*</span>
             </label>
@@ -207,7 +207,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="house-no"
-              className="block whitespace-nowrap truncate text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block whitespace-nowrap truncate text-sm font-medium leading-6 text-gray-900"
             >
               House No./Bldg./Apartment/Suite, etc.{" "}
               <span className="text-red-500">*</span>
@@ -224,7 +224,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="street"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Street <span className="text-red-500">*</span>
             </label>
@@ -240,7 +240,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="town"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Town/Brgy. <span className="text-red-500">*</span>
             </label>
@@ -256,7 +256,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="city"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               City <span className="text-red-500">*</span>
             </label>
@@ -272,7 +272,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="zip"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Zip Code <span className="text-red-500">*</span>
             </label>
@@ -288,7 +288,7 @@ const Tab = ({}) => {
           <div className="grid-item">
             <label
               htmlFor="country"
-              className="block text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900"
             >
               Country <span className="text-red-500">*</span>
             </label>

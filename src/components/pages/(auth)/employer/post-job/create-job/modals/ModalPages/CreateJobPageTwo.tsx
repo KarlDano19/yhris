@@ -1,13 +1,14 @@
 import { Dispatch, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
+import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 export default function CreateJobPageTwo({
   control,
   register,
-  watch,
   setValue,
   setPageNumber,
   setIsSalaryRangeModalOpen,
@@ -17,7 +18,6 @@ export default function CreateJobPageTwo({
   control: any;
   register: any;
   setValue: any;
-  watch: any;
   setPageNumber: Dispatch<number>;
   setIsSalaryRangeModalOpen: Dispatch<boolean>;
   handleSubmit: any;
@@ -32,6 +32,7 @@ export default function CreateJobPageTwo({
   });
   const JobType = ['Full Time', 'Part Time', 'Internship/OJT', 'Project-based'];
   const Schedule = ['Flexible', '8 Hours', '12 Hours', 'Night Shift'];
+
   const handleData = (action: string, option: string, type: string) => {
     let data = getValues(type);
     data = data ? data : [];
@@ -45,8 +46,10 @@ export default function CreateJobPageTwo({
     }
     return setValue(type, [...data, option]);
   };
-  const onSubmit = () => {
+
+  const secondFormSubmit = handleSubmit((data: any) => {
     const hireDate = getValues('hireDate');
+    const hireCount = getValues('hireCount');
     let jobType = getValues('jobType');
     let schedule = getValues('schedule');
     const otherJobTypeData = getValues('otherJobType');
@@ -65,6 +68,12 @@ export default function CreateJobPageTwo({
       schedule: !!!schedule,
     };
     setManualInputFocus(manualInputFocusData);
+    if (hireCount > 1000) {
+      toast.custom(() => <CustomToast message={'The maximum number of hires allowed is 1000.'} type='error' />, {
+        duration: 7000,
+      });
+      return;
+    }
     const results = [!!hireDate, !!jobType, !!schedule];
     const incomplete = results.some((item: boolean) => !item);
     if (!incomplete) {
@@ -72,10 +81,10 @@ export default function CreateJobPageTwo({
       setValue('jobType', jobType);
       setValue('schedule', schedule);
     }
-  };
+  });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={secondFormSubmit}>
       <div className='px-4 pb-6'>
         <div className='sm:col-span-4 mt-4'>
           <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -243,12 +252,18 @@ export default function CreateJobPageTwo({
             <div className='relative mt-2'>
               <input
                 id='hireCount'
-                {...register('hireCount', {
-                  required: true,
-                })}
+                {...register('hireCount')}
+                onChange={e => {
+                  const value = parseInt(e.target.value);
+                  if (value < 0) {
+                    setValue('hireCount', 0);
+                  } else {
+                    setValue('hireCount', value);
+                  }
+                }}
                 type='number'
                 defaultValue={1}
-                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
               />
             </div>
           </div>

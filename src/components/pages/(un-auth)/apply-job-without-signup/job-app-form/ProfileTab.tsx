@@ -1,16 +1,37 @@
+import { useState } from 'react';
+
 import { UseFormRegister } from 'react-hook-form';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 
 import { UserIcon } from '@heroicons/react/24/solid';
 import DropDownArrow from '@/svg/DropDownArrow';
 
 interface ProfileTabProps {
   register: UseFormRegister<any>;
-  renderUploadPhoto: any;
-  profilePhoto: any;
-  profileSubmit: any;
+  handleSubmit: any;
+  firstSubmit: any;
+  setCurrentTab: any;
 }
 
-const ProfileTab = ({ register, renderUploadPhoto, profilePhoto, profileSubmit }: ProfileTabProps) => {
+const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: ProfileTabProps) => {
+  const [profilePhoto, setProfilePhoto] = useState<any>();
+
+  const renderUploadPhoto = (event: any) => {
+    if (event.target.files && event.target.files[0]) {
+      let reader = new FileReader();
+      reader.readAsDataURL(event.target.files[0]);
+      reader.onload = (input) => {
+        setProfilePhoto(input.target?.result);
+      };
+    }
+  };
+
+  const profileSubmit = handleSubmit((data: any) => {
+    firstSubmit(data);
+  });
+
   return (
     <form onSubmit={profileSubmit}>
       <h5 className='text-xl font-semibold'>Profile</h5>
@@ -96,7 +117,7 @@ const ProfileTab = ({ register, renderUploadPhoto, profilePhoto, profileSubmit }
           </div>
           <div className='grid-item'>
             <label htmlFor='address' className='text-sm font-medium leading-6 text-gray-900'>
-              Address <span className='text-red-500'>*</span>
+              City Address (Please provide your current city address) <span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -111,63 +132,27 @@ const ProfileTab = ({ register, renderUploadPhoto, profilePhoto, profileSubmit }
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11'>
         <div className='grid-item'>
-          <label htmlFor='nationality' className='text-sm font-medium leading-6 text-gray-900'>
-            Nationality <span className='text-red-500'>*</span>
-          </label>
-          <div className='mt-2'>
-            <input
-              type='text'
-              {...register('nationality', { required: true })}
-              id='nationality'
-              className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-            />
-          </div>
-        </div>
-        <div className='grid-item'>
-          <label htmlFor='gender' className='text-sm font-medium leading-6 text-gray-900'>
-            Gender <span className='text-red-500'>*</span>
-          </label>
-          <div className='relative mt-2'>
-            <select
-              id='gender'
-              {...register('gender', { required: true })}
-              className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-              defaultValue='Male'
-            >
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-            <div className='absolute right-3 top-[14px]'>
-              <DropDownArrow />
-            </div>
-          </div>
-        </div>
-        <div className='grid-item'>
-          <label htmlFor='religion' className='text-sm font-medium leading-6 text-gray-900'>
-            Religion <span className='text-red-500'>*</span>
-          </label>
-          <div className='mt-2'>
-            <input
-              type='text'
-              {...register('religion', { required: true })}
-              id='religion'
-              className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-            />
-          </div>
-        </div>
-        <div className='grid-item'>
           <h6 className='block text-sm font-medium leading-6 text-gray-900'>
-            Photo (2x2 photo is recommended) <span className='text-red-500'>*</span>
+            Photo (2x2 photo is recommended)
           </h6>
           <div className='mt-2'>
             <input
               type='file'
-              {...register('profilePicture', { required: true })}
+              {...register('profilePicture', {
+                onChange: (e: any) => {
+                  const file = e.target.files[0];
+                  if (file && file.size > 5 * 1024 * 1024) {
+                    toast.custom(() => <CustomToast message='Photo size should not exceed 5 MB' type='error' />, {
+                      duration: 7000,
+                    });
+                    e.target.value = null;
+                  } else {
+                    renderUploadPhoto(e);
+                  }
+                },
+              })}
               id='profile-picture'
-              className='rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4'
-              onChange={(event) => {
-                renderUploadPhoto(event);
-              }}
+              className='rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4 focus:ring-black'
               accept='image/png, image/jpeg, image/jpg'
             />
             <h6 className='text-xs mt-3'>Maximum file size: 5 MB</h6>
@@ -178,7 +163,20 @@ const ProfileTab = ({ register, renderUploadPhoto, profilePhoto, profileSubmit }
           <div className='mt-2'>
             <input
               type='file'
-              {...register('resume')}
+              {...register('resume', {
+                onChange: (e: any) => {
+                  const file = e.target.files[0];
+                  if (file && file.size > 5 * 1024 * 1024) {
+                    toast.custom(
+                      () => <CustomToast message='Curriculum Vitae/Resume size should not exceed 5 MB' type='error' />,
+                      {
+                        duration: 7000,
+                      }
+                    );
+                    e.target.value = null;
+                  }
+                },
+              })}
               id='resume'
               className='rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4'
               accept='application/pdf'

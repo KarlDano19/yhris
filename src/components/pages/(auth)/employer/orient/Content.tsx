@@ -35,7 +35,6 @@ const Content = () => {
   });
   const {
     data: applicationOrient,
-    isLoading: applicationOrientIsLoading,
     refetch,
   } = useGetApplicantOrient(Number(params.position), itemsFilter);
   const { mutate, isLoading } = useUpdateApplicantOrient();
@@ -58,7 +57,7 @@ const Content = () => {
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
 
   useEffect(() => {
-    if (applicationOrient && applicationOrient.length !== 0) {
+    if (applicationOrient) {
       applicationOrient.map((item: any) => {
         item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
         item['isContractSent'] = item.is_contract_sent;
@@ -212,6 +211,7 @@ const Content = () => {
               setReceived={() => {
                 setReceived(item.id, 'contract');
               }}
+              isLoading={isLoading}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -242,6 +242,7 @@ const Content = () => {
                 setEnrolled={() => {
                   setEnrolled(item.id);
                 }}
+                isLoading={isLoading}
               />
             </div>
           </td>
@@ -270,7 +271,7 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Orient</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -312,12 +313,6 @@ const Content = () => {
                   }}
                 />
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
@@ -329,11 +324,14 @@ const Content = () => {
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-                </div>
               </div>
             </div>
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
           </div>
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>

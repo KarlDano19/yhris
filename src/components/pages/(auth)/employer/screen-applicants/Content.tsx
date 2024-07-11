@@ -1,13 +1,24 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
-import Wrapper from '@/components/pages/(auth)/employer/screen-applicants/Wrapper';
-import PostJobCard from './PostJobCard';
+
 import Link from 'next/link';
+
+import PostJobCard from './PostJobCard';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
 
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const [itemsFilter, setItemsFilter] = useState<any>({
+    search: '',
+  });
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
-  const { data: dataJobPost, isLoading: isGetJobPostLoading } = useGetJobPostItems();
+  const { data: dataJobPost, refetch: refetchJobPost } = useGetJobPostItems(itemsFilter);
+
+  useEffect(() => {
+    refetchJobPost();
+  }, []);
 
   useEffect(() => {
     if (dataJobPost) {
@@ -26,33 +37,64 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [dataJobPost]);
 
   return (
-    <Wrapper title='Screen Applicants' backLink='/dashboard' backText='Dashboard'>
-      <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
-        {jobPostHistoryItems.map((item: any) => {
-          return (
-            <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
-              <h2 className='font-semibold text-xl'>{item.jobTitle}</h2>
-              <p className='text-[15px] mb-12'>{item.placeAdvertise}</p>
-              <Link
-                href={`screen-applicants/${item.id}`}
-                className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
-              >
-                {item.applicantApplied} New Applicant/s
-              </Link>
+    <div className='min-h-screen'>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
+        <div className='flex px-4 pt-4 pb-2'>
+          <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+            <ArrowLeftIcon className='h-5 w-5' />
+            <h4>Dashboard</h4>
+          </Link>
+        </div>
+        <div className='p-2 md:px-8 lg:px-4'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Screen Applicants</h2>
+          <div className='mt-6 mb-10 flex flex-col lg:flex-row items-center gap-4'>
+            <div className='flex-none lg:w-1/3'>
+              <div className='relative flex items-center'>
+                <input
+                  type='text'
+                  name='search'
+                  id='search'
+                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  placeholder='Search ...'
+                />
+              </div>
             </div>
-          );
-        })}
-        {/* ensuring cards displayed are always six */}
-        {jobPostHistoryItems.length <= 6 &&
-          Array.from({ length: 6 - jobPostHistoryItems.length }).map((_, index) => {
-            return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
-          })}
-        {jobPostHistoryItems.length > 6 &&
-          Array.from({ length: 1 }).map((_, index) => {
-            return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
-          })}
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={() => refetchJobPost()}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
+          </div>
+          <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
+            {jobPostHistoryItems.map((item: any) => {
+              return (
+                <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
+                  <h2 className='font-semibold text-xl'>{item.jobTitle}</h2>
+                  <p className='text-[15px] mb-12'>{item.placeAdvertise}</p>
+                  <Link
+                    href={`screen-applicants/${item.id}`}
+                    className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
+                  >
+                    {item.applicantApplied} New Applicant/s
+                  </Link>
+                </div>
+              );
+            })}
+            {/* ensuring cards displayed are always six */}
+            {jobPostHistoryItems.length <= 6 &&
+              Array.from({ length: 6 - jobPostHistoryItems.length }).map((_, index) => {
+                return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
+              })}
+            {jobPostHistoryItems.length > 6 &&
+              Array.from({ length: 1 }).map((_, index) => {
+                return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
+              })}
+          </div>
+        </div>
       </div>
-    </Wrapper>
+    </div>
   );
 };
 

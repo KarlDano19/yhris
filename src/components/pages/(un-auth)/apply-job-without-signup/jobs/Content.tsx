@@ -1,6 +1,5 @@
 'use client';
 
-
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -13,8 +12,6 @@ import { useEffect, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import jobIllustration from '@/assets/find-job-illustration.svg';
 import FileCaseIcon from '@/svg/FileCaseIcon';
-
-
 
 const Content = () => {
   const [hasJob, setJob] = useState(false);
@@ -59,9 +56,7 @@ const Content = () => {
 
   return (
     <>
-      <div
-        className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}
-      >
+      <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
         <div className='px-4 pt-8'>
           <h4 className='text-lg md:text-2xl text-indigo-dye font-bold md:font-semibold'>
             Find a job that&#39;s right for you!
@@ -76,10 +71,7 @@ const Content = () => {
             >
               <div className='lg:flex lg:px-4 lg:justify-between md:mt-4'>
                 <div className='flex items-center justify-around rounded-md p-3 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-black w-full lg:w-[39%]'>
-                  <label
-                    htmlFor='what'
-                    className='font-semibold text-indigo-dye text-sm'
-                  >
+                  <label htmlFor='what' className='font-semibold text-indigo-dye text-sm'>
                     What
                   </label>
                   <input
@@ -93,10 +85,7 @@ const Content = () => {
                   <MagnifyingGlassIcon className='w-5 h-5 text-gray-400' />
                 </div>
                 <div className='flex items-center justify-around rounded-md p-3 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-black w-full lg:w-[39%] mt-3 lg:mt-0'>
-                  <label
-                    htmlFor='where'
-                    className='font-semibold text-indigo-dye text-sm'
-                  >
+                  <label htmlFor='where' className='font-semibold text-indigo-dye text-sm'>
                     Where
                   </label>
                   <input
@@ -140,29 +129,19 @@ const Content = () => {
                           <div
                             key={job.id}
                             className={`${
-                              isJobView && selectedJobId === job.id
-                                ? 'border-savoy-blue'
-                                : 'border-gray-300'
+                              isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
                             } card border rounded-md p-4 cursor-pointer`}
                             onClick={() => openJobDetails(job.id)}
                           >
-                            <span className='text-xs text-red-500'>
-                              {job.isNew ? 'NEW' : ''}
-                            </span>
+                            <span className='text-xs text-red-500'>{job.isNew ? 'NEW' : ''}</span>
                             <div className='flex flex-col'>
                               <span className='mt-1 ml-1'>
                                 <FileCaseIcon className='h-6 w-6' />
                               </span>
                               <div className='ml-0 mt-2'>
-                                <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>
-                                  {job.title}
-                                </h5>
-                                <h6 className='text-indigo-dye text-sm font-medium mt-1'>
-                                  {job.company}
-                                </h6>
-                                <h6 className='text-indigo-dye text-sm'>
-                                  {job.location}
-                                </h6>
+                                <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>{job.title}</h5>
+                                <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
+                                <h6 className='text-indigo-dye text-sm'>{job.location}</h6>
                                 <Link href={`/job-app-form/${job.id}`}>
                                   <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
                                     Apply Now!
@@ -176,11 +155,7 @@ const Content = () => {
                   </div>
                 </div>
                 <div className='lg:border-l lg:border-gray-300 pl-10 pr-5 py-10 lg:w-[64%] hidden lg:block'>
-                  <div
-                    className={`${
-                      isJobView ? '' : 'hidden'
-                    } card border border-gray-300 rounded-md`}
-                  >
+                  <div className={`${isJobView ? '' : 'hidden'} card border border-gray-300 rounded-md sticky top-10`}>
                     <div className='flex justify-end px-3 mt-2'>
                       <button onClick={closeJobDetails}>
                         <XMarkIcon className='h-5 w-5 text-indigo-dye' />
@@ -198,11 +173,6 @@ const Content = () => {
           <Image src={jobIllustration} fill alt='Find job illustration' />
         </div>
       )}
-      {/* <JobDetailsModal
-        open={isJobModal}
-        onClose={closeJobModal}
-        jobId={selectedJobId}
-      /> */}
     </>
   );
 };

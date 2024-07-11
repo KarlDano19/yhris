@@ -73,3 +73,11 @@ div.remove-height {
   transition: transform 0.2s;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
+
+.ql-editor ul {
+  padding-left: unset !important;
+}
+
+.ql-editor ul > li {
+  padding-left: 0.5em !important;
+}

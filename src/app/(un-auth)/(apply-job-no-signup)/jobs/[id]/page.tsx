@@ -8,45 +8,59 @@ type Props = {
 };
 
 export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
-  const id = params.id;
-  const response = await fetch(`${process.env.NEXT_API_URL}/api/public/jobs/${id}/metadata/`).then((res) => res.json());
-
-  let metaConfig = {};
-  let openGraphConfig = {};
-  let metaData = {};
-  if (Object.keys(response).length !== 0) {
-    metaConfig = {
-      title: `${response.og_title} - Yahshua HRIS`,
-      description: 'HRISS',
+  try {
+    const id = params.id;
+    const config = {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+      },
     };
-    openGraphConfig = {
-      url: response.og_url,
-      type: response.og_type,
-      title: response.og_title,
-      description: response.og_description,
-      images: [
-        {
-          url: response.og_image,
-          width: response.og_image_width,
-          height: response.og_image_height,
-        },
-      ],
-    };
-    metaData = {
-      other: metaConfig,
-      openGraph: openGraphConfig,
-    };
-  } else {
-    metaConfig = {
-      title: `Job - Yahshua HRIS`,
-      description: 'HRIS',
-    };
-    metaData = {
-      other: metaConfig,
-    };
+    const res = await fetch(`${process.env.NEXT_API_URL}/api/public/jobs/${id}/metadata/`, config);
+    if (!res.ok) {
+      throw res.json();
+    }
+    const json_response = await res.json();
+    let metaConfig = {};
+    let openGraphConfig = {};
+    let metaData = {};
+    if (Object.keys(json_response).length !== 0) {
+      metaConfig = {
+        title: `${json_response.og_title} - Yahshua HRIS`,
+        description: 'HRISS',
+      };
+      openGraphConfig = {
+        url: json_response.og_url,
+        type: json_response.og_type,
+        title: json_response.og_title,
+        description: json_response.og_description,
+        images: [
+          {
+            url: json_response.og_image,
+            width: json_response.og_image_width,
+            height: json_response.og_image_height,
+          },
+        ],
+      };
+      metaData = {
+        other: metaConfig,
+        openGraph: openGraphConfig,
+      };
+    } else {
+      metaConfig = {
+        title: `Job - Yahshua HRIS`,
+        description: 'HRIS',
+      };
+      metaData = {
+        other: metaConfig,
+      };
+    }
+    return metaData;
+  } catch (err: any) {
+    let errStringify = await err;
+    console.error(errStringify)
+    return {};
   }
-
-  return metaData;
 }
 
 const JobsDetail = ({ params, searchParams }: Props) => {

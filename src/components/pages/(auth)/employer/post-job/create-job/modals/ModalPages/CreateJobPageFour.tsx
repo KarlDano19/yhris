@@ -1,20 +1,23 @@
 import { Dispatch, useState } from 'react';
 
-import SelectChevronDown from '@/svg/SelectChevronDownDummy';
-import 'react-quill/dist/quill.snow.css';
-import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import dynamic from 'next/dynamic';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 export default function CreateJobPageFour({
   setValue,
   getValues,
   register,
   setPageNumber,
+  onSubmit,
 }: {
   register: any;
   setValue: any;
   getValues: any;
   setPageNumber: Dispatch<number>;
+  onSubmit: () => void;
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -98,13 +101,12 @@ export default function CreateJobPageFour({
             Role:
           </label>
           <div className='mt-2 h-72 mb-12'>
-            <textarea rows={4} {...register('jobDescription', { required: true })} id='jobDescription' hidden />
             <ReactQuill
               onChange={(value) => setValue('jobDescription', value)}
               formats={QUILL_FORMATS}
               modules={QUILL_MODULES}
-              style={{ height: '100%' }}
-              defaultValue={getValues('jobDescription')}
+              style={{ height: '100%', padding: '5px 8px !important' }}
+              value={getValues('jobDescription')}
             />
           </div>
         </div>
@@ -113,13 +115,12 @@ export default function CreateJobPageFour({
             Qualifications:
           </label>
           <div className='mt-2 h-72 mb-12'>
-            <textarea rows={4} {...register('qualifications', { required: true })} id='qualifications' hidden />
             <ReactQuill
               onChange={(value) => setValue('qualifications', value)}
               formats={QUILL_FORMATS}
               modules={QUILL_MODULES}
-              style={{ height: '100%' }}
-              defaultValue={getValues('qualifications')}
+              style={{ height: '100%', padding: '5px 8px !important' }}
+              value={getValues('qualifications')}
             />
           </div>
         </div>
@@ -141,7 +142,7 @@ export default function CreateJobPageFour({
             ];
             const incomplete = results.every((item: boolean) => !item);
             if (!incomplete) {
-              setPageNumber(5);
+              onSubmit();
             } else {
               setManualInputFocus({
                 jobDescriptionFile: !!!jobDescriptionFile,

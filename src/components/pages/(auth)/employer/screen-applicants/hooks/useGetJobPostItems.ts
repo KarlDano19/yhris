@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getJobPostItems() {
+async function getJobPostItems(filters: any) {
   try {
+    let newFilters = { ...filters };
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -12,10 +14,7 @@ async function getJobPostItems() {
       },
     };
     if (token) {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/`,
-        config
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -31,9 +30,9 @@ async function getJobPostItems() {
   }
 }
 
-function useGetJobPostItems() {
-  const query = useQuery(['jobPostItemCache', {}], () => getJobPostItems(), {
-    refetchOnWindowFocus: false,
+function useGetJobPostItems(filters: any) {
+  const query = useQuery(['jobPostItemCache', {}], () => getJobPostItems(filters), {
+    enabled: false,
     keepPreviousData: true,
   });
 

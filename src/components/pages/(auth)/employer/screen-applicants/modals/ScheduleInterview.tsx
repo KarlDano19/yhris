@@ -156,17 +156,6 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
 
   const onSubmit = (data: any) => {
     if (tags.length !== 0) {
-      if (selectionId === 'video' && !data.platform) {
-        toast.custom(
-          () => (
-            <CustomToast message={'You need to connect or select for video format before proceeding.'} type='error' />
-          ),
-          {
-            duration: 4000,
-          }
-        );
-        return;
-      }
       data.applicantId = applicant?.id;
       data.emails = tags;
       data.selectionId = selectionId;

@@ -207,11 +207,11 @@ export default function SendContractModal({
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
                                     <XMarkIcon className='w-4 h-4' />
@@ -254,11 +254,11 @@ export default function SendContractModal({
                             CC
                           </label>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
                               {tagsCc.map((tag: string) => (
                                 <div
                                   key={tag}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => handleRemoveTag(tag)}>
                                     <XMarkIcon className='w-4 h-4' />
@@ -287,7 +287,7 @@ export default function SendContractModal({
                               {tagsBcc.map((tagBcc: string) => (
                                 <div
                                   key={tagBcc}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
                                     <XMarkIcon className='w-4 h-4' />
@@ -316,7 +316,7 @@ export default function SendContractModal({
                             onChange={(value) => setValue('message', value)}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
-                            style={{ height: '100%' }}
+                            style={{ height: '100%', padding: '5px 8px !important' }}
                             value={watch('message')}
                           />
                         </div>
@@ -326,7 +326,7 @@ export default function SendContractModal({
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                       <button
                         type='submit'
-                        className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
+                        className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto disabled:opacity-50'
                         disabled={isLoading}
                       >
                         {isLoading ? (

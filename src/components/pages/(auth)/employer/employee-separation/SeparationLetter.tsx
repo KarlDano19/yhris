@@ -86,7 +86,7 @@ export default function SeparationLetter({
               isLetterSent
                 ? 'bg-red-500 border-[1px] border-red-500 text-white'
                 : 'border-[1px] border-red-500 text-red-500',
-              'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10 cursor-default disabled:opacity-75'
+              'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10 disabled:opacity-75'
             )}
             disabled={isLetterSent}
           >

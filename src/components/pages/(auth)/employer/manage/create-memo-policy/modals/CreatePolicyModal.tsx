@@ -173,7 +173,7 @@ export default function CreatePolicyModal({
                                 {tagsTo.map((tagTo: string) => (
                                   <div
                                     key={tagTo}
-                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start'
+                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                   >
                                     <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
                                       <XMarkIcon className='w-4 h-4' />
@@ -325,7 +325,7 @@ export default function CreatePolicyModal({
                             Upload File (Optional)
                           </label>
                           <DragDrop setValue={(value: any) => setValue('file', value)} />
-                          <p className='text-xs mt-1 text-gray-400'>Maximum file size: 10mb</p>
+                          <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                         </div>
                       </div>
                     </div>

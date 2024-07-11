@@ -10,7 +10,6 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN npm install
-RUN npm run build
 RUN chmod +x node_modules/.bin/next
 RUN chmod +x entrypoint.sh
 
