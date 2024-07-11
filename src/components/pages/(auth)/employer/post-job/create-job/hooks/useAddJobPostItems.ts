@@ -20,7 +20,7 @@ async function addJobPost(jobPost: any) {
     formData.append('og_url', `${window.location.protocol}//${window.location.host}/jobs/`);
     formData.append('og_type', 'article');
     formData.append('og_title', jobPost.jobTitle);
-    formData.append('og_description', 'This is just a test');
+    formData.append('og_description', `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`);
     formData.append('og_image_width', '300');
     formData.append('og_image_height', '300');
 
