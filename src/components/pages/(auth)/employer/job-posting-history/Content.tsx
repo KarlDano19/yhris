@@ -333,6 +333,7 @@ const Content = () => {
                       to: value,
                     });
                   }}
+                  minDate={itemsFilter.from}
                 />
               </div>
             </div>
