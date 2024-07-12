@@ -15,7 +15,7 @@ const Tab = ({}) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 mt-10 md:gap-x-10 lg:gap-x-14">
           <div className="col-1 md:col-span-2 lg:col-span-4 flex">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-8 lg:gap-x-5 md:w-full lg:w-auto">
-              <div className="image-container over-flowhidden h-[155px] w-36 md:w-auto md:max-w-[150px] mx-auto md:mx-0 md:cols-span-1 lg:col-span-3 bg-gray-300 rounded-md flex items-center justify-center">
+              <div className="overflow-hidden h-[155px] w-36 md:w-auto md:max-w-[150px] mx-auto md:mx-0 md:cols-span-1 lg:col-span-3 bg-gray-300 rounded-md flex items-center justify-center">
                 <Image
                   className="hidden"
                   src=""

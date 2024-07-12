@@ -14,6 +14,7 @@ import useSubmitApplication from './hooks/useSubmitApplication';
 import useGetJobDetails from './hooks/useGetJobDetails';
 import ProfileTab from './ProfileTab';
 import PreferencesTab from './PreferencesTab';
+import DataConfirmationModal from './modals/DataConfirmationModal';
 
 const Content = () => {
   const params = useParams();

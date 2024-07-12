@@ -53,32 +53,13 @@ export default function CreateJobPageFive({
                 id='textBtn'
                 type='radio'
                 className='form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900'
-                value='text'
+                value='default'
                 name='postAsRadioGroup'
                 {...register('postAs', { required: true })}
                 onChange={handleSelection}
               />
-              <span className='ml-2 text-sm font-medium leading-6 text-gray-900'>Text</span>
+              <span className='ml-2 text-sm font-medium leading-6 text-gray-900'>Default</span>
             </label>
-
-            {/* <label className='inline-flex items-start'>
-              <input
-                id='posterBtn'
-                type='radio'
-                className='form-radio h-5 w-5 ext-sm font-medium leading-6 text-gray-900'
-                value='poster'
-                name='postAsRadioGroup'
-                {...register('postAs', { required: true })}
-                onChange={handleSelection}
-              />
-              <span className='ml-2 text-sm font-medium leading-6 text-gray-900'>
-                Poster
-                <span className='block mt-0 font-normal text-gray-400'>
-                  Please make sure that you have set-up your hiring poster
-                  template in the Employee Kit.
-                </span>
-              </span>
-            </label> */}
 
             <label className='inline-flex items-center'>
               <input

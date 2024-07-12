@@ -7,6 +7,8 @@ import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroi
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
+import * as DOMPurify from 'dompurify';
+import JobDetailsLocation from '@/svg/JobDetailLocation';
 import 'react-quill/dist/quill.snow.css';
 
 interface JobDetailsProp {
@@ -55,7 +57,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
         </div>
         <div className='col-span-1 lg:col-span-2 px-1'>
           <div
-            className='image-container lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md hidden lg:block'
+            className='lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md hidden lg:block'
             style={{
               backgroundImage: `url(${jobDetailData.company_logo})`,
               backgroundRepeat: 'no-repeat',
@@ -68,6 +70,13 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
         <div className='details mx-5 mt-2'>
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
+            <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
+            Location
+          </h6>
+          <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
+            {!isLoading ? jobDetailData.advertise_to : 'Loading location...'}
+          </p>
           {/* qualifications */}
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
             <CheckCircleIcon className='h-5 w-5 mr-1' />

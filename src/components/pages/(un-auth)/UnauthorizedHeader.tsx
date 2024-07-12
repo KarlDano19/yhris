@@ -33,7 +33,7 @@ const UnauthorizedHeader = () => {
         {({ open }) => (
           <>
             <div className={`mx-auto max-w-7xl px-4 py-1 sm:px-6 lg:px-8 `}>
-              <div className='flex justify-between lg:gap-8 p-2 md:p-8 lg:p-4'>
+              <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
                   <div className='flex flex-shrink-0 items-center'>
                     <Link href='/'>

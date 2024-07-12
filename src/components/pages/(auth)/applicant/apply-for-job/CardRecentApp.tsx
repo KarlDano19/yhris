@@ -11,9 +11,9 @@ const CardRecentApp = () => {
       <p className="text-center mx-auto text-[#CCD8EA] font-semibold w-40 h-32 mt-7">
         No application yet. Apply Now!
       </p>
-      <div className="grid grid-cols-6 mx-7 mt-6 gap-x-4 hidden">
+      <div className="grid grid-cols-6 mx-7 mt-6 gap-x-4">
         <div className="col-span-2">
-          <div className="image-container h-[80px] rounded-md bg-gray-200 overflow-hidden">
+          <div className="h-[80px] rounded-md bg-gray-200 overflow-hidden">
             <Image
               className="hidden"
               src={profileImage}
