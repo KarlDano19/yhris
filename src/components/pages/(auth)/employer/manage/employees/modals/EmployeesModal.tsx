@@ -228,7 +228,7 @@ export default function EmployeesModal({
                               <div className='grid lg:grid-cols-7 gap-x-8 mt-7'>
                                 <div className='lg:col-span-1'>
                                   <div
-                                    className='image-container bg-gray-300 h-40 w-1/2 md:w-44 lg:w-full rounded-md mx-auto lg:mx-0 flex items-center justify-center'
+                                    className='bg-gray-300 h-40 w-1/2 md:w-44 lg:w-full rounded-md mx-auto lg:mx-0 flex items-center justify-center'
                                     style={{
                                       backgroundImage: `url(${dataEmployeeDetail?.photo})`,
                                       backgroundRepeat: 'no-repeat',
