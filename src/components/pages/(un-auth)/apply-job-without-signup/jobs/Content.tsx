@@ -122,7 +122,7 @@ const Content = () => {
           <div className='border-t border-gray-300'></div>
           <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
             <div className='px-4 lg:px-5'>
-              <div className='xl:flex'>
+              <div className='lg:flex'>
                 <div className='lg:w-[36%]'>
                   <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                     <>
@@ -155,7 +155,7 @@ const Content = () => {
                               </div>
                             </div>
                             {isJobView && selectedJobId === job.id && (
-                              <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] xl:hidden block'>
+                              <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] lg:hidden block'>
                                 <div 
                                   className={classNames(
                                     'card border border-savoy-blue rounded-md sticky top-10', isJobModalOpen ? '' : 'hidden' 
@@ -177,7 +177,7 @@ const Content = () => {
                     </>
                   </div>
                 </div>
-                <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-10 lg:w-[64%] hidden xl:block'>
+                <div className='lg:border-l lg:border-gray-300 lg:pl-10 lg:pr-5 py-10 lg:w-[64%] hidden lg:block'>
                   <div
                     className={classNames(
                       'card border border-savoy-blue rounded-md sticky top-10', isJobView ? '' : 'hidden' 
