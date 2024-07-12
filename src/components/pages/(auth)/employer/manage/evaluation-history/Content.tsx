@@ -177,6 +177,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       to: value,
                     });
                   }}
+                  minDate={itemsFilter.from}
                 />
               </div>
             </div>
