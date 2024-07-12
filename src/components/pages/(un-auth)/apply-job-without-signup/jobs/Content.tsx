@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import jobIllustration from '@/assets/find-job-illustration.svg';
 import FileCaseIcon from '@/svg/FileCaseIcon';
+import classNames from '@/helpers/classNames';
 
 const Content = () => {
   const [hasJob, setJob] = useState(false);
@@ -131,9 +132,9 @@ const Content = () => {
                           <div>
                             <div
                               key={job.id}
-                              className={`${
-                                isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
-                              } card border rounded-md p-4 cursor-pointer`}
+                              className={classNames(
+                                'card border rounded-md p-4 cursor-pointer', isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
+                              )}
                               onClick={() => openJobDetails(job.id)}
                             >
                               <span className='text-xs text-red-500'>{job.isNew ? 'NEW' : ''}</span>
@@ -155,7 +156,11 @@ const Content = () => {
                             </div>
                             {isJobView && selectedJobId === job.id && (
                               <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] xl:hidden block'>
-                                <div className={`${isJobModalOpen ? '' : 'hidden'} card border border-savoy-blue rounded-md sticky top-10`}>
+                                <div 
+                                  className={classNames(
+                                    'card border border-savoy-blue rounded-md sticky top-10', isJobModalOpen ? '' : 'hidden' 
+                                  )}  
+                                >
                                   <div className='flex justify-end px-3 mt-2'>
                                     <button onClick={closeJobDetails}>
                                       <XMarkIcon className='h-5 w-5 text-indigo-dye' />
@@ -173,7 +178,11 @@ const Content = () => {
                   </div>
                 </div>
                 <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-10 lg:w-[64%] hidden xl:block'>
-                  <div className={`${isJobView ? '' : 'hidden'} card border border-gray-300 rounded-md sticky top-10`}>
+                  <div
+                    className={classNames(
+                      'card border border-savoy-blue rounded-md sticky top-10', isJobView ? '' : 'hidden' 
+                    )}  
+                  >
                     <div className='flex justify-end px-3 mt-2'>
                       <button onClick={closeJobDetails}>
                         <XMarkIcon className='h-5 w-5 text-indigo-dye' />
