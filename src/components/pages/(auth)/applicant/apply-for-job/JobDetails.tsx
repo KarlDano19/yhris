@@ -28,7 +28,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           </div>
         </div>
         <div className='col-span-1 px-1'>
-          <div className='image-container bg-gray-300 h-[72px] rounded-md'></div>
+          <div className='bg-gray-300 h-[72px] rounded-md'></div>
         </div>
       </div>
       <p className='text-sm text-indigo-dye px-[70px] mt-4'>

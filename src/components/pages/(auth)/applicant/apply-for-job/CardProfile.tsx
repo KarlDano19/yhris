@@ -8,7 +8,7 @@ const CardProfile = () => {
     <div className="card card-user-info bg-white border border-gray-300 w-full h-auto shadow rounded-md overflow-hidden relative">
       <div className="h-32 bg-[#FCCA34] border-b border-gray-300"></div>
       <div className="flex justify-center">
-        <div className="profile-image-container w-32 h-36 bg-gray-50 border border-gray-300 rounded-md overflow-hidden absolute top-11">
+        <div className="w-32 h-36 bg-gray-50 border border-gray-300 rounded-md overflow-hidden absolute top-11">
           <Image
             className="hidden"
             src={profileImage}
