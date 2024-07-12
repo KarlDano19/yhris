@@ -44,18 +44,15 @@ const Content = () => {
   const openJobDetails = (jobId: any) => {
     setSelectedJobId(jobId);
     setIsJobView(true);
+    setIsJobModalOpen(true);
     // setJobModal(true);
   };
 
   const closeJobDetails = () => {
     setIsJobView(false);
     setJobModal(false);
-  };
-
-  const closeJobModal = () => {
-    setIsJobModalOpen(false);
-    console.log(1)
-  };
+    setIsJobModalOpen(false)
+  }
 
   return (
     <>
@@ -130,6 +127,8 @@ const Content = () => {
                     <>
                       {!isGetJobsLoading
                         ? jobsItems.map((job: any) => (
+                          <>
+                          <div>
                             <div
                               key={job.id}
                               className={`${
@@ -151,23 +150,23 @@ const Content = () => {
                                       Apply Now!
                                     </button>
                                   </Link>
-                                  {isJobView && selectedJobId === job.id && (
-                                    <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-10 lg:w-[64%] xl:hidden block'>
-                                      <div className={`${isJobView ? '' : 'hidden'} card border border-gray-300 rounded-md sticky top-10`}>
-                                        <div className='flex justify-end px-3 mt-2'>
-                                          <button onClick={closeJobModal}>
-                                            <XMarkIcon className='h-5 w-5 text-indigo-dye' />
-                                          </button>
-                                        </div>
-                                        <div className={`${isJobModalOpen? '': ''}`}>
-                                          <JobDetails jobId={selectedJobId} />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
                               </div>
                             </div>
+                            {isJobView && selectedJobId === job.id && (
+                              <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] xl:hidden block'>
+                                <div className={`${isJobModalOpen ? '' : 'hidden'} card border border-savoy-blue rounded-md sticky top-10`}>
+                                  <div className='flex justify-end px-3 mt-2'>
+                                    <button onClick={closeJobDetails}>
+                                      <XMarkIcon className='h-5 w-5 text-indigo-dye' />
+                                    </button>
+                                  </div>
+                                    <JobDetails jobId={selectedJobId} />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          </>
                           ))
                         : 'Loading jobs...'}
                     </>
