@@ -55,7 +55,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
         </div>
         <div className='col-span-1 lg:col-span-2 px-1'>
           <div
-            className='image-container lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md'
+            className='image-container lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md hidden lg:block'
             style={{
               backgroundImage: `url(${jobDetailData.company_logo})`,
               backgroundRepeat: 'no-repeat',
