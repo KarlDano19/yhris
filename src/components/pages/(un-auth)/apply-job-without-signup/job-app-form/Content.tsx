@@ -90,7 +90,7 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <DataConfirmationModal open={submitModal} onClose={() => setOpenSubmitModal(false)} />
+      <SubmittedModal open={submitModal} onClose={() => setOpenSubmitModal(false)} />
       <SuggestionModal open={isSuggestModal} onClose={() => setSuggestModal(false)} />
     </div>
   );
