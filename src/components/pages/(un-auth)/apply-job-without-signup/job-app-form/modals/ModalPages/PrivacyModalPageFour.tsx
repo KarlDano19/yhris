@@ -52,22 +52,26 @@ export default function PrivacyModaPagelFour({
 
   return (
     <>
-      <div className='h-[400px] overflow-auto' ref={scrollContainerRef}>
+      <div className='h-[450px] overflow-auto pr-2' ref={scrollContainerRef}>
         <div>
           <div className='mt-3 text-left sm:mt-3'>
             <div className='mt-2'>
               <ul>
-                <li>VIII. Storage and Retention</li>
-                <p className='text-indigo-dye font-bold'>
-                  We store files containing personal information in our laptops and computers, which are kept in a secure environment. We also store your personal information with cloud-based third-party data storage providers. We shall ensure that proper measures are adopted to protect your information.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                  We maintain personal information in our systems only for as long as necessary to fulfill the purposes for which it was collected, for the establishment, exercise, or defense of legal claims, for legitimate business purposes, or as provided by applicable laws.
-                </p>
-                <li>IX. Disposal</li>
-                <p className='text-indigo-dye font-bold'>
-                  Physical records shall be disposed of through shredding, while digital files shall be anonymized. In all instances, our manner of disposal shall ensure that the personal information shall no longer be retrieved, processed, or accessed by unauthorized persons.
-                </p>
+                <li className='text-base font-semibold mb-3 mt-6'>VIII. Storage and Retention</li>
+                <div className='space-y-3'>
+                  <p className='text-sm'>
+                    We store files containing personal information in our laptops and computers, which are kept in a secure environment. We also store your personal information with cloud-based third-party data storage providers. We shall ensure that proper measures are adopted to protect your information.
+                  </p>
+                  <p className='text-sm'>
+                    We maintain personal information in our systems only for as long as necessary to fulfill the purposes for which it was collected, for the establishment, exercise, or defense of legal claims, for legitimate business purposes, or as provided by applicable laws.
+                  </p>                 
+                </div>
+                <li className='text-base font-semibold mb-3 mt-6'>IX. Disposal</li>
+                <div className='space-y-3'>
+                  <p className='text-sm'>
+                    Physical records shall be disposed of through shredding, while digital files shall be anonymized. In all instances, our manner of disposal shall ensure that the personal information shall no longer be retrieved, processed, or accessed by unauthorized persons.
+                  </p>
+                </div>
               </ul>
             </div>
           </div>

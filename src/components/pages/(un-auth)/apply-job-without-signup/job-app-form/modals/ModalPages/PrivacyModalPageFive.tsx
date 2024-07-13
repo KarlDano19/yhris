@@ -4,6 +4,7 @@ import Select from 'react-select';
 import { Dialog, Transition } from '@headlessui/react';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
+import classNames from '@/helpers/classNames';
 
 interface Field {
   onChange: (value: any) => void;
@@ -52,56 +53,67 @@ export default function PrivacyModaPagelFive({
 
   return (
     <>
-      <div className='h-[400px] overflow-auto' ref={scrollContainerRef}>
+      <div className='h-[450px] overflow-auto px-4' ref={scrollContainerRef}>
         <div>
           <div className='mt-3 text-left sm:mt-3'>
             <div className='mt-2'>
               <ul>
-                <li>X. Rights of a Data Subject</li>
-                <p className='text-indigo-dye font-bold'>
-                  Under the DPA, you have the right to be informed regarding processing the personal information we hold about you.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                    Further, you may be entitled to request:
-                </p>
-                <ul>
-                    <li>Access to personal information we process about you. It is your right to obtain confirmation on whether or not data relating to you are being processed;</li>
-                    <li>Rectification of your personal information. This is your right to have your personal information corrected if it is inaccurate or incomplete;</li>
-                    <li>Erasure or blocking of your personal information whenever warranted;</li>
-                    <li>The right to object if the personal information processing involved is based on consent or on legitimate interest;</li>
-                    <li>The right to data portability through which you may obtain and electronically move, copy, or transfer your data securely for further use</li>
-                </ul>
-                <p className='text-indigo-dye font-bold'>
-                    Once you have registered as our customer/client, you may access your account details and request correction of your personal information by contacting YAHSHUA-ABBA Customer Care through Globe 0917-625-5249 or by sending us an email through this email address: clientrelations@abba.works.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                    You may claim compensation if you believe you suffered damages due to inaccurate, incomplete, outdated, false, unlawfully obtained, or unauthorized use of personal information or for violating your rights and freedoms as a data subject.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                    Should you think that your personal information has been misused, maliciously disclosed, or improperly disposed of or that your data privacy rights have been violated, you have a right to file a complaint with the NPC.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                    Our channels are open for any concerns you would like to bring to our attention. You may email us at dpo@yahshuagroup.com / dpo@abba.works to lodge a complaint. We will ensure that your complaint is addressed and that it will remain confidential especially where the subject matter of the complaint is sensitive.
-                </p>
+                <li className='text-base font-semibold mb-3 mt-6'>X. Rights of a Data Subject</li>
+                  <div className='space-y-3'>
+                    <p className='text-sm'>
+                      Under the DPA, you have the right to be informed regarding processing the personal information we hold about you.
+                    </p>
+                    <p className='text-sm'>
+                        Further, you may be entitled to request:
+                    </p>
+                    <ul className='list-decimal pl-5 text-sm'>
+                        <li>Access to personal information we process about you. It is your right to obtain confirmation on whether or not data relating to you are being processed;</li>
+                        <li>Rectification of your personal information. This is your right to have your personal information corrected if it is inaccurate or incomplete;</li>
+                        <li>Erasure or blocking of your personal information whenever warranted;</li>
+                        <li>The right to object if the personal information processing involved is based on consent or on legitimate interest;</li>
+                        <li>The right to data portability through which you may obtain and electronically move, copy, or transfer your data securely for further use</li>
+                    </ul>
+                    <p className='text-sm'>
+                        Once you have registered as our customer/client, you may access your account details and request correction of your personal information by contacting YAHSHUA-ABBA Customer Care through Globe <span className='font-semibold'>0917-625-5249</span> or by sending us an email through this email address: <span className='font-semibold'>clientrelations@abba.works</span>.
+                    </p>
+                    <p className='text-sm'>
+                        You may claim compensation if you believe you suffered damages due to inaccurate, incomplete, outdated, false, unlawfully obtained, or unauthorized use of personal information or for violating your rights and freedoms as a data subject.
+                    </p>
+                    <p className='text-sm'>
+                        Should you think that your personal information has been misused, maliciously disclosed, or improperly disposed of or that your data privacy rights have been violated, you have a right to file a complaint with the NPC.
+                    </p>
+                    <p className='text-sm'>
+                        Our channels are open for any concerns you would like to bring to our attention. You may email us at dpo@yahshuagroup.com / dpo@abba.works to lodge a complaint. We will ensure that your complaint is addressed and that it will remain confidential especially where the subject matter of the complaint is sensitive.
+                    </p>
+                  </div>
               </ul>
             </div>
           </div>
         </div>
       </div>
+      <div className={classNames(
+        'text-center py-3 bg-[#ACB9CB]',
+        !atBottom ? 'bg-[#EBF3FF]' : 'bg-[#EBF3FF]'
+        )}
+      >
+        <button
+          type='button'
+          disabled={!atBottom}
+          className={classNames(
+            'inline-flex w-1/2 justify-center rounded-md px-3 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2', 
+            !atBottom ? 'bg-[#EBF3FF] border=[#ACB9CB] border text-[#ACB9CB]' : 'bg-savoy-blue hover:bg-indigo-500 focus-visible:outline-indigo-600 text-white')}
+          onClick={handleNext}
+        >
+          {!atBottom ? (
+            'Scroll to agree'
+          ) : (
+            'I agree'
+          )}
+        </button>
+      </div>
       {!atBottom && (
-        <div className='mt-5 sm:mt-6 text-center text-red-500'>
-          Scroll down to the bottom to enable the button.
-        </div>
-      )}
-      {atBottom && (
-        <div className='mt-5 sm:mt-6'>
-          <button
-            type='button'
-            className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-            onClick={handleNext}
-          >
-            Next
-          </button>
+        <div className='text-center font-semibold text-base bg-[#B8C7F0] py-3 text-[#2C3F58]'>
+          Please scroll down to Agree
         </div>
       )}
     </>
