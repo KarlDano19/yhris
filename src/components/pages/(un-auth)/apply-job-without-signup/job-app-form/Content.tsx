@@ -26,6 +26,7 @@ const Content = () => {
   const [combinedFormData, setCombinedFormData] = useState<any>({});
 
   const [submitModal, setOpenSubmitModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
   const { data } = useGetJobDetails(Number(params.id));
   const { mutate: mutateSubmitApplication, isLoading: isLoadingSubmitApplication } = useSubmitApplication();
 
@@ -40,25 +41,33 @@ const Content = () => {
     setCurrentTab(2);
   };
 
+  const handleConfirmation = (isConfirmed: boolean) => {
+    setConfirmModal(false);
+    if (isConfirmed) {
+      const finalData = { ...combinedFormData, ...secondForm.getValues() };
+      finalData['jobPosting'] = params.id;
+      const callBackReq = {
+        onSuccess: (data: any) => {
+          if (!data.error) {
+            setOpenSubmitModal(true);
+          }
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+          if (err === 'Curriculum Vitae/Resume: Invalid file type') {
+            setSuggestModal(true);
+          }
+        },
+      };
+      mutateSubmitApplication(finalData, callBackReq);
+    }
+  };
+
   const submitToSave = (data: any) => {
-    const finalData = { ...combinedFormData, ...data };
-    finalData['jobPosting'] = params.id;
-    const callBackReq = {
-      onSuccess: (data: any) => {
-        if (!data.error) {
-          setOpenSubmitModal(true);
-        }
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
-        if (err === 'Curriculum Vitae/Resume: Invalid file type') {
-          setSuggestModal(true);
-        }
-      },
-    };
-    mutateSubmitApplication(finalData, callBackReq);
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setConfirmModal(true);
   };
 
   return (
@@ -91,6 +100,7 @@ const Content = () => {
         </div>
       </div>
       <SubmittedModal open={submitModal} onClose={() => setOpenSubmitModal(false)} />
+      <DataConfirmationModal open={confirmModal} onClose={handleConfirmation} />
       <SuggestionModal open={isSuggestModal} onClose={() => setSuggestModal(false)} />
     </div>
   );

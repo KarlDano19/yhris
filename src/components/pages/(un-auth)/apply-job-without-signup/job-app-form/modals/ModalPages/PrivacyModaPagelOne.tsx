@@ -4,6 +4,7 @@ import Select from 'react-select';
 import { Dialog, Transition } from '@headlessui/react';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
+import classNames from '@/helpers/classNames';
 
 interface Field {
   onChange: (value: any) => void;
@@ -52,46 +53,57 @@ export default function PrivacyModaPagelOne({
 
   return (
     <>
-      <div className='h-[400px] overflow-auto' ref={scrollContainerRef}>
+      <div className='h-[450px] overflow-auto px-4' ref={scrollContainerRef}>
         <div>
-          <div className='mt-3 text-left sm:mt-3'>
+          <div className='mt-3 text-left sm:mt-3 px-4'>
             <div className='mt-2'>
               <ul>
-                <li>I. Privacy Policy</li>
-                <p className='text-indigo-dye font-bold'>
-                  We, at YAHSHUA Outsourcing Worldwide Inc. (YAHSHUA) and The ABBA Initiative, OPC (ABBA), YAHSHUA’s parent company, collectively referred to asYAHSHUA-ABBA, highly regard the privacy of our clients or customers, suppliers or vendors, business or industry partners, employees, interns, shareholders or investors, and by extension, the community we operate in.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                  We are committed to fully protecting your personal data privacy in compliance with Republic Act No. 10173, otherwise known as the Data Privacy Act of 2012 (DPA), its Implementing Rules and Regulations (IRR), relevant issuances of the National Privacy Commission (NPC) and other related laws, rules, regulations, and issuances.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                  We shall detail the manner in which we process your personal information and provide a separate privacy notice in an appropriate format and manner whenever we collect personal information through other channels (e.g., publicly accessible data processing online systems, mobile apps, logbook and CCTV in our office, or during events where participants personal information is gathered through attendance sheets, registration forms, or evaluation forms).
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                  In all instances, we assure you that processing your personal information will strictly follow the provisions of DPA, especially the general data privacy principles ofTransparency, Legitimate Purpose, and Proportionality.
-                </p>
-                <p className='text-indigo-dye font-bold'>
-                  By continuing to use YAHSHUA-ABBA products and services and involvement in any YAHSHUA-ABBA activity, such as, but not limited to, systems subscription, sales & marketing events, and promotions, you signify that you have read, understood, and consented to the collection and processing of your personal information in accordance with this Privacy Policy.
-                </p>
+                <li className='text-base font-semibold mb-3 mt-6'>I. Privacy Policy</li>
+                <div className='space-y-3'>
+                  <p className='text-sm'>
+                    We, at YAHSHUA Outsourcing Worldwide Inc. (YAHSHUA) and The ABBA Initiative, OPC (ABBA), YAHSHUA’s parent company, collectively referred to asYAHSHUA-ABBA, highly regard the privacy of our clients or customers, suppliers or vendors, business or industry partners, employees, interns, shareholders or investors, and by extension, the community we operate in.
+                  </p>
+                  <p className='text-sm'>
+                    We are committed to fully protecting your personal data privacy in compliance with Republic Act No. 10173, otherwise known as the Data Privacy Act of 2012 (DPA), its Implementing Rules and Regulations (IRR), relevant issuances of the National Privacy Commission (NPC) and other related laws, rules, regulations, and issuances.
+                  </p>
+                  <p className='text-sm'>
+                    We shall detail the manner in which we process your personal information and provide a separate privacy notice in an appropriate format and manner whenever we collect personal information through other channels (e.g., publicly accessible data processing online systems, mobile apps, logbook and CCTV in our office, or during events where participants personal information is gathered through attendance sheets, registration forms, or evaluation forms).
+                  </p>
+                  <p className='text-sm'>
+                    In all instances, we assure you that processing your personal information will strictly follow the provisions of DPA, especially the general data privacy principles ofTransparency, Legitimate Purpose, and Proportionality.
+                  </p>
+                  <p className='text-sm'>
+                    By continuing to use YAHSHUA-ABBA products and services and involvement in any YAHSHUA-ABBA activity, such as, but not limited to, systems subscription, sales & marketing events, and promotions, you signify that you have read, understood, and consented to the collection and processing of your personal information in accordance with this Privacy Policy.
+                  </p>
+                </div>
               </ul>
             </div>
           </div>
         </div>
       </div>
+      <div className={classNames(
+        'text-center py-3 bg-[#ACB9CB]',
+        !atBottom ? 'bg-[#EBF3FF]' : 'bg-[#EBF3FF]'
+        )}
+      >
+        <button
+          type='button'
+          disabled={!atBottom}
+          className={classNames(
+            'inline-flex w-1/2 justify-center rounded-md px-3 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2', 
+            !atBottom ? 'bg-[#EBF3FF] border=[#ACB9CB] border text-[#ACB9CB]' : 'bg-savoy-blue hover:bg-indigo-500 focus-visible:outline-indigo-600 text-white')}
+          onClick={handleNext}
+        >
+          {!atBottom ? (
+            'Scroll to agree'
+          ) : (
+            'I agree'
+          )}
+        </button>
+      </div>
       {!atBottom && (
-        <div className='mt-5 sm:mt-6 text-center text-red-500'>
-          Scroll down to the bottom to enable the button.
-        </div>
-      )}
-      {atBottom && (
-        <div className='mt-5 sm:mt-6'>
-          <button
-            type='button'
-            className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-            onClick={handleNext}
-          >
-            Next
-          </button>
+        <div className='text-center font-semibold text-base bg-[#B8C7F0] py-3 text-[#2C3F58]'>
+          Please scroll down to Agree
         </div>
       )}
     </>

@@ -79,5 +79,32 @@ div.remove-height {
 }
 
 .ql-editor ul > li {
+  padding-left: 0.5em !important;
+}
+
+/* Style the scroll container */
+::-webkit-scrollbar {
+  width: 5px;
+  /* Width of the scrollbar */
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  /* Color of the track */
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #2C3F58;
+  /* Color of the scroll handle */
+  border-radius: 6px;
+  /* Rounded corners */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #2C3F58;
+  /* Color of the scroll handle on hover */
   padding-left: 1em !important;
 }
