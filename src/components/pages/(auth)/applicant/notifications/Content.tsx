@@ -55,7 +55,7 @@ const Content = () => {
                       isNotifClicked ? "lg:hidden bg-transparent" : ""
                     } circle-active h-4 w-4 md:h-5 md:w-5 mr-2 md:mr-0 md:mt-5 lg:mt-0 bg-savoy-blue rounded-full`}
                   ></div>
-                  <div className="comp-image-container h-14 w-[60px] md:h-16 md:w-[70px] rounded-lg bg-gray-200 overflow-hidden">
+                  <div className="h-14 w-[60px] md:h-16 md:w-[70px] rounded-lg bg-gray-200 overflow-hidden">
                     <Image
                       className="hidden"
                       src={profileImage}

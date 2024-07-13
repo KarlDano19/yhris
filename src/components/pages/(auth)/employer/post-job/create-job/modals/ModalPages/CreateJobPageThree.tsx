@@ -337,7 +337,7 @@ export default function CreateJobPageThree({
                 salaryTypeValue !== 'Range' && (salaryValueValue.trim() === '-' || !salaryValueValue) ? true : false,
             });
             if (salaryTypeValue === 'Range') {
-              if (salaryRangeMinValue >= salaryRangeMaxValue) {
+              if (parseInt(salaryRangeMinValue) >= parseInt(salaryRangeMaxValue)) {
                 toast.custom(() => <CustomToast message={'Minimum salary cannot be greater than or equal to maximum salary.'} type='error' />, {
                   duration: 7000,
                 });

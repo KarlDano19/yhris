@@ -37,14 +37,14 @@ const Content = () => {
   return (
     <>
       {!!Object.keys(jobDetailData).length && (
-        <div className='py-12'>
-          <div className='w-[650px] mx-auto border border-gray-200 shadow-md rounded-[20px] py-8 px-10'>
-            <div className='grid grid-cols-4 px-4 mt-5'>
-              <div className='col-span-3 lg:col-span-2 flex'>
-                <span className='mt-1 ml-1'>
+        <div className='py-4 mx-4 md:py-12'>
+          <div className='md:w-[40em] mx-auto border border-gray-200 shadow-md rounded-[20px] py-2 px-3 sm:px-8 md:py-8 md:px-10'>
+            <div className='grid sm:grid-cols-3 md:px-4 mt-5'>
+              <div className='col-span-2 flex'>
+                <div className='p-1'>
                   <FileCaseIcon className='h-6 w-6' />
-                </span>
-                <div className='ml-6'>
+                </div>
+                <div className='pl-3 md:pl-6 pr-12 sm:pr-1'>
                   <h5 className='text-xl font-semibold text-indigo-dye'>
                     {!isLoading ? jobDetailData?.job_title : 'Loading job title...'}
                   </h5>
@@ -61,9 +61,8 @@ const Content = () => {
                   </div>
                 </div>
               </div>
-              <div className='col-span-1 lg:col-span-2 px-1'>
-                <div
-                  className='image-container lg:w-40 bg-gray-300 h-[150px] rounded-md float-right'
+              <div className='col-span-1 px-1 rounded-md h-[10rem] w-[10rem] hidden sm:flex justify-center'>
+                <div className='bg-gray-300 w-full h-full rounded-md'
                   style={{
                     backgroundImage: `url(${jobDetailData.company_logo})`,
                     backgroundRepeat: 'no-repeat',
@@ -73,15 +72,15 @@ const Content = () => {
                 ></div>
               </div>
             </div>
-            <div className='border-t border-gray-300 my-5 p-4'>
+            <div className='border-t border-gray-300 my-5 pt-4 sm:pt-4 sm:px-4'>
               <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
-              <div className='details mx-5 mt-2'>
+              <div className='details mx-2 sm:mx-5 mt-2'>
                 {/* qualifications */}
                 <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
                   <CheckCircleIcon className='h-5 w-5 mr-1' />
                   Qualifications
                 </h6>
-                <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                <div className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
                   {!isLoading
                     ? renderQualificationsDescription(jobDetailData?.qualifications)
                     : 'Loading qualifications...'}
@@ -91,7 +90,7 @@ const Content = () => {
                   <BriefcaseIcon className='h-5 w-5 mr-1' />
                   Job Type
                 </h6>
-                <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
                   {!isLoading ? jobDetailData?.job_type : 'Loading job type...'}
                 </p>
                 {/* schedule */}
@@ -99,7 +98,7 @@ const Content = () => {
                   <ClockIcon className='h-5 w-5 mr-1' />
                   Schedule
                 </h6>
-                <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
                   {!isLoading ? jobDetailData?.job_schedule : 'Loading schedule...'}
                 </p>
                 {/* salary range */}
@@ -109,7 +108,7 @@ const Content = () => {
                       <BanknotesIcon className='h-5 w-5 mr-1' />
                       Salary Range
                     </h6>
-                    <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                    <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
                       {!isLoading && jobDetailData?.salary_range_type == 'Range' && (
                         <>
                           PHP {formatPrice(jobDetailData?.minimum_amount)} -{' '}

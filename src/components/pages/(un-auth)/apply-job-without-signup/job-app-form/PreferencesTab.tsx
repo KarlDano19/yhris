@@ -162,7 +162,7 @@ function PreferencesTab({
           </div>
           <button
             type='button'
-            className='absolute z-10 right-0 bottom-0 -mb-12 border shadow bg-red-600 text-white rounded-md px-2 py-1.5 text-sm'
+            className='lg:mt-5 w-full md:w-auto rounded-md flex justify-center items-center bg-red-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm mb-4'
             onClick={() => remove(index)}
           >
             Remove

@@ -74,7 +74,7 @@ div.remove-height {
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
-.ql-editor ul {
+.ql-editor ul { 
   padding-left: unset !important;
 }
 
@@ -106,4 +106,5 @@ div.remove-height {
 ::-webkit-scrollbar-thumb:hover {
   background: #2C3F58;
   /* Color of the scroll handle on hover */
+  padding-left: 1em !important;
 }
