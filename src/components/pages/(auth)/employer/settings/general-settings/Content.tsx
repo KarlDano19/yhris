@@ -10,6 +10,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EnvelopeIcon from '@/svg/EnvelopeIcon';
 import EmployeeIdLogo from '@/svg/EmployeeIdLogo';
 import HiringLogo from '@/svg/HiringLogo';
+import ThirdPartyPlaformLogo from '@/svg/ThirdPartyPlaformLogo';
 
 const menus = [
   {
@@ -28,6 +29,12 @@ const menus = [
     icon: <EnvelopeIcon />,
     text: 'Email Template',
     link: '/settings/general-settings/email-template',
+    isAvailable: true,
+  },
+  {
+    icon: <ThirdPartyPlaformLogo />,
+    text: 'Third Party Platform',
+    link: '/settings/general-settings/third-party-platform',
     isAvailable: true,
   },
 ];

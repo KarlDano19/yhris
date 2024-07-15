@@ -1,19 +1,17 @@
-import { useContext, useEffect, useState, useRef, useCallback } from 'react';
+import { useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react';
 
+import { Marker } from '@react-google-maps/api';
 import { useForm } from 'react-hook-form';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
-import { Marker } from '@react-google-maps/api';
-import { useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 
 import { ApplicantType, ContextTypes, ScheduleInterviewPropTypes as PropTypes } from '../types';
 import { initialActionState } from '../lib/initialActionState';
-import CustomToast from '@/components/CustomToast';
+import classNames from '@/helpers/classNames';
+import useGetThirdPartyIntegrationItems from '@/components/hooks/useGetThirdPartyIntegrationItems';
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import useTagInput from '../hooks/useTagInput';
 import StateContext from '../contexts/StateContext';
 import ModalLayout from './ModalLayout';
-import classNames from '@/helpers/classNames';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { LocationIcon, WhiteLocationIcon } from '@/svg/LocationIcon';
@@ -55,7 +53,7 @@ const formatTypes = [
     disabled: true,
   },
 ];
-const platforms = [
+const platformsOptions = [
   {
     title: 'Zoom',
     name: 'platform',
@@ -83,23 +81,16 @@ const platforms = [
 ];
 
 export default function ScheduleInterview({ title, handleFormSubmit, isSendInterviewScheduleLoading }: PropTypes) {
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const broadcastChannel = new BroadcastChannel('integration-channel');
-  const [integration, setIntegration] = useState<any>([]);
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: 'AIzaSyDTAy1T3Yz-3gk_O8dQH7rwvbp8OaLa65A',
   });
+  const [platforms, setPlatforms] = useState<any>([]);
+  const [integrationItems, setIntegrationItems] = useState<any>([]);
   const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
-  let applicant: ApplicantType | undefined
-  state.forEach(stage => {
-    if (stage.id === actionState.stageId) {
-      applicant = stage.applicants.find(applicant => applicant.id === actionState.applicantId)
-    }
-  })
-  const { register, setValue, getValues, handleSubmit } = useForm();
+  const { register, setValue, watch, handleSubmit } = useForm();
   const [isOpen, setIsOpen] = useState(false);
   const [selectionId, setSelectionId] = useState('video');
   const [input, setInput] = useState('');
@@ -108,6 +99,12 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
   const [map, setMap] = useState(null);
+  const applicant: ApplicantType | undefined = useMemo(() => {
+    return state
+      .find((stage) => stage.id === actionState.stageId)
+      ?.applicants.find((applicant) => applicant.id === actionState.applicantId);
+  }, [state, actionState]);
+  const { data: dataIntegrationItems, refetch: refetchIntegrationItems } = useGetThirdPartyIntegrationItems();
 
   const onLoad = useCallback(function callback(map: any) {
     navigator.geolocation.getCurrentPosition(
@@ -130,23 +127,29 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
 
   useEffect(() => {
     setIsOpen(true);
-    if (cachedProfile?.state?.data) {
-      const jsonStringify = JSON.stringify(cachedProfile?.state?.data);
-      const jsonParsed = JSON.parse(jsonStringify);
-      setIntegration(jsonParsed.integrated);
-    }
+    refetchIntegrationItems();
   }, []);
+
+  useEffect(() => {
+    if (dataIntegrationItems) {
+      setPlatforms(dataIntegrationItems.map((item: any) => item.provider));
+    }
+  }, [dataIntegrationItems]);
+
+  useEffect(() => {
+    if (watch('platform')) {
+      setIntegrationItems(dataIntegrationItems.filter((item: any) => item.provider === watch('platform')));
+    }
+  }, [watch('platform')]);
 
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
       if (event.data.isGranted) {
-        setIntegration([...integration, event.data.provider]);
-        queryClient.refetchQueries({ queryKey: ["employerProfileCache"] });
       }
     };
     return () => {
       broadcastChannel.close();
-    }
+    };
   }, []);
 
   const handleClose = () => {
@@ -226,7 +229,9 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   {...register('duration')}
                   id='duration'
                   className='w-full py-2 px-4 focus:none outline-none rounded-full'
+                  defaultValue=''
                 >
+                  <option value='' disabled>Select...</option>
                   <option value='30'>30 min</option>
                   <option value='60'>1 hr</option>
                   <option value='120'>2 hr</option>
@@ -273,10 +278,10 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
           </div>
           {selectionId === 'video' && (
             <div className='flex items-center justify-between px-12 mb-8 text-indigo-dye text-[15px]'>
-              {platforms.map((item, index) => {
+              {platformsOptions.map((item, index) => {
                 return (
                   <div key={index}>
-                    {integration.includes(item.value) && (
+                    {platforms.includes(item.value) && (
                       <div className='flex items-center gap-2'>
                         <input
                           className='w-5 h-5'
@@ -290,7 +295,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                         <label htmlFor={item.id}>{item.title}</label>
                       </div>
                     )}
-                    {!integration.includes(item.value) && (
+                    {!platforms.includes(item.value) && (
                       <div className='flex items-center gap-2'>
                         <button
                           type='button'
@@ -357,7 +362,31 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
               )}
             </div>
           )}
+          {selectionId === 'video' && platforms.length > 0 && watch('platform') && (
+            <div className='text-indigo-dye flex-grow mb-2'>
+              <label htmlFor='integrated_accounts' className='block mb-2'>
+                Integrated Account
+              </label>
 
+              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <select
+                  {...register('integrated_id')}
+                  id='integrated_accounts'
+                  className='w-full py-2 px-4 focus:none outline-none rounded-full'
+                  defaultValue=''
+                  required
+                >
+                  <option value='' disabled>Select...</option>
+                  {integrationItems.map((item: any) => (
+                    <option value={item.id}>{item.email}</option>
+                  ))}
+                </select>
+                <div className='absolute right-4 pointer-events-none'>
+                  <SelectChevronDown />
+                </div>
+              </div>
+            </div>
+          )}
           <div className='mb-6'>
             <label htmlFor='message' className='text-[15px] mb-2'>
               Message

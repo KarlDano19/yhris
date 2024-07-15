@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getEvaluationTemplateItems() {
+async function getEmailTemplate(filters: any) {
   try {
-    let newFilters = { view_type: 'select' };
+    let newFilters = { ...filters };
+    if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
+    if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -13,14 +15,11 @@ async function getEvaluationTemplateItems() {
         Authorization: `Token ${token}`,
       },
     };
-    if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/?${searchParams}`, config);
-      if (!res.ok) {
-        throw res.json();
-      }
-      return res.json();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/?${searchParams}`, config);
+    if (!res.ok) {
+      throw res.json();
     }
-    return [];
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -30,8 +29,8 @@ async function getEvaluationTemplateItems() {
   }
 }
 
-function useGetEvaluationTemplateItems() {
-  const query = useQuery(['evaluationTemplateItemsCache'], () => getEvaluationTemplateItems(), {
+function useGetEmailTemplateItems(filters: any) {
+  const query = useQuery(['emailTemplateItemsCache'], () => getEmailTemplate(filters), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
@@ -39,4 +38,4 @@ function useGetEvaluationTemplateItems() {
   return query;
 }
 
-export default useGetEvaluationTemplateItems;
+export default useGetEmailTemplateItems;

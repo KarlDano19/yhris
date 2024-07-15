@@ -90,7 +90,7 @@ export default function ClientGoalModal({
                         id='reason'
                         className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
-                        <option value=''>Select...</option>
+                        <option value='' disabled>Select...</option>
                         <option value='Resignation'>Resignation</option>
                         <option value='Absence Without Leave (AWoL)'>Absence Without Leave (AWoL)</option>
                         <option value='Layoff'>Layoff</option>

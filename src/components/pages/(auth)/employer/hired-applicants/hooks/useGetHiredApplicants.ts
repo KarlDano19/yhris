@@ -29,14 +29,10 @@ async function getHiredApplicants() {
 }
 
 function useGetHiredApplicants() {
-  const query = useQuery(
-    ['hiredApplicantJobCache', {}],
-    () => getHiredApplicants(),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    }
-  );
+  const query = useQuery(['hiredApplicantJobCache', {}], () => getHiredApplicants(), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
 
   return query;
 }

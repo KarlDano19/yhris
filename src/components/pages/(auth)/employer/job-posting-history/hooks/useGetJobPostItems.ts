@@ -34,7 +34,7 @@ async function getJobPostItems(filters: any) {
 
 function useGetJobPostItems(filters: any) {
   const query = useQuery(['jobPostItemCache', filters], () => getJobPostItems(filters), {
-    enabled: false,
+    refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 

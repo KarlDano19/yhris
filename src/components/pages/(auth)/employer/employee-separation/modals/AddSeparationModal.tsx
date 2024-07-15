@@ -115,7 +115,7 @@ export default function AddSeparationModal({
                           {...register('name', { required: true })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
-                          <option value=''>Select...</option>
+                          <option value='' disabled>Select...</option>
                           {(dataEmployee || []).map((item: any) => {
                             return (
                               <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
@@ -137,7 +137,7 @@ export default function AddSeparationModal({
                           {...register('position', { required: true })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
-                          <option value=''>Select...</option>
+                          <option value='' disabled>Select...</option>
                           {positionItems.map((item: any) => {
                             return (
                               <option key={item.id} value={item.id}>
@@ -167,7 +167,7 @@ export default function AddSeparationModal({
                           {...register('department', { required: true })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
-                          <option value=''>Select...</option>
+                          <option value='' disabled>Select...</option>
                           {departmentItems.map((item: any) => {
                             return (
                               <option key={item.id} value={item.id}>
@@ -197,7 +197,7 @@ export default function AddSeparationModal({
                           {...register('reason', { required: true })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
-                          <option value=''>Select...</option>
+                          <option value='' disabled>Select...</option>
                           <option value='Resignation'>Resignation</option>
                           <option value='Absence Without Leave (AWoL)'>Absence Without Leave (AWoL)</option>
                           <option value='Layoff'>Layoff</option>

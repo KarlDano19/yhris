@@ -21,6 +21,9 @@ async function login(credentials: T_Login) {
     if (Object.hasOwn(errStringify, 'response')) {
       throw errStringify.response.data.message;
     }
+    if (Object.hasOwn(errStringify, 'detail')) {
+      throw errStringify.detail;
+    }
     throw errStringify.message;
   }
 }

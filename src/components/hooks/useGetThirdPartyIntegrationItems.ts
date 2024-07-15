@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getEvaluationTemplateItems() {
+async function getThirdPartyIntegration() {
   try {
     let newFilters = { view_type: 'select' };
     const searchParams = new URLSearchParams(newFilters);
@@ -13,14 +13,11 @@ async function getEvaluationTemplateItems() {
         Authorization: `Token ${token}`,
       },
     };
-    if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/?${searchParams}`, config);
-      if (!res.ok) {
-        throw res.json();
-      }
-      return res.json();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/third-party-integrations/?${searchParams}`, config);
+    if (!res.ok) {
+      throw res.json();
     }
-    return [];
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -30,8 +27,8 @@ async function getEvaluationTemplateItems() {
   }
 }
 
-function useGetEvaluationTemplateItems() {
-  const query = useQuery(['evaluationTemplateItemsCache'], () => getEvaluationTemplateItems(), {
+function useGetThirdPartyIntegrationItems() {
+  const query = useQuery(['ThirdPartyIntegrationItemsCache'], () => getThirdPartyIntegration(), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
@@ -39,4 +36,4 @@ function useGetEvaluationTemplateItems() {
   return query;
 }
 
-export default useGetEvaluationTemplateItems;
+export default useGetThirdPartyIntegrationItems;

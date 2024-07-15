@@ -35,7 +35,6 @@ async function updateJobPostStatus(data: any) {
 
 function useUpdateJobPostStatus() {
   const query = useMutation((data: any) => updateJobPostStatus(data));
-
   return query;
 }
 

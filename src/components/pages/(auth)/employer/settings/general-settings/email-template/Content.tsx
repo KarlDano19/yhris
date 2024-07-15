@@ -4,14 +4,11 @@ import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
-import toast from 'react-hot-toast';
-
-import CustomToast from '@/components/CustomToast';
-import getEmailTemplate from './hooks/useGetEmailTemplate';
+import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
-import SuccessModal from './modal/SuccessModal';
 import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal';
 import EditEmailTemplateModal from './modal/EditEmailTemplateModal';
+import SuccessModal from './modal/SuccessModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -32,7 +29,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     data: dataEmailTemplate,
     isLoading: isGetEmailTemplateLoading,
     refetch: refetchEmailTemplate,
-  } = getEmailTemplate(itemsFilter);
+  } = useGetEmailTemplateItems(itemsFilter);
 
   const handleCreateTemplateSuccess = () => {
     setIsSuccessModalOpen(true);

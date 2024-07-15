@@ -79,7 +79,7 @@ function EvaluationFormTab({
                         {...register('rating_type', { required: true })}
                         className='appearance-none block w-full py-2 pl-3 text-gray-900 border-b-2 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                       >
-                        <option value=''>Select...</option>
+                        <option value='' disabled>Select...</option>
                         <option value='individual'>Individual</option>
                         <option value='team'>Team</option>
                         <option value='manager'>Manager</option>
