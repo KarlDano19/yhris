@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useParams, useSearchParams } from 'next/navigation';
 
@@ -11,6 +11,7 @@ function Content() {
   const params = useParams();
   const searchParams = useSearchParams();
   const code = searchParams.get('code') || '';
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const { mutate, isLoading, isError, isSuccess } = useVerifyOauth();
 
   useEffect(() => {
@@ -27,7 +28,8 @@ function Content() {
           }, 500);
         },
         onError: (err: any) => {
-          console.log(err);
+          debugger
+          setErrorMessage(err);
         },
       };
       mutate(data, callbackRequest);
@@ -106,7 +108,7 @@ function Content() {
                     </svg>
                   </div>
                   <h1 className='text-center text-[#d65846] text-[32px] font-bold'>ERROR</h1>
-                  <h1 className='text-xl text-center'>Redirecting ...</h1>
+                  <h1 className='text-xl text-center'>{errorMessage}</h1>
                 </div>
               </div>
             </div>

@@ -47,9 +47,9 @@ export default function CreateThirdPartyIntegrationModal({
     }
     const platformDetail = platforms.find((platform) => platform.id === selectedPlatformId);
     const url = platformDetail?.redirect_url;
-    const left = (window.innerWidth - 600) / 2;
-    const top = (window.innerHeight - 400) / 2;
-    const popup = window.open(url, 'popup', `width=600, height=400, left=${left}, top=${top}`);
+    const left = (window.innerWidth - 900) / 2;
+    const top = (window.innerHeight - 700) / 2;
+    const popup = window.open(url, 'popup', `width=900, height=900, left=${left}, top=${top}`);
     setIsOpen(false);
     const checkOAuthStatus = setInterval(function () {
       if (popup?.closed) {
@@ -88,10 +88,16 @@ export default function CreateThirdPartyIntegrationModal({
                 <form onSubmit={ssoLogin}>
                   <div className='text-xl px-20 text-center'>
                     <div className='flex justify-center py-8 px-2'>Select a platform to integrate</div>
-                    <div className={classNames('flex flex-col space-y-4 p-2', manualInputFocus ? 'ring-2 ring-red-500 rounded-md' : '')}>
+                    <div
+                      className={classNames(
+                        'flex flex-col space-y-4 p-2',
+                        manualInputFocus ? 'ring-2 ring-red-500 rounded-md' : ''
+                      )}
+                    >
                       {platforms.map((platform: any) => (
                         <div key={platform.id} className='flex items-center'>
                           <input
+                            id={platform.id}
                             type='radio'
                             name='platform'
                             value={platform.value}
@@ -101,7 +107,9 @@ export default function CreateThirdPartyIntegrationModal({
                             disabled={platform.disabled}
                             required
                           />
-                          <label className='ml-2 text-sm text-gray-700'>{platform.title}</label>
+                          <label htmlFor={platform.id} className='ml-2 text-sm text-gray-700'>
+                            {platform.title}
+                          </label>
                         </div>
                       ))}
                     </div>

@@ -43,6 +43,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (dataEmailTemplate && !isGetEmailTemplateLoading) {
       dataEmailTemplate.map((item: any) => {
         item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+        return item;
       });
       setEmailTemplatesItems(dataEmailTemplate);
     }

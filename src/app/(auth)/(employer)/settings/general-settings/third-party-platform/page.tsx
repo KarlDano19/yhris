@@ -1,14 +1,14 @@
-import Content from '@/components/pages/(auth)/employer/settings/general-settings/third-party-integration/Content'
+import Content from '@/components/pages/(auth)/employer/settings/general-settings/third-party-platform/Content'
 import React from 'react'
 
 export const metadata = {
-    title: 'Third Party Integration - Yahshua HRIS',
+    title: 'Third Party Platform - Yahshua HRIS',
 }
 
-const ThirdPartyIntegrationPage = async () => {
+const ThirdPartyPlatformPage = async () => {
     return (
         <Content/>
     )
 }
 
-export default ThirdPartyIntegrationPage
+export default ThirdPartyPlatformPage

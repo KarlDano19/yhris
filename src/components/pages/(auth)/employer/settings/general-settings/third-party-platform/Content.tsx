@@ -14,7 +14,7 @@ function Content() {
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
-  const [thirdPartyIntegrationItems, setthirdPartyIntegrationItems] = useState<any>([]);
+  const [thirdPartyIntegrationItems, setThirdPartyIntegrationItems] = useState<any>([]);
   const [isCreateThirdPartyIntegrationModalOpen, setIsCreateThirdPartyIntegrationModalOpen] = useState(false);
   const {
     data: dataThirdPartyIntegration,
@@ -27,8 +27,12 @@ function Content() {
   }, []);
 
   useEffect(() => {
-    if (dataThirdPartyIntegration && !isGetThirdPartyIntegrationLoading) {
-      setthirdPartyIntegrationItems(dataThirdPartyIntegration);
+    if (dataThirdPartyIntegration) {
+      dataThirdPartyIntegration.map((item: any) => {
+        item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+        return item;
+      });
+      setThirdPartyIntegrationItems(dataThirdPartyIntegration);
     }
   }, [dataThirdPartyIntegration]);
 
