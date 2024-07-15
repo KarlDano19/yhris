@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getEmailTemplate(filters: any) {
+async function getThirdPartyIntegration(filters: any) {
   try {
     let newFilters = { ...filters };
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
@@ -15,7 +15,7 @@ async function getEmailTemplate(filters: any) {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/?${searchParams}`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/third-party-integrations/?${searchParams}`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -29,8 +29,8 @@ async function getEmailTemplate(filters: any) {
   }
 }
 
-function useGetEmailTemplate(filters: any) {
-  const query = useQuery(['emailTemplates', {}], () => getEmailTemplate(filters), {
+function useGetThirdPartyIntegrationItems(filters: any) {
+  const query = useQuery(['ThirdPartyIntegrationItemsCache'], () => getThirdPartyIntegration(filters), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
@@ -38,4 +38,4 @@ function useGetEmailTemplate(filters: any) {
   return query;
 }
 
-export default useGetEmailTemplate;
+export default useGetThirdPartyIntegrationItems;

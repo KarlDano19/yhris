@@ -1,9 +1,9 @@
-import { useEffect, useState, Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 
+import CustomToast from '@/components/CustomToast';
 import useDeleteEmailTemplate from '../hooks/useDeleteEmailTemplate';
 
 import WarningRed from '@/svg/WarningRed';

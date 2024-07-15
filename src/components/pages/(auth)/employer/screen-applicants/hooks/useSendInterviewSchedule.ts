@@ -14,6 +14,7 @@ export async function sendInterviewSchedule(data: any) {
     };
     if (data.selectionId == 'video') {
       payloads['platform'] = data.platform;
+      payloads['integrated_id'] = parseInt(data.integrated_id);
     } else if (data.selectionId == 'phone') {
       payloads['phone_number'] = data.phoneNumber;
     } else {
@@ -28,6 +29,7 @@ export async function sendInterviewSchedule(data: any) {
       },
       body: JSON.stringify(payloads),
     };
+    debugger
     if (token) {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/applicants/send-interview-schedule/`,
