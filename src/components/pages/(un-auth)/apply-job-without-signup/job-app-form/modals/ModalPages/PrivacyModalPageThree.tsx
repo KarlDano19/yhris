@@ -53,9 +53,9 @@ export default function PrivacyModaPagelThree({
 
   return (
     <>
-      <div className='h-[450px] overflow-auto px-4' ref={scrollContainerRef}>
+      <div className='h-[450px] overflow-auto px-6' ref={scrollContainerRef}>
         <div>
-          <div className='mt-3 text-left sm:mt-3'>
+          <div className='mt-3 text-left sm:mt-3 px-6'>
             <div className='mt-2'>
               <ul>
                 
