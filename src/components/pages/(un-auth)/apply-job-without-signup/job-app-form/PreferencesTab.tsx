@@ -162,10 +162,10 @@ function PreferencesTab({
           </div>
           <button
             type='button'
-            className='lg:mt-5 w-full md:w-auto rounded-md flex justify-center items-center bg-red-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm mb-4'
+            className='lg:mt-5 w-full md:w-1/2 rounded-md flex justify-center items-center bg-red-600 xl:px-[100px] px-10 py-2.5 text-sm font-semibold text-white shadow-sm mb-4'
             onClick={() => remove(index)}
           >
-            Remove
+            REMOVE
           </button>
         </div>
       );
@@ -190,7 +190,7 @@ function PreferencesTab({
         }
       >
         <PlusIcon className='h-5 w-5 mr-3' />
-        Add Experience
+        ADD EXPERIENCE
       </button>
       <h6 className='text-sm font-semibold mt-16'>Work Set-up Preference</h6>
       <div className='flex items-center mt-3'>

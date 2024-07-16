@@ -71,7 +71,7 @@ export default function ApplicantForm({ title }: PropTypes) {
             </div>
           </div>
         </div>
-        <div>
+        <div className='mt-4'>
           <button
             type='button'
             className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
@@ -79,7 +79,7 @@ export default function ApplicantForm({ title }: PropTypes) {
             disabled={!!!applicantProfile.cv}
             title={!!!applicantProfile.cv ? 'No CV/Resume Attached' : ''}
           >
-            View Attached CV/Resume
+            {!!!applicantProfile.cv ? 'No CV/Resume Attached' : 'View Attached CV/Resume'}
           </button>
         </div>
       </>
