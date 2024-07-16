@@ -40,7 +40,8 @@ export default function CreateThirdPartyIntegrationModal({
   const [selectedPlatformId, setSelectedPlatformId] = useState<string | null>(null);
   const [manualInputFocus, setManualInputFocus] = useState<boolean>(false);
 
-  const ssoLogin = () => {
+  const ssoLogin = (event: any) => {
+    event.preventDefault();
     if (!selectedPlatformId) {
       setManualInputFocus(true);
       return;
@@ -128,7 +129,6 @@ export default function CreateThirdPartyIntegrationModal({
                       <button
                         type='submit'
                         className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                        onClick={() => ssoLogin()}
                       >
                         Continue
                       </button>
