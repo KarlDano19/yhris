@@ -18,7 +18,6 @@ function Header({ type }: { type: string }) {
   const employerRoutes: any = [
     'manage-subscriptions',
     'checkout',
-    'sso',
     'dashboard',
     'post-job',
     'screen-applicants',

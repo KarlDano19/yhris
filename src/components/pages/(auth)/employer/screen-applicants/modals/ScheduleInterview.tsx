@@ -145,6 +145,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
       if (event.data.isGranted) {
+        refetchIntegrationItems();
       }
     };
     return () => {
@@ -170,9 +171,9 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   };
 
   const ssoLogin = (url: string) => {
-    const left = (window.innerWidth - 600) / 2;
-    const top = (window.innerHeight - 400) / 2;
-    const popup = window.open(url, 'popup', `width=600, height=400, left=${left}, top=${top}`);
+    const left = (window.innerWidth - 900) / 2;
+    const top = (window.innerHeight - 700) / 2;
+    const popup = window.open(url, 'popup', `width=900, height=900, left=${left}, top=${top}`);
     const checkOAuthStatus = setInterval(function () {
       if (popup?.closed) {
         clearInterval(checkOAuthStatus);
