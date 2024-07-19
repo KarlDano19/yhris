@@ -75,7 +75,7 @@ function Content() {
           <h4>Dashboard</h4>
         </Link>
       </div>
-      <div className='px-2 md:px-8 lg:px-4'>
+      <div className='px-2 md:px-8 lg:px-4 pb-8'>
         <h2 className='text-xl font-bold text-indigo-dye mb-6'>My Profile</h2>
         <div>
           <div className='sm:hidden'>
