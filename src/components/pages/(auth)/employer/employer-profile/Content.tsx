@@ -25,6 +25,7 @@ function Content() {
   const [progressBar, setProgressBar] = useState(0);
   const { register, setValue, watch, handleSubmit } = useForm<T_EmployerProfile>();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [formData, setFormData] = useState<T_EmployerProfile | null>(null);
   const { mutate, isLoading } = useSavedProfile();
 
   useEffect(() => {
@@ -53,19 +54,27 @@ function Content() {
     }
   }, [cachedProfile]);
 
-  const onSubmit = handleSubmit((data) => {
-    const callbackReq = {
-      onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setIsSuccessModalOpen(true);
-        queryClient.refetchQueries({ queryKey: ['employerProfileCache'] });
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
-      },
-    };
-    mutate(data, callbackReq);
+  const openConfirmModal = handleSubmit((data) => {
+    setFormData(data);
+    setIsSuccessModalOpen(true);
   });
+
+  const confirmSubmit = () => {
+    if (formData) {
+      const callbackReq = {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+          setIsSuccessModalOpen(false);
+          queryClient.refetchQueries({ queryKey: ['employerProfileCache'] });
+          window.location.href = '/dashboard';
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+        },
+      };
+      mutate(formData, callbackReq);
+    }
+  };
 
   return (
     <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -131,9 +140,14 @@ function Content() {
         {progressBar === 0 && (
           <Details register={register} handleSubmit={handleSubmit} setValue={setValue} watch={watch} setProgressBar={setProgressBar}/>
         )}
-        {progressBar === 1 && <Settings register={register} onSubmit={onSubmit} isLoading={isLoading} />}
+        {progressBar === 1 && <Settings register={register} onSubmit={openConfirmModal} isLoading={isLoading} />}
       </div>
-      <ConfirmEditEmployerProfileModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}/>
+      <ConfirmEditEmployerProfileModal 
+        isOpen={isSuccessModalOpen} 
+        setIsOpen={setIsSuccessModalOpen} 
+        confirmSubmit={confirmSubmit} 
+        formData={formData}
+      />
     </div>
   );
 }

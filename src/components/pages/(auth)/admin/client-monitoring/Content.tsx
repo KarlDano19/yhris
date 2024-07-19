@@ -115,7 +115,7 @@ const Content = () => {
                 </button>
                 <div className='flex-1 flex justify-end ml-4'>
                   <button
-                    className='bg-green-500 w-max rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
+                    className='bg-slate-500 w-max rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80 disabled:opacity-50'
                     // onClick={() => setIsClientGoalModalOpen(true)} // Disabled for now to now open the client analytics dialog box
                     disabled={true}
                   >
