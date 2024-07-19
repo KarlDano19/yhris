@@ -36,15 +36,8 @@ export default function EmployeesModal({
   });
   const {
     data: dataEmployeeDetail,
-    refetch: employeeDetailRefetch,
     remove: employeeDetailRemove,
   } = useGetEmployeeDetails(selectedEmployeeId);
-
-  useEffect(() => {
-    if (isOpen) {
-      employeeDetailRefetch();
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     if (dataEmployeeDetail) {
