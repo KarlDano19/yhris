@@ -2,13 +2,18 @@ import {Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import SuccessImage from '@/svg/SuccessImage';
+import { T_EmployerProfile } from '@/types/globals';
 
 export default function ConfirmEditEmployerProfileModal({
   isOpen,
   setIsOpen,
+  confirmSubmit,
+  formData
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  confirmSubmit: () => void;
+  formData: T_EmployerProfile | null;
 }) {
   const cancelButtonRef = useRef(null);
 
@@ -45,22 +50,24 @@ export default function ConfirmEditEmployerProfileModal({
                 <div className='text-xl text-center space-y-4'>
                     <h1 className='font-bold text-3xl text-[#4CAF50]'>Awesome!</h1>
                     <p className='text-lg text-black font-bold whitespace-nowrap'>
-                        Profile successfuly saved!
+                        Are you sure you want to save the changes?
                     </p>
                 </div>
-                <div className='w-full px-8 space-x-8 pt-10 pb-7 whitespace-nowrap'>
-                  <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
-                    <button
-                      type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-lg border border-blue-600 px-20 py-3 bg-blue-600 text-lg leading-6 font-bold text-white shadow-sm hover:text-white focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                      onClick={() => {
-                        setIsOpen(false);
-                        window.location.href = '/dashboard';
-                      }}
-                    >
-                      Continue
-                    </button>
-                  </span>
+                <div className='lg:flex-row lg:space-x-4 whitespace-nowrap px-8 pt-10 pb-7 flex sm:flex-col'>
+                  <button
+                    type='button'
+                    className='inline-flex justify-center drop-shadow-xl w-full rounded-lg border border-blue-600 px-20 py-3 bg-blue-600 text-lg leading-6 font-bold text-white shadow-sm hover:text-white focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                    onClick={confirmSubmit}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type='button'
+                    className='inline-flex justify-center drop-shadow-xl w-full rounded-lg border border-blue-600 px-20 py-3 bg-blue-600 text-lg leading-6 font-bold text-white shadow-sm hover:text-white focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                    onClick={() => {setIsOpen(false); window.location.href = '/dashboard';}}
+                  >
+                    No
+                  </button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

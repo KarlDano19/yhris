@@ -31,6 +31,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
+        jobPost['hiredApplicant'] = jobPost['hired_applicant_applied_no'];
       });
       setJobPostHistoryItems(dataJobPost);
     }
@@ -77,7 +78,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     href={`screen-applicants/${item.id}`}
                     className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
                   >
-                    {item.applicantApplied} New Applicant/s
+                    {item.applicantApplied - item.hiredApplicant} New Applicant/s
                   </Link>
                 </div>
               );
