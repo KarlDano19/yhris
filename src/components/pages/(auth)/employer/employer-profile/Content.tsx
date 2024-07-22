@@ -66,7 +66,9 @@ function Content() {
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
           setIsSuccessModalOpen(false);
           queryClient.refetchQueries({ queryKey: ['employerProfileCache'] });
-          window.location.href = '/dashboard';
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 2000);
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
