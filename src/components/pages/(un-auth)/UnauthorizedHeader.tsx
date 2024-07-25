@@ -15,7 +15,6 @@ import {
   StarIcon,
   TagIcon,
   InformationCircleIcon,
-  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import MainLogo from '@/svg/MainLogo';
 import ExitIcon from '@/svg/ExitIcon';
