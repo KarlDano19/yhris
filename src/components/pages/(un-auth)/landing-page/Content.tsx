@@ -3,6 +3,8 @@ import { useState } from "react";
 
 import Image from "next/image";
 
+import { UserIcon } from "@heroicons/react/24/solid";
+
 import pexelsImage1 from "@/assets/landing-page-images/pexels-fauxels-1.png";
 import pexelsImage2 from "@/assets/landing-page-images/pexels-fauxels-2.png";
 import pexelsImage3 from "@/assets/landing-page-images/pexels-fauxels-3.png";
@@ -20,9 +22,8 @@ import pexelsImage14 from "@/assets/landing-page-images/pexels-anna-1.png";
 import pexelsImage15 from "@/assets/landing-page-images/pexels-anna-2.png";
 import ToolsIcon from "@/svg/ToolsIcons";
 import DedicatedIcon from "@/svg/DedicatedIcon";
-import { UserIcon } from "@heroicons/react/24/solid";
-import Footer from "./Footer";
 import BetaModal from "./modal/BetaModal";
+import Footer from "./Footer";
 
 
 
