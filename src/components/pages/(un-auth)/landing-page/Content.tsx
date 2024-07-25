@@ -26,8 +26,6 @@ import pexelsImage14 from "@/assets/landing-page-images/pexels-anna-1.png";
 import pexelsImage15 from "@/assets/landing-page-images/pexels-anna-2.png";
 
 
-
-
 const Content = () => {
   const [isOpen, setIsOpen] = useState(true);
 
