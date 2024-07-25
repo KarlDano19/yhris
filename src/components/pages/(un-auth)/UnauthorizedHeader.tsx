@@ -1,11 +1,10 @@
 'use client';
-
 import { Popover } from '@headlessui/react';
-
-import { Tooltip } from 'react-tooltip';
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+
+import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
 
