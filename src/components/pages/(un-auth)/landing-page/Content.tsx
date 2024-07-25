@@ -1,3 +1,6 @@
+"use client"
+import { useState } from "react";
+
 import Image from "next/image";
 
 import pexelsImage1 from "@/assets/landing-page-images/pexels-fauxels-1.png";
@@ -19,10 +22,13 @@ import ToolsIcon from "@/svg/ToolsIcons";
 import DedicatedIcon from "@/svg/DedicatedIcon";
 import { UserIcon } from "@heroicons/react/24/solid";
 import Footer from "./Footer";
+import BetaModal from "./modal/BetaModal";
 
 
 
 const Content = () => {
+  const [isOpen, setIsOpen] = useState(true);
+
   return (
     <div
       className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}
@@ -321,6 +327,7 @@ const Content = () => {
             </div>
           </div>
         </div>
+        <BetaModal isOpen={isOpen} setIsOpen={setIsOpen} />
         <Footer />
       </div>
     </div>
