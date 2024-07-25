@@ -7,7 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 const CustomDatePicker = ({
   id,
-  selected,
+  selected = new Date(),
   pickerOnChange,
   inputOnChange,
   minDate,
@@ -31,11 +31,12 @@ const CustomDatePicker = ({
     return regexGoodDate.test(date);
   };
 
+  // eslint-disable-next-line react/display-name
   const CustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
     <>
       <input
         ref={ref}
-        defaultValue={value}
+        defaultValue={value || new Date().toLocaleDateString()}
         onClick={() => {
           onClick();
         }}

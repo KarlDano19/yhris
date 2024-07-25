@@ -231,10 +231,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  {/* <div className='h-5 w-0.5 bg-gray-300 mr-2'></div> */}
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400'/>
-                </div>
               </div>
             </div>
             <button
