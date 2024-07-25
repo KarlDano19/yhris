@@ -3,6 +3,9 @@ import { useState } from "react";
 
 import Image from "next/image";
 
+import BetaModal from "./modal/BetaModal";
+import Footer from "./Footer";
+
 import { UserIcon } from "@heroicons/react/24/solid";
 import ToolsIcon from "@/svg/ToolsIcons";
 import DedicatedIcon from "@/svg/DedicatedIcon";
@@ -22,8 +25,6 @@ import pexelsImage13 from "@/assets/landing-page-images/pexels-tima-2.png";
 import pexelsImage14 from "@/assets/landing-page-images/pexels-anna-1.png";
 import pexelsImage15 from "@/assets/landing-page-images/pexels-anna-2.png";
 
-import BetaModal from "./modal/BetaModal";
-import Footer from "./Footer";
 
 
 
