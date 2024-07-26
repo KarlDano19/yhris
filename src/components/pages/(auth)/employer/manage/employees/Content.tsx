@@ -12,6 +12,7 @@ import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import EmployeesModal from './modals/EmployeesModal';
 import ExportProgressModal from './modals/ExportProgressModal';
+import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItems from './hooks/useGetEmployeeItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -21,6 +22,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
+  const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -32,7 +34,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: employeeListRefetch,
   } = useGetEmployeeItems(itemsFilter);
 
-  const menuOptions = [{ name: 'Export', action: () => setIsExportProgressModalOpen(true) }];
+  const menuOptions = [
+    {
+      name: 'Export',
+      action: () => setIsDataAgreementModalOpen(true),
+    },
+  ];
 
   useEffect(() => {
     if (employeeListData) {
@@ -289,6 +296,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      {isDataAgreementModalOpen && (
+        <DataExportAgreementModal
+          isOpen={isDataAgreementModalOpen}
+          setIsOpen={setIsDataAgreementModalOpen}
+          isAgreementAccepted={false}
+          setIsAgreementAccepted={() => {
+            setIsDataAgreementModalOpen(false);
+            setIsExportProgressModalOpen(true);
+          }}
+        />
+      )}
       {isExportProgressModalOpen && (
         <ExportProgressModal
           isOpen={isExportProgressModalOpen}
