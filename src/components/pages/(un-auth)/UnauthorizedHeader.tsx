@@ -36,7 +36,7 @@ const UnauthorizedHeader = () => {
             <div className={`mx-auto max-w-7xl px-4 py-1 sm:px-6 lg:px-8 `}>
               <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
-                  <div className='flex flex-shrink-0 items-center space-x-4'>
+                  <div className='flex flex-shrink-0 items-center space-x-2'>
                     <Link href='/'>
                       <MainLogo />
                     </Link>
@@ -44,7 +44,8 @@ const UnauthorizedHeader = () => {
                       <div className='border-2 border-[#FFC107] rounded-lg py-2 px-4'>
                         <h1 className='text-sm font-medium text-center'>ON BETA!</h1>
                       </div>
-                      <div
+                    </div>
+                    <div
                         data-tooltip-id='add-section-tooltip'
                         data-tooltip-place='bottom'
                       >
@@ -67,7 +68,6 @@ const UnauthorizedHeader = () => {
                         </div>
                         </Tooltip>
                       </div>
-                    </div>
                   </div>
                 </div>
                 <div className='flex items-center lg:hidden'>
