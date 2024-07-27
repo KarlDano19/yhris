@@ -36,37 +36,39 @@ const UnauthorizedHeader = () => {
             <div className={`mx-auto max-w-7xl px-4 py-1 sm:px-6 lg:px-8 `}>
               <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
-                  <div className='flex flex-shrink-0 items-center space-x-4'>
-                    <Link href='/'>
-                      <MainLogo />
-                    </Link>
+                  <div className='flex flex-shrink-0 space-x-2'>
+                    <div className='flex items-center'>
+                      <Link href='/'>
+                        <MainLogo />
+                      </Link>
+                    </div>
                     <div className='flex'>
                       <div className='border-2 border-[#FFC107] rounded-lg py-2 px-4'>
                         <h1 className='text-sm font-medium text-center'>ON BETA!</h1>
                       </div>
-                      <div
-                        data-tooltip-id='add-section-tooltip'
-                        data-tooltip-place='bottom'
-                      >
-                        <InfoIcon />
-                        <Tooltip id='add-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', width:'290px', backgroundColor: '#222C3B' }}>
-                        <div className='px-1 pt-2'>
-                          <h2 className='text-[12px] font-medium'>
-                            YAHSHUA HRIS is on <span className='font-bold'>BETA!</span> This means all 
-                            information you provide in the Beta version will 
-                            carry over to the official release.
-                          </h2>
-                        </div>
-                        <div className='px-1 pt-2 pb-2'>
-                          <h2 className='text-[10px] font-normal'>
-                            Rest assured, your data is safe with us. YAHSHUA HRIS, and 
-                            all products of The ABBA Initiative, OPC are compliant to the 
-                            Data Privacy Act of 2012. Plus, we are ISO 27001 certified and 
-                            GDPR compliant with a SOC2 Type 2 attestation.
-                          </h2>
-                        </div>
-                        </Tooltip>
+                    </div>
+                    <div
+                      data-tooltip-id='add-section-tooltip'
+                      data-tooltip-place='bottom'
+                    >
+                      <InfoIcon />
+                      <Tooltip id='add-section-tooltip' className='mt-[-25px]' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', width:'290px', backgroundColor: '#222C3B' }}>
+                      <div className='px-1 pt-2'>
+                        <h2 className='text-[12px] font-medium'>
+                          YAHSHUA HRIS is on <span className='font-bold'>BETA!</span> This means all 
+                          information you provide in the Beta version will 
+                          carry over to the official release.
+                        </h2>
                       </div>
+                      <div className='px-1 pt-2 pb-2'>
+                        <h2 className='text-[10px] font-normal'>
+                          Rest assured, your data is safe with us. YAHSHUA HRIS, and 
+                          all products of The ABBA Initiative, OPC are compliant to the 
+                          Data Privacy Act of 2012. Plus, we are ISO 27001 certified and 
+                          GDPR compliant with a SOC2 Type 2 attestation.
+                        </h2>
+                      </div>
+                      </Tooltip>
                     </div>
                   </div>
                 </div>

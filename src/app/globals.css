@@ -108,3 +108,17 @@ div.remove-height {
   /* Color of the scroll handle on hover */
   padding-left: 1em !important;
 }
+
+.nested-decimal {
+  counter-reset: section;
+}
+
+.nested-decimal > li {
+  display: list-item;
+  list-style-type: none;
+  counter-increment: section;
+}
+
+.nested-decimal > li:before {
+  content: counters(section, ".") ". ";
+}
