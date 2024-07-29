@@ -159,6 +159,14 @@ export type T_EmployerProfile = {
   imagePath: any;
 };
 
+export type T_ExportAgreement = {
+  is_export_agree: boolean;
+};
+
+export interface CachedProfileData {
+  is_export_agreed: boolean;
+}
+
 export type T_IncidentReport = {
   name: string;
   position: string;

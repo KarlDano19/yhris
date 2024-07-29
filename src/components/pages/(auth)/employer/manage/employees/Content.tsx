@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
+import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -14,14 +15,18 @@ import EmployeesModal from './modals/EmployeesModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItems from './hooks/useGetEmployeeItems';
+import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport'; // Import the mutation hook
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
+  const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
   const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
@@ -34,10 +39,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: employeeListRefetch,
   } = useGetEmployeeItems(itemsFilter);
 
+  const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport(); // Get the mutate function
+
+  const cachedData: any = cachedProfile?.state?.data;
+  const hasAgreed = cachedData?.is_export_agreed;
+
+  useEffect(() => {
+    if (!hasAgreed) {
+      setIsAgreementAccepted(true);
+    }
+  }, [hasAgreed]);
+
   const menuOptions = [
     {
       name: 'Export',
-      action: () => setIsDataAgreementModalOpen(true),
+      action: () => {
+        if (!hasAgreed) {
+          setIsDataAgreementModalOpen(true);
+        } else {
+          setIsExportProgressModalOpen(true);
+        }
+      },
     },
   ];
 
@@ -300,9 +322,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <DataExportAgreementModal
           isOpen={isDataAgreementModalOpen}
           setIsOpen={setIsDataAgreementModalOpen}
-          isAgreementAccepted={false}
-          setIsAgreementAccepted={() => {
+          setIsAgreementAccepted={(isAgree) => {
             setIsDataAgreementModalOpen(false);
+            updateEmployerAgreeExport({ is_export_agree: isAgree });
             setIsExportProgressModalOpen(true);
           }}
         />
