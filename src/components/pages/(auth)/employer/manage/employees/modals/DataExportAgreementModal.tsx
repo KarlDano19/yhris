@@ -1,22 +1,34 @@
 /* eslint-disable react/no-unescaped-entities */
 import { Dispatch, Fragment, useEffect, useState, useRef } from 'react';
+
+import { useQueryClient } from '@tanstack/react-query';
 import { Dialog, Transition } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 export default function DataAgreementModal({
   isOpen,
   setIsOpen,
-  isAgreementAccepted,
   setIsAgreementAccepted,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  isAgreementAccepted: boolean;
   setIsAgreementAccepted: Dispatch<boolean>;
 }) {
-  const [isChecked, setIsChecked] = useState(false);
+  const { register, handleSubmit } = useForm<{ is_export_agreed: boolean }>();
+  const queryClient = useQueryClient();
+  const [isAgreeChecked, setIsAgreeChecked] = useState(false); 
   const cancelButtonRef = useRef(null);
+
+  const onSubmit = (data: { is_export_agreed: boolean }) => {
+    setIsOpen(false);
+    setIsAgreementAccepted(data.is_export_agreed);
+    queryClient.setQueryData(['employerProfileCache'], (oldData: any) => ({
+        ...oldData,
+        is_export_agreed: data.is_export_agreed,
+    }));
+};
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -72,7 +84,7 @@ export default function DataAgreementModal({
                                 </li>
                                 <ul className='list-disc pl-5 text-sm'>
                                     <li>
-                                      Employee Profile such as Date Hired, Employee’s Name (First Name,
+                                      Employee Profile such as Date Hired, Employee's Name (First Name,
                                       Middle Name, Last Name), City Address, Email Address, and Mobile
                                       number.
                                     </li>
@@ -122,25 +134,24 @@ export default function DataAgreementModal({
                         </div>
                     </ul>
                   </div>
-                  <div className='flex items-center pt-4 pl-10'>
-                    <input 
-                      type='checkbox' 
-                      checked={isChecked} 
-                      onChange={() => setIsChecked(!isChecked)}
-                      className='mr-2'
-                    />
-                    <label className='text-gray-600'>I Agree</label>
-                  </div>
-                  <button
-                    className='rounded-md border border-transparent px-20 py-2 mt-6 bg-blue-600 text-base font-bold text-white shadow-sm enabled:hover:bg-gray-500 disabled:opacity-50'
-                    onClick={() => {
-                      setIsOpen(false); // Close the agreement modal
-                      setIsAgreementAccepted(true); // Set agreement accepted
-                    }}
-                    disabled={!isChecked}
-                  >
-                   Submit
-                  </button>
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className='flex items-center pt-4 pl-10'>
+                      <input 
+                        type='checkbox' 
+                        {...register('is_export_agreed')}
+                        className='mr-2'
+                        onChange={(e) => setIsAgreeChecked(e.target.checked)}
+                      />
+                      <label className='text-gray-600'>I Agree</label>
+                    </div>
+                    <button
+                      type='submit'
+                      className='rounded-md border border-transparent px-20 py-2 mt-6 bg-blue-600 text-base font-bold text-white shadow-sm enabled:hover:bg-blue-700 disabled:opacity-50'
+                      disabled={!isAgreeChecked}
+                    >
+                      Submit
+                    </button>
+                  </form>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
