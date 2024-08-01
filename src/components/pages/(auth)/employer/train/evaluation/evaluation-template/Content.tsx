@@ -12,7 +12,6 @@ import SelectionModal from './modals/SelectionTemplateModal';
 import DeleteEvaluationModal from './modals/DeleteEvaluationTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
-import useGetEvaluationTemplateDetails from './hooks/useGetEvaluationTemplateDetails';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';

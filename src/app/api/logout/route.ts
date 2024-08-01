@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/logout/`, config);
+    const res = await fetch(`${process.env.NEXT_API_URL}/api/logout/`, config);
     const data = await res.json();
     if (!res.ok) {
       throw res.json();

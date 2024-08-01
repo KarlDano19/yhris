@@ -57,7 +57,7 @@ const MainHeader = () => {
 
   const userNavigation = [
     { name: 'My Profile', href: '/employer-profile', onClick: void 0, isDisabled: false },
-    { name: 'Subscriptions', href: '/manage-subscriptions#active-plans', onClick: void 0, isDisabled: false },
+    { name: 'Subscriptions', href: '/manage-subscriptions#active-plans', onClick: void 0, isDisabled: true },
     {
       name: 'Sign out',
       href: '',
@@ -88,16 +88,15 @@ const MainHeader = () => {
         {item.href && (
           <Menu.Item>
             {({ active }) => (
-              <Link href={item.href}>
-                <div
-                  className={classNames(
-                    'block rounded-md py-2 px-3 text-base font-medium',
-                    item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
-                    active ? 'bg-gray-100' : ''
-                  )}
-                >
-                  {item.name}
-                </div>
+              <Link
+                href={item.isDisabled ? '#' : item.href}
+                className={classNames(
+                  'block rounded-md py-2 px-3 text-base font-medium',
+                  item.isDisabled ? 'opacity-50 hover:bg-transparent cursor-default' : 'hover:bg-gray-50',
+                  active ? 'bg-gray-100' : ''
+                )}
+              >
+                {item.name}
               </Link>
             )}
           </Menu.Item>
