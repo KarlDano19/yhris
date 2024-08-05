@@ -7,7 +7,13 @@ import { useParams } from 'next/navigation';
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from './hooks/useGetJobDetails';
 
-import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  BriefcaseIcon,
+  ClockIcon,
+  BanknotesIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
@@ -62,7 +68,8 @@ const Content = () => {
                 </div>
               </div>
               <div className='col-span-1 px-1 rounded-md h-[10rem] w-[10rem] hidden sm:flex justify-center'>
-                <div className='bg-gray-300 w-full h-full rounded-md'
+                <div
+                  className='bg-gray-300 w-full h-full rounded-md'
                   style={{
                     backgroundImage: `url(${jobDetailData.company_logo})`,
                     backgroundRepeat: 'no-repeat',
@@ -142,6 +149,36 @@ const Content = () => {
                   }}
                 >
                   Apply Now!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {!!!Object.keys(jobDetailData).length && (
+        <div className='py-12 px-4 sm:px-6 lg:px-8'>
+          <div className='max-w-3xl mx-auto lg:mt-32'>
+            <div className='px-4 py-5 sm:p-6'>
+              <div className='flex items-center justify-center'>
+                <ExclamationTriangleIcon className='h-20 w-20 text-yellow-400' aria-hidden='true' />
+              </div>
+              <div className='mt-3 text-center sm:mt-5'>
+                <h3 className='text-lg leading-6 font-medium text-gray-900'>Job Not Available</h3>
+                <div className='mt-2'>
+                  <p className='text-sm text-gray-500'>
+                    We're sorry, but the job you're looking for is no longer available or doesn't exist.
+                  </p>
+                </div>
+              </div>
+              <div className='mt-5 sm:mt-6 text-center'>
+                <button
+                  type='button'
+                  className='inline-flex justify-center w-6/12 rounded-md border border-transparent shadow-sm px-4 py-2 bg-savoy-blue text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm'
+                  onClick={() => {
+                    window.location.href = '/jobs';
+                  }}
+                >
+                  View All Jobs
                 </button>
               </div>
             </div>
