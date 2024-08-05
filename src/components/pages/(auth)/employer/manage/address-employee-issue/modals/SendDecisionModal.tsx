@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
+import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -194,7 +195,11 @@ export default function SendDecisionModal({
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                            <div 
+                              className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                              data-tooltip-id='to-section-tooltip'
+                              data-tooltip-place='bottom' 
+                            >
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
@@ -213,6 +218,13 @@ export default function SendDecisionModal({
                                 onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
                                 className='focus:none outline-none px-2 py-1 grow'
                               />
+                              <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter.
+                                  </h2>
+                                </div>
+                              </Tooltip>
                             </div>
                           </div>
                           <button
@@ -241,7 +253,11 @@ export default function SendDecisionModal({
                             CC
                           </label>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                            <div 
+                              className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                              data-tooltip-id='cc-section-tooltip'
+                              data-tooltip-place='bottom' 
+                            > 
                               {tagsCc.map((tag: string) => (
                                 <div
                                   key={tag}
@@ -260,6 +276,13 @@ export default function SendDecisionModal({
                                 onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
                                 className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
+                              <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter.
+                                  </h2>
+                                </div>
+                              </Tooltip>
                             </div>
                           </div>
                         </div>
@@ -270,7 +293,11 @@ export default function SendDecisionModal({
                             BCC
                           </label>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
+                            <div 
+                              className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'
+                              data-tooltip-id='bcc-section-tooltip'
+                              data-tooltip-place='bottom' 
+                            >
                               {tagsBcc.map((tagBcc: string) => (
                                 <div
                                   key={tagBcc}
@@ -289,6 +316,13 @@ export default function SendDecisionModal({
                                 onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
                                 className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
+                              <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter.
+                                  </h2>
+                                </div>
+                              </Tooltip>
                             </div>
                           </div>
                         </div>

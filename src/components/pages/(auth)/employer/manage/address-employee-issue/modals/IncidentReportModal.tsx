@@ -37,7 +37,7 @@ export default function IncidentReportModal({
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        toast.custom(() => <CustomToast message={"Successfully created an incident report."} type='success' />, { duration: 5000 });
         setIsOpen(false);
         reset();
         refetch();
