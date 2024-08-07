@@ -7,8 +7,12 @@ async function addInvestigationReport(investigation: T_Investigation) {
   try {
     const token = getCookie('token');
     const data = new FormData();
+    const investigationDate = new Date(investigation.date);
+    if (isNaN(investigationDate.getTime())) {
+      throw new Error('Invalid date format');
+    }
     data.append('employee_issue', investigation.employee_issue);
-    data.append('date_of_investigation', new Date(investigation.date).toISOString());
+    data.append('date_of_investigation', investigationDate.toISOString());
     data.append('witness', investigation.witness);
     data.append('presider', investigation.presider);
     data.append('has_attended_hearing', investigation.isAttendHearing);

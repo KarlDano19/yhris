@@ -33,10 +33,11 @@ export default function InvestigationModal({
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
       const currentDate = new Date();
+      const submissionDate = typeof data.date === 'object' && 'getTime' in data.date ? data.date : currentDate;
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       employeeIssueItemsCopy[itemIndex].investigateForm.employee_issue = isOpen.id;
-      employeeIssueItemsCopy[itemIndex].investigateForm.date = data.date;
+      employeeIssueItemsCopy[itemIndex].investigateForm.date = submissionDate;
       employeeIssueItemsCopy[itemIndex].investigateForm.witness = data.witness;
       employeeIssueItemsCopy[itemIndex].investigateForm.presider = data.presider;
       employeeIssueItemsCopy[itemIndex].investigateForm.isAttendHearing = data.isAttendHearing;
