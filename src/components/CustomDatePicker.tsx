@@ -36,7 +36,6 @@ const CustomDatePicker = ({
     <>
       <input
         ref={ref}
-        // defaultValue={value || new Date().toLocaleDateString()}
         value={value || new Date().toLocaleDateString()}
         onClick={() => {
           onClick();
