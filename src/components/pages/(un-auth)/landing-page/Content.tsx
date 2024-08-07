@@ -48,8 +48,9 @@ const Content = () => {
             <button
               type="button"
               className="rounded-md bg-[#FFC107] px-10 py-2.5 text-xl font-semibold text-[#16202E] shadow-sm mt-8"
+              onClick={() => { window.location.href = '/register'; }}
             >
-              Contact Us
+              Get Beta Now!
             </button>
           </div>
           <div className="image md:w-2/4">

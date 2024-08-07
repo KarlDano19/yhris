@@ -62,7 +62,7 @@ const UnauthorizedHeader = () => {
                       </div>
                       <div className='px-1 pt-2 pb-2'>
                         <h2 className='text-[10px] font-normal'>
-                          Rest assured, your data is safe with us. YAHSHUA HRIS, and 
+                          YAHSHUA HRIS, and 
                           all products of The ABBA Initiative, OPC are compliant to the 
                           Data Privacy Act of 2012. Plus, we are ISO 27001 certified and 
                           GDPR compliant with a SOC2 Type 2 attestation.
@@ -86,34 +86,46 @@ const UnauthorizedHeader = () => {
                 <div className='hidden lg:flex lg:items-center lg:justify-end lg:space-x-8'>
                   <Link
                     href='/features'
-                    className={`${
-                      pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    } flex items-center font-semibold opacity-50 pointer-events-none`}
+                    className={classNames(
+                      'flex items-center font-semibold',
+                      pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye opacity-50 pointer-events-none'
+                    )}
                   >
                     <StarIcon
-                      className={`${pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'} h-4 w-4 mr-2.5`}
+                      className={classNames(
+                        'h-4 w-4 mr-2.5',
+                        pathName === '/features' ? 'text-savoy-blue' : 'text-indigo-dye'
+                      )}
                     />
                     Features
                   </Link>
                   <Link
                     href='/pricing'
-                    className={`${
-                      pathName === '/pricing' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    }  flex items-center font-semibold`}
+                    className={classNames(
+                      'flex items-center font-semibold',
+                      pathName === '/pricing' ? 'text-savoy-blue' : 'text-indigo-dye opacity-50 pointer-events-none'
+                    )}
                   >
                     <TagIcon
-                      className={`${pathName === '/pricing' ? 'text-savoy-blue' : 'text-indigo-dye'} h-4 w-4 mr-2.5`}
+                      className={classNames(
+                        'h-4 w-4 mr-2.5',
+                        pathName === '/pricing' ? 'text-savoy-blue' : 'text-indigo-dye'
+                      )}
                     />
                     Pricing
                   </Link>
                   <Link
                     href='/demo'
-                    className={`${
-                      pathName === '/demo' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    } flex items-center font-semibold opacity-50 pointer-events-none`}
+                    className={classNames(
+                      'flex items-center font-semibold',
+                      pathName === '/demo' ? 'text-savoy-blue' : 'text-indigo-dye opacity-50 pointer-events-none'
+                    )}
                   >
                     <InformationCircleIcon
-                      className={`${pathName === '/demo' ? 'text-savoy-blue' : 'text-indigo-dye'} h-5 w-5 mr-2.5`}
+                      className={classNames(
+                        'h-4 w-4 mr-2.5',
+                        pathName === '/pricing' ? 'text-savoy-blue' : 'text-indigo-dye'
+                      )}
                     />
                     Request Demo
                   </Link>
