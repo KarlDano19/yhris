@@ -62,7 +62,7 @@ const UnauthorizedHeader = () => {
                       </div>
                       <div className='px-1 pt-2 pb-2'>
                         <h2 className='text-[10px] font-normal'>
-                          Rest assured, your data is safe with us. YAHSHUA HRIS, and 
+                          YAHSHUA HRIS, and 
                           all products of The ABBA Initiative, OPC are compliant to the 
                           Data Privacy Act of 2012. Plus, we are ISO 27001 certified and 
                           GDPR compliant with a SOC2 Type 2 attestation.
@@ -99,7 +99,7 @@ const UnauthorizedHeader = () => {
                     href='/pricing'
                     className={`${
                       pathName === '/pricing' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    }  flex items-center font-semibold`}
+                    }  flex items-center font-semibold opacity-50 pointer-events-none`}
                   >
                     <TagIcon
                       className={`${pathName === '/pricing' ? 'text-savoy-blue' : 'text-indigo-dye'} h-4 w-4 mr-2.5`}

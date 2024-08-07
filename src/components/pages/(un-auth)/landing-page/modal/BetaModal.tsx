@@ -59,7 +59,7 @@ export default function BetaModal({
                 </div>
                 <div className='px-6 pt-3 pb-6'>
                   <h2 className='text-[15px] font-normal text-center'>
-                    Rest assured, your data is safe with us. YAHSHUA HRIS, and 
+                    YAHSHUA HRIS, and 
                     all products of The ABBA Initiative, OPC are compliant to the 
                     Data Privacy Act of 2012. Plus, we are ISO 27001 certified and 
                     GDPR compliant with a SOC2 Type 2 attestation.
@@ -69,9 +69,9 @@ export default function BetaModal({
                     <button
                       type='button'
                       className='inline-flex justify-center drop-shadow-xl rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                      onClick={() => {setIsOpen(false)}}
+                      onClick={() => { window.location.href = '/register'; }}
                     >
-                      Got it!
+                      Sign up for Beta
                     </button>
                 </div>
               </Dialog.Panel>
