@@ -18,6 +18,7 @@ import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import SyncingIcon from '@/svg/SyncingIcon';
 import ExitIcon from '@/svg/ExitIcon';
+import Fab from '@/components/button/FloatingButton';
 
 const menus = [
   {
@@ -96,6 +97,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <Fab />
     </>
   );
 };
