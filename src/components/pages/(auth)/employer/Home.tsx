@@ -4,6 +4,7 @@ import React from 'react';
 
 import MenuItem from '../MenuItem';
 import FloatingProgress from '../../../FloatingProgress';
+import Fab from '@/components/button/FloatingButton';
 
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import AddPostLogo from '@/svg/AddPostLogo';
@@ -18,7 +19,6 @@ import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import SyncingIcon from '@/svg/SyncingIcon';
 import ExitIcon from '@/svg/ExitIcon';
-import Fab from '@/components/button/FloatingButton';
 
 const menus = [
   {

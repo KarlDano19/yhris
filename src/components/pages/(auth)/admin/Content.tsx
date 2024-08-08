@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 
+import Fab from '@/components/button/FloatingButton';
+
 import PersonSearchLogo from '@/svg/PersonSearchLogo';
 import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
-import Fab from '@/components/button/FloatingButton';
 
 const menus = [
   {
