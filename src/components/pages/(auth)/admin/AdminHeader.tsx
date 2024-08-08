@@ -2,19 +2,22 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 
-import { getCookie, deleteCookie } from 'cookies-next';
 import Link from 'next/link';
 
-import { Menu, Popover, Transition } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import classNames from '@/helpers/classNames';
-import MainLogo from '@/svg/MainLogo';
-import useGetAdminProfile from '@/components/hooks/useGetAdminProfile';
+import { getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
+
+import { Menu, Popover, Transition } from '@headlessui/react';
+import classNames from '@/helpers/classNames';
+import useGetAdminProfile from '@/components/hooks/useGetAdminProfile';
 import CustomToast from '@/components/CustomToast';
 import useLogout from '@/components/hooks/useLogout';
 import Timer from '@/components/Timer';
+import Fab from '@/components/button/FloatingButton';
+
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import MainLogo from '@/svg/MainLogo';
 
 const AdminHeader = () => {
   const { mutate, isLoading: isLogoutLoading } = useLogout();
@@ -236,6 +239,7 @@ const AdminHeader = () => {
           </>
         )}
       </Popover>
+      <Fab />
     </>
   );
 };

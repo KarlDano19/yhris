@@ -13,6 +13,7 @@ import useGetEmployerProfile from '../../../hooks/useGetEmployerProfile';
 import CustomToast from '@/components/CustomToast';
 import useLogout from '../../../hooks/useLogout';
 import Timer from '../../../Timer';
+import Fab from '@/components/button/FloatingButton';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -249,6 +250,7 @@ const MainHeader = () => {
           </>
         )}
       </Popover>
+      <Fab />
     </>
   );
 };

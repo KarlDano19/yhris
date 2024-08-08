@@ -4,7 +4,6 @@ import React from 'react';
 
 import MenuItem from '../MenuItem';
 import FloatingProgress from '../../../FloatingProgress';
-import Fab from '@/components/button/FloatingButton';
 
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import AddPostLogo from '@/svg/AddPostLogo';
@@ -97,7 +96,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <Fab />
     </>
   );
 };
