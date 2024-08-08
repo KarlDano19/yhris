@@ -41,10 +41,10 @@ export default function BetaModal({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
-                <div className='flex p-2 justify-end md:hidden'>
-                    <XCircleIcon className='w-8 h-8 text-[#ACB9CB] cursor-pointer mt-1' onClick={() => {setIsOpen(false)}} />
+                <div className='flex pr-4 pt-4 justify-end '>
+                    <XCircleIcon className='w-6 h-6 text-[#ACB9CB] cursor-pointer mt-1' onClick={() => {setIsOpen(false)}} />
                 </div>
-                <div className='flex justify-center px-2 md:pt-8 md:pb-2'>
+                <div className='flex justify-center pb-2 md:pt-8 md:pb-2'>
                   <YahshuaHRISLogo />
                 </div>
                 <div className='flex justify-center px-2 pt-4'>
