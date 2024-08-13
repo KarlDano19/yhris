@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from './hooks/useGetJobDetails';
-import useGetEmployerDetails from './hooks/useGetEmployerDetail';
 
 import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
@@ -19,8 +18,6 @@ interface JobDetailsProp {
 const JobDetails = ({ jobId }: JobDetailsProp) => {
   const { data, isLoading } = useGetJobDetails(jobId);
   const [jobDetailData, setJobDetailData] = useState<any>({});
-  const [jobIndustry, setJobIndustry] = useState<any>({})
-  const { data: profileData } = useGetEmployerDetails(jobDetailData.company_id)
 
   useEffect(() => {
     if (data) {
@@ -28,12 +25,6 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
       console.log({data})
     }
   }, [data]);
-
-  useEffect(() => {
-    if (profileData){
-      setJobIndustry(profileData)
-    }
-  },[profileData])
 
   const renderRoleDescription = (jobDescription: any) => {
     const markup = { __html: jobDescription };
@@ -57,7 +48,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               {!isLoading ? jobDetailData?.job_title : 'Loading job title...'}
             </h5>
             <h6 className='text-indigo-dye text-sm'> 
-              for a {!isLoading ? profileData?.type_of_industry : 'Loading indsutry...'} Company
+              for a {!isLoading ? jobDetailData?.industry : 'Loading indsutry...'} Company
             </h6>
             <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
           </div>
