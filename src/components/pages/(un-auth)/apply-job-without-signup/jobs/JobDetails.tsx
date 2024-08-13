@@ -22,6 +22,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
   useEffect(() => {
     if (data) {
       setJobDetailData(data);
+      console.log({data})
     }
   }, [data]);
 
@@ -46,13 +47,10 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             <h5 className='text-xl font-semibold text-indigo-dye'>
               {!isLoading ? jobDetailData?.job_title : 'Loading job title...'}
             </h5>
-            <h6 className='text-indigo-dye text-sm font-medium mt-1'>
-              {!isLoading ? jobDetailData?.company : 'Loading company name...'}
+            <h6 className='text-indigo-dye text-sm'> 
+              for a {!isLoading ? jobDetailData?.industry : 'Loading indsutry...'} Company
             </h6>
             <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
-            <div className='text-sm text-indigo-dye mt-4 lg:w-60'>
-              <p className='text-[1rem] font-semibold mb-1'>Role:</p>{!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
-            </div>
           </div>
         </div>
         <div className='col-span-1 lg:col-span-2 px-1'>

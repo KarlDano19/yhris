@@ -52,15 +52,14 @@ export default function EmailTemplateModal({
 
     const callbackReq = {
       onSuccess: async (data: any) => {
-        console.log({ data });
-        toast.custom(() => <CustomToast message={data.message} type='success' />);
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         setIsOpen(false);
         reset();
         refetch();
         onSuccess();
       },
       onError: async (error: any) => {
-        toast.custom(() => <CustomToast message={error.message} type='error' />);
+        toast.custom(() => <CustomToast message={error} type='error' />, { duration: 4000 });
       },
     };
     mutate(data, callbackReq);
@@ -131,7 +130,7 @@ export default function EmailTemplateModal({
                       />
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          To<span className='text-red-600'>*</span>
+                          To<span className='text-red-600'> *</span>
                         </label>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
