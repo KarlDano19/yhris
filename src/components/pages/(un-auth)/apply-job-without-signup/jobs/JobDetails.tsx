@@ -10,6 +10,8 @@ import FileCaseIcon from '@/svg/FileCaseIcon';
 import * as DOMPurify from 'dompurify';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
 import 'react-quill/dist/quill.snow.css';
+import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
+import useGetEmployerDetails from './hooks/useGetEmployerDetail';
 
 interface JobDetailsProp {
   jobId: any;
@@ -18,12 +20,21 @@ interface JobDetailsProp {
 const JobDetails = ({ jobId }: JobDetailsProp) => {
   const { data, isLoading } = useGetJobDetails(jobId);
   const [jobDetailData, setJobDetailData] = useState<any>({});
+  const [jobIndustry, setJobIndustry] = useState<any>({})
+  const { data: profileData } = useGetEmployerDetails(jobDetailData.company_id)
 
   useEffect(() => {
     if (data) {
       setJobDetailData(data);
+      console.log({data})
     }
   }, [data]);
+
+  useEffect(() => {
+    if (profileData){
+      setJobIndustry(profileData)
+    }
+  },[profileData])
 
   const renderRoleDescription = (jobDescription: any) => {
     const markup = { __html: jobDescription };
@@ -46,13 +57,10 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             <h5 className='text-xl font-semibold text-indigo-dye'>
               {!isLoading ? jobDetailData?.job_title : 'Loading job title...'}
             </h5>
-            <h6 className='text-indigo-dye text-sm font-medium mt-1'>
-              {!isLoading ? jobDetailData?.company : 'Loading company name...'}
+            <h6 className='text-indigo-dye text-sm'> 
+              for a {!isLoading ? profileData?.type_of_industry : 'Loading indsutry...'} Company
             </h6>
             <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
-            <div className='text-sm text-indigo-dye mt-4 lg:w-60'>
-              <p className='text-[1rem] font-semibold mb-1'>Role:</p>{!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
-            </div>
           </div>
         </div>
         <div className='col-span-1 lg:col-span-2 px-1'>
