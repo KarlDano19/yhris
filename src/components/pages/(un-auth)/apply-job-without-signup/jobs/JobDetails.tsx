@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from './hooks/useGetJobDetails';
+import useGetEmployerDetails from './hooks/useGetEmployerDetail';
 
 import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
@@ -10,8 +11,6 @@ import FileCaseIcon from '@/svg/FileCaseIcon';
 import * as DOMPurify from 'dompurify';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
 import 'react-quill/dist/quill.snow.css';
-import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
-import useGetEmployerDetails from './hooks/useGetEmployerDetail';
 
 interface JobDetailsProp {
   jobId: any;
