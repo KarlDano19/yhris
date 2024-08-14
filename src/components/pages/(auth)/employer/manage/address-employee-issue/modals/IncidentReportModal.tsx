@@ -33,7 +33,7 @@ export default function IncidentReportModal({
   const { mutate, isLoading } = useAddEmployeeIssueItems();
   const { register, handleSubmit, setValue, reset, control, trigger } = useForm<T_IncidentReport>({
     defaultValues: {
-      incidentDate: new Date().toISOString(), // Set default value to current date in ISO format
+      incidentDate: new Date().toISOString(), 
     },
   });
   const dateInputRef = useRef(null);
