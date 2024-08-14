@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react';
 
+import dynamic from 'next/dynamic';
+
 import { Marker } from '@react-google-maps/api';
 import { useForm } from 'react-hook-form';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
@@ -19,6 +21,10 @@ import { PhoneIcon, WhitePhoneIcon } from '@/svg/PhoneIcon';
 import { VideoIcon, WhiteVideoIcon } from '@/svg/VideoIcon';
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 import CalendarIcon from '@/svg/CalendarIcon';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 const containerStyle = {
   width: 'auto',
@@ -90,7 +96,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   const [integrationItems, setIntegrationItems] = useState<any>([]);
   const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const { register, setValue, watch, handleSubmit } = useForm();
+  const { register, setValue, watch, handleSubmit, getValues } = useForm();
   const [isOpen, setIsOpen] = useState(false);
   const [selectionId, setSelectionId] = useState('video');
   const [input, setInput] = useState('');
@@ -99,6 +105,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
   const [map, setMap] = useState(null);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const applicant: ApplicantType | undefined = useMemo(() => {
     return state
       .find((stage) => stage.id === actionState.stageId)
@@ -379,7 +386,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 >
                   <option value='' disabled>Select...</option>
                   {integrationItems.map((item: any) => (
-                    <option value={item.id}>{item.email}</option>
+                    <option key={item.id} value={item.id}>{item.email}</option>
                   ))}
                 </select>
                 <div className='absolute right-4 pointer-events-none'>
@@ -395,14 +402,16 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
             <p className='mb-1 text-[#6F829B]'>
               You may include information about agenda, dresscord, and any additional information.
             </p>
-            <textarea
-              {...register('message')}
-              id='message'
-              rows={4}
-              placeholder='Enter message...'
-              className='border border-[#ACB9CB] rounded-md py-2 px-6 w-full focus:outline focus:outline-1 focus:outline-[#355FD0]'
-              required
-            ></textarea>
+            <div className='mt-2 h-72 mb-12'>
+              <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
+              <ReactQuill
+                onChange={(value) => setValue('message', value)}
+                formats={QUILL_FORMATS}
+                modules={QUILL_MODULES}
+                style={{ height: '100%', padding: '5px 8px !important' }}
+                defaultValue={getValues('message')}
+              />
+            </div>
           </div>
 
           <div className='mb-6'>

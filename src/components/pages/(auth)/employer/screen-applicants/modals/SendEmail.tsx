@@ -57,6 +57,9 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
 
   const handleOnSubmit = (data: any) => {
     const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
+    data.email = tagsTo
+    data.cc = tagsCc;
+    data.bcc = tagsBcc;
     data.template = template.subject;
     handleFormSubmit(data, setIsOpen);
   };
@@ -127,7 +130,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                     </div>
                   ))}
                   <input
-                    type='cc'
+                    type='to'
                     value={inputTo}
                     onKeyDown={handleKeyDownTo}
                     onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
