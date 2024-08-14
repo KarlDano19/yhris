@@ -31,7 +31,11 @@ export default function IncidentReportModal({
 }) {
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useAddEmployeeIssueItems();
-  const { register, handleSubmit, setValue, reset, control, trigger } = useForm<T_IncidentReport>();
+  const { register, handleSubmit, setValue, reset, control, trigger } = useForm<T_IncidentReport>({
+    defaultValues: {
+      incidentDate: new Date().toISOString(), // Set default value to current date in ISO format
+    },
+  });
   const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   const onSubmit = handleSubmit((data) => {
@@ -197,7 +201,7 @@ export default function IncidentReportModal({
                                 className={
                                   'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
                                 }
-                                selected={field.value}
+                                selected={field.value ? new Date(field.value) : null}
                                 pickerOnChange={(date: any) => field.onChange(date)}
                                 inputOnChange={(value: any) => field.onChange(value)}
                                 required={true}
