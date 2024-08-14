@@ -182,7 +182,7 @@ export default function CreatePolicyModal({
                                   </div>
                                 ))}
                                 <input
-                                  type='cc'
+                                  type='text'
                                   value={inputTo}
                                   onKeyDown={handleKeyDownTo}
                                   onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state

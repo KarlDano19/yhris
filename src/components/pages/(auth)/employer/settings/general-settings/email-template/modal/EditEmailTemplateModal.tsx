@@ -177,7 +177,7 @@ export default function EditEmailTemplateModal({
                                 </div>
                               ))}
                               <input
-                                type='cc'
+                                type='text'
                                 value={inputTo}
                                 onKeyDown={handleKeyDownTo}
                                 onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
@@ -224,7 +224,7 @@ export default function EditEmailTemplateModal({
                                 </div>
                               ))}
                               <input
-                                type='cc'
+                                type='text'
                                 value={inputCc}
                                 onKeyDown={handleKeyDown}
                                 onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
@@ -253,7 +253,7 @@ export default function EditEmailTemplateModal({
                                 </div>
                               ))}
                               <input
-                                type='bcc'
+                                type='text'
                                 value={inputBcc}
                                 onKeyDown={handleKeyDownBcc}
                                 onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
