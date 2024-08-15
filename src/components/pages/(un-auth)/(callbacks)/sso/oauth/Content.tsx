@@ -28,7 +28,6 @@ function Content() {
           }, 500);
         },
         onError: (err: any) => {
-          debugger
           setErrorMessage(err);
         },
       };

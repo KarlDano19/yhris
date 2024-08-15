@@ -46,7 +46,6 @@ export default function QuitclaimModal({
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
 
   const emailFormSubmit = handleSubmit((data) => {
-    debugger
     onSubmit(data);
   });
 
