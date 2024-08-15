@@ -1,12 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
+interface newFiltersProps {
+  from?: string;
+  to?: string;
+  current_page: number;
+  page_size: number;
+}
+
 async function getEmployeeItems(filters: any) {
   try {
-    let newFilters = { ...filters };
+    let newFilters: newFiltersProps = { current_page: filters.currentPage, page_size: filters.pageSize };
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
-    const searchParams = new URLSearchParams(newFilters);
+    const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie('token');
     const config = {
       method: 'GET',
