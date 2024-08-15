@@ -16,11 +16,11 @@ interface PaginationProps {
   onPageChange: (selectedItem: { selected: number }) => void;
 }
 
-const pageSizes = [10, 25, 50];
+const pageSizes = [5, 10, 25, 50];
 
 const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSize, onPageSizeChange, onPageChange }) => {
   return (
-    <div className='flex items-center justify-between mt-3'>
+    <div className='flex items-center justify-between my-3'>
       <p className='text-sm text-gray-500'>Total Record/s: {pagination.totalRecords}</p>
       <div className='flex items-center'>
         <p className='text-sm text-gray-500 mx-2'>Records per page</p>
