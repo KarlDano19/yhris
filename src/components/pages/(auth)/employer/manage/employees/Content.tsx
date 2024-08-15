@@ -33,7 +33,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
