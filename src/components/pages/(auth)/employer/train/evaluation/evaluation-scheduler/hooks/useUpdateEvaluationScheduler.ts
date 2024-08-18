@@ -5,14 +5,14 @@ async function updateEvaluationScheduler(evaluation_scheduler_id: string, data: 
   try {
     const token = getCookie('token');
     const formData = new FormData();
-    formData.append('employee', JSON.stringify(data.employee));
+    formData.append('employees', JSON.stringify(data.employees));
     formData.append('evaluation_template', data.evaluation_template);
     formData.append('frequency_unit', data.frequency_unit);
     formData.append('frequency_value', data.frequency_value);
     formData.append('message', data.message);
     formData.append('name', data.name);
     formData.append('reminder_schedule', data.reminder_schedule);
-    if (data.attachment && data.attachment.length) {
+    if (data.attachment && typeof data.attachment === "object" && data.attachment.length) {
       formData.append('attachment', data.attachment[0]);
     }
     const config = {
