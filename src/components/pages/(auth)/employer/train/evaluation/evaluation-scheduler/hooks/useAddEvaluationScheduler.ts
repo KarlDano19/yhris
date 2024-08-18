@@ -5,7 +5,7 @@ async function addEvaluationScheduler(data: any) {
   try {
     const token = getCookie('token');
     const formData = new FormData();
-    formData.append('employee', JSON.stringify(data.employee));
+    formData.append('employees', JSON.stringify(data.employees));
     formData.append('evaluation_template', data.evaluation_template);
     formData.append('frequency_unit', data.frequency_unit);
     formData.append('frequency_value', data.frequency_value);

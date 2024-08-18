@@ -4,6 +4,8 @@ import Image from 'next/image';
 
 import toast from 'react-hot-toast';
 
+import CustomToast from '@/components/CustomToast';
+
 const Details = ({
   register,
   handleSubmit,
@@ -34,7 +36,9 @@ const Details = ({
         };
       }
     } else {
-      toast.error('Maximum file size is 5mb.');
+      toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+        duration: 2000,
+      });
     }
   };
 
@@ -72,6 +76,7 @@ const Details = ({
               id='companyLogo'
               className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
               onChange={uploadImgOnChange}
+              accept='image/png, image/jpeg, image/jpg'
             />
           </div>
         </div>
