@@ -23,7 +23,7 @@ function Content() {
           onSuccess: () => {
           },
           onError: (err: any) => {
-            console.log(err);
+            console.error(err);
           },
         };
         mutate(data, callbackRequest);

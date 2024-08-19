@@ -306,6 +306,7 @@ export default function EditEmailTemplateModal({
                                 type='file'
                                 className='sr-only'
                                 onChange={handleChange}
+                                accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
                               />
                             </label>
                             <div className={`${file !== null ? 'file-preview' : 'hidden'}`}>

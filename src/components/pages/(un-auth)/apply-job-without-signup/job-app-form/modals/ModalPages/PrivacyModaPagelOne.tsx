@@ -55,7 +55,7 @@ export default function PrivacyModaPagelOne({
     <>
       <div className='h-[450px] overflow-auto px-6' ref={scrollContainerRef}>
         <div>
-          <div className='mt-3 text-left sm:mt-3 px-6'>
+          <div className='my-3 text-left sm:mt-3 px-6'>
             <div className='mt-2'>
               <ul>
                 <li className='text-base font-semibold mb-3 mt-6'>I. Privacy Policy</li>
@@ -82,8 +82,8 @@ export default function PrivacyModaPagelOne({
         </div>
       </div>
       <div className={classNames(
-        'text-center py-3 bg-[#ACB9CB]',
-        !atBottom ? 'bg-[#EBF3FF]' : 'bg-[#EBF3FF]'
+        'text-center py-3',
+        !atBottom ? 'bg-[#ACB9CB]' : 'bg-[#EBF3FF]'
         )}
       >
         <button

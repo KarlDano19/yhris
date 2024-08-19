@@ -54,7 +54,7 @@ function EmployeeAssigneeTab({
             Send to<span className='text-red-600'>*</span>
           </label>
           <Controller
-            name='employee'
+            name='employees'
             control={control}
             render={({ field: { onChange, value } }: { field: Field }) => (
               <Select
@@ -96,6 +96,7 @@ function EmployeeAssigneeTab({
             type='file'
             {...register('attachment')}
             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+            accept='image/jpeg, image/png, application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
           />
           {typeof watch('attachment') === 'string' && (
             <div className='flex text-sm mt-1 ml-1'>

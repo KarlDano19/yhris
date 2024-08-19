@@ -6,26 +6,26 @@ import { T_Investigation } from '@/types/globals';
 async function addInvestigationReport(investigation: T_Investigation) {
   try {
     const token = getCookie('token');
-    const data = new FormData();
+    const formData = new FormData();
     const investigationDate = new Date(investigation.date);
     if (isNaN(investigationDate.getTime())) {
       throw new Error('Invalid date format');
     }
-    data.append('employee_issue', investigation.employee_issue);
-    data.append('date_of_investigation', investigationDate.toISOString());
-    data.append('witness', investigation.witness);
-    data.append('presider', investigation.presider);
-    data.append('has_attended_hearing', investigation.isAttendHearing);
-    data.append('results', investigation.resultOfInvestigation);
-    data.append('decision', investigation.decision);
-    data.append('custom_decision', investigation.other);
-    data.append('attachments', investigation.attachments);
+    formData.append('employee_issue', investigation.employee_issue);
+    formData.append('date_of_investigation', investigationDate.toISOString());
+    formData.append('witness', investigation.witness);
+    formData.append('presider', investigation.presider);
+    formData.append('has_attended_hearing', investigation.isAttendHearing);
+    formData.append('results', investigation.resultOfInvestigation);
+    formData.append('decision', investigation.decision);
+    formData.append('custom_decision', investigation.other);
+    formData.append('attachments', investigation.attachments);
     const config = {
       method: 'POST',
       headers: {
         Authorization: `Token ${token}`,
       },
-      body: data,
+      body: formData,
     };
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/investigation-reports/`, config);
     if (!res.ok) {
@@ -35,7 +35,7 @@ async function addInvestigationReport(investigation: T_Investigation) {
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
-      throw errStringify.response.data.message;
+      throw errStringify.response.formData.message;
     }
     throw errStringify.message;
   }

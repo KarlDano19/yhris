@@ -6,31 +6,31 @@ import { T_EmployerProfile } from '@/types/globals';
 async function saveProfile(profile: T_EmployerProfile) {
   try {
     const token = getCookie('token');
-    const data = new FormData();
-    data.append('name', profile.companyName);
-    data.append('description', profile.companyDescription);
-    data.append('type_of_industry', profile.typeOfIndustry);
-    data.append('work_set_up', profile.workSetUp);
-    data.append('email', profile.email);
-    data.append('mobile_number', profile.mobileNumber);
-    data.append('landline_number', profile.landlineNumber);
-    data.append('building', profile.building);
-    data.append('street', profile.street);
-    data.append('locality', profile.locality);
-    data.append('city', profile.city);
-    data.append('zip_code', profile.zipCode);
-    data.append('country', profile.country);
-    data.append('language', profile.language);
-    data.append('currency', profile.currency);
+    const formData = new FormData();
+    formData.append('name', profile.companyName);
+    formData.append('description', profile.companyDescription);
+    formData.append('type_of_industry', profile.typeOfIndustry);
+    formData.append('work_set_up', profile.workSetUp);
+    formData.append('email', profile.email);
+    formData.append('mobile_number', profile.mobileNumber);
+    formData.append('landline_number', profile.landlineNumber);
+    formData.append('building', profile.building);
+    formData.append('street', profile.street);
+    formData.append('locality', profile.locality);
+    formData.append('city', profile.city);
+    formData.append('zip_code', profile.zipCode);
+    formData.append('country', profile.country);
+    formData.append('language', profile.language);
+    formData.append('currency', profile.currency);
     if (profile.companyLogo) {
-      data.append('logo', profile.companyLogo);
+      formData.append('logo', profile.companyLogo);
     }
     const config = {
       method: 'POST',
       headers: {
         Authorization: `Token ${token}`,
       },
-      body: data,
+      body: formData,
     };
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/employers/profiles/`,
@@ -43,7 +43,7 @@ async function saveProfile(profile: T_EmployerProfile) {
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
-      throw errStringify.response.data.message;
+      throw errStringify.response.formData.message;
     }
     throw errStringify.message;
   }
