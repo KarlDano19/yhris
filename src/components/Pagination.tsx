@@ -26,7 +26,7 @@ const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSi
         <p className='text-sm text-gray-500 mx-2'>Records per page</p>
         <select
           id='role'
-          className='w-20 mx-2 py-1 rounded-md border-0 text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm'
+          className='w-20 mx-2 p-1 rounded-md border-0 text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm'
           onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
           defaultValue={pageSize}
           placeholder='Select...'
@@ -39,7 +39,7 @@ const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSi
           breakLabel='...'
           nextLabel={<ChevronRightIcon className='h-5 w-5' />}
           onPageChange={onPageChange}
-          pageRangeDisplayed={pageSize}
+          pageRangeDisplayed={3}
           pageCount={pagination.totalPages}
           forcePage={currentPage - 1}
           previousLabel={<ChevronLeftIcon className='h-5 w-5' />}
