@@ -7,6 +7,7 @@ import { Popover } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
+import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 import {
   Bars3Icon,
@@ -235,6 +236,7 @@ const UnauthorizedHeader = () => {
           </>
         )}
       </Popover>
+      <FloatingHelpButton />
     </>
   );
 };
