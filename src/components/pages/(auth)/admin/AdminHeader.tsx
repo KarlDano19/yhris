@@ -13,7 +13,6 @@ import useGetAdminProfile from '@/components/hooks/useGetAdminProfile';
 import CustomToast from '@/components/CustomToast';
 import useLogout from '@/components/hooks/useLogout';
 import Timer from '@/components/Timer';
-import Fab from '@/components/button/FloatingButton';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -239,7 +238,6 @@ const AdminHeader = () => {
           </>
         )}
       </Popover>
-      <Fab />
     </>
   );
 };

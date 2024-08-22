@@ -1,7 +1,9 @@
 'use client';
-import SyncingIcon from '@/svg/SyncingIcon';
-import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon';
+
 import { useState } from 'react';
+
+import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon';
+import SyncingIcon from '@/svg/SyncingIcon';
 
 const FloatingProgress = () => {
   const [isProgressShow, setShowProgress] = useState(false);
