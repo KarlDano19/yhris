@@ -189,33 +189,6 @@ const Content = () => {
                     />
                   </div>
                   }
-                  <div className='mb-2'>
-                    <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
-                      Password
-                      <span className='text-red-500'>*</span>
-                    </label>
-                    <div className='relative'>
-                      <input
-                        type='email'
-                        id='email'
-                        {...register('email', { required: true })}
-                        className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                        tabIndex={2}
-                      />
-                    </div>
-                    <div className='mb-2'>
-                      <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                        Name
-                        <span className='text-red-500'>*</span>
-                      </label>
-                      <input
-                        type='text'
-                        id='name'
-                        {...register('name', { required: true })}
-                        className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                        tabIndex={2}
-                      />
-                    </div>
                     <div className='mb-2'>
                       <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
                         Password
