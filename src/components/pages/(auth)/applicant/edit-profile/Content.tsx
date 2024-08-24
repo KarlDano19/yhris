@@ -1,7 +1,6 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useQueryClient } from '@tanstack/react-query';
 import ProfileTab from "./profile/Tab";
 import ContactsTab from "./contacts/Tab";
 import ProfDetailTab from "./prof-details/Tab";

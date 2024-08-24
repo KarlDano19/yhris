@@ -1,11 +1,14 @@
 "use client";
-import Image from "next/image";
-import DateCalendar from "@/svg/DateCalendar";
-import DropDownArrow from "@/svg/DropDownArrow";
 import { useEffect, useRef, useState } from "react";
-import { UserIcon } from "@heroicons/react/24/solid";
+
+import Image from "next/image";
+
 import { useForm, useFormContext } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
+
+import { UserIcon } from "@heroicons/react/24/solid";
+import DateCalendar from "@/svg/DateCalendar";
+import DropDownArrow from "@/svg/DropDownArrow";
 
 
 const Tab = ({}) => {

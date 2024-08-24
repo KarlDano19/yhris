@@ -35,7 +35,7 @@ const Content = () => {
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
   const [isApplicant, setIsApplicant] = useState("")
-  const { register, handleSubmit, reset } = useForm<T_Register>();
+  const { register, handleSubmit, reset, watch } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
 
   const onSubmit = (data: T_Register) => {
@@ -108,7 +108,10 @@ const Content = () => {
                       className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
                       defaultValue=''
                       placeholder='Select...'
-                      onChange={(e) => setIsApplicant(e.target.value)}
+                      onChange={(e) => {
+                        setIsApplicant(e.target.value);
+                        const selectedValue = watch('accountType');
+                      }}
                     >
                       <option value='' disabled className='text-gray-400'>
                         Select...

@@ -1,7 +1,13 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+
 import { useQueryClient } from '@tanstack/react-query';
+import { useForm ,FormProvider} from "react-hook-form";
+import { toast } from "react-hot-toast";
+
+import useSaveApplicantProfile from "./hooks/useSaveApplicantProfile";
+
 import ProfileTab from "./profile/Tab";
 import ContactsTab from "./contacts/Tab";
 import ProfDetailTab from "./prof-details/Tab";
@@ -10,12 +16,8 @@ import WelcomeModal from "./modals/WelcomeModal";
 import SuccessPopAlert from "@/components/SuccessPopAlert";
 import AskProfModal from "./modals/AskProfModal";
 import AskDocumentModal from "./modals/AskDocumentModal";
-import { useForm ,FormProvider} from "react-hook-form";
-import { toast } from "react-hot-toast";
-import useSaveApplicantProfile from "./hooks/useSaveApplicantProfile";
+
 import { T_ApplicantProfile } from "@/types/globals";
-
-
 
 const Content = () => {
   const queryClient = useQueryClient();

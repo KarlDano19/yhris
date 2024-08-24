@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 
 import { Popover } from '@headlessui/react';
 
@@ -7,18 +8,18 @@ import { deleteCookie } from 'cookies-next';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
-import useLogout from '@/components/hooks/useLogout';
 
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
+import useLogout from '@/components/hooks/useLogout';
 import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
+
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import CaseSearchIcon from '@/svg/CaseSearchIcon';
 import HomeIcon from '@/svg/HomeIcon';
 import MainLogo from '@/svg/MainLogo';
 import BellIcon from '@/svg/BellIcon';
 import ExitIcon from '@/svg/ExitIcon';
-import { useEffect, useState } from 'react';
 
 interface ErrorDetail {
   detail: string;
