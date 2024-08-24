@@ -1,8 +1,9 @@
 import React, { Dispatch } from 'react';
 
 import classNames from '@/helpers/classNames';
-import ClipIcon from '@/svg/ClipIcon';
 import { T_LastPayModal } from '@/types/globals';
+
+import ClipIcon from '@/svg/ClipIcon';
 
 const LastPay = ({
   id,

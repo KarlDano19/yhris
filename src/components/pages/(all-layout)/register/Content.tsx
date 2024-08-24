@@ -34,7 +34,7 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const [isApplicant, setIsApplicant] = useState("")
+  const [selectedValue, setSelectedValue] = useState("")
   const { register, handleSubmit, reset, watch } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
 
@@ -109,8 +109,8 @@ const Content = () => {
                       defaultValue=''
                       placeholder='Select...'
                       onChange={(e) => {
-                        setIsApplicant(e.target.value);
-                        const selectedValue = watch('accountType');
+                        setSelectedValue(e.target.value);
+                        watch('accountType')
                       }}
                     >
                       <option value='' disabled className='text-gray-400'>
@@ -136,7 +136,7 @@ const Content = () => {
                       tabIndex={2}
                     />
                   </div>
-                  {isApplicant === 'Applicant' ? (
+                  {selectedValue === 'Applicant' ? (
                     <>
                       <div className='mb-2'>
                         <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
