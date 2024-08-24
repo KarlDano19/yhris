@@ -33,6 +33,7 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
+  const [isApplicant, setIsApplicant] = useState("")
   const { register, handleSubmit, reset } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
 
@@ -105,12 +106,13 @@ const Content = () => {
                       className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
                       defaultValue=''
                       placeholder='Select...'
+                      onChange={(e) => setIsApplicant(e.target.value)}
                     >
                       <option value='' disabled className='text-gray-400'>
                         Select...
                       </option>
                       <option value={'Employer'}>Employer</option>
-                      {/* <option value={'Applicant'}>Applicant</option> */}
+                      <option value={'Applicant'}>Applicant</option>
                     </select>
                     <div className='absolute right-4 top-[46px]'>
                       <DropDownArrow />
@@ -129,6 +131,48 @@ const Content = () => {
                       tabIndex={2}
                     />
                   </div>
+                  {isApplicant === 'Applicant' ? (
+                    <>
+                      <div className='mb-2'>
+                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                          First Name
+                          <span className='text-red-500'>*</span>
+                        </label>
+                        <input
+                          type='text'
+                          id='firstname'
+                          {...register('firstname', { required: true })}
+                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                          tabIndex={2}
+                        />
+                      </div>
+                      <div className='mb-2'>
+                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                          Middle Name
+                        </label>
+                        <input
+                          type='text'
+                          id='middlename'
+                          {...register('middlename')}
+                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                          tabIndex={2}
+                        />
+                      </div>
+                      <div className='mb-2'>
+                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                          Last Name
+                          <span className='text-red-500'>*</span>
+                        </label>
+                        <input
+                          type='text'
+                          id='lastname'
+                          {...register('lastname', { required: true })}
+                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                          tabIndex={2}
+                        />
+                      </div>
+                    </>
+                  ):
                   <div className='mb-2'>
                     <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
                       Name
@@ -142,6 +186,7 @@ const Content = () => {
                       tabIndex={2}
                     />
                   </div>
+                  }
                   <div className='mb-2'>
                     <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
                       Password

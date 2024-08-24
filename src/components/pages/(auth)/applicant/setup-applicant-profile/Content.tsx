@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { useQueryClient } from '@tanstack/react-query';
 import ProfileTab from "./profile/Tab";
 import ContactsTab from "./contacts/Tab";
 import ProfDetailTab from "./prof-details/Tab";
@@ -12,10 +13,14 @@ import AskDocumentModal from "./modals/AskDocumentModal";
 import { useForm ,FormProvider} from "react-hook-form";
 import { toast } from "react-hot-toast";
 import useSaveApplicantProfile from "./hooks/useSaveApplicantProfile";
+import { T_ApplicantProfile } from "@/types/globals";
 
 
 
 const Content = () => {
+  const queryClient = useQueryClient();
+  const cachedApplicantProfile = queryClient.getQueryCache().find(['applicantProfileCache']);
+  const { register, setValue, watch, handleSubmit } = useForm<T_ApplicantProfile>();
   const [isWelcomeModal, setWelcomeModal] = useState(false);
   const [openSuccessAlert, setSuccessAlert] = useState(false);
   const [setupProfDetails, setProfDetails] = useState(false);
@@ -24,7 +29,9 @@ const Content = () => {
   const [openDocumentsModal, setDocumentsModal] = useState(false);
 
   const [currentTab, setCurrentTab] = useState(1);
-  const {mutate, isLoading} = useSaveApplicantProfile();
+  const cachedApplicantData: any = cachedApplicantProfile?.state?.data;
+  const {mutate, isLoading} = useSaveApplicantProfile(cachedApplicantData?.id);
+
   
   const submitProfile=(data: any)=>{
     setCurrentTab(currentTab + 1);

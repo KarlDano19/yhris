@@ -6,6 +6,9 @@ async function register(user: T_Register) {
   try {
     const data = {
       name: user.name,
+      firstname: user.firstname,
+      middlename: user.middlename,
+      lastname: user.lastname,
       email: user.email,
       password: user.password,
       confirm_password: user.confirmPassword,
