@@ -203,6 +203,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <LastPay
               id={item.id}
               isLastPayReleased={item.isLastPayReleased}
+              quitclaimReceivedDate={item.quitclaimReceivedDate}
               setIsLastPayModalOpen={setIsLastPayModalOpen}
             />
           </td>
