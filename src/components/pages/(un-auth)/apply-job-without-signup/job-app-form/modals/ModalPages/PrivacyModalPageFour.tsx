@@ -54,7 +54,7 @@ export default function PrivacyModaPagelFour({
     <>
       <div className='h-[450px] overflow-auto pr-2' ref={scrollContainerRef}>
         <div>
-          <div className='mt-3 text-left sm:mt-3'>
+          <div className='my-3 text-left sm:mt-3'>
             <div className='mt-2'>
               <ul>
                 <li className='text-base font-semibold mb-3 mt-6'>VIII. Storage and Retention</li>

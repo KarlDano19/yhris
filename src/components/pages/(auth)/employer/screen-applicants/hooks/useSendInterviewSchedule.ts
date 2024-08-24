@@ -29,7 +29,6 @@ export async function sendInterviewSchedule(data: any) {
       },
       body: JSON.stringify(payloads),
     };
-    debugger
     if (token) {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/applicants/send-interview-schedule/`,

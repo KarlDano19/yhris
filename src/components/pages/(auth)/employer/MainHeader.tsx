@@ -4,16 +4,16 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
+import { Menu, Popover, Transition } from '@headlessui/react';
 import { getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
 
-import { Menu, Popover, Transition } from '@headlessui/react';
-import classNames from '@/helpers/classNames';
-import useGetEmployerProfile from '../../../hooks/useGetEmployerProfile';
 import CustomToast from '@/components/CustomToast';
+import classNames from '@/helpers/classNames';
+import FloatingHelpButton from '@/components/FloatingHelpButton';
+import useGetEmployerProfile from '../../../hooks/useGetEmployerProfile';
 import useLogout from '../../../hooks/useLogout';
 import Timer from '../../../Timer';
-import Fab from '@/components/button/FloatingButton';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -250,7 +250,7 @@ const MainHeader = () => {
           </>
         )}
       </Popover>
-      <Fab />
+      <FloatingHelpButton companyName={profile.name} />
     </>
   );
 };

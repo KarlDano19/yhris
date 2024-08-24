@@ -8,6 +8,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
+import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
@@ -19,6 +20,11 @@ import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
+interface PaginationProps {
+  totalRecords: number;
+  totalPages: number;
+}
+
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
@@ -27,6 +33,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationProps>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
@@ -37,7 +49,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     data: employeeListData,
     isLoading: isEmployeeListLoading,
     refetch: employeeListRefetch,
-  } = useGetEmployeeItems(itemsFilter);
+  } = useGetEmployeeItems({ ...itemsFilter, pageSize, currentPage });
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport(); // Get the mutate function
 
@@ -65,17 +77,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (employeeListData) {
-      employeeListData.map((employee: any) => {
+      employeeListData.records.map((employee: any) => {
         employee.date = Intl.DateTimeFormat('en-US').format(new Date(employee.date));
         return employee;
       });
-      setEmployeeItems(employeeListData);
+      setEmployeeItems(employeeListData.records);
+      setPagination({
+        totalPages: employeeListData.total_pages,
+        totalRecords: employeeListData.total_records,
+      });
     }
   }, [employeeListData]);
 
   useEffect(() => {
     setIsEmployeesModalOpen(true);
   }, [selectedEmployeeId]);
+
+  useEffect(() => {
+    employeeListRefetch();
+  }, [currentPage, pageSize]);
 
   const openEditEmployeeModal = (employeeId: number) => {
     if (selectedEmployeeId && selectedEmployeeId == employeeId) {
@@ -109,6 +129,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     employeeListRefetch();
   };
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  }
 
   const renderRows = () => {
     if (isEmployeeListLoading) {
@@ -242,9 +272,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 CREATE
               </button>
               <Menu as='div' className='relative'>
-                <Menu.Button
-                  className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                >
+                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
                   <div className='flex gap-4'>
                     <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
@@ -312,7 +340,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {employeeItems.length}</p>
+                <Pagination pagination={pagination} currentPage={currentPage} pageSize={pageSize} onPageSizeChange={pageSizeChange} onPageChange={paginationChange} />
               </div>
             </div>
           </div>

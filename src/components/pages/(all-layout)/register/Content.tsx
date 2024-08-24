@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
 import CustomToast from '@/components/CustomToast';
+import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
 
 import { EyeIcon } from '@heroicons/react/24/solid';
@@ -73,11 +74,12 @@ const Content = () => {
     }
   };
   return (
-    <SplitLayout
-      left={
-        <>
-          <div className={`w-full hidden lg:flex flex-col items-center justify-center  `}>
-            <MainIconOnly className='w-24 h-24' />
+    <>
+      <SplitLayout
+        left={
+          <>
+            <div className={`w-full hidden lg:flex flex-col items-center justify-center  `}>
+              <MainIconOnly className='w-24 h-24' />
 
             <h1 className='text-[50px] font-bold text-white mt-4'>
               YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
@@ -194,120 +196,149 @@ const Content = () => {
                     </label>
                     <div className='relative'>
                       <input
-                        type={showPassword ? 'text' : 'password'}
-                        id='password'
-                        {...register('password', { required: true })}
+                        type='email'
+                        id='email'
+                        {...register('email', { required: true })}
                         className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                         tabIndex={2}
-                        onChange={(e) => setPassword(e.currentTarget.value)}
                       />
-                      <button
-                        type='button'
-                        className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                        onClick={() => {
-                          setShowPassword(!showPassword);
-                        }}
-                      >
-                        {showPassword ? (
-                          <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                        ) : (
-                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                        )}
-                      </button>
                     </div>
-                  </div>
-                  <div className='mb-4'>
-                    <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
-                      Confirm Password
-                      <span className='text-red-500'>*</span>
-                    </label>
-                    <div className='relative'>
+                    <div className='mb-2'>
+                      <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                        Name
+                        <span className='text-red-500'>*</span>
+                      </label>
                       <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        id='confirm-password'
+                        type='text'
+                        id='name'
+                        {...register('name', { required: true })}
                         className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                         tabIndex={2}
-                        {...register('confirmPassword', { required: true })}
-                        onChange={(e) => setConfirmPassword(e.currentTarget.value)}
-                      />
-                      <button
-                        type='button'
-                        className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                        onClick={() => {
-                          setShowConfirmPassword(!showConfirmPassword);
-                        }}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                        ) : (
-                          <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <div className='relative flex items-start'>
-                    <div className='flex h-6 items-center'>
-                      <input
-                        id='checkbox-agree'
-                        aria-describedby='checkbox-agree'
-                        name='checkbox-agree'
-                        type='checkbox'
-                        onChange={() => {
-                          setAgree(!agree);
-                        }}
-                        className='h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600'
                       />
                     </div>
-                    <div className='ml-3 text-sm leading-6'>
-                      <p id='checkbox-agree'>
-                        I have read and agree with{' '}
-                        <Link href='#' className='text-savoy-blue underline'>
-                          Terms of Service
-                        </Link>
-                        ,{' '}
-                        <Link href='#' className='text-savoy-blue underline'>
-                          Privacy Notice
-                        </Link>
-                        , and{' '}
-                        <Link href='#' className='text-savoy-blue underline'>
-                          Personal Data Collection and Disclosure Policy
-                        </Link>
-                        .
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <button
-                      type='submit'
-                      className='w-full mt-5 uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center mb-5'
-                      tabIndex={5}
-                    >
-                      {isLoading ? (
-                        <div
-                          className='animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-white rounded-full my-1 mx-2'
-                          role='status'
-                          aria-label='loading'
+                    <div className='mb-2'>
+                      <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
+                        Password
+                        <span className='text-red-500'>*</span>
+                      </label>
+                      <div className='relative'>
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          id='password'
+                          {...register('password', { required: true })}
+                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                          tabIndex={2}
+                          onChange={(e) => setPassword(e.currentTarget.value)}
+                        />
+                        <button
+                          type='button'
+                          className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
+                          onClick={() => {
+                            setShowPassword(!showPassword);
+                          }}
                         >
-                          <span className='sr-only'>Loading...</span>
-                        </div>
-                      ) : (
-                        'Sign up'
-                      )}
-                    </button>
-                    <h6 className='text-center'>
-                      <Link href='/login' className='font-semibold text-blue-600 hover:underline'>
-                        Back to Sign In
-                      </Link>
-                    </h6>
-                  </div>
-                </form>
+                          {showPassword ? (
+                            <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                          ) : (
+                            <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className='mb-4'>
+                      <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
+                        Confirm Password
+                        <span className='text-red-500'>*</span>
+                      </label>
+                      <div className='relative'>
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          id='confirm-password'
+                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                          tabIndex={2}
+                          {...register('confirmPassword', { required: true })}
+                          onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                        />
+                        <button
+                          type='button'
+                          className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
+                          onClick={() => {
+                            setShowConfirmPassword(!showConfirmPassword);
+                          }}
+                        >
+                          {showConfirmPassword ? (
+                            <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                          ) : (
+                            <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className='relative flex items-start'>
+                      <div className='flex h-6 items-center'>
+                        <input
+                          id='checkbox-agree'
+                          aria-describedby='checkbox-agree'
+                          name='checkbox-agree'
+                          type='checkbox'
+                          onChange={() => {
+                            setAgree(!agree);
+                          }}
+                          className='h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600'
+                        />
+                      </div>
+                      <div className='ml-3 text-sm leading-6'>
+                        <p id='checkbox-agree'>
+                          I have read and agree with{' '}
+                          <Link href='#' className='text-savoy-blue underline'>
+                            Terms of Service
+                          </Link>
+                          ,{' '}
+                          <Link href='#' className='text-savoy-blue underline'>
+                            Privacy Notice
+                          </Link>
+                          , and{' '}
+                          <Link href='#' className='text-savoy-blue underline'>
+                            Personal Data Collection and Disclosure Policy
+                          </Link>
+                          .
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        type='submit'
+                        className='w-full mt-5 uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center mb-5'
+                        tabIndex={5}
+                      >
+                        {isLoading ? (
+                          <div
+                            className='animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-white rounded-full my-1 mx-2'
+                            role='status'
+                            aria-label='loading'
+                          >
+                            <span className='sr-only'>Loading...</span>
+                          </div>
+                        ) : (
+                          'Sign up'
+                        )}
+                      </button>
+                      <h6 className='text-center'>
+                        <Link href='/login' className='font-semibold text-blue-600 hover:underline'>
+                          Back to Sign In
+                        </Link>
+                      </h6>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
-        </>
-      }
-      leftBG={SplitViewBg}
-    />
+          </>
+        }
+        leftBG={SplitViewBg}
+      />
+      <FloatingHelpButton />
+    </>
   );
 };
 
