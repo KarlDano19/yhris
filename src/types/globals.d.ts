@@ -133,6 +133,9 @@ export type T_Login = {
 export type T_Register = {
   accountType: string;
   name: string;
+  firstname?: string,
+  middlename?: string
+  lastname?: string,
   email: string;
   password: string;
   confirmPassword: string;
@@ -285,4 +288,24 @@ export type EmailTemplate = {
   bcc: string;
   body: string;
   attachment: string;
+}
+
+export type T_ApplicantProfile = {
+  id: number;
+  userId: number;
+  name: string;
+  about: string;
+  profilePicture: string;
+  birthDay: string;
+  age: number;
+  gender: string;
+  religion: string;
+  nationality: string;
+  civilStatus: string;
+  houseNo: string;
+  street: string;
+  townBrgy: string;
+  city: string;
+  zipCode: string;
+  country: string;
 }

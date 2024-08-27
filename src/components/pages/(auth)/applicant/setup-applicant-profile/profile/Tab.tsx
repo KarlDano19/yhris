@@ -1,14 +1,31 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
+
 import Image from "next/image";
+
+import { useForm, useFormContext } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { UserIcon } from "@heroicons/react/24/solid";
 import DateCalendar from "@/svg/DateCalendar";
 import DropDownArrow from "@/svg/DropDownArrow";
-import { useRef, useState } from "react";
-import { UserIcon } from "@heroicons/react/24/solid";
-import { useForm, useFormContext } from "react-hook-form";
+
 
 const Tab = ({}) => {
   const dateInputRef = useRef(null);
-  const {register} = useFormContext()
+  const queryClient = useQueryClient();
+  const cachedApplicantProfile = queryClient.getQueryCache().find(['applicantProfileCache']);
+  const {register, setValue} = useFormContext()
+  const cachedApplicantData: any = cachedApplicantProfile?.state?.data;
+
+  useEffect(() => {
+    if (cachedApplicantData) {
+      setValue("firstname", cachedApplicantData.firstname || '');
+      setValue("middlename", cachedApplicantData.middlename || '');
+      setValue("lastname", cachedApplicantData.lastname || '');
+    }
+  }, [cachedApplicantData, setValue]);
+
   return (
     <>
     
@@ -26,23 +43,6 @@ const Tab = ({}) => {
                 <UserIcon className="h-4/5 w-4/5 text-white" />
               </div>
               <div className="md:col-span-2 lg:col-span-5 mt-5 md:mt-0">
-                <div className="grid-item">
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Name <span className="text-red-500">*</span>
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      {...register("name")}
-                      id="name"
-                      autoComplete="given-name"
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                    />
-                  </div>
-                </div>
                 <div className="grid-item mt-5">
                   <h6 className="block text-sm font-medium leading-6 text-gray-900">
                     Profile Picture <span className="text-red-500">*</span>
@@ -85,6 +85,54 @@ const Tab = ({}) => {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4 md:gap-x-11 gap-y-5">
+        <div className="grid-item">
+            <label
+              htmlFor="firstname"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              First Name <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                {...register("firstname")}
+                id="firstname"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div className="grid-item">
+            <label
+              htmlFor="middlename"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Middle Name
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                {...register("middlename")}
+                id="middlename"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div className="grid-item">
+            <label
+              htmlFor="lastname"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Last Name <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                {...register("lastname")}
+                id="lastname"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
           <div className="grid-item">
             <label
               htmlFor="bday"

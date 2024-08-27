@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 
 import { Popover } from '@headlessui/react';
 
@@ -7,9 +8,11 @@ import { deleteCookie } from 'cookies-next';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
-import useLogout from '@/components/hooks/useLogout';
+
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
+import useLogout from '@/components/hooks/useLogout';
+import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import CaseSearchIcon from '@/svg/CaseSearchIcon';
@@ -18,9 +21,21 @@ import MainLogo from '@/svg/MainLogo';
 import BellIcon from '@/svg/BellIcon';
 import ExitIcon from '@/svg/ExitIcon';
 
+interface ErrorDetail {
+  detail: string;
+}
+
 const AuthorizedHeader = () => {
   const pathName = usePathname();
+  const [applicantProfile, setApplicantProfile] = useState<any>({});
   const { mutate, isLoading: isLogoutLoading } = useLogout();
+
+  const {
+    data, 
+    isLoading: isApplicantProfileLoading, 
+    error
+  } = useGetApplicantProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
+
   const logout = () => {
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -37,6 +52,15 @@ const AuthorizedHeader = () => {
     };
     mutate(void 0, callbackReq);
   };
+
+  useEffect(() => {
+    if (data) {
+      setApplicantProfile(data);
+    }
+  }, [data, error]);
+
+
+
   return (
     <>
       <Popover

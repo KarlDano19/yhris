@@ -1,10 +1,19 @@
 "use client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const Tab = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const {register} = useFormContext()
+  const queryClient = useQueryClient();
+  const cachedApplicantProfile = queryClient.getQueryCache().find(['applicantProfileCache']);
+  const cachedApplicantData: any = cachedApplicantProfile?.state?.data;
+
+  const defaultValues = {
+    email: cachedApplicantData?.email || '',
+  };
+
   return (
     <>
       
@@ -21,6 +30,7 @@ const Tab = () => {
                 type="email"
                 {...register("email")}
                 id="email"
+                defaultValue={defaultValues.email}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -35,7 +45,7 @@ const Tab = () => {
             <div className="mt-2">
               <input
                 type="tel"
-                {...register("mobileNo")}
+                {...register("mobile")}
                 id="mobile-num"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />

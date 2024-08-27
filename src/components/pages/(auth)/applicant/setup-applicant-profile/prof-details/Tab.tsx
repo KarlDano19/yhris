@@ -1,15 +1,19 @@
 "use client";
-import DropDownArrow from "@/svg/DropDownArrow";
 import { useState } from "react";
-import AddProfModal from "../modals/AddProfModal";
+
+import { useForm, useFormContext } from "react-hook-form";
+
 import SuccessPopAlert from "@/components/SuccessPopAlert";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import AddProfModal from "../modals/AddProfModal";
+
+import DropDownArrow from "@/svg/DropDownArrow";
 
 const Tab = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [openSuccessAlert, setSuccessAlert] = useState(false);
   const {register} = useFormContext()
   const method =useForm()
+
   return (
     <>
       <SuccessPopAlert

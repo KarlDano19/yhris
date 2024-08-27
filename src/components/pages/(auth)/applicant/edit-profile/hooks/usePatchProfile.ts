@@ -27,7 +27,7 @@ const response = {
 }
 export async function updateProfile(profile:T_UserProfile, id:number) {
   const token = getCookie("token");
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/${id}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/${id}/`, {
     method: "PATCH",
     body: JSON.stringify({
       profile,

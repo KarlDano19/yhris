@@ -1,12 +1,10 @@
 "use client";
+import React, { useState } from 'react';
 
-import { useState } from "react";
 import ProfileTab from "./profile/Tab";
 import ContactsTab from "./contacts/Tab";
 import ProfDetailTab from "./prof-details/Tab";
 import DocumentsTab from "./documents/Tab";
-
-
 
 const Content = () => {
   const [tabs, setTabs] = useState([

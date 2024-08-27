@@ -3,12 +3,12 @@ import { useMutation } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 
-async function saveApplicantProfile(data: any) {
+async function saveApplicantProfile(data: any, id:number) {
   try {
     const token = getCookie('token');
     console.log(data)
     const config = {
-      method: "POST",
+      method: "PATCH",
       headers: {
         "content-type": "application/json",
         Authorization: `Token ${token}`,
@@ -16,7 +16,7 @@ async function saveApplicantProfile(data: any) {
       body: JSON.stringify(data),
     };
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/profiles/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/profiles/${id}/`,
       config
     ); // change URI
     if (!res.ok) {
@@ -32,8 +32,8 @@ async function saveApplicantProfile(data: any) {
   }
 }
 
-function useSaveApplicantProfile() {
-  const query = useMutation((data: any) => saveApplicantProfile(data));
+function useSaveApplicantProfile(id:number) {
+  const query = useMutation((data: any) => saveApplicantProfile(data, id));
   return query;
 }
 

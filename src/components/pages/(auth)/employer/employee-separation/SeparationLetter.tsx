@@ -31,7 +31,7 @@ export default function SeparationLetter({
     <div className='flex flex-col'>
       <div className='inline-flex'>
         <Menu as='div' className='relative'>
-          <Menu.Button className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-11 pr-3 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80' disabled={isLetterSent}>
+          <Menu.Button className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-14 pr-4 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80' disabled={isLetterSent}>
             <span className='sr-only'>Open options</span>
             <div className='flex gap-4'>
               <span className='flex-1'>Create</span>
@@ -130,7 +130,7 @@ export default function SeparationLetter({
             </button>
           </div>
           {isLetterReceived ? (
-            <div className='flex gap-1 items-center mt-2'>
+            <div className='flex gap-1 items-center mt-2 justify-center'>
               <ClipIcon />
               <p className='ml-2 text-xs'>{letterReceivedDate}</p>
             </div>
