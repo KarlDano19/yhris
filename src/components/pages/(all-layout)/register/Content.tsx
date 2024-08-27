@@ -34,7 +34,6 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const [selectedValue, setSelectedValue] = useState("")
   const { register, handleSubmit, reset, watch } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
 
@@ -81,117 +80,113 @@ const Content = () => {
             <div className={`w-full hidden lg:flex flex-col items-center justify-center  `}>
               <MainIconOnly className='w-24 h-24' />
 
-            <h1 className='text-[50px] font-bold text-white mt-4'>
-              YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
-            </h1>
-            <h3 className='text-white text-3xl text-center w-96 mt-2'>Leading your employees in one place.</h3>
-          </div>
-        </>
-      }
-      right={
-        <>
-          <div className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}>
-            <div className='w-full rounded-lg md:mt-0 sm:max-w-md xl:p-0'>
-              <div className='p-6 space-y-4 md:space-y-5 sm:p-8'>
-                <h1 className='text-2xl font-bold leading-none tracking-tight text-indigo-dye lg:text-3xl'>
-                  Create Account
-                </h1>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  <div className='relative mb-2'>
-                    <label htmlFor='role' className='text-sm leading-6 text-gray-900'>
-                      Register As
-                      <span className='text-red-500'>*</span>
-                    </label>
-                    <select
-                      id='role'
-                      {...register('accountType', { required: true })}
-                      className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-                      defaultValue=''
-                      placeholder='Select...'
-                      onChange={(e) => {
-                        setSelectedValue(e.target.value);
-                        watch('accountType')
-                      }}
-                    >
-                      <option value='' disabled className='text-gray-400'>
-                        Select...
-                      </option>
-                      <option value={'Employer'}>Employer</option>
-                      <option value={'Applicant'}>Applicant</option>
-                    </select>
-                    <div className='absolute right-4 top-[46px]'>
-                      <DropDownArrow />
+              <h1 className='text-[50px] font-bold text-white mt-4'>
+                YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
+              </h1>
+              <h3 className='text-white text-3xl text-center w-96 mt-2'>Leading your employees in one place.</h3>
+            </div>
+          </>
+        }
+        right={
+          <>
+            <div className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}>
+              <div className='w-full rounded-lg md:mt-0 sm:max-w-md xl:p-0'>
+                <div className='p-6 space-y-4 md:space-y-5 sm:p-8'>
+                  <h1 className='text-2xl font-bold leading-none tracking-tight text-indigo-dye lg:text-3xl'>
+                    Create Account
+                  </h1>
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className='relative mb-2'>
+                      <label htmlFor='role' className='text-sm leading-6 text-gray-900'>
+                        Register As
+                        <span className='text-red-500'>*</span>
+                      </label>
+                      <select
+                        id='role'
+                        {...register('accountType', { required: true })}
+                        className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                        defaultValue=''
+                        placeholder='Select...'
+                      >
+                        <option value='' disabled className='text-gray-400'>
+                          Select...
+                        </option>
+                        <option value={'Employer'}>Employer</option>
+                        <option value={'Applicant'}>Applicant</option>
+                      </select>
+                      <div className='absolute right-4 top-[46px]'>
+                        <DropDownArrow />
+                      </div>
                     </div>
-                  </div>
-                  <div className='mb-2'>
-                    <label htmlFor='email' className='text-sm leading-6 text-gray-900'>
-                      Email Address
-                      <span className='text-red-500'>*</span>
-                    </label>
-                    <input
-                      type='email'
-                      id='email'
-                      {...register('email', { required: true })}
-                      className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                      tabIndex={2}
-                    />
-                  </div>
-                  {selectedValue === 'Applicant' ? (
-                    <>
+                    <div className='mb-2'>
+                      <label htmlFor='email' className='text-sm leading-6 text-gray-900'>
+                        Email Address
+                        <span className='text-red-500'>*</span>
+                      </label>
+                      <input
+                        type='email'
+                        id='email'
+                        {...register('email', { required: true })}
+                        className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                        tabIndex={2}
+                      />
+                    </div>
+                    {watch('accountType') === 'Applicant' ? (
+                      <>
+                        <div className='mb-2'>
+                          <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                            First Name
+                            <span className='text-red-500'>*</span>
+                          </label>
+                          <input
+                            type='text'
+                            id='firstname'
+                            {...register('firstname', { required: true })}
+                            className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                            tabIndex={2}
+                          />
+                        </div>
+                        <div className='mb-2'>
+                          <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                            Middle Name
+                          </label>
+                          <input
+                            type='text'
+                            id='middlename'
+                            {...register('middlename')}
+                            className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                            tabIndex={2}
+                          />
+                        </div>
+                        <div className='mb-2'>
+                          <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                            Last Name
+                            <span className='text-red-500'>*</span>
+                          </label>
+                          <input
+                            type='text'
+                            id='lastname'
+                            {...register('lastname', { required: true })}
+                            className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                            tabIndex={2}
+                          />
+                        </div>
+                      </>
+                    ) : (
                       <div className='mb-2'>
                         <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                          First Name
+                          Name
                           <span className='text-red-500'>*</span>
                         </label>
                         <input
                           type='text'
-                          id='firstname'
-                          {...register('firstname', { required: true })}
+                          id='name'
+                          {...register('name', { required: true })}
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
                         />
                       </div>
-                      <div className='mb-2'>
-                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                          Middle Name
-                        </label>
-                        <input
-                          type='text'
-                          id='middlename'
-                          {...register('middlename')}
-                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                          tabIndex={2}
-                        />
-                      </div>
-                      <div className='mb-2'>
-                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                          Last Name
-                          <span className='text-red-500'>*</span>
-                        </label>
-                        <input
-                          type='text'
-                          id='lastname'
-                          {...register('lastname', { required: true })}
-                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                          tabIndex={2}
-                        />
-                      </div>
-                    </>
-                  ):
-                  <div className='mb-2'>
-                    <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                      Name
-                      <span className='text-red-500'>*</span>
-                    </label>
-                    <input
-                      type='text'
-                      id='name'
-                      {...register('name', { required: true })}
-                      className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                      tabIndex={2}
-                    />
-                  </div>
-                  }
+                    )}
                     <div className='mb-2'>
                       <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
                         Password
