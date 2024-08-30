@@ -1,38 +1,47 @@
 import { useEffect, useState, useContext, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
+import toast from 'react-hot-toast';
 
+import CustomToast from '@/components/CustomToast';
+import classNames from '@/helpers/classNames';
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 import StateContext from '../contexts/StateContext';
-import classNames from '@/helpers/classNames';
 
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../lib/initialActionState';
-import { ContextTypes } from '../types';
+import { ApplicantType, ContextTypes } from '../types';
 
 type PropTypes = {
   title: string;
 };
 export default function ApplicantForm({ title }: PropTypes) {
   const cancelButtonRef = useRef(null);
-  const { actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const { data, isLoading } = useGetApplicantDetails(actionState.applicantId);
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    setIsOpen(true);
-  }, []);
+  const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
+  let applicant: ApplicantType | undefined;
+  state.forEach((stage) => {
+    if (stage.id === actionState.stageId) {
+      applicant = stage.applicants.find((applicant) => applicant.id === actionState.applicantId);
+    }
+  });
+  const { data, isLoading, error, isError } = useGetApplicantDetails(applicant?.applicationId);
 
   useEffect(() => {
     if (data && !isLoading) {
       setApplicantProfile(data);
+      setIsOpen(true);
+    } else if (error && isError) {
+      toast.custom(() => <CustomToast message={error as string} type='error' />, {
+        duration: 7000,
+      });
     }
-  }, [data]);
+  }, [data, error]);
 
   const handleClose = () => {
     setViewCV(false);

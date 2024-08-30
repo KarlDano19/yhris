@@ -47,10 +47,8 @@ const Content = () => {
       const finalData = { ...combinedFormData, ...secondForm.getValues() };
       finalData['jobPosting'] = params.id;
       const callBackReq = {
-        onSuccess: (data: any) => {
-          if (!data.error) {
-            setOpenSubmitModal(true);
-          }
+        onSuccess: () => {
+          setOpenSubmitModal(true);
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
