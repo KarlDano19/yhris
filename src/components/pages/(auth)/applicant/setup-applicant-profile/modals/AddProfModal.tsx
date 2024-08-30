@@ -1,10 +1,12 @@
 "use client";
+
 import { Fragment, useRef } from "react";
+
 import { Dialog, Transition } from "@headlessui/react";
+import { useFormContext, useFieldArray, useForm} from "react-hook-form";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import DateCalendar from "@/svg/DateCalendar";
-import { useFormContext, useFieldArray} from "react-hook-form";
 
 
 
@@ -17,7 +19,7 @@ interface AddProfModalProps {
 const AddProfModal = ({ open, onSave, onClose }: AddProfModalProps) => {
   const fromInputRef1 = useRef(null);
   const fromInputRef2 = useRef(null);
-  const {register,control} = useFormContext()
+  const {register,control} = useForm()
   const {fields} = useFieldArray({
     control,
     name:"exprerience"

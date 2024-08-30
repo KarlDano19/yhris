@@ -2,137 +2,65 @@
 
 import { use, useEffect, useState } from "react";
 
-import { useQueryClient } from '@tanstack/react-query';
-import { useForm ,FormProvider} from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
+import { useForm, FormProvider } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
 import useSaveApplicantProfile from "./hooks/useSaveApplicantProfile";
 
+import CustomToast from '@/components/CustomToast';
 import ProfileTab from "./profile/Tab";
 import ContactsTab from "./contacts/Tab";
 import ProfDetailTab from "./prof-details/Tab";
 import DocumentsTab from "./documents/Tab";
 import WelcomeModal from "./modals/WelcomeModal";
 import SuccessPopAlert from "@/components/SuccessPopAlert";
-import AskProfModal from "./modals/AskProfModal";
 import AskDocumentModal from "./modals/AskDocumentModal";
 
 import { T_ApplicantProfile } from "@/types/globals";
 
 const Content = () => {
   const queryClient = useQueryClient();
-  const cachedApplicantProfile = queryClient.getQueryCache().find(['applicantProfileCache']);
-  const { register, setValue, watch, handleSubmit } = useForm<T_ApplicantProfile>();
+  const cachedApplicantProfile = queryClient
+    .getQueryCache()
+    .find(["applicantProfileCache"]);
+  const { register, setValue, watch, handleSubmit, getValues, reset } = useForm<T_ApplicantProfile>();
   const [isWelcomeModal, setWelcomeModal] = useState(false);
   const [openSuccessAlert, setSuccessAlert] = useState(false);
   const [setupProfDetails, setProfDetails] = useState(false);
   const [openProfDetailsModal, setProfDetailsModal] = useState(false);
   const [setupDocuments, setDocuments] = useState(false);
   const [openDocumentsModal, setDocumentsModal] = useState(false);
+  const [profileData, setProfileData] = useState<T_ApplicantProfile | null>(
+    null
+  );
 
   const [currentTab, setCurrentTab] = useState(1);
   const cachedApplicantData: any = cachedApplicantProfile?.state?.data;
-  const {mutate, isLoading} = useSaveApplicantProfile(cachedApplicantData?.id);
+  const { mutate, isLoading } = useSaveApplicantProfile(
+    cachedApplicantData?.id
+  );
 
-  
-  const submitProfile=(data: any)=>{
-    setCurrentTab(currentTab + 1);
-    console.log(data)
-    }
-
-    const submitContact=(data: any)=>{
-      if (currentTab === 2 && setupProfDetails === false) {
-        setProfDetailsModal(true);
-      }else{
-        setCurrentTab(currentTab + 1);
-      }
-      console.log(data)
-      }
-      const submitProfDetails=(data: any)=>{
-        if (currentTab === 3 && setupDocuments === false) {
-          setDocumentsModal(true);
-        }else{
-          setCurrentTab(currentTab + 1);
-        }
-        console.log(data)
-        }
-
-        const finalSubmit = (data:any)=>{
-          console.log(data)
-          const callBackReq = {
-            onSuccess: (data: any) => {
-               if(!data.error){
-                toast.success("Applicant Profile Successfully Created")
-               }
-            },
-            onError: (err: any) => {
-              //toast.error(String(err)) //uncooment this if backend is ready
-              toast.success("Applicant Profile Successfully Created") //remove this when backend is ready
-            },
-          }
-            mutate(data,callBackReq)
-        }
-    const method = useForm();
-  const nextTab = () => {
-    if (currentTab === 2 && setupProfDetails === false) {
-      setProfDetailsModal(true);
-    } else if (currentTab === 3 && setupDocuments === false) {
-      setDocumentsModal(true);
-    }else{
-      setCurrentTab(currentTab + 1);
-    }
-  };
-
-  const renderButtons=()=>(
-    <div
-            className={`${
-              currentTab <= 1 ? "justify-end" : "justify-between"
-            } md:flex mt-10 md:mt-12 mb-7`}
-          >
-            <button
-              type="button"
-              className={`${
-                currentTab <= 1 ? "hidden" : ""
-              } w-full mb-5 md:mb-0 md:w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
-              onClick={prevTab}
-            >
-              BACK
-            </button>
-            <button
-              type="submit"
-              className="w-full md:w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              // onClick={nextTab}
-            >
-              {currentTab < 4 ? "NEXT" : (
-                isLoading ? (
-                  <div
-                    className="animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-white rounded-full my-1 mx-2"
-                    role="status"
-                    aria-label="loading"
-                  >
-                    <span className="sr-only">Loading...</span>
-                  </div>
-                ) : (
-                  "Submit"
-                )
-              )}
-            </button>
-          </div>
-  )
-  const prevTab = () => {
-    if (currentTab > 1) {
-      setCurrentTab(currentTab - 1);
-    }
-  };
+  const onSubmit = handleSubmit((data) => {
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type="success" />, { duration: 4000 });
+        setCurrentTab(1);
+        reset();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type="error" />, { duration: 4000 });
+      },
+    };
+    mutate(data, callbackReq);
+  })
 
   useEffect(() => {
     setWelcomeModal(true);
   }, []);
 
   return (
-    <div
-      className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}
-    >
+    <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
       <SuccessPopAlert
         message="Successfully uploaded document."
         open={openSuccessAlert}
@@ -272,51 +200,56 @@ const Content = () => {
             </div>
           </div>
           <div>
-            {currentTab === 2 ? (
-              <FormProvider {...method}>
-                <form onSubmit={method.handleSubmit(submitContact)}>
-              <ContactsTab />
-              {renderButtons()}
-              </form>
-              </FormProvider>
-            ) : currentTab === 3 ? (
-              <FormProvider {...method}>
-                <form onSubmit={method.handleSubmit(submitProfDetails)}>
-              <ProfDetailTab />
-              {renderButtons()}
-              </form>
-              </FormProvider>
-            ) : currentTab === 4 ? (
-              <FormProvider {...method}>
-                <form onSubmit={method.handleSubmit(finalSubmit)}>
-              <DocumentsTab />
-              {renderButtons()}
-              </form>
-              </FormProvider>
-            ) : (
-              <FormProvider {...method}>
-              <form onSubmit={method.handleSubmit(submitProfile)}>
-              <ProfileTab />
-              {renderButtons()}
-              </form>
-              </FormProvider>
+            {currentTab === 1 && (
+              <ProfileTab
+                {...{
+                  register,
+                  setValue,
+                  handleSubmit,
+                  setCurrentTab,
+                }}
+              />
+            )}
+            {currentTab === 2 && (
+              <ContactsTab
+                {...{
+                  register,
+                  watch,
+                  setValue,
+                  onSubmit,
+                  setCurrentTab,
+                }}
+              />
+            )}
+            {currentTab === 3 && (
+              <ProfDetailTab
+                {...{
+                  register,
+                  watch,
+                  setValue,
+                  handleSubmit,
+                  setCurrentTab,
+                }}
+              />
+            )}
+            {currentTab === 4 && (
+              <DocumentsTab
+                {...{
+                  register,
+                  watch,
+                  setValue,
+                  handleSubmit,
+                  setCurrentTab,
+                }}
+              />
             )}
           </div>
-          
         </div>
       </div>
       <WelcomeModal
         open={isWelcomeModal}
         onSuccess={() => setSuccessAlert(true)}
         onClose={() => setWelcomeModal(false)}
-      />
-      <AskProfModal
-        open={openProfDetailsModal}
-        onAgree={() => {
-          setProfDetails(true);
-          setCurrentTab(currentTab + 1);
-        }}
-        onClose={() => setProfDetailsModal(false)}
       />
       <AskDocumentModal
         open={openDocumentsModal}

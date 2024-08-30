@@ -1,27 +1,58 @@
 "use client";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useState, useEffect } from "react";
 
-const Tab = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const {register} = useFormContext()
+import { useQueryClient } from "@tanstack/react-query";
+
+import AskProfModal from "../modals/AskProfModal";
+
+function ContactsTab({
+  register, 
+  watch,
+  setValue,
+  onSubmit,
+  setCurrentTab
+}: {
+  register:any, 
+  watch:any,
+  setValue:any,
+  onSubmit:any, 
+  setCurrentTab :any
+}) {
   const queryClient = useQueryClient();
   const cachedApplicantProfile = queryClient.getQueryCache().find(['applicantProfileCache']);
   const cachedApplicantData: any = cachedApplicantProfile?.state?.data;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleNext = (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsModalOpen(true);
+  };
+
+  const handleAgree = () => {
+    setCurrentTab(3);
+  };
+
+  const handleDecline = () => {
+    onSubmit();
+    setIsModalOpen(false);
+  };
 
   const defaultValues = {
     email: cachedApplicantData?.email || '',
   };
 
+  useEffect(() => {
+    setValue('email', cachedApplicantData?.email || '');
+  }, [cachedApplicantData, setValue]); 
+
   return (
     <>
-      
+      <form onSubmit={handleNext}>
         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 md:gap-x-12">
           <div className="grid-item mt-4 md:mt-0">
             <label
               htmlFor="email"
-              className="text-sm text-indigo-dye font-medium leading-6 text-gray-900"
+              className="text-sm font-medium leading-6 text-gray-900"
             >
               Email Address <span className="text-red-500">*</span>
             </label>
@@ -151,8 +182,31 @@ const Tab = () => {
             </div>
           </div>
         </div>
+        <div className="flex justify-between py-4 px-4">
+          <button
+            type="button"
+            className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            onClick={() => setCurrentTab(1)}
+          >
+            Back
+          </button>
+          <button
+            type="submit"
+            className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Next
+          </button>
+        </div>
+      </form>
+      <AskProfModal 
+        open={isModalOpen} 
+        onAgree={handleAgree}
+        onDecline={handleDecline}
+        onClose={() => setIsModalOpen(false)} 
+      /> {/* Modal component */}
     </>
   );
 };
+  
 
-export default Tab;
+export default ContactsTab;
