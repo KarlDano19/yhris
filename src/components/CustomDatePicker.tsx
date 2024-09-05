@@ -15,6 +15,7 @@ const CustomDatePicker = ({
   disabled,
   className,
   required,
+  tabIndex,
 }: {
   id: string;
   pickerOnChange: any;
@@ -25,6 +26,7 @@ const CustomDatePicker = ({
   disabled?: boolean;
   className?: string;
   required?: boolean;
+  tabIndex?: number;
 }) => {
   const isGoodDate = (date: any) => {
     var regexGoodDate = /^(?:(0[1-9]|1[012])[\/.](0[1-9]|[12][0-9]|3[01])[\/.](19|20)[0-9]{2})$/;
@@ -55,6 +57,7 @@ const CustomDatePicker = ({
         placeholder={placeholder}
         disabled={disabled}
         required={required}
+        tabIndex={tabIndex}
       />
       <button
         id={`${id}-datepicker-button`}
@@ -64,6 +67,7 @@ const CustomDatePicker = ({
           onClick();
         }}
         disabled={disabled}
+        tabIndex={-1}
       >
         <DateCalendar />
       </button>

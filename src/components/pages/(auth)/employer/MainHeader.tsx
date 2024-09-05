@@ -24,14 +24,13 @@ interface ErrorDetail {
 }
 
 const MainHeader = () => {
-  const { mutate } = useLogout();
   const [profile, setProfile] = useState<any>({});
-
   const {
     data,
     isLoading: isProfileLoading,
     error,
   } = useGetEmployerProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
+  const { mutate } = useLogout();
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -164,7 +163,7 @@ const MainHeader = () => {
       >
         {({ open }) => (
           <>
-            <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+            <div className='mx-auto max-w-7xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
               <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                 <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
                   <div className='flex flex-shrink-0 items-center'>

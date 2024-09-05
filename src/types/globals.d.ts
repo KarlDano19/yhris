@@ -293,7 +293,10 @@ export type EmailTemplate = {
 export type T_ApplicantProfile = {
   id: number;
   userId: number;
-  name: string;
+  firstname: string;
+  middlename: string;
+  lastname: string;
+  email: string;
   about: string;
   profilePicture: string;
   birthDay: string;
@@ -308,4 +311,7 @@ export type T_ApplicantProfile = {
   city: string;
   zipCode: string;
   country: string;
+  contactName: string;
+  contactPersonContactNo: string;
+  contactRelationship: string;
 }

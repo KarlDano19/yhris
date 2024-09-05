@@ -99,7 +99,7 @@ const Content = () => {
                     <div className='relative mb-2'>
                       <label htmlFor='role' className='text-sm leading-6 text-gray-900'>
                         Register As
-                        <span className='text-red-500'>*</span>
+                       <span className='text-red-500'>*</span>
                       </label>
                       <select
                         id='role'
@@ -121,7 +121,7 @@ const Content = () => {
                     <div className='mb-2'>
                       <label htmlFor='email' className='text-sm leading-6 text-gray-900'>
                         Email Address
-                        <span className='text-red-500'>*</span>
+                       <span className='text-red-500'>*</span>
                       </label>
                       <input
                         type='email'
@@ -136,7 +136,7 @@ const Content = () => {
                         <div className='mb-2'>
                           <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
                             First Name
-                            <span className='text-red-500'>*</span>
+                           <span className='text-red-500'>*</span>
                           </label>
                           <input
                             type='text'
@@ -161,7 +161,7 @@ const Content = () => {
                         <div className='mb-2'>
                           <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
                             Last Name
-                            <span className='text-red-500'>*</span>
+                           <span className='text-red-500'>*</span>
                           </label>
                           <input
                             type='text'
@@ -176,7 +176,7 @@ const Content = () => {
                       <div className='mb-2'>
                         <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
                           Name
-                          <span className='text-red-500'>*</span>
+                         <span className='text-red-500'>*</span>
                         </label>
                         <input
                           type='text'
@@ -190,7 +190,7 @@ const Content = () => {
                     <div className='mb-2'>
                       <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
                         Password
-                        <span className='text-red-500'>*</span>
+                       <span className='text-red-500'>*</span>
                       </label>
                       <div className='relative'>
                         <input
@@ -219,7 +219,7 @@ const Content = () => {
                     <div className='mb-4'>
                       <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
                         Confirm Password
-                        <span className='text-red-500'>*</span>
+                       <span className='text-red-500'>*</span>
                       </label>
                       <div className='relative'>
                         <input

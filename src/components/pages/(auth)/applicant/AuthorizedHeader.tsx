@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 
 import { Popover } from '@headlessui/react';
@@ -27,39 +28,41 @@ interface ErrorDetail {
 
 const AuthorizedHeader = () => {
   const pathName = usePathname();
-  const [applicantProfile, setApplicantProfile] = useState<any>({});
-  const { mutate, isLoading: isLogoutLoading } = useLogout();
-
   const {
-    data, 
-    isLoading: isApplicantProfileLoading, 
-    error
+    data,
+    isLoading: isProfileLoading,
+    error,
   } = useGetApplicantProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
+  const { mutate } = useLogout();
 
-  const logout = () => {
+  const logout = (isExpired: boolean) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        if (isExpired) {
+          toast.custom(() => <CustomToast message={'Session is expired.'} type='error' />, {
+            duration: 4000,
+          });
+        } else {
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        }
         deleteCookie('token');
-        deleteCookie('type');
         location.href = '/login';
       },
       onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
+        toast.custom(() => <CustomToast message={err || 'Session is expired.'} type='error' />, {
           duration: 4000,
         });
+        location.href = '/login';
       },
     };
     mutate(void 0, callbackReq);
   };
 
   useEffect(() => {
-    if (data) {
-      setApplicantProfile(data);
+    if (error && error.detail.includes('Invalid token')) {
+      logout(true);
     }
-  }, [data, error]);
-
-
+  }, [error]);
 
   return (
     <>
@@ -71,7 +74,7 @@ const AuthorizedHeader = () => {
       >
         {({ open }) => (
           <>
-            <div className={`mx-auto max-w-7xl px-4 py-1 sm:px-6 lg:px-8 `}>
+            <div className={`mx-auto max-w-7xl px-4 py-[0.6rem] sm:px-6 lg:px-8 `}>
               <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
                   <div className='flex flex-shrink-0 items-center'>
@@ -97,14 +100,14 @@ const AuthorizedHeader = () => {
                     className={`${
                       pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                         ? 'text-savoy-blue'
-                        : 'text-[#6F829B]'
+                        : 'text-indigo-dye'
                     } flex items-center font-semibold`}
                   >
                     <HomeIcon
                       className={`${
                         pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                           ? 'fill-savoy-blue'
-                          : 'fill-[#6F829B]'
+                          : 'fill-indigo-dye'
                       } h-5 w-5 mt-1 mr-2.5`}
                     />
                     Home
@@ -112,12 +115,12 @@ const AuthorizedHeader = () => {
                   <Link
                     href='/application-tracker'
                     className={`${
-                      pathName === '/application-tracker' ? 'text-savoy-blue' : 'text-[#6F829B]'
+                      pathName === '/application-tracker' ? 'text-savoy-blue' : 'text-indigo-dye'
                     }  flex items-center font-semibold`}
                   >
                     <CaseSearchIcon
                       className={`${
-                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
+                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-indigo-dye'
                       } h-5 w-5 mt-1.5 mr-2.5`}
                     />
                     Application Tracker
@@ -125,25 +128,25 @@ const AuthorizedHeader = () => {
                   <Link
                     href='/notification'
                     className={`${
-                      pathName === '/notification' ? 'text-savoy-blue' : 'text-[#6F829B]'
+                      pathName === '/notification' ? 'text-savoy-blue' : 'text-indigo-dye'
                     } flex items-center font-semibold`}
                   >
                     <BellIcon
                       className={`${
-                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
+                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-indigo-dye'
                       } h-4 w-4 mr-2.5`}
                     />
                     Notification
                   </Link>
                   <Link
                     href='#'
-                    className='flex items-center text-[#6F829B] font-semibold'
+                    className='flex items-center text-indigo-dye font-semibold'
                     onClick={(event) => {
                       event.preventDefault();
-                      logout();
+                      logout(false);
                     }}
                   >
-                    <ExitIcon className='h-4 w-4 mr-2.5 fill-[#6F829B]' />
+                    <ExitIcon className='h-4 w-4 mr-2.5 fill-indigo-dye' />
                     Sign Out
                   </Link>
                 </div>
@@ -155,12 +158,12 @@ const AuthorizedHeader = () => {
                   <Link
                     href='/apply-for-a-job'
                     className={`${
-                      pathName === '/apply-for-a-job' ? 'text-savoy-blue bg-gray-50' : 'text-[#6F829B]'
+                      pathName === '/apply-for-a-job' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
                     } flex items-center font-semibold px-4 py-4`}
                   >
                     <HomeIcon
                       className={`${
-                        pathName === '/apply-for-a-job' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
+                        pathName === '/apply-for-a-job' ? 'fill-savoy-blue' : 'fill-indigo-dye'
                       } h-5 w-5 mt-1 mr-2.5`}
                     />
                     Home
@@ -168,12 +171,12 @@ const AuthorizedHeader = () => {
                   <Link
                     href='/application-tracker'
                     className={`${
-                      pathName === '/application-tracker' ? 'text-savoy-blue bg-gray-50' : 'text-[#6F829B]'
+                      pathName === '/application-tracker' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
                     }  flex items-center font-semibold px-4 py-4`}
                   >
                     <CaseSearchIcon
                       className={`${
-                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
+                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-indigo-dye'
                       } h-5 w-5 mt-1.5 mr-2.5`}
                     />
                     Application Tracker
@@ -181,25 +184,25 @@ const AuthorizedHeader = () => {
                   <Link
                     href='/notification'
                     className={`${
-                      pathName === '/notification' ? 'text-savoy-blue bg-gray-50' : 'text-[#6F829B]'
+                      pathName === '/notification' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
                     } flex items-center font-semibold px-4 py-4`}
                   >
                     <BellIcon
                       className={`${
-                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
+                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-indigo-dye'
                       } h-4 w-4 mr-2.5`}
                     />
                     Notification
                   </Link>
                   <Link
                     href='#'
-                    className='flex items-center text-[#6F829B] font-semibold px-4 py-4'
+                    className='flex items-center text-indigo-dye font-semibold px-4 py-4'
                     onClick={(event) => {
                       event.preventDefault();
-                      logout();
+                      logout(false);
                     }}
                   >
-                    <ExitIcon className='h-4 w-4 mr-2.5 fill-[#6F829B]' />
+                    <ExitIcon className='h-4 w-4 mr-2.5 fill-indigo-dye' />
                     Sign Out
                   </Link>
                 </div>

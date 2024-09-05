@@ -237,7 +237,7 @@ function ProfDetailTab({
             </div>
           </div>
         </div>
-        <div className="flex justify-between py-4 px-4">
+        <div className="flex justify-between py-10">
           <button
             type="button"
             className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

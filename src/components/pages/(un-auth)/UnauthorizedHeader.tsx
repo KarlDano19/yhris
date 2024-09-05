@@ -9,13 +9,7 @@ import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 
-import {
-  Bars3Icon,
-  XMarkIcon,
-  StarIcon,
-  TagIcon,
-  InformationCircleIcon,
-} from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, StarIcon, TagIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import MainLogo from '@/svg/MainLogo';
 import ExitIcon from '@/svg/ExitIcon';
 import CaseIcon from '@/svg/CaseIcon';
@@ -48,27 +42,27 @@ const UnauthorizedHeader = () => {
                         <h1 className='text-sm font-medium text-center'>ON BETA!</h1>
                       </div>
                     </div>
-                    <div
-                      data-tooltip-id='add-section-tooltip'
-                      data-tooltip-place='bottom'
-                    >
+                    <div data-tooltip-id='add-section-tooltip' data-tooltip-place='bottom'>
                       <InfoIcon />
-                      <Tooltip id='add-section-tooltip' className='mt-[-25px]' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', width:'290px', backgroundColor: '#222C3B' }}>
-                      <div className='px-1 pt-2'>
-                        <h2 className='text-[12px] font-medium'>
-                          YAHSHUA HRIS is on <span className='font-bold'>BETA!</span> This means all 
-                          information you provide in the Beta version will 
-                          carry over to the official release.
-                        </h2>
-                      </div>
-                      <div className='px-1 pt-2 pb-2'>
-                        <h2 className='text-[10px] font-normal'>
-                          YAHSHUA HRIS, and 
-                          all products of The ABBA Initiative, OPC are compliant to the 
-                          Data Privacy Act of 2012. Plus, we are ISO 27001 certified and 
-                          GDPR compliant with a SOC2 Type 2 attestation.
-                        </h2>
-                      </div>
+                      <Tooltip
+                        id='add-section-tooltip'
+                        className='mt-[-25px]'
+                        opacity={1}
+                        style={{ fontSize: '10px', borderRadius: '10px', width: '290px', backgroundColor: '#222C3B' }}
+                      >
+                        <div className='px-1 pt-2'>
+                          <h2 className='text-[12px] font-medium'>
+                            YAHSHUA HRIS is on <span className='font-bold'>BETA!</span> This means all information you
+                            provide in the Beta version will carry over to the official release.
+                          </h2>
+                        </div>
+                        <div className='px-1 pt-2 pb-2'>
+                          <h2 className='text-[10px] font-normal'>
+                            YAHSHUA HRIS, and all products of The ABBA Initiative, OPC are compliant to the Data Privacy
+                            Act of 2012. Plus, we are ISO 27001 certified and GDPR compliant with a SOC2 Type 2
+                            attestation.
+                          </h2>
+                        </div>
                       </Tooltip>
                     </div>
                   </div>
