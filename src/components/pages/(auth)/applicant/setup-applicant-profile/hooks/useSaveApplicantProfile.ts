@@ -17,8 +17,8 @@ async function saveApplicantProfile(data: any) {
     formData.append('contact_person_address', data.contactPersonAddress);
     formData.append('contact_person_mobile', data.contactPersonContactNo);
     formData.append('contact_person_relationship', data.contactPersonRelationship);
-    if (data.profilePicture) {
-      formData.append('photo', data.profilePicture);
+    if (data.profilePicture.length !== 0) {
+      formData.append('photo', data.profilePicture[0]);
     }
     if (data.about) {
       formData.append('about', data.about);

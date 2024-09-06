@@ -26,7 +26,7 @@ interface ErrorDetail {
   detail: string;
 }
 
-const AuthorizedHeader = () => {
+const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
   const pathName = usePathname();
   const {
     data,
@@ -97,44 +97,70 @@ const AuthorizedHeader = () => {
                 <div className='hidden lg:flex lg:items-center lg:justify-end lg:space-x-10'>
                   <Link
                     href='/apply-for-a-job'
-                    className={`${
+                    className={classNames(
+                      'flex items-center font-semibold',
                       pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                         ? 'text-savoy-blue'
-                        : 'text-indigo-dye'
-                    } flex items-center font-semibold`}
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <HomeIcon
-                      className={`${
+                      className={classNames(
+                        'h-5 w-5 mt-1 mr-2.5',
                         pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                           ? 'fill-savoy-blue'
-                          : 'fill-indigo-dye'
-                      } h-5 w-5 mt-1 mr-2.5`}
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Home
                   </Link>
                   <Link
                     href='/application-tracker'
-                    className={`${
-                      pathName === '/application-tracker' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    }  flex items-center font-semibold`}
+                    className={classNames(
+                      'flex items-center font-semibold',
+                      pathName === '/application-tracker'
+                        ? 'text-savoy-blue'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <CaseSearchIcon
-                      className={`${
-                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-indigo-dye'
-                      } h-5 w-5 mt-1.5 mr-2.5`}
+                      className={classNames(
+                        'h-5 w-5 mt-1.5 mr-2.5',
+                        pathName === '/application-tracker'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Application Tracker
                   </Link>
                   <Link
                     href='/notification'
-                    className={`${
-                      pathName === '/notification' ? 'text-savoy-blue' : 'text-indigo-dye'
-                    } flex items-center font-semibold`}
+                    className={classNames(
+                      'flex items-center font-semibold',
+                      pathName === '/notification'
+                        ? 'text-savoy-blue'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <BellIcon
-                      className={`${
-                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-indigo-dye'
-                      } h-4 w-4 mr-2.5`}
+                      className={classNames(
+                        'h-4 w-4 mr-2.5',
+                        pathName === '/notification'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Notification
                   </Link>
@@ -157,40 +183,70 @@ const AuthorizedHeader = () => {
                 <div className='shadow rounded-md'>
                   <Link
                     href='/apply-for-a-job'
-                    className={`${
-                      pathName === '/apply-for-a-job' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
-                    } flex items-center font-semibold px-4 py-4`}
+                    className={classNames(
+                      'flex items-center font-semibold px-4 py-4',
+                      pathName === '/apply-for-a-job'
+                        ? 'text-savoy-blue bg-gray-50'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <HomeIcon
-                      className={`${
-                        pathName === '/apply-for-a-job' ? 'fill-savoy-blue' : 'fill-indigo-dye'
-                      } h-5 w-5 mt-1 mr-2.5`}
+                      className={classNames(
+                        'h-5 w-5 mt-1 mr-2.5',
+                        pathName === '/apply-for-a-job'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Home
                   </Link>
                   <Link
                     href='/application-tracker'
-                    className={`${
-                      pathName === '/application-tracker' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
-                    }  flex items-center font-semibold px-4 py-4`}
+                    className={classNames(
+                      'flex items-center font-semibold px-4 py-4',
+                      pathName === '/application-tracker'
+                        ? 'text-savoy-blue bg-gray-50'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <CaseSearchIcon
-                      className={`${
-                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-indigo-dye'
-                      } h-5 w-5 mt-1.5 mr-2.5`}
+                      className={classNames(
+                        'h-5 w-5 mt-1.5 mr-2.5',
+                        pathName === '/application-tracker'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Application Tracker
                   </Link>
                   <Link
                     href='/notification'
-                    className={`${
-                      pathName === '/notification' ? 'text-savoy-blue bg-gray-50' : 'text-indigo-dye'
-                    } flex items-center font-semibold px-4 py-4`}
+                    className={classNames(
+                      'flex items-center font-semibold px-4 py-4',
+                      pathName === '/notification'
+                        ? 'text-savoy-blue bg-gray-50'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <BellIcon
-                      className={`${
-                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-indigo-dye'
-                      } h-4 w-4 mr-2.5`}
+                      className={classNames(
+                        'h-4 w-4 mr-2.5',
+                        pathName === '/notification'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Notification
                   </Link>
