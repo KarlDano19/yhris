@@ -13,10 +13,11 @@ async function getSession() {
 async function Auth({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   const type = session.accountType;
+  const hasProfile = session.hasProfile;
 
   return (
     <>
-      <Header type={type} />
+      <Header type={type} hasProfile={hasProfile} />
       {children}
     </>
   );

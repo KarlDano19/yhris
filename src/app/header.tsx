@@ -7,7 +7,7 @@ import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
 import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
 import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader';
 
-function Header({ type }: { type: string }) {
+function Header({ type, hasProfile }: { type: string, hasProfile: boolean }) {
   const pathname = usePathname();
   const listPathname = pathname.split('/');
   const slicePaths = listPathname.slice(1);
@@ -43,7 +43,7 @@ function Header({ type }: { type: string }) {
       {unAuthRoutes.includes(firstRoute) && <UnauthorizedHeader />}
       {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
       {type === 'employer' && employerRoutes.includes(firstRoute) && <MainHeader />}
-      {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader />}
+      {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader hasProfile={hasProfile} />}
     </>
   );
 }

@@ -8,11 +8,20 @@ import AddProfModal from "../modals/AddProfModal";
 
 import DropDownArrow from "@/svg/DropDownArrow";
 
-const Tab = () => {
+function ProfDetailTab({
+  register,
+  handleSubmit,
+  setCurrentTab,
+}: {
+  register: any;
+  handleSubmit: any;
+  setCurrentTab: any;
+}) {
+  const onSubmit = handleSubmit(() => {
+    setCurrentTab(3);
+  });
   const [modalOpen, setModalOpen] = useState(false);
   const [openSuccessAlert, setSuccessAlert] = useState(false);
-  const {register} = useFormContext()
-  const method =useForm()
 
   return (
     <>
@@ -21,7 +30,7 @@ const Tab = () => {
         open={openSuccessAlert}
         onClose={() => setSuccessAlert(false)}
       />
-      
+      <form onSubmit={onSubmit}>
         <div className="mt-10">
           <div className="grid grid-cols-1 md:grid-cols-3 md:gap-x-12">
             <div className="grid-item">
@@ -39,7 +48,9 @@ const Tab = () => {
                   defaultValue="College Graduate"
                 >
                   <option value={"College Graduate"}>College Graduate</option>
-                  <option value={"Highschool Graduate"}>Highschool Graduate</option>
+                  <option value={"Highschool Graduate"}>
+                    Highschool Graduate
+                  </option>
                 </select>
                 <div className="absolute right-3 top-[14px]">
                   <DropDownArrow />
@@ -226,16 +237,29 @@ const Tab = () => {
             </div>
           </div>
         </div>
-     
-   
+        <div className="flex justify-between py-10">
+          <button
+            type="button"
+            className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            onClick={() => setCurrentTab(1)}
+          >
+            Back
+          </button>
+          <button
+            type="submit"
+            className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Next
+          </button>
+        </div>
+      </form>
       <AddProfModal
         open={modalOpen}
         onSave={() => setSuccessAlert(true)}
         onClose={() => setModalOpen(false)}
       />
-
     </>
   );
-};
+}
 
-export default Tab;
+export default ProfDetailTab;

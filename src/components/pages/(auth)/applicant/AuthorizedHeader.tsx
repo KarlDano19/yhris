@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 
 import { Popover } from '@headlessui/react';
@@ -25,41 +26,43 @@ interface ErrorDetail {
   detail: string;
 }
 
-const AuthorizedHeader = () => {
+const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
   const pathName = usePathname();
-  const [applicantProfile, setApplicantProfile] = useState<any>({});
-  const { mutate, isLoading: isLogoutLoading } = useLogout();
-
   const {
-    data, 
-    isLoading: isApplicantProfileLoading, 
-    error
+    data,
+    isLoading: isProfileLoading,
+    error,
   } = useGetApplicantProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
+  const { mutate } = useLogout();
 
-  const logout = () => {
+  const logout = (isExpired: boolean) => {
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        if (isExpired) {
+          toast.custom(() => <CustomToast message={'Session is expired.'} type='error' />, {
+            duration: 4000,
+          });
+        } else {
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        }
         deleteCookie('token');
-        deleteCookie('type');
         location.href = '/login';
       },
       onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
+        toast.custom(() => <CustomToast message={err || 'Session is expired.'} type='error' />, {
           duration: 4000,
         });
+        location.href = '/login';
       },
     };
     mutate(void 0, callbackReq);
   };
 
   useEffect(() => {
-    if (data) {
-      setApplicantProfile(data);
+    if (error && error.detail.includes('Invalid token')) {
+      logout(true);
     }
-  }, [data, error]);
-
-
+  }, [error]);
 
   return (
     <>
@@ -71,7 +74,7 @@ const AuthorizedHeader = () => {
       >
         {({ open }) => (
           <>
-            <div className={`mx-auto max-w-7xl px-4 py-1 sm:px-6 lg:px-8 `}>
+            <div className={`mx-auto max-w-7xl px-4 py-[0.6rem] sm:px-6 lg:px-8 `}>
               <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
                   <div className='flex flex-shrink-0 items-center'>
@@ -94,56 +97,82 @@ const AuthorizedHeader = () => {
                 <div className='hidden lg:flex lg:items-center lg:justify-end lg:space-x-10'>
                   <Link
                     href='/apply-for-a-job'
-                    className={`${
+                    className={classNames(
+                      'flex items-center font-semibold',
                       pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                         ? 'text-savoy-blue'
-                        : 'text-[#6F829B]'
-                    } flex items-center font-semibold`}
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <HomeIcon
-                      className={`${
+                      className={classNames(
+                        'h-5 w-5 mt-1 mr-2.5',
                         pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                           ? 'fill-savoy-blue'
-                          : 'fill-[#6F829B]'
-                      } h-5 w-5 mt-1 mr-2.5`}
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Home
                   </Link>
                   <Link
                     href='/application-tracker'
-                    className={`${
-                      pathName === '/application-tracker' ? 'text-savoy-blue' : 'text-[#6F829B]'
-                    }  flex items-center font-semibold`}
+                    className={classNames(
+                      'flex items-center font-semibold',
+                      pathName === '/application-tracker'
+                        ? 'text-savoy-blue'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <CaseSearchIcon
-                      className={`${
-                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
-                      } h-5 w-5 mt-1.5 mr-2.5`}
+                      className={classNames(
+                        'h-5 w-5 mt-1.5 mr-2.5',
+                        pathName === '/application-tracker'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Application Tracker
                   </Link>
                   <Link
                     href='/notification'
-                    className={`${
-                      pathName === '/notification' ? 'text-savoy-blue' : 'text-[#6F829B]'
-                    } flex items-center font-semibold`}
+                    className={classNames(
+                      'flex items-center font-semibold',
+                      pathName === '/notification'
+                        ? 'text-savoy-blue'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <BellIcon
-                      className={`${
-                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
-                      } h-4 w-4 mr-2.5`}
+                      className={classNames(
+                        'h-4 w-4 mr-2.5',
+                        pathName === '/notification'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Notification
                   </Link>
                   <Link
                     href='#'
-                    className='flex items-center text-[#6F829B] font-semibold'
+                    className='flex items-center text-indigo-dye font-semibold'
                     onClick={(event) => {
                       event.preventDefault();
-                      logout();
+                      logout(false);
                     }}
                   >
-                    <ExitIcon className='h-4 w-4 mr-2.5 fill-[#6F829B]' />
+                    <ExitIcon className='h-4 w-4 mr-2.5 fill-indigo-dye' />
                     Sign Out
                   </Link>
                 </div>
@@ -154,52 +183,82 @@ const AuthorizedHeader = () => {
                 <div className='shadow rounded-md'>
                   <Link
                     href='/apply-for-a-job'
-                    className={`${
-                      pathName === '/apply-for-a-job' ? 'text-savoy-blue bg-gray-50' : 'text-[#6F829B]'
-                    } flex items-center font-semibold px-4 py-4`}
+                    className={classNames(
+                      'flex items-center font-semibold px-4 py-4',
+                      pathName === '/apply-for-a-job'
+                        ? 'text-savoy-blue bg-gray-50'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <HomeIcon
-                      className={`${
-                        pathName === '/apply-for-a-job' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
-                      } h-5 w-5 mt-1 mr-2.5`}
+                      className={classNames(
+                        'h-5 w-5 mt-1 mr-2.5',
+                        pathName === '/apply-for-a-job'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Home
                   </Link>
                   <Link
                     href='/application-tracker'
-                    className={`${
-                      pathName === '/application-tracker' ? 'text-savoy-blue bg-gray-50' : 'text-[#6F829B]'
-                    }  flex items-center font-semibold px-4 py-4`}
+                    className={classNames(
+                      'flex items-center font-semibold px-4 py-4',
+                      pathName === '/application-tracker'
+                        ? 'text-savoy-blue bg-gray-50'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <CaseSearchIcon
-                      className={`${
-                        pathName === '/application-tracker' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
-                      } h-5 w-5 mt-1.5 mr-2.5`}
+                      className={classNames(
+                        'h-5 w-5 mt-1.5 mr-2.5',
+                        pathName === '/application-tracker'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Application Tracker
                   </Link>
                   <Link
                     href='/notification'
-                    className={`${
-                      pathName === '/notification' ? 'text-savoy-blue bg-gray-50' : 'text-[#6F829B]'
-                    } flex items-center font-semibold px-4 py-4`}
+                    className={classNames(
+                      'flex items-center font-semibold px-4 py-4',
+                      pathName === '/notification'
+                        ? 'text-savoy-blue bg-gray-50'
+                        : hasProfile
+                        ? 'text-indigo-dye'
+                        : 'text-gray-300 pointer-events-none'
+                    )}
                   >
                     <BellIcon
-                      className={`${
-                        pathName === '/notification' ? 'fill-savoy-blue' : 'fill-[#6F829B]'
-                      } h-4 w-4 mr-2.5`}
+                      className={classNames(
+                        'h-4 w-4 mr-2.5',
+                        pathName === '/notification'
+                          ? 'fill-savoy-blue'
+                          : hasProfile
+                          ? 'fill-indigo-dye'
+                          : 'fill-gray-300'
+                      )}
                     />
                     Notification
                   </Link>
                   <Link
                     href='#'
-                    className='flex items-center text-[#6F829B] font-semibold px-4 py-4'
+                    className='flex items-center text-indigo-dye font-semibold px-4 py-4'
                     onClick={(event) => {
                       event.preventDefault();
-                      logout();
+                      logout(false);
                     }}
                   >
-                    <ExitIcon className='h-4 w-4 mr-2.5 fill-[#6F829B]' />
+                    <ExitIcon className='h-4 w-4 mr-2.5 fill-indigo-dye' />
                     Sign Out
                   </Link>
                 </div>

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import Image from 'next/image';
+
 import { UseFormRegister } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -37,22 +39,21 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: Prof
       <h5 className='text-xl font-semibold'>Profile</h5>
       <div className='grid lg:grid-cols-7 gap-x-8 mt-7'>
         <div className='lg:col-span-1'>
-          <div
-            className='bg-gray-300 h-40 w-1/2 md:w-44 lg:w-full rounded-md mx-auto lg:mx-0 flex items-center justify-center'
-            style={{
-              backgroundImage: `url(${profilePhoto})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            {!profilePhoto && <UserIcon className='w-auto md:p-4 lg:p-0 h-auto text-white' />}
+          <div className='overflow-hidden h-[155px] w-36 md:w-auto md:max-w-[150px] mx-auto md:mx-0 md:cols-span-1 lg:col-span-3 flex items-center justify-center'>
+            <Image
+              src={profilePhoto || '/assets/no-user.png'}
+              width={143}
+              height={155}
+              priority={true}
+              alt='profile-logo'
+              className='rounded object-cover max-w-[143px] h-[155px]'
+            />
           </div>
         </div>
         <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5'>
           <div className='grid-item'>
             <label htmlFor='first-name' className='text-sm font-medium leading-6 text-gray-900'>
-              First Name <span className='text-red-500'>*</span>
+              First Name<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -78,7 +79,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: Prof
           </div>
           <div className='grid-item'>
             <label htmlFor='last-name' className='text-sm font-medium leading-6 text-gray-900'>
-              Last Name <span className='text-red-500'>*</span>
+              Last Name<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -91,7 +92,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: Prof
           </div>
           <div className='grid-item'>
             <label htmlFor='email' className='text-sm font-medium leading-6 text-gray-900'>
-              Email Address <span className='text-red-500'>*</span>
+              Email Address<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -104,7 +105,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: Prof
           </div>
           <div className='grid-item'>
             <label htmlFor='mobile-no' className='text-sm font-medium leading-6 text-gray-900'>
-              Mobile No. <span className='text-red-500'>*</span>
+              Mobile No.<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -117,7 +118,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: Prof
           </div>
           <div className='grid-item'>
             <label htmlFor='address' className='text-sm font-medium leading-6 text-gray-900'>
-              City Address (Please provide your current city address) <span className='text-red-500'>*</span>
+              City Address (Please provide your current city address)<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -132,9 +133,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab }: Prof
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11'>
         <div className='grid-item'>
-          <h6 className='block text-sm font-medium leading-6 text-gray-900'>
-            Photo (2x2 photo is recommended)
-          </h6>
+          <h6 className='block text-sm font-medium leading-6 text-gray-900'>Photo (2x2 photo is recommended)</h6>
           <div className='mt-2'>
             <input
               type='file'

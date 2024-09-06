@@ -36,7 +36,7 @@ const Content = () => {
   return (
     <>
       <div className='container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-8'>
-        <h1>Tell us more about you!</h1>
+        <h3 className='text-2xl text-indigo-dye font-semibold'>Tell us more about you!</h3>
         <div className='px-5 sm:px-7 lg:px-9'>
           <div className='mt-5'>
             <div className='sm:hidden'>
@@ -54,13 +54,9 @@ const Content = () => {
               </div>
               <div className='border-t-4 border-gray-300 mx-24 w-auto mb-3 translate-y-[23px] hidden'></div>
               <nav className='-mb-px flex relative justify-between w-[90%] mx-auto' aria-label='Tabs'>
-                <li
-                  className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue'
-                >
+                <li className='text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue'>
                   <div className='bg-white px-2'>
-                    <div
-                      className='h-4 w-4 bg-white border-2 mb-2 rounded-full flex justify-center items-center border-savoy-blue'
-                    >
+                    <div className='h-4 w-4 bg-white border-2 mb-2 rounded-full flex justify-center items-center border-savoy-blue'>
                       <div className='h-2 w-2 rounded-full bg-savoy-blue'></div>
                     </div>
                   </div>

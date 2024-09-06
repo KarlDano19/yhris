@@ -233,7 +233,7 @@ export default function EmployeesModal({
                                 <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5'>
                                   <div className='grid-item'>
                                     <label htmlFor='first-name' className='text-sm font-medium leading-6 text-gray-900'>
-                                      First Name <span className='text-red-500'>*</span>
+                                      First Name<span className='text-red-500'>*</span>
                                     </label>
                                     <div className='mt-2'>
                                       <input
@@ -264,7 +264,7 @@ export default function EmployeesModal({
                                   </div>
                                   <div className='grid-item'>
                                     <label htmlFor='last-name' className='text-sm font-medium leading-6 text-gray-900'>
-                                      Last Name <span className='text-red-500'>*</span>
+                                      Last Name<span className='text-red-500'>*</span>
                                     </label>
                                     <div className='mt-2'>
                                       <input
@@ -278,7 +278,7 @@ export default function EmployeesModal({
                                   </div>
                                   <div className='grid-item'>
                                     <label htmlFor='email' className='text-sm font-medium leading-6 text-gray-900'>
-                                      Email Address <span className='text-red-500'>*</span>
+                                      Email Address<span className='text-red-500'>*</span>
                                     </label>
                                     <div className='mt-2'>
                                       <input
@@ -292,7 +292,7 @@ export default function EmployeesModal({
                                   </div>
                                   <div className='grid-item'>
                                     <label htmlFor='mobile-no' className='text-sm font-medium leading-6 text-gray-900'>
-                                      Mobile No. <span className='text-red-500'>*</span>
+                                      Mobile No.<span className='text-red-500'>*</span>
                                     </label>
                                     <div className='mt-2'>
                                       <input
@@ -306,7 +306,7 @@ export default function EmployeesModal({
                                   </div>
                                   <div className='grid-item'>
                                     <label htmlFor='address' className='text-sm font-medium leading-6 text-gray-900'>
-                                      Address <span className='text-red-500'>*</span>
+                                      Address<span className='text-red-500'>*</span>
                                     </label>
                                     <div className='mt-2'>
                                       <input
@@ -323,7 +323,7 @@ export default function EmployeesModal({
                               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11'>
                                 <div className='grid-item'>
                                   <label htmlFor='nationality' className='text-sm font-medium leading-6 text-gray-900'>
-                                    Nationality <span className='text-red-500'>*</span>
+                                    Nationality<span className='text-red-500'>*</span>
                                   </label>
                                   <div className='mt-2'>
                                     <input
@@ -337,7 +337,7 @@ export default function EmployeesModal({
                                 </div>
                                 <div className='grid-item'>
                                   <label htmlFor='gender' className='text-sm font-medium leading-6 text-gray-900'>
-                                    Gender <span className='text-red-500'>*</span>
+                                    Gender<span className='text-red-500'>*</span>
                                   </label>
                                   <div className='relative mt-2'>
                                     <select
@@ -357,7 +357,7 @@ export default function EmployeesModal({
                                 </div>
                                 <div className='grid-item'>
                                   <label htmlFor='religion' className='text-sm font-medium leading-6 text-gray-900'>
-                                    Religion <span className='text-red-500'>*</span>
+                                    Religion<span className='text-red-500'>*</span>
                                   </label>
                                   <div className='mt-2'>
                                     <input

@@ -1,23 +1,26 @@
 "use client";
-import { Fragment, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import { Fragment } from "react";
 
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
-import Link from "next/link";
-import findFaceEmoji from "@/assets/find-face-emoji.png";
 import Image from "next/image";
+import Link from "next/link";
 
 
+import { Dialog, Transition } from "@headlessui/react";
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import findFaceEmoji from "@/assets/find-face-emoji.png";
 
 interface AskProfModalProps {
   open: boolean;
   onAgree: () => void;
   onClose: () => void;
+  onDecline: () => void;
 }
 
-const AskProfModal = ({ open, onAgree, onClose }: AskProfModalProps) => {
+const AskProfModal = ({ open, onAgree, onClose, onDecline }: AskProfModalProps) => {
   const handleLinkClick = () => {
     sessionStorage.setItem("showSuccessOnLoad", "true");
+    onClose();
+    onDecline();
   };
 
   return (

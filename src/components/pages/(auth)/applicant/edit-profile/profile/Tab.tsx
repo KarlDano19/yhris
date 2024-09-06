@@ -75,9 +75,9 @@ const Tab = () => {
                 <div className='grid-item'>
                   <label
                     htmlFor='name'
-                    className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+                    className='block text-sm font-medium leading-6 text-gray-900'
                   >
-                    Name <span className='text-red-500'>*</span>
+                    Name<span className='text-red-500'>*</span>
                   </label>
                   <div className='mt-2'>
                     <input
@@ -92,8 +92,8 @@ const Tab = () => {
                   </div>
                 </div>
                 <div className='grid-item mt-5'>
-                  <h6 className='block text-indigo-dye text-sm font-medium leading-6 text-gray-900'>
-                    Profile Picture <span className='text-red-500'>*</span>
+                  <h6 className='block text-sm font-medium leading-6 text-gray-900'>
+                    Profile Picture<span className='text-red-500'>*</span>
                   </h6>
                   <div className='mt-2'>
                     <input
@@ -102,7 +102,7 @@ const Tab = () => {
                       id='profile-picture'
                       className='rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4'
                     />
-                    <h6 className='text-xs text-indigo-dye mt-3'>
+                    <h6 className='text-xs mt-3'>
                       Maximum file size: 5 MB
                     </h6>
                   </div>
@@ -113,7 +113,7 @@ const Tab = () => {
           <div className='col-2 md:col-span-2 lg:col-span-5 grid-item mt-5 md:mt-3 lg:mt-0'>
             <label
               htmlFor='about-you'
-              className='block text-indigo-dye text-sm font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
               About you
             </label>
@@ -127,7 +127,7 @@ const Tab = () => {
                 placeholder='Tell us about you...'
                 value={!isLoading ? data?.about : 'Loading...'}
               />
-              <h6 className='text-xs text-indigo-dye mt-3'>
+              <h6 className='text-xs mt-3'>
                 Maximum words: 500
               </h6>
             </div>
@@ -137,9 +137,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='bday'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Birthday <span className='text-red-500'>*</span>
+              Birthday<span className='text-red-500'>*</span>
             </label>
             <div className='relative mt-2'>
               <input
@@ -161,9 +161,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='age'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Age <span className='text-red-500'>*</span>
+              Age<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -179,9 +179,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='gender'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Gender <span className='text-red-500'>*</span>
+              Gender<span className='text-red-500'>*</span>
             </label>
             <div className='relative mt-2'>
               <select
@@ -211,9 +211,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='religion'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Religion <span className='text-red-500'>*</span>
+              Religion<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -229,9 +229,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='nationality'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Nationality <span className='text-red-500'>*</span>
+              Nationality<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -247,9 +247,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='civil-status'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Civil Status <span className='text-red-500'>*</span>
+              Civil Status<span className='text-red-500'>*</span>
             </label>
             <div className='relative mt-2'>
               <select
@@ -289,15 +289,15 @@ const Tab = () => {
             </div>
           </div>
         </div>
-        <h6 className='text-indigo-dye text-sm font-semibold mt-6'>Address</h6>
+        <h6 className='text-sm font-semibold mt-6'>Address</h6>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4 md:gap-x-11 gap-y-5'>
           <div className='grid-item'>
             <label
               htmlFor='house-no'
-              className='block whitespace-nowrap truncate text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block whitespace-nowrap truncate text-sm font-medium leading-6 text-gray-900'
             >
               House No./Bldg./Apartment/Suite, etc.{' '}
-              <span className='text-red-500'>*</span>
+             <span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -313,9 +313,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='street'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Street <span className='text-red-500'>*</span>
+              Street<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -331,9 +331,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='town'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Town/Brgy. <span className='text-red-500'>*</span>
+              Town/Brgy.<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -349,9 +349,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='city'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              City <span className='text-red-500'>*</span>
+              City<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -367,9 +367,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='zip'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Zip Code <span className='text-red-500'>*</span>
+              Zip Code<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2'>
               <input
@@ -385,9 +385,9 @@ const Tab = () => {
           <div className='grid-item'>
             <label
               htmlFor='country'
-              className='block text-sm text-indigo-dye font-medium leading-6 text-gray-900'
+              className='block text-sm font-medium leading-6 text-gray-900'
             >
-              Country <span className='text-red-500'>*</span>
+              Country<span className='text-red-500'>*</span>
             </label>
             <div className='relative mt-2'>
               <select
