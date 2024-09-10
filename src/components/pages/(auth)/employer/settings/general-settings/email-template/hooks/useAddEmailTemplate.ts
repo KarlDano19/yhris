@@ -10,20 +10,13 @@ async function addEmailTemplate(emailTemplate: EmailTemplate) {
     formData.append('subject', emailTemplate.subject);
     formData.append('body', emailTemplate.body);
     if (emailTemplate.to && Array.isArray(emailTemplate.to)) {
-      emailTemplate.to.forEach((to) => {
-        formData.append('to', to)
-      });
+      formData.append('to', emailTemplate.to.join(','));
     }
     if (emailTemplate.cc && Array.isArray(emailTemplate.cc)) {
-      emailTemplate.cc.forEach((cc) => {
-        formData.append('cc', cc);
-      });
+      formData.append('cc', emailTemplate.cc.join(','));
     }
-
     if (emailTemplate.bcc && Array.isArray(emailTemplate.bcc)) {
-      emailTemplate.bcc.forEach((bcc) => {
-        formData.append('bcc', bcc);
-      });
+      formData.append('bcc', emailTemplate.bcc.join(','));
     }
     if (emailTemplate.attachment) {
       formData.append('attachment', emailTemplate.attachment);
