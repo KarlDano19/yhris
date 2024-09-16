@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
 import Confetti from "@/svg/Confetti";
+import Link from "next/link";
 
 
 
@@ -16,7 +17,7 @@ const SubmittedModal = ({ open, onClose }: SubmittedModalProps) => {
       <Dialog
         as="div"
         className={`relative z-10 `}
-        onClose={onClose}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}
@@ -60,13 +61,15 @@ const SubmittedModal = ({ open, onClose }: SubmittedModalProps) => {
                   </div>
                 </div>
                 <div className="mt-5 sm:mt-6">
-                  <button
-                    type="button"
-                    className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    onClick={onClose}
-                  >
-                    CONTINUE
-                  </button>
+                  <Link href="/apply-for-a-job">
+                    <button
+                      type="button"
+                      className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      onClick={onClose}
+                    >
+                      CONTINUE
+                    </button>
+                  </Link>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

@@ -7,8 +7,9 @@ import { toast } from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import SuccessPopAlert from '@/components/SuccessPopAlert';
-import updateSession from '@/helpers/updateSession';
 import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
+import classNames from '@/helpers/classNames';
+import updateSession from '@/helpers/updateSession';
 import ProfileTab from './profile/Tab';
 import ContactsTab from './contacts/Tab';
 import ProfDetailTab from './prof-details/Tab';
@@ -18,7 +19,6 @@ import AskDocumentModal from './modals/AskDocumentModal';
 import useSaveApplicantProfile from './hooks/useSaveApplicantProfile';
 
 import { T_ApplicantProfile } from '@/types/globals';
-import classNames from '@/helpers/classNames';
 
 const Content = () => {
   const [isWelcomeModal, setWelcomeModal] = useState(false);
@@ -30,11 +30,11 @@ const Content = () => {
   const [profileData, setProfileData] = useState<T_ApplicantProfile | null>(null);
   const [currentTab, setCurrentTab] = useState(1);
   const { register, setValue, watch, handleSubmit, control } = useForm<T_ApplicantProfile>();
-  const { mutate, isLoading } = useSaveApplicantProfile();
   const {
     data: applicantProfileData, 
     isLoading: isApplicantProfileLoading
   } = useGetApplicantProfile();
+  const { mutate, isLoading } = useSaveApplicantProfile();
 
   useEffect(() => {
     if (applicantProfileData) {

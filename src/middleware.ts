@@ -40,6 +40,7 @@ export async function middleware(request: NextRequest) {
     'edit-profile',
     'notification',
     'setup-applicant-profile',
+    'job-applicant-form'
   ];
 
   if (bypassRoutes.includes(firstRoute)) {
@@ -101,7 +102,8 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'apply-for-a-job' ||
           firstRoute === 'edit-profile' ||
           firstRoute === 'notification' ||
-          firstRoute === 'setup-applicant-profile'
+          firstRoute === 'setup-applicant-profile' ||
+          firstRoute === 'job-applicant-form'
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-applicant-profile') {
