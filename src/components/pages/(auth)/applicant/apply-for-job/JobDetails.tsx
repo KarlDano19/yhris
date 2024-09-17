@@ -1,7 +1,15 @@
+import { useState, useEffect } from 'react';
+
+import formatPrice from '@/helpers/currencyFormat';
+import useGetJobDetails from './hooks/useGetJobDetails';
+
+import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
-import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroicons/react/24/outline';
-import useGetJobDetails from './hooks/useGetJobDetails';
+
+import * as DOMPurify from 'dompurify';
+import JobDetailsLocation from '@/svg/JobDetailLocation';
+import 'react-quill/dist/quill.snow.css';
 
 interface JobDetailsProp {
   jobId: any;
@@ -9,53 +17,80 @@ interface JobDetailsProp {
 
 const JobDetails = ({ jobId }: JobDetailsProp) => {
   const { data, isLoading } = useGetJobDetails(jobId);
+  const [jobDetailData, setJobDetailData] = useState<any>({});
+
+  useEffect(() => {
+    if (data) {
+      setJobDetailData(data);
+    }
+  }, [data]);
+
+  const renderRoleDescription = (jobDescription: any) => {
+    const markup = { __html: jobDescription };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+
+  const renderQualificationsDescription = (qualifications: any) => {
+    const markup = { __html: qualifications };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
 
   return (
     <>
       <div className='grid grid-cols-4 px-4 mt-5'>
-        <div className='col-span-3 flex'>
+        <div className='col-span-3 lg:col-span-2 flex'>
           <span className='mt-1 ml-1'>
             <FileCaseIcon className='h-6 w-6' />
           </span>
           <div className='ml-6'>
             <h5 className='text-xl font-semibold text-indigo-dye'>
-              {!isLoading ? data?.title : 'Loading job title...'}
+              {!isLoading ? jobDetailData?.job_title : 'Loading job title...'}
             </h5>
-            <h6 className='text-indigo-dye text-sm font-medium mt-1'>
-              {!isLoading ? data?.company : 'Loading company name...'}
+            <h6 className='text-indigo-dye text-sm'> 
+              for a {!isLoading ? jobDetailData?.industry : 'Loading indsutry...'} Company
             </h6>
-            <h6 className='text-indigo-dye text-sm'>{!isLoading ? data?.location : 'Loading location...'}</h6>
+            <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
           </div>
         </div>
-        <div className='col-span-1 px-1'>
-          <div className='bg-gray-300 h-[72px] rounded-md'></div>
+        <div className='col-span-1 lg:col-span-2 px-1'>
+          <div
+            className='lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md hidden lg:block'
+            style={{
+              backgroundImage: `url(${jobDetailData.company_logo})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          ></div>
         </div>
       </div>
-      <p className='text-sm text-indigo-dye px-[70px] mt-4'>
-        Role:<br/>{!isLoading ? data?.role : 'Loading role description...'}
-      </p>
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
         <div className='details mx-5 mt-2'>
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
+            <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
+            Location
+          </h6>
+          <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
+            {!isLoading ? jobDetailData.advertise_to : 'Loading location...'}
+          </p>
           {/* qualifications */}
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
             <CheckCircleIcon className='h-5 w-5 mr-1' />
             Qualifications
           </h6>
-          <ul className='text-[13px] text-indigo-dye mt-1 list-disc ml-6'>
+          <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
             {!isLoading
-              ? data?.jobDetails.qualifications.map((qualification: any) => (
-                  <li key={qualification}>{qualification}</li>
-                ))
+              ? renderQualificationsDescription(jobDetailData?.qualifications)
               : 'Loading qualifications...'}
-          </ul>
+          </div>
           {/* job type */}
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
             <BriefcaseIcon className='h-5 w-5 mr-1' />
             Job Type
           </h6>
           <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
-            {!isLoading ? data?.jobDetails.jobType.join(', ') : 'Loading job type...'}
+            {!isLoading ? jobDetailData?.job_type : 'Loading job type...'}
           </p>
           {/* schedule */}
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
@@ -63,27 +98,40 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             Schedule
           </h6>
           <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
-            {!isLoading ? data?.jobDetails.schedule.join(', ') : 'Loading schedule...'}
+            {!isLoading ? jobDetailData?.job_schedule : 'Loading schedule...'}
           </p>
           {/* salary range */}
-          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
-            <BanknotesIcon className='h-5 w-5 mr-1' />
-            Salary Range
-          </h6>
-          <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
-            {!isLoading ? data?.jobDetails.currencyType + ' ' + data?.jobDetails.salaryFrom : '0'} -{' '}
-            {!isLoading ? data?.jobDetails.currencyType + ' ' + data?.jobDetails.salaryTo : '0'}
-          </p>
+          {jobDetailData.rate && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                <BanknotesIcon className='h-5 w-5 mr-1' />
+                Salary Range
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading && jobDetailData?.salary_range_type == 'Range' && (
+                  <>
+                    PHP {formatPrice(jobDetailData?.minimum_amount)} - {formatPrice(jobDetailData?.maximum_amount)}
+                  </>
+                )}
+                {!isLoading && jobDetailData?.salary_range_type != 'Range' && (
+                  <>PHP {formatPrice(jobDetailData?.exact_amount)}</>
+                )}
+                &nbsp;/ {jobDetailData.rate}
+              </p>
+            </>
+          )}
           {/* benefits */}
-          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
-            <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
-            Benefits
-          </h6>
-          <ul className='text-[13px] text-indigo-dye mt-1 list-disc ml-6'>
-            {!isLoading
-              ? data?.jobDetails.benefits.map((benefit: any) => <li key={benefit}>{benefit}</li>)
-              : 'Loading benefits...'}
-          </ul>
+          {jobDetailData.offered_benefits && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
+                Benefits
+              </h6>
+              <ul className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading ? jobDetailData.offered_benefits : 'Loading benefits...'}
+              </ul>
+            </>
+          )}
         </div>
       </div>
     </>

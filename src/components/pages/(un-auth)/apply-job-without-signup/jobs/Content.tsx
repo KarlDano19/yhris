@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -8,7 +10,6 @@ import JobDetailsModal from './modals/JobDetailsModal';
 import useFindJobs from './hooks/useFindJobs';
 
 import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/solid';
-import { useEffect, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import jobIllustration from '@/assets/find-job-illustration.svg';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -25,7 +26,6 @@ const Content = () => {
   });
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [jobsItems, setJobsItems] = useState<any>([]);
-
   const { data: dataJobs, isLoading: isGetJobsLoading, refetch } = useFindJobs(itemsFilter);
 
   useEffect(() => {
@@ -52,8 +52,8 @@ const Content = () => {
   const closeJobDetails = () => {
     setIsJobView(false);
     setJobModal(false);
-    setIsJobModalOpen(false)
-  }
+    setIsJobModalOpen(false);
+  };
 
   return (
     <>
@@ -128,50 +128,50 @@ const Content = () => {
                     <>
                       {!isGetJobsLoading
                         ? jobsItems.map((job: any) => (
-                          <>
-                          <div>
-                            <div
-                              key={job.id}
-                              className={classNames(
-                                'card border rounded-md p-4 cursor-pointer', isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
-                              )}
-                              onClick={() => openJobDetails(job.id)}
-                            >
-                              <span className='text-xs text-red-500'>{job.isNew ? 'NEW' : ''}</span>
-                              <div className='flex flex-col'>
-                                <span className='mt-1 ml-1'>
-                                  <FileCaseIcon className='h-6 w-6' />
-                                </span>
-                                <div className='ml-0 mt-2'>
-                                  <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>{job.title}</h5>
-                                  <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
-                                  <h6 className='text-indigo-dye text-sm'>{job.location}</h6>
-                                  <Link href={`/job-app-form/${job.id}`}>
-                                    <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
-                                      Apply Now!
-                                    </button>
-                                  </Link>
-                                </div>
-                              </div>
-                            </div>
-                            {isJobView && selectedJobId === job.id && (
-                              <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] lg:hidden block'>
-                                <div 
-                                  className={classNames(
-                                    'card border border-savoy-blue rounded-md sticky top-10', isJobModalOpen ? '' : 'hidden' 
-                                  )}  
-                                >
-                                  <div className='flex justify-end px-3 mt-2'>
-                                    <button onClick={closeJobDetails}>
-                                      <XMarkIcon className='h-5 w-5 text-indigo-dye' />
-                                    </button>
+                            <>
+                              <div
+                                key={job.id}
+                                className={classNames(
+                                  'card border rounded-md p-4 cursor-pointer',
+                                  isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
+                                )}
+                                onClick={() => openJobDetails(job.id)}
+                              >
+                                <span className='text-xs text-red-500'>{job.isNew ? 'NEW' : ''}</span>
+                                <div className='flex flex-col'>
+                                  <span className='mt-1 ml-1'>
+                                    <FileCaseIcon className='h-6 w-6' />
+                                  </span>
+                                  <div className='ml-0 mt-2'>
+                                    <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>{job.title}</h5>
+                                    <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
+                                    <h6 className='text-indigo-dye text-sm'>{job.location}</h6>
+                                    <Link href={`/job-app-form/${job.id}`}>
+                                      <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
+                                        Apply Now!
+                                      </button>
+                                    </Link>
                                   </div>
-                                    <JobDetails jobId={selectedJobId} />
                                 </div>
                               </div>
-                            )}
-                          </div>
-                          </>
+                              {isJobView && selectedJobId === job.id && (
+                                <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] lg:hidden block'>
+                                  <div
+                                    className={classNames(
+                                      'card border border-savoy-blue rounded-md sticky top-10',
+                                      isJobModalOpen ? '' : 'hidden'
+                                    )}
+                                  >
+                                    <div className='flex justify-end px-3 mt-2'>
+                                      <button onClick={closeJobDetails}>
+                                        <XMarkIcon className='h-5 w-5 text-indigo-dye' />
+                                      </button>
+                                    </div>
+                                    <JobDetails jobId={selectedJobId} />
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           ))
                         : 'Loading jobs...'}
                     </>
@@ -180,8 +180,9 @@ const Content = () => {
                 <div className='lg:border-l lg:border-gray-300 lg:pl-10 lg:pr-5 py-10 lg:w-[64%] hidden lg:block'>
                   <div
                     className={classNames(
-                      'card border border-savoy-blue rounded-md sticky top-10', isJobView ? '' : 'hidden' 
-                    )}  
+                      'card border border-savoy-blue rounded-md sticky top-10',
+                      isJobView ? '' : 'hidden'
+                    )}
                   >
                     <div className='flex justify-end px-3 mt-2'>
                       <button onClick={closeJobDetails}>

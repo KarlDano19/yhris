@@ -1,19 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 
-async function findJobs(itemsFilter: any) {
+async function getJobDetails(job_id: number) {
   try {
-    const jobTitle = itemsFilter.job_title;
-    const location = itemsFilter.location;
     const config = {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
       },
     };
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/?job_title=${jobTitle}&location=${location}`,
-      config
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/${job_id}/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -27,8 +22,8 @@ async function findJobs(itemsFilter: any) {
   }
 }
 
-function useFindJobs(itemsFilter: any) {
-  const query = useQuery(['findJobsPublicCache'], () => findJobs(itemsFilter), {
+function useGetJobDetails(job_id: number) {
+  const query = useQuery(['jobPostDetailPublicCache', {}], () => getJobDetails(job_id), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
@@ -36,4 +31,4 @@ function useFindJobs(itemsFilter: any) {
   return query;
 }
 
-export default useFindJobs;
+export default useGetJobDetails;
