@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Popover } from '@headlessui/react';
 
 import { usePathname } from 'next/navigation';
-import { getCookie, deleteCookie } from 'cookies-next';
+import { deleteCookie } from 'cookies-next';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
@@ -64,13 +64,6 @@ const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
     }
   }, [error]);
 
-  useEffect(() => {
-    const token = getCookie('token');
-    if (!token) {
-      logout(true);
-    }
-  }, []);
-
   return (
     <>
       <Popover
@@ -85,7 +78,9 @@ const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
               <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
                   <div className='flex flex-shrink-0 items-center'>
-                    <MainLogo />
+                    <Link href='/apply-for-a-job'>
+                      <MainLogo />
+                    </Link>
                   </div>
                 </div>
                 <div className='flex items-center lg:hidden'>
@@ -104,7 +99,7 @@ const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
                     href='/apply-for-a-job'
                     className={classNames(
                       'flex items-center font-semibold',
-                      pathName === '/apply-for-a-job'
+                      pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                         ? 'text-savoy-blue'
                         : hasProfile
                         ? 'text-indigo-dye'
@@ -114,7 +109,7 @@ const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
                     <HomeIcon
                       className={classNames(
                         'h-5 w-5 mt-1 mr-2.5',
-                        pathName === '/apply-for-a-job'
+                        pathName === '/apply-for-a-job' || pathName === '/edit-profile'
                           ? 'fill-savoy-blue'
                           : hasProfile
                           ? 'fill-indigo-dye'

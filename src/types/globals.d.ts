@@ -298,19 +298,20 @@ export type T_ApplicantProfile = {
   lastname: string;
   email: string;
   about: string;
-  imagePath: string;
   profilePicture: string;
-  birthDay: any;
+  birthDay: string;
   age: number;
   gender: string;
   religion: string;
   nationality: string;
   civilStatus: string;
-  address: string;
-  mobile: string;
-  landLineNo: string;
-  contactPersonName: string;
-  contactPersonAddress: string;
+  houseNo: string;
+  street: string;
+  townBrgy: string;
+  city: string;
+  zipCode: string;
+  country: string;
+  contactName: string;
   contactPersonContactNo: string;
-  contactPersonRelationship: string;
+  contactRelationship: string;
 }
