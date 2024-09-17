@@ -8,13 +8,13 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import SubmittedModal from '@/components/SubmittedModal';
-import DataConfirmationModal from './modals/DataConfirmationModal';
 import SuggestionModal from './modals/SuggestionModal';
+import SubmittedModal from '../jobs/modals/SubmittedModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
 import useGetJobDetails from './hooks/useGetJobDetails';
 import ProfileTab from './ProfileTab';
 import PreferencesTab from './PreferencesTab';
+import DataConfirmationModal from './modals/DataConfirmationModal';
 
 const Content = () => {
   const params = useParams();

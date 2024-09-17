@@ -17,7 +17,7 @@ async function submitApplication(data: any) {
       setup_preference: (data.setupPreference || '').join(),
     };
     const formData = new FormData();
-    formData.append('application_form', JSON.stringify(finalData));
+    formData.append('applicant_form', JSON.stringify(finalData));
     formData.append('job_posting', data.jobPosting);
     if (data.profilePicture.length !== 0) {
       formData.append('photo', data.profilePicture[0]);
@@ -30,7 +30,7 @@ async function submitApplication(data: any) {
       headers: {},
       body: formData,
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/applications/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/`, config);
     if (!res.ok) {
       throw res.json();
     }

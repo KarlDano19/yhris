@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
+import { UserIcon } from '@heroicons/react/24/solid';
+import DateCalendar from '@/svg/DateCalendar';
 import DropDownArrow from '@/svg/DropDownArrow';
 
 function ProfileTab({
