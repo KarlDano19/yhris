@@ -1,50 +1,104 @@
 'use client';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import React, { useState, useRef } from 'react';
 
-import DateCalendar from '@/svg/DateCalendar';
+import React, { useState, useEffect } from 'react';
+
+import toast from 'react-hot-toast';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomToast from '@/components/CustomToast';
 import useGetApplicationByUser from './hooks/useGetApplicationByUser';
+
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 interface Application {
   id: number;
-  userId: number;
-  applicationDate: string;
-  jobTitle: string;
-  company: string;
+  created_at: string;
+  job_title: string;
+  employer_name: string;
+  job_stages_title: string;
   status: string;
-  statusUpdateDate: string;
+  updated_at: string;
 }
 
 const Content = () => {
-  const date1InputRef = useRef(null);
-  const date2InputRef = useRef(null);
+  const [itemsFilter, setItemsFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const [applications, setApplications] = useState<any>([]);
+  const { data, isLoading, refetch } = useGetApplicationByUser(itemsFilter);
 
-  const [isApply, setIsApply] = useState(false);
-  const { data, isLoading } = useGetApplicationByUser(93);
+  useEffect(() => {
+    if (data) {
+      setApplications(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    refetch();
+  }, []);
+
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    refetch();
+  };
 
   const renderRows = () => {
-    if (isApply) {
+    if (applications.length > 0) {
       return (
         <>
           {!isLoading ? (
             applications.map((application: Application, index: number) => (
               <tr key={index}>
                 <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>
-                  {application.applicationDate}
+                  {new Date(application.created_at).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </td>
-                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.jobTitle}</td>
-                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.company}</td>
+                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.job_title}</td>
+                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.employer_name}</td>
                 <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>
                   <h6
                     className={`${
                       application.status === 'Hired' ? 'bg-green-500' : 'bg-[#6F829B]'
                     } text-white px-5 py-3 rounded-md`}
                   >
-                    {application.status}
+                    {application.job_stages_title}
                   </h6>
                   <span className='flex justify-center'>
                     <p className='md:absolute mt-1 text-xs text-[#ACB9CB]'>
-                      Status as of {application.statusUpdateDate}
+                      Status as of{' '}
+                      {new Date(application.updated_at).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true,
+                      })}
                     </p>
                   </span>
                 </td>
@@ -53,7 +107,6 @@ const Content = () => {
           ) : (
             <div className='text-center'>Loading...</div>
           )}
-          ;
         </>
       );
     } else {
@@ -73,36 +126,48 @@ const Content = () => {
       <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
         <div className='px-2 md:px-8 lg:px-4 mt-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Application Tracker</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-16'>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='to'
-                  id='to'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  ref={date1InputRef}
-                  // @ts-expect-error
-                  onClick={() => date1InputRef.current.showPicker()}
+                <CustomDatePicker
+                  id='from-datepicker'
+                  placeholder={'mm/dd/yyyy'}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  selected={itemsFilter.from}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      from: value,
+                    });
+                  }}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
               <p>to</p>
               <div className='relative'>
-                <input
-                  type='date'
-                  name='from'
-                  id='from'
-                  className='appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  ref={date2InputRef}
-                  // @ts-expect-error
-                  onClick={() => date2InputRef.current.showPicker()}
+                <CustomDatePicker
+                  id='to-datepicker'
+                  placeholder={'mm/dd/yyyy'}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  selected={itemsFilter.to}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
+                    if (!itemsFilter) setItemsFilter(date);
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      to: value,
+                    });
+                  }}
+                  minDate={itemsFilter.from}
                 />
-                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-                  <DateCalendar />
-                </div>
               </div>
             </div>
             <div className='flex-none lg:w-1/3'>
@@ -112,21 +177,17 @@ const Content = () => {
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-                </div>
               </div>
             </div>
-            <div className='flex-1 flex justify-end'>
-              <button
-                className='bg-savoy-blue rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none focus:opacity-80'
-                onClick={() => setIsApply(true)}
-              >
-                APPLY NOW!
-              </button>
-            </div>
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
           </div>
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
@@ -151,9 +212,7 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>
-                  Total record/s: {isApply && !isLoading ? applications.length : 0}
-                </p>
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {!isLoading ? applications.length : 0}</p>
               </div>
             </div>
           </div>

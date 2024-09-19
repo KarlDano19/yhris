@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
 
 async function submitApplication(data: any) {
   try {
@@ -16,6 +17,7 @@ async function submitApplication(data: any) {
       work_experience: data.exp,
       setup_preference: (data.setupPreference || '').join(),
     };
+    const token = getCookie('token');
     const formData = new FormData();
     formData.append('application_form', JSON.stringify(finalData));
     formData.append('job_posting', data.jobPosting);
@@ -27,10 +29,12 @@ async function submitApplication(data: any) {
     }
     const config = {
       method: 'POST',
-      headers: {},
+      headers: {
+        Authorization: `Token ${token}`,
+      },
       body: formData,
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/applications/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/`, config);
     if (!res.ok) {
       throw res.json();
     }

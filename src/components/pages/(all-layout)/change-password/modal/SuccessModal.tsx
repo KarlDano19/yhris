@@ -1,8 +1,10 @@
 import { Fragment } from 'react';
+
+import { useRouter } from 'next/navigation';
+
 import { Dialog, Transition } from '@headlessui/react';
 
 import Confetti from '@/svg/Confetti';
-import { useRouter } from 'next/navigation';
 
 interface SuccessModalProps {
   open: boolean;
