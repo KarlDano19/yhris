@@ -24,10 +24,10 @@ async function saveApplicantProfile(data: any) {
       formData.append('about', data.about);
     }
     if (data.middlename) {
-      formData.append('middlename', data.middlename.toLocaleDateString('en-CA'));
+      formData.append('middlename', data.middlename);
     }
     if (data.birthDay) {
-      formData.append('birth_date', data.birthDay);
+      formData.append('birth_date', data.birthDay.toLocaleDateString('en-CA'));
     }
     if (data.landLineNo) {
       formData.append('landline', data.landLineNo);

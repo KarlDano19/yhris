@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getApplicantProfile() {
+async function getApplicantRecentApplication() {
   try {
     const token = getCookie('token');
     const config = {
@@ -12,7 +12,7 @@ async function getApplicantProfile() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applicants/profiles/`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/recent/`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -31,12 +31,12 @@ async function getApplicantProfile() {
   }
 }
 
-function useGetApplicantProfile() {
-  const query = useQuery(['applicantProfileCache'], () => getApplicantProfile(), {
+function useGetApplicantRecentApplication() {
+  const query = useQuery(['applicantRecentApplicationCache'], () => getApplicantRecentApplication(), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
   return query;
 }
 
-export default useGetApplicantProfile;
+export default useGetApplicantRecentApplication;

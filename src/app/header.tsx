@@ -36,6 +36,7 @@ function Header({ type, hasProfile }: { type: string, hasProfile: boolean }) {
     'edit-profile',
     'notification',
     'setup-applicant-profile',
+    'job-applicant-form'
   ];
 
   return (

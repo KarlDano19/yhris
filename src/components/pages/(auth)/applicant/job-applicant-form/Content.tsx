@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import SubmittedModal from '@/components/SubmittedModal';
+import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
 import DataConfirmationModal from './modals/DataConfirmationModal';
 import SuggestionModal from './modals/SuggestionModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
@@ -24,10 +25,10 @@ const Content = () => {
   const [jobDetailData, setJobDetailData] = useState<any>({});
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
-
   const [submitModal, setOpenSubmitModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
   const { data } = useGetJobDetails(Number(params.id));
+  const { data: applicantDetails } = useGetApplicantProfile();
   const { mutate: mutateSubmitApplication, isLoading: isLoadingSubmitApplication } = useSubmitApplication();
 
   useEffect(() => {
@@ -35,6 +36,18 @@ const Content = () => {
       setJobDetailData(data);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (applicantDetails) {
+      firstForm.setValue('firstName', applicantDetails.firstname);
+      firstForm.setValue('middleName', applicantDetails.middlename);
+      firstForm.setValue('lastName', applicantDetails.lastname);
+      firstForm.setValue('email', applicantDetails.email);
+      firstForm.setValue('mobileNo', applicantDetails.mobile);
+      firstForm.setValue('address', applicantDetails.address);
+      firstForm.setValue('profilePicture', applicantDetails.photo);
+    }
+  }, [applicantDetails]);
 
   const firstSubmit = (data: any) => {
     setCombinedFormData((prev: any) => ({ ...prev, ...data }));
@@ -79,6 +92,7 @@ const Content = () => {
             <ProfileTab
               register={firstForm.register}
               handleSubmit={firstForm.handleSubmit}
+              watch={firstForm.watch}
               firstSubmit={firstSubmit}
               setCurrentTab={setCurrentTab}
             />
