@@ -13,7 +13,7 @@ import ManageLogo from '@/svg/ManageLogo';
 import TrainLogo from '@/svg/TrainLogo';
 import PayrollLogo from '@/svg/PayrollLogo';
 import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
-import GetHelpLogo from '@/svg/GetHelpLogo';
+import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import SyncingIcon from '@/svg/SyncingIcon';
@@ -69,10 +69,10 @@ const menus = [
     isAvailable: false,
   },
   {
-    icon: <GetHelpLogo />,
-    text: 'Get Help',
-    link: '/get-help',
-    isAvailable: false,
+    icon: <DoleLogo />,
+    text: 'DOLE',
+    link: '/dole',
+    isAvailable: true,
   },
   {
     icon: <SettingsLogo />,
