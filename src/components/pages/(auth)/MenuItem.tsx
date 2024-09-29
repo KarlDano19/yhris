@@ -5,7 +5,7 @@ import { Tooltip } from 'react-tooltip';
 function MenuItem({ menu }: { menu: any }) {
   return (
     <>
-      {menu.isAvailable && (
+      {(menu.isAvailable && menu.link) && (
         <Link
           href={menu.link}
           aria-disabled={true}
@@ -14,6 +14,15 @@ function MenuItem({ menu }: { menu: any }) {
           {menu.icon}
           <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
         </Link>
+      )}
+      {(menu.isAvailable && menu.onClickEvent) && (
+        <div
+          className='cursor-pointer bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none'
+          onClick={menu.onClickEvent}
+        >
+          {menu.icon}
+          <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
+        </div>
       )}
       {!menu.isAvailable && (
         <>

@@ -29,6 +29,7 @@ function Header({ type, hasProfile }: { type: string, hasProfile: boolean }) {
     'admin',
     'train',
     'settings',
+    'dole'
   ];
   const applicantRoutes: any = [
     'application-tracker',
