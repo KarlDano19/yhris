@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 
 import Select from 'react-select';
 
+import classNames from '@/helpers/classNames';
+
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -56,24 +58,28 @@ function EmployeeAssigneeTab({
           <Controller
             name='employees'
             control={control}
-            render={({ field: { onChange, value } }: { field: Field }) => (
-              <Select
-                className='basic-multi-select'
-                classNamePrefix='select'
-                options={employeeItems}
-                value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
-                components={{
-                  DropdownIndicator: () => (
-                    <div className='pointer-events-none px-2'>
-                      <SelectChevronDown />
-                    </div>
-                  ),
-                  IndicatorSeparator: () => null,
-                }}
-                isClearable={false}
-                isMulti
-              />
+            rules={{ required: 'Please select at least one employee' }}
+            render={({ field: { onChange, value }, fieldState: { error } }: { field: Field; fieldState: { error?: { message?: string } } }) => (
+              <>
+                <Select
+                  className='basic-multi-select'
+                  classNamePrefix='select'
+                  options={employeeItems}
+                  value={employeeItems.filter((item: any) => value?.includes(item.value))}
+                  onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className='pointer-events-none px-2'>
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable={false}
+                  isMulti
+                />
+                {error && <p className='text-red-500 text-sm mt-1 ml-1'>{error.message}</p>}
+              </>
             )}
           />
         </div>
