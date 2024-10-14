@@ -11,8 +11,9 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EmployeeCompensitionLogbookLogo from '@/svg/EmployeeCompensitionLogbookLogo';
 import EstablishmentRegistrationLogo from '@/svg/EstablishmentRegistrationLogo';
 
-const Content = () => {
-  const [isEstablishmentRegistrationConfirmationModalOpen, setIsEstablishmentRegistrationConfirmationModalOpen] = useState(false);
+function Content() {
+  const [isEstablishmentRegistrationConfirmationModalOpen, setIsEstablishmentRegistrationConfirmationModalOpen] =
+    useState(false);
   const menus = [
     {
       icon: <EmployeeCompensitionLogbookLogo />,
@@ -51,6 +52,6 @@ const Content = () => {
       />
     </div>
   );
-};
+}
 
 export default Content;

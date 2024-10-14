@@ -8,8 +8,7 @@ interface newFiltersProps {
   current_page: number;
   page_size: number;
 }
-
-async function getEmployeeItems(filters: any) {
+async function getEmployeeCompensationLogbookItems(filters: any) {
   try {
     let newFilters: newFiltersProps = { search: filters.search, current_page: filters.currentPage, page_size: filters.pageSize };
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
@@ -24,7 +23,7 @@ async function getEmployeeItems(filters: any) {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/?${searchParams}`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employee-compensation-logbooks/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -40,13 +39,13 @@ async function getEmployeeItems(filters: any) {
   }
 }
 
-function useGetEmployeeItems(filters: any) {
-  const query = useQuery(['employeesListItemsCache'], () => getEmployeeItems(filters), {
-    refetchOnWindowFocus: false,
+function useGetEmployeeCompensationLogbookItems(filters: any) {
+  const query = useQuery(['employeeCompensationLogbookItemsCache'], () => getEmployeeCompensationLogbookItems(filters), {
+    enabled: false,
     keepPreviousData: true,
   });
 
   return query;
 }
 
-export default useGetEmployeeItems;
+export default useGetEmployeeCompensationLogbookItems;
