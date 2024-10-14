@@ -31,8 +31,8 @@ const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSi
           defaultValue={pageSize}
           placeholder='Select...'
         >
-          {pageSizes.map((item: number) => {
-            return <option value={item}>{item}</option>;
+          {pageSizes.map((item: number, index: number) => {
+            return <option key={index} value={item}>{item}</option>;
           })}
         </select>
         <ReactPaginate

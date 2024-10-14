@@ -28,7 +28,7 @@ async function getPositionItems() {
   }
 }
 
-function useGetEmployeeItems() {
+function useGetPositionItems() {
   const query = useQuery(['positionItemsCache'], () => getPositionItems(), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
@@ -37,4 +37,4 @@ function useGetEmployeeItems() {
   return query;
 }
 
-export default useGetEmployeeItems;
+export default useGetPositionItems;

@@ -5,105 +5,89 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
-import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
+import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
-import EmployeesModal from './modals/EmployeesModal';
-import ExportProgressModal from './modals/ExportProgressModal';
-import DataExportAgreementModal from './modals/DataExportAgreementModal';
-import useGetEmployeeItems from './hooks/useGetEmployeeItems';
-import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport'; // Import the mutation hook
+import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensationLogModal';
+import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
+import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
+import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 type PaginationProps = {
   totalRecords: number;
   totalPages: number;
-}
+};
 
-const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
-  const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
+
+function Content() {
+  const [employeeCompensationLogbookItems, setEmployeeCompensationLogbookItems] = useState<any>([]);
+  const [isEmployeesCompensationLogbookCreateModalOpen, setIsEmployeesCompensationLogbookCreateModalOpen] =
+    useState<boolean>(false);
+  const [isEmployeesCompensationLogbookEditModalOpen, setIsEmployeesCompensationLogbookEditModalOpen] =
+    useState<T_ModalData | null>(null);
+  const [isEmployeesCompensationLogbookDeleteModalOpen, setIsEmployeesCompensationLogbookDeleteModalOpen] =
+    useState<T_ModalData | null>(null);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
-  const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
   });
-  const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
   });
   const {
-    data: employeeListData,
-    isLoading: isEmployeeListLoading,
-    refetch: employeeListRefetch,
-  } = useGetEmployeeItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
-
-  const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
-
-  const cachedData: any = cachedProfile?.state?.data;
-  const hasAgreed = cachedData?.is_export_agreed;
-
-  useEffect(() => {
-    if (!hasAgreed) {
-      setIsAgreementAccepted(true);
-    }
-  }, [hasAgreed]);
+    data: employeeCompensationLogbookData,
+    isLoading: isEmployeeCompensationLogbookListLoading,
+    refetch: employeeCompensationLogbookListRefetch,
+  } = useGetEmployeeCompensationLogbookItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
 
   const menuOptions = [
     {
       name: 'Export',
       action: () => {
-        if (!hasAgreed) {
-          setIsDataAgreementModalOpen(true);
-        } else {
-          setIsExportProgressModalOpen(true);
-        }
+        setIsExportProgressModalOpen(true);
       },
+    },
+    {
+      name: 'Generate Report',
+      action: () => {},
     },
   ];
 
   useEffect(() => {
-    if (employeeListData) {
-      employeeListData.records.map((employee: any) => {
-        employee.date = Intl.DateTimeFormat('en-US').format(new Date(employee.date));
-        return employee;
+    if (employeeCompensationLogbookData) {
+      employeeCompensationLogbookData.records.map((item: any) => {
+        item.date_of_entry = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_entry));
+        item.date_of_notification = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_notification));
+        item.date_of_contingency = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_contingency));
+        return item;
       });
-      setEmployeeItems(employeeListData.records);
+      setEmployeeCompensationLogbookItems(employeeCompensationLogbookData.records);
       setPagination({
-        totalPages: employeeListData.total_pages,
-        totalRecords: employeeListData.total_records,
+        totalPages: employeeCompensationLogbookData.total_pages,
+        totalRecords: employeeCompensationLogbookData.total_records,
       });
     }
-  }, [employeeListData]);
+  }, [employeeCompensationLogbookData]);
 
   useEffect(() => {
-    setIsEmployeesModalOpen(true);
-  }, [selectedEmployeeId]);
-
-  useEffect(() => {
-    employeeListRefetch();
+    employeeCompensationLogbookListRefetch();
   }, [currentPage, pageSize]);
-
-  const openEditEmployeeModal = (employeeId: number) => {
-    if (selectedEmployeeId && selectedEmployeeId == employeeId) {
-      setIsEmployeesModalOpen(true);
-    } else {
-      setselectedEmployeeId(employeeId);
-    }
-  };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -127,7 +111,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    employeeListRefetch();
+    employeeCompensationLogbookListRefetch();
   };
 
   const paginationChange = (event: any) => {
@@ -141,7 +125,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isEmployeeListLoading) {
+    if (isEmployeeCompensationLogbookListLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -168,15 +152,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </tr>
       );
     }
-    if (employeeItems && employeeItems.length > 0) {
-      return employeeItems.map((item: any) => (
-        <tr key={item.id} className='cursor-pointer' onClick={() => openEditEmployeeModal(item.id)}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.address}</td>
+    if (employeeCompensationLogbookItems && employeeCompensationLogbookItems.length > 0) {
+      return employeeCompensationLogbookItems.map((item: any) => (
+        <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_entry}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_notification}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_contingency}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.place_of_contingency}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.days_of_employee_absence}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.remarks}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+            <div className='flex space-x-2'>
+              <button onClick={() => setIsEmployeesCompensationLogbookEditModalOpen({ id: item.id, open: true })}>
+                <EditIcon />
+              </button>
+              <button onClick={() => setIsEmployeesCompensationLogbookDeleteModalOpen({ id: item.id, open: true })}>
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
         </tr>
       ));
     } else {
@@ -184,7 +179,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <tr>
           <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add employee.</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>
+              Please click create to add employee compensation logbook.
+            </h4>
           </td>
         </tr>
       );
@@ -195,13 +192,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+          <Link href='/dole' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Manage</h4>
+            <h4>DOLE</h4>
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Employees</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Employee Compensation Logbook</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
@@ -267,7 +264,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled
+                onClick={() => setIsEmployeesCompensationLogbookCreateModalOpen(true)}
               >
                 CREATE
               </button>
@@ -318,22 +315,28 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date Hired
+                        Date of Entry
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Name
+                        Date of Notification
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Email
+                        Employee Name
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Contact No.
+                        Date of Contingency
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Gender
+                        Place of Contingency
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Address
+                        No. of Days of Employee’s Absence
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Remarks
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -352,33 +355,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      {isDataAgreementModalOpen && (
-        <DataExportAgreementModal
-          isOpen={isDataAgreementModalOpen}
-          setIsOpen={setIsDataAgreementModalOpen}
-          setIsAgreementAccepted={(isAgree) => {
-            setIsDataAgreementModalOpen(false);
-            updateEmployerAgreeExport({ is_export_agree: isAgree });
-            setIsExportProgressModalOpen(true);
-          }}
+      {isEmployeesCompensationLogbookCreateModalOpen && (
+        <CreateEmployeeCompensationLogModal
+          refetch={employeeCompensationLogbookListRefetch}
+          isOpen={isEmployeesCompensationLogbookCreateModalOpen}
+          setIsOpen={setIsEmployeesCompensationLogbookCreateModalOpen}
         />
       )}
-      {isExportProgressModalOpen && (
-        <ExportProgressModal
-          isOpen={isExportProgressModalOpen}
-          setIsOpen={setIsExportProgressModalOpen}
-          itemsFilter={itemsFilter}
+      {isEmployeesCompensationLogbookEditModalOpen && (
+        <EditEmployeeCompensationLogModal
+          refetch={employeeCompensationLogbookListRefetch}
+          isOpen={isEmployeesCompensationLogbookEditModalOpen}
+          setIsOpen={setIsEmployeesCompensationLogbookEditModalOpen}
         />
       )}
-      {isEmployeesModalOpen && selectedEmployeeId && (
-        <EmployeesModal
-          selectedEmployeeId={selectedEmployeeId}
-          isOpen={isEmployeesModalOpen}
-          setIsOpen={setIsEmployeesModalOpen}
+      {isEmployeesCompensationLogbookDeleteModalOpen && (
+        <DeleteEmployeeCompensationLogModal
+          refetch={employeeCompensationLogbookListRefetch}
+          isOpen={isEmployeesCompensationLogbookDeleteModalOpen}
+          setIsOpen={setIsEmployeesCompensationLogbookDeleteModalOpen}
         />
       )}
     </>
   );
-};
+}
 
 export default Content;
