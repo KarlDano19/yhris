@@ -137,12 +137,13 @@ export default function DataAgreementModal({
                   <form onSubmit={handleSubmit(onSubmit)}>
                     <div className='flex items-center pt-4 pl-10'>
                       <input 
+                        id='is_export_agreed'
                         type='checkbox' 
                         {...register('is_export_agreed')}
                         className='mr-2'
                         onChange={(e) => setIsAgreeChecked(e.target.checked)}
                       />
-                      <label className='text-gray-600'>I Agree</label>
+                      <label htmlFor='is_export_agreed' className='text-gray-600'>I Agree</label>
                     </div>
                     <button
                       type='submit'

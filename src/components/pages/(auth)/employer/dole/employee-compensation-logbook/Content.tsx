@@ -11,6 +11,7 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
+import ExportProgressModal from './modals/ExportProgressModal';
 import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensationLogModal';
 import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
 import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
@@ -355,6 +356,13 @@ function Content() {
           </div>
         </div>
       </div>
+      {isExportProgressModalOpen && (
+        <ExportProgressModal
+          isOpen={isExportProgressModalOpen}
+          setIsOpen={setIsExportProgressModalOpen}
+          itemsFilter={itemsFilter}
+        />
+      )}
       {isEmployeesCompensationLogbookCreateModalOpen && (
         <CreateEmployeeCompensationLogModal
           refetch={employeeCompensationLogbookListRefetch}
