@@ -95,7 +95,7 @@ function Content() {
                     </h1>
                     <p className='text-center text-[#6F829B]'>Start managing your people faster and better.</p>
                   </div>
-                  <form onSubmit={onSubmit}>
+                  <form method='POST' onSubmit={onSubmit}>
                     <div className='relative mb-5'>
                       <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
                         <EnvelopeIcon className='h-5 w-5 text-savoy-blue' aria-hidden='true' />
