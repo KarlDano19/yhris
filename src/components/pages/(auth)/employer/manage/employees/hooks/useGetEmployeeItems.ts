@@ -11,7 +11,11 @@ interface newFiltersProps {
 
 async function getEmployeeItems(filters: any) {
   try {
-    let newFilters: newFiltersProps = { search: filters.search, current_page: filters.currentPage, page_size: filters.pageSize };
+    let newFilters: newFiltersProps = {
+      search: filters.search,
+      current_page: filters.currentPage,
+      page_size: filters.pageSize,
+    };
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
     const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));

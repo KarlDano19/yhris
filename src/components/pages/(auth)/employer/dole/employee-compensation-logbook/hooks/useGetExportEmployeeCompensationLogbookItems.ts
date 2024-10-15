@@ -1,23 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-interface newFiltersProps {
-  search?: string;
-  from?: string;
-  to?: string;
-  current_page: number;
-  page_size: number;
-}
 async function getEmployeeCompensationLogbookItems(filters: any) {
   try {
-    let newFilters: newFiltersProps = {
-      search: filters.search,
-      current_page: filters.currentPage,
-      page_size: filters.pageSize,
-    };
+    let newFilters = { ...filters };
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
-    const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
+    newFilters.export = true;
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -47,14 +37,10 @@ async function getEmployeeCompensationLogbookItems(filters: any) {
 }
 
 function useGetEmployeeCompensationLogbookItems(filters: any) {
-  const query = useQuery(
-    ['employeeCompensationLogbookItemsCache'],
-    () => getEmployeeCompensationLogbookItems(filters),
-    {
-      enabled: false,
-      keepPreviousData: true,
-    }
-  );
+  const query = useQuery([], () => getEmployeeCompensationLogbookItems(filters), {
+    enabled: false,
+    keepPreviousData: true,
+  });
 
   return query;
 }
