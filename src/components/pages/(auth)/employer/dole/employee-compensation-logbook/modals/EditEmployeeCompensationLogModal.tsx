@@ -52,10 +52,10 @@ export default function EditEmployeeCompensationLogModal({
 
   useEffect(() => {
     if (employeeCompensationLogbookData) {
-      setValue('date_of_entry', employeeCompensationLogbookData.date_of_entry);
-      setValue('date_of_notification', employeeCompensationLogbookData.date_of_notification);
+      setValue('date_of_entry', new Date(employeeCompensationLogbookData.date_of_entry));
+      setValue('date_of_notification', new Date(employeeCompensationLogbookData.date_of_notification));
       setValue('employee', employeeCompensationLogbookData.employee);
-      setValue('date_of_contingency', employeeCompensationLogbookData.date_of_contingency);
+      setValue('date_of_contingency', new Date(employeeCompensationLogbookData.date_of_contingency));
       setValue('place_of_contingency', employeeCompensationLogbookData.place_of_contingency);
       setValue('days_of_employee_absence', employeeCompensationLogbookData.days_of_employee_absence);
       setValue('remarks', employeeCompensationLogbookData.remarks);
@@ -81,6 +81,7 @@ export default function EditEmployeeCompensationLogModal({
   });
 
   const customCloseModal = () => {
+    reset();
     removeEmployeeCompensationLogbook();
     setIsOpen(null);
   };
