@@ -31,7 +31,7 @@ function Content() {
   const [evaluationForm, setEvaluationForm] = useState<any>({});
   const [evaluationCriterionIndex, setEvaluationCriterionIndex] = useState(0);
   const { data: dataEvaluationTemplateDetails, isLoading: evaluationTemplateDetailsLoading } =
-    useGetEvaluationTemplateDetails(Number(params.evaluation_template_id) || null);
+    useGetEvaluationTemplateDetails(params.evaluation_template_id || null);
   const {
     data: dateEvaluationEmployeeFormDetails,
     isLoading: evaluationEmployeeFormDetailsLoading,

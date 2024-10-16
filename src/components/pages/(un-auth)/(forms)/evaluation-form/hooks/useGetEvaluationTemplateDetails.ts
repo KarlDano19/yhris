@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-async function getEvaluationTemplateDetails(evaluation_template_id: number | null) {
+async function getEvaluationTemplateDetails(evaluation_template_id: string | null) {
   try {
     const config = {
       method: 'GET',
@@ -25,7 +25,7 @@ async function getEvaluationTemplateDetails(evaluation_template_id: number | nul
   }
 }
 
-function useGetEvaluationTemplateDetails(evaluation_template_id: number | null) {
+function useGetEvaluationTemplateDetails(evaluation_template_id: string | null) {
   const query = useQuery(
     ['evaluationTemplateDetailsPublicCache'],
     () => getEvaluationTemplateDetails(evaluation_template_id),
