@@ -7,9 +7,6 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 
-import { UserIcon } from '@heroicons/react/24/solid';
-import DropDownArrow from '@/svg/DropDownArrow';
-
 interface ProfileTabProps {
   register: UseFormRegister<any>;
   handleSubmit: any;

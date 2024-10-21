@@ -3,9 +3,11 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
+import html2canvas from 'html2canvas';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -29,6 +31,12 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type newFiltersProps = {
+  search?: string;
+  from?: string;
+  to?: string;
 };
 
 function Content() {
@@ -66,7 +74,9 @@ function Content() {
     },
     {
       name: 'Generate Report',
-      action: () => {},
+      action: () => {
+        handlePrint();
+      },
     },
   ];
 
@@ -89,6 +99,41 @@ function Content() {
   useEffect(() => {
     employeeCompensationLogbookListRefetch();
   }, [currentPage, pageSize]);
+
+  const handlePrint = () => {
+    // Create a new div element
+    const printDiv = document.createElement('div');
+
+    // Copy the content of the original printSection
+    const originalPrintSection = document.getElementById('printSection');
+    if (originalPrintSection) {
+      printDiv.innerHTML = originalPrintSection.innerHTML;
+    }
+
+    // Style the new div to be off-screen
+    printDiv.style.width = '1980px';
+    printDiv.style.height = '100%';
+    printDiv.style.position = 'absolute';
+    printDiv.style.left = '-9999px';
+    printDiv.style.top = '-9999px';
+
+    // Add the new div to the body
+    document.body.appendChild(printDiv);
+
+    // Use html2canvas on the new div
+    html2canvas(printDiv).then((canvas) => {
+      // Remove the temporary div
+      document.body.removeChild(printDiv);
+
+      const imgData = canvas.toDataURL('image/png');
+      const newWindow = window.open('', '_blank');
+      newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
+      newWindow?.document.close();
+      setTimeout(() => {
+        newWindow?.print();
+      }, 500);
+    });
+  };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -161,6 +206,7 @@ function Content() {
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_contingency}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.place_of_contingency}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.nature_of_contingency}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.days_of_employee_absence}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.remarks}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
@@ -331,6 +377,9 @@ function Content() {
                         Place of Contingency
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Nature of Contingency
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Days of Employee’s Absence
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -384,6 +433,62 @@ function Content() {
           setIsOpen={setIsEmployeesCompensationLogbookDeleteModalOpen}
         />
       )}
+      {/* Print Section */}
+      <div className='container mx-auto p-4 hidden'>
+        <div id='printSection'>
+          <Image className='mx-auto my-6' src='/assets/ec-logbook.png' alt='EC Logbook' width={1500} height={1000} />
+          <div className='overflow-x-auto'>
+            <table className='w-full border-collapse border border-gray-800 table-fixed'>
+              <thead>
+                <tr>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    DATE OF ENTRY
+                  </th>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    DATE OF NOTIFICATION
+                  </th>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    NAME OF EMPLOYEE
+                  </th>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    DATE OF CONTINGENCY
+                  </th>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    PLACE OF CONTINGENCY
+                  </th>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    NATURE OF CONTINGENCY
+                  </th>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    NUMBER OF DAYS THE WORKER WAS ABSENT FROM WORK
+                  </th>
+                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#011f47] text-white p-2 text-xl'>
+                    REMARKS/ OTHER INFO
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {employeeCompensationLogbookItems.map((item: any, rowIndex: number) => (
+                  <tr key={rowIndex}>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.date_of_entry}</td>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.date_of_notification}</td>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.employee}</td>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.date_of_contingency}</td>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.place_of_contingency}</td>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.nature_of_contingency}</td>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.days_of_employee_absence}</td>
+                    <td className='border-2 border-gray-800 p-2 text-xl'>{item.remarks}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className='mt-4 text-xl italic'>
+            *Date of notification to the employer by the employee or his/her dependents or anybody on his/her behalf,
+            provided the contingency is not known to the employer, his/her agents or representatives
+          </p>
+        </div>
+      </div>
     </>
   );
 }
