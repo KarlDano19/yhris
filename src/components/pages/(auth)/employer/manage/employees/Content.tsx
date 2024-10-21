@@ -13,6 +13,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import EmployeesModal from './modals/EmployeesModal';
+import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItems from './hooks/useGetEmployeeItems';
@@ -31,6 +32,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(true);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
@@ -63,6 +65,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [hasAgreed]);
 
   const menuOptions = [
+    {
+      name: 'Import',
+      action: () => {
+        setIsImportModalOpen(true);
+      },
+    },
     {
       name: 'Export',
       action: () => {
@@ -376,6 +384,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEmployeesModalOpen}
           setIsOpen={setIsEmployeesModalOpen}
         />
+      )}
+      {isImportModalOpen && (
+        <ImportModal isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
       )}
     </>
   );

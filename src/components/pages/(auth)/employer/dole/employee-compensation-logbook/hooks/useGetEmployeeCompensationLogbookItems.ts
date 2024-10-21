@@ -5,16 +5,15 @@ interface newFiltersProps {
   search?: string;
   from?: string;
   to?: string;
-  current_page: number;
-  page_size: number;
+  current_page?: number;
+  page_size?: number;
 }
 async function getEmployeeCompensationLogbookItems(filters: any) {
   try {
-    let newFilters: newFiltersProps = {
-      search: filters.search,
-      current_page: filters.currentPage,
-      page_size: filters.pageSize,
-    };
+    let newFilters: newFiltersProps = {};
+    if (filters.currentPage) newFilters.current_page = filters.currentPage;
+    if (filters.pageSize) newFilters.page_size = filters.pageSize;
+    if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
     const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));

@@ -8,10 +8,10 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import SubmittedModal from '@/components/SubmittedModal';
 import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
 import DataConfirmationModal from './modals/DataConfirmationModal';
 import SuggestionModal from './modals/SuggestionModal';
+import SubmittedModal from './modals/SubmittedModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
 import useGetJobDetails from './hooks/useGetJobDetails';
 import ProfileTab from './ProfileTab';
