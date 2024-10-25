@@ -24,7 +24,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/
 type PaginationProps = {
   totalRecords: number;
   totalPages: number;
-}
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
@@ -32,7 +32,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
   const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(true);
+  const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
@@ -86,7 +86,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (employeeListData) {
       employeeListData.records.map((employee: any) => {
-        employee.date = Intl.DateTimeFormat('en-US').format(new Date(employee.date));
+        employee.date_hired = Intl.DateTimeFormat('en-US').format(new Date(employee.date_hired));
         return employee;
       });
       setEmployeeItems(employeeListData.records);
@@ -179,8 +179,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer' onClick={() => openEditEmployeeModal(item.id)}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
@@ -329,7 +331,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Date Hired
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Name
+                        First Name
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Middle Name
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Last Name
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Email
@@ -386,7 +394,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isImportModalOpen && (
-        <ImportModal isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
+        <ImportModal refetch={employeeListRefetch} isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
       )}
     </>
   );
