@@ -3,13 +3,45 @@ import { Dispatch, Fragment, useEffect, useState, useRef, useCallback } from 're
 import { Dialog, Transition } from '@headlessui/react';
 import { useDropzone } from 'react-dropzone';
 import Papa from 'papaparse';
+import toast from 'react-hot-toast';
 
-export default function ImportModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
+import CustomToast from '@/components/CustomToast';
+import classNames from '@/helpers/classNames';
+import useAddImportEmployeeItems from '../hooks/useAddImportEmployeeItems';
+
+export default function ImportModal({
+  refetch,
+  isOpen,
+  setIsOpen,
+}: {
+  refetch: any;
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
+}) {
   const cancelButtonRef = useRef(null);
-  const importHeaders = {};
+  const allowHeaders: any = {
+    'Date Hired (mm/dd/yyyy)*': 'date_hired',
+    'First Name *': 'firstname',
+    'Middle Name': 'middlename',
+    'Last Name *': 'lastname',
+    'Contact Number': 'mobile',
+    Email: 'email',
+    Gender: 'gender',
+    Address: 'address',
+  };
+  const importHeaders = {
+    date_hired: 'Date Hired',
+    firstname: 'First Name',
+    middlename: 'Middle Name',
+    lastname: 'Last Name',
+    mobile: 'Contact Number',
+    email: 'Email',
+    address: 'Address',
+    gender: 'Gender',
+  };
   const [importJSON, setImportJSON] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
-
+  const { mutate: addImportEmployeeItems, isLoading: isLoadingAddImportEmployeeItems } = useAddImportEmployeeItems();
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles && acceptedFiles.length > 0) {
       setFile(acceptedFiles[0]);
@@ -29,20 +61,60 @@ export default function ImportModal({ isOpen, setIsOpen }: { isOpen: boolean; se
     setFile(null);
   };
 
+  const handleReset = () => {
+    setImportJSON([]);
+  };
+
   const handleUpload = () => {
     if (file) {
       Papa.parse(file, {
         header: true,
         complete: (results: any) => {
           if (results.data) {
-            for (const [key, value] of Object.entries(results.data)) {
-              console.log(`${key}: ${value}`);
+            const importData = [];
+            for (const item of results.data) {
+              if (Object.keys(item).length <= Object.keys(importHeaders).length) {
+                continue;
+              }
+
+              const importItem: any = {};
+              for (const [key, value] of Object.entries(item)) {
+                const allowKey = allowHeaders[key];
+                if (allowKey) {
+                  importItem[allowKey] = value;
+                }
+              }
+              importData.push(importItem);
             }
-            setImportJSON(results.data);
+            setImportJSON(importData);
           }
         },
       });
     }
+  };
+
+  const onSubmit = () => {
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, {
+          duration: 5000,
+        });
+        refetch();
+        customCloseModal();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    importJSON.forEach((item: any) => {
+      item.date_hired = new Date(item.date_hired).toISOString().split('T')[0];
+    });
+    const data = {
+      employees: importJSON,
+    };
+    addImportEmployeeItems(data, callbackReq);
   };
 
   return (
@@ -71,7 +143,12 @@ export default function ImportModal({ isOpen, setIsOpen }: { isOpen: boolean; se
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
+              <Dialog.Panel
+                className={classNames(
+                  'relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8',
+                  importJSON.length > 0 ? 'sm:w-full sm:max-w-7xl' : 'w-[500px]'
+                )}
+              >
                 <div className='text-center px-8 pt-10 pb-7'>
                   <div className='text-xl pb-6'>
                     <p className='text-xl text-gray-600 font-bold'>Import Employees</p>
@@ -79,15 +156,73 @@ export default function ImportModal({ isOpen, setIsOpen }: { isOpen: boolean; se
                   {importJSON.length > 0 ? (
                     <>
                       <div>
-                        <table className='w-full'>
+                        <table className='min-w-full divide-y divide-gray-300 text-center'>
                           <thead>
                             <tr>
-                              <th>Name</th>
+                              <th className='px-3 py-3.5 text-sm font-semibold text-gray-900'>#</th>
+                              {Object.values(importHeaders).map((header: string) => (
+                                <th key={header} className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                                  {header}
+                                </th>
+                              ))}
                             </tr>
                           </thead>
+                          <tbody className='divide-y divide-gray-200'>
+                            {importJSON.map((item: any, index: number) => (
+                              <tr key={index}>
+                                <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{index + 1}</td>
+                                {Object.keys(importHeaders).map((header: string) => (
+                                  <td key={header} className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+                                    {item[header]}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
                         </table>
                       </div>
-                      <div></div>
+                      <div className='flex justify-center gap-4'>
+                        <button
+                          className='rounded-md border border-transparent px-20 py-2 mt-6 bg-stone-200 text-base font-bold text-white shadow-sm hover:bg-stone-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:ring-offset-2'
+                          onClick={customCloseModal}
+                        >
+                          CANCEL
+                        </button>
+                        <button
+                          className='rounded-md border border-transparent px-20 py-2 mt-6 bg-red-600 text-base font-bold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+                          onClick={handleReset}
+                        >
+                          RESET
+                        </button>
+                        <button
+                          className='rounded-md border border-transparent px-20 py-2 mt-6 bg-blue-600 text-base font-bold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                          disabled={isLoadingAddImportEmployeeItems}
+                          onClick={onSubmit}
+                        >
+                          {isLoadingAddImportEmployeeItems && (
+                            <div role='status'>
+                              <svg
+                                aria-hidden='true'
+                                className='inline w-6 h-6 mr-2 text-gray-200 animate-spin fill-blue-600'
+                                viewBox='0 0 100 101'
+                                fill='none'
+                                xmlns='http://www.w3.org/2000/svg'
+                              >
+                                <path
+                                  d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                                  fill='currentColor'
+                                />
+                                <path
+                                  d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
+                                  fill='currentFill'
+                                />
+                              </svg>
+                              <span className='sr-only'>Loading...</span>
+                            </div>
+                          )}
+                          {!isLoadingAddImportEmployeeItems && 'SUBMIT'}
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -123,7 +258,7 @@ export default function ImportModal({ isOpen, setIsOpen }: { isOpen: boolean; se
                         onClick={handleUpload}
                         disabled={!file}
                       >
-                        Upload
+                        UPLOAD
                       </button>
                     </>
                   )}
