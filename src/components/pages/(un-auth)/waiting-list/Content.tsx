@@ -1,5 +1,3 @@
-// src/components/pages/(un-auth)/waiting-list/Content.tsx
-
 import React from "react";
 
 const Content = () => {
