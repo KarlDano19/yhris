@@ -119,22 +119,23 @@ const Content = () => {
           allowFullScreen
         ></iframe>
       </div>
-      <div className="flex overflow-hidden flex-wrap justify-center px-28 py-16 font-bold max-md:px-5">
+      <div className="flex overflow-hidden flex-wrap justify-center px-28 py-16 max-md:px-5">
         <div className="flex flex-col self-stretch my-auto justify-center items-center [240px] w-[685px] max-md:max-w-full">
-          <div className="flex flex-col max-w-full text-6xl text-yellow-500 w-[685px] leading-1 max-md:text-4xl">
-            <div className="text-center max-md:max-w-full max-md:text-4xl">
-              Join the Waiting List and
+          <div className="flex flex-col max-w-full text-6xl w-[685px] leading-1 max-md:text-4xl">
+            <div className="text-center max-md:max-w-full max-md:text-4xl font-semibold">
+              Join the Waiting List
             </div>
-            <div className="text-center max-md:max-w-full max-md:text-4xl">
-              be the first to access YAHSHUA HRIS!
+            <div className="text-center max-md:max-w-full max-md:text-4xl font-medium">
+            and be the <span className="text-yellow-500">first to access
+              YAHSHUA HRIS!</span> 
             </div>
           </div>
-          <a
+          <a  
             href="https://yahshua.notion.site/12dc8ec4423180aa89e8ea5a37f87d21"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <div className="overflow-hidden py-5 mt-8 max-w-full text-xl text-center text-black bg-yellow-400 rounded-xl w-[298px]">
+            <div className="overflow-hidden py-5 mt-8 max-w-full text-xl text-center text-black bg-yellow-400 rounded-xl w-[298px] font-semibold">
               Join the waiting list today
             </div>
           </a>
