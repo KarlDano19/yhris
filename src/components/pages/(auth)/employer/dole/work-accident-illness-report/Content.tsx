@@ -132,7 +132,7 @@ function Content() {
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_incident}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_incident}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.nature_of_injury}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.reportable_illness}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.part_of_body_affected}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_returned_to_work}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.days_of_absence}</td>
