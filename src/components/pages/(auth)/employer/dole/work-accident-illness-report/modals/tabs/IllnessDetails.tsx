@@ -68,7 +68,7 @@ function IllnessDetails({
           </div>
           <div>
             <label
-              htmlFor="date_of_illness_began"
+              htmlFor="date_of_illness"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Date Illness Began
@@ -76,7 +76,7 @@ function IllnessDetails({
             <div className="relative mt-2">
               <Controller
                 control={control}
-                name="date_of_illness_began"
+                name="date_of_illness"
                 render={({ field }) => (
                   <CustomDatePicker
                     id="employee-work-accident-illness-report-datepicker"
@@ -94,7 +94,7 @@ function IllnessDetails({
           </div>
           <div>
             <label
-              htmlFor="date_of_illness_ended"
+              htmlFor="date_returned_to_work"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Date Returned to Work
@@ -103,7 +103,7 @@ function IllnessDetails({
             <div className="relative mt-2">
               <Controller
                 control={control}
-                name="date_of_illness_ended"
+                name="date_returned_to_work"
                 render={({ field }) => (
                   <CustomDatePicker
                     id="employee-work-accident-illness-report-datepicker"
@@ -123,7 +123,7 @@ function IllnessDetails({
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
             <label
-              htmlFor="days_lost"
+              htmlFor="days_of_absence"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Days Lost
@@ -131,15 +131,15 @@ function IllnessDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("days_lost")}
-                id="days_lost"
+                {...register("days_of_absence")}
+                id="days_of_absence"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
           <div>
             <label
-              htmlFor="days_charged"
+              htmlFor="days_chargeable"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Day/s Charged
@@ -147,8 +147,8 @@ function IllnessDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("days_charged")}
-                id="days_charged"
+                {...register("days_chargeable")}
+                id="days_chargeable"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>

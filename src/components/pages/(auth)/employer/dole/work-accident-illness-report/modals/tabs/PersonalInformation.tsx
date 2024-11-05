@@ -136,7 +136,7 @@ function PersonalInformation({
           </div>
           <div>
             <label
-              htmlFor="email"
+              htmlFor="age"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Age
@@ -153,7 +153,7 @@ function PersonalInformation({
           </div>
           <div>
             <label
-              htmlFor="email"
+              htmlFor="civil_status"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Civil Status
@@ -181,7 +181,7 @@ function PersonalInformation({
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
             <label
-              htmlFor="position"
+              htmlFor="address"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Address<span className="text-red-600">*</span>

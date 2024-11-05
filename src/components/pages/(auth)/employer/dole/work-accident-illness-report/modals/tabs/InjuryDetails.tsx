@@ -100,7 +100,7 @@ function InjuryDetails({
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
             <label
-              htmlFor="date_of_disability_began"
+              htmlFor="date_of_disability"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Date Disability Began
@@ -108,7 +108,7 @@ function InjuryDetails({
             <div className="relative mt-2">
               <Controller
                 control={control}
-                name="date_of_disability_began"
+                name="date_of_disability"
                 render={({ field }) => (
                   <CustomDatePicker
                     id="employee-work-accident-illness-report-datepicker"
@@ -152,7 +152,7 @@ function InjuryDetails({
           </div>
           <div>
             <label
-              htmlFor="days_lost"
+              htmlFor="days_of_absence"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Days Lost
@@ -160,8 +160,8 @@ function InjuryDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("days_lost")}
-                id="days_lost"
+                {...register("days_of_absence")}
+                id="days_of_absence"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -170,7 +170,7 @@ function InjuryDetails({
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
             <label
-              htmlFor="days_charged"
+              htmlFor="days_chargeable"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Day/s Charged
@@ -178,8 +178,8 @@ function InjuryDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("days_charged")}
-                id="days_charged"
+                {...register("days_chargeable")}
+                id="days_chargeable"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>

@@ -75,23 +75,23 @@ function EmployementDetails({
           </div>
           <div>
             <label
-              htmlFor="employement_status"
+              htmlFor="employment_status"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Employement Status<span className="text-red-600">*</span>
+              Employment Status<span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("employement_status", { required: true })}
-                id="employement_status"
+                {...register("employment_status", { required: true })}
+                id="employment_status"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
           <div>
             <label
-              htmlFor="average_weekly_wage"
+              htmlFor="average_weekly_earnings"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Average Weekly Wage<span className="text-red-600">*</span>
@@ -99,8 +99,8 @@ function EmployementDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("average_weekly_wage", { required: true })}
-                id="average_weekly_wage"
+                {...register("average_weekly_earnings", { required: true })}
+                id="average_weekly_earnings"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -125,7 +125,7 @@ function EmployementDetails({
           </div>
           <div>
             <label
-              htmlFor="year_of_experience"
+              htmlFor="years_of_experience"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Year of Experience at <br /> Occupation<span className="text-red-600">*</span>
@@ -133,15 +133,15 @@ function EmployementDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("year_of_experience", { required: true })}
-                id="year_of_experience"
+                {...register("years_of_experience", { required: true })}
+                id="years_of_experience"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
           <div>
             <label
-              htmlFor="hours_of_work_per_day"
+              htmlFor="hours_worked_per_day"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               <br/>Hours of Work per Day<span className="text-red-600">*</span>
@@ -149,8 +149,8 @@ function EmployementDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("hours_of_work_per_day", { required: true })}
-                id="hours_of_work_per_day"
+                {...register("hours_worked_per_day", { required: true })}
+                id="hours_worked_per_day"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -159,7 +159,7 @@ function EmployementDetails({
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
             <label
-              htmlFor="hours_of_work_per_week"
+              htmlFor="hours_worked_per_week"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Hours of Work per Week<span className="text-red-600">*</span>
@@ -167,8 +167,8 @@ function EmployementDetails({
             <div className="relative mt-2">
               <input
                 type="number"
-                {...register("hours_of_work_per_week", { required: true })}
-                id="hours_of_work_per_week"
+                {...register("hours_worked_per_week", { required: true })}
+                id="hours_worked_per_week"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
