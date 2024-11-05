@@ -1,7 +1,7 @@
-import Content from "@/components/pages/(un-auth)/waiting-list/Content";
+import WaitingListContent from "@/components/pages/(un-auth)/waiting-list/Content";
 
 const WaitingPage = () => {
-  return <Content />;
+  return <WaitingListContent />;
 };
 
 export default WaitingPage;

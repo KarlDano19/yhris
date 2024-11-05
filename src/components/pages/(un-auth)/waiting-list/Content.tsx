@@ -1,6 +1,6 @@
 import React from "react";
 
-const Content = () => {
+const WaitingListContent = () => {
   return (
     <div>
       <div className="flex overflow-hidden flex-wrap gap-10 justify-between items-center font-semibold px-28 py-24 max-md:px-5">
@@ -126,8 +126,7 @@ const Content = () => {
               Join the Waiting List
             </div>
             <div className="text-center max-md:max-w-full max-md:text-4xl font-medium">
-            and be the <span className="text-yellow-500">first to access
-              YAHSHUA HRIS!</span> 
+              and be the <span className="text-yellow-500 underline">first to access</span><span className="text-yellow-500">&nbsp;YAHSHUA HRIS!</span>
             </div>
           </div>
           <a  
@@ -145,4 +144,4 @@ const Content = () => {
   );
 };
 
-export default Content;
+export default WaitingListContent;
