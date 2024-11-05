@@ -10,6 +10,7 @@ import EstablishmentRegistrationConfirmationModal from './modals/EstablishmentRe
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EmployeeCompensitionLogbookLogo from '@/svg/EmployeeCompensitionLogbookLogo';
 import EstablishmentRegistrationLogo from '@/svg/EstablishmentRegistrationLogo';
+import WorkAccidentIllnessReportLogo from '@/svg/WorkAccidentIllnessReportLogo';
 
 function Content() {
   const [isEstablishmentRegistrationConfirmationModalOpen, setIsEstablishmentRegistrationConfirmationModalOpen] =
@@ -28,6 +29,12 @@ function Content() {
       onClickEvent: () => {
         setIsEstablishmentRegistrationConfirmationModalOpen(true);
       },
+    },
+    {
+      icon: <WorkAccidentIllnessReportLogo />,
+      text: 'Work Accident/Illness Report',
+      link: '/dole/work-accident-illness-report',
+      isAvailable: true,
     },
   ];
   return (
