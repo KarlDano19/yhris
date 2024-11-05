@@ -3,16 +3,16 @@ import React from "react";
 const Content = () => {
   return (
     <div>
-      <div className="flex overflow-hidden flex-wrap gap-10 justify-between items-center px-28 py-24 font-bold max-md:px-5">
+      <div className="flex overflow-hidden flex-wrap gap-10 justify-between items-center font-semibold px-28 py-24 max-md:px-5">
         <div className="flex flex-col justify-center self-stretch my-auto min-w-[240px] w-[685px] max-md:max-w-full">
-          <div className="flex flex-col max-w-full text-6xl text-yellow-500 w-[685px] max-md:text-4xl">
+          <div className="flex flex-col max-w-full text-6xl w-[685px] max-md:text-4xl">
             <div className="self-start tracking-tighter max-md:max-w-full max-md:text-4xl">
-              Meet the New HR.
+              Meet the <span className="text-yellow-500">New HR.</span>
             </div>
             <div className="tracking-tighter max-md:max-w-full max-md:text-4xl">
-              Where HR Meets People.
+              Where <span className="text-yellow-500">HR Meets People.</span>
             </div>
-            <div className="mt-5 mr-14 text-2xl max-md:mr-2.5 max-md:max-w-full">
+            <div className="mt-5 mr-14 font-normal text-2xl max-md:mr-2.5 max-md:max-w-full">
               We’re making a new HR tool that helps HR find the best people,
               makes it easier to onboard them, and even easier to manage them.
             </div>
@@ -45,18 +45,19 @@ const Content = () => {
         ></iframe>
       </div>
       <div className="flex overflow-hidden flex-col px-24 py-24 text-center max-md:px-5 max-md:text-4xl">
-        <div className="flex flex-col items-center self-center tracking-tighter font-bold px-20 pb-3.5 max-w-full text-yellow-500 w-[1291px] max-md:px-5 text-5xl">
+        <div className="flex flex-col items-center self-center tracking-tighter font-semibold px-20 pb-3.5 max-w-fullw-[1291px] max-md:px-5 text-5xl">
           <div className="flex flex-col max-w-full w-[711px] max-md:text-4xl">
             <div className="self-center max-md:max-w-full max-md:text-4xl">
               Find the best people
             </div>
             <div className="mt-2 max-md:max-w-full max-md:text-4xl">
               and&nbsp;
-              <span className="underline">Automate</span> job posting
+              <span className="underline text-yellow-500">Automate</span> job
+              posting
             </div>
           </div>
         </div>
-        <div className="text-2xl text-yellow-500 pt-3">
+        <div className="text-2xl pt-3">
           Make finding great candidates easier by automating job posting.
         </div>
         <iframe
@@ -70,18 +71,18 @@ const Content = () => {
         ></iframe>
       </div>
       <div className="flex overflow-hidden flex-col px-24 py-24 text-center max-md:px-5">
-        <div className="flex flex-col items-center self-center px-20 pb-3.5 max-w-full text-5xl font-bold tracking-tighter text-yellow-500 w-[1291px] max-md:px-5xl">
+        <div className="flex flex-col items-center self-center px-20 pb-3.5 max-w-full text-5xl font-semibold tracking-tighter w-[1291px] max-md:px-5xl">
           <div className="flex flex-col max-w-full w-[711px] max-md:text-4xl">
             <div className="self-center max-md:max-w-full max-md:text-4xl">
               Easily screen Applicants
             </div>
             <div className="mt-2 max-md:max-w-full max-md:text-4xl">
               and find the&nbsp;
-              <span className="underline">right</span> fit
+              <span className="underline text-yellow-500">right</span> fit
             </div>
           </div>
         </div>
-        <div className="text-2xl text-yellow-500 pt-3">
+        <div className="text-2xl pt-3">
           Easily manage applicants by drag-and-drop.
         </div>
         <iframe
@@ -95,17 +96,17 @@ const Content = () => {
         ></iframe>
       </div>
       <div className="flex overflow-hidden flex-col px-24 py-24 text-center max-md:px-5">
-        <div className="flex flex-col items-center self-center px-20 pb-3.5 max-w-full font-bold tracking-tighter text-yellow-500 w-[1291px] max-md:px-5 text-5xl">
+        <div className="flex flex-col items-center self-center px-20 pb-3.5 max-w-full font-bold tracking-tighter w-[1291px] max-md:px-5 text-5xl">
           <div className="flex flex-col max-w-full w-[711px] max-md:text-4xl">
             <div className="self-center max-md:max-w-full max-md:text-4xl">
               Welcome new hires
             </div>
             <div className="mt-2 max-md:max-w-full max-md:text-4xl">
-              <span className="underline">with ease</span>
+              <span className="underline text-yellow-500">with ease</span>
             </div>
           </div>
         </div>
-        <div className="text-2xl text-yellow-500 pt-3">
+        <div className="text-2xl pt-3">
           Onboard new applicants with pre-defined steps.
         </div>
         <iframe
