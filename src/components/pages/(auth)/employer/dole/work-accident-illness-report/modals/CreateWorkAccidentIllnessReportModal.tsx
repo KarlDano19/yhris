@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
-// import useAddWorkAccidentIllnessReport from '../hooks/useAddWorkAccidentIllnessReport';
+import useAddWorkAccidentIllnessReport from '../hooks/useAddWorkAccidentIllnessReports';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -25,25 +25,25 @@ function CreateWorkAccidentIllnessReportModal({
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
   const { register, handleSubmit, reset, control } = useForm();
-  const { mutate: addEmployeeCompensationLogbook, isLoading: isLoadingAddEmployeeCompensationLogbook } = useAddEmployeeCompensationLogbook();
+  const { mutate: addWorkAccidentIllnessReport, isLoading: isLoadingAddWorkAccidentIllnessReport } = useAddWorkAccidentIllnessReport();
 
   const onSubmit = handleSubmit((data) => {
-    // const callbackReq = {
-    //   onSuccess: (data: any) => {
-    //     toast.custom(() => <CustomToast message={data.message} type='success' />, {
-    //       duration: 5000,
-    //     });
-    //     setIsOpen(false);
-    //     reset();
-    //     refetch();
-    //   },
-    //   onError: (err: any) => {
-    //     toast.custom(() => <CustomToast message={err} type='error' />, {
-    //       duration: 7000,
-    //     });
-    //   },
-    // };
-    // addEmployeeCompensationLogbook(data, callbackReq);
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, {
+          duration: 5000,
+        });
+        setIsOpen(false);
+        reset();
+        refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    addWorkAccidentIllnessReport(data, callbackReq);
   });
 
   useEffect(() => {
@@ -100,16 +100,16 @@ function CreateWorkAccidentIllnessReportModal({
                     <div className='grid grid-cols-3 gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Date of Entry
+                          Date of Accident
                           <span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
                           <Controller
                             control={control}
-                            name='date_of_entry'
+                            name='date_of_incident'
                             render={({ field }) => (
                               <CustomDatePicker
-                                id='employee-compensation-logbook-datepicker'
+                                id='employee-work-accident-illness-report-datepicker'
                                 placeholder={'mm/dd/yyyy'}
                                 className={
                                   'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
@@ -125,27 +125,129 @@ function CreateWorkAccidentIllnessReportModal({
                       </div>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Date of Accident
+                          Time of Accident
                           <span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                          <Controller
-                            control={control}
-                            name='date_of_notification'
-                            render={({ field }) => (
-                              <CustomDatePicker
-                                id='employee-compensation-logbook-datepicker'
-                                placeholder={'mm/dd/yyyy'}
-                                className={
-                                  'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
-                                }
-                                selected={field.value ? new Date(field.value) : null}
-                                pickerOnChange={(date: any) => field.onChange(date)}
-                                inputOnChange={(value: any) => field.onChange(value)}
-                                required={true}
-                              />
-                            )}
+                          <input
+                            type='time'
+                            {...register('time_of_incident', { required: true })}
+                            id='time_of_incident'
+                            className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
                           />
+                        </div>
+                      </div>
+                    </div>
+                    <div className='mt-4'>
+                      <h1 className='text-lg font-semibold'>Personal Information</h1>
+                    </div>
+                    <div className='grid grid-cols-3 gap-6 mt-4'>
+                      <div>
+                        <label htmlFor='employee' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Name of Injured Worker<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <select
+                            id='employee'
+                            {...register('employee', { required: true })}
+                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          >
+                            <option value=''>Select...</option>
+                            {employeeItems.map((item: any) => {
+                              return (
+                                <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
+                              );
+                            })}
+                          </select>
+                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                            <SelectChevronDown />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Age
+                          <span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <input
+                            type='number'
+                            {...register('age', { required: true })}
+                            id='age'
+                            className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Civil Status
+                          <span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <select
+                            id='civil_status'
+                            {...register('civil_status', { required: true })}
+                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          >
+                            <option value=''>Select...</option>
+                            <option value='single'>Single</option>
+                            <option value='married'>Married</option>
+                            <option value='widowed'>Widowed</option>
+                            <option value='separated'>Separated</option>
+                            <option value='divorced'>Divorced</option>
+                          </select>
+                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                            <SelectChevronDown />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className='grid grid-cols-3 gap-6 mt-4'>
+                      <div>
+                        <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Address<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <input
+                            type='text'
+                            {...register('address', { required: true })}
+                            id='address'
+                            className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Number of Dependents
+                          <span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <input
+                            type='number'
+                            {...register('number_of_dependents', { required: true })}
+                            id='number_of_dependents'
+                            className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Sex
+                          <span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <select
+                            id='sex'
+                            {...register('sex', { required: true })}
+                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          >
+                            <option value=''>Select...</option>
+                            <option value='male'>Male</option>
+                            <option value='female'>Female</option>
+                          </select>
+                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                            <SelectChevronDown />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -155,9 +257,9 @@ function CreateWorkAccidentIllnessReportModal({
                     <button
                       type='submit'
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-                      disabled={isLoadingAddEmployeeCompensationLogbook}
+                      disabled={isLoadingAddWorkAccidentIllnessReport}
                     >
-                      {isLoadingAddEmployeeCompensationLogbook && (
+                      {isLoadingAddWorkAccidentIllnessReport && (
                         <div role='status'>
                           <svg
                             aria-hidden='true'
@@ -178,7 +280,7 @@ function CreateWorkAccidentIllnessReportModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoadingAddEmployeeCompensationLogbook && 'Create'}
+                      {!isLoadingAddWorkAccidentIllnessReport && 'Create'}
                     </button>
                     <button
                       type='button'
