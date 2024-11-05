@@ -51,7 +51,7 @@ const Content = () => {
               Find the best people
             </div>
             <div className="mt-2 max-md:max-w-full max-md:text-4xl">
-              and<span> </span>
+              and&nbsp;
               <span className="underline">Automate</span> job posting
             </div>
           </div>
@@ -76,7 +76,7 @@ const Content = () => {
               Easily screen Applicants
             </div>
             <div className="mt-2 max-md:max-w-full max-md:text-4xl">
-              and find the <span> </span>
+              and find the&nbsp;
               <span className="underline">right</span> fit
             </div>
           </div>
