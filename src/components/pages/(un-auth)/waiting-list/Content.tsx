@@ -135,7 +135,7 @@ const Content = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <div className="overflow-hidden py-5 mt-8 max-w-full text-xl text-center text-black bg-yellow-400 rounded-xl w-[298px]">
+            <div className="overflow-hidden py-5 mt-8 max-w-full text-xl text-center text-black bg-yellow-400 rounded-xl w-[298px] font-semibold">
               Join the waiting list today
             </div>
           </a>
