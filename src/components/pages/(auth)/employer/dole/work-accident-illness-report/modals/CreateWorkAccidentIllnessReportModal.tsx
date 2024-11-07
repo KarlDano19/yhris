@@ -49,7 +49,8 @@ function CreateWorkAccidentIllnessReportModal({
         refetch();
       },
       onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type="error" />, {
+        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
+        toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
           duration: 7000,
         });
       },

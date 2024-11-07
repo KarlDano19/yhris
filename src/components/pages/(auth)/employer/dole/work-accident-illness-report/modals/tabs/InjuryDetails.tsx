@@ -66,7 +66,7 @@ function InjuryDetails({
           </div>
           <div>
             <label
-              htmlFor="reportable_illness"
+              htmlFor="nature_of_injury"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Nature of Injury
@@ -74,8 +74,8 @@ function InjuryDetails({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("reportable_illness")}
-                id="reportable_illness"
+                {...register("nature_of_injury")}
+                id="nature_of_injury"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -132,7 +132,7 @@ function InjuryDetails({
               Date Returned to Work
             </label>
             <div className="relative mt-2">
-              <Controller
+            <Controller
                 control={control}
                 name="date_returned_to_work"
                 render={({ field }) => (
@@ -142,8 +142,8 @@ function InjuryDetails({
                     className={
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                     }
-                    selected={field.value ? new Date(field.value) : null}
-                    pickerOnChange={(date: any) => field.onChange(date)}
+                    selected={field.value ? new Date(field.value) : null} // Ensure field.value is a Date
+                    pickerOnChange={(date: any) => field.onChange(date ? date.toISOString() : null)} // Convert to ISO string
                     inputOnChange={(value: any) => field.onChange(value)}
                   />
                 )}

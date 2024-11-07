@@ -4,10 +4,11 @@ import { getCookie } from "cookies-next";
 async function addWorkAccidentIllnessReport(data: any) {
   try {
     const token = getCookie("token");
-    data.date_of_incident = data.date_of_incident.toISOString().split('T')[0]; // Change made here
-    data.date_returned_to_work = data.date_returned_to_work.toISOString().split('T')[0]; // Change made here
-    data.date_of_illness = data.date_of_illness.toISOString().split('T')[0]; // Change made here
-    // data.time_of_incident = data.time_of_incident.toLocaleTimeString("en-CA");
+    data.date_of_incident = data.date_of_incident.toISOString().split('T')[0]
+    data.date_of_disability = data.date_of_disability.toISOString().split('T')[0]
+    // data.date_returned_to_work = data.date_returned_to_work.toISOString().split('T')[0]; // Change made here
+    // data.date_of_illness = data.date_of_illness.toISOString().split('T')[0]; // Change made here
+    // // data.time_of_incident = data.time_of_incident.toLocaleTimeString("en-CA");
     const config = {
       method: "POST",
       headers: {
