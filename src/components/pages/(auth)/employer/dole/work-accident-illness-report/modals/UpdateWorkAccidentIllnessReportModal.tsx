@@ -5,17 +5,15 @@ import { useForm, Controller, set } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import CustomDatePicker from '@/components/CustomDatePicker';
 import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentIllnessReportDetails';
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
-
-import { XCircleIcon } from '@heroicons/react/24/solid';
-import SelectChevronDown from '@/svg/SelectChevronDown';
 import PersonalInformation from './tabs/PersonalInformation';
 import EmployementDetails from './tabs/EmployementDetails';
 import InjuryDetails from './tabs/InjuryDetails';
 import IllnessDetails from './tabs/IllnessDetails';
+
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;
