@@ -80,6 +80,9 @@ export default function UpdateWorkAccidentIllnessReportModal({
       setValue('date_of_disability', workAccidentIllnessReportData.date_of_disability);
       setValue('location_of_incident', workAccidentIllnessReportData.location_of_incident);
       setValue('extent_of_injury', workAccidentIllnessReportData.extent_of_injury);
+      setValue('days_of_absence_illness', workAccidentIllnessReportData.days_of_absence_illness);
+      setValue('days_chargeable_illness', workAccidentIllnessReportData.days_chargeable_illness);
+      setValue('date_returned_to_work_illness', workAccidentIllnessReportData.date_returned_to_work_illness);
     }
   }, [workAccidentIllnessReportData]);
 

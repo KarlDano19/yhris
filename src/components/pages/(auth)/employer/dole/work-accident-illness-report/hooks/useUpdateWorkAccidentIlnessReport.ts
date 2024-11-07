@@ -46,6 +46,15 @@ async function updateWorkAccidentIllnessReport(
           throw new Error("Invalid date_of_disability");
         }
       }
+
+      if (data.date_returned_to_work_illness) {
+        const returnedIllnessDate = new Date(data.date_returned_to_work_illness);
+        if (!isNaN(returnedIllnessDate.getTime())) {
+          data.date_returned_to_work_illness = returnedIllnessDate.toISOString().slice(0, 10);
+        } else {
+          throw new Error("Invalid date_returned_to_work_illness");
+        }
+      }
   
       const config = {
         method: "PATCH",

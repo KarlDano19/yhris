@@ -93,10 +93,19 @@ function Content() {
     if (workAccidentIlnessReportsData) {
       workAccidentIlnessReportsData.records.map((item: any) => {
         const incidentDate = new Date(item.date_of_incident);
-        item.date_of_incident = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+        item.date_of_incident = `${
+          incidentDate.getMonth() + 1
+        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
 
         const returnDate = new Date(item.date_returned_to_work);
-        item.date_returned_to_work = `${returnDate.getMonth() + 1}/${returnDate.getDate()}/${returnDate.getFullYear()}`;
+        item.date_returned_to_work = `${
+          returnDate.getMonth() + 1
+        }/${returnDate.getDate()}/${returnDate.getFullYear()}`;
+
+        const returnedIllnessDate = new Date(item.date_returned_to_work_illness);
+        item.date_returned_to_work_illness = `${
+          returnedIllnessDate.getMonth() + 1
+        }/${returnedIllnessDate.getDate()}/${returnedIllnessDate.getFullYear()}`;
 
         return item;
       });
@@ -239,19 +248,38 @@ function Content() {
             {item.employee}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.reportable_illness}
+            {item.reportable_illness ? (
+              <>
+                {item.reportable_illness} <br />
+                {item.date_returned_to_work_illness && (
+                  <>
+                    (Date of Return: {item.date_returned_to_work_illness}){" "}
+                    <br />
+                  </>
+                )}
+                {item.days_of_absence_illness && (
+                  <>(Days Lost: {item.days_of_absence_illness})</>
+                )}
+              </>
+            ) : null}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.nature_of_injury}
+            {item.nature_of_injury ? (
+              <>
+                {item.nature_of_injury} <br />
+                {item.date_returned_to_work && (
+                  <>
+                    (Date of Return: {item.date_returned_to_work}) <br />
+                  </>
+                )}
+                {item.days_of_absence && (
+                  <>(Days Lost: {item.days_of_absence})</>
+                )}
+              </>
+            ) : null}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.part_of_body_affected}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.date_returned_to_work}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.days_of_absence}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.extent_of_injury}
@@ -467,18 +495,6 @@ function Content() {
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Date Returned to Work
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
-                        Days Lost
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
                         Extent of Disability
                       </th>
                       <th
@@ -545,8 +561,14 @@ function Content() {
             height={1000}
           />
           <div className="flex flex-col gap-1 text-left pb-2">
-          <h1 className="text-sm font-bold">Date of Accident: {workAccidentIlnessReportsItems[0]?.date_of_incident || 'N/A'}</h1>
-          <h1 className="text-sm font-bold">Time of Accident: {workAccidentIlnessReportsItems[0]?.time_of_incident || 'N/A'}</h1>
+            <h1 className="text-sm font-bold">
+              Date of Accident:{" "}
+              {workAccidentIlnessReportsItems[0]?.date_of_incident || "N/A"}
+            </h1>
+            <h1 className="text-sm font-bold">
+              Time of Accident:{" "}
+              {workAccidentIlnessReportsItems[0]?.time_of_incident || "N/A"}
+            </h1>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-800 table-fixed">
@@ -706,13 +728,13 @@ function Content() {
                         {item.date_of_illness}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_returned_to_work}
+                        {item.date_returned_to_work_illness}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_of_absence}
+                        {item.days_of_absence_illness}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_chargeable}
+                        {item.days_chargeable_illness}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
                         {item.extent_of_disability}
@@ -741,9 +763,7 @@ function Content() {
               </tbody>
             </table>
           </div>
-          <p className="mt-4 text-xl text-center">
-            -- Nothing follows --
-          </p>
+          <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
         </div>
       </div>
     </>
