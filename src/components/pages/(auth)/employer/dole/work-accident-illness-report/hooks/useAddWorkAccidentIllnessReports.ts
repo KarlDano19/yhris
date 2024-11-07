@@ -4,11 +4,47 @@ import { getCookie } from "cookies-next";
 async function addWorkAccidentIllnessReport(data: any) {
   try {
     const token = getCookie("token");
-    data.date_of_incident = data.date_of_incident.toISOString().split('T')[0]
-    data.date_of_disability = data.date_of_disability.toISOString().split('T')[0]
-    // data.date_returned_to_work = data.date_returned_to_work.toISOString().split('T')[0]; // Change made here
-    // data.date_of_illness = data.date_of_illness.toISOString().split('T')[0]; // Change made here
-    // // data.time_of_incident = data.time_of_incident.toLocaleTimeString("en-CA");
+    
+    if (data.date_of_incident) {
+      const incidentDate = new Date(data.date_of_incident);
+      if (!isNaN(incidentDate.getTime())) {
+        data.date_of_incident = incidentDate.toISOString().split('T')[0];
+      }
+    }
+    
+    if (data.date_of_disability) {
+      const disabilityDate = new Date(data.date_of_disability);
+      if (!isNaN(disabilityDate.getTime())) {
+        data.date_of_disability = disabilityDate.toISOString().split('T')[0];
+      }
+    }
+    
+    if (data.date_returned_to_work) {
+      const returnedDate = new Date(data.date_returned_to_work);
+      if (!isNaN(returnedDate.getTime())) {
+        data.date_returned_to_work = returnedDate.toISOString().split('T')[0];
+      }
+    }
+    
+    if (data.date_returned_to_work_illness) {
+      const returnedIllnessDate = new Date(data.date_returned_to_work_illness);
+      if (!isNaN(returnedIllnessDate.getTime())) {
+        data.date_returned_to_work_illness = returnedIllnessDate.toISOString().split('T')[0];
+      }
+    }
+    
+    if (data.date_of_illness) {
+      const illnessDate = new Date(data.date_of_illness);
+      if (!isNaN(illnessDate.getTime())) {
+        data.date_of_illness = illnessDate.toISOString().split('T')[0];
+      }
+    }
+
+    data.days_chargeable = data.days_chargeable ? data.days_chargeable : "0";
+    data.days_chargeable_illness = data.days_chargeable_illness ? data.days_chargeable_illness : "0";
+    data.days_of_absence = data.days_of_absence ? data.days_of_absence : "0";
+    data.days_of_absence_illness = data.days_of_absence_illness ? data.days_of_absence_illness : "0";
+
     const config = {
       method: "POST",
       headers: {
