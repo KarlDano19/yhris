@@ -33,12 +33,6 @@ type T_ModalData = {
   open: boolean;
 };
 
-type newFiltersProps = {
-  search?: string;
-  from?: string;
-  to?: string;
-};
-
 function Content() {
   const [employeeCompensationLogbookItems, setEmployeeCompensationLogbookItems] = useState<any>([]);
   const [isEmployeesCompensationLogbookCreateModalOpen, setIsEmployeesCompensationLogbookCreateModalOpen] =

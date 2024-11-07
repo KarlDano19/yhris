@@ -2,7 +2,7 @@ import { Dispatch, Fragment, useEffect, useState, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
-import useGetExportEmployeeCompensationLogbookItems from '../hooks/useGetExportEmployeeCompensationLogbookItems';
+import useGetExportWorkAccidentIllnessReport from '../hooks/useGetExportWorkAccidentIllnessReport';
 
 export default function ExportProgressModal({
   isOpen,
@@ -18,18 +18,18 @@ export default function ExportProgressModal({
   const [downloadUrl, setDownloadUrl] = useState<string>('');
 
   const {
-    data: exportEmployeeCompensationLogbookListData,
-    isLoading: isExportEmployeeCompensationLogbookListLoading,
-    refetch: exportEmployeeCompensationLogbookListRefetch,
-    remove: exportEmployeeCompensationLogbookListRemove,
-  } = useGetExportEmployeeCompensationLogbookItems(itemsFilter);
+    data: exportWorkAccidentIllnessReportData,
+    isLoading: isExportWorkAccidentIllnessReportLoading,
+    refetch: exportWorkAccidentIllnessReportRefetch,
+    remove: exportWorkAccidentIllnessReportRemove,
+  } = useGetExportWorkAccidentIllnessReport(itemsFilter);
 
   useEffect(() => {
-    exportEmployeeCompensationLogbookListRefetch();
+    exportWorkAccidentIllnessReportRefetch();
   }, []);
 
   useEffect(() => {
-    if (isExportEmployeeCompensationLogbookListLoading) {
+    if (isExportWorkAccidentIllnessReportLoading) {
       const interval = setInterval(() => {
         const increment = Math.floor(Math.random() * 5) + 1;
         setProgress((prevProgress) => (prevProgress < 95 ? prevProgress + increment : prevProgress));
@@ -37,18 +37,18 @@ export default function ExportProgressModal({
 
       return () => clearInterval(interval);
     }
-  }, [isExportEmployeeCompensationLogbookListLoading]);
+  }, [isExportWorkAccidentIllnessReportLoading]);
 
   useEffect(() => {
-    if (exportEmployeeCompensationLogbookListData) {
+    if (exportWorkAccidentIllnessReportData) {
       setProgress(100);
-      setDownloadUrl(exportEmployeeCompensationLogbookListData);
+      setDownloadUrl(exportWorkAccidentIllnessReportData);
     }
-  }, [exportEmployeeCompensationLogbookListData]);
+  }, [exportWorkAccidentIllnessReportData]);
 
   const customCloseModal = () => {
     setIsOpen(false);
-    exportEmployeeCompensationLogbookListRemove();
+    exportWorkAccidentIllnessReportRemove();
   };
 
   return (

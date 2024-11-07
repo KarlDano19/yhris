@@ -4,7 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useDeleteEmployeeCompensationLogbook from '../hooks/useDeleteEmployeeCompensationLogbook';
+import useDeleteWorkAccidentIllnessReport from '../hooks/useDeleteWorkAccidentillnessReport';
 
 import WarningRed from '@/svg/WarningRed';
 
@@ -14,7 +14,7 @@ type T_ModalData = {
   code?: string;
 };
 
-export default function DeleteEmployeeCompensationLogModal({
+export default function DeleteWorkAccidentIllnessReportModal({
   refetch,
   isOpen,
   setIsOpen,
@@ -24,7 +24,7 @@ export default function DeleteEmployeeCompensationLogModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { mutate, isLoading } = useDeleteEmployeeCompensationLogbook();
+  const { mutate, isLoading } = useDeleteWorkAccidentIllnessReport();
 
   const onSubmit = () => {
     const callbackReq = {
