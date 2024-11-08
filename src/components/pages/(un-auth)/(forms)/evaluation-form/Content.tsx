@@ -94,27 +94,32 @@ function Content() {
   const submitForm = () => {
     let hasError = false;
     let totalScore = 0;
+    let scoreErrorShown = false; // Track if score error has been shown
+    let commentErrorShown = false; // Track if comment error has been shown
+
     evaluationForm.map((item: any, index: number) => {
       for (const [criteriaIndex, criteriaItem] of item.criterion.entries()) {
-        if (!Object.hasOwn(criteriaItem, 'score')) {
+        if (!Object.hasOwn(criteriaItem, 'score') && !scoreErrorShown) {
           let errorMessage: string = '';
           if (!item.section_title) {
             errorMessage = `Section ${convertToRoman(index + 1)} `;
           }
-          errorMessage += `Question ${criteriaIndex + 1}, Score is required`;
+          errorMessage += `You missed to score a question`;
           toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 4000 });
           hasError = true;
+          scoreErrorShown = true; // Set to true after showing the error
         } else {
           totalScore += criteriaItem.score;
         }
-        if (!criteriaItem.is_disable_comment && !Object.hasOwn(criteriaItem, 'comment')) {
+        if (!criteriaItem.is_disable_comment && !Object.hasOwn(criteriaItem, 'comment') && !commentErrorShown) {
           let errorMessage: string = '';
           if (!item.section_title) {
             errorMessage = `Section ${convertToRoman(index + 1)} `;
           }
-          errorMessage += `Question ${criteriaIndex + 1}, Comment is required`;
+          errorMessage += `You missed to comment a question`;
           toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 4000 });
           hasError = true;
+          commentErrorShown = true; // Set to true after showing the error
         }
       }
     });

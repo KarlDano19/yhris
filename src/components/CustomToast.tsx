@@ -12,7 +12,7 @@ import {
   HandRaisedIcon,
 } from '@heroicons/react/20/solid';
 
-const CustomToast = ({ message, type }: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => {
+const CustomToast = ({ message, type }: { message: string; type: 'success' | 'error' | 'info' | 'warning'; onClose?: () => void }) => {
   const renderIcon = () => {
     const className = 'h-9 w-9 text-white';
     if (type === 'success') {
