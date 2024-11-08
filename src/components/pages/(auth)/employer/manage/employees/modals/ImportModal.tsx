@@ -109,7 +109,13 @@ export default function ImportModal({
       },
     };
     importJSON.forEach((item: any) => {
-      item.date_hired = new Date(item.date_hired).toISOString().split('T')[0];
+      const date = new Date(item.date_hired);
+      if (!isNaN(date.getTime())) {
+        item.date_hired = date.toISOString().split('T')[0];
+      } else {
+        console.error(`Invalid date for item: ${JSON.stringify(item)}`);
+        item.date_hired = null;
+      }
     });
     const data = {
       employees: importJSON,
