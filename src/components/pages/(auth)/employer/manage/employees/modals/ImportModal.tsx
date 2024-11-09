@@ -94,52 +94,16 @@ export default function ImportModal({
   };
 
   const onSubmit = () => {
-    const displayedErrors = new Set<string>(); // To track displayed error messages
-
     // Check for required headers
-    importJSON.forEach((item: any) => {
-      if (!item.date_hired && !displayedErrors.has('Date Hired is required')) {
-        toast.custom(() => <CustomToast message='Date Hired is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Date Hired is required');
-      }
-      if (!item.firstname && !displayedErrors.has('First Name is required')) {
-        toast.custom(() => <CustomToast message='First Name is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('First Name is required');
-      }
-      if (!item.lastname && !displayedErrors.has('Last Name is required')) {
-        toast.custom(() => <CustomToast message='Last Name is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Last Name is required');
-      }
-      if (!item.mobile && !displayedErrors.has('Contact Number is required')) {
-        toast.custom(() => <CustomToast message='Contact Number is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Contact Number is required');
-      }
-      if (!item.email && !displayedErrors.has('Email is required')) {
-        toast.custom(() => <CustomToast message='Email is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Email is required');
-      }
-      if (!item.address && !displayedErrors.has('Address is required')) {
-        toast.custom(() => <CustomToast message='Address is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Address is required');
-      }
-    });
-
-    // Check if any errors were shown
-    const hasErrors = displayedErrors.size > 0;
+    const hasErrors = importJSON.some((item: any) =>
+      !item.date_hired || !item.firstname || !item.lastname || !item.mobile || !item.email || !item.address
+    );
 
     if (hasErrors) {
+      // Show a single custom toast error message
+      toast.custom(() => <CustomToast message='Please make sure all the columns with asterisk (*) are filled out.' type='error' />, {
+        duration: 7000,
+      });
       return; // Prevent submission if there are any errors
     }
 
