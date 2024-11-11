@@ -11,6 +11,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EmployeeCompensitionLogbookLogo from '@/svg/EmployeeCompensitionLogbookLogo';
 import EstablishmentRegistrationLogo from '@/svg/EstablishmentRegistrationLogo';
 import WorkAccidentIllnessReportLogo from '@/svg/WorkAccidentIllnessReportLogo';
+import WemLogo from '@/svg/WemLogo';
 
 function Content() {
   const [isEstablishmentRegistrationConfirmationModalOpen, setIsEstablishmentRegistrationConfirmationModalOpen] =
@@ -34,6 +35,12 @@ function Content() {
       icon: <WorkAccidentIllnessReportLogo />,
       text: 'Work Accident/Illness Report',
       link: '/dole/work-accident-illness-report',
+      isAvailable: true,
+    },
+    {
+      icon: <WemLogo />,
+      text: 'Work Environment Measurement Request',
+      link: '/dole/work-environment-measurement-request',
       isAvailable: true,
     },
   ];
