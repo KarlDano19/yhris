@@ -25,7 +25,7 @@ function WEMDetailsRequest({
   setSelectedTab: any;
 }) {
   const onSubmit = handleSubmit(() => {
-    setSelectedTab(4);
+    setSelectedTab(3);
   });
 
   return (
@@ -46,64 +46,69 @@ function WEMDetailsRequest({
             </div>
           </div>
         </div>
-        <div className="mt-4">
-          <h1 className="text-lg font-semibold">Illness</h1>
+        <div className="mt-4 pl-6">
+          <h1 className="text-lg font-semibold">WEM Details Request</h1>
         </div>
-        <div className="gap-6 mt-4">
+        <div className="gap-6 mt-4 pl-6">
           <div>
             <label
-              htmlFor="safety_officer_levels"
+              htmlFor="purpose_of_wem_request"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Safety Officer Levels
+              Purpose of WEM Request
               <span className="text-red-600">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("purpose_of_wem_request")}
+                  id="purpose_of_wem_request"
+                  value="workplace_improvement"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="purpose_of_wem_request" className="ml-2">
                   Workplace Improvement
                 </label>
               </div>
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("purpose_of_wem_request")}
+                  id="purpose_of_wem_request"
+                  value="oshs_compliance"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="purpose_of_wem_request" className="ml-2">
                   OSHS Compliance
                 </label>
               </div>
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("purpose_of_wem_request")}
+                  id="purpose_of_wem_request"
+                  value="client_customer_requirement"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="purpose_of_wem_request" className="ml-2">
                   Client/Customer Requirement
                 </label>
               </div>
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("purpose_of_wem_request")}
+                  id="purpose_of_wem_request"
+                  value="iso_compliance"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="purpose_of_wem_request" className="ml-2">
                   ISO Compliance
                 </label>
               </div>
               <div className="relative mt-2 flex items-center gap-2">
                 <input
                   type="checkbox"
-                  {...register("required_by_labor_inspector")} // Updated name for uniqueness
+                  {...register("required_by_labor_inspector")}
                   id="required_by_labor_inspector"
+                  value="required_by_labor_inspector"
                 />
                 <label htmlFor="required_by_labor_inspector" className="ml-2">
                   Required by Labor Inspector
@@ -115,63 +120,67 @@ function WEMDetailsRequest({
               <div className="relative flex gap-2 mt-6">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("required_by_labor_inspector")}
+                  id="required_by_labor_inspector"
+                  value="others"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="required_by_labor_inspector" className="ml-2">
                   Others
                 </label>
               </div>
             </div>
           </div>
         </div>
-        <div className="gap-6 mt-4">
+        <div className="gap-6 mt-4 pl-6">
           <div>
             <label
-              htmlFor="safety_officer_levels"
+              htmlFor="wem_conducted_by"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Safety Officer Levels
+              WEM Conducted By
               <span className="text-red-600">*</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("wem_conducted_by")}
+                  id="wem_conducted_by"
+                  value="oshc"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="wem_conducted_by" className="ml-2">
                   OSHC
                 </label>
               </div>
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("wem_conducted_by")}
+                  id="wem_conducted_by"
+                  value="none"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="wem_conducted_by" className="ml-2">
                   None (New Client)
                 </label>
               </div>
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_level_1")}
-                  id="safety_officer_level_1"
+                  {...register("wem_conducted_by")}
+                  id="wem_conducted_by"
+                  value="accredited_wem_officer"
                 />
-                <label htmlFor="safety_officer_level_1" className="ml-2">
+                <label htmlFor="wem_conducted_by" className="ml-2">
                   Accredited Wem Officer
                 </label>
               </div>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-3 gap-6 mt-4 pl-6">
           <div>
-          <label
-              htmlFor="safety_officer_levels"
+            <label
+              htmlFor="last_wem_date"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Last WEM Date
@@ -180,10 +189,10 @@ function WEMDetailsRequest({
             <div className="relative mt-2">
               <Controller
                 control={control}
-                name="date_of_illness"
+                name="last_wem_date"
                 render={({ field }) => (
                   <CustomDatePicker
-                    id="employee-work-accident-illness-report-datepicker"
+                    id="last_wem_date"
                     placeholder={"mm/dd/yyyy"}
                     className={
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
@@ -203,7 +212,7 @@ function WEMDetailsRequest({
         <button
           type="button"
           className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          onClick={() => setSelectedTab(2)}
+          onClick={() => setSelectedTab(1)}
         >
           Back
         </button>

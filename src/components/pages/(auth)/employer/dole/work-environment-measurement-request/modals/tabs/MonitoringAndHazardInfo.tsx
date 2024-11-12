@@ -1,0 +1,353 @@
+"use client";
+
+import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+
+import { Dialog, Transition } from "@headlessui/react";
+import { useForm, Controller } from "react-hook-form";
+import toast from "react-hot-toast";
+
+import CustomToast from "@/components/CustomToast";
+import CustomDatePicker from "@/components/CustomDatePicker";
+import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
+import SelectChevronDown from "@/svg/SelectChevronDown";
+
+function MonitoringAndHazardInfo({
+  control,
+  register,
+  handleSubmit,
+  setSelectedTab,
+}: {
+  control: any;
+  register: any;
+  handleSubmit: any;
+  setSelectedTab: any;
+}) {
+  const onSubmit = handleSubmit(() => {
+    setSelectedTab(4);
+  });
+
+  const [employeeItems, setEmployeeItems] = useState<any>([]);
+  const { data: employeeData } = useGetEmployeeItems();
+
+  useEffect(() => {
+    if (employeeData) {
+      setEmployeeItems(employeeData);
+    }
+  }, [employeeData]);
+
+  return (
+    <form onSubmit={onSubmit}>
+      <div className="px-4 pt-4 pb-6">
+        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <XCircleIcon
+                className="h-5 w-5 text-red-400"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                You cannot proceed due to incomplete fields. Please review.
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6 mt-4">
+          <div className="border-r border-slate-300 pr-6 space-y-6 pl-6">
+            <div className="mb-2">
+              <h1 className="text-lg font-semibold">Monitoring Capability</h1>
+            </div>
+            <div>
+              <label
+                htmlFor="wem_internal_monitoring_capability"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                WEM Internal Monitoring Capability
+                <span className="text-red-600">*</span>
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="text"
+                  {...register("wem_internal_monitoring_capability")}
+                  id="wem_internal_monitoring_capability"
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="wem_equipment_owned_by_company"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                WEM Equipment Owned by Company
+                <span className="text-red-600">*</span>
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="text"
+                  {...register("wem_equipment_owned_by_company")}
+                  id="wem_equipment_owned_by_company"
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="conducting_internal_wem"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Conducting Internal WEM
+                <span className="text-red-600">*</span>
+              </label>
+              <div className="relative mt-2">
+                <div className="space-y-2">
+                  <div>
+                    <input
+                      type="radio"
+                      {...register("conducting_internal_wem")}
+                      id="conducting_internal_wem"
+                      value="yes"
+                    />
+                    <label htmlFor="conducting_internal_wem" className="ml-2">
+                      Yes
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      {...register("conducting_internal_wem")}
+                      id="conducting_internal_wem"
+                      value="no"
+                    />
+                    <label htmlFor="conducting_internal_wem" className="ml-2">
+                      No
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="date_of_internal_monitoring"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Date of Internal Monitoring
+              </label>
+              <div className="relative mt-2">
+                <Controller
+                  control={control}
+                  name="date_of_internal_monitoring"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      id="date_of_internal_monitoring"
+                      placeholder={"mm/dd/yyyy"}
+                      className={
+                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                      }
+                      selected={field.value ? new Date(field.value) : null}
+                      pickerOnChange={(date: any) => field.onChange(date)}
+                      inputOnChange={(value: any) => field.onChange(value)}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="pr-6 space-y-6">
+            <div className="mb-2">
+              <h1 className="text-lg font-semibold">Hazards</h1>
+            </div>
+            <div>
+              <div className="gap-6 mt-4">
+                <div>
+                  <label
+                    htmlFor="purpose_of_wem_request"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Purpose of WEM Request
+                    <span className="text-red-600">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("purpose_of_wem_request")}
+                        id="purpose_of_wem_request"
+                        value="noise"
+                      />
+                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                        Noise
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("purpose_of_wem_request")}
+                        id="purpose_of_wem_request"
+                        value="illumination"
+                      />
+                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                        Illumination
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("purpose_of_wem_request")}
+                        id="purpose_of_wem_request"
+                        value="vibration"
+                      />
+                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                       Vibration
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("purpose_of_wem_request")}
+                        id="purpose_of_wem_request"
+                        value="heat"
+                      />
+                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                        Heat
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label
+                    htmlFor="chemical_hazards"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Chemical Hazards
+                    <span className="text-red-600">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("chemical_hazards")}
+                        id="dust"
+                        value="dust"
+                      />
+                      <label htmlFor="dust" className="ml-2">
+                        Dust
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("chemical_hazards")}
+                        id="organic_solvents"
+                        value="organic_solvents"
+                      />
+                      <label htmlFor="organic_solvents" className="ml-2">
+                        Organic Solvents
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("chemical_hazards")}
+                        id="heavy_metals"
+                        value="heavy_metals"
+                      />
+                      <label htmlFor="chemical_hazards" className="ml-2">
+                       Heavy Metals
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("chemical_hazards")}
+                        id="acids"
+                        value="acids"
+                      />
+                      <label htmlFor="acids" className="ml-2">
+                        Acids
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("chemical_hazards")}
+                        id="gasses"
+                        value="gasses"
+                      />
+                      <label htmlFor="gasses" className="ml-2">
+                       Gasses
+                      </label>
+                    </div>
+                    <div className="relative mt-2 flex gap-2">
+                      <input
+                        type="checkbox"
+                        {...register("chemical_hazards")}
+                        id="other"
+                        value="other"
+                      />
+                      <label htmlFor="other" className="ml-2">
+                        Other
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="safety_officer_levels"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Ventilation
+                <span className="text-red-600">*</span>
+              </label>
+              <div className="relative mt-2 flex gap-2">
+                <input
+                  type="checkbox"
+                  {...register("general_ventilation")}
+                  id="general_ventilation"
+                  value="general_ventilation"
+                />
+                <label htmlFor="general_ventilation" className="ml-2">
+                  General Ventilation
+                </label>
+              </div>
+              <div className="relative mt-2 flex gap-2">
+                <input
+                  type="checkbox"
+                  {...register("local_exhaust_ventilation")}
+                  id="local_exhaust_ventilation"
+                  value="local_exhaust_ventilation"
+                />
+                <label htmlFor="local_exhaust_ventilation" className="ml-2">
+                  Local Exhaust Ventilation
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div className="flex justify-between py-4 px-4">
+        <button
+          type="button"
+          className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          onClick={() => setSelectedTab(2)}
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          Next
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export default MonitoringAndHazardInfo;

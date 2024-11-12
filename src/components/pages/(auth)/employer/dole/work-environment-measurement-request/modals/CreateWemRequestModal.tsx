@@ -13,6 +13,8 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import useAddWorkAccidentIllnessReport from "../../work-accident-illness-report/hooks/useAddWorkAccidentIllnessReports";
 import WEMDetailsRequest from "./tabs/WEMDetailsRequest";
+import MonitoringAndHazardInfo from "./tabs/MonitoringAndHazardInfo";
+import DataPrivacyAndCertification from "./tabs/DataPrivacyAndCertification";
 
 function CreateWemRequestModal({
   refetch,
@@ -26,7 +28,7 @@ function CreateWemRequestModal({
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, control, setValue, getValues } = useForm();
   const {
     mutate: addWorkAccidentIllnessReport,
     isLoading: isLoadingAddWorkAccidentIllnessReport,
@@ -34,30 +36,30 @@ function CreateWemRequestModal({
   const [selectedTab, setSelectedTab] = useState(1);
 
   const onSubmit = handleSubmit((data) => {
-    const callbackReq = {
-      onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
-          {
-            duration: 5000,
-          }
-        );
-        setIsOpen(false);
-        reset();
-        refetch();
-      },
-      onError: (err: any) => {
-        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
-        toast.custom(
-          () => <CustomToast message={errorMessage} type="error" />,
-          {
-            duration: 7000,
-          }
-        );
-      },
-    };
+    // const callbackReq = {
+    //   onSuccess: (data: any) => {
+    //     toast.custom(
+    //       () => <CustomToast message={data.message} type="success" />,
+    //       {
+    //         duration: 5000,
+    //       }
+    //     );
+    //     setIsOpen(false);
+    //     reset();
+    //     refetch();
+    //   },
+    //   onError: (err: any) => {
+    //     const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
+    //     toast.custom(
+    //       () => <CustomToast message={errorMessage} type="error" />,
+    //       {
+    //         duration: 7000,
+    //       }
+    //     );
+    //   },
+    // };
     console.log(data);
-    addWorkAccidentIllnessReport(data, callbackReq);
+    // addWorkAccidentIllnessReport(data, callbackReq);
   });
 
   useEffect(() => {
@@ -106,17 +108,39 @@ function CreateWemRequestModal({
                     onClick={() => setIsOpen(false)}
                   />
                 </div>
-                {/* <BasicAndRiskInfo
-                  register={register}
-                  handleSubmit={handleSubmit}
-                  setSelectedTab={setSelectedTab}
-                /> */}
-                <WEMDetailsRequest
-                control={control}
-                  register={register}
-                  handleSubmit={handleSubmit}
-                  setSelectedTab={setSelectedTab}
-                />
+                {selectedTab === 1 && (
+                  <BasicAndRiskInfo
+                    setValue={setValue}
+                    register={register}
+                    handleSubmit={handleSubmit}
+                    setSelectedTab={setSelectedTab}
+                  />
+                )}
+                {selectedTab === 2 && (
+                  <WEMDetailsRequest
+                    control={control}
+                    register={register}
+                    handleSubmit={handleSubmit}
+                    setSelectedTab={setSelectedTab}
+                  />
+                )}
+                {selectedTab === 3 && (
+                  <MonitoringAndHazardInfo
+                    control={control}
+                    register={register}
+                    handleSubmit={handleSubmit}
+                    setSelectedTab={setSelectedTab}
+                  />
+                )}
+                {selectedTab === 4 && (
+                  <DataPrivacyAndCertification
+                    control={control}
+                    register={register}
+                    onSubmit={onSubmit}
+                    setSelectedTab={setSelectedTab}
+                    setValue={setValue}
+                  />
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>
