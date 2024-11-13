@@ -20,7 +20,7 @@ const ProfileTab = ({
   firstSubmit,
   setCurrentTab,
 }: ProfileTabProps) => {
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [profilePhotoList, setProfilePhotoList] = useState<FileList | null>(null);
   const compressImage = useCallback(
     (
       file: File,
@@ -55,6 +55,7 @@ const ProfileTab = ({
             if (ctx) {
               ctx.drawImage(img, 0, 0, width, height);
               const dataUrl = elem.toDataURL("image/jpeg", quality);
+              console.log(`Compressed image dimensions: ${width}x${height}`);
               resolve(dataUrl);
             } else {
               reject(new Error("Failed to get canvas context"));
@@ -67,6 +68,34 @@ const ProfileTab = ({
     },
     []
   );
+
+  const dataURLtoFile = (dataUrl: string, filename: string): File => {
+    const arr = dataUrl.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    
+    if (!mimeMatch) {
+      throw new Error("Invalid data URL: MIME type not found");
+    }
+
+    const mime = mimeMatch[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  const dataURLtoFileList = (dataUrl: string, filename: string): FileList => {
+    const file = dataURLtoFile(dataUrl, filename);
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    return dataTransfer.files;
+  };
+
   const renderUploadPhoto = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -78,7 +107,8 @@ const ProfileTab = ({
           1080,
           0.7
         );
-        setProfilePhoto(compressedImage);
+        const fileList = dataURLtoFileList(compressedImage, event.target.files[0].name);
+        setProfilePhotoList(fileList);
       } catch (error) {
         console.error("Error compressing image:", error);
         toast.custom(
@@ -92,7 +122,11 @@ const ProfileTab = ({
   };
 
   const profileSubmit = handleSubmit((data: any) => {
-    firstSubmit(data);
+    const formData = {
+      ...data,
+      profilePicture: profilePhotoList,
+    };
+    firstSubmit(formData);
   });
 
   return (
@@ -102,7 +136,7 @@ const ProfileTab = ({
         <div className="lg:col-span-1">
           <div className="overflow-hidden h-[155px] w-36 md:w-auto md:max-w-[150px] mx-auto md:mx-0 md:cols-span-1 lg:col-span-3 flex items-center justify-center">
             <Image
-              src={profilePhoto || "/assets/no-user.png"}
+              src={profilePhotoList ? URL.createObjectURL(profilePhotoList[0]) : "/assets/no-user.png"}
               width={143}
               height={155}
               priority={true}
