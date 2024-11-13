@@ -100,8 +100,9 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 id="template"
                 className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                 onChange={(event) => {
+                  const templateId = parseInt(event.target.value);
                   const template = dataEmailTemplate.find(
-                    (item: any) => item.id === parseInt(event.target.value)
+                    (item: any) => item.id === templateId
                   );
                   if (template) {
                     if (actionState.email) {
@@ -118,6 +119,10 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                       setTagsCc(template.cc);
                     }
                     setValue("message", template.body);
+                    setValue("subject", template.subject);
+                    console.log("Subject set to:", template.subject);
+                  } else {
+                    console.error("Template not found for ID:", templateId);
                   }
                 }}
               >
@@ -145,9 +150,9 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
             <input
               id="subject"
               type="text"
-              value={customSubject}
+              {...register("subject")}
               onChange={(e) => setCustomSubject(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             />
           </div>
           <div className="sm:col-span-4 mt-4">
