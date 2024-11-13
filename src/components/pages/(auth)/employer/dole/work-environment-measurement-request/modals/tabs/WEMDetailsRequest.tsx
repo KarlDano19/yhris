@@ -62,9 +62,9 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("purpose_of_wem_request")}
+                  {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="workplace_improvement"
+                  value="workplace improvement"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   Workplace Improvement
@@ -73,9 +73,9 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("purpose_of_wem_request")}
+                  {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="oshs_compliance"
+                  value="oshs compliance"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   OSHS Compliance
@@ -84,9 +84,9 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("purpose_of_wem_request")}
+                  {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="client_customer_requirement"
+                  value="client/customer requirement"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   Client/Customer Requirement
@@ -95,9 +95,9 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("purpose_of_wem_request")}
+                  {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="iso_compliance"
+                  value="iso compliance"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   ISO Compliance
@@ -106,9 +106,9 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex items-center gap-2">
                 <input
                   type="checkbox"
-                  {...register("required_by_labor_inspector")}
-                  id="required_by_labor_inspector"
-                  value="required_by_labor_inspector"
+                  {...register("purpose_of_wem_request", { required: true })}
+                  id="purpose_of_wem_request"
+                  value="required by labor inspector"
                 />
                 <label htmlFor="required_by_labor_inspector" className="ml-2">
                   Required by Labor Inspector
@@ -120,8 +120,8 @@ function WEMDetailsRequest({
               <div className="relative flex gap-2 mt-6">
                 <input
                   type="checkbox"
-                  {...register("required_by_labor_inspector")}
-                  id="required_by_labor_inspector"
+                  {...register("purpose_of_wem_request", { required: true })}
+                  id="purpose_of_wem_request"
                   value="others"
                 />
                 <label htmlFor="required_by_labor_inspector" className="ml-2">
@@ -144,7 +144,7 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("wem_conducted_by")}
+                  {...register("wem_conducted_by", { required: true })}
                   id="wem_conducted_by"
                   value="oshc"
                 />
@@ -155,7 +155,7 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("wem_conducted_by")}
+                  {...register("wem_conducted_by", { required: true })}
                   id="wem_conducted_by"
                   value="none"
                 />
@@ -166,7 +166,7 @@ function WEMDetailsRequest({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("wem_conducted_by")}
+                  {...register("wem_conducted_by", { required: true })}
                   id="wem_conducted_by"
                   value="accredited_wem_officer"
                 />
@@ -200,6 +200,7 @@ function WEMDetailsRequest({
                     selected={field.value ? new Date(field.value) : null}
                     pickerOnChange={(date: any) => field.onChange(date)}
                     inputOnChange={(value: any) => field.onChange(value)}
+                    required={true}
                   />
                 )}
               />

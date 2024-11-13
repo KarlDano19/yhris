@@ -21,11 +21,15 @@ interface CachedProfileData {
 }
 
 function BasicAndRiskInfo({
+  name_of_safety_officer,
+  control,
   register,
   handleSubmit,
   setSelectedTab,
   setValue,
 }: {
+  name_of_safety_officer?: string[];
+  control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
@@ -40,9 +44,13 @@ function BasicAndRiskInfo({
     handleRemoveTagOfficer,
   } = useTagOfficer(inputOfficer, setInputOfficer);
   const onSubmit = handleSubmit(() => {
-    setValue("safety_officer_name", tagsOfficer);
+    setValue("name_of_safety_officer", tagsOfficer);
     setSelectedTab(2);
   });
+
+  useEffect(() => {
+    setTagsOfficer(name_of_safety_officer || []);
+  }, [name_of_safety_officer])
 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
@@ -84,6 +92,33 @@ function BasicAndRiskInfo({
             </div>
             <div>
               <label
+                htmlFor="date_of_application"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Date of Application
+              </label>
+              <div className="relative mt-2">
+                <Controller
+                  control={control}
+                  name="date_of_application"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      id="date_of_application"
+                      placeholder={"mm/dd/yyyy"}
+                      className={
+                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                      }
+                      selected={field.value ? new Date(field.value) : null}
+                      pickerOnChange={(date: any) => field.onChange(date)}
+                      inputOnChange={(value: any) => field.onChange(value)}
+                      required={true}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+            <div>
+              <label
                 htmlFor="company_name"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
@@ -93,7 +128,7 @@ function BasicAndRiskInfo({
               <div className="relative mt-2">
                 <input
                   type="text"
-                  {...register("company_name")}
+                  {...register("company_name", { required: true })}
                   id="company_name"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
@@ -110,7 +145,7 @@ function BasicAndRiskInfo({
               <div className="relative mt-2">
                 <input
                   type="text"
-                  {...register("type_of_industry")}
+                  {...register("type_of_industry", { required: true })}
                   id="type_of_industry"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
@@ -124,14 +159,14 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-6">
                 <label
                   htmlFor="number_of_workers_male"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 mr-4"
                 >
                   Male
                   <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
-                  {...register("number_of_workers_male")}
+                  {...register("number_of_workers_male", { required: true })}
                   id="number_of_workers_male"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
@@ -146,7 +181,7 @@ function BasicAndRiskInfo({
                 </label>
                 <input
                   type="text"
-                  {...register("number_of_workers_female")}
+                  {...register("number_of_workers_female", { required: true })}
                   id="number_of_workers_female"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
@@ -154,14 +189,14 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-6">
                 <label
                   htmlFor="number_of_workers_total"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 mr-4"
                 >
                   Total
                   <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
-                  {...register("number_of_workers_total")}
+                  {...register("number_of_workers_total", { required: true })}
                   id="number_of_workers_total"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
@@ -185,7 +220,7 @@ function BasicAndRiskInfo({
                   <div>
                     <input
                       type="radio"
-                      {...register("risk_classification")}
+                      {...register("risk_classification", { required: true })}
                       id="risk_low"
                       value="low"
                     />
@@ -196,7 +231,7 @@ function BasicAndRiskInfo({
                   <div>
                     <input
                       type="radio"
-                      {...register("risk_classification")}
+                      {...register("risk_classification", { required: true })}
                       id="risk_medium"
                       value="medium"
                     />
@@ -207,7 +242,7 @@ function BasicAndRiskInfo({
                   <div>
                     <input
                       type="radio"
-                      {...register("risk_classification")}
+                      {...register("risk_classification", { required: true })}
                       id="risk_high"
                       value="high"
                     />
@@ -258,9 +293,9 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels")}
+                  {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_1"
-                  value="safety_officer_level_1"
+                  value="safety officer level 1"
                 />
                 <label htmlFor="safety_officer_level_1" className="ml-2">
                   Safety Officer Level 1
@@ -269,9 +304,9 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels")}
+                  {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_2"
-                  value="safety_officer_level_2"
+                  value="safety officer level 2"
                 />
                 <label htmlFor="safety_officer_level_2" className="ml-2">
                   Safety Officer Level 2
@@ -280,9 +315,9 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels")}
+                  {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_3"
-                  value="safety_officer_level_3"
+                  value="safety officer level 3"
                 />
                 <label htmlFor="safety_officer_level_3" className="ml-2">
                   Accredited Safety Officer Level 3
@@ -291,9 +326,9 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels")}
+                  {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_4"
-                  value="safety_officer_level_4"
+                  value="safety officer level 4"
                 />
                 <label htmlFor="safety_officer_level_4" className="ml-2">
                   Safety Officer Level 4
@@ -302,9 +337,9 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels")}
+                  {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_5"
-                  value="safety_officer_level_5"
+                  value="safety officer level 5"
                 />
                 <label htmlFor="safety_officer_level_5" className="ml-2">
                   Safety Officer Level 5

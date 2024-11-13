@@ -24,6 +24,10 @@ import DeleteIcon from "@/svg/DeleteIcon";
 import useGetWorkAccidentIlnessReportsItems from "../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
 import CreateWemRequestModal from "./modals/CreateWemRequestModal";
 import ExportProgressModal from "../employee-compensation-logbook/modals/ExportProgressModal";
+import useGetWorkEnvironmentRequestItems from "./hooks/useGetWorkEnvironmentRequestItems";
+import DeleteWemRequestModal from "./modals/DeleteWemRequestModal";
+import EditWemRequestModal from "./modals/EditWemRequestModal";
+import EmailLogo from "@/svg/EmailLogo";
 
 type PaginationProps = {
   totalRecords: number;
@@ -36,22 +40,11 @@ type T_ModalData = {
 };
 
 function Content() {
-  const [workAccidentIlnessReportsItems, setWorkAccidentIlnessReportsItems] =
-    useState<any>([]);
-  const [
-    isWorkAccidentIllnessReportDeleteModalOpen,
-    setIsWorkAccidentIllnessReportDeleteModalOpen,
-  ] = useState<T_ModalData | null>(null);
-  const [
-    isUpdateWorkAccidentIllnessReportModalOpen,
-    setIsUpdateWorkAccidentIllnessReportModalOpen,
-  ] = useState<T_ModalData | null>(null);
-  const [
-    isCreateWemRequestModalOpen,
-    setIsCreateWemRequestModalOpen,
-  ] = useState<boolean>(false);
-  const [isExportProgressModalOpen, setIsExportProgressModalOpen] =
-    useState<boolean>(false);
+  const [workEnvironmentRequestItems, setWorkEnvironmentRequestItems] = useState<any>([]);
+  const [isWorkEnvironmentRequestDeleteModalOpen, setIsWorkEnvironmentRequestDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [isCreateWorkEnvironmentRequestModalOpen, setIsCreateWorkEnvironmentRequestModalOpen] = useState<boolean>(false);
+  const [isUpdateWorkEnvironmentRequestModalOpen, setIsUpdateWorkEnvironmentRequestModalOpen] = useState<T_ModalData | null>(null);
+  const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -63,15 +56,13 @@ function Content() {
     to: "",
     search: "",
   });
-  const {
-    data: workAccidentIlnessReportsData,
-    isLoading: isWorkAccidentIlnessReportsLoading,
-    refetch: workAccidentIlnessReportsRefetch,
-  } = useGetWorkAccidentIlnessReportsItems({
+
+  const { data: workEnvironmentRequestItemsData, isLoading: isWorkEnvironmentRequestItemsLoading, refetch: workEnvironmentRequestItemsRefetch } = useGetWorkEnvironmentRequestItems({
     ...itemsFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
+
   const menuOptions = [
     {
       name: "Export",
@@ -88,35 +79,22 @@ function Content() {
   ];
 
   useEffect(() => {
-    if (workAccidentIlnessReportsData) {
-      workAccidentIlnessReportsData.records.map((item: any) => {
-        const incidentDate = new Date(item.date_of_incident);
-        item.date_of_incident = `${
-          incidentDate.getMonth() + 1
-        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
-
-        const returnDate = new Date(item.date_returned_to_work);
-        item.date_returned_to_work = `${
-          returnDate.getMonth() + 1
-        }/${returnDate.getDate()}/${returnDate.getFullYear()}`;
-
-        const returnedIllnessDate = new Date(item.date_returned_to_work_illness);
-        item.date_returned_to_work_illness = `${
-          returnedIllnessDate.getMonth() + 1
-        }/${returnedIllnessDate.getDate()}/${returnedIllnessDate.getFullYear()}`;
-
+    if (workEnvironmentRequestItemsData) {
+      workEnvironmentRequestItemsData.records.map((item: any) => {
+        const applicationDate = new Date(item.date_of_application);
+        item.date_of_application = `${applicationDate.getMonth() + 1}/${applicationDate.getDate()}/${applicationDate.getFullYear()}`;
         return item;
       });
-      setWorkAccidentIlnessReportsItems(workAccidentIlnessReportsData.records);
+      setWorkEnvironmentRequestItems(workEnvironmentRequestItemsData.records);
       setPagination({
-        totalPages: workAccidentIlnessReportsData.total_pages,
-        totalRecords: workAccidentIlnessReportsData.total_records,
+        totalPages: workEnvironmentRequestItemsData.total_pages,
+        totalRecords: workEnvironmentRequestItemsData.total_records,
       });
     }
-  }, [workAccidentIlnessReportsData]);
+  }, [workEnvironmentRequestItemsData]);
 
   useEffect(() => {
-    workAccidentIlnessReportsRefetch();
+    workEnvironmentRequestItemsRefetch();
   }, [currentPage, pageSize]);
 
   const handlePrint = () => {
@@ -189,7 +167,7 @@ function Content() {
         }
       );
     }
-    workAccidentIlnessReportsRefetch();
+    workEnvironmentRequestItemsRefetch();
   };
 
   const paginationChange = (event: any) => {
@@ -202,114 +180,96 @@ function Content() {
     setPageSize(value);
   };
 
-//   const renderRows = () => {
-//     if (isWorkAccidentIlnessReportsLoading) {
-//       return (
-//         <tr>
-//           <td colSpan={100}>
-//             <div role="status" className="py-5 text-center">
-//               <svg
-//                 aria-hidden="true"
-//                 className="inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400"
-//                 viewBox="0 0 100 101"
-//                 fill="none"
-//                 xmlns="http://www.w3.org/2000/svg"
-//               >
-//                 <path
-//                   d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-//                   fill="currentColor"
-//                 />
-//                 <path
-//                   d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-//                   fill="currentFill"
-//                 />
-//               </svg>
-//               <span className="sr-only">Loading...</span>
-//             </div>
-//           </td>
-//         </tr>
-//       );
-//     }
-//     if (
-//       workAccidentIlnessReportsItems &&
-//       workAccidentIlnessReportsItems.length > 0
-//     ) {
-//       return workAccidentIlnessReportsItems.map((item: any) => (
-//         <tr key={item.id} className="cursor-pointer">
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.date_of_incident}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.time_of_incident}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.employee}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.reportable_illness ? (
-//               <>
-//                 {item.reportable_illness} <br />
-//                 {item.date_returned_to_work_illness && (
-//                   <>
-//                     (Date of Return: {item.date_returned_to_work_illness}){" "}
-//                     <br />
-//                   </>
-//                 )}
-//                 {item.days_of_absence_illness && (
-//                   <>(Days Lost: {item.days_of_absence_illness})</>
-//                 )}
-//               </>
-//             ) : null}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.nature_of_injury ? (
-//               <>
-//                 {item.nature_of_injury} <br />
-//                 {item.date_returned_to_work && (
-//                   <>
-//                     (Date of Return: {item.date_returned_to_work}) <br />
-//                   </>
-//                 )}
-//                 {item.days_of_absence && (
-//                   <>(Days Lost: {item.days_of_absence})</>
-//                 )}
-//               </>
-//             ) : null}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.part_of_body_affected}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.extent_of_injury}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
-//             <div className="flex space-x-2">
-//               <button
-//                 onClick={() =>
-//                   setIsUpdateWorkAccidentIllnessReportModalOpen({
-//                     id: item.id,
-//                     open: true,
-//                   })
-//                 }
-//               >
-//                 <EditIcon />
-//               </button>
-//               <button
-//                 onClick={() =>
-//                   setIsWorkAccidentIllnessReportDeleteModalOpen({
-//                     id: item.id,
-//                     open: true,
-//                   })
-//                 }
-//               >
-//                 <DeleteIcon />
-//               </button>
-//             </div>
-//           </td>
-//         </tr>
-//       ));
-//     }
-//   };
+  const renderRows = () => {
+    if (isWorkEnvironmentRequestItemsLoading) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div role="status" className="py-5 text-center">
+              <svg
+                aria-hidden="true"
+                className="inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400"
+                viewBox="0 0 100 101"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="currentFill"
+                />
+              </svg>
+              <span className="sr-only">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    if (
+      workEnvironmentRequestItems &&
+      workEnvironmentRequestItems.length > 0
+    ) {
+      return workEnvironmentRequestItems.map((item: any) => (
+        <tr key={item.id} className="cursor-pointer">
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.date_of_application}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.number_of_workers_total}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.risk_classification.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.purpose_of_wem_request.map((purpose: string) => purpose.charAt(0).toUpperCase() + purpose.slice(1)).join(' ')}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.wem_conducted_by.map((conductedBy: string) => conductedBy.charAt(0).toUpperCase() + conductedBy.slice(1)).join(' ')}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.name_of_safety_officer.map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ')}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
+            <div className="flex space-x-2">
+              <button
+                onClick={() =>
+                  setIsUpdateWorkEnvironmentRequestModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <EditIcon />
+              </button>
+              <button
+                onClick={() =>
+                  setIsUpdateWorkEnvironmentRequestModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <EmailLogo />
+              </button>
+              <button
+                onClick={() =>
+                  setIsWorkEnvironmentRequestDeleteModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
+        </tr>
+      ));
+    }
+  };
 
   return (
     <>
@@ -325,7 +285,7 @@ function Content() {
         </div>
         <div className="px-2 md:px-8 lg:px-4">
           <h2 className="text-xl font-bold text-indigo-dye">
-            Work Accident/Illness Report
+            Work Environment Measurement (WEM) Request
           </h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
             <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
@@ -396,7 +356,7 @@ function Content() {
             <div className="flex-1 flex justify-end">
               <button
                 className="bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
-                onClick={() => setIsCreateWemRequestModalOpen(true)}
+                onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
               >
                 CREATE
               </button>
@@ -496,7 +456,7 @@ function Content() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {/* {renderRows()} */}
+                    {renderRows()}
                   </tbody>
                 </table>
                 <hr />
@@ -512,27 +472,27 @@ function Content() {
           </div>
         </div>
       </div>
-      {isCreateWemRequestModalOpen && (
+      {isCreateWorkEnvironmentRequestModalOpen && (
         <CreateWemRequestModal
-          refetch={workAccidentIlnessReportsRefetch}
-          isOpen={isCreateWemRequestModalOpen}
-          setIsOpen={setIsCreateWemRequestModalOpen}
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isCreateWorkEnvironmentRequestModalOpen}
+          setIsOpen={setIsCreateWorkEnvironmentRequestModalOpen}
         />
       )}
-      {/* {isWorkAccidentIllnessReportDeleteModalOpen && (
-        <DeleteWorkAccidentIllnessReportModal
-          refetch={workAccidentIlnessReportsRefetch}
-          isOpen={isWorkAccidentIllnessReportDeleteModalOpen}
-          setIsOpen={setIsWorkAccidentIllnessReportDeleteModalOpen}
+      {isWorkEnvironmentRequestDeleteModalOpen && (
+        <DeleteWemRequestModal
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isWorkEnvironmentRequestDeleteModalOpen}
+          setIsOpen={setIsWorkEnvironmentRequestDeleteModalOpen}
         />
       )}
-      {isUpdateWorkAccidentIllnessReportModalOpen && (
-        <UpdateWorkAccidentIllnessReportModal
-          refetch={workAccidentIlnessReportsRefetch}
-          isOpen={isUpdateWorkAccidentIllnessReportModalOpen}
-          setIsOpen={setIsUpdateWorkAccidentIllnessReportModalOpen}
+      {isUpdateWorkEnvironmentRequestModalOpen && (
+        <EditWemRequestModal
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isUpdateWorkEnvironmentRequestModalOpen}
+          setIsOpen={setIsUpdateWorkEnvironmentRequestModalOpen}
         />
-      )} */}
+      )}
       {isExportProgressModalOpen && (
         <ExportProgressModal
           isOpen={isExportProgressModalOpen}
@@ -553,11 +513,11 @@ function Content() {
           <div className="flex flex-col gap-1 text-left pb-2">
             <h1 className="text-sm font-bold">
               Date of Accident:{" "}
-              {workAccidentIlnessReportsItems[0]?.date_of_incident || "N/A"}
+              {workEnvironmentRequestItems[0]?.date_of_application || "N/A"}
             </h1>
             <h1 className="text-sm font-bold">
               Time of Accident:{" "}
-              {workAccidentIlnessReportsItems[0]?.time_of_incident || "N/A"}
+              {workEnvironmentRequestItems[0]?.time_of_incident || "N/A"}
             </h1>
           </div>
           <div className="overflow-x-auto">
@@ -669,7 +629,7 @@ function Content() {
                 </tr>
               </thead>
               <tbody>
-                {workAccidentIlnessReportsItems.map(
+                {workEnvironmentRequestItems.map(
                   (item: any, rowIndex: number) => (
                     <tr key={rowIndex}>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">

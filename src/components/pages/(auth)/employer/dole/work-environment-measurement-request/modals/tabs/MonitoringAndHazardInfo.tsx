@@ -71,7 +71,7 @@ function MonitoringAndHazardInfo({
               <div className="relative mt-2">
                 <input
                   type="text"
-                  {...register("wem_internal_monitoring_capability")}
+                  {...register("wem_internal_monitoring_capability", { required: true })}
                   id="wem_internal_monitoring_capability"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
@@ -88,7 +88,7 @@ function MonitoringAndHazardInfo({
               <div className="relative mt-2">
                 <input
                   type="text"
-                  {...register("wem_equipment_owned_by_company")}
+                  {...register("wem_equipment_owned_by_company", { required: true })}
                   id="wem_equipment_owned_by_company"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
@@ -107,22 +107,22 @@ function MonitoringAndHazardInfo({
                   <div>
                     <input
                       type="radio"
-                      {...register("conducting_internal_wem")}
-                      id="conducting_internal_wem"
+                      {...register("conducting_internal_wem", { required: true })}
+                      id="conducting_internal_wem_yes"
                       value="yes"
                     />
-                    <label htmlFor="conducting_internal_wem" className="ml-2">
+                    <label htmlFor="conducting_internal_wem_yes" className="ml-2">
                       Yes
                     </label>
                   </div>
                   <div>
                     <input
                       type="radio"
-                      {...register("conducting_internal_wem")}
-                      id="conducting_internal_wem"
+                      {...register("conducting_internal_wem", { required: true })}
+                      id="conducting_internal_wem_no"
                       value="no"
                     />
-                    <label htmlFor="conducting_internal_wem" className="ml-2">
+                    <label htmlFor="conducting_internal_wem_no" className="ml-2">
                       No
                     </label>
                   </div>
@@ -150,6 +150,7 @@ function MonitoringAndHazardInfo({
                       selected={field.value ? new Date(field.value) : null}
                       pickerOnChange={(date: any) => field.onChange(date)}
                       inputOnChange={(value: any) => field.onChange(value)}
+                      required={true}
                     />
                   )}
                 />
@@ -164,7 +165,7 @@ function MonitoringAndHazardInfo({
               <div className="gap-6 mt-4">
                 <div>
                   <label
-                    htmlFor="purpose_of_wem_request"
+                    htmlFor="hazards_purpose_of_wem_request"
                     className="block text-sm font-medium leading-6 text-gray-900"
                   >
                     Purpose of WEM Request
@@ -174,8 +175,8 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("purpose_of_wem_request")}
-                        id="purpose_of_wem_request"
+                        {...register("hazards_purpose_of_wem_request", { required: true })}
+                        id="hazards_purpose_of_wem_request"
                         value="noise"
                       />
                       <label htmlFor="purpose_of_wem_request" className="ml-2">
@@ -185,8 +186,8 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("purpose_of_wem_request")}
-                        id="purpose_of_wem_request"
+                        {...register("hazards_purpose_of_wem_request", { required: true })}
+                        id="hazards_purpose_of_wem_request"
                         value="illumination"
                       />
                       <label htmlFor="purpose_of_wem_request" className="ml-2">
@@ -196,8 +197,8 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("purpose_of_wem_request")}
-                        id="purpose_of_wem_request"
+                        {...register("hazards_purpose_of_wem_request", { required: true })}
+                        id="hazards_purpose_of_wem_request"
                         value="vibration"
                       />
                       <label htmlFor="purpose_of_wem_request" className="ml-2">
@@ -207,8 +208,8 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("purpose_of_wem_request")}
-                        id="purpose_of_wem_request"
+                        {...register("hazards_purpose_of_wem_request", { required: true })}
+                        id="hazards_purpose_of_wem_request"
                         value="heat"
                       />
                       <label htmlFor="purpose_of_wem_request" className="ml-2">
@@ -229,7 +230,7 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("chemical_hazards")}
+                        {...register("chemical_hazards", { required: true })}
                         id="dust"
                         value="dust"
                       />
@@ -240,9 +241,9 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("chemical_hazards")}
+                        {...register("chemical_hazards", { required: true })}
                         id="organic_solvents"
-                        value="organic_solvents"
+                        value="organic solvents"
                       />
                       <label htmlFor="organic_solvents" className="ml-2">
                         Organic Solvents
@@ -251,9 +252,9 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("chemical_hazards")}
+                        {...register("chemical_hazards", { required: true })}
                         id="heavy_metals"
-                        value="heavy_metals"
+                        value="heavy metals"
                       />
                       <label htmlFor="chemical_hazards" className="ml-2">
                        Heavy Metals
@@ -262,7 +263,7 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("chemical_hazards")}
+                        {...register("chemical_hazards", { required: true })}
                         id="acids"
                         value="acids"
                       />
@@ -273,7 +274,7 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("chemical_hazards")}
+                        {...register("chemical_hazards", { required: true })}
                         id="gasses"
                         value="gasses"
                       />
@@ -284,7 +285,7 @@ function MonitoringAndHazardInfo({
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("chemical_hazards")}
+                        {...register("chemical_hazards", { required: true })}
                         id="other"
                         value="other"
                       />
@@ -298,7 +299,7 @@ function MonitoringAndHazardInfo({
             </div>
             <div>
               <label
-                htmlFor="safety_officer_levels"
+                htmlFor="ventilation"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Ventilation
@@ -307,8 +308,8 @@ function MonitoringAndHazardInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("general_ventilation")}
-                  id="general_ventilation"
+                  {...register("ventilation")}
+                  id="ventilation"
                   value="general_ventilation"
                 />
                 <label htmlFor="general_ventilation" className="ml-2">
@@ -318,8 +319,8 @@ function MonitoringAndHazardInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("local_exhaust_ventilation")}
-                  id="local_exhaust_ventilation"
+                  {...register("ventilation")}
+                  id="ventilation"
                   value="local_exhaust_ventilation"
                 />
                 <label htmlFor="local_exhaust_ventilation" className="ml-2">
