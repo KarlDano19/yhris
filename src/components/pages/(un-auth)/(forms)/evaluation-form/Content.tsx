@@ -251,13 +251,13 @@ function Content() {
                                   onClick={() => {
                                     let prevScore = item.score || 0;
                                     setEvaluationForm((prevForm: any) => {
-                                      return prevForm.map((criterionItem: any, criterionIndex: number) => {
+                                      const updatedForm = prevForm.map((criterionItem: any, criterionIndex: number) => {
                                         if (criterionIndex === evaluationCriterionIndex) {
                                           return {
                                             ...criterionItem,
                                             criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
                                               if (itemIndex === index) {
-                                                return { ...item, score: (prevScore -= 1) };
+                                                return { ...item, score: Math.max(prevScore - 1, 0) };
                                               }
                                               return item;
                                             }),
@@ -265,6 +265,7 @@ function Content() {
                                         }
                                         return criterionItem;
                                       });
+                                      return updatedForm;
                                     });
                                   }}
                                 >
@@ -276,14 +277,15 @@ function Content() {
                                   className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-1/6 border p-2 rounded-md text-center'
                                   value={item.score || 0}
                                   onChange={(event) => {
+                                    const newScore = Number(event.target.value);
                                     setEvaluationForm((prevForm: any) => {
-                                      return prevForm.map((criterionItem: any, criterionIndex: number) => {
+                                      const updatedForm = prevForm.map((criterionItem: any, criterionIndex: number) => {
                                         if (criterionIndex === evaluationCriterionIndex) {
                                           return {
                                             ...criterionItem,
                                             criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
                                               if (itemIndex === index) {
-                                                return { ...item, score: Number(event.target.value) };
+                                                return { ...item, score: newScore };
                                               }
                                               return item;
                                             }),
@@ -291,6 +293,7 @@ function Content() {
                                         }
                                         return criterionItem;
                                       });
+                                      return updatedForm;
                                     });
                                   }}
                                 />
@@ -299,13 +302,13 @@ function Content() {
                                   onClick={() => {
                                     let prevScore = item.score || 0;
                                     setEvaluationForm((prevForm: any) => {
-                                      return prevForm.map((criterionItem: any, criterionIndex: number) => {
+                                      const updatedForm = prevForm.map((criterionItem: any, criterionIndex: number) => {
                                         if (criterionIndex === evaluationCriterionIndex) {
                                           return {
                                             ...criterionItem,
                                             criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
                                               if (itemIndex === index) {
-                                                return { ...item, score: (prevScore += 1) };
+                                                return { ...item, score: prevScore + 1 };
                                               }
                                               return item;
                                             }),
@@ -313,6 +316,7 @@ function Content() {
                                         }
                                         return criterionItem;
                                       });
+                                      return updatedForm;
                                     });
                                   }}
                                 >
@@ -354,7 +358,9 @@ function Content() {
                               id={`comment-${evaluationCriterionIndex}-${index}`}
                               className='border rounded px-5 pt-4 pb-12 text-gray-400'
                               placeholder='Enter comment...'
+                              value={item.comment || ''}
                               onChange={(event) => {
+                                const newComment = event.target.value;
                                 setEvaluationForm((prevForm: any) => {
                                   return prevForm.map((criterionItem: any, criterionIndex: number) => {
                                     if (criterionIndex === evaluationCriterionIndex) {
@@ -362,7 +368,7 @@ function Content() {
                                         ...criterionItem,
                                         criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
                                           if (itemIndex === index) {
-                                            return { ...item, comment: event.target.value };
+                                            return { ...item, comment: newComment };
                                           }
                                           return item;
                                         }),
@@ -404,7 +410,9 @@ function Content() {
                       <button
                         type='button'
                         className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 font-semibold text-sm text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                        onClick={() => setEvaluationCriterionIndex(evaluationCriterionIndex + 1)}
+                        onClick={() => {
+                          setEvaluationCriterionIndex(evaluationCriterionIndex + 1);
+                        }}
                       >
                         Next
                       </button>
