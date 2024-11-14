@@ -13,11 +13,6 @@ import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import classNames from "@/helpers/classNames";
-import ExportProgressModal from "./modals/ExportProgressModal";
-import CreateWorkAccidentIllnessReportModal from "./modals/CreateWorkAccidentIllnessReportModal";
-import useGetWorkAccidentIlnessReportsItems from "./hooks/useGetWorkAccidentIlnessReportsItems";
-import DeleteWorkAccidentIllnessReportModal from "./modals/DeleteWorkAccidentIllnessReportModal";
-import UpdateWorkAccidentIllnessReportModal from "./modals/UpdateWorkAccidentIllnessReportModal";
 
 import {
   ArrowLeftIcon,
@@ -26,6 +21,14 @@ import {
 } from "@heroicons/react/24/solid";
 import EditIcon from "@/svg/EditIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
+import useGetWorkAccidentIlnessReportsItems from "../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
+import CreateWemRequestModal from "./modals/CreateWemRequestModal";
+import ExportProgressModal from "../employee-compensation-logbook/modals/ExportProgressModal";
+import useGetWorkEnvironmentRequestItems from "./hooks/useGetWorkEnvironmentRequestItems";
+import DeleteWemRequestModal from "./modals/DeleteWemRequestModal";
+import EditWemRequestModal from "./modals/EditWemRequestModal";
+import EmailLogo from "@/svg/EmailLogo";
+import SendEmailModal from "./modals/SendEmailModal";
 
 type PaginationProps = {
   totalRecords: number;
@@ -38,22 +41,12 @@ type T_ModalData = {
 };
 
 function Content() {
-  const [workAccidentIlnessReportsItems, setWorkAccidentIlnessReportsItems] =
-    useState<any>([]);
-  const [
-    isWorkAccidentIllnessReportDeleteModalOpen,
-    setIsWorkAccidentIllnessReportDeleteModalOpen,
-  ] = useState<T_ModalData | null>(null);
-  const [
-    isUpdateWorkAccidentIllnessReportModalOpen,
-    setIsUpdateWorkAccidentIllnessReportModalOpen,
-  ] = useState<T_ModalData | null>(null);
-  const [
-    isCreateWorkAccidentIllnessReportModalOpen,
-    setIsCreateWorkAccidentIllnessReportModalOpen,
-  ] = useState<boolean>(false);
-  const [isExportProgressModalOpen, setIsExportProgressModalOpen] =
-    useState<boolean>(false);
+  const [workEnvironmentRequestItems, setWorkEnvironmentRequestItems] = useState<any>([]);
+  const [isWorkEnvironmentRequestDeleteModalOpen, setIsWorkEnvironmentRequestDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [isCreateWorkEnvironmentRequestModalOpen, setIsCreateWorkEnvironmentRequestModalOpen] = useState<boolean>(false);
+  const [isUpdateWorkEnvironmentRequestModalOpen, setIsUpdateWorkEnvironmentRequestModalOpen] = useState<T_ModalData | null>(null);
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
+  const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -65,15 +58,13 @@ function Content() {
     to: "",
     search: "",
   });
-  const {
-    data: workAccidentIlnessReportsData,
-    isLoading: isWorkAccidentIlnessReportsLoading,
-    refetch: workAccidentIlnessReportsRefetch,
-  } = useGetWorkAccidentIlnessReportsItems({
+
+  const { data: workEnvironmentRequestItemsData, isLoading: isWorkEnvironmentRequestItemsLoading, refetch: workEnvironmentRequestItemsRefetch } = useGetWorkEnvironmentRequestItems({
     ...itemsFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
+
   const menuOptions = [
     {
       name: "Export",
@@ -90,35 +81,22 @@ function Content() {
   ];
 
   useEffect(() => {
-    if (workAccidentIlnessReportsData) {
-      workAccidentIlnessReportsData.records.map((item: any) => {
-        const incidentDate = new Date(item.date_of_incident);
-        item.date_of_incident = `${
-          incidentDate.getMonth() + 1
-        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
-
-        const returnDate = new Date(item.date_returned_to_work);
-        item.date_returned_to_work = `${
-          returnDate.getMonth() + 1
-        }/${returnDate.getDate()}/${returnDate.getFullYear()}`;
-
-        const returnedIllnessDate = new Date(item.date_returned_to_work_illness);
-        item.date_returned_to_work_illness = `${
-          returnedIllnessDate.getMonth() + 1
-        }/${returnedIllnessDate.getDate()}/${returnedIllnessDate.getFullYear()}`;
-
+    if (workEnvironmentRequestItemsData) {
+      workEnvironmentRequestItemsData.records.map((item: any) => {
+        const applicationDate = new Date(item.date_of_application);
+        item.date_of_application = `${applicationDate.getMonth() + 1}/${applicationDate.getDate()}/${applicationDate.getFullYear()}`;
         return item;
       });
-      setWorkAccidentIlnessReportsItems(workAccidentIlnessReportsData.records);
+      setWorkEnvironmentRequestItems(workEnvironmentRequestItemsData.records);
       setPagination({
-        totalPages: workAccidentIlnessReportsData.total_pages,
-        totalRecords: workAccidentIlnessReportsData.total_records,
+        totalPages: workEnvironmentRequestItemsData.total_pages,
+        totalRecords: workEnvironmentRequestItemsData.total_records,
       });
     }
-  }, [workAccidentIlnessReportsData]);
+  }, [workEnvironmentRequestItemsData]);
 
   useEffect(() => {
-    workAccidentIlnessReportsRefetch();
+    workEnvironmentRequestItemsRefetch();
   }, [currentPage, pageSize]);
 
   const handlePrint = () => {
@@ -191,7 +169,7 @@ function Content() {
         }
       );
     }
-    workAccidentIlnessReportsRefetch();
+    workEnvironmentRequestItemsRefetch();
   };
 
   const paginationChange = (event: any) => {
@@ -205,7 +183,7 @@ function Content() {
   };
 
   const renderRows = () => {
-    if (isWorkAccidentIlnessReportsLoading) {
+    if (isWorkEnvironmentRequestItemsLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -233,62 +211,34 @@ function Content() {
       );
     }
     if (
-      workAccidentIlnessReportsItems &&
-      workAccidentIlnessReportsItems.length > 0
+      workEnvironmentRequestItems &&
+      workEnvironmentRequestItems.length > 0
     ) {
-      return workAccidentIlnessReportsItems.map((item: any) => (
+      return workEnvironmentRequestItems.map((item: any) => (
         <tr key={item.id} className="cursor-pointer">
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.date_of_incident}
+            {item.date_of_application}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.time_of_incident}
+            {item.number_of_workers_total}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.employee}
+            {item.risk_classification.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.reportable_illness ? (
-              <>
-                {item.reportable_illness} <br />
-                {item.date_returned_to_work_illness && (
-                  <>
-                    (Date of Return: {item.date_returned_to_work_illness}){" "}
-                    <br />
-                  </>
-                )}
-                {item.days_of_absence_illness && (
-                  <>(Days Lost: {item.days_of_absence_illness})</>
-                )}
-              </>
-            ) : null}
+            {item.purpose_of_wem_request.map((purpose: string) => purpose.charAt(0).toUpperCase() + purpose.slice(1)).join(' ')}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.nature_of_injury ? (
-              <>
-                {item.nature_of_injury} <br />
-                {item.date_returned_to_work && (
-                  <>
-                    (Date of Return: {item.date_returned_to_work}) <br />
-                  </>
-                )}
-                {item.days_of_absence && (
-                  <>(Days Lost: {item.days_of_absence})</>
-                )}
-              </>
-            ) : null}
+            {item.wem_conducted_by.map((conductedBy: string) => conductedBy.charAt(0).toUpperCase() + conductedBy.slice(1)).join(' ')}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.part_of_body_affected}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.extent_of_injury}
+            {item.name_of_safety_officer.map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ')}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
             <div className="flex space-x-2">
               <button
                 onClick={() =>
-                  setIsUpdateWorkAccidentIllnessReportModalOpen({
+                  setIsUpdateWorkEnvironmentRequestModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -298,7 +248,17 @@ function Content() {
               </button>
               <button
                 onClick={() =>
-                  setIsWorkAccidentIllnessReportDeleteModalOpen({
+                  setIsSendEmailModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <EmailLogo />
+              </button>
+              <button
+                onClick={() =>
+                  setIsWorkEnvironmentRequestDeleteModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -310,15 +270,6 @@ function Content() {
           </td>
         </tr>
       ));
-    } else {
-      return (
-        <tr>
-          <td colSpan={100}>
-            <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add data.</h4>
-          </td>
-        </tr>
-      );
     }
   };
 
@@ -331,12 +282,12 @@ function Content() {
             className="flex-none flex gap-3 items-center hover:bg-gray-200"
           >
             <ArrowLeftIcon className="h-5 w-5" />
-            <h2 className='text-xl font-bold'>DOLE</h2>
+            <h4>DOLE</h4>
           </Link>
         </div>
         <div className="px-2 md:px-8 lg:px-4">
           <h2 className="text-xl font-bold text-indigo-dye">
-            Work Accident/Illness Report
+            Work Environment Measurement (WEM) Request
           </h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
             <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
@@ -407,9 +358,7 @@ function Content() {
             <div className="flex-1 flex justify-end">
               <button
                 className="bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
-                onClick={() =>
-                  setIsCreateWorkAccidentIllnessReportModalOpen(true)
-                }
+                onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
               >
                 CREATE
               </button>
@@ -468,43 +417,37 @@ function Content() {
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Date of Accident
+                        Date of Application
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Time of Accident
+                        Number of Workers
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Name of Injured Worker
+                        Risk Classification
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Reportable Illness
+                        Purpose of WEM Request
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Nature of Injury
+                        WEM Conducted by
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Parts of the Body Affected
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
-                        Extent of Disability
+                        Safety Officer(s)
                       </th>
                       <th
                         scope="col"
@@ -531,25 +474,25 @@ function Content() {
           </div>
         </div>
       </div>
-      {isCreateWorkAccidentIllnessReportModalOpen && (
-        <CreateWorkAccidentIllnessReportModal
-          refetch={workAccidentIlnessReportsRefetch}
-          isOpen={isCreateWorkAccidentIllnessReportModalOpen}
-          setIsOpen={setIsCreateWorkAccidentIllnessReportModalOpen}
+      {isCreateWorkEnvironmentRequestModalOpen && (
+        <CreateWemRequestModal
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isCreateWorkEnvironmentRequestModalOpen}
+          setIsOpen={setIsCreateWorkEnvironmentRequestModalOpen}
         />
       )}
-      {isWorkAccidentIllnessReportDeleteModalOpen && (
-        <DeleteWorkAccidentIllnessReportModal
-          refetch={workAccidentIlnessReportsRefetch}
-          isOpen={isWorkAccidentIllnessReportDeleteModalOpen}
-          setIsOpen={setIsWorkAccidentIllnessReportDeleteModalOpen}
+      {isWorkEnvironmentRequestDeleteModalOpen && (
+        <DeleteWemRequestModal
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isWorkEnvironmentRequestDeleteModalOpen}
+          setIsOpen={setIsWorkEnvironmentRequestDeleteModalOpen}
         />
       )}
-      {isUpdateWorkAccidentIllnessReportModalOpen && (
-        <UpdateWorkAccidentIllnessReportModal
-          refetch={workAccidentIlnessReportsRefetch}
-          isOpen={isUpdateWorkAccidentIllnessReportModalOpen}
-          setIsOpen={setIsUpdateWorkAccidentIllnessReportModalOpen}
+      {isUpdateWorkEnvironmentRequestModalOpen && (
+        <EditWemRequestModal
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isUpdateWorkEnvironmentRequestModalOpen}
+          setIsOpen={setIsUpdateWorkEnvironmentRequestModalOpen}
         />
       )}
       {isExportProgressModalOpen && (
@@ -559,26 +502,16 @@ function Content() {
           itemsFilter={itemsFilter}
         />
       )}
+      {isSendEmailModalOpen && (
+        <SendEmailModal
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isSendEmailModalOpen}
+          setIsOpen={setIsSendEmailModalOpen}
+        />
+      )}
       {/* Print Section */}
       <div className="container mx-auto p-4 hidden">
         <div id="printSection">
-          <Image
-            className="mx-auto my-6"
-            src="/assets/work-accident-illness-report.png"
-            alt="Work Accident/Illness Report"
-            width={1500}
-            height={1000}
-          />
-          <div className="flex flex-col gap-1 text-left pb-2">
-            <h1 className="text-sm font-bold">
-              Date of Accident:{" "}
-              {workAccidentIlnessReportsItems[0]?.date_of_incident || "N/A"}
-            </h1>
-            <h1 className="text-sm font-bold">
-              Time of Accident:{" "}
-              {workAccidentIlnessReportsItems[0]?.time_of_incident || "N/A"}
-            </h1>
-          </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-800 table-fixed">
               <thead>
@@ -587,184 +520,153 @@ function Content() {
                     colSpan={6}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
                   >
-                    Personal Information
+                    Basic Information
                   </th>
                   <th
-                    colSpan={7}
+                    colSpan={3}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center py-1"
                   >
-                    Employment Details
+                    Risk and Safety Information
                   </th>
                   <th
-                    colSpan={5}
+                    colSpan={3}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
                   >
-                    Illness
+                    WEM Details Request
                   </th>
                   <th
-                    colSpan={7}
+                    colSpan={4}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
                   >
-                    Nature/Extent of Injury
+                    Monitoring Capability
+                  </th>
+                  <th
+                    colSpan={3}
+                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
+                  >
+                    Hazards
                   </th>
                 </tr>
                 <tr>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Name of Injured Worker
+                    Date of Application
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Age
+                    Company Name
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Civil Status
+                    Type of Industry
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Address
+                    Number of Workers Male
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    No. of Dependents
+                    Number of Workers Female
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Sex
+                    Number of Workers Total
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Occupation
+                    Risk Classification
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Employment Status
+                    Name of Safety Officer
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Average Weekly Wage
+                    Safety Officer Level
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Length of Service in Establishment prior to Accident or
-                    Illness
+                    Purpose of WEM Request
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Years of Experience at the Occupation
+                    WEM Conducted by
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Hours of Work per day
+                    Last WEM Date
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Hours of Work per Week
+                    WEM Internal Monitoring Capability
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Reportable Illness
+                    WEM Equipment Owned by Company
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Illness Begun
+                    Conducting Internal WEM
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Returned to Work
+                    Date of Internal Monitoring
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Days Lost
+                    Purpose of WEM Request
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Day/s Charged
+                    Chemical Hazards
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Extent of Disability
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Nature of Injury
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Parts of the Body Affected
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Disability Began
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Returned to Work
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Days Lost
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Day/s Charged
+                    Ventilation
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {workAccidentIlnessReportsItems.map(
+                {workEnvironmentRequestItems.map(
                   (item: any, rowIndex: number) => (
                     <tr key={rowIndex}>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.employee}
+                        {item.date_of_application}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.age}
+                        {item.company_name}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.civil_status}
+                        {item.type_of_industry}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.address}
+                        {item.number_of_workers_male}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.no_of_dependents}
+                        {item.number_of_workers_female}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.sex}
+                        {item.number_of_workers_total}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.occupation}
+                        {item.risk_classification}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.employment_status}
+                        {item.name_of_safety_officer}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.average_weekly_earnings}
+                        {item.safety_officer_levels}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.length_of_service}
+                        {item.purpose_of_wem_request}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.years_of_experience}
+                        {item.wem_conducted_by}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hours_worked_per_day}
+                        {item.last_wem_date}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hours_worked_per_week}
+                        {item.wem_internal_monitoring_capability}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.reportable_illness}
+                        {item.wem_equipment_owned_by_company}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_illness}
+                        {item.conducting_internal_wem ? 'Yes' : 'No'}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_returned_to_work_illness}
+                        {item.date_of_internal_monitoring}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_of_absence_illness}
+                        {item.hazards_purpose_of_wem_request}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_chargeable_illness}
+                        {item.chemical_hazards}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.extent_of_disability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.nature_of_injury}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.part_of_body_affected}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_disability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_returned_to_work}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_of_absence}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_chargeable}
+                        {item.ventilation}
                       </td>
                     </tr>
                   )
