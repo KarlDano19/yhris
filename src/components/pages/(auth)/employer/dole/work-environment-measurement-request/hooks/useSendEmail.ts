@@ -7,8 +7,8 @@ export async function sendEmail(data: any) {
     const payloads = {
       bcc: data.bcc,
       cc: data.cc,
-      subject: `Work Environment Measurement Request | ${data.template}`,
-      to: data.email,
+      subject: `Work Environment Measurement Request`,
+      to: data.to,
       context: data.message,
     };
     const config = {
@@ -21,7 +21,7 @@ export async function sendEmail(data: any) {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/wem-request/send-email/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/work-environment-measures/send-email/`,
         config
       );
       if (!res.ok) {

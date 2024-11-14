@@ -28,6 +28,7 @@ import useGetWorkEnvironmentRequestItems from "./hooks/useGetWorkEnvironmentRequ
 import DeleteWemRequestModal from "./modals/DeleteWemRequestModal";
 import EditWemRequestModal from "./modals/EditWemRequestModal";
 import EmailLogo from "@/svg/EmailLogo";
+import SendEmailModal from "./modals/SendEmailModal";
 
 type PaginationProps = {
   totalRecords: number;
@@ -44,6 +45,7 @@ function Content() {
   const [isWorkEnvironmentRequestDeleteModalOpen, setIsWorkEnvironmentRequestDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [isCreateWorkEnvironmentRequestModalOpen, setIsCreateWorkEnvironmentRequestModalOpen] = useState<boolean>(false);
   const [isUpdateWorkEnvironmentRequestModalOpen, setIsUpdateWorkEnvironmentRequestModalOpen] = useState<T_ModalData | null>(null);
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -246,7 +248,7 @@ function Content() {
               </button>
               <button
                 onClick={() =>
-                  setIsUpdateWorkEnvironmentRequestModalOpen({
+                  setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -498,6 +500,13 @@ function Content() {
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
           itemsFilter={itemsFilter}
+        />
+      )}
+      {isSendEmailModalOpen && (
+        <SendEmailModal
+          refetch={workEnvironmentRequestItemsRefetch}
+          isOpen={isSendEmailModalOpen}
+          setIsOpen={setIsSendEmailModalOpen}
         />
       )}
       {/* Print Section */}
