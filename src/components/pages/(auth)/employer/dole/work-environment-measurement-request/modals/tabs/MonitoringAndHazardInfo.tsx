@@ -232,7 +232,7 @@ function MonitoringAndHazardInfo({
                         type="checkbox"
                         {...register("chemical_hazards", { required: true })}
                         id="dust"
-                        value="dust"
+                        value="Dust"
                       />
                       <label htmlFor="dust" className="ml-2">
                         Dust
@@ -243,7 +243,7 @@ function MonitoringAndHazardInfo({
                         type="checkbox"
                         {...register("chemical_hazards", { required: true })}
                         id="organic_solvents"
-                        value="organic solvents"
+                        value="Organic Solvents"
                       />
                       <label htmlFor="organic_solvents" className="ml-2">
                         Organic Solvents
@@ -254,7 +254,7 @@ function MonitoringAndHazardInfo({
                         type="checkbox"
                         {...register("chemical_hazards", { required: true })}
                         id="heavy_metals"
-                        value="heavy metals"
+                        value="Heavy Metals"
                       />
                       <label htmlFor="chemical_hazards" className="ml-2">
                        Heavy Metals
@@ -265,7 +265,7 @@ function MonitoringAndHazardInfo({
                         type="checkbox"
                         {...register("chemical_hazards", { required: true })}
                         id="acids"
-                        value="acids"
+                        value="Acids"
                       />
                       <label htmlFor="acids" className="ml-2">
                         Acids
@@ -276,7 +276,7 @@ function MonitoringAndHazardInfo({
                         type="checkbox"
                         {...register("chemical_hazards", { required: true })}
                         id="gasses"
-                        value="gasses"
+                        value="Gasses"
                       />
                       <label htmlFor="gasses" className="ml-2">
                        Gasses
@@ -287,7 +287,7 @@ function MonitoringAndHazardInfo({
                         type="checkbox"
                         {...register("chemical_hazards", { required: true })}
                         id="other"
-                        value="other"
+                        value="Other"
                       />
                       <label htmlFor="other" className="ml-2">
                         Other
@@ -310,7 +310,7 @@ function MonitoringAndHazardInfo({
                   type="checkbox"
                   {...register("ventilation")}
                   id="ventilation"
-                  value="general_ventilation"
+                  value="General Ventilation"
                 />
                 <label htmlFor="general_ventilation" className="ml-2">
                   General Ventilation
@@ -321,7 +321,7 @@ function MonitoringAndHazardInfo({
                   type="checkbox"
                   {...register("ventilation")}
                   id="ventilation"
-                  value="local_exhaust_ventilation"
+                  value="Local Exhaust Ventilation"
                 />
                 <label htmlFor="local_exhaust_ventilation" className="ml-2">
                   Local Exhaust Ventilation

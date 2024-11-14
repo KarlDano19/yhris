@@ -64,7 +64,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="workplace improvement"
+                  value="Workplace Improvement"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   Workplace Improvement
@@ -75,7 +75,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="oshs compliance"
+                  value="OSHS Compliance"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   OSHS Compliance
@@ -86,7 +86,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="client/customer requirement"
+                  value="Client/Customer Requirement"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   Client/Customer Requirement
@@ -97,7 +97,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="iso compliance"
+                  value="ISO Compliance"
                 />
                 <label htmlFor="purpose_of_wem_request" className="ml-2">
                   ISO Compliance
@@ -108,7 +108,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="required by labor inspector"
+                  value="Required by Labor Inspector"
                 />
                 <label htmlFor="required_by_labor_inspector" className="ml-2">
                   Required by Labor Inspector
@@ -122,7 +122,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
-                  value="others"
+                  value="Others"
                 />
                 <label htmlFor="required_by_labor_inspector" className="ml-2">
                   Others
@@ -146,7 +146,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("wem_conducted_by", { required: true })}
                   id="wem_conducted_by"
-                  value="oshc"
+                  value="OSHC"
                 />
                 <label htmlFor="wem_conducted_by" className="ml-2">
                   OSHC
@@ -157,7 +157,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("wem_conducted_by", { required: true })}
                   id="wem_conducted_by"
-                  value="none"
+                  value="None (New Client)"
                 />
                 <label htmlFor="wem_conducted_by" className="ml-2">
                   None (New Client)
@@ -168,7 +168,7 @@ function WEMDetailsRequest({
                   type="checkbox"
                   {...register("wem_conducted_by", { required: true })}
                   id="wem_conducted_by"
-                  value="accredited_wem_officer"
+                  value="Accredited Wem Officer"
                 />
                 <label htmlFor="wem_conducted_by" className="ml-2">
                   Accredited Wem Officer

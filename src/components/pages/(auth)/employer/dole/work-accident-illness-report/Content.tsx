@@ -331,7 +331,7 @@ function Content() {
             className="flex-none flex gap-3 items-center hover:bg-gray-200"
           >
             <ArrowLeftIcon className="h-5 w-5" />
-            <h4>DOLE</h4>
+            <h2 className='text-xl font-bold'>DOLE</h2>
           </Link>
         </div>
         <div className="px-2 md:px-8 lg:px-4">

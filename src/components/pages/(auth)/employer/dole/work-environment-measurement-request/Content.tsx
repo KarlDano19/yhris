@@ -512,23 +512,6 @@ function Content() {
       {/* Print Section */}
       <div className="container mx-auto p-4 hidden">
         <div id="printSection">
-          <Image
-            className="mx-auto my-6"
-            src="/assets/work-accident-illness-report.png"
-            alt="Work Accident/Illness Report"
-            width={1500}
-            height={1000}
-          />
-          <div className="flex flex-col gap-1 text-left pb-2">
-            <h1 className="text-sm font-bold">
-              Date of Accident:{" "}
-              {workEnvironmentRequestItems[0]?.date_of_application || "N/A"}
-            </h1>
-            <h1 className="text-sm font-bold">
-              Time of Accident:{" "}
-              {workEnvironmentRequestItems[0]?.time_of_incident || "N/A"}
-            </h1>
-          </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-800 table-fixed">
               <thead>
@@ -537,103 +520,90 @@ function Content() {
                     colSpan={6}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
                   >
-                    Personal Information
+                    Basic Information
                   </th>
                   <th
-                    colSpan={7}
+                    colSpan={3}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center py-1"
                   >
-                    Employment Details
+                    Risk and Safety Information
                   </th>
                   <th
-                    colSpan={5}
+                    colSpan={3}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
                   >
-                    Illness
+                    WEM Details Request
                   </th>
                   <th
-                    colSpan={7}
+                    colSpan={4}
                     className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
                   >
-                    Nature/Extent of Injury
+                    Monitoring Capability
+                  </th>
+                  <th
+                    colSpan={3}
+                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
+                  >
+                    Hazards
                   </th>
                 </tr>
                 <tr>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Name of Injured Worker
+                    Date of Application
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Age
+                    Company Name
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Civil Status
+                    Type of Industry
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Address
+                    Number of Workers Male
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    No. of Dependents
+                    Number of Workers Female
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Sex
+                    Number of Workers Total
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Occupation
+                    Risk Classification
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Employment Status
+                    Name of Safety Officer
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Average Weekly Wage
+                    Safety Officer Level
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Length of Service in Establishment prior to Accident or
-                    Illness
+                    Purpose of WEM Request
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Years of Experience at the Occupation
+                    WEM Conducted by
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Hours of Work per day
+                    Last WEM Date
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Hours of Work per Week
+                    WEM Internal Monitoring Capability
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Reportable Illness
+                    WEM Equipment Owned by Company
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Illness Begun
+                    Conducting Internal WEM
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Returned to Work
+                    Date of Internal Monitoring
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Days Lost
+                    Purpose of WEM Request
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Day/s Charged
+                    Chemical Hazards
                   </th>
                   <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Extent of Disability
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Nature of Injury
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Parts of the Body Affected
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Disability Began
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Returned to Work
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Days Lost
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Day/s Charged
+                    Ventilation
                   </th>
                 </tr>
               </thead>
@@ -642,79 +612,61 @@ function Content() {
                   (item: any, rowIndex: number) => (
                     <tr key={rowIndex}>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.employee}
+                        {item.date_of_application}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.age}
+                        {item.company_name}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.civil_status}
+                        {item.type_of_industry}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.address}
+                        {item.number_of_workers_male}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.no_of_dependents}
+                        {item.number_of_workers_female}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.sex}
+                        {item.number_of_workers_total}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.occupation}
+                        {item.risk_classification}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.employment_status}
+                        {item.name_of_safety_officer}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.average_weekly_earnings}
+                        {item.safety_officer_levels}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.length_of_service}
+                        {item.purpose_of_wem_request}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.years_of_experience}
+                        {item.wem_conducted_by}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hours_worked_per_day}
+                        {item.last_wem_date}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hours_worked_per_week}
+                        {item.wem_internal_monitoring_capability}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.reportable_illness}
+                        {item.wem_equipment_owned_by_company}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_illness}
+                        {item.conducting_internal_wem ? 'Yes' : 'No'}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_returned_to_work_illness}
+                        {item.date_of_internal_monitoring}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_of_absence_illness}
+                        {item.hazards_purpose_of_wem_request}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_chargeable_illness}
+                        {item.chemical_hazards}
                       </td>
                       <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.extent_of_disability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.nature_of_injury}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.part_of_body_affected}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_disability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_returned_to_work}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_of_absence}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_chargeable}
+                        {item.ventilation}
                       </td>
                     </tr>
                   )

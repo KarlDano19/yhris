@@ -222,7 +222,7 @@ function BasicAndRiskInfo({
                       type="radio"
                       {...register("risk_classification", { required: true })}
                       id="risk_low"
-                      value="low"
+                      value="Low"
                     />
                     <label htmlFor="risk_low" className="ml-2">
                       Low
@@ -233,7 +233,7 @@ function BasicAndRiskInfo({
                       type="radio"
                       {...register("risk_classification", { required: true })}
                       id="risk_medium"
-                      value="medium"
+                      value="Medium"
                     />
                     <label htmlFor="risk_medium" className="ml-2">
                       Medium
@@ -244,7 +244,7 @@ function BasicAndRiskInfo({
                       type="radio"
                       {...register("risk_classification", { required: true })}
                       id="risk_high"
-                      value="high"
+                      value="High"
                     />
                     <label htmlFor="risk_high" className="ml-2">
                       High
@@ -295,7 +295,7 @@ function BasicAndRiskInfo({
                   type="checkbox"
                   {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_1"
-                  value="safety officer level 1"
+                  value="Safety Officer Level 1"
                 />
                 <label htmlFor="safety_officer_level_1" className="ml-2">
                   Safety Officer Level 1
@@ -306,7 +306,7 @@ function BasicAndRiskInfo({
                   type="checkbox"
                   {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_2"
-                  value="safety officer level 2"
+                  value="Safety Officer Level 2"
                 />
                 <label htmlFor="safety_officer_level_2" className="ml-2">
                   Safety Officer Level 2
@@ -317,7 +317,7 @@ function BasicAndRiskInfo({
                   type="checkbox"
                   {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_3"
-                  value="safety officer level 3"
+                  value="Safety Officer Level 3"
                 />
                 <label htmlFor="safety_officer_level_3" className="ml-2">
                   Accredited Safety Officer Level 3
@@ -328,7 +328,7 @@ function BasicAndRiskInfo({
                   type="checkbox"
                   {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_4"
-                  value="safety officer level 4"
+                  value="Safety Officer Level 4"
                 />
                 <label htmlFor="safety_officer_level_4" className="ml-2">
                   Safety Officer Level 4
@@ -339,7 +339,7 @@ function BasicAndRiskInfo({
                   type="checkbox"
                   {...register("safety_officer_levels", { required: true })}
                   id="safety_officer_level_5"
-                  value="safety officer level 5"
+                  value="Safety Officer Level 5"
                 />
                 <label htmlFor="safety_officer_level_5" className="ml-2">
                   Safety Officer Level 5
