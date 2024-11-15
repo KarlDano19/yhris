@@ -32,7 +32,9 @@ async function submitApplication(data: any) {
     };
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/applications/`, config);
     if (!res.ok) {
-      throw res.json();
+      const error = res.json();
+      (error as any).status = res.status; // Attach the status code to the error
+      throw error;
     }
     return res.json();
   } catch (err: any) {
@@ -40,7 +42,7 @@ async function submitApplication(data: any) {
     if (Object.hasOwn(errStringify, 'response')) {
       throw errStringify.response.data.message;
     }
-    throw errStringify.message;
+    throw `${err.status}: ${errStringify.message}`;
   }
 }
 
