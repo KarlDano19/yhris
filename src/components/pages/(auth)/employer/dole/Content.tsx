@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import Link from 'next/link';
 
@@ -11,32 +11,11 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EmployeeCompensitionLogbookLogo from '@/svg/EmployeeCompensitionLogbookLogo';
 import EstablishmentRegistrationLogo from '@/svg/EstablishmentRegistrationLogo';
 import WorkAccidentIllnessReportLogo from '@/svg/WorkAccidentIllnessReportLogo';
-import SafetyAndHealthLogo from '@/svg/SafetyAndHealthLogo';
 import WemLogo from '@/svg/WemLogo';
-import SafetyAndHealthPolicyModal from './safety-and-health-policy/modals/SafetyAndHealthPolicyModal';
-import { useQueryClient } from '@tanstack/react-query';
-import AnnualWAIR from '@/svg/AnnualWAIR';
-
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-}
 
 function Content() {
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: CachedProfileData } | undefined };
-
   const [isEstablishmentRegistrationConfirmationModalOpen, setIsEstablishmentRegistrationConfirmationModalOpen] =
     useState(false);
-  const [isSafetyAndHealthPolicyModalOpen, setIsSafetyAndHealthPolicyModalOpen] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-
-  useEffect(() => {
-    if (cachedProfile?.state?.data) {
-      setCompanyName(cachedProfile.state.data.name);
-    }
-  }, [cachedProfile]);
-
   const menus = [
     {
       icon: <EmployeeCompensitionLogbookLogo />,
@@ -64,20 +43,6 @@ function Content() {
       link: '/dole/work-environment-measurement-request',
       isAvailable: true,
     },
-    {
-      icon: <SafetyAndHealthLogo />,
-      text: 'Safety and Health Policy',
-      isAvailable: true,
-      onClickEvent: () => {
-        setIsSafetyAndHealthPolicyModalOpen(true);
-      },
-    },
-    {
-      icon: <AnnualWAIR />,
-      text: 'Annual Work Accident/Illness Exposure Data Report',
-      link: '/dole/annual-work-accident-illness-exposure-data-report',
-      isAvailable: true,
-    },
   ];
   return (
     <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -98,11 +63,6 @@ function Content() {
       <EstablishmentRegistrationConfirmationModal
         isOpen={isEstablishmentRegistrationConfirmationModalOpen}
         setIsOpen={setIsEstablishmentRegistrationConfirmationModalOpen}
-      />
-      <SafetyAndHealthPolicyModal
-        isOpen={isSafetyAndHealthPolicyModalOpen}
-        setIsOpen={setIsSafetyAndHealthPolicyModalOpen}
-        companyName={companyName}
       />
     </div>
   );
