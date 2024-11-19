@@ -52,8 +52,40 @@ function EmployeeAssigneeTab({
     <form onSubmit={onSubmit}>
       <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-6 pt-6 pb-8'>
         <div className='sm:col-span-4 mt-2 w-full'>
+          <label htmlFor='recipient' className='block text-sm font-medium leading-6 text-gray-900'>
+            Recipient<span className='text-red-600'>*</span>
+          </label>
+          <Controller
+            name='recipient'
+            control={control}
+            rules={{ required: 'Please select a recipient' }}
+            render={({ field: { onChange, value }, fieldState: { error } }: { field: Field; fieldState: { error?: { message?: string } } }) => (
+              <>
+                <Select
+                  className='basic-multi-select'
+                  classNamePrefix='select'
+                  options={employeeItems}
+                  value={employeeItems.filter((item: any) => value?.includes(item.value))}
+                  onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className='pointer-events-none px-2'>
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable={false}
+                  isMulti
+                />
+                {error && <p className='text-red-500 text-sm mt-1 ml-1'>{error.message}</p>}
+              </>
+            )}
+          />
+        </div>
+        <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-            Send to<span className='text-red-600'>*</span>
+            Person to be Evaluated<span className='text-red-600'>*</span>
           </label>
           <Controller
             name='employees'

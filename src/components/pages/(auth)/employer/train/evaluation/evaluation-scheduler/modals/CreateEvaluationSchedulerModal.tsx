@@ -30,6 +30,7 @@ function CreateEvaluationSchedulerModal({ refetch, isOpen, setIsOpen }: { refetc
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
+    console.log(data);
     mutate(data, callbackReq);
   });
 
