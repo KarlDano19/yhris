@@ -13,6 +13,7 @@ import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import classNames from "@/helpers/classNames";
+import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import ExportProgressModal from "../work-accident-illness-report/modals/ExportProgressModal";
 import CreateWorkAccidentIllnessReportModal from "../work-accident-illness-report/modals/CreateWorkAccidentIllnessReportModal";
 import useGetWorkAccidentIlnessReportsItems from "../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
@@ -76,6 +77,7 @@ function Content() {
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  const { data: employeeData } = useGetEmployeeItems();
   const menuOptions = [
     {
       name: "Download",
@@ -258,7 +260,7 @@ function Content() {
             {item.date_of_incident}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.time_of_incident}
+            {employeeData.length}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.employee}
