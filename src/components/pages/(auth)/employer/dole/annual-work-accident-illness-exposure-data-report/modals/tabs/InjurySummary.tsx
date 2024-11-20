@@ -4,28 +4,67 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { ChevronDownIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import DrawSignatureModal from "../DrawSignatureModal";
 
-function InjuryDetails({
+interface CachedProfileData {
+  name: string;
+  type_of_industry: string;
+  city: string;
+}
+
+function InjurySummary({
   control,
   register,
   onSubmit,
-  isLoading,
   setSelectedTab,
+  setValue,
+  isLoading,
 }: {
   control: any;
   register: any;
   onSubmit: any;
-  isLoading: any;
   setSelectedTab: any;
+  setValue: any;
+  isLoading: boolean;
 }) {
+  const queryClient = useQueryClient();
+
+  const [employeeItems, setEmployeeItems] = useState<any>([]);
+  const { data: employeeData } = useGetEmployeeItems();
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(["employerProfileCache"]) as {
+    state: { data: CachedProfileData } | undefined;
+  };
+
+  const [drawSignatureModal, setDrawSignatureModal] = useState(false);
+  const [signatureUrl, setSignatureUrl] = useState<string>("");
+  const [attachmentExist, setAttachmentExist] = useState(false);
+
+  const toggleDrawSignatureModal = () => {
+    setDrawSignatureModal(!drawSignatureModal);
+  };
+
+  useEffect(() => {
+    if (signatureUrl) {
+      setValue("signature", signatureUrl);
+    } else {
+      setSignatureUrl("");
+    }
+    if (!drawSignatureModal && signatureUrl) {
+      setSignatureUrl("");
+    }
+  }, [signatureUrl, setValue, drawSignatureModal]);
+
   return (
     <form onSubmit={onSubmit}>
       <div className="px-4 pt-4 pb-6">
@@ -44,178 +83,169 @@ function InjuryDetails({
             </div>
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+          <div>
+            <label
+              htmlFor="total_all_disabling_injuries_illnesses"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Total-All Disabling Injuries/ Illnesses
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("total_all_disabling_injuries_illnesses", {
+                  required: true,
+                })}
+                id="total_all_disabling_injuries_illnesses"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="total_non_disabling_injuries"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Total-Non-Disabling Injuries
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("total_non_disabling_injuries", {
+                  required: true,
+                })}
+                id="total_non_disabling_injuries"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="frequency_rate"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Frequency Rate
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("frequency_rate", { required: true })}
+                id="frequency_rate"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="severity_rate"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Severity Rate
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("severity_rate", { required: true })}
+                id="severity_rate"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+        </div>
         <div className="mt-4">
-          <h1 className="text-lg font-semibold">Nature/Extent of Injury</h1>
+          <h1 className="text-lg font-semibold">Signature</h1>
         </div>
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
             <label
-              htmlFor="extent_of_injury"
+              htmlFor="name_signature"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Extent of Injury
+              Name
+              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("extent_of_injury")}
-                id="extent_of_injury"
+                {...register("name_signature", {
+                  required: true,
+                })}
+                id="naname_signatureme"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
           <div>
             <label
-              htmlFor="nature_of_injury"
+              htmlFor="draw_signature"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Nature of Injury
+              Draw Signature
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <button
+                type="button"
+                className="w-full rounded-md bg-white border border-savoy-blue px-14 py-1.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                onClick={toggleDrawSignatureModal}
+              >
+                Draw
+              </button>
+            </div>
+          </div>
+          <div className="flex-1">
+            <label
+              htmlFor="signature"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Upload Signature
+              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
-                type="text"
-                {...register("nature_of_injury")}
-                id="nature_of_injury"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                id="signature"
+                {...register("signature")}
+                onChange={(e) => {
+                  e.target.value ? setSignatureUrl("") : null;
+                  e.target.value ? setAttachmentExist(true) : null;
+                }}
+                type="file"
+                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
+              {attachmentExist ? (
+                <button
+                  type="button"
+                  className="underline text-savoy-blue text-sm"
+                  onClick={() => {
+                    setValue("signature", "");
+                    setAttachmentExist(false);
+                  }}
+                >
+                  Remove Attachment
+                </button>
+              ) : null}
             </div>
           </div>
-          <div>
-            <label
-              htmlFor="part_of_body_affected"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Part of Body Affected
-            </label>
-            <div className="relative mt-2">
-              <input
-                type="text"
-                {...register("part_of_body_affected")}
-                id="part_of_body_affected"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
-          <div>
-            <label
-              htmlFor="date_of_disability"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Date Disability Began
-            </label>
-            <div className="relative mt-2">
-              <Controller
-                control={control}
-                name="date_of_disability"
-                render={({ field }) => (
-                  <CustomDatePicker
-                    id="employee-work-accident-illness-report-datepicker"
-                    placeholder={"mm/dd/yyyy"}
-                    className={
-                      "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                    }
-                    selected={field.value ? new Date(field.value) : null}
-                    pickerOnChange={(date: any) => field.onChange(date)}
-                    inputOnChange={(value: any) => field.onChange(value)}
-                  />
-                )}
-              />
-            </div>
-          </div>
-          <div>
-            <label
-              htmlFor="date_returned_to_work"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Date Returned to Work
-            </label>
-            <div className="relative mt-2">
-              <Controller
-                control={control}
-                name="date_returned_to_work"
-                render={({ field }) => (
-                  <CustomDatePicker
-                    id="employee-work-accident-illness-report-datepicker"
-                    placeholder={"mm/dd/yyyy"}
-                    className={
-                      "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                    }
-                    selected={field.value ? new Date(field.value) : null} // Ensure field.value is a Date
-                    pickerOnChange={(date: any) =>
-                      field.onChange(date ? date.toISOString() : null)
-                    } // Convert to ISO string
-                    inputOnChange={(value: any) => field.onChange(value)}
-                  />
-                )}
-              />
-            </div>
-          </div>
-          <div>
-            <label
-              htmlFor="days_of_absence"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Days Lost
-            </label>
-            <div className="relative mt-2">
-              <input
-                type="number"
-                {...register("days_of_absence")}
-                id="days_of_absence"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
-          <div>
-            <label
-              htmlFor="days_chargeable"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Day/s Charged
-            </label>
-            <div className="relative mt-2">
-              <input
-                type="number"
-                {...register("days_chargeable")}
-                id="days_chargeable"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
-          <div>
-          <label
-            htmlFor="disabling_injury"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Disabling Injury?
-            <span className="text-red-600">*</span>
-          </label>
-          <div className="relative mt-2">
-            <select
-              id="disabling_injury"
-              {...register("disabling_injury", { required: true })}
-              className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-              <SelectChevronDown />
-            </div>
-          </div>
-        </div>
         </div>
       </div>
+      {drawSignatureModal && (
+        <DrawSignatureModal
+          isOpen={drawSignatureModal}
+          setIsOpen={setDrawSignatureModal}
+          setSignatureUrl={setSignatureUrl}
+        />
+      )}
       <hr />
       <div className="flex justify-between py-4 px-4">
         <button
           type="button"
           className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          onClick={() => setSelectedTab(3)}
+          onClick={() => setSelectedTab(1)}
         >
           Back
         </button>
@@ -251,4 +281,4 @@ function InjuryDetails({
   );
 }
 
-export default InjuryDetails;
+export default InjurySummary;
