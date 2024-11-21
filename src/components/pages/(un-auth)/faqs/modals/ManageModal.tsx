@@ -153,5 +153,3 @@ const ManageModal = ({
 };
 
 export default ManageModal;
-
-                  

@@ -133,6 +133,4 @@ const OrientModal = ({
   );
 };
 
-export default OrientModal;
-
-                  
+export default OrientModal; 

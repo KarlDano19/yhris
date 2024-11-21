@@ -133,5 +133,3 @@ const PostJobModal = ({
 };
 
 export default PostJobModal;
-
-                  

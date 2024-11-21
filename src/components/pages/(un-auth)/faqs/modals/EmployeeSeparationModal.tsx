@@ -131,5 +131,3 @@ const EmployeeSeparationModal = ({
 };
 
 export default EmployeeSeparationModal;
-
-                  

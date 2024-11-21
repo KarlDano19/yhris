@@ -151,6 +151,4 @@ const TrainModal = ({
   );
 };
 
-export default TrainModal;
-
-                  
+export default TrainModal;    

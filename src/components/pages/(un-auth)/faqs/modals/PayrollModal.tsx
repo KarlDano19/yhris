@@ -85,6 +85,4 @@ const PayrollModal = ({
   );
 };
 
-export default PayrollModal;
-
-                  
+export default PayrollModal;      

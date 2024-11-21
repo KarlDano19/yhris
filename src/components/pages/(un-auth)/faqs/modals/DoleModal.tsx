@@ -126,6 +126,4 @@ const DoleModal = ({
   );
 };
 
-export default DoleModal;
-
-                  
+export default DoleModal;  

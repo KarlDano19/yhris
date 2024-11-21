@@ -119,6 +119,4 @@ const ScreenApplicantsModal = ({
   );
 };
 
-export default ScreenApplicantsModal;
-
-                  
+export default ScreenApplicantsModal;        

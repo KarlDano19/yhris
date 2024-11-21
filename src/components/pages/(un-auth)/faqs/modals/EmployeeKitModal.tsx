@@ -109,6 +109,4 @@ const EmployeeKitModal = ({
   );
 };
 
-export default EmployeeKitModal;
-
-                  
+export default EmployeeKitModal;        
