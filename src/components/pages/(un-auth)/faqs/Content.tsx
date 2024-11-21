@@ -2,16 +2,6 @@
 
 import React, { useState } from "react";
 
-import { PlusIcon, MinusIcon } from "@heroicons/react/24/outline";
-import AddPostLogo from "@/svg/AddPostLogo";
-import ScreenApplicantsLogo from "@/svg/ScreenApplicantsLogo";
-import OrientLogo from "@/svg/OrientLogo";
-import ManageLogo from "@/svg/ManageLogo";
-import TrainLogo from "@/svg/TrainLogo";
-import PayrollLogo from "@/svg/PayrollLogo";
-import EmployeeSeparationLogo from "@/svg/EmployeeSeparationLogo";
-import EmployeeKitLogo from "@/svg/EmployeeKitLogo";
-import DoleLogo from "@/svg/DoleLogo";
 import SettingsLogo from "@/svg/SettingsLogo";
 import PostJobModal from "./modals/PostJobModal";
 import ScreenApplicantsModal from "./modals/ScreenApplicantsModal";
@@ -23,6 +13,17 @@ import EmployeeSeparationModal from "./modals/EmployeeSeparationModal";
 import EmployeeKitModal from "./modals/EmployeeKitModal";
 import DoleModal from "./modals/DoleModal";
 import SettingsModal from "./modals/SettingsModal";
+
+import { PlusIcon, MinusIcon } from "@heroicons/react/24/outline";
+import AddPostLogo from "@/svg/AddPostLogo";
+import ScreenApplicantsLogo from "@/svg/ScreenApplicantsLogo";
+import OrientLogo from "@/svg/OrientLogo";
+import ManageLogo from "@/svg/ManageLogo";
+import TrainLogo from "@/svg/TrainLogo";
+import PayrollLogo from "@/svg/PayrollLogo";
+import EmployeeSeparationLogo from "@/svg/EmployeeSeparationLogo";
+import EmployeeKitLogo from "@/svg/EmployeeKitLogo";
+import DoleLogo from "@/svg/DoleLogo";
 
 const FaqPage = () => {
   const [activeIndex, setActiveIndex] = useState(null);
