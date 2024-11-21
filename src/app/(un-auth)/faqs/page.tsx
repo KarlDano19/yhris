@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { PlusIcon, MinusIcon } from "@heroicons/react/24/outline";
 import AddPostLogo from "@/svg/AddPostLogo";
 import ScreenApplicantsLogo from "@/svg/ScreenApplicantsLogo";
