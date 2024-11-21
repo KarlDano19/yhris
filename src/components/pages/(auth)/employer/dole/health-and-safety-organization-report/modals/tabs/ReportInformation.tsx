@@ -11,7 +11,12 @@ import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { PlusIcon, XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import {
+  PlusIcon,
+  XCircleIcon,
+  XMarkIcon,
+  MinusIcon,
+} from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 interface CachedProfileData {
@@ -70,59 +75,59 @@ function ReportInformation({
   const renderEmployeeInputs = () => {
     return fields.map((item, index) => {
       return (
-        <div key={index} className="grid grid-cols-3 gap-6 mt-4 pb-6">
-          <div className="grid grid-cols-3 gap-6">
+        <div key={index} className="grid grid-cols-4 gap-6 mt-4 pb-6">
+          <div className="flex justify-center items-center mt-6">
             <div className="grid-item">
-              <label
-                htmlFor="employee"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
+              <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
                 Shift {index + 1}
-              </label>
+              </h1>
             </div>
           </div>
           <div className="grid-item">
-            <label
-              htmlFor="male"
-              className="text-sm font-medium leading-6 text-gray-900"
-            >
-              Male
-            </label>
             <div className="mt-2">
               <input
                 type="number"
                 {...register(`employees.${index}.male`)}
-                id="male"
+                id={`employees.${index}.male`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
           <div className="grid-item">
-            <label
-              htmlFor="female"
-              className="text-sm font-medium leading-6 text-gray-900"
-            >
-              Female
-            </label>
             <div className="mt-2">
               <input
                 type="number"
                 {...register(`employees.${index}.female`)}
-                id="female"
+                id={`employees.${index}.female`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
-          <button
-            type="button"
-            className="lg:mt-5 w-full md:w-1/2 rounded-md flex justify-center items-center bg-red-600 lg:px-[110px] px-10 py-2.5 text-sm font-semibold text-white shadow-sm mb-4"
-            onClick={() => remove(index)}
-          >
-            REMOVE
-          </button>
+          <div className="flex justify-center items-center">
+            <button
+              type="button"
+              className="flex justify-center items-center rounded-md bg-red-600 p-2 text-white"
+              onClick={() => remove(index)}
+            >
+              <MinusIcon className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       );
     });
+  };
+
+  const calculateTotalEmployees = () => {
+    return fields.reduce(
+      (totals, item) => {
+        const maleCount = item.male ? Number(item.male) : 0;
+        const femaleCount = item.female ? Number(item.female) : 0;
+        totals.male += maleCount;
+        totals.female += femaleCount;
+        return totals;
+      },
+      { male: 0, female: 0 }
+    );
   };
 
   return (
@@ -229,15 +234,61 @@ function ReportInformation({
             <h1 className="text-lg font-semibold">Persons Employed</h1>
           </div>
         </div>
+        <div className="flex mt-4">
+          <button
+            type="button"
+            className="flex justify-center items-center rounded-md bg-savoy-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm mb-4"
+            onClick={() => append({ male: 0, female: 0 })}
+          >
+            <PlusIcon className="h-5 w-5 mr-3" />
+            Add Shift
+          </button>
+        </div>
+        {fields.length > 0 && (
+          <div className="grid grid-cols-4 gap-6 mt-4">
+            <label className="text-sm font-medium leading-6 text-gray-900">
+              {""}
+            </label>
+            <label className="text-sm font-medium leading-6 text-gray-900">
+              Male
+            </label>
+            <label className="text-sm font-medium leading-6 text-gray-900">
+              Female
+            </label>
+          </div>
+        )}
         <div>{renderEmployeeInputs()}</div>
-        <button
-          type="button"
-          className="lg:mt-5 w-full md:w-1/4 rounded-md flex justify-center items-center bg-savoy-blue lg:px-[110px] px-2 py-2.5 text-sm font-semibold text-white shadow-sm mb-4"
-          onClick={() => append({ male: 0, female: 0 })}
-        >
-          <PlusIcon className="h-5 w-5 mr-3" />
-          Add Shift
-        </button>
+        {fields.length > 0 && (
+          <div className="grid grid-cols-4 gap-6 mt-4 pb-6">
+            <div className="flex justify-center items-center mt-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
+                  Total Employees
+                </h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={calculateTotalEmployees().male}
+                  disabled
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={calculateTotalEmployees().female}
+                  disabled
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <hr />
       <div className="py-4 px-4 text-right">

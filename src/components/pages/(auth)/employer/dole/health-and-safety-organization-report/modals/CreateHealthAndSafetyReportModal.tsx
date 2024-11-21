@@ -10,6 +10,7 @@ import ReportInformation from "./tabs/ReportInformation";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import PolicyAndComittee from "./tabs/PolicyAndComittee";
 
 function CreateWemRequestModal({
   refetch,
@@ -27,7 +28,7 @@ function CreateWemRequestModal({
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddWorkEnvironmentRequest,
     } = useAddHealthAndSafetyReport();
-  const [selectedTab, setSelectedTab] = useState(1);
+  const [selectedTab, setSelectedTab] = useState(2);
 
   const onSubmit = handleSubmit((data) => {
     // const callbackReq = {
@@ -103,6 +104,15 @@ function CreateWemRequestModal({
                     setValue={setValue}
                     register={register}
                     handleSubmit={handleSubmit}
+                    setSelectedTab={setSelectedTab}
+                  />
+                )}
+                {selectedTab === 2 && (
+                  <PolicyAndComittee
+                    control={control}
+                    setValue={setValue}
+                    register={register}
+                    onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                   />
                 )}
