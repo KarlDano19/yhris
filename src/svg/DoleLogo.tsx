@@ -2,7 +2,7 @@ import React from 'react';
 
 const DoleLogo = () => {
   return (
-    <svg width='119' height='105' viewBox='0 0 119 105' fill='none' xmlns='http://www.w3.org/2000/svg'>
+    <svg width='104' height='90' viewBox='0 0 119 105' fill='none' xmlns='http://www.w3.org/2000/svg'>
       <mask id='path-1-inside-1_1466_5376' fill='white'>
         <path
           fillRule='evenodd'
