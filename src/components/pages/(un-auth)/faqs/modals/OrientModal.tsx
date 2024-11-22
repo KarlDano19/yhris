@@ -113,10 +113,10 @@ const OrientModal = ({
                     </div>
                     
                 </div>
-                <div className='px-6 mb-6 flex gap-6 mt-4'>
+                <div className='px-6 mb-6 flex gap-6 mt-4 justify-end'>
                   <button
                     type='button'
-                    className='w-1/2 justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0'
+                    className='justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0'
                     onClick={() => setIsOpen(false)}
                     ref={cancelButtonRef}
                     tabIndex={-1}
