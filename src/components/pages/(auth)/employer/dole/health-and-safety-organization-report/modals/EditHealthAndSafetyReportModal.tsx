@@ -5,31 +5,68 @@ import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-import useAddHealthAndSafetyReport from "../hooks/useAddHealthAndSafetyReport";
+import useGetHealthAndSafetyReportDetails from "../hooks/useGetHealthAndSafetyReportDetails";
+import useUpdateHealthAndSafetyReport from "../hooks/useUpdateHealthAndSafetyReport";
 import ReportInformation from "./tabs/ReportInformation";
-
-import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import PolicyAndComittee from "./tabs/PolicyAndComittee";
 import TechnicalAndSignature from "./tabs/TechnicalAndSignature";
 
-function CreateHealthAndSafetyReportModal({
+import { XCircleIcon } from "@heroicons/react/24/solid";
+import SelectChevronDown from "@/svg/SelectChevronDown";
+
+type T_ModalData = {
+    id: number;
+  open: boolean;
+};
+
+function EditHealthAndSafetyReportModal({
   refetch,
   isOpen,
   setIsOpen,
 }: {
   refetch: any;
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
+  isOpen: T_ModalData;
+  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
+  const {
+    data: healthAndSafetyReportData,
+    refetch: refetchHealthAndSafetyReport,
+    remove: removeHealthAndSafetyReport,
+  } = useGetHealthAndSafetyReportDetails(isOpen.id);
   const { register, handleSubmit, reset, control, setValue, getValues } = useForm();
   const {
-    mutate: addWorkEnvironmentRequest,
-    isLoading: isLoadingAddWorkEnvironmentRequest,
-    } = useAddHealthAndSafetyReport();
+    mutate: updateHealthAndSafetyReport,
+    isLoading: isLoadingUpdateHealthAndSafetyReport,
+    } = useUpdateHealthAndSafetyReport();
   const [selectedTab, setSelectedTab] = useState(1);
+
+  const customCloseModal = () => {
+    reset();
+    removeHealthAndSafetyReport();
+    setIsOpen(null);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      refetchHealthAndSafetyReport();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (healthAndSafetyReportData) {
+        setValue("date_of_report", healthAndSafetyReportData.date_of_report);
+        setValue("company_name", healthAndSafetyReportData.company_name);
+        setValue("address", healthAndSafetyReportData.address);
+        setValue("comittee_type", healthAndSafetyReportData.comittee_type);
+        setValue("submitted_by", healthAndSafetyReportData.submitted_by);
+        setValue("type_of_industry", healthAndSafetyReportData.type_of_industry);
+        setValue("number_of_workers_male", healthAndSafetyReportData.number_of_workers_male);
+        setValue("number_of_workers_female", healthAndSafetyReportData.number_of_workers_female);
+        setValue("number_of_workers_total", healthAndSafetyReportData.number_of_workers_total);
+        setValue("risk_classification", healthAndSafetyReportData.risk_classification);
+    }
+  })
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -40,8 +77,7 @@ function CreateHealthAndSafetyReportModal({
             duration: 5000,
           }
         );
-        setIsOpen(false);
-        reset();
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
@@ -55,16 +91,16 @@ function CreateHealthAndSafetyReportModal({
       },
     };
     console.log(data);
-    addWorkEnvironmentRequest(data, callbackReq);
+    updateHealthAndSafetyReport(data, callbackReq);
   });
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition.Root show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
+        onClose={() => customCloseModal()}
       >
         <Transition.Child
           as={Fragment}
@@ -96,7 +132,7 @@ function CreateHealthAndSafetyReportModal({
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => customCloseModal()}
                   />
                 </div>
                 {selectedTab === 1 && (
@@ -135,4 +171,4 @@ function CreateHealthAndSafetyReportModal({
   );
 }
 
-export default CreateHealthAndSafetyReportModal;
+export default EditHealthAndSafetyReportModal;

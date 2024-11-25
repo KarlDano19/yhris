@@ -21,9 +21,12 @@ import {
 } from "@heroicons/react/24/solid";
 import EditIcon from "@/svg/EditIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
-import useGetWorkAccidentIlnessReportsItems from "@/components/pages/(auth)/employer/dole/work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
+import useGetHealthAndSafetyReportItems from "./hooks/useGetHealthAndSafetyReportItems";
 import EmailLogo from "@/svg/EmailLogo";
 import CreateHealthAndSafetyReportModal from "./modals/CreateHealthAndSafetyReportModal";
+import DeleteHealthAndSafetyReportModal from "./modals/DeleteHealthAndSafetyReportModal";
+import EditHealthAndSafetyReportModal from "./modals/EditHealthAndSafetyReportModal";
+import SendEmailModal from "./modals/SendEmailModal";
 // import CreateWemRequestModal from "./modals/CreateWemRequestModal";
 // import ExportProgressModal from "../employee-compensation-logbook/modals/ExportProgressModal";
 // import useGetWorkEnvironmentRequestItems from "./hooks/useGetWorkEnvironmentRequestItems";
@@ -44,9 +47,10 @@ type T_ModalData = {
 
 function Content() {
   const [healthAndSafetyReportItems, setHealthAndSafetyReportItems] = useState<any>([]);
-  const [isHealthAndSafetyReportDeleteModalOpen, setIsHealthAndSafetyReportDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
+  const [isDeleteHealthAndSafetyReportModalOpen, setIsDeleteHealthAndSafetyReportModalOpen] = useState<T_ModalData | null>(null);
   const [isCreateHealthAndSafetyReportModalOpen, setIsCreateHealthAndSafetyReportModalOpen] = useState<boolean>(false);
-  const [isUpdateHealthAndSafetyReportModalOpen, setIsUpdateHealthAndSafetyReportModalOpen] = useState<T_ModalData | null>(null);
+  const [isEditHealthAndSafetyReportModalOpen, setIsEditHealthAndSafetyReportModalOpen] = useState<T_ModalData | null>(null);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,7 +64,7 @@ function Content() {
     search: "",
   });
 
-  const { data: workEnvironmentRequestItemsData, isLoading: isWorkEnvironmentRequestItemsLoading, refetch: workEnvironmentRequestItemsRefetch } = useGetWorkAccidentIlnessReportsItems({
+  const { data: healthAndSafetyReportItemsData, isLoading: isHealthAndSafetyReportItemsLoading, refetch: healthAndSafetyReportItemsRefetch } = useGetHealthAndSafetyReportItems({
     ...itemsFilter,
     pageSize: pageSize,
     currentPage: currentPage,
@@ -82,22 +86,22 @@ function Content() {
   ];
 
   useEffect(() => {
-    if (workEnvironmentRequestItemsData) {
-      workEnvironmentRequestItemsData.records.map((item: any) => {
+    if (healthAndSafetyReportItemsData) {
+      healthAndSafetyReportItemsData.records.map((item: any) => {
         const applicationDate = new Date(item.date_of_application);
         item.date_of_application = `${applicationDate.getMonth() + 1}/${applicationDate.getDate()}/${applicationDate.getFullYear()}`;
         return item;
       });
-      setHealthAndSafetyReportItems(workEnvironmentRequestItemsData.records);
+      setHealthAndSafetyReportItems(healthAndSafetyReportItemsData.records);
       setPagination({
-        totalPages: workEnvironmentRequestItemsData.total_pages,
-        totalRecords: workEnvironmentRequestItemsData.total_records,
+        totalPages: healthAndSafetyReportItemsData.total_pages,
+        totalRecords: healthAndSafetyReportItemsData.total_records,
       });
     }
-  }, [workEnvironmentRequestItemsData]);
+  }, [healthAndSafetyReportItemsData]);
 
   useEffect(() => {
-    workEnvironmentRequestItemsRefetch();
+    healthAndSafetyReportItemsRefetch();
   }, [currentPage, pageSize]);
 
   const handlePrint = () => {
@@ -170,7 +174,7 @@ function Content() {
         }
       );
     }
-    workEnvironmentRequestItemsRefetch();
+    healthAndSafetyReportItemsRefetch();
   };
 
   const paginationChange = (event: any) => {
@@ -183,96 +187,90 @@ function Content() {
     setPageSize(value);
   };
 
-//   const renderRows = () => {
-//     if (isWorkEnvironmentRequestItemsLoading) {
-//       return (
-//         <tr>
-//           <td colSpan={100}>
-//             <div role="status" className="py-5 text-center">
-//               <svg
-//                 aria-hidden="true"
-//                 className="inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400"
-//                 viewBox="0 0 100 101"
-//                 fill="none"
-//                 xmlns="http://www.w3.org/2000/svg"
-//               >
-//                 <path
-//                   d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-//                   fill="currentColor"
-//                 />
-//                 <path
-//                   d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-//                   fill="currentFill"
-//                 />
-//               </svg>
-//               <span className="sr-only">Loading...</span>
-//             </div>
-//           </td>
-//         </tr>
-//       );
-//     }
-//     if (
-//       workEnvironmentRequestItems &&
-//       workEnvironmentRequestItems.length > 0
-//     ) {
-//       return workEnvironmentRequestItems.map((item: any) => (
-//         <tr key={item.id} className="cursor-pointer">
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.date_of_application}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.number_of_workers_total}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.risk_classification.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.purpose_of_wem_request.map((purpose: string) => purpose.charAt(0).toUpperCase() + purpose.slice(1)).join(' ')}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.wem_conducted_by.map((conductedBy: string) => conductedBy.charAt(0).toUpperCase() + conductedBy.slice(1)).join(' ')}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-//             {item.name_of_safety_officer.map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ')}
-//           </td>
-//           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
-//             <div className="flex space-x-2">
-//               <button
-//                 onClick={() =>
-//                   setIsUpdateWorkEnvironmentRequestModalOpen({
-//                     id: item.id,
-//                     open: true,
-//                   })
-//                 }
-//               >
-//                 <EditIcon />
-//               </button>
-//               <button
-//                 onClick={() =>
-//                   setIsSendEmailModalOpen({
-//                     id: item.id,
-//                     open: true,
-//                   })
-//                 }
-//               >
-//                 <EmailLogo />
-//               </button>
-//               <button
-//                 onClick={() =>
-//                   setIsWorkEnvironmentRequestDeleteModalOpen({
-//                     id: item.id,
-//                     open: true,
-//                   })
-//                 }
-//               >
-//                 <DeleteIcon />
-//               </button>
-//             </div>
-//           </td>
-//         </tr>
-//       ));
-//     }
-//   };
+  const renderRows = () => {
+    if (isHealthAndSafetyReportItemsLoading) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div role="status" className="py-5 text-center">
+              <svg
+                aria-hidden="true"
+                className="inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400"
+                viewBox="0 0 100 101"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="currentFill"
+                />
+              </svg>
+              <span className="sr-only">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    if (
+      healthAndSafetyReportItems &&
+      healthAndSafetyReportItems.length > 0
+    ) {
+      return healthAndSafetyReportItems.map((item: any) => (
+        <tr key={item.id} className="cursor-pointer">
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.date_of_report}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.person_employed}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.comittee_type}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.chairman_name}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
+            <div className="flex space-x-2">
+              <button
+                onClick={() =>
+                  setIsEditHealthAndSafetyReportModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <EditIcon />
+              </button>
+              <button
+                onClick={() =>
+                    setIsSendEmailModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <EmailLogo />
+              </button>
+              <button
+                onClick={() =>
+                  setIsDeleteHealthAndSafetyReportModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
+        </tr>
+      ));
+    }
+  };
 
   return (
     <>
@@ -418,37 +416,25 @@ function Content() {
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Date of Application
+                        Date of Report
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Number of Workers
+                        Number of Employees
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Risk Classification
+                        Safety Committee Type
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Purpose of WEM Request
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
-                        WEM Conducted by
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      >
-                        Safety Officer(s)
+                        Chairman/ Officer in Charge
                       </th>
                       <th
                         scope="col"
@@ -459,7 +445,7 @@ function Content() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {/* {renderRows()} */}
+                    {renderRows()}
                   </tbody>
                 </table>
                 <hr />
@@ -480,6 +466,27 @@ function Content() {
           refetch={null}
           isOpen={isCreateHealthAndSafetyReportModalOpen}
           setIsOpen={setIsCreateHealthAndSafetyReportModalOpen}
+        />
+      )}
+      {isDeleteHealthAndSafetyReportModalOpen && (
+        <DeleteHealthAndSafetyReportModal
+          refetch={null}
+          isOpen={isDeleteHealthAndSafetyReportModalOpen}
+          setIsOpen={setIsDeleteHealthAndSafetyReportModalOpen}
+        />
+      )}
+      {isEditHealthAndSafetyReportModalOpen && (
+        <EditHealthAndSafetyReportModal
+          refetch={null}
+          isOpen={isEditHealthAndSafetyReportModalOpen}
+          setIsOpen={setIsEditHealthAndSafetyReportModalOpen}
+        />
+      )}
+      {isSendEmailModalOpen && (
+        <SendEmailModal
+          refetch={null}
+          isOpen={isSendEmailModalOpen}
+          setIsOpen={setIsSendEmailModalOpen}
         />
       )}
       {/* Print Section */}
