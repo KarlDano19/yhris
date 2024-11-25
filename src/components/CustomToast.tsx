@@ -38,7 +38,7 @@ const CustomToast = ({ message, type }: { message: string; type: 'success' | 'er
     >
       <div className='px-4 py-3'>
         <div className='flex items-center'>
-          <div className='flex-shrink-0'>{renderIcon()}</div>
+          {/* <div className='flex-shrink-0'>{renderIcon()}</div> */}
           <div className='ml-3 w-0 flex-1'>
             <p className='mt-1 text-sm text-white'>{message}</p>
           </div>
