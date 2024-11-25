@@ -32,6 +32,7 @@ import DeleteIcon from "@/svg/DeleteIcon";
 import EmailLogo from "@/svg/EmailLogo";
 import UpdateReportModal from "./modals/UpdateReportModal";
 import DeleteReportModal from "./modals/DeleteReportModal";
+import SendEmailModal from "./modals/SendEmailModal";
 
 type PaginationProps = {
   totalRecords: number;
@@ -60,6 +61,8 @@ function Content() {
   ] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] =
     useState<boolean>(false);
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] =
+    useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -298,12 +301,12 @@ function Content() {
                 <EditIcon />
               </button>
               <button
-                // onClick={() =>
-                //   setIsSendEmailModalOpen({
-                //     id: item.id,
-                //     open: true,
-                //   })
-                // }
+                onClick={() =>
+                  setIsSendEmailModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
               >
                 <EmailLogo />
               </button> 
@@ -592,6 +595,13 @@ function Content() {
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
           itemsFilter={itemsFilter}
+        />
+      )}
+      {isSendEmailModalOpen && (
+        <SendEmailModal
+          refetch={annualAccidentIllnessReportRefetch}
+          isOpen={isSendEmailModalOpen}
+          setIsOpen={setIsSendEmailModalOpen}
         />
       )}
       {/* Print Section */}

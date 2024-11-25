@@ -21,7 +21,7 @@ export async function sendEmail(data: any) {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/health-and-safety-organization-reports/send-email/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/annual-work-accident-illness-reports/send-email/`,
         config
       );
       if (!res.ok) {

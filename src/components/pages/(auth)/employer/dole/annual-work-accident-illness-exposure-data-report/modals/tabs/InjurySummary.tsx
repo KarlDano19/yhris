@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
@@ -37,9 +36,6 @@ function InjurySummary({
   isLoading: boolean;
 }) {
   const queryClient = useQueryClient();
-
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
   const cachedProfile = queryClient
     .getQueryCache()
     .find(["employerProfileCache"]) as {
@@ -49,6 +45,10 @@ function InjurySummary({
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
+  const [totalDisablingInjuries, setTotalDisablingInjuries] =
+    useState<number>(0);
+  const [employeeHours, setEmployeeHours] = useState<number>(0);
+  const [daysLost, setDaysLost] = useState<number>(0);
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -64,6 +64,25 @@ function InjurySummary({
       setSignatureUrl("");
     }
   }, [signatureUrl, setValue, drawSignatureModal]);
+
+  useEffect(() => {
+    if (employeeHours > 0) {
+      const calculatedFrequencyRate =
+        (totalDisablingInjuries * 1000000) / employeeHours;
+      setValue("frequency_rate", calculatedFrequencyRate);
+    } else {
+      setValue("frequency_rate", 0);
+    }
+  }, [totalDisablingInjuries, employeeHours, setValue]);
+
+  useEffect(() => {
+    if (employeeHours > 0) {
+      const calculatedSeverityRate = (daysLost * 1000000) / employeeHours;
+      setValue("severity_rate", calculatedSeverityRate);
+    } else {
+      setValue("severity_rate", 0);
+    }
+  }, [daysLost, employeeHours, setValue]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -136,6 +155,7 @@ function InjurySummary({
                 {...register("frequency_rate", { required: true })}
                 id="frequency_rate"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                disabled
               />
             </div>
           </div>
@@ -153,6 +173,7 @@ function InjurySummary({
                 {...register("severity_rate", { required: true })}
                 id="severity_rate"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                disabled
               />
             </div>
           </div>
@@ -186,7 +207,6 @@ function InjurySummary({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Draw Signature
-              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <button
@@ -204,7 +224,6 @@ function InjurySummary({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Upload Signature
-              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
