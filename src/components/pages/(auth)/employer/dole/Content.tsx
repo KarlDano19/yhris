@@ -16,6 +16,7 @@ import WorkAccidentIllnessReportLogo from '@/svg/WorkAccidentIllnessReportLogo';
 import SafetyAndHealthLogo from '@/svg/SafetyAndHealthLogo'
 import AnnualWAIR from '@/svg/AnnualWAIR';
 import WemLogo from '@/svg/WemLogo';
+import HealthAndSafetyReportLogo from '@/svg/HealthAndSafetyReportLogo';
 
 interface CachedProfileData {
   name: string;
@@ -75,6 +76,12 @@ function Content() {
       icon: <AnnualWAIR />,
       text: 'Annual Work Accident/Illness Exposure Data Report',
       link: '/dole/annual-work-accident-illness-exposure-data-report',
+      isAvailable: true,
+    },
+    {
+      icon: <HealthAndSafetyReportLogo />,
+      text: 'Health And Safety Organization Report',
+      link: '/dole/health-and-safety-organization-report',
       isAvailable: true,
     },
   ];
