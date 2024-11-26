@@ -54,6 +54,7 @@ function CreateShcMettingMinutesModal({
         });
       },
     };
+    console.log(data);
     addShcMeetingMinutes(data, callbackReq);
   });
 

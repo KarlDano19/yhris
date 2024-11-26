@@ -19,14 +19,16 @@ import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
   ChevronDownIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/24/solid";
 import EditIcon from "@/svg/EditIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
-import useGetWorkAccidentIlnessReportsItems from "../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
-import useGetShcMinutesMeetingItems from "./hooks/useGetShcMinutesMettingItems";
+import useGetShcMinutesMeetingItems from "./hooks/useGetShcMinutesMettingItems"
 import UpdateShcMinutesMeetingModal from "./modals/UpdateShcMinutesMeeting";
 import DeleteShcMinutesMeetingModal from "./modals/DeleteShcMinutesMeetingModal";
 import ExportProgressModal from "./modals/ExportProgressModals";
+import EmailLogo from "@/svg/EmailLogo";
+import SendEmailModal from "./modals/SendEmailModal";
 
 type PaginationProps = {
   totalRecords: number;
@@ -55,6 +57,8 @@ function Content() {
   ] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] =
     useState<boolean>(false);
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] =
+    useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -88,21 +92,9 @@ function Content() {
     if (shcMinutesMeetingData) {
       shcMinutesMeetingData.records.map((item: any) => {
         const incidentDate = new Date(item.date_of_meeting);
-        item.date_of_incident = `${
+        item.date_of_meeting = `${
           incidentDate.getMonth() + 1
         }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
-
-        const returnDate = new Date(item.date_returned_to_work);
-        item.date_returned_to_work = `${
-          returnDate.getMonth() + 1
-        }/${returnDate.getDate()}/${returnDate.getFullYear()}`;
-
-        const returnedIllnessDate = new Date(
-          item.date_returned_to_work_illness
-        );
-        item.date_returned_to_work_illness = `${
-          returnedIllnessDate.getMonth() + 1
-        }/${returnedIllnessDate.getDate()}/${returnedIllnessDate.getFullYear()}`;
 
         return item;
       });
@@ -236,50 +228,19 @@ function Content() {
       return shcMinutesMeetingItems.map((item: any) => (
         <tr key={item.id} className="cursor-pointer">
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.date_of_incident}
+            {item.date_of_meeting}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.time_of_incident}
+            {item.time_of_meeting}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.employee}
+            {item.venue}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.reportable_illness ? (
-              <>
-                {item.reportable_illness} <br />
-                {item.date_returned_to_work_illness && (
-                  <>
-                    (Date of Return: {item.date_returned_to_work_illness}){" "}
-                    <br />
-                  </>
-                )}
-                {item.days_of_absence_illness && (
-                  <>(Days Lost: {item.days_of_absence_illness})</>
-                )}
-              </>
-            ) : null}
+            {item.attendees.length}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.nature_of_injury ? (
-              <>
-                {item.nature_of_injury} <br />
-                {item.date_returned_to_work && (
-                  <>
-                    (Date of Return: {item.date_returned_to_work}) <br />
-                  </>
-                )}
-                {item.days_of_absence && (
-                  <>(Days Lost: {item.days_of_absence})</>
-                )}
-              </>
-            ) : null}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.part_of_body_affected}
-          </td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.extent_of_injury}
+            {item.absentees.length}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
             <div className="flex space-x-2">
@@ -302,6 +263,16 @@ function Content() {
                 }
               >
                 <DeleteIcon />
+              </button>
+              <button
+                onClick={() =>
+                  setIsSendEmailModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <EmailLogo />
               </button>
             </div>
           </td>
@@ -502,7 +473,7 @@ function Content() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {/* {renderRows()} */}
+                    {renderRows()}
                   </tbody>
                 </table>
                 <hr />
@@ -544,6 +515,13 @@ function Content() {
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
           itemsFilter={itemsFilter}
+        />
+      )}
+      {isSendEmailModalOpen && (
+        <SendEmailModal
+          refetch={shcMinutesMeetingRefetch}
+          isOpen={isSendEmailModalOpen}
+          setIsOpen={setIsSendEmailModalOpen}
         />
       )}
     </>

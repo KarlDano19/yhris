@@ -4,31 +4,34 @@ import { getCookie } from "cookies-next";
 async function addShcMinutesMeeting(data: any) {
   try {
     const token = getCookie("token");
-    if (data.date_of_meeting) {
-      const dateOfMeeting = new Date(data.date_of_meeting);
-      if (!isNaN(dateOfMeeting.getTime())) {
-        data.date_of_meeting = dateOfMeeting.toISOString().split("T")[0];
-      }
+    const formData = new FormData();
+    formData.append("time_of_meeting", data.time_of_meeting);
+    formData.append("venue", data.venue);
+    
+    // Validate date_of_meeting format
+    const dateOfMeeting = new Date(data.date_of_meeting);
+    if (isNaN(dateOfMeeting.getTime())) {
+      throw new Error("Invalid date format. Use YYYY-MM-DD.");
     }
-    if (data.signature && data.signature.length) {
-      const signatureBlob = await fetch(`${data.signature}`).then((res) =>
-        res.blob()
-      );
-      const formData = new FormData();
-      formData.append("signature", signatureBlob, "signature.jpg");
-      for (const key in data) {
-        if (key !== "signature") {
-          formData.append(key, data[key]);
-        }
-      }
-      data = formData;
-    }
+    formData.append("date_of_meeting", dateOfMeeting.toISOString().split('T')[0]); // Format to YYYY-MM-DD
+
+    // Append attendees and absentees as arrays of integers
+    data.attendees.forEach((attendee: number) => {
+      formData.append("attendees", attendee.toString());
+    });
+    data.absentees.forEach((absentee: number) => {
+      formData.append("absentees", absentee.toString());
+    });
+
+    formData.append("details_of_meeting", data.details_of_meeting);
+    formData.append("prepared_by", data.prepared_by);
+    formData.append("position", data.position);
     const config = {
       method: "POST",
       headers: {
         Authorization: `Token ${token}`,
       },
-      body: data instanceof FormData ? data : JSON.stringify(data),
+      body: formData,
     };
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/shc-meeting-minutes/`,

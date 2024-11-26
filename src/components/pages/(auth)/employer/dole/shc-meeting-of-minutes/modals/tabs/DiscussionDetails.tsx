@@ -77,16 +77,16 @@ export default function DiscussionDetails({
           <div className="mt-2 h-72 mb-12">
             <textarea
               rows={4}
-              {...register("message", { required: true })}
-              id="message"
+              {...register("details_of_meeting", { required: true })}
+              id="details_of_meeting"
               hidden
             />
             <ReactQuill
-              onChange={(value) => setValue("message", value)}
+              onChange={(value) => setValue("details_of_meeting", value)}
               formats={QUILL_FORMATS}
               modules={QUILL_MODULES}
               style={{ height: "100%", padding: "5px 8px !important" }}
-              value={watch("message")}
+              value={watch("details_of_meeting")}
             />
           </div>
         </div>
