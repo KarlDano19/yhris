@@ -7,12 +7,13 @@ import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import useAddShcMeetingMinutes from "../hooks/useAddShcMinutesMeeting";
+import DiscussionDetails from "./tabs/DiscussionDetails";
+import MeetingSignature from "./tabs/MeetingSignature";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import MeetingInfo from "./tabs/MeetingInfo";
-import DiscussionDetails from "./tabs/DiscussionDetails";
-import MeetingSignature from "./tabs/MeetingSignature";
 
 function CreateShcMettingMinutesModal({
   refetch,
@@ -27,15 +28,33 @@ function CreateShcMettingMinutesModal({
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
   const { register, handleSubmit, reset, control, setValue, watch } = useForm();
-//   const {
-//     mutate: addWorkAccidentIllnessReport,
-//     isLoading: isLoadingAddWorkAccidentIllnessReport,
-//   } = useAddWorkAccidentIllnessReport();
+  const {
+    mutate: addShcMeetingMinutes,
+    isLoading: isLoadingAddShcMeetingMinutes,
+  } = useAddShcMeetingMinutes();
   const [selectedTab, setSelectedTab] = useState(1);
 
   const onSubmit = handleSubmit((data) => {
-   
-    console.log(data);
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(
+          () => <CustomToast message={data.message} type="success" />,
+          {
+            duration: 5000,
+          }
+        );
+        setIsOpen(false);
+        reset();
+        refetch();
+      },
+      onError: (err: any) => {
+        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
+        toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
+          duration: 7000,
+        });
+      },
+    };
+    addShcMeetingMinutes(data, callbackReq);
   });
 
   useEffect(() => {

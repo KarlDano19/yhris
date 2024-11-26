@@ -42,8 +42,26 @@ function UpdateShcMinutesMeetingModal({
   const [selectedTab, setSelectedTab] = useState(1);
 
   const onSubmit = handleSubmit((data) => {
-   
-    console.log(data);
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(
+          () => <CustomToast message={data.message} type="success" />,
+          {
+            duration: 5000,
+          }
+        );
+        setIsOpen({ id: 0, open: false });
+        reset();
+        refetch();
+      },
+      onError: (err: any) => {
+        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
+        toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
+          duration: 7000,
+        });
+      },
+    };
+    updateShcMinutesMeeting(data, callbackReq);
   });
 
   useEffect(() => {
