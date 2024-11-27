@@ -20,8 +20,8 @@ const CustomDatePicker = ({
   id: string;
   pickerOnChange: any;
   inputOnChange: any;
-  selected?: any;
-  minDate?: any;
+  selected?: Date;
+  minDate?: Date;
   placeholder?: string;
   disabled?: boolean;
   className?: string;

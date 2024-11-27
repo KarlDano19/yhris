@@ -24,7 +24,11 @@ export default function AddSeparationModal({
   refetch: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, control, reset, trigger } = useForm<T_Separation>();
+  const { register, handleSubmit, control, reset, trigger } = useForm<T_Separation>({
+    defaultValues: {
+      date: new Date().toISOString(),
+    },
+  });
   const { data: dataEmployee } = useGetEmployeeItems();
   const { mutate, isLoading } = useAddSeparation();
 
@@ -96,7 +100,7 @@ export default function AddSeparationModal({
                               className={
                                 'block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
                               }
-                              selected={field.value}
+                              selected={field.value ? new Date(field.value) : new Date()}
                               pickerOnChange={(date: any) => field.onChange(date)}
                               inputOnChange={(value: any) => field.onChange(value)}
                               required={true}
