@@ -43,6 +43,7 @@ function CreateEvaluationSchedulerModal({
     if (dataEvaluationSchedulerDetails) {
       setValue('name', dataEvaluationSchedulerDetails.name);
       setValue('evaluation_template', dataEvaluationSchedulerDetails.evaluation_template);
+      setValue('recipient', dataEvaluationSchedulerDetails.recipient);
       setValue('frequency_value', dataEvaluationSchedulerDetails.frequency_value);
       setValue('frequency_unit', dataEvaluationSchedulerDetails.frequency_unit);
       setValue('reminder_schedule', dataEvaluationSchedulerDetails.reminder_schedule);
