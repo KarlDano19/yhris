@@ -308,7 +308,7 @@ function Content() {
         </div>
         <div className="px-2 md:px-8 lg:px-4">
           <h2 className="text-xl font-bold text-indigo-dye">
-            SHC Meeting of Minutes
+            SHC Minutes of Meeting
           </h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
             <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
