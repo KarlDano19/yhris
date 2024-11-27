@@ -13,19 +13,21 @@ import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import classNames from "@/helpers/classNames";
+import CreateShcMettingMinutesModal from "./modals/CreateShcMettingMinutesModal";
 
 import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
   ChevronDownIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/24/solid";
 import EditIcon from "@/svg/EditIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
-import useGetHealthAndSafetyReportItems from "./hooks/useGetHealthAndSafetyReportItems";
+import useGetShcMinutesMeetingItems from "./hooks/useGetShcMinutesMettingItems"
+import UpdateShcMinutesMeetingModal from "./modals/UpdateShcMinutesMeeting";
+import DeleteShcMinutesMeetingModal from "./modals/DeleteShcMinutesMeetingModal";
+import ExportProgressModal from "./modals/ExportProgressModals";
 import EmailLogo from "@/svg/EmailLogo";
-import CreateHealthAndSafetyReportModal from "./modals/CreateHealthAndSafetyReportModal";
-import DeleteHealthAndSafetyReportModal from "./modals/DeleteHealthAndSafetyReportModal";
-import EditHealthAndSafetyReportModal from "./modals/EditHealthAndSafetyReportModal";
 import SendEmailModal from "./modals/SendEmailModal";
 
 type PaginationProps = {
@@ -39,12 +41,24 @@ type T_ModalData = {
 };
 
 function Content() {
-  const [healthAndSafetyReportItems, setHealthAndSafetyReportItems] = useState<any>([]);
-  const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
-  const [isDeleteHealthAndSafetyReportModalOpen, setIsDeleteHealthAndSafetyReportModalOpen] = useState<T_ModalData | null>(null);
-  const [isCreateHealthAndSafetyReportModalOpen, setIsCreateHealthAndSafetyReportModalOpen] = useState<boolean>(false);
-  const [isEditHealthAndSafetyReportModalOpen, setIsEditHealthAndSafetyReportModalOpen] = useState<T_ModalData | null>(null);
-  const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
+  const [shcMinutesMeetingItems, setShcMinutesMeetingItems] =
+    useState<any>([]);
+  const [
+    isShcMinutesMeetingDeleteModalOpen,
+    setIsShcMinutesMeetingDeleteModalOpen,
+  ] = useState<T_ModalData | null>(null);
+  const [
+    isUpdateShcMinutesMeetingModalOpen,
+    setIsUpdateShcMinutesMeetingModalOpen,
+  ] = useState<T_ModalData | null>(null);
+  const [
+    isCreateShcMeetingMinutesModalOpen,
+    setIsCreateShcMeetingMinutesModalOpen,
+  ] = useState<boolean>(false);
+  const [isExportProgressModalOpen, setIsExportProgressModalOpen] =
+    useState<boolean>(false);
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] =
+    useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -56,13 +70,15 @@ function Content() {
     to: "",
     search: "",
   });
-
-  const { data: healthAndSafetyReportItemsData, isLoading: isHealthAndSafetyReportItemsLoading, refetch: healthAndSafetyReportItemsRefetch } = useGetHealthAndSafetyReportItems({
+  const {
+    data: shcMinutesMeetingData,
+    isLoading: isShcMinutesMeetingLoading,
+    refetch: shcMinutesMeetingRefetch,
+  } = useGetShcMinutesMeetingItems({
     ...itemsFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
-
   const menuOptions = [
     {
       name: "Export",
@@ -70,31 +86,28 @@ function Content() {
         setIsExportProgressModalOpen(true);
       },
     },
-    {
-      name: "Generate Report",
-      action: () => {
-        handlePrint();
-      },
-    },
   ];
 
   useEffect(() => {
-    if (healthAndSafetyReportItemsData) {
-      healthAndSafetyReportItemsData.records.map((item: any) => {
-        const applicationDate = new Date(item.date_of_application);
-        item.date_of_application = `${applicationDate.getMonth() + 1}/${applicationDate.getDate()}/${applicationDate.getFullYear()}`;
+    if (shcMinutesMeetingData) {
+      shcMinutesMeetingData.records.map((item: any) => {
+        const incidentDate = new Date(item.date_of_meeting);
+        item.date_of_meeting = `${
+          incidentDate.getMonth() + 1
+        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+
         return item;
       });
-      setHealthAndSafetyReportItems(healthAndSafetyReportItemsData.records);
+      setShcMinutesMeetingItems(shcMinutesMeetingData.records);
       setPagination({
-        totalPages: healthAndSafetyReportItemsData.total_pages,
-        totalRecords: healthAndSafetyReportItemsData.total_records,
+        totalPages: shcMinutesMeetingData.total_pages,
+        totalRecords: shcMinutesMeetingData.total_records,
       });
     }
-  }, [healthAndSafetyReportItemsData]);
+  }, [shcMinutesMeetingData]);
 
   useEffect(() => {
-    healthAndSafetyReportItemsRefetch();
+    shcMinutesMeetingRefetch();
   }, [currentPage, pageSize]);
 
   const handlePrint = () => {
@@ -167,7 +180,7 @@ function Content() {
         }
       );
     }
-    healthAndSafetyReportItemsRefetch();
+    shcMinutesMeetingRefetch();
   };
 
   const paginationChange = (event: any) => {
@@ -181,7 +194,7 @@ function Content() {
   };
 
   const renderRows = () => {
-    if (isHealthAndSafetyReportItemsLoading) {
+    if (isShcMinutesMeetingLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -209,28 +222,31 @@ function Content() {
       );
     }
     if (
-      healthAndSafetyReportItems &&
-      healthAndSafetyReportItems.length > 0
+      shcMinutesMeetingItems &&
+      shcMinutesMeetingItems.length > 0
     ) {
-      return healthAndSafetyReportItems.map((item: any) => (
+      return shcMinutesMeetingItems.map((item: any) => (
         <tr key={item.id} className="cursor-pointer">
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.date_of_report}
+            {item.date_of_meeting}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.person_employed}
+            {item.time_of_meeting}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.comittee_type}
+            {item.venue}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-            {item.chairman_name}
+            {item.attendees.length}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.absentees.length}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
             <div className="flex space-x-2">
               <button
                 onClick={() =>
-                  setIsEditHealthAndSafetyReportModalOpen({
+                  setIsUpdateShcMinutesMeetingModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -240,17 +256,7 @@ function Content() {
               </button>
               <button
                 onClick={() =>
-                    setIsSendEmailModalOpen({
-                    id: item.id,
-                    open: true,
-                  })
-                }
-              >
-                <EmailLogo />
-              </button>
-              <button
-                onClick={() =>
-                  setIsDeleteHealthAndSafetyReportModalOpen({
+                  setIsShcMinutesMeetingDeleteModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -258,10 +264,33 @@ function Content() {
               >
                 <DeleteIcon />
               </button>
+              <button
+                onClick={() =>
+                  setIsSendEmailModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+              >
+                <EmailLogo />
+              </button>
             </div>
           </td>
         </tr>
       ));
+    } else {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <h4 className="text-center text-gray-300 text-sm mt-4">
+              There{`'`}s no data yet.
+            </h4>
+            <h4 className="text-center text-gray-300 text-sm mb-4">
+              Please click create to add data.
+            </h4>
+          </td>
+        </tr>
+      );
     }
   };
 
@@ -274,12 +303,12 @@ function Content() {
             className="flex-none flex gap-3 items-center hover:bg-gray-200"
           >
             <ArrowLeftIcon className="h-5 w-5" />
-            <h4>DOLE</h4>
+            <h2 className="text-xl font-bold">DOLE</h2>
           </Link>
         </div>
         <div className="px-2 md:px-8 lg:px-4">
           <h2 className="text-xl font-bold text-indigo-dye">
-            Health and Safety Organization Report
+            Work Accident/Illness Report
           </h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
             <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
@@ -350,7 +379,7 @@ function Content() {
             <div className="flex-1 flex justify-end">
               <button
                 className="bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
-                onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
+                onClick={() => setIsCreateShcMeetingMinutesModalOpen(true)}
               >
                 CREATE
               </button>
@@ -409,25 +438,31 @@ function Content() {
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Date of Report
+                        Date of Meeting
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Number of Employees
+                        Time of Meeting
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Safety Committee Type
+                        Venue
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Chairman/ Officer in Charge
+                        No. of Attendees
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        No. of Absentees
                       </th>
                       <th
                         scope="col"
@@ -454,202 +489,41 @@ function Content() {
           </div>
         </div>
       </div>
-      {isCreateHealthAndSafetyReportModalOpen && (
-        <CreateHealthAndSafetyReportModal
-          refetch={null}
-          isOpen={isCreateHealthAndSafetyReportModalOpen}
-          setIsOpen={setIsCreateHealthAndSafetyReportModalOpen}
+      {isCreateShcMeetingMinutesModalOpen && (
+        <CreateShcMettingMinutesModal
+          refetch={shcMinutesMeetingRefetch}
+          isOpen={isCreateShcMeetingMinutesModalOpen}
+          setIsOpen={setIsCreateShcMeetingMinutesModalOpen}
         />
       )}
-      {isDeleteHealthAndSafetyReportModalOpen && (
-        <DeleteHealthAndSafetyReportModal
-          refetch={null}
-          isOpen={isDeleteHealthAndSafetyReportModalOpen}
-          setIsOpen={setIsDeleteHealthAndSafetyReportModalOpen}
+      {isUpdateShcMinutesMeetingModalOpen && (
+        <UpdateShcMinutesMeetingModal
+          refetch={shcMinutesMeetingRefetch}
+          isOpen={isUpdateShcMinutesMeetingModalOpen}
+          setIsOpen={setIsUpdateShcMinutesMeetingModalOpen}
         />
       )}
-      {isEditHealthAndSafetyReportModalOpen && (
-        <EditHealthAndSafetyReportModal
-          refetch={null}
-          isOpen={isEditHealthAndSafetyReportModalOpen}
-          setIsOpen={setIsEditHealthAndSafetyReportModalOpen}
+      {isShcMinutesMeetingDeleteModalOpen && (
+        <DeleteShcMinutesMeetingModal
+          refetch={shcMinutesMeetingRefetch}
+          isOpen={isShcMinutesMeetingDeleteModalOpen}
+          setIsOpen={setIsShcMinutesMeetingDeleteModalOpen}
+        />
+      )}
+      {isExportProgressModalOpen && (
+        <ExportProgressModal
+          isOpen={isExportProgressModalOpen}
+          setIsOpen={setIsExportProgressModalOpen}
+          itemsFilter={itemsFilter}
         />
       )}
       {isSendEmailModalOpen && (
         <SendEmailModal
-          refetch={null}
+          refetch={shcMinutesMeetingRefetch}
           isOpen={isSendEmailModalOpen}
           setIsOpen={setIsSendEmailModalOpen}
         />
       )}
-      {/* Print Section */}
-      {/* <div className="container mx-auto p-4 hidden">
-        <div id="printSection">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-800 table-fixed">
-              <thead>
-                <tr>
-                  <th
-                    colSpan={6}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Basic Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center py-1"
-                  >
-                    Risk and Safety Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    WEM Details Request
-                  </th>
-                  <th
-                    colSpan={4}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Monitoring Capability
-                  </th>
-                  <th
-                    colSpan={3}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Hazards
-                  </th>
-                </tr>
-                <tr>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date of Application
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Company Name
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Type of Industry
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Number of Workers Male
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Number of Workers Female
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Number of Workers Total
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Risk Classification
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Name of Safety Officer
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Safety Officer Level
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Purpose of WEM Request
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    WEM Conducted by
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Last WEM Date
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    WEM Internal Monitoring Capability
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    WEM Equipment Owned by Company
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Conducting Internal WEM
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date of Internal Monitoring
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Purpose of WEM Request
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Chemical Hazards
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Ventilation
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {workEnvironmentRequestItems.map(
-                  (item: any, rowIndex: number) => (
-                    <tr key={rowIndex}>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_application}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.company_name}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.type_of_industry}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.number_of_workers_male}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.number_of_workers_female}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.number_of_workers_total}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.risk_classification}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.name_of_safety_officer}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.safety_officer_levels}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.purpose_of_wem_request}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.wem_conducted_by}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.last_wem_date}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.wem_internal_monitoring_capability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.wem_equipment_owned_by_company}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.conducting_internal_wem ? 'Yes' : 'No'}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_internal_monitoring}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hazards_purpose_of_wem_request}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.chemical_hazards}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.ventilation}
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
-        </div>
-      </div> */}
     </>
   );
 }

@@ -225,24 +225,28 @@ const Content = () => {
             {jobPost.hireCount}
           </td>
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {jobPost.postIn.map((social: any) => {
-              const DynamicComponent = componentMap[social];
-              return (
-                <span
-                  key={social}
-                  className='cursor-pointer'
-                  onClick={() => {
-                    socialMediaShare(social, jobPost.og_url);
-                  }}
-                  data-tooltip-id='social-btn-tooltip'
-                  data-tooltip-content={`Share to ${social}`}
-                  data-tooltip-place='bottom'
-                >
-                  <Tooltip id='social-btn-tooltip' style={{ fontSize: '10px' }} />
-                  <DynamicComponent />
-                </span>
-              );
-            })}
+            {jobPost.isActive ? ( // Check if jobPost is active
+              jobPost.postIn.map((social: any) => {
+                const DynamicComponent = componentMap[social];
+                return (
+                  <span
+                    key={social}
+                    className='cursor-pointer'
+                    onClick={() => {
+                      socialMediaShare(social, jobPost.og_url);
+                    }}
+                    data-tooltip-id='social-btn-tooltip'
+                    data-tooltip-content={`Share to ${social}`}
+                    data-tooltip-place='bottom'
+                  >
+                    <Tooltip id='social-btn-tooltip' style={{ fontSize: '10px' }} />
+                    <DynamicComponent />
+                  </span>
+                );
+              })
+            ) : (
+              <span className='text-gray-400'>Sharing disabled</span> // Message when inactive
+            )}
           </td>
         </tr>
       ));
