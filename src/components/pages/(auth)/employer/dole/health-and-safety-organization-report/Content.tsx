@@ -27,13 +27,6 @@ import CreateHealthAndSafetyReportModal from "./modals/CreateHealthAndSafetyRepo
 import DeleteHealthAndSafetyReportModal from "./modals/DeleteHealthAndSafetyReportModal";
 import EditHealthAndSafetyReportModal from "./modals/EditHealthAndSafetyReportModal";
 import SendEmailModal from "./modals/SendEmailModal";
-// import CreateWemRequestModal from "./modals/CreateWemRequestModal";
-// import ExportProgressModal from "../employee-compensation-logbook/modals/ExportProgressModal";
-// import useGetWorkEnvironmentRequestItems from "./hooks/useGetWorkEnvironmentRequestItems";
-// import DeleteWemRequestModal from "./modals/DeleteWemRequestModal";
-// import EditWemRequestModal from "./modals/EditWemRequestModal";
-// import EmailLogo from "@/svg/EmailLogo";
-// import SendEmailModal from "./modals/SendEmailModal";
 
 type PaginationProps = {
   totalRecords: number;
