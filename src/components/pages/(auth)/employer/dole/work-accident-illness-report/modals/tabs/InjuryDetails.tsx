@@ -10,7 +10,7 @@ import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { ChevronDownIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function InjuryDetails({
@@ -132,7 +132,7 @@ function InjuryDetails({
               Date Returned to Work
             </label>
             <div className="relative mt-2">
-            <Controller
+              <Controller
                 control={control}
                 name="date_returned_to_work"
                 render={({ field }) => (
@@ -143,7 +143,9 @@ function InjuryDetails({
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                     }
                     selected={field.value ? new Date(field.value) : null} // Ensure field.value is a Date
-                    pickerOnChange={(date: any) => field.onChange(date ? date.toISOString() : null)} // Convert to ISO string
+                    pickerOnChange={(date: any) =>
+                      field.onChange(date ? date.toISOString() : null)
+                    } // Convert to ISO string
                     inputOnChange={(value: any) => field.onChange(value)}
                   />
                 )}
@@ -184,6 +186,28 @@ function InjuryDetails({
               />
             </div>
           </div>
+          <div>
+          <label
+            htmlFor="disabling_injury"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            Disabling Injury?
+            <span className="text-red-600">*</span>
+          </label>
+          <div className="relative mt-2">
+            <select
+              id="disabling_injury"
+              {...register("disabling_injury", { required: true })}
+              className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+            >
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+              <SelectChevronDown />
+            </div>
+          </div>
+        </div>
         </div>
       </div>
       <hr />

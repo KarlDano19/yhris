@@ -1,21 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 
 import MenuItem from '../../MenuItem';
 import EstablishmentRegistrationConfirmationModal from './modals/EstablishmentRegistrationConfirmationModal';
+import SafetyAndHealthPolicyModal from './safety-and-health-policy/modals/SafetyAndHealthPolicyModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EmployeeCompensitionLogbookLogo from '@/svg/EmployeeCompensitionLogbookLogo';
 import EstablishmentRegistrationLogo from '@/svg/EstablishmentRegistrationLogo';
 import WorkAccidentIllnessReportLogo from '@/svg/WorkAccidentIllnessReportLogo';
+import SafetyAndHealthLogo from '@/svg/SafetyAndHealthLogo'
+import AnnualWAIR from '@/svg/AnnualWAIR';
 import WemLogo from '@/svg/WemLogo';
+import HealthAndSafetyReportLogo from '@/svg/HealthAndSafetyReportLogo';
+import ShcMeetingOfMinutesLogo from '@/svg/ShcMeetingOfMinutesLogo';
+
+interface CachedProfileData {
+  name: string;
+  type_of_industry: string;
+}
 
 function Content() {
   const [isEstablishmentRegistrationConfirmationModalOpen, setIsEstablishmentRegistrationConfirmationModalOpen] =
     useState(false);
+    
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: CachedProfileData } | undefined };
+  const [isSafetyAndHealthPolicyModalOpen, setIsSafetyAndHealthPolicyModalOpen] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+
+  useEffect(() => {
+    if (cachedProfile?.state?.data) {
+      setCompanyName(cachedProfile.state.data.name);
+    }
+  }, [cachedProfile]);
   const menus = [
     {
       icon: <EmployeeCompensitionLogbookLogo />,
@@ -43,6 +65,32 @@ function Content() {
       link: '/dole/work-environment-measurement-request',
       isAvailable: true,
     },
+    {
+      icon: <SafetyAndHealthLogo />,
+      text: 'Safety and Health Policy',
+      isAvailable: true,
+      onClickEvent: () => {
+        setIsSafetyAndHealthPolicyModalOpen(true);
+      },
+    },
+    {
+      icon: <AnnualWAIR />,
+      text: 'Annual Work Accident/Illness Exposure Data Report',
+      link: '/dole/annual-work-accident-illness-exposure-data-report',
+      isAvailable: true,
+    },
+    {
+      icon: <HealthAndSafetyReportLogo />,
+      text: 'Health And Safety Organization Report',
+      link: '/dole/health-and-safety-organization-report',
+      isAvailable: true,
+    },
+    {
+      icon: <ShcMeetingOfMinutesLogo />,
+      text: 'SHC Minutes of Meetings',
+      link: '/dole/shc-minutes-of-meetings',
+      isAvailable: true,
+    },
   ];
   return (
     <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -63,6 +111,11 @@ function Content() {
       <EstablishmentRegistrationConfirmationModal
         isOpen={isEstablishmentRegistrationConfirmationModalOpen}
         setIsOpen={setIsEstablishmentRegistrationConfirmationModalOpen}
+      />
+      <SafetyAndHealthPolicyModal
+        isOpen={isSafetyAndHealthPolicyModalOpen}
+        setIsOpen={setIsSafetyAndHealthPolicyModalOpen}
+        companyName={companyName}
       />
     </div>
   );

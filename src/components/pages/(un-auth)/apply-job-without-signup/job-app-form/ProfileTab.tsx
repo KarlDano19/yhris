@@ -124,7 +124,7 @@ const ProfileTab = ({
   const profileSubmit = handleSubmit((data: any) => {
     const formData = {
       ...data,
-      profilePicture: profilePhotoList,
+      profilePicture: profilePhotoList ? profilePhotoList : [],
     };
     firstSubmit(formData);
   });

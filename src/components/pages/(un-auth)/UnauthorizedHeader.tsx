@@ -9,7 +9,7 @@ import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 
-import { Bars3Icon, XMarkIcon, StarIcon, TagIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, StarIcon, TagIcon, InformationCircleIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline';
 import MainLogo from '@/svg/MainLogo';
 import ExitIcon from '@/svg/ExitIcon';
 import CaseIcon from '@/svg/CaseIcon';
@@ -79,6 +79,19 @@ const UnauthorizedHeader = () => {
                   </Popover.Button>
                 </div>
                 <div className='hidden lg:flex lg:items-center lg:justify-end lg:space-x-8'>
+                <Link
+                    href='/faqs'
+                    className={`${
+                      pathName === '/faqs' ? 'text-savoy-blue' : 'text-indigo-dye'
+                    } flex items-center font-semibold`}
+                  >
+                    <ChatBubbleLeftEllipsisIcon
+                      className={`${
+                        pathName === '/faqs' ? 'text-savoy-blue' : 'text-indigo-dye'
+                      } h-4 w-4 mt-0.5 mr-2.5`}
+                    />
+                    FAQs
+                  </Link>
                   <Link
                     href='/features'
                     className={classNames(
