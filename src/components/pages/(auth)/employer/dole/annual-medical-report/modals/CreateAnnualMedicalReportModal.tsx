@@ -57,7 +57,6 @@ function CreateAnnualMedicalReportModal({
         );
       },
     };
-    console.log(data);
     addAnnualMedicalReport(data, callbackReq);
   });
 
