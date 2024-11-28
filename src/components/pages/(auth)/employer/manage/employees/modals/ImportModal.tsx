@@ -94,18 +94,6 @@ export default function ImportModal({
   };
 
   const onSubmit = () => {
-    // Check for required headers
-    // const hasErrors = importJSON.some((item: any) =>
-    //   !item.date_hired || !item.firstname || !item.lastname || !item.mobile || !item.email || !item.address
-    // );
-
-    // if (hasErrors) {
-    //   // Show a single custom toast error message
-    //   toast.custom(() => <CustomToast message='Please make sure all the columns with asterisk (*) are filled out.' type='error' />, {
-    //     duration: 7000,
-    //   });
-    //   return; // Prevent submission if there are any errors
-    // }
 
     const displayedErrors = new Set<string>(); // To track displayed error messages
 
