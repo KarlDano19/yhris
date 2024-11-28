@@ -1,0 +1,434 @@
+"use client";
+
+import { useState } from "react";
+
+function EmergencyOccupational({
+  control,
+  register,
+  handleSubmit,
+  setSelectedTab,
+  setValue,
+}: {
+  control: any;
+  register: any;
+  handleSubmit: any;
+  setSelectedTab: any;
+  setValue: any;
+}) {
+  const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
+  const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
+
+  const onSubmit = handleSubmit(() => {
+    setSelectedTab(4);
+  });
+
+  return (
+    <form onSubmit={onSubmit}>
+      <div className="gap-6 mt-4 pl-6 mb-6">
+        <div>
+          <label
+            htmlFor="provided_treatment_room_medical_clinic"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            a. The employer provides a treatment room/medical clinic in the
+            workplace with medicines and facilities:
+            <span className="text-red-600">*</span>
+          </label>
+          <div className="grid grid-cols-3 gap-2 pl-6">
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("provided_treatment_room_medical_clinic")}
+                id="provided_treatment_room_medical_clinic"
+                value="yes"
+              />
+              <label
+                htmlFor="provided_treatment_room_medical_clinic"
+                className="ml-1"
+              >
+                yes
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                {...register("provided_treatment_room_medical_clinic")}
+                id="provided_treatment_room_medical_clinic"
+                value="no"
+              />
+              <label
+                htmlFor="provided_treatment_room_medical_clinic"
+                className="ml-2"
+              >
+                no
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("provided_treatment_room_medical_clinic")}
+                id="provided_treatment_room_medical_clinic"
+                value="Other"
+                onChange={(e) => setIsOtherCheckedA(e.target.checked)}
+              />
+              <label
+                htmlFor="provided_treatment_room_medical_clinic"
+                className="ml-2"
+              >
+                others, please specify
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            {isOtherCheckedA && (
+              <div className="relative mt-2 flex items-center gap-2 col-span-3">
+                <input
+                  type="text"
+                  {...register(
+                    "provided_treatment_room_medical_clinic_other_specification",
+                    {
+                      required: isOtherCheckedA,
+                    }
+                  )}
+                  placeholder="Please specify"
+                  className="border-b p-2 border-gray-300"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="gap-6 mt-4 pl-6 mb-6">
+        <div className="pr-8">
+          <label
+            htmlFor="organized_provided_as_a_service"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            b. Occupational health services as described above, is
+            organized/provided as a Service:
+            <span className="text-red-600">*</span>
+          </label>
+          <div className="grid grid-cols-3 gap-4">
+            <div>{""}</div>
+            <div>{""}</div>
+            <div>
+              <h1 className="text-sm font-medium pl-14">Shift</h1>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-6 pb-6">
+            <div className="flex justify-start items-center pl-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                  Occupational health physician
+                </h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2 flex flex-row items-center">
+                <input
+                  type="text"
+                  {...register(`occupational_health_physician_hours_per_day`)}
+                  id={`occupational_health_physician_hours_per_day`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="text"
+                  {...register(`occupational_health_physician_shift`)}
+                  id={`occupational_health_physician_shift`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-6 pb-6">
+            <div className="flex justify-start items-center pl-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                  Occupational health dentist
+                </h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2 flex flex-row items-center">
+                <input
+                  type="text"
+                  {...register(`occupational_health_dentist_hours_per_day`)}
+                  id={`occupational_health_dentist_hours_per_day`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="text"
+                  {...register(`occupational_health_dentist_shift`)}
+                  id={`occupational_health_dentist_shift`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-6 pb-6">
+            <div className="flex justify-start items-center pl-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                  Occupational health practitioner
+                </h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2 flex flex-row items-center">
+                <input
+                  type="text"
+                  {...register(
+                    `occupational_health_practitioner_hours_per_day`
+                  )}
+                  id={`occupational_health_practitioner_hours_per_day`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="text"
+                  {...register(`occupational_health_practitioner_shift`)}
+                  id={`occupational_health_practitioner_shift`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-6 pb-6">
+            <div className="flex justify-start items-center pl-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                  Occupational health nurse
+                </h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2 flex flex-row items-center">
+                <input
+                  type="text"
+                  {...register(`occupational_health_nurse_hours_per_day`)}
+                  id={`occupational_health_nurse_hours_per_day`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="text"
+                  {...register(`occupational_health_nurse_shift`)}
+                  id={`occupational_health_nurse_shift`}
+                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="gap-6 mt-4 pl-6 mb-6">
+        <div>
+          <label
+            htmlFor="schedule_of_attendance_of_full_time_first_aider"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            c. Schedule of attendance of full time first aider:
+            <span className="text-red-600">*</span>
+          </label>
+          <div className="grid grid-cols-3 gap-2 pl-6">
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("schedule_of_attendance_of_full_time_first_aider")}
+                id="schedule_of_attendance_of_full_time_first_aider"
+                value="1st shift"
+              />
+              <label
+                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                className="ml-1"
+              >
+                1st shift
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                {...register("schedule_of_attendance_of_full_time_first_aider")}
+                id="schedule_of_attendance_of_full_time_first_aider"
+                value="2nd shift"
+              />
+              <label
+                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                className="ml-2"
+              >
+                2nd shift
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                {...register("schedule_of_attendance_of_full_time_first_aider")}
+                id="schedule_of_attendance_of_full_time_first_aider"
+                value="3rd shift"
+              />
+              <label
+                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                className="ml-2"
+              >
+                3rd shift
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="gap-6 mt-4 pl-6 mb-6">
+        <div>
+          <label
+            htmlFor="occupational_health_personnel_training"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            d. The following occupational health personnel of the establishment
+            have undergone training in occupational health and safety/first aid:
+            <span className="text-red-600">*</span>
+          </label>
+          <div className="grid grid-cols-3 gap-2 pl-6">
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("occupational_health_personnel_training", {
+                  required: true,
+                })}
+                id="occupational_health_personnel_training"
+                value="occupational health physician"
+              />
+              <label
+                htmlFor="occupational_health_personnel_training"
+                className="ml-1"
+              >
+                occupational health physician
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                {...register("occupational_health_personnel_training", {
+                  required: true,
+                })}
+                id="occupational_health_personnel_training"
+                value="occupational health dentist"
+              />
+              <label
+                htmlFor="occupational_health_personnel_training"
+                className="ml-2"
+              >
+                occupational health dentist
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("occupational_health_personnel_training", {
+                  required: true,
+                })}
+                id="occupational_health_personnel_training"
+                value="occupational health nurse"
+              />
+              <label
+                htmlFor="occupational_health_personnel_training"
+                className="ml-1"
+              >
+                occupational health nurse
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                {...register("occupational_health_personnel_training", {
+                  required: true,
+                })}
+                id="occupational_health_personnel_training"
+                value="first aider"
+              />
+              <label
+                htmlFor="occupational_health_personnel_training"
+                className="ml-2"
+              >
+                first aider
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("occupational_health_personnel_training", {
+                  required: true,
+                })}
+                id="occupational_health_personnel_training"
+                value="Other"
+                onChange={(e) => setIsOtherCheckedD(e.target.checked)}
+              />
+              <label
+                htmlFor="occupational_health_personnel_training"
+                className="ml-2"
+              >
+                others, please specify
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-1">
+              {isOtherCheckedD && (
+                <div className="relative mt-2 flex items-center gap-2 col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "occupational_health_personnel_training_other_specification",
+                      {
+                        required: isOtherCheckedD,
+                      }
+                    )}
+                    placeholder="Please specify"
+                    className="border-b p-2 border-gray-300"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div className="py-4 px-4 flex justify-between">
+        <button
+          type="button"
+          className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          onClick={() => setSelectedTab(2)}
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          Next
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export default EmergencyOccupational;
