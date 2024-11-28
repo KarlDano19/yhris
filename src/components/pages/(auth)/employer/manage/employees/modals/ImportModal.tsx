@@ -65,8 +65,6 @@ export default function ImportModal({
     setImportJSON([]);
   };
 
-  console.log(importJSON);
-
   const handleUpload = () => {
     if (file) {
       Papa.parse(file, {

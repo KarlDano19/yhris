@@ -55,7 +55,6 @@ function CreateWemRequestModal({
         );
       },
     };
-    console.log(data);
     addWorkEnvironmentRequest(data, callbackReq);
   });
 

@@ -17,7 +17,6 @@ interface Notification{
 const Content = () => {
   const [isNotifClicked, setNotifClicked] = useState(false);
   const {data, isLoading} = useGetNotifications(93)
-  console.log(data)
   return (
     <div
       className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}

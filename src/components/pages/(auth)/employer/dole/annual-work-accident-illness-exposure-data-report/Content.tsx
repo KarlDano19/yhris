@@ -84,38 +84,6 @@ function Content() {
     currentPage: currentPage,
   });
 
-  console.log(annualAccidentIllnessReportData);
-  const { data: employeeData } = useGetEmployeeItems();
-  // const menuOptions = [
-  //   {
-  //     name: "Download",
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //   },
-  //   {
-  //     name: "Print",
-  //     action: () => {
-  //       handlePrint();
-  //     },
-  //   },
-  //   {
-  //     name: "Edit",
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //   },
-  //   {
-  //     name: "Delete",
-  //     action: () => {
-  //       setIsDeleteAnnualAccidentIllnessReportModalOpen({
-  //         id: item.id,
-  //         open: true,
-  //       });
-  //     },
-  //   },
-  // ];
-
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
       annualAccidentIllnessReportData.records?.map((item: any) => {

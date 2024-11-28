@@ -140,7 +140,6 @@ export default function EditWemRequestModal({
         });
       },
     };
-    console.log(data)
     mutate({ work_environment_measurement_request_id: isOpen.id, data: data }, callbackReq);
   });
 

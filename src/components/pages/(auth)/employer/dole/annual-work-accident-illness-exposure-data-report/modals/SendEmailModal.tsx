@@ -92,7 +92,6 @@ export default function SendEmailModal({
             to: tagsTo,
         };
 
-        console.log(payload);
         const callbackReq = {
             onSuccess: () => {
                 setIsOpen({ id: 0, open: false });

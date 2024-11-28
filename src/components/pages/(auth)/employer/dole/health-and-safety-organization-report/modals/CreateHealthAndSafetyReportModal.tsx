@@ -54,7 +54,6 @@ function CreateHealthAndSafetyReportModal({
         );
       },
     };
-    console.log(data);
     addWorkEnvironmentRequest(data, callbackReq);
   });
 

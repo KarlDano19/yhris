@@ -28,10 +28,6 @@ export default function PrivacyModaPagelOne({
     if (container) {
       const { scrollHeight, scrollTop, clientHeight } = container;
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // Adjusting the logic to correctly detect the bottom with a small buffer
-      console.log('scrollHeight:', scrollHeight);
-      console.log('scrollTop:', scrollTop);
-      console.log('clientHeight:', clientHeight);
-      console.log('isAtBottom:', isAtBottom);
       setAtBottom(isAtBottom);
     }
   };
@@ -39,10 +35,8 @@ export default function PrivacyModaPagelOne({
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      console.log('Attaching scroll event listener');
       container.addEventListener('scroll', handleScroll);
       return () => {
-        console.log('Removing scroll event listener');
         container.removeEventListener('scroll', handleScroll);
       };
     } else {
