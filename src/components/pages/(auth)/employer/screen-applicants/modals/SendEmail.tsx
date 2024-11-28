@@ -58,10 +58,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
 
-  console.log({dataEmailTemplate});
-
   useEffect(() => {
-    console.log(actionState);
     setIsOpen(true);
     setTagsTo([actionState.email]);
   }, []);
@@ -120,7 +117,6 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                     }
                     setValue("message", template.body);
                     setValue("subject", template.subject);
-                    console.log("Subject set to:", template.subject);
                   } else {
                     console.error("Template not found for ID:", templateId);
                   }

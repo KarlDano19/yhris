@@ -22,7 +22,6 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
   useEffect(() => {
     if (data) {
       setJobDetailData(data);
-      console.log({data})
     }
   }, [data]);
 
