@@ -1,17 +1,13 @@
 "use client";
 
 function OccupationalHealthService({
-  control,
   register,
   handleSubmit,
   setSelectedTab,
-  setValue,
 }: {
-  control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
-  setValue: any;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(5);

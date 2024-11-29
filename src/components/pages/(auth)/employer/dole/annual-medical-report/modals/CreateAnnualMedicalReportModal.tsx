@@ -158,34 +158,27 @@ function CreateAnnualMedicalReportModal({
                 )}
                 {selectedTab === 2 && (
                   <PreventiveAndEmergency
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 3 && (
                   <EmergencyOccupational
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 4 && (
                   <OccupationalHealthService
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 5 && (
                   <ReportOfDisease
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
@@ -193,20 +186,16 @@ function CreateAnnualMedicalReportModal({
                 )}
                 {selectedTab === 6 && (
                   <WorkplaceSafetyCompliance
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 7 && (
                   <WorkplaceWelfare
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 8 && (

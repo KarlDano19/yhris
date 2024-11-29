@@ -5,17 +5,13 @@ import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 function WorkplaceSafetyCompliance({
-  control,
   register,
   handleSubmit,
   setSelectedTab,
-  setValue,
 }: {
-  control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
-  setValue: any;
 }) {
   const [isImmunizationOpen, setIsImmunizationOpen] = useState(false);
   const [isOccupationalAccidentOpen, setIsOccupationalAccidentOpen] =

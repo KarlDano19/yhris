@@ -7,12 +7,10 @@ import classNames from "@/helpers/classNames";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 function ReportOfDisease({
-  control,
   register,
   handleSubmit,
   setSelectedTab,
 }: {
-  control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;

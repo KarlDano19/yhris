@@ -3,17 +3,13 @@
 import { useState } from "react";
 
 function PreventiveAndEmergency({
-  control,
   register,
   handleSubmit,
   setSelectedTab,
-  setValue,
 }: {
-  control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
-  setValue: any;
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);

@@ -11,13 +11,6 @@ import DrawNotedBySignatureModal from "../DrawNotedBySignature";
 
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
-
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
-
 function WorkplaceSafetyCompliance({
   control,
   register,
@@ -31,7 +24,6 @@ function WorkplaceSafetyCompliance({
   setSelectedTab: any;
   setValue: any;
 }) {
-  const queryClient = useQueryClient();
 
   const [isChemicalHazardsOpen, setIsChemicalHazardsOpen] = useState(false);
   const [isPhysicalHazardsOpen, setIsPhysicalHazardsOpen] = useState(false);
