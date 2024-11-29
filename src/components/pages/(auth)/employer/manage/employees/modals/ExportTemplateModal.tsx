@@ -2,7 +2,6 @@ import { Dispatch, Fragment, useEffect, useState, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
-import useGetExportEmployeeItems from '../hooks/useGetExportEmployeeItems';
 import useGetExportDummyEmployeeData from '../hooks/useExportDummyEmployeeData';
 
 export default function ExportTemplateModal({
