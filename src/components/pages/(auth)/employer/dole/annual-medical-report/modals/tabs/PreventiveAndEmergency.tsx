@@ -9,7 +9,6 @@ function PreventiveAndEmergency({
   setSelectedTab,
   setValue,
 }: {
-  name_of_safety_officer?: string[];
   control: any;
   register: any;
   handleSubmit: any;
