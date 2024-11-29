@@ -84,8 +84,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       action: () => {
         if (!hasAgreed) {
           setIsDataAgreementModalOpen(true);
-        } else {
+        } else if (employeeListData && employeeListData.records.length > 0) {
           setIsExportProgressModalOpen(true);
+        } else {
+          toast.custom(() => <CustomToast message='No employee data available for export.' type='error' />, {
+            duration: 5000,
+          });
         }
       },
     },
