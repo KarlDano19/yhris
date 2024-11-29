@@ -1,11 +1,10 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import classNames from "@/helpers/classNames";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import GeneralInfo from "./tabs/GeneralInfo";
 import PreventiveAndEmergency from "./tabs/PreventiveAndEmergency";
 import EmergencyOccupational from "./tabs/EmergencyOccupational";
@@ -16,9 +15,7 @@ import WorkplaceHazards from "./tabs/WorkplaceHazards";
 import WorkplaceWelfare from "./tabs/WorkplaceWelfare";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import CustomToast from "@/components/CustomToast";
-import useAddAnnualMedicalReport from "../hooks/useAddAnnualMedicalReport";
 import useGetAnnualMedicalReportDetails from "../hooks/useGetAnnualMedicalReportDetails";
 import useUpdateAnnualMedicalReport from "../hooks/useUpdateAnnualMedicalReport";
 
@@ -536,7 +533,22 @@ function EditAnnualMedicalReportModal({
   }, [annualMedicalReportData]);
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(
+          () => <CustomToast message={data.message} type="success" />,
+          { duration: 5000 }
+        );
+        customCloseModal();
+        refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type="error" />, {
+          duration: 7000,
+        });
+      },
+    }
+    updateAnnualMedicalReport({ annual_medical_report_id: isOpen.id, data: data }, callbackReq);
   });
 
   return (
@@ -631,34 +643,27 @@ function EditAnnualMedicalReportModal({
                 )}
                 {selectedTab === 2 && (
                   <PreventiveAndEmergency
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 3 && (
                   <EmergencyOccupational
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 4 && (
                   <OccupationalHealthService
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 5 && (
                   <ReportOfDisease
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
@@ -666,20 +671,16 @@ function EditAnnualMedicalReportModal({
                 )}
                 {selectedTab === 6 && (
                   <WorkplaceSafetyCompliance
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 7 && (
                   <WorkplaceWelfare
-                    control={control}
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 8 && (
@@ -688,6 +689,7 @@ function EditAnnualMedicalReportModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
+                    isLoading={isLoadingUpdateAnnualMedicalReport}
                     setValue={setValue}
                   />
                 )}

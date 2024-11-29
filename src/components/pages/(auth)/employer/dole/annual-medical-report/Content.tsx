@@ -12,7 +12,6 @@ import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import classNames from "@/helpers/classNames";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import useGetAnnualMedicalReportItems from "./hooks/useGetAnnualMedicalReportItems";
 import ExportProgressModal from "./modals/ExportProgressModal";
 import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportModal";
@@ -53,8 +52,6 @@ function Content() {
   ] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] =
     useState<boolean>(false);
-  const [isSendEmailModalOpen, setIsSendEmailModalOpen] =
-    useState<T_ModalData | null>(null);
   const [annualMedicalReportItems, setAnnualMedicalReportItems] = useState<any>([]);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,7 +75,6 @@ function Content() {
   });
 
   console.log(annualMedicalReportData);
-  const { data: employeeData } = useGetEmployeeItems();
   const menuOptions = [
     {
       name: "Export",

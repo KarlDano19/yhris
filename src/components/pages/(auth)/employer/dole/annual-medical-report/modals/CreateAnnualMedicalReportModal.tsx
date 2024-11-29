@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import classNames from "@/helpers/classNames";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import GeneralInfo from "./tabs/GeneralInfo";
 import PreventiveAndEmergency from "./tabs/PreventiveAndEmergency";
 import EmergencyOccupational from "./tabs/EmergencyOccupational";
@@ -29,9 +28,7 @@ function CreateAnnualMedicalReportModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = useForm();
   const {
     mutate: addAnnualMedicalReport,
     isLoading: isLoadingAddAnnualMedicalReport,
@@ -60,11 +57,6 @@ function CreateAnnualMedicalReportModal({
     addAnnualMedicalReport(data, callbackReq);
   });
 
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -205,6 +197,7 @@ function CreateAnnualMedicalReportModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
+                    isLoading={isLoadingAddAnnualMedicalReport}
                   />
                 )}
               </Dialog.Panel>
