@@ -18,6 +18,7 @@ import AnnualWAIR from '@/svg/AnnualWAIR';
 import WemLogo from '@/svg/WemLogo';
 import HealthAndSafetyReportLogo from '@/svg/HealthAndSafetyReportLogo';
 import ShcMeetingOfMinutesLogo from '@/svg/ShcMeetingOfMinutesLogo';
+import AnnualMedicalReportLogo from '@/svg/AnnualMedicalReportLogo';
 
 interface CachedProfileData {
   name: string;
@@ -89,6 +90,12 @@ function Content() {
       icon: <ShcMeetingOfMinutesLogo />,
       text: 'SHC Minutes of Meetings',
       link: '/dole/shc-minutes-of-meetings',
+      isAvailable: true,
+    },
+    {
+      icon: <AnnualMedicalReportLogo />,
+      text: 'Annual Medical Report',
+      link: '/dole/annual-medical-report',
       isAvailable: true,
     },
   ];
