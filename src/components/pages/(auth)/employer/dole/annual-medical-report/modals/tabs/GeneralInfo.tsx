@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 
-import { useFieldArray } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
@@ -40,10 +39,6 @@ function GeneralInfo({
     .find(["employerProfileCache"]) as {
     state: { data: CachedProfileData } | undefined;
   };
-  const { fields, append, remove } = useFieldArray({
-    control: control,
-    name: "employees",
-  });
 
   useEffect(() => {
     if (employeeData) {

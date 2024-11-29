@@ -62,12 +62,12 @@ function ReportOfDisease({
 
   const toggleDiseaseOpen = () => {
     setIsDiseaseOpen(!isDiseaseOpen);
-    setIsPhysicalEnvironmentOpen(false); // Close the other tab
+    setIsPhysicalEnvironmentOpen(false); 
   };
 
   const togglePhysicalEnvironmentOpen = () => {
     setIsPhysicalEnvironmentOpen(!isPhysicalEnvironmentOpen);
-    setIsDiseaseOpen(false); // Close the other tab
+    setIsDiseaseOpen(false); 
   };
 
   const onSubmit = handleSubmit(() => {
