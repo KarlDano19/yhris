@@ -50,7 +50,6 @@ function CreateReportModal({
         );
       },
     };
-    console.log(data);
     addAnnualAccidentIllnessReport(data, callbackReq);
   });
 

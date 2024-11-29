@@ -90,7 +90,6 @@ function EditHealthAndSafetyReportModal({
         );
       },
     };
-    console.log(data);
     updateHealthAndSafetyReport(data, callbackReq);
   });
 

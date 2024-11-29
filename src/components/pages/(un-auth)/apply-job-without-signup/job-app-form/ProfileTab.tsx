@@ -55,7 +55,6 @@ const ProfileTab = ({
             if (ctx) {
               ctx.drawImage(img, 0, 0, width, height);
               const dataUrl = elem.toDataURL("image/jpeg", quality);
-              console.log(`Compressed image dimensions: ${width}x${height}`);
               resolve(dataUrl);
             } else {
               reject(new Error("Failed to get canvas context"));

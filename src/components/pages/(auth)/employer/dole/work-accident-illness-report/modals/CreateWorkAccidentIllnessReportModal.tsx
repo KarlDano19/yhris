@@ -55,7 +55,6 @@ function CreateWorkAccidentIllnessReportModal({
         });
       },
     };
-    console.log(data);
     addWorkAccidentIllnessReport(data, callbackReq);
   });
 
