@@ -26,7 +26,7 @@ export default function ImportModal({
     'Last Name *': 'lastname',
     'Contact Number *': 'mobile',
     "Email *": 'email',
-    "Gender ": 'gender',
+    "Gender": 'gender',
     "Address *": 'address',
   };
   const importHeaders = {
