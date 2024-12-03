@@ -17,9 +17,10 @@ import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItems from './hooks/useGetEmployeeItems';
-import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport'; // Import the mutation hook
+import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import ExportTemplateModal from './modals/ExportTemplateModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -35,6 +36,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
+  const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -66,6 +68,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const menuOptions = [
     {
+      name: "Download Template",
+      action: () => {
+        setIsExportTemplateModalOpen(true);
+      },
+    },
+    {
       name: 'Import',
       action: () => {
         setIsImportModalOpen(true);
@@ -76,8 +84,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       action: () => {
         if (!hasAgreed) {
           setIsDataAgreementModalOpen(true);
-        } else {
+        } else if (employeeListData && employeeListData.records.length > 0) {
           setIsExportProgressModalOpen(true);
+        } else {
+          toast.custom(() => <CustomToast message='No employee data available for export.' type='error' />, {
+            duration: 5000,
+          });
         }
       },
     },
@@ -395,6 +407,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isImportModalOpen && (
         <ImportModal refetch={employeeListRefetch} isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
+      )}
+      {isExportTemplateModalOpen && (
+        <ExportTemplateModal
+          isOpen={isExportTemplateModalOpen}
+          setIsOpen={setIsExportTemplateModalOpen}
+          itemsFilter={itemsFilter}
+        />
       )}
     </>
   );
