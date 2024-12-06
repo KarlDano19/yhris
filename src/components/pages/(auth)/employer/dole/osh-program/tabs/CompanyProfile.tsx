@@ -1,0 +1,459 @@
+"use client";
+import { Controller } from "react-hook-form";
+
+import CustomDatePicker from "@/components/CustomDatePicker";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
+
+export default function CompanyProfile({
+  control,
+  register,
+}: {
+  control: any;
+  register: any;
+}) {
+
+  return (
+    <form>
+      <div className="px-4 pt-4 pb-6">
+        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <XCircleIcon
+                className="h-5 w-5 text-red-400"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                You cannot proceed due to incomplete fields. Please review.
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-6 mt-4">
+          <div>
+            <label
+              htmlFor="company_name"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Company Name
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("company_name")}
+                id="company_name"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Date Established
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <Controller
+                control={control}
+                name="date_established"
+                render={({ field }) => (
+                  <CustomDatePicker
+                    id="date-established-datepicker"
+                    placeholder={"mm/dd/yyyy"}
+                    className={
+                      "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                    }
+                    selected={field.value ? new Date(field.value) : null}
+                    pickerOnChange={(date: any) => field.onChange(date)}
+                    inputOnChange={(value: any) => field.onChange(value)}
+                  />
+                )}
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="complete_address"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Complete Address
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("complete_address")}
+                id="complete_address"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="phone_number"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Phone Number
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("phone_number")}
+                id="phone_number"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-6 mt-4">
+          <div>
+            <label
+              htmlFor="fax_number"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Fax Number
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("fax_number")}
+                id="fax_number"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="website_url"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Website URL/ Email Address
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("website_url")}
+                id="website_url"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="company_owner"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Company Owner/ Manager
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                {...register("company_owner")}
+                id="company_owner"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-6 mt-4">
+          <div>
+            <label
+              htmlFor="number_of_male_employees"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              No. of Male Employees
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="number"
+                {...register("number_of_male_employees")}
+                id="number_of_male_employees"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="number_of_female_employees"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              No. of Female Employees
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="number"
+                {...register("number_of_female_employees")}
+                id="number_of_female_employees"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="total_number_of_employees"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Total No. of Employees
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="number"
+                {...register("total_number_of_employees")}
+                id="total_number_of_employees"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="mt-4">
+          <h1 className="text-lg font-semibold">Business Description</h1>
+        </div>
+        <div className="grid grid-cols-2 gap-10 mt-4">
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="manufacturing"
+                value="Manufacturing"
+              />
+              <label htmlFor="manufacturing" className="ml-2 mt-1">
+                Manufacturing
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("manufacturing_description")}
+              id="manufacturing_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="bank_and_financial_institution"
+                value="Bank and Financial Institution"
+              />
+              <label
+                htmlFor="bank_and_financial_institution"
+                className="ml-2 mt-1"
+              >
+                Bank and Financial Institution
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("bank_and_financial_institution_description")}
+              id="bank_and_financial_institution_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="service"
+                value="Service"
+              />
+              <label htmlFor="service" className="ml-2 mt-1">
+                Service
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("service_description")}
+              id="service_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="security_agency"
+                value="Security Agency"
+              />
+              <label htmlFor="security_agency" className="ml-2 mt-1">
+                Security Agency
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("security_agency_description")}
+              id="security_agency_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="agri_fishing"
+                value="Agri/ Fishing"
+              />
+              <label htmlFor="agri_fishing" className="ml-2 mt-1">
+                Agri/ Fishing
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("agri_fishing_description")}
+              id="agri_fishing_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="maintenance"
+                value="Maintenance"
+              />
+              <label htmlFor="maintenance" className="ml-2 mt-1">
+                Maintenance
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("maintenance_description")}
+              id="maintenance_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="wholesale_retail"
+                value="Wholesale/ Retail"
+              />
+              <label htmlFor="wholesale_retail" className="ml-2 mt-1">
+                Wholesale/ Retail
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("wholesale_retail_description")}
+              id="wholesale_retail_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="construction"
+                value="Construction"
+              />
+              <label htmlFor="construction" className="ml-2 mt-1">
+                Construction
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("construction_description")}
+              id="construction_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="utilities"
+                value="Utilities"
+              />
+              <label htmlFor="utilities" className="ml-2 mt-1">
+                Utilities
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("utilities_description")}
+              id="utilities_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                {...register("business_description")}
+                id="others"
+                value="Others (Please specify)"
+              />
+              <label htmlFor="others" className="ml-2 mt-1">
+                Others (Please specify)
+              </label>
+            </div>
+            <input
+              type="text"
+              {...register("others_description")}
+              id="others_description"
+              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6 mt-10">
+          <div>
+            <label
+              htmlFor="type_of_industry"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Product Description
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <textarea
+                {...register("product_description")}
+                id="product_description"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="type_of_industry"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Services Description
+              <span className="text-red-600">*</span>
+            </label>
+            <div className="relative mt-2">
+              <textarea
+                {...register("services_description")}
+                id="services_description"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* <div className="flex justify-end">
+        <button
+          type="submit"
+          className="w-full rounded-md bg-savoy-blue px-14 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          Next
+        </button>
+      </div> */}
+    </form>
+  );
+}

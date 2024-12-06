@@ -19,6 +19,7 @@ import WemLogo from '@/svg/WemLogo';
 import HealthAndSafetyReportLogo from '@/svg/HealthAndSafetyReportLogo';
 import ShcMeetingOfMinutesLogo from '@/svg/ShcMeetingOfMinutesLogo';
 import AnnualMedicalReportLogo from '@/svg/AnnualMedicalReportLogo';
+import OSHProgramLogo from '@/svg/OSHProgramLogo';
 
 interface CachedProfileData {
   name: string;
@@ -96,6 +97,12 @@ function Content() {
       icon: <AnnualMedicalReportLogo />,
       text: 'Annual Medical Report',
       link: '/dole/annual-medical-report',
+      isAvailable: true,
+    },
+    {
+      icon: <OSHProgramLogo />,
+      text: 'OSH Program',
+      link: '/dole/osh-program',
       isAvailable: true,
     },
   ];
