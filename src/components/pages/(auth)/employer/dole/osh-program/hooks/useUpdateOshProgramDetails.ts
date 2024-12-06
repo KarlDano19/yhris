@@ -1,21 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
-async function updateShcMinutesMeeting(data: any, shc_meeting_minutes_id: number | null) {
+async function updateOshProgramDetails(data: any) {
     try {
         const token = getCookie("token");
 
-        if (data.date_of_meeting) {
-            const dateOfMeeting = new Date(data.date_of_meeting);
-            if (!isNaN(dateOfMeeting.getTime())) {
-                data.date_of_meeting = dateOfMeeting.toISOString().split("T")[0];
+        if (data.date_established) {
+            const dateEstablished = new Date(data.date_established);
+            if (!isNaN(dateEstablished.getTime())) {
+                data.date_established = dateEstablished.toISOString().split("T")[0];
             }
         }
 
-        if (data.date_filled) {
-            const dateFilled = new Date(data.date_filled);
-            if (!isNaN(dateFilled.getTime())) {
-                data.date_filled = dateFilled.toISOString().split("T")[0];
+        if (data.date) {
+            const dateSigned = new Date(data.date);
+            if (!isNaN(dateSigned.getTime())) {
+                data.date = dateSigned.toISOString().split("T")[0];
             }
         }
 
@@ -34,16 +34,22 @@ async function updateShcMinutesMeeting(data: any, shc_meeting_minutes_id: number
         const config = {
             method: "PATCH",
             headers: {
-                Authorization: `Token ${token}`,
+                Authorization: `Token ${token}`
             },
             body: data instanceof FormData ? data : JSON.stringify(data),
-        };
+        }
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`, config);
+        const contentType = res.headers.get("content-type");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shc-meeting-minutes/${shc_meeting_minutes_id}/`, config);
         if (!res.ok) {
             throw res.json();
         }
-        return res.json();
+
+        if (contentType && contentType.includes("application/json")) {
+            return res.json();
+        } else {
+            throw new Error("Response is not JSON");
+        }
     } catch (err: any) {
         let errStringify = await err;
         if (Object.hasOwn(errStringify, "response")) {
@@ -53,9 +59,10 @@ async function updateShcMinutesMeeting(data: any, shc_meeting_minutes_id: number
     }
 }
 
-function useUpdateShcMinutesMeeting() {
-    const mutation = useMutation((props: any) => updateShcMinutesMeeting(props.data, props.shc_meeting_minutes_id));
-    return mutation;
+function useUpdateOshProgramDetails() {
+    const query = useMutation((props: any) => updateOshProgramDetails(props.data));
+    return query;
 }
 
-export default useUpdateShcMinutesMeeting;
+export default useUpdateOshProgramDetails;
+
