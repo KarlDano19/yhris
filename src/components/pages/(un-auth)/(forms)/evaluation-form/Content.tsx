@@ -271,32 +271,35 @@ function Content() {
                                 >
                                   <MinusIcon />
                                 </div>
-                                <input
-                                  id={`score-${evaluationCriterionIndex}-${index}`}
-                                  type='number'
-                                  className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-1/6 border p-2 rounded-md text-center'
-                                  value={item.score || 0}
-                                  onChange={(event) => {
-                                    const newScore = Number(event.target.value);
-                                    setEvaluationForm((prevForm: any) => {
-                                      const updatedForm = prevForm.map((criterionItem: any, criterionIndex: number) => {
-                                        if (criterionIndex === evaluationCriterionIndex) {
-                                          return {
-                                            ...criterionItem,
-                                            criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
-                                              if (itemIndex === index) {
-                                                return { ...item, score: newScore };
-                                              }
-                                              return item;
-                                            }),
-                                          };
-                                        }
-                                        return criterionItem;
+                                <div className='border p-2 rounded-md text-center w-1/3'>
+                                  <input
+                                    id={`score-${evaluationCriterionIndex}-${index}`}
+                                    type='number'
+                                    className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-1/6 focus:outline-none'
+                                    value={item.score || 0}
+                                    onChange={(event) => {
+                                      const newScore = Number(event.target.value);
+                                      setEvaluationForm((prevForm: any) => {
+                                        const updatedForm = prevForm.map((criterionItem: any, criterionIndex: number) => {
+                                          if (criterionIndex === evaluationCriterionIndex) {
+                                            return {
+                                              ...criterionItem,
+                                              criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
+                                                if (itemIndex === index) {
+                                                  return { ...item, score: newScore };
+                                                }
+                                                return item;
+                                              }),
+                                            };
+                                          }
+                                          return criterionItem;
+                                        });
+                                        return updatedForm;
                                       });
-                                      return updatedForm;
-                                    });
-                                  }}
-                                />
+                                    }}
+                                  />
+                                  <span className='text-base'>/ {item.max_score}</span>
+                                </div>
                                 <div
                                   className='p-2 cursor-pointer'
                                   onClick={() => {
@@ -308,7 +311,8 @@ function Content() {
                                             ...criterionItem,
                                             criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
                                               if (itemIndex === index) {
-                                                return { ...item, score: prevScore + 1 };
+                                                const newScore = Math.min(prevScore + 1, item.max_score);
+                                                return { ...item, score: newScore };
                                               }
                                               return item;
                                             }),
@@ -356,7 +360,7 @@ function Content() {
                           {!item.is_disable_comment && (
                             <textarea
                               id={`comment-${evaluationCriterionIndex}-${index}`}
-                              className='border rounded px-5 pt-4 pb-12 text-gray-400'
+                              className='border rounded px-5 pt-4 pb-12 text-gray-400 w-1/2'
                               placeholder='Enter comment...'
                               value={item.comment || ''}
                               onChange={(event) => {
