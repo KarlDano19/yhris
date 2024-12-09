@@ -1,10 +1,10 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, Transition } from '@headlessui/react';
 
-import useGetEvaluationHistoryDetails from "../hooks/useGetEvaluationHistoryDetails";
+import useGetEvaluationHistoryDetails from '../hooks/useGetEvaluationHistoryDetails';
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;
@@ -50,7 +50,7 @@ function EvaluationDetailsModal({
       I: 1,
     };
 
-    let romanNumber = "";
+    let romanNumber = '';
 
     // Iterate through numerals in descending order
     for (const key in romanNumerals) {
@@ -98,52 +98,52 @@ function EvaluationDetailsModal({
     <div>
       <Transition.Root show={isOpen.open} as={Fragment}>
         <Dialog
-          as="div"
-          className="relative z-10"
+          as='div'
+          className='relative z-10'
           initialFocus={cancelButtonRef}
           onClose={customCloseModal}
         >
           <Transition.Child
             as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
+            enter='ease-out duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
           >
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
           </Transition.Child>
 
-          <div className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
               <Transition.Child
                 as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                enterTo="opacity-100 translate-y-0 sm:scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enter='ease-out duration-300'
+                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200'
+                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
-                  <div className="flex bg-savoy-blue p-2 items-center">
-                    <h3 className="flex-1 text-white ml-2 font-semibold">
+                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+                  <div className='flex bg-savoy-blue p-2 items-center'>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>
                       Create Work Accident/Illness Report
                     </h3>
                     <XCircleIcon
-                      className="w-8 h-8 text-white cursor-pointer"
+                      className='w-8 h-8 text-white cursor-pointer'
                       onClick={customCloseModal}
                     />
                   </div>
                   <div>
                     {evaluationForm.length > 0 && (
                       <>
-                        <div className="border-2 rounded-lg mx-4 mt-4 mb-12">
+                        <div className='border-2 rounded-lg mx-4 mt-4 mb-12'>
                           {evaluationForm[currentFormIndex].section_title && (
-                            <div className="p-6 border-b-2">
-                              <p className="text-[1.2rem] font-semibold">
-                                {convertToRoman(evaluationCriterionIndex + 1)}.{" "}
+                            <div className='p-6 border-b-2'>
+                              <p className='text-[1.2rem] font-semibold'>
+                                {convertToRoman(evaluationCriterionIndex + 1)}.{' '}
                                 {evaluationForm[currentFormIndex].section_title}
                               </p>
                               <p>
@@ -158,26 +158,26 @@ function EvaluationDetailsModal({
                             (criterionItem: any, index: number) => (
                               <div
                                 key={index}
-                                className="px-[1.55rem] py-4 border-b-2"
+                                className='px-[1.55rem] py-4 border-b-2'
                               >
-                                <div className="flex justify-between mb-2">
+                                <div className='flex justify-between mb-2'>
                                   <div>
                                     {index + 1}. {criterionItem.title}
                                   </div>
                                   <div>
-                                    <p className="text-base font-semibold">
+                                    <p className='text-base font-semibold'>
                                       Score:
                                     </p>
                                     {criterionItem.score}
-                                    <span className="text-base">
-                                      {" "}
+                                    <span className='text-base'>
+                                      {' '}
                                       / {criterionItem.max_score}
                                     </span>
                                   </div>
                                 </div>
-                                <div className="flex justify-between mb-2">
+                                <div className='flex justify-between mb-2'>
                                   <div>
-                                    <p className="text-base font-semibold">
+                                    <p className='text-base font-semibold'>
                                       Comment:
                                     </p>
                                     {criterionItem.comment}
@@ -187,25 +187,27 @@ function EvaluationDetailsModal({
                             )
                           )}
                         </div>
-                        <div className="py-4 px-4 flex justify-between">
+                        <div className='py-4 px-4 flex justify-between'>
                           {currentFormIndex > 0 && (
                             <button
-                              className="bg-savoy-blue text-white px-4 py-2 rounded-md"
-                              onClick={() => setCurrentFormIndex(currentFormIndex - 1)}
+                              className='bg-savoy-blue text-white px-4 py-2 rounded-md'
+                              onClick={() =>
+                                setCurrentFormIndex(currentFormIndex - 1)
+                              }
                             >
                               Back
                             </button>
                           )}
-                          <div className="flex-1" />
+                          <div className='flex-1' />
                           {currentFormIndex < evaluationForm.length - 1 ? (
                             <button
                               onClick={handleNext}
-                              className="bg-savoy-blue text-white px-4 py-2 rounded-md"
+                              className='bg-savoy-blue text-white px-4 py-2 rounded-md'
                             >
                               Next
                             </button>
                           ) : (
-                            <div className="flex-1" />
+                            <div className='flex-1' />
                           )}
                         </div>
                       </>
