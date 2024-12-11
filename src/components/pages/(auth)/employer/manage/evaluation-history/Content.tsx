@@ -18,14 +18,9 @@ type T_ModalData = {
   open: boolean;
 };
 
-const Content = ({
-  hasActiveSubscription,
-}: {
-  hasActiveSubscription: boolean;
-}) => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
-  const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] =
-    useState<T_ModalData | null>(null);
+  const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -41,9 +36,7 @@ const Content = ({
   useEffect(() => {
     if (dataEvaluationHistoryItems) {
       dataEvaluationHistoryItems.map((item: any) => {
-        item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(
-          new Date(item.date_of_evaluation)
-        );
+        item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
       });
       setEvaluationHistoryItems(dataEvaluationHistoryItems);
     }
@@ -58,29 +51,18 @@ const Content = ({
     const dateTo = Date.parse(itemsFilter.to);
 
     if (dateFrom && !dateTo) {
-      return toast.custom(
-        () => <CustomToast message='Invalid date to.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
     }
     if (!dateFrom && dateTo) {
-      return toast.custom(
-        () => <CustomToast message='Invalid date from.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
     }
     if (dateFrom > dateTo) {
       return toast.custom(
-        () => (
-          <CustomToast
-            message='You have entered an invalid date range. Please select again.'
-            type='error'
-          />
-        ),
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
         {
           duration: 5000,
         }
@@ -122,29 +104,14 @@ const Content = ({
         <tr
           key={item.id}
           className='cursor-pointer'
-          onClick={() =>
-            setIsEvaluationDetailsModalOpen({ id: item.id, open: true })
-          }
+          onClick={() => setIsEvaluationDetailsModalOpen({ id: item.id, open: true })}
         >
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_evaluation}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_period}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_form}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.employee_name}
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.date_of_evaluation}
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.evaluation_period}
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.evaluation_form}
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span
-              className={classNames(
-                'text-gray-500',
-                item.form_total_score < item.passing_score && 'text-red-500'
-              )}
-            >
+            <span className={classNames('text-gray-500', item.form_total_score < item.passing_score && 'text-red-500')}>
               {item.form_total_score}
             </span>
             /<span>{item.total_score}</span>
@@ -163,9 +130,7 @@ const Content = ({
       return (
         <tr>
           <td colSpan={7}>
-            <h4 className='text-center text-gray-300 text-sm my-4'>
-              There{`'`}s no data yet.
-            </h4>
+            <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
           </td>
         </tr>
       );
@@ -176,18 +141,13 @@ const Content = ({
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link
-            href='/manage'
-            className='flex-none flex gap-3 items-center hover:bg-gray-200'
-          >
+          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Manage</h4>
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>
-            Evaluation History
-          </h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Evaluation History</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
@@ -199,8 +159,7 @@ const Content = ({
                   }
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter)
-                      setItemsFilter({ ...itemsFilter, from: date });
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
                   }}
                   inputOnChange={(value: any) => {
                     setItemsFilter({
@@ -220,8 +179,7 @@ const Content = ({
                   }
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter)
-                      setItemsFilter({ ...itemsFilter, to: date });
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
                     if (!itemsFilter) setItemsFilter(date);
                   }}
                   inputOnChange={(value: any) => {
@@ -241,9 +199,7 @@ const Content = ({
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) =>
-                    setItemsFilter({ ...itemsFilter, search: e.target.value })
-                  }
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
               </div>
@@ -262,52 +218,30 @@ const Content = ({
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Employee
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Date
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Period
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Evaluation Form
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Overall Rating
                       </th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-sm font-semibold text-gray-900'
-                      >
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Recommendation
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='divide-y divide-gray-200'>
-                    {renderRows()}
-                  </tbody>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>
-                  Total record/s: {evaluationHistoryItems.length}
-                </p>
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {evaluationHistoryItems.length}</p>
               </div>
             </div>
           </div>

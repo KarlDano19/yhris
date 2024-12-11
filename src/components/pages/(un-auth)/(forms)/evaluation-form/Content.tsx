@@ -280,20 +280,24 @@ function Content() {
                                     onChange={(event) => {
                                       const newScore = Number(event.target.value);
                                       setEvaluationForm((prevForm: any) => {
-                                        const updatedForm = prevForm.map((criterionItem: any, criterionIndex: number) => {
-                                          if (criterionIndex === evaluationCriterionIndex) {
-                                            return {
-                                              ...criterionItem,
-                                              criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
-                                                if (itemIndex === index) {
-                                                  return { ...item, score: newScore };
-                                                }
-                                                return item;
-                                              }),
-                                            };
+                                        const updatedForm = prevForm.map(
+                                          (criterionItem: any, criterionIndex: number) => {
+                                            if (criterionIndex === evaluationCriterionIndex) {
+                                              return {
+                                                ...criterionItem,
+                                                criterion: criterionItem.criterion.map(
+                                                  (item: any, itemIndex: number) => {
+                                                    if (itemIndex === index) {
+                                                      return { ...item, score: newScore };
+                                                    }
+                                                    return item;
+                                                  }
+                                                ),
+                                              };
+                                            }
+                                            return criterionItem;
                                           }
-                                          return criterionItem;
-                                        });
+                                        );
                                         return updatedForm;
                                       });
                                     }}

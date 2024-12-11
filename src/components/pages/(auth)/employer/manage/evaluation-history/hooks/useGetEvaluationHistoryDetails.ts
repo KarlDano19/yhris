@@ -11,10 +11,7 @@ async function getEvaluationHistoryDetails(evaluation_form_id: number | null) {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-history/${evaluation_form_id}/`,
-      config
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-history/${evaluation_form_id}/`, config);
     if (!res.ok) {
       throw res.json();
     }

@@ -25,9 +25,7 @@ function EvaluationDetailsModal({
     refetch: refetchEvaluationHistory,
     remove: removeEvaluationHistory,
   } = useGetEvaluationHistoryDetails(isOpen.id);
-  const [evaluationHistoryDetails, setEvaluationHistoryDetails] = useState<any>(
-    {}
-  );
+  const [evaluationHistoryDetails, setEvaluationHistoryDetails] = useState<any>({});
   const [evaluationCriterionIndex, setEvaluationCriterionIndex] = useState(0);
   const [evaluationForm, setEvaluationForm] = useState<any[]>([]);
   const [currentFormIndex, setCurrentFormIndex] = useState(0);
@@ -97,12 +95,7 @@ function EvaluationDetailsModal({
   return (
     <div>
       <Transition.Root show={isOpen.open} as={Fragment}>
-        <Dialog
-          as='div'
-          className='relative z-10'
-          initialFocus={cancelButtonRef}
-          onClose={customCloseModal}
-        >
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={customCloseModal}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -128,13 +121,8 @@ function EvaluationDetailsModal({
               >
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>
-                      Create Work Accident/Illness Report
-                    </h3>
-                    <XCircleIcon
-                      className='w-8 h-8 text-white cursor-pointer'
-                      onClick={customCloseModal}
-                    />
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Create Work Accident/Illness Report</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
                   </div>
                   <div>
                     {evaluationForm.length > 0 && (
@@ -146,64 +134,42 @@ function EvaluationDetailsModal({
                                 {convertToRoman(evaluationCriterionIndex + 1)}.{' '}
                                 {evaluationForm[currentFormIndex].section_title}
                               </p>
-                              <p>
-                                {
-                                  evaluationForm[currentFormIndex]
-                                    .section_description
-                                }
-                              </p>
+                              <p>{evaluationForm[currentFormIndex].section_description}</p>
                             </div>
                           )}
-                          {evaluationForm[currentFormIndex].criterion.map(
-                            (criterionItem: any, index: number) => (
-                              <div
-                                key={index}
-                                className='px-[1.55rem] py-4 border-b-2'
-                              >
-                                <div className='flex justify-between mb-2'>
-                                  <div>
-                                    {index + 1}. {criterionItem.title}
-                                  </div>
-                                  <div>
-                                    <p className='text-base font-semibold'>
-                                      Score:
-                                    </p>
-                                    {criterionItem.score}
-                                    <span className='text-base'>
-                                      {' '}
-                                      / {criterionItem.max_score}
-                                    </span>
-                                  </div>
+                          {evaluationForm[currentFormIndex].criterion.map((criterionItem: any, index: number) => (
+                            <div key={index} className='px-[1.55rem] py-4 border-b-2'>
+                              <div className='flex justify-between mb-2'>
+                                <div>
+                                  {index + 1}. {criterionItem.title}
                                 </div>
-                                <div className='flex justify-between mb-2'>
-                                  <div>
-                                    <p className='text-base font-semibold'>
-                                      Comment:
-                                    </p>
-                                    {criterionItem.comment}
-                                  </div>
+                                <div>
+                                  <p className='text-base font-semibold'>Score:</p>
+                                  {criterionItem.score}
+                                  <span className='text-base'> / {criterionItem.max_score}</span>
                                 </div>
                               </div>
-                            )
-                          )}
+                              <div className='flex justify-between mb-2'>
+                                <div>
+                                  <p className='text-base font-semibold'>Comment:</p>
+                                  {criterionItem.comment}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                         <div className='py-4 px-4 flex justify-between'>
                           {currentFormIndex > 0 && (
                             <button
                               className='bg-savoy-blue text-white px-4 py-2 rounded-md'
-                              onClick={() =>
-                                setCurrentFormIndex(currentFormIndex - 1)
-                              }
+                              onClick={() => setCurrentFormIndex(currentFormIndex - 1)}
                             >
                               Back
                             </button>
                           )}
                           <div className='flex-1' />
                           {currentFormIndex < evaluationForm.length - 1 ? (
-                            <button
-                              onClick={handleNext}
-                              className='bg-savoy-blue text-white px-4 py-2 rounded-md'
-                            >
+                            <button onClick={handleNext} className='bg-savoy-blue text-white px-4 py-2 rounded-md'>
                               Next
                             </button>
                           ) : (
