@@ -11,9 +11,16 @@ import useGetEvaluationHistoryItems from './hooks/useGetEvaluationHistoryItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
+import EvaluationDetailsModal from './modals/EvaluationDetailsModal';
+
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
+  const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -94,7 +101,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     if (evaluationHistoryItems && evaluationHistoryItems.length > 0) {
       return evaluationHistoryItems.map((item: any) => (
-        <tr key={item.id} className='cursor-pointer'>
+        <tr
+          key={item.id}
+          className='cursor-pointer'
+          onClick={() => setIsEvaluationDetailsModalOpen({ id: item.id, open: true })}
+        >
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_evaluation}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_period}</td>
@@ -236,6 +247,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      {isEvaluationDetailsModalOpen && (
+        <EvaluationDetailsModal
+          refetch={refetchEvaluationHistoryItems}
+          isOpen={isEvaluationDetailsModalOpen}
+          setIsOpen={setIsEvaluationDetailsModalOpen}
+        />
+      )}
     </>
   );
 };
