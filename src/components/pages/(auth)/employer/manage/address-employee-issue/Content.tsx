@@ -1,23 +1,39 @@
 'use client';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import React, { useEffect, useState, useRef } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import { T_SendNTEModal, T_SendDecisionModal, T_InvestigationModal } from '@/types/globals';
-import IncidentReportModal from './modals/IncidentReportModal';
-import SendNTEModal from './modals/SendNTEModal';
-import SendNTE from './SendNTE';
-import Investigation from './Investigation';
-import InvestigationModal from './modals/InvestigationModal';
-import SendDecision from './SendDecision';
-import SendDecisionModal from './modals/SendDecisionModal';
+
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+
+import {
+  T_SendNTEModal,
+  T_SendDecisionModal,
+  T_InvestigationModal,
+  T_InvestigationReportDetailsModal,
+  T_UploadEmployeeIssueAttachmentModal,
+  T_NTEAttachmentViewModal,
+  T_DecisionAttachmentViewModal,
+} from '@/types/globals';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
+import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
+import NTEAttachmentViewModal from './modals/NTEAttachmentViewModal';
+import UploadDecisionAttachmentModal from './modals/UploadDecisionAttachment';
+import DecisionAttachmentViewModal from './modals/DecisionAttachmentViewModal';
+import IncidentReportModal from './modals/IncidentReportModal';
+import InvestigationReportDetailsModal from './modals/InvestigationReportDetailsModal';
+import SendNTEModal from './modals/SendNTEModal';
+import SendNTE from './SendNTE';
+import Investigation from './Investigation';
+import InvestigationModal from './modals/InvestigationModal';
+import SendDecision from './SendDecision';
+import SendDecisionModal from './modals/SendDecisionModal';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
@@ -32,7 +48,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] = useState(false);
   const [isSendNTEModalOpen, setIsSendNTEModalOpen] = useState<T_SendNTEModal | null>(null);
   const [isInvestigateModalOpen, setIsInvestigateModalOpen] = useState<T_InvestigationModal | null>(null);
+  const [isInvestigationReportDetailsModalOpen, setInvestigationReportDetailsModalOpen] =
+    useState<T_InvestigationReportDetailsModal | null>(null);
+  const [isNTEAttachmentViewModalOpen, setNTEAttachmentViewModalOpen] = useState<T_NTEAttachmentViewModal | null>(null);
+  const [isUploadEmployeeIssueAttachmentModalOpen, setIsUploadEmployeeIssueAttachmentModalOpen] =
+    useState<T_UploadEmployeeIssueAttachmentModal | null>(null);
   const [isSendDecisionModalOpen, setIsSendDecisionModalOpen] = useState<T_SendDecisionModal | null>(null);
+  const [isDecisionAttachmentViewModalOpen, setIsDecisionAttachmentViewModalOpen] =
+    useState<T_DecisionAttachmentViewModal | null>(null);
+  const [isUploadDecisionAttachmentModalOpen, setIsUploadDecisionAttachmentModalOpen] =
+    useState<T_DecisionAttachmentViewModal | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
@@ -225,6 +250,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isNTEReceived={item.isNTEReceived}
               incidentReceivedDate={item.incidentReceivedDate}
               setIsSendNTEModalOpen={setIsSendNTEModalOpen}
+              setIsUploadEmployeeIssueAttachmentModalOpen={setIsUploadEmployeeIssueAttachmentModalOpen}
+              setNTEAttachmentViewModalOpen={setNTEAttachmentViewModalOpen}
               setReleased={setReleased}
               isLoading={isLoading}
             />
@@ -235,6 +262,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               investigatedDate={item.investigatedDate}
               isInvestigated={item.isInvestigated}
               setIsInvestigateModalOpen={setIsInvestigateModalOpen}
+              setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -244,6 +272,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isDecisionReceived={item.isDecisionReceived}
               decisionReceivedDate={item.decisionReceivedDate}
               setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
+              setIsUploadDecisionAttachmentModalOpen={setIsUploadDecisionAttachmentModalOpen}
+              setIsDecisionAttachmentViewModalOpen={setIsDecisionAttachmentViewModalOpen}
               setReleased={setReleased}
               isLoading={isLoading}
             />
@@ -404,6 +434,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         employeeIssueItems={employeeIssueItems}
         setEmployeeIssueItems={setEmployeeIssueItems}
       />
+      {isInvestigationReportDetailsModalOpen && (
+        <InvestigationReportDetailsModal
+          isOpen={isInvestigationReportDetailsModalOpen}
+          setIsOpen={setInvestigationReportDetailsModalOpen}
+        />
+      )}
+      {isUploadEmployeeIssueAttachmentModalOpen && (
+        <UploadEmployeeIssueAttachmentModal
+          isOpen={isUploadEmployeeIssueAttachmentModalOpen}
+          setIsOpen={setIsUploadEmployeeIssueAttachmentModalOpen}
+        />
+      )}
+      {isNTEAttachmentViewModalOpen && (
+        <NTEAttachmentViewModal isOpen={isNTEAttachmentViewModalOpen} setIsOpen={setNTEAttachmentViewModalOpen} />
+      )}
+      {isUploadDecisionAttachmentModalOpen && (
+        <UploadDecisionAttachmentModal
+          isOpen={isUploadDecisionAttachmentModalOpen}
+          setIsOpen={setIsUploadDecisionAttachmentModalOpen}
+        />
+      )}
+      {isDecisionAttachmentViewModalOpen && (
+        <DecisionAttachmentViewModal
+          isOpen={isDecisionAttachmentViewModalOpen}
+          setIsOpen={setIsDecisionAttachmentViewModalOpen}
+        />
+      )}
     </>
   );
 };

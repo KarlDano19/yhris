@@ -1,7 +1,9 @@
-import classNames from '@/helpers/classNames';
-import ClipIcon from '@/svg/ClipIcon';
-import { T_SendNTEModal } from '@/types/globals';
 import React, { Dispatch } from 'react';
+
+import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
+import classNames from '@/helpers/classNames';
+
+import ClipIcon from '@/svg/ClipIcon';
 
 const SendNTE = ({
   id,
@@ -9,6 +11,8 @@ const SendNTE = ({
   isNTEReceived,
   incidentReceivedDate,
   setIsSendNTEModalOpen,
+  setIsUploadEmployeeIssueAttachmentModalOpen,
+  setNTEAttachmentViewModalOpen,
   setReleased,
   isLoading,
 }: {
@@ -17,9 +21,18 @@ const SendNTE = ({
   isNTEReceived: boolean;
   incidentReceivedDate?: string;
   setIsSendNTEModalOpen: Dispatch<T_SendNTEModal>;
+  setIsUploadEmployeeIssueAttachmentModalOpen: Dispatch<T_UploadEmployeeIssueAttachmentModal>;
+  setNTEAttachmentViewModalOpen: Dispatch<T_NTEAttachmentViewModal>;
   setReleased: any;
   isLoading: boolean;
 }) => {
+  const customOnclick = () => {
+    setIsUploadEmployeeIssueAttachmentModalOpen({
+      isOpen: true,
+      id,
+    });
+  };
+
   return (
     <div className='flex flex-col gap-2'>
       <div>
@@ -47,13 +60,13 @@ const SendNTE = ({
       <div>
         <button
           className={classNames(
-            isNTEReceived
-              ? 'bg-savoy-blue text-white'
-              : 'bg-blue-100 text-blue-400',
+            isNTEReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isNTESent || isNTEReceived || isLoading}
-          onClick={() => setReleased(id, 'nte')}
+          onClick={() => {
+            customOnclick(), setReleased(id, 'nte');
+          }}
         >
           {isLoading && (
             <div role='status'>
@@ -76,13 +89,23 @@ const SendNTE = ({
               <span className='sr-only'>Loading...</span>
             </div>
           )}
-          {!isLoading && 'Received'}
+          {!isLoading && (isNTEReceived ? 'Received' : 'Receive')}
         </button>
       </div>
       {isNTEReceived ? (
         <div>
           <div className='flex gap-1 items-center justify-center'>
-            <ClipIcon />
+            <div
+              className='cursor-pointer'
+              onClick={() =>
+                setNTEAttachmentViewModalOpen({
+                  isOpen: true,
+                  id,
+                })
+              }
+            >
+              <ClipIcon />
+            </div>
             <p className='ml-2 text-xs'>{incidentReceivedDate}</p>
           </div>
         </div>

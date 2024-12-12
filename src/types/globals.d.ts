@@ -90,6 +90,26 @@ export type T_InvestigationModal = {
   id: number;
 };
 
+export type T_InvestigationReportDetailsModal = {
+  isOpen: boolean;
+  id: number;
+};
+
+export type T_UploadEmployeeIssueAttachmentModal = {
+  isOpen: boolean;
+  id: number;
+};
+
+export type T_NTEAttachmentViewModal = {
+  isOpen: boolean;
+  id: number;
+};
+
+export type T_DecisionAttachmentViewModal = {
+  isOpen: boolean;
+  id: number;
+};
+
 export type T_DesignBenefitsModal = {
   isOpen: boolean;
   id: number;
