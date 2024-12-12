@@ -3,6 +3,7 @@ import React, { Dispatch } from 'react';
 import classNames from '@/helpers/classNames';
 
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
+
 import ClipIcon from '@/svg/ClipIcon';
 
 const SendNTE = ({

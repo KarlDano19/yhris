@@ -35,6 +35,13 @@ function UploadDecisionAttachmentModal({ isOpen, setIsOpen }: { isOpen: any; set
   };
 
   const onSubmit = handleSubmit(() => {
+    if (!isOpen?.id) {
+      toast.custom(() => <CustomToast message='Missing employee issue ID' type='error' />, {
+        duration: 5000,
+      });
+      return;
+    }
+
     if (!toSaveData?.decision_attachment) {
       toast.custom(() => <CustomToast message='Please select a file to upload' type='error' />, {
         duration: 5000,
@@ -56,19 +63,13 @@ function UploadDecisionAttachmentModal({ isOpen, setIsOpen }: { isOpen: any; set
       },
     };
 
-    if (isOpen?.id && toSaveData?.decision_attachment) {
-      uploadEmployeeIssueAttachments(
-        {
-          employee_issue_id: isOpen.id,
-          decision_attachment: toSaveData.decision_attachment,
-        },
-        callbackReq
-      );
-    } else {
-      toast.custom(() => <CustomToast message='Missing required information' type='error' />, {
-        duration: 5000,
-      });
-    }
+    uploadEmployeeIssueAttachments(
+      {
+        employee_issue_id: isOpen.id,
+        decision_attachment: toSaveData.decision_attachment,
+      },
+      callbackReq
+    );
   });
 
   return (

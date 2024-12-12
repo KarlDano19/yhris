@@ -33,6 +33,7 @@ import {
   T_NTEAttachmentViewModal,
   T_DecisionAttachmentViewModal,
 } from '@/types/globals';
+
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
