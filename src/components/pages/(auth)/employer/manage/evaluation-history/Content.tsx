@@ -116,12 +116,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </span>
             /<span>{item.total_score}</span>
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+          {/* Still not implemented */}
+          {/* <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <button
               className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
               disabled={!(item.form_total_score < item.passing_score)}
             >
               Enroll for Training
+            </button>
+          </td> */}
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+              View
             </button>
           </td>
         </tr>
@@ -233,8 +239,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Overall Rating
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      {/* Still not implemented */}
+                      {/* <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Recommendation
+                      </th> */}
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
                       </th>
                     </tr>
                   </thead>
