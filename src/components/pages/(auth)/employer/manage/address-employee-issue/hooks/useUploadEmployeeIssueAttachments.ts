@@ -36,7 +36,6 @@ async function uploadEmployeeIssueAttachments(params: UploadParams) {
     }
     return res.json();
   } catch (err: any) {
-    console.error('Upload error:', err);
     throw err.message || 'An error occurred during upload';
   }
 }

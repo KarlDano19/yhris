@@ -6,12 +6,12 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import useGetEvaluationHistoryItems from './hooks/useGetEvaluationHistoryItems';
+import EvaluationDetailsModal from './modals/EvaluationDetailsModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import classNames from '@/helpers/classNames';
-import EvaluationDetailsModal from './modals/EvaluationDetailsModal';
 
 type T_ModalData = {
   id: number;

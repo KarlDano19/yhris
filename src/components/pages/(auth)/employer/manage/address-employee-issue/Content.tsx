@@ -4,15 +4,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-import {
-  T_SendNTEModal,
-  T_SendDecisionModal,
-  T_InvestigationModal,
-  T_InvestigationReportDetailsModal,
-  T_UploadEmployeeIssueAttachmentModal,
-  T_NTEAttachmentViewModal,
-  T_DecisionAttachmentViewModal,
-} from '@/types/globals';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
@@ -33,6 +24,15 @@ import InvestigationModal from './modals/InvestigationModal';
 import SendDecision from './SendDecision';
 import SendDecisionModal from './modals/SendDecisionModal';
 
+import {
+  T_SendNTEModal,
+  T_SendDecisionModal,
+  T_InvestigationModal,
+  T_InvestigationReportDetailsModal,
+  T_UploadEmployeeIssueAttachmentModal,
+  T_NTEAttachmentViewModal,
+  T_DecisionAttachmentViewModal,
+} from '@/types/globals';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {

@@ -10,8 +10,6 @@ function DecisionAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIs
   const cancelButtonRef = useRef(null);
   const { data: employeeIssueData, remove: removeEmployeeIssue } = useGetEmployeeIssueDetails(isOpen.id);
 
-  console.log(isOpen);
-
   const customCloseModal = () => {
     removeEmployeeIssue();
     setIsOpen(null);
