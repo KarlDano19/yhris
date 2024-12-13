@@ -1,18 +1,23 @@
-import classNames from '@/helpers/classNames';
-import ClipIcon from '@/svg/ClipIcon';
-import { T_InvestigationModal } from '@/types/globals';
 import React, { Dispatch } from 'react';
+
+import classNames from '@/helpers/classNames';
+
+import { T_InvestigationModal, T_InvestigationReportDetailsModal } from '@/types/globals';
+
+import ClipIcon from '@/svg/ClipIcon';
 
 const Investigation = ({
   id,
   isInvestigated,
   investigatedDate,
   setIsInvestigateModalOpen,
+  setInvestigationReportDetailsModalOpen,
 }: {
   id: number;
   isInvestigated: boolean;
   investigatedDate: string;
   setIsInvestigateModalOpen: Dispatch<T_InvestigationModal>;
+  setInvestigationReportDetailsModalOpen: Dispatch<T_InvestigationReportDetailsModal>;
 }) => {
   return (
     <div className='flex flex-col gap-2'>
@@ -41,7 +46,17 @@ const Investigation = ({
       {isInvestigated ? (
         <div>
           <div className='flex gap-1 items-center justify-center'>
-            <ClipIcon />
+            <div
+              className='cursor-pointer'
+              onClick={() =>
+                setInvestigationReportDetailsModalOpen({
+                  isOpen: true,
+                  id,
+                })
+              }
+            >
+              <ClipIcon />
+            </div>
             <p className='text-xs ml-1'>{investigatedDate}</p>
           </div>
         </div>
