@@ -11,7 +11,7 @@ async function getEmployeeIssueDetails(employee_issue_id: number | null) {
       },
     };
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/employee-issues/attachments/${employee_issue_id}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/employee-issues/${employee_issue_id}/`,
       config
     );
     if (!res.ok) {
