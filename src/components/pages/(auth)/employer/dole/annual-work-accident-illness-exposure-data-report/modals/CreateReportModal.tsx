@@ -10,6 +10,7 @@ import InjurySummary from "./tabs/InjurySummary";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import useAddAnnualAccidentIllnessReport from "../hooks/useAddAnnualAccidentIllnessReport";
+import useGetWorkAccidentIlnessReportsItems from "../../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
 
 function CreateReportModal({
   refetch,
@@ -21,12 +22,22 @@ function CreateReportModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
+  const filters = { search: "", from: "", to: "" };
+  const { data: reportsData } = useGetWorkAccidentIlnessReportsItems(filters);
   const { register, handleSubmit, reset, control, setValue, getValues } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addAnnualAccidentIllnessReport, isLoading: isLoadingAddAnnualAccidentIllnessReport } = useAddAnnualAccidentIllnessReport();
 
+  useEffect(() => {
+    if (reportsData && reportsData.records && Array.isArray(reportsData.records)) {
+      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
+      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
+      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
+      setValue("total_non_disabling_injuries", totalNonDisabling);
+    }
+  }, [reportsData, setValue]);
+  
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -109,7 +120,7 @@ function CreateReportModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
-                    isLoading={false}
+                    isLoading={isLoadingAddAnnualAccidentIllnessReport}
                     setValue={setValue}
                   />
                 )}

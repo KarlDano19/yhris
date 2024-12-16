@@ -37,19 +37,13 @@ function InjurySummary({
     .find(["employerProfileCache"]) as {
     state: { data: CachedProfileData } | undefined;
   };
-  const filters = { search: "", from: "", to: "" }; // Adjust filters as needed for your use case
-  const { data: reportsData } = useGetWorkAccidentIlnessReportsItems(filters);
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [totalDisablingInjuries, setTotalDisablingInjuries] =
     useState<number>(0);
-  const [totalNonDisablingInjuriesState, setTotalNonDisablingInjuries] =
-    useState<number>(0);
   const [employeeHours, setEmployeeHours] = useState<number>(0);
   const [daysLost, setDaysLost] = useState<number>(0);
-
-  const { getValues } = useForm();
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -65,22 +59,6 @@ function InjurySummary({
       setSignatureUrl("");
     }
   }, [signatureUrl, setValue, drawSignatureModal]);
-
-  useEffect(() => {
-    if (reportsData && reportsData.records && Array.isArray(reportsData.records)) {
-      console.log(reportsData.records);
-      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
-      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
-  
-      setTotalDisablingInjuries(totalDisabling);
-      setEmployeeHours(totalNonDisabling);
-  
-      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
-      setValue("total_non_disabling_injuries", totalNonDisabling);
-    } else {
-      console.warn("reportsData is not in the expected format:", reportsData);
-    }
-  }, [reportsData, setValue]);
 
   useEffect(() => {
     if (employeeHours > 0) {
@@ -131,10 +109,9 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                id="total_all_disabling_injuries_illnesses"
-                value={getValues("total_all_disabling_injuries_illnesses") || totalDisablingInjuries}
-                onChange={(e) => setValue("total_all_disabling_injuries_illnesses", e.target.value)}
+                {...register("total_all_disabling_injuries_illnesses")}
                 disabled
+                id="total_all_disabling_injuries_illnesses"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -150,10 +127,9 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                id="total_non_disabling_injuries"
-                value={getValues("total_non_disabling_injuries") || totalNonDisablingInjuriesState}
-                onChange={(e) => setValue("total_non_disabling_injuries", e.target.value)}
+                {...register("total_non_disabling_injuries")}
                 disabled
+                id="total_non_disabling_injuries"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
