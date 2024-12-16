@@ -1,13 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
+interface newFiltersProps {
+  search?: string;
+  from?: string;
+  to?: string;
+  current_page?: number;
+  page_size?: number;
+}
+
 async function getAnnualAccidentIllnessReportItems(filters: any) {
   try {
-    let newFilters = { ...filters };
+    let newFilters: newFiltersProps = {};
+    if (filters.currentPage) newFilters.current_page = filters.currentPage;
+    if (filters.pageSize) newFilters.page_size = filters.pageSize;
+    if (filters.search) newFilters.search = filters.search;
     if (filters.from)
       newFilters.from = filters.from.toLocaleDateString("en-CA");
     if (filters.to) newFilters.to = filters.to.toLocaleDateString("en-CA");
-    const searchParams = new URLSearchParams(newFilters);
+    const searchParams = new URLSearchParams(
+      Object.entries(newFilters).map(([key, value]) => [key, String(value)])
+    );
     const token = getCookie("token");
     const config = {
       method: "GET",
@@ -38,7 +51,7 @@ async function getAnnualAccidentIllnessReportItems(filters: any) {
 
 function useGetAnnualAccidentIllnessReportItems(filters: any) {
   const query = useQuery(
-    [],
+    ["annualAccidentIllnessReportItemsCache"],
     () => getAnnualAccidentIllnessReportItems(filters),
     {
       enabled: false,

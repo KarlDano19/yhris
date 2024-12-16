@@ -1,17 +1,13 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
+import useGetWorkAccidentIlnessReportsItems from "../../../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import DrawSignatureModal from "../DrawSignatureModal";
 
 interface CachedProfileData {
@@ -41,14 +37,22 @@ function InjurySummary({
     .find(["employerProfileCache"]) as {
     state: { data: CachedProfileData } | undefined;
   };
-
+  const filters = { search: "", from: "", to: "" }; // Adjust filters as needed for your use case
+  const { data: reportsData } = useGetWorkAccidentIlnessReportsItems(filters);
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [totalDisablingInjuries, setTotalDisablingInjuries] =
     useState<number>(0);
+  const [totalNonDisablingInjuriesState, setTotalNonDisablingInjuries] =
+    useState<number>(0);
   const [employeeHours, setEmployeeHours] = useState<number>(0);
   const [daysLost, setDaysLost] = useState<number>(0);
+
+  const { watch } = useForm();
+
+  const totalAllDisablingInjuries = watch("total_all_disabling_injuries_illnesses");
+  const totalNonDisablingInjuries = watch("total_non_disabling_injuries");
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -64,6 +68,22 @@ function InjurySummary({
       setSignatureUrl("");
     }
   }, [signatureUrl, setValue, drawSignatureModal]);
+
+  useEffect(() => {
+    if (reportsData && reportsData.records && Array.isArray(reportsData.records)) {
+      console.log(reportsData.records);
+      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
+      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
+  
+      setTotalDisablingInjuries(totalDisabling);
+      setEmployeeHours(totalNonDisabling);
+  
+      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
+      setValue("total_non_disabling_injuries", totalNonDisabling);
+    } else {
+      console.warn("reportsData is not in the expected format:", reportsData);
+    }
+  }, [reportsData, setValue]);
 
   useEffect(() => {
     if (employeeHours > 0) {
@@ -114,9 +134,9 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("total_all_disabling_injuries_illnesses", {
-                  required: true,
-                })}
+                value={totalAllDisablingInjuries || totalDisablingInjuries}
+                {...register("total_all_disabling_injuries_illnesses")}
+                disabled
                 id="total_all_disabling_injuries_illnesses"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
@@ -133,9 +153,9 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("total_non_disabling_injuries", {
-                  required: true,
-                })}
+                value={totalNonDisablingInjuries || totalNonDisablingInjuriesState}
+                {...register("total_non_disabling_injuries")}
+                disabled
                 id="total_non_disabling_injuries"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />

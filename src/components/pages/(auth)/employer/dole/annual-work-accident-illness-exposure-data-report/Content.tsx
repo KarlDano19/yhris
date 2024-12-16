@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Transition } from "@headlessui/react";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
@@ -45,6 +46,8 @@ type T_ModalData = {
 };
 
 function Content() {
+  const queryClient = useQueryClient();
+  const cachedWAIReport = queryClient.getQueryCache().find(['workAccidentIlnessReportsItemsCache']) as { state: { data: any } | undefined };
   const [annualAccidentIllnessReportItems, setAnnualAccidentIllnessReportItems] =
     useState<any>([]);
   const [
