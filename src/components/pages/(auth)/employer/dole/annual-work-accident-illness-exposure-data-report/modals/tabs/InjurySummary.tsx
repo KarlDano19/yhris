@@ -49,10 +49,7 @@ function InjurySummary({
   const [employeeHours, setEmployeeHours] = useState<number>(0);
   const [daysLost, setDaysLost] = useState<number>(0);
 
-  const { watch } = useForm();
-
-  const totalAllDisablingInjuries = watch("total_all_disabling_injuries_illnesses");
-  const totalNonDisablingInjuries = watch("total_non_disabling_injuries");
+  const { getValues } = useForm();
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -134,10 +131,10 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                value={totalAllDisablingInjuries || totalDisablingInjuries}
-                {...register("total_all_disabling_injuries_illnesses")}
-                disabled
                 id="total_all_disabling_injuries_illnesses"
+                value={getValues("total_all_disabling_injuries_illnesses") || totalDisablingInjuries}
+                onChange={(e) => setValue("total_all_disabling_injuries_illnesses", e.target.value)}
+                disabled
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -153,10 +150,10 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                value={totalNonDisablingInjuries || totalNonDisablingInjuriesState}
-                {...register("total_non_disabling_injuries")}
-                disabled
                 id="total_non_disabling_injuries"
+                value={getValues("total_non_disabling_injuries") || totalNonDisablingInjuriesState}
+                onChange={(e) => setValue("total_non_disabling_injuries", e.target.value)}
+                disabled
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
