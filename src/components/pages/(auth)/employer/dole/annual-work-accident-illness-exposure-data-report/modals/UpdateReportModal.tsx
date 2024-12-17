@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller, set } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -152,7 +152,7 @@ export default function UpdateReportModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
-                    isLoading={false}
+                    isLoading={isLoadingUpdateAnnualAccidentIllnessReport}
                     setValue={setValue}
                   />
                 )}  

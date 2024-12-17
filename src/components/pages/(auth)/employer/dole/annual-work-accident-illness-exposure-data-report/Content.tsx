@@ -3,8 +3,8 @@
 import React, { useEffect, useState, Fragment } from "react";
 
 import Link from "next/link";
-import Image from "next/image";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Transition } from "@headlessui/react";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
@@ -13,22 +13,16 @@ import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import classNames from "@/helpers/classNames";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import ExportProgressModal from "../work-accident-illness-report/modals/ExportProgressModal";
 import CreateReportModal from "./modals/CreateReportModal";
 import useGetAnnualAccidentIllnessReportItems from "./hooks/useGetAnnualAccidentIllnessReportItems";
-import useGetWorkAccidentIlnessReportsItems from "../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
-import DeleteWorkAccidentIllnessReportModal from "../work-accident-illness-report/modals/DeleteWorkAccidentIllnessReportModal";
-import UpdateWorkAccidentIllnessReportModal from "../work-accident-illness-report/modals/UpdateWorkAccidentIllnessReportModal";
 
 import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
-  ChevronDownIcon,
   EllipsisHorizontalIcon
 } from "@heroicons/react/24/solid";
 import EditIcon from "@/svg/EditIcon";
-import DeleteIcon from "@/svg/DeleteIcon";
 import EmailLogo from "@/svg/EmailLogo";
 import UpdateReportModal from "./modals/UpdateReportModal";
 import DeleteReportModal from "./modals/DeleteReportModal";
@@ -44,7 +38,9 @@ type T_ModalData = {
   open: boolean;
 };
 
-function Content() {
+function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
+  const queryClient = useQueryClient();
+  const cachedWAIReport = queryClient.getQueryCache().find(['workAccidentIlnessReportsItemsCache']) as { state: { data: any } | undefined };
   const [annualAccidentIllnessReportItems, setAnnualAccidentIllnessReportItems] =
     useState<any>([]);
   const [
@@ -454,10 +450,11 @@ function Content() {
             </button>
             <div className="flex-1 flex justify-end">
               <button
-                className="bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
+                className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
                 onClick={() =>
                   setIsCreateAnnualAccidentIllnessReportModalOpen(true)
                 }
+                disabled={!hasActiveSubscription}
               >
                 Generate Report
               </button>

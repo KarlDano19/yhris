@@ -1,17 +1,13 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
+import useGetWorkAccidentIlnessReportsItems from "../../../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import DrawSignatureModal from "../DrawSignatureModal";
 
 interface CachedProfileData {
@@ -41,7 +37,6 @@ function InjurySummary({
     .find(["employerProfileCache"]) as {
     state: { data: CachedProfileData } | undefined;
   };
-
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
@@ -114,9 +109,8 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("total_all_disabling_injuries_illnesses", {
-                  required: true,
-                })}
+                {...register("total_all_disabling_injuries_illnesses")}
+                disabled
                 id="total_all_disabling_injuries_illnesses"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
@@ -133,9 +127,8 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("total_non_disabling_injuries", {
-                  required: true,
-                })}
+                {...register("total_non_disabling_injuries")}
+                disabled
                 id="total_non_disabling_injuries"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />

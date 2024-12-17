@@ -1,18 +1,16 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import {  Controller } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
+
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
+
 
 interface CachedProfileData {
   name: string;
@@ -59,6 +57,7 @@ function ExposureData({
         cachedProfile.state.data.type_of_industry || ""
       );
       setValue("address", cachedProfile.state.data.city || "");
+      setValue("year", new Date().getFullYear() || "");
     }
   }, [employeeData, cachedProfile, setValue]);
 
@@ -167,7 +166,7 @@ function ExposureData({
           </div>
           <div className="flex flex-row gap-2 justify-end">
             <label
-              htmlFor="employee"
+              htmlFor="year"
               className="block text-sm font-medium leading-6 text-gray-900 mt-4"
             >
               January to December<span className="text-red-600">*</span>
@@ -175,8 +174,8 @@ function ExposureData({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("address", { required: true })}
-                id="address"
+                {...register("year", { required: true })}
+                id="year"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>

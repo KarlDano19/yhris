@@ -1,15 +1,16 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import ExposureData from "./tabs/ExposureData";
 import InjurySummary from "./tabs/InjurySummary";
+import useAddAnnualAccidentIllnessReport from "../hooks/useAddAnnualAccidentIllnessReport";
+import useGetWorkAccidentIlnessReportsItems from "../hooks/useGetWorkAccidentIlnessReportsItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import useAddAnnualAccidentIllnessReport from "../hooks/useAddAnnualAccidentIllnessReport";
 
 function CreateReportModal({
   refetch,
@@ -21,12 +22,21 @@ function CreateReportModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { register, handleSubmit, reset, control, setValue, getValues } =
+  const { data: reportsData } = useGetWorkAccidentIlnessReportsItems();
+  const { register, handleSubmit, reset, control, setValue } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addAnnualAccidentIllnessReport, isLoading: isLoadingAddAnnualAccidentIllnessReport } = useAddAnnualAccidentIllnessReport();
 
+  useEffect(() => {
+    if (reportsData && reportsData.records) {
+      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
+      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
+      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
+      setValue("total_non_disabling_injuries", totalNonDisabling);
+    }
+  }, [reportsData, setValue]);
+  
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -109,7 +119,7 @@ function CreateReportModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
-                    isLoading={false}
+                    isLoading={isLoadingAddAnnualAccidentIllnessReport}
                     setValue={setValue}
                   />
                 )}

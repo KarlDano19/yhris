@@ -1,17 +1,16 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import useAddHealthAndSafetyReport from "../hooks/useAddHealthAndSafetyReport";
 import ReportInformation from "./tabs/ReportInformation";
-
-import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import PolicyAndComittee from "./tabs/PolicyAndComittee";
 import TechnicalAndSignature from "./tabs/TechnicalAndSignature";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function CreateHealthAndSafetyReportModal({
   refetch,
@@ -91,7 +90,7 @@ function CreateHealthAndSafetyReportModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Create Work Environment Measurement (WEM) Request
+                    Create Health and Safety Organization Report
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
