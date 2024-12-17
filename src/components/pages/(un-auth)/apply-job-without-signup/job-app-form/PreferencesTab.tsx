@@ -7,6 +7,7 @@ import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { PlusIcon, CheckIcon } from '@heroicons/react/24/solid';
+import ConfirmationModal from './modals/ConfirmationModal';
 
 function PreferencesTab({
   control,
@@ -29,6 +30,9 @@ function PreferencesTab({
 }) {
   const [isWFH, setCheckWFH] = useState(false);
   const [isWOS, setCheckWOS] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [actionType, setActionType] = useState<'add' | 'remove' | null>(null);
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: 'experiences',
@@ -71,6 +75,30 @@ function PreferencesTab({
     }
     submitToSave(data);
   });
+
+  const handleAddExperience = () => {
+    append({
+      position: '',
+      majorRole: '',
+      companyOrg: '',
+      dateFrom: '',
+      dateTo: '',
+    });
+    setShowModal(false);
+  };
+
+  const handleRemoveExperience = () => {
+    if (currentIndex !== null) {
+      remove(currentIndex);
+    }
+    setShowModal(false);
+  };
+
+  const confirmAction = (type: 'add' | 'remove', index?: number) => {
+    setActionType(type);
+    setCurrentIndex(index ?? null);
+    setShowModal(true);
+  };
 
   const renderExpInputs = () => {
     return fields.map((item, index) => {
@@ -163,7 +191,7 @@ function PreferencesTab({
           <button
             type='button'
             className='lg:mt-5 w-full md:w-1/2 rounded-md flex justify-center items-center bg-red-600 lg:px-[110px] px-10 py-2.5 text-sm font-semibold text-white shadow-sm mb-4'
-            onClick={() => remove(index)}
+            onClick={() => confirmAction('remove', index)}
           >
             REMOVE
           </button>
@@ -179,15 +207,7 @@ function PreferencesTab({
       <button
         type='button'
         className='lg:mt-5 w-full md:w-auto rounded-md flex justify-center items-center bg-[#65C979] px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#90d69e]'
-        onClick={() =>
-          append({
-            position: '',
-            majorRole: '',
-            companyOrg: '',
-            dateFrom: '',
-            dateTo: '',
-          })
-        }
+        onClick={() => confirmAction('add')}
       >
         <PlusIcon className='h-5 w-5 mr-3' />
         ADD EXPERIENCE
@@ -271,6 +291,17 @@ function PreferencesTab({
           )}
         </button>
       </div>
+      <ConfirmationModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onConfirm={actionType === 'add' ? handleAddExperience : handleRemoveExperience}
+        title={actionType === 'add' ? 'Add Experience' : 'Remove Experience'}
+        message={
+          actionType === 'add'
+            ? 'Are you sure you want to add a new experience?'
+            : 'Are you sure you want to remove this experience?'
+        }
+      />
     </form>
   );
 }
