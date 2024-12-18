@@ -3,8 +3,8 @@ import React from "react";
 const EmployeeKitLogo = () => {
   return (
     <svg
-      width="1130"
-      height="88"
+      width="104"
+      height="90"
       viewBox="0 0 140 98"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
