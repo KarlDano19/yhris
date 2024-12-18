@@ -33,6 +33,7 @@ export default function CreateJobModal({
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
+  const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
   const firstForm = useForm<any>({
     defaultValues: {
       country: 'Philippines',
@@ -194,6 +195,7 @@ export default function CreateJobModal({
                       register={fourthForm.register}
                       setPageNumber={setPageNumber}
                       onSubmit={fourthFormSubmit}
+                      setFileProps={setFileProps}
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
@@ -212,6 +214,7 @@ export default function CreateJobModal({
                       fourthFormGetValues={fourthForm.getValues}
                       setPageNumber={setPageNumber}
                       onSubmit={sixthFormSubmit}
+                      fileProps={fileProps}
                     />
                   </div>
                   <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>

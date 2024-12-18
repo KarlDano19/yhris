@@ -377,7 +377,6 @@ export default function CreateJobPageOne({
               className='appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
             >
               <option>English</option>
-              <option>Chinese</option>
             </select>
             <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
               <SelectChevronDown />

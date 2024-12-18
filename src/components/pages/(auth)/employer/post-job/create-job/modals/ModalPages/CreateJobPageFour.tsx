@@ -12,12 +12,14 @@ export default function CreateJobPageFour({
   register,
   setPageNumber,
   onSubmit,
+  setFileProps,
 }: {
   register: any;
   setValue: any;
   getValues: any;
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
+  setFileProps: (fileProps: { fileName?: string; fileSize?: number; file?: File }) => void; // Update type definition
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -25,10 +27,12 @@ export default function CreateJobPageFour({
     jobDescription: false,
     qualifications: false,
   });
-  const [fileProps, setFileProps] = useState<{
+  const [filePropsLocal, setFilePropsLocal] = useState<{
     fileName?: string;
     fileSize?: number;
+    file?: File;
   }>({});
+
   return (
     <>
       <div className='px-4 pb-6'>
@@ -50,11 +54,11 @@ export default function CreateJobPageFour({
               </label>
               <label className='block text-sm font-medium leading-6 text-savoy-blue'>or fill in the box below.</label>
             </div>
-            {fileProps.fileName && (
+            {filePropsLocal.fileName && (
               <>
                 <p className='block text-sm font-medium leading-6 text-gray-900'>
-                  <span>{fileProps.fileName}</span> /
-                  <span className='ml-1'>{`${(fileProps?.fileSize ? fileProps.fileSize / 1024 / 1024 : 0).toFixed(
+                  <span>{filePropsLocal.fileName}</span> /
+                  <span className='ml-1'>{`${(filePropsLocal?.fileSize ? filePropsLocal.fileSize / 1024 / 1024 : 0).toFixed(
                     2
                   )} MB`}</span>
                 </p>
@@ -64,7 +68,8 @@ export default function CreateJobPageFour({
                   className='underline text-savoy-blue text-sm'
                   onClick={() => {
                     setValue('jobDescriptionFile', null);
-                    setFileProps({});
+                    setFilePropsLocal({});
+                    setFileProps({}); 
                   }}
                 >
                   Remove File
@@ -82,16 +87,22 @@ export default function CreateJobPageFour({
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    const fileName = e.target.files?.[0].name;
-                    const fileSize = e.target.files?.[0].size;
+                    const fileName = file.name;
+                    const fileSize = file.size;
 
-                    setFileProps({
+                    setFilePropsLocal({
                       fileName: fileName,
                       fileSize: fileSize,
+                      file: file, 
                     });
                     setValue('jobDescriptionFile', file);
+                    setFileProps({ 
+                      fileName: fileName,
+                      fileSize: fileSize,
+                      file: file,
+                    });
                   }
-                }}
+                }} 
               />
             </div>
           </div>
@@ -136,7 +147,7 @@ export default function CreateJobPageFour({
             const jobDescription = getValues('jobDescription');
             const qualifications = getValues('qualifications');
             const results = [
-              fileProps.fileName,
+              filePropsLocal.fileName,
               jobDescription !== '<ul><li><br></li></ul>' && jobDescription !== '<p><br></p>' && jobDescription,
               qualifications !== '<ul><li><br></li></ul>' && qualifications !== '<p><br></p>' && qualifications,
             ];
