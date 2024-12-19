@@ -22,7 +22,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataJobPost) {
-      dataJobPost.map((jobPost: any) => {
+      dataJobPost.records.map((jobPost: any) => {
         jobPost['jobTitle'] = jobPost['job_title'];
         jobPost['jobType'] = jobPost['job_type'];
         jobPost['jobDescription'] = jobPost['job_description'];
@@ -33,7 +33,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['hiredApplicant'] = jobPost['hired_applicant_applied_no'];
       });
-      setJobPostHistoryItems(dataJobPost);
+      setJobPostHistoryItems(dataJobPost.records);
     }
   }, [dataJobPost]);
 
