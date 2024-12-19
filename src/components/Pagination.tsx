@@ -13,15 +13,19 @@ interface PaginationProps {
   pageSize: number;
   onPageSizeChange: (value: number) => void;
   onPageChange: (selectedItem: { selected: number }) => void;
-  isScreenApplicant?: boolean;
+  pageType?: string;
 }
 
-const pageSizes = [5, 10, 25, 50];
-const pageSizesScreenApplicant = [6, 12, 24];
+const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSize, onPageSizeChange, onPageChange, pageType }) => {
 
-const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSize, onPageSizeChange, onPageChange, isScreenApplicant }) => {
-  const pageSizesToUse = isScreenApplicant ? pageSizesScreenApplicant : pageSizes;
-  
+  const pageSizesToUse = () => {
+    let pageSizes = [5, 10, 25, 50];
+    if (pageType && ['screenApplicant', 'hiredApplicant'].includes(pageType)) {
+      pageSizes = [6, 12, 24];
+    }
+    return pageSizes;
+  }
+
   return (
     <div className='flex items-center justify-between my-3'>
       <p className='text-sm text-gray-500'>Total Record/s: {pagination.totalRecords}</p>
@@ -34,7 +38,7 @@ const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSi
           defaultValue={pageSize}
           placeholder='Select...'
         >
-          {pageSizesToUse.map((item: number, index: number) => {
+          {pageSizesToUse().map((item: number, index: number) => {
             return <option key={index} value={item}>{item}</option>;
           })}
         </select>

@@ -129,7 +129,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           pageSize={pageSize}
           onPageSizeChange={pageSizeChange}
           onPageChange={paginationChange}
-          isScreenApplicant={true}
+          pageType='screenApplicant'
         />
       </div>
     </div>
