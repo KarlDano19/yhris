@@ -5,11 +5,13 @@ export default function CreateJobPageSix({
   fourthFormGetValues,
   setPageNumber,
   onSubmit,
+  fileProps,
 }: {
   firstFormGetValues: any;
   fourthFormGetValues: any;
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
+  fileProps: any;
 }) {
   const markup = { __html: fourthFormGetValues('jobDescription') };
   const markup2 = { __html: fourthFormGetValues('qualifications') };
@@ -36,6 +38,11 @@ export default function CreateJobPageSix({
               <p>Qualifications:</p>
               <p className='ql-editor !p-0' dangerouslySetInnerHTML={markup2}></p>
             </div>
+            {fileProps.fileName && (
+              <div className='mt-4'>
+                <object data={URL.createObjectURL(fileProps.file)} width='100%' height='500px' />
+              </div>
+            )}
           </div>
         </div>
       </div>

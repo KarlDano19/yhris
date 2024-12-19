@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from "react";
 
 import Link from 'next/link';
 
@@ -22,6 +22,12 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 
 import { T_JobPreviewModal } from '@/types/globals';
+import Pagination from '@/components/Pagination';
+
+type PaginationProps = {
+  totalRecords: number;
+  totalPages: number;
+};
 
 type ComponentMap = {
   [key: string]: React.ElementType;
@@ -48,7 +54,17 @@ const Content = () => {
   });
   const [isJobPreviewOpen, setIsJobPreviewOpen] = useState<T_JobPreviewModal | null>(null);
   const [isSetJobInactiveModalOpen, setIsSetJobInactiveModalOpen] = useState(false);
-  const { data: dataJobPost, isLoading: isGetJobPostLoading, refetch } = useGetJobPostItems(itemsFilter);
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationProps>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const { data: dataJobPost, isLoading: isGetJobPostLoading, refetch } = useGetJobPostItems({
+    ...itemsFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
   const { mutate } = useUpdateJobPostItems();
 
   const handleRightClick = (event: any, jobPost: any) => {
@@ -62,6 +78,7 @@ const Content = () => {
       rightClickItemLabel = 'Set as Active';
       successMessage = 'Successfully set job as active.';
     }
+    
 
     menuOptions['label'] = rightClickItemLabel;
     menuOptions['action'] = (jobId: any) => {
@@ -100,7 +117,7 @@ const Content = () => {
 
   useEffect(() => {
     if (dataJobPost && !isGetJobPostLoading) {
-      dataJobPost.map((jobPost: any) => {
+      dataJobPost.records.map((jobPost: any) => {
         jobPost['jobTitle'] = jobPost['job_title'];
         jobPost['jobType'] = jobPost['job_type'];
         jobPost['jobDescription'] = jobPost['job_description'];
@@ -111,9 +128,27 @@ const Content = () => {
         jobPost['isActive'] = jobPost['is_active'];
         jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
       });
-      setJobPostHistoryItems(dataJobPost);
+      setJobPostHistoryItems(dataJobPost.records);
+      setPagination({
+        totalPages: dataJobPost.total_pages,
+        totalRecords: dataJobPost.total_records,
+      });
     }
   }, [dataJobPost]);
+
+  useEffect(() => {
+    refetch();
+  }, [currentPage, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   const socialMediaShare = (social: string, og_url: string) => {
     const encoded_url = encodeURIComponent(og_url);
@@ -398,6 +433,13 @@ const Content = () => {
                 </table>
                 <hr />
                 <p className='text-xs text-gray-500 mt-2'>Total record/s: {jobPostHistoryItems.length}</p>
+                <Pagination
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={pageSizeChange}
+                  onPageChange={paginationChange}
+                />
               </div>
             </div>
           </div>

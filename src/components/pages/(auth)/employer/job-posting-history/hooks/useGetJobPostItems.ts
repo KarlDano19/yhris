@@ -4,6 +4,8 @@ import { getCookie } from 'cookies-next';
 async function getJobPostItems(filters: any) {
   try {
     let newFilters = { ...filters };
+    if (filters.currentPage) newFilters.current_page = filters.currentPage;
+    if (filters.pageSize) newFilters.page_size = filters.pageSize;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
     const searchParams = new URLSearchParams(newFilters);
