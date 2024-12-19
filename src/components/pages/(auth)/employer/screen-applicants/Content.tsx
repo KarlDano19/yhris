@@ -8,21 +8,46 @@ import PostJobCard from './PostJobCard';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import Pagination from '@/components/Pagination';
+
+type PaginationProps = {
+  totalRecords: number;
+  totalPages: number;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
-  const { data: dataJobPost, refetch: refetchJobPost } = useGetJobPostItems(itemsFilter);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+  const [pagination, setPagination] = useState<PaginationProps>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const { data: dataJobPost, refetch: refetchJobPost } = useGetJobPostItems({
+    ...itemsFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
   useEffect(() => {
     refetchJobPost();
-  }, []);
+  }, [currentPage, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   useEffect(() => {
     if (dataJobPost) {
-      dataJobPost.map((jobPost: any) => {
+      dataJobPost.records.map((jobPost: any) => {
         jobPost['jobTitle'] = jobPost['job_title'];
         jobPost['jobType'] = jobPost['job_type'];
         jobPost['jobDescription'] = jobPost['job_description'];
@@ -33,7 +58,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['hiredApplicant'] = jobPost['hired_applicant_applied_no'];
       });
-      setJobPostHistoryItems(dataJobPost);
+      setJobPostHistoryItems(dataJobPost.records);
+      setPagination({
+        totalPages: dataJobPost.total_pages,
+        totalRecords: dataJobPost.total_records,
+      });
     }
   }, [dataJobPost]);
 
@@ -94,6 +123,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               })}
           </div>
         </div>
+        <Pagination
+          pagination={pagination}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onPageSizeChange={pageSizeChange}
+          onPageChange={paginationChange}
+          isScreenApplicant={true}
+        />
       </div>
     </div>
   );

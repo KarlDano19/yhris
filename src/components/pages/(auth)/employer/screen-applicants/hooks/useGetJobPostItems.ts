@@ -4,6 +4,8 @@ import { getCookie } from 'cookies-next';
 async function getJobPostItems(filters: any) {
   try {
     let newFilters = { ...filters };
+    if (filters.currentPage) newFilters.current_page = filters.currentPage;
+    if (filters.pageSize) newFilters.page_size = filters.pageSize;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
