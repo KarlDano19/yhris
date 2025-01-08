@@ -89,7 +89,7 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
                   className='my-2 border shadow-sm bg-[#FFC107] font-bold text-sm px-4 py-3 w-full rounded-md hover:bg-[#e0b532]'
                   onClick={() => {
                     window.open(
-                      'https://docs.google.com/forms/d/e/1FAIpQLSdiP1STofmt_702w5Dkh0a1VvgwhRynuI-zItOx4RGCWnFAQQ/viewform',
+                      'https://yahshua.notion.site/173c8ec44231803a94e5ec947a3546e2?pvs=105',
                       '_blank'
                     );
                   }}
