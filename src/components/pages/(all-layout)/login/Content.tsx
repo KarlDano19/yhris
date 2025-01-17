@@ -23,6 +23,7 @@ import FacebookRoundedIcon from '@/svg/FacebookRoundedIcon';
 import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 
 import { T_Login } from '@/types/globals';
+import YahshuaPayrollButton from './button/SignInWithYP';
 
 function Content() {
   const searchParams = useSearchParams();
@@ -198,15 +199,7 @@ function Content() {
                     >
                       <FacebookRoundedIcon className='w-4 h-4 mr-2' /> Facebook
                     </button>
-                    <button
-                      className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
-                      disabled={true}
-                    >
-                      <div className='mx-1'>
-                        <YahshuaPayrollLogo />
-                      </div>{' '}
-                      YAHSHUA Payroll
-                    </button>
+                    <YahshuaPayrollButton />
                   </div>
                   <div className='text-sm'>
                     By continuing, you agree to our{' '}
