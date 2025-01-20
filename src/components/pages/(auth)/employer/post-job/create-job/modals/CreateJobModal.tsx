@@ -222,6 +222,7 @@ export default function CreateJobModal({
                       isLoading={isLoading}
                       setValue={seventhForm.setValue}
                       setPageNumber={setPageNumber}
+                      register={seventhForm.register}
                       onSubmit={onSubmit}
                     />
                   </div>

@@ -26,6 +26,7 @@ export default function CreateJobPageFour({
     jobDescriptionFile: false,
     jobDescription: false,
     qualifications: false,
+    notesRemarks: false,
   });
   const [filePropsLocal, setFilePropsLocal] = useState<{
     fileName?: string;
@@ -135,6 +136,20 @@ export default function CreateJobPageFour({
             />
           </div>
         </div>
+        <div className={`sm:col-span-4 mt-4 ${manualInputFocus.notesRemarks ? 'border-2 border-blue-700' : ''}`}>
+          <label htmlFor='notesRemarks' className='block text-sm font-medium leading-6 text-gray-900'>
+            Notes/Remarks (optional):
+          </label>
+          <div className='mt-2 h-32 mb-12'>
+            <ReactQuill
+              onChange={(value) => setValue('notesRemarks', value)}
+              formats={QUILL_FORMATS}
+              modules={QUILL_MODULES}
+              style={{ height: '100%', padding: '5px 8px !important' }}
+              value={getValues('notesRemarks')}
+            />
+          </div>
+        </div>
       </div>
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
@@ -146,10 +161,12 @@ export default function CreateJobPageFour({
             const jobDescriptionFile = getValues('jobDescriptionFile');
             const jobDescription = getValues('jobDescription');
             const qualifications = getValues('qualifications');
+            const notesRemarks = getValues('notesRemarks');
             const results = [
               filePropsLocal.fileName,
               jobDescription !== '<ul><li><br></li></ul>' && jobDescription !== '<p><br></p>' && jobDescription,
               qualifications !== '<ul><li><br></li></ul>' && qualifications !== '<p><br></p>' && qualifications,
+              notesRemarks !== '<ul><li><br></li></ul>' && notesRemarks !== '<p><br></p>' && notesRemarks,
             ];
             const incomplete = results.every((item: boolean) => !item);
             if (!incomplete) {
@@ -159,6 +176,7 @@ export default function CreateJobPageFour({
                 jobDescriptionFile: !!!jobDescriptionFile,
                 jobDescription: !!!jobDescription,
                 qualifications: !!!qualifications,
+                notesRemarks: !!!notesRemarks,
               });
             }
           }}

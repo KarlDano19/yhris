@@ -15,6 +15,8 @@ async function addJobPost(jobPost: any) {
     formData.append('date_required', new Date(jobPost.hireDate).toISOString());
     formData.append('job_description', jobPost.jobDescription);
     formData.append('qualifications', jobPost.qualifications);
+    formData.append('job_remark', jobPost.notesRemarks);
+    formData.append('job_url', jobPost.jobUrl);
     formData.append('poster_type', jobPost.postAs);
     formData.append('shared_to', jobPost.postIn.join());
     formData.append('og_url', `${window.location.protocol}//${window.location.host}/jobs/`);
