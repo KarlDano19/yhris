@@ -156,6 +156,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               </p>
             </>
           )}
+          {/* job url */}
           {jobDetailData.job_url && (
             <>
               <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
