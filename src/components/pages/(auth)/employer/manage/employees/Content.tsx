@@ -18,13 +18,22 @@ import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItems from './hooks/useGetEmployeeItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
+import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
+import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
+import ExportTemplateModal from './modals/ExportTemplateModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import ExportTemplateModal from './modals/ExportTemplateModal';
+import EditIcon from "@/svg/EditIcon";
+import DeleteIcon from "@/svg/DeleteIcon";
 
 type PaginationProps = {
   totalRecords: number;
   totalPages: number;
+};
+
+type T_ModalData = {
+  id: number;
+  open: boolean;
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
@@ -32,11 +41,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
-  const [isEmployeesModalOpen, setIsEmployeesModalOpen] = useState<boolean>(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
+  const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);;
+  const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -110,20 +120,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [employeeListData]);
 
   useEffect(() => {
-    setIsEmployeesModalOpen(true);
-  }, [selectedEmployeeId]);
-
-  useEffect(() => {
     employeeListRefetch();
   }, [currentPage, pageSize]);
 
-  const openEditEmployeeModal = (employeeId: number) => {
-    if (selectedEmployeeId && selectedEmployeeId == employeeId) {
-      setIsEmployeesModalOpen(true);
-    } else {
-      setselectedEmployeeId(employeeId);
-    }
-  };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -190,7 +189,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
-        <tr key={item.id} className='cursor-pointer' onClick={() => openEditEmployeeModal(item.id)}>
+        <tr key={item.id} className='cursor-pointer'>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
@@ -198,7 +197,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.address}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>{item.address}</td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setIsEmployeesEditModalOpen({ id: item.id, open: true })}
+              >
+                <EditIcon />
+              </button>
+              <button
+                onClick={() => setIsEmployeesDeleteModalOpen({ id: item.id, open: true })}
+              >
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
         </tr>
       ));
     } else {
@@ -363,6 +376,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Address
                       </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
@@ -398,13 +414,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           itemsFilter={itemsFilter}
         />
       )}
-      {isEmployeesModalOpen && selectedEmployeeId && (
-        <EmployeesModal
-          selectedEmployeeId={selectedEmployeeId}
-          isOpen={isEmployeesModalOpen}
-          setIsOpen={setIsEmployeesModalOpen}
-        />
-      )}
       {isImportModalOpen && (
         <ImportModal refetch={employeeListRefetch} isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
       )}
@@ -413,6 +422,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isExportTemplateModalOpen}
           setIsOpen={setIsExportTemplateModalOpen}
           itemsFilter={itemsFilter}
+        />
+      )}
+      {isEmployeesDeleteModalOpen && (
+        <DeleteEmployeeDetailModal
+          refetch={employeeListRefetch}
+          isOpen={isEmployeesDeleteModalOpen}
+          setIsOpen={setIsEmployeesDeleteModalOpen}
+        />
+      )}
+      {isEmployeesEditModalOpen && (
+        <EditEmployeeDetailsModal
+          isOpen={isEmployeesEditModalOpen}
+          setIsOpen={setIsEmployeesEditModalOpen}
+          refetch={employeeListRefetch}
         />
       )}
     </>
