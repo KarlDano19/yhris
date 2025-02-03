@@ -24,10 +24,10 @@ export default function ImportModal({
     'First Name *': 'firstname',
     'Middle Name': 'middlename',
     'Last Name *': 'lastname',
-    'Contact Number *': 'mobile',
-    "Email *": 'email',
+    'Contact Number': 'mobile',
+    "Email": 'email',
     "Gender": 'gender',
-    "Address *": 'address',
+    "Address": 'address',
   };
   const importHeaders = {
     date_hired: 'Date Hired',
