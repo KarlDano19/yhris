@@ -69,6 +69,7 @@ export default function ImportModal({
     if (file) {
       Papa.parse(file, {
         header: true,
+        skipEmptyLines: true,
         complete: (results: any) => {
           if (results.data) {
             const importData = [];
