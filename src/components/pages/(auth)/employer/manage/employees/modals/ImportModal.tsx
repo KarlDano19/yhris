@@ -21,6 +21,7 @@ export default function ImportModal({
   const cancelButtonRef = useRef(null);
   const allowHeaders: any = {
     'Date Hired (mm/dd/yyyy)*': 'date_hired',
+    'Date Hired': 'date_hired',
     'First Name *': 'firstname',
     'Middle Name': 'middlename',
     'Last Name *': 'lastname',
