@@ -229,6 +229,12 @@ export default function CreateJobPageThree({
             </div>
           </div>
         </div>
+        <div className='relative mt-2 flex gap-2'>
+          <input type='checkbox' {...register('is_show_salary', { required: true })} id='is_show_salary' value='true' />
+          <label htmlFor='is_show_salary' className='ml-2'>
+            Show Salary
+          </label>
+        </div>
         {/* end */}
         <div className='sm:col-span-4 mt-4'>
           <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -305,6 +311,17 @@ export default function CreateJobPageThree({
             </div>
           </div>
         )}
+        <div className='relative flex gap-2 mt-4'>
+          <input
+            type='checkbox'
+            {...register('is_show_benefits', { required: true })}
+            id='is_show_benefits'
+            value='true'
+          />
+          <label htmlFor='is_show_benefits' className='ml-2'>
+            Show Benefits
+          </label>
+        </div>
       </div>
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
@@ -338,9 +355,17 @@ export default function CreateJobPageThree({
             });
             if (salaryTypeValue === 'Range') {
               if (parseInt(salaryRangeMinValue) >= parseInt(salaryRangeMaxValue)) {
-                toast.custom(() => <CustomToast message={'Minimum salary cannot be greater than or equal to maximum salary.'} type='error' />, {
-                  duration: 7000,
-                });
+                toast.custom(
+                  () => (
+                    <CustomToast
+                      message={'Minimum salary cannot be greater than or equal to maximum salary.'}
+                      type='error'
+                    />
+                  ),
+                  {
+                    duration: 7000,
+                  }
+                );
                 return;
               }
             }
