@@ -59,9 +59,10 @@ export default function CreateJobPageFour({
               <>
                 <p className='block text-sm font-medium leading-6 text-gray-900'>
                   <span>{filePropsLocal.fileName}</span> /
-                  <span className='ml-1'>{`${(filePropsLocal?.fileSize ? filePropsLocal.fileSize / 1024 / 1024 : 0).toFixed(
-                    2
-                  )} MB`}</span>
+                  <span className='ml-1'>{`${(filePropsLocal?.fileSize
+                    ? filePropsLocal.fileSize / 1024 / 1024
+                    : 0
+                  ).toFixed(2)} MB`}</span>
                 </p>
                 <button
                   id='fileJobDescriptionBtn'
@@ -70,7 +71,7 @@ export default function CreateJobPageFour({
                   onClick={() => {
                     setValue('jobDescriptionFile', null);
                     setFilePropsLocal({});
-                    setFileProps({}); 
+                    setFileProps({});
                   }}
                 >
                   Remove File
@@ -94,16 +95,16 @@ export default function CreateJobPageFour({
                     setFilePropsLocal({
                       fileName: fileName,
                       fileSize: fileSize,
-                      file: file, 
+                      file: file,
                     });
                     setValue('jobDescriptionFile', file);
-                    setFileProps({ 
+                    setFileProps({
                       fileName: fileName,
                       fileSize: fileSize,
                       file: file,
                     });
                   }
-                }} 
+                }}
               />
             </div>
           </div>
@@ -121,6 +122,12 @@ export default function CreateJobPageFour({
               value={getValues('jobDescription')}
             />
           </div>
+        </div>
+        <div className='relative mt-2 flex gap-2'>
+          <input type='checkbox' {...register('is_show_roles', { required: true })} id='is_show_roles' value='true' />
+          <label htmlFor='is_show_roles' className='ml-2'>
+            Show Roles
+          </label>
         </div>
         <div className={`sm:col-span-4 mt-4 ${manualInputFocus.qualifications ? 'border-2 border-blue-700' : ''}`}>
           <label htmlFor='qualifications' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -149,6 +156,17 @@ export default function CreateJobPageFour({
               value={getValues('notesRemarks')}
             />
           </div>
+        </div>
+        <div className='relative mt-2 flex gap-2'>
+          <input
+            type='checkbox'
+            {...register('is_show_remarks', { required: true })}
+            id='is_show_remarks'
+            value='true'
+          />
+          <label htmlFor='is_show_remarks' className='ml-2'>
+            Show Notes/Remarks
+          </label>
         </div>
       </div>
       <hr />
