@@ -5,7 +5,7 @@ import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 
 import CreateJobModal from './create-job/modals/CreateJobModal';
-import ConfirmSocialShareModal from './create-job/modals/ConfirmSocialShareModal';
+import ConfirmSocialShareModal from '../modals/ConfirmSocialShareModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import JobPostingHistory from '@/svg/JobPostingHistory';

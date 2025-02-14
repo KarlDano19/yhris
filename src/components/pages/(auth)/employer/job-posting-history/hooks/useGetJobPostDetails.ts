@@ -3,6 +3,8 @@ import { getCookie } from 'cookies-next';
 
 async function getJobDetails(job_post_id: any) {
   try {
+    let newFilters = { view_type: 'edit' };
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -11,7 +13,7 @@ async function getJobDetails(job_post_id: any) {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${job_post_id}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${job_post_id}/?${searchParams}`, config);
     if (!res.ok) {
       throw res.json();
     }

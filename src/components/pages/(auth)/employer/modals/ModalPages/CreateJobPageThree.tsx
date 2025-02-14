@@ -15,6 +15,7 @@ export default function CreateJobPageThree({
   setFocus,
   getValues,
   onSubmit,
+  pageNumber,
 }: {
   watch: any;
   register: any;
@@ -24,6 +25,7 @@ export default function CreateJobPageThree({
   setFocus: any;
   getValues: any;
   onSubmit: () => void;
+  pageNumber?: number;
 }) {
   const [selectedBenefitOptions, setSelectedBenefitOptions] = useState<string[]>([]);
   const [selectedOtherBenefit, setSelectedOtherBenefit] = useState<string[]>([]);
@@ -64,6 +66,12 @@ export default function CreateJobPageThree({
     }
     setValue('benefits', concatenatedValue);
   }, [selectedBenefitOptions, selectedOtherBenefit, isOtherBenefitOpen, setValue]);
+
+  useEffect(() => {
+    if (pageNumber === 3) {
+      setSelectedBenefitOptions(getValues('benefits') || []);
+    }
+  }, [pageNumber]);
 
   // Convert string to array of string in other benefits
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -351,7 +359,7 @@ export default function CreateJobPageThree({
               benefits: !!!benefits && !isOtherBenefitOpen,
               range: salaryTypeValue === 'Range' && !salaryRangeMinValue && !salaryRangeMaxValue ? true : false,
               amount:
-                salaryTypeValue !== 'Range' && (salaryValueValue.trim() === '-' || !salaryValueValue) ? true : false,
+                salaryTypeValue !== 'Range' && ((typeof salaryValueValue !== 'number' && salaryValueValue.trim() === '-') || !salaryValueValue) ? true : false,
             });
             if (salaryTypeValue === 'Range') {
               if (parseInt(salaryRangeMinValue) >= parseInt(salaryRangeMaxValue)) {
@@ -374,7 +382,7 @@ export default function CreateJobPageThree({
             if (
               !incomplete &&
               ((salaryTypeValue === 'Range' && salaryRangeMinValue && salaryRangeMaxValue) ||
-                (salaryTypeValue !== 'Range' && salaryValueValue.trim() !== '-' && salaryValueValue))
+                (salaryTypeValue !== 'Range' && (typeof salaryValueValue !== 'number' && salaryValueValue.trim()) !== '-' && salaryValueValue))
             ) {
               onSubmit();
             }

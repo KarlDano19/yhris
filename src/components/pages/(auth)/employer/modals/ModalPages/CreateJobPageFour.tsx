@@ -13,6 +13,7 @@ export default function CreateJobPageFour({
   setPageNumber,
   onSubmit,
   setFileProps,
+  hasSalaryRange,
 }: {
   register: any;
   setValue: any;
@@ -20,6 +21,7 @@ export default function CreateJobPageFour({
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   setFileProps: (fileProps: { fileName?: string; fileSize?: number; file?: File }) => void; // Update type definition
+  hasSalaryRange?: boolean;
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -205,7 +207,13 @@ export default function CreateJobPageFour({
           id='pageFourBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-          onClick={() => setPageNumber(2)}
+          onClick={() => {
+            if (hasSalaryRange) {
+              setPageNumber(3);
+            } else {
+              setPageNumber(2);
+            }
+          }}
         >
           Back
         </button>

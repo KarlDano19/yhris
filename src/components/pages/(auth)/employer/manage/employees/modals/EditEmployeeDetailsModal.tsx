@@ -70,7 +70,6 @@ export default function EditEmployeeDetailsModal({
         });
       },
     };
-    console.log(data);
     mutate({ employee_id: isOpen.id, data: data }, callbackReq);
   });
 

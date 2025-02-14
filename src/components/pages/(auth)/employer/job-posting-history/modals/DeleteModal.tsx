@@ -9,7 +9,7 @@ import useDeleteJobPost from '../hooks/useDeleteJobPost';
 import WarningRed from '@/svg/WarningRed';
 
 type T_ModalData = {
-  id: number;
+  id: number | null;
   open: boolean;
   code?: string;
 };

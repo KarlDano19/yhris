@@ -1,34 +1,34 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
-import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import RightClickMenu from '@/components/RightClickMenu';
+import Pagination from '@/components/Pagination';
 import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
 import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
-import useUpdateJobPostItems from './hooks/useUpdateJobPostItems';
+import UpdateJobModal from './modals/UpdateJobModal';
+import DeleteJobModal from './modals/DeleteModal';
+
+import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
+import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { T_JobPreviewModal } from '@/types/globals';
-import Pagination from '@/components/Pagination';
-import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
-import UpdateJobModal from '../post-job/create-job/modals/UpdateJobModal';
-import DeleteJobModal from './modals/DeleteModal';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
 type PaginationProps = {
   totalRecords: number;
@@ -40,7 +40,7 @@ type ComponentMap = {
 };
 
 type T_ModalData = {
-  id: number;
+  id: number | null;
   open: boolean;
 };
 
@@ -82,7 +82,7 @@ const Content = () => {
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const { mutate } = useUpdateJobPostItems();
+  const { mutate } = useUpdateJobPostStatus();
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
 
@@ -362,7 +362,7 @@ const Content = () => {
             {jobPost.hireCount}
           </td>
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+            <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
               <div className='flex space-x-2'>
                 <button onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}>
                   <EditIcon />
@@ -426,7 +426,7 @@ const Content = () => {
                   </ul>
                 </div>
               )}
-            </td>
+            </div>
           </td>
         </tr>
       ));
@@ -577,7 +577,6 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {jobPostHistoryItems.length}</p>
                 <Pagination
                   pagination={pagination}
                   currentPage={currentPage}
@@ -607,8 +606,8 @@ const Content = () => {
           selectedJobId={selectedJobId}
         />
       )}
-      {isEditModalOpen && <UpdateJobModal refetch={refetch} isOpen={isEditModalOpen} setIsOpen={setIsEditModalOpen} />}
-      {isDeleteModalOpen && (
+      {isEditModalOpen?.open && <UpdateJobModal refetch={refetch} isOpen={isEditModalOpen} setIsOpen={setIsEditModalOpen} />}
+      {isDeleteModalOpen?.open && (
         <DeleteJobModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
       )}
     </div>

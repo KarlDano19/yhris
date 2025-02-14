@@ -5,102 +5,110 @@ import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import SalaryRangeModal from './SalaryRangeModal';
-import CreateJobPageOne from './ModalPages/CreateJobPageOne';
-import CreateJobPageTwo from './ModalPages/CreateJobPageTwo';
-import CreateJobPageThree from './ModalPages/CreateJobPageThree';
-import CreateJobPageFour from './ModalPages/CreateJobPageFour';
-import CreateJobPageFive from './ModalPages/CreateJobPageFive';
-import CreateJobPageSix from './ModalPages/CreateJobPageSix';
-import CreateJobPageSeven from './ModalPages/CreateJobPageSeven';
-import useAddJobPostItems from '../hooks/useAddJobPostItems';
-import useEditJobPostItems from '../hooks/useEditJobPostItems';
+import SalaryRangeModal from '../../modals/SalaryRangeModal';
+import CreateJobPageOne from '../../modals/ModalPages/CreateJobPageOne';
+import CreateJobPageTwo from '../../modals/ModalPages/CreateJobPageTwo';
+import CreateJobPageThree from '../../modals/ModalPages/CreateJobPageThree';
+import CreateJobPageFour from '../../modals/ModalPages/CreateJobPageFour';
+import CreateJobPageFive from '../../modals/ModalPages/CreateJobPageFive';
+import CreateJobPageSix from '../../modals/ModalPages/CreateJobPageSix';
+import CreateJobPageSeven from '../../modals/ModalPages/CreateJobPageSeven';
+
+import useGetJobDetails from '../hooks/useGetJobPostDetails';
+import useUpdateJobPostItems from '../hooks/useUpdateJobPostItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
-import useGetJobDetails from '../hooks/useGetJobDetails';
-
 type T_ModalData = {
-    id: number;
-    open: boolean;
-  };
+  id: number | null;
+  open: boolean;
+};
 
 export default function UpdateJobModal({
-    refetch,
-    isOpen,
-    setIsOpen,
+  refetch,
+  isOpen,
+  setIsOpen,
 }: {
-    refetch: any;
-    isOpen: T_ModalData;
-    setIsOpen: Dispatch<T_ModalData | null>;
+  refetch: any;
+  isOpen: T_ModalData;
+  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
+  const [hasSalaryRange, setHasSalaryRange] = useState(false);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
-  const { data: jobPostData, refetch: refetchJobPost, remove: removeJobPost } = useGetJobDetails(isOpen.id);
   const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
-  
+  const {
+    data: jobPostDataDetails,
+    refetch: refetchJobPostDetails,
+    remove: removeJobPostDetails,
+  } = useGetJobDetails(isOpen.id);
+
   useEffect(() => {
-    if (isOpen) {
-      refetchJobPost();
+    if (isOpen.id) {
+      refetchJobPostDetails();
     }
   }, [isOpen]);
 
-  console.log(jobPostData);
-  
-  const firstForm = useForm<any>({
-    defaultValues: {
-      country: jobPostData.country,
-      language: jobPostData.language,
-    },
-  });
-  const secondForm = useForm({
-    defaultValues: {
-      jobType: jobPostData.job_type,
-      schedule: jobPostData.job_schedule,
-      hireDate: jobPostData.date_required,
-      hireCount: jobPostData.required_slot,
-    },
-  });
-  const thirdForm = useForm<any>({
-    defaultValues: {
-      salary: {
-        salaryType: jobPostData.salary_type,
-        salaryRangeMin: jobPostData.minimum_amount,
-        salaryRangeMax: jobPostData.maximum_amount,
-        salaryExactAmount: jobPostData.exact_amount,
-        rate: jobPostData.rate,
-      },
-      benefits: jobPostData.offered_benefits,
-      otherBenefits: jobPostData.other_benefits,
-    },
-  });
-  const fourthForm = useForm<any>({
-    defaultValues: {
-      jobDescription: jobPostData.job_description,
-      qualifications: jobPostData.qualifications,
-      notesRemarks: jobPostData.job_remark,
-      is_show_remarks: jobPostData.is_show_remarks,
-    },
-  });
+  const firstForm = useForm();
+  const secondForm = useForm();
+  const thirdForm = useForm();
+  const fourthForm = useForm();
   const fifthForm = useForm();
   const sixthForm = useForm();
   const seventhForm = useForm();
-  const { mutate, isLoading } = useEditJobPostItems();
+  const { mutate, isLoading } = useUpdateJobPostItems();
 
-  const customCloseModal = () => {
-    firstForm.reset();
-    secondForm.reset();
-    thirdForm.reset();
-    fourthForm.reset();
-    fifthForm.reset();
-    sixthForm.reset();
-    seventhForm.reset();
-    setIsOpen({ id: 0, open: false });
-  };
+  useEffect(() => {
+    if (jobPostDataDetails) {
+      firstForm.reset({
+        jobTitle: jobPostDataDetails.job_title,
+        placeAdvertise: jobPostDataDetails.advertise_to,
+        country: jobPostDataDetails.country,
+        language: jobPostDataDetails.language,
+      });
+      secondForm.reset({
+        jobType: jobPostDataDetails.job_type.split(','),
+        schedule: jobPostDataDetails.job_schedule.split(','),
+        hireDate: new Date(jobPostDataDetails.date_required),
+        hireCount: jobPostDataDetails.required_slot,
+      });
+      if (jobPostDataDetails?.salary_range_type) {
+        setHasSalaryRange(true);
+        thirdForm.reset({
+          is_show_salary: jobPostDataDetails.is_show_salary,
+          is_show_benefits: jobPostDataDetails.is_show_benefits,
+          salary: {
+            salaryType: jobPostDataDetails.salary_range_type,
+            salaryRangeMin: jobPostDataDetails.minimum_amount,
+            salaryRangeMax: jobPostDataDetails.maximum_amount,
+            salaryValue: jobPostDataDetails.exact_amount,
+            rate: jobPostDataDetails.rate,
+          },
+          benefits: jobPostDataDetails.offered_benefits.split(','),
+          otherBenefits: jobPostDataDetails.other_benefits,
+        });
+      }
+      fourthForm.reset({
+        is_show_roles: jobPostDataDetails.is_show_roles,
+        is_show_remarks: jobPostDataDetails.is_show_remarks,
+        jobDescription: jobPostDataDetails.job_description,
+        qualifications: jobPostDataDetails.qualifications,
+        notesRemarks: jobPostDataDetails.job_remark,
+      });
+      fifthForm.reset({
+        postAs: jobPostDataDetails.poster_type,
+        uploaded_image: jobPostDataDetails.uploaded_image,
+      });
+      sixthForm.reset();
+      seventhForm.reset({
+        shared_to: jobPostDataDetails.shared_to.split(','),
+        jobUrl: jobPostDataDetails.job_url,
+      });
+    }
+  }, [jobPostDataDetails]);
 
   const firstFormSubmit = (data: any) => {
     setCombinedFormData((prev: any) => ({ ...prev, ...data }));
@@ -144,6 +152,7 @@ export default function UpdateJobModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         customCloseModal();
         setIsSalaryRangeModalOpen(false);
+        refetch();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -151,7 +160,20 @@ export default function UpdateJobModal({
         });
       },
     };
-    mutate(finalData, callbackReq);
+    mutate({jobPost: finalData, job_post_id: isOpen.id}, callbackReq);
+  };
+
+  const customCloseModal = () => {
+    removeJobPostDetails();
+    firstForm.reset();
+    secondForm.reset();
+    thirdForm.reset();
+    fourthForm.reset();
+    fifthForm.reset();
+    sixthForm.reset();
+    seventhForm.reset();
+    setPageNumber(1);
+    setIsOpen({ id: null, open: false });
   };
 
   return (
@@ -205,6 +227,8 @@ export default function UpdateJobModal({
                       setValue={secondForm.setValue}
                       setPageNumber={setPageNumber}
                       getValues={secondForm.getValues}
+                      hasSalaryRange={hasSalaryRange}
+                      secondFormSubmit={secondFormSubmit}
                     />
                   </div>
                   <div style={{ display: pageNumber == 3 ? 'block' : 'none' }}>
@@ -217,6 +241,7 @@ export default function UpdateJobModal({
                       setFocus={thirdForm.setFocus}
                       getValues={thirdForm.getValues}
                       onSubmit={thirdFormSubmit}
+                      pageNumber={pageNumber}
                     />
                   </div>
                   <div style={{ display: pageNumber == 4 ? 'block' : 'none' }}>
@@ -227,6 +252,7 @@ export default function UpdateJobModal({
                       setPageNumber={setPageNumber}
                       onSubmit={fourthFormSubmit}
                       setFileProps={setFileProps}
+                      hasSalaryRange={hasSalaryRange}
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
@@ -237,6 +263,7 @@ export default function UpdateJobModal({
                       getValues={fifthForm.getValues}
                       isRangeBenefitsAdded={isRangeBenefitsAdded}
                       onSubmit={fifthFormSubmit}
+                      pageNumber={pageNumber}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
@@ -252,9 +279,12 @@ export default function UpdateJobModal({
                     <CreateJobPageSeven
                       isLoading={isLoading}
                       setValue={seventhForm.setValue}
+                      getValues={seventhForm.getValues}
                       setPageNumber={setPageNumber}
                       register={seventhForm.register}
                       onSubmit={onSubmit}
+                      pageNumber={pageNumber}
+                      isEdit={true}
                     />
                   </div>
                   <SalaryRangeModal
