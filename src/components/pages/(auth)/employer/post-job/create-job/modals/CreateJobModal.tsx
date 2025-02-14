@@ -5,14 +5,14 @@ import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import SalaryRangeModal from './SalaryRangeModal';
-import CreateJobPageOne from './ModalPages/CreateJobPageOne';
-import CreateJobPageTwo from './ModalPages/CreateJobPageTwo';
-import CreateJobPageThree from './ModalPages/CreateJobPageThree';
-import CreateJobPageFour from './ModalPages/CreateJobPageFour';
-import CreateJobPageFive from './ModalPages/CreateJobPageFive';
-import CreateJobPageSix from './ModalPages/CreateJobPageSix';
-import CreateJobPageSeven from './ModalPages/CreateJobPageSeven';
+import SalaryRangeModal from '../../../modals/SalaryRangeModal';
+import CreateJobPageOne from '../../../modals/ModalPages/CreateJobPageOne';
+import CreateJobPageTwo from '../../../modals/ModalPages/CreateJobPageTwo';
+import CreateJobPageThree from '../../../modals/ModalPages/CreateJobPageThree';
+import CreateJobPageFour from '../../../modals/ModalPages/CreateJobPageFour';
+import CreateJobPageFive from '../../../modals/ModalPages/CreateJobPageFive';
+import CreateJobPageSix from '../../../modals/ModalPages/CreateJobPageSix';
+import CreateJobPageSeven from '../../../modals/ModalPages/CreateJobPageSeven';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
