@@ -20,6 +20,7 @@ import useGetEmployeeItems from './hooks/useGetEmployeeItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
+import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -40,7 +41,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [selectedEmployeeId, setselectedEmployeeId] = useState<number | null>(null);
+  const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState<boolean>(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
@@ -301,8 +302,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </button>
             <div className='flex-1 flex justify-end'>
               <button
+                onClick={() => setIsAddEmployeeModalOpen(true)}
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled
               >
                 CREATE
               </button>
@@ -436,6 +437,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEmployeesEditModalOpen}
           setIsOpen={setIsEmployeesEditModalOpen}
           refetch={employeeListRefetch}
+        />
+      )}
+      {isAddEmployeeModalOpen && (
+        <AddEmployeeModal
+          refetch={employeeListRefetch}
+          isOpen={isAddEmployeeModalOpen}
+          setIsOpen={setIsAddEmployeeModalOpen}
         />
       )}
     </>

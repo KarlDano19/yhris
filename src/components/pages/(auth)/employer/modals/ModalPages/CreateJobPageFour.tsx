@@ -13,6 +13,7 @@ export default function CreateJobPageFour({
   setPageNumber,
   onSubmit,
   setFileProps,
+  hasSalaryRange,
 }: {
   register: any;
   setValue: any;
@@ -20,6 +21,7 @@ export default function CreateJobPageFour({
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   setFileProps: (fileProps: { fileName?: string; fileSize?: number; file?: File }) => void; // Update type definition
+  hasSalaryRange?: boolean;
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -59,9 +61,10 @@ export default function CreateJobPageFour({
               <>
                 <p className='block text-sm font-medium leading-6 text-gray-900'>
                   <span>{filePropsLocal.fileName}</span> /
-                  <span className='ml-1'>{`${(filePropsLocal?.fileSize ? filePropsLocal.fileSize / 1024 / 1024 : 0).toFixed(
-                    2
-                  )} MB`}</span>
+                  <span className='ml-1'>{`${(filePropsLocal?.fileSize
+                    ? filePropsLocal.fileSize / 1024 / 1024
+                    : 0
+                  ).toFixed(2)} MB`}</span>
                 </p>
                 <button
                   id='fileJobDescriptionBtn'
@@ -70,7 +73,7 @@ export default function CreateJobPageFour({
                   onClick={() => {
                     setValue('jobDescriptionFile', null);
                     setFilePropsLocal({});
-                    setFileProps({}); 
+                    setFileProps({});
                   }}
                 >
                   Remove File
@@ -94,16 +97,16 @@ export default function CreateJobPageFour({
                     setFilePropsLocal({
                       fileName: fileName,
                       fileSize: fileSize,
-                      file: file, 
+                      file: file,
                     });
                     setValue('jobDescriptionFile', file);
-                    setFileProps({ 
+                    setFileProps({
                       fileName: fileName,
                       fileSize: fileSize,
                       file: file,
                     });
                   }
-                }} 
+                }}
               />
             </div>
           </div>
@@ -121,6 +124,12 @@ export default function CreateJobPageFour({
               value={getValues('jobDescription')}
             />
           </div>
+        </div>
+        <div className='relative mt-2 flex gap-2'>
+          <input type='checkbox' {...register('is_show_roles', { required: true })} id='is_show_roles' value='true' />
+          <label htmlFor='is_show_roles' className='ml-2'>
+            Show Roles
+          </label>
         </div>
         <div className={`sm:col-span-4 mt-4 ${manualInputFocus.qualifications ? 'border-2 border-blue-700' : ''}`}>
           <label htmlFor='qualifications' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -149,6 +158,17 @@ export default function CreateJobPageFour({
               value={getValues('notesRemarks')}
             />
           </div>
+        </div>
+        <div className='relative mt-2 flex gap-2'>
+          <input
+            type='checkbox'
+            {...register('is_show_remarks', { required: true })}
+            id='is_show_remarks'
+            value='true'
+          />
+          <label htmlFor='is_show_remarks' className='ml-2'>
+            Show Notes/Remarks
+          </label>
         </div>
       </div>
       <hr />
@@ -187,7 +207,13 @@ export default function CreateJobPageFour({
           id='pageFourBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-          onClick={() => setPageNumber(2)}
+          onClick={() => {
+            if (hasSalaryRange) {
+              setPageNumber(3);
+            } else {
+              setPageNumber(2);
+            }
+          }}
         >
           Back
         </button>

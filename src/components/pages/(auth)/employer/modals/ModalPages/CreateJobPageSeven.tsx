@@ -4,15 +4,21 @@ import { LinkedIn, Facebook } from '@/svg/SocialMedia';
 export default function CreateJobPageSeven({
   isLoading,
   setValue,
+  getValues,
   setPageNumber,
   register,
   onSubmit,
+  pageNumber,
+  isEdit,
 }: {
   isLoading: any;
   setValue: any;
+  getValues?: any;
   setPageNumber: Dispatch<number>;
   register: any;
   onSubmit: any;
+  pageNumber?: number;
+  isEdit?: boolean;
 }) {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [manualInputFocus, setManualInputFocus] = useState(false);
@@ -32,7 +38,13 @@ export default function CreateJobPageSeven({
       setValue('postIn', selectedOptions);
     }
   }, [selectedOptions, setValue]);
-  
+
+  useEffect(() => {
+    if (getValues && getValues('shared_to')) {
+      setSelectedOptions(getValues('shared_to'));
+    }
+  }, [pageNumber]);
+
   return (
     <>
       <div className='px-4 pb-6'>
@@ -52,6 +64,7 @@ export default function CreateJobPageSeven({
                   handleRadioChange('LinkedIn');
                   setManualInputFocus(false);
                 }}
+                checked={selectedOptions.includes('LinkedIn')}
               />
               <span className='flex items-center ml-2 text-sm font-medium leading-6 text-gray-900'>
                 <LinkedIn /> <span className='ml-2'>LinkedIn</span>
@@ -67,6 +80,7 @@ export default function CreateJobPageSeven({
                   handleRadioChange('Facebook');
                   setManualInputFocus(false);
                 }}
+                checked={selectedOptions.includes('Facebook')}
               />
               <span className='flex items-center ml-2 text-sm font-medium leading-6 text-gray-900'>
                 <Facebook />
@@ -74,13 +88,14 @@ export default function CreateJobPageSeven({
               </span>
             </label>
           </div>
-          <div>
+          <div className='mt-3'>
             <label htmlFor='jobUrl' className='block text-sm font-medium leading-6 text-gray-900'>
               Add a link to your job post
             </label>
-            <div className='mt-2'>
+            <div className='mt-1'>
               <input
                 id='jobUrl'
+                placeholder='Enter URL...'
                 {...register('jobUrl', { required: true })}
                 type='text'
                 className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
@@ -125,7 +140,8 @@ export default function CreateJobPageSeven({
               <span className='sr-only'>Loading...</span>
             </div>
           )}
-          {!isLoading && 'Share'}
+          {!isLoading && !isEdit && 'Share'}
+          {!isLoading && isEdit && 'Save'}
         </button>
         <button
           id='pageSevenBackBtn'
