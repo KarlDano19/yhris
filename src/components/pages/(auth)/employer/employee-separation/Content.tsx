@@ -276,7 +276,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Employee Separation</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Employee Resignation/Separation</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
@@ -356,7 +356,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date of Separation
+                        Date of Resignation/Separation
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Name
@@ -365,7 +365,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Reason of Leaving
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Letter of Separation
+                        Letter of Documentation
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Sign Documents
