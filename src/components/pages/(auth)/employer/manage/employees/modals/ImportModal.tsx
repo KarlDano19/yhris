@@ -83,7 +83,13 @@ export default function ImportModal({
               for (const [key, value] of Object.entries(item)) {
                 const allowKey = allowHeaders[key];
                 if (allowKey) {
-                  importItem[allowKey] = value;
+                  if (key === 'Date Hired (mm/dd/yyyy)*' || key === 'Date Hired') {
+                    const dateValue = value as string;
+                    const [day, month, year] = dateValue.split('/');
+                    importItem[allowKey] = `${month}/${day}/${year}`;
+                  } else {
+                    importItem[allowKey] = value;
+                  }
                 }
               }
               importData.push(importItem);
@@ -213,7 +219,7 @@ export default function ImportModal({
                   </div>
                   {importJSON.length > 0 ? (
                     <>
-                      <div>
+                      <div className='overflow-x-auto'>
                         <table className='min-w-full divide-y divide-gray-300 text-center'>
                           <thead>
                             <tr>
