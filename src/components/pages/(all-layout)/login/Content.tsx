@@ -34,12 +34,16 @@ function Content() {
   const { mutate, isLoading } = useLogin();
   const { register, getValues, handleSubmit } = useForm<T_Login>();
 
-  const onSubmit = handleSubmit((data: any) => {
+  const onSubmit = handleSubmit(async (data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        if (data.is_valid) {
-          setSession(data);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+      onSuccess: async (response: any) => {
+        if (response.is_granted) {
+          setSession(response.token);
+          
+          const returnTo = response.account_type === 'employer' ? '/dashboard' : '/apply-for-a-job';
+          window.location.href = returnTo;
+          
+          toast.custom(() => <CustomToast message='Login successful!' type='success' />, { duration: 4000 });
         } else {
           setEmailVerificationModal(true);
         }
@@ -54,6 +58,8 @@ function Content() {
   });
 
   const setSession = async (data: any) => {
+    localStorage.setItem('token', data.token);
+
     if (data.account_type === 'employer') {
       if (data.has_profile) {
         const returnTo = searchParams.get('redirect') || '/dashboard';
@@ -175,7 +181,7 @@ function Content() {
                       {!isLoading && 'Sign in'}
                     </button>
                     <p className='text-sm font-light text-gray-500 text-center mb-9'>
-                      Don’t have an account yet?{' '}
+                      Don&apos;t have an account yet?{' '}
                       <Link href='/register' className='font-semibold text-blue-600 hover:underline'>
                         Sign Up here
                       </Link>
