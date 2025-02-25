@@ -13,7 +13,7 @@ function Content() {
   const code = searchParams.get('code') || '';
   const errorParam = searchParams.get('error');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const { mutate, isLoading, isError, isSuccess } = useVerifyOauth();
+  const { mutate, isLoading, isError, isSuccess, data } = useVerifyOauth();
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
@@ -22,20 +22,20 @@ function Content() {
         code: code,
         provider: params?.provider,
       };
-      const callbackRequest = {
-        onSuccess: (data: any) => {
-          broadcastChannel.postMessage({ isGranted: data.is_granted, provider: params?.provider });
-          setTimeout(() => {
-            window.close();
-          }, 500);
-        },
-        onError: (err: any) => {
-          setErrorMessage(err);
-        },
-      };
-      mutate(data, callbackRequest);
+      mutate(data);
     }
-  }, []);
+  }, [code, params, mutate]);
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      console.log('Success response:', data);
+      if (data.is_granted) {
+        window.location.href = data.redirect_url;
+      } else {
+        setErrorMessage('Access not granted');
+      }
+    }
+  }, [isSuccess, data]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
