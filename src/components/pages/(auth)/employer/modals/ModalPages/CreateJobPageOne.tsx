@@ -26,136 +26,47 @@ export default function CreateJobPageOne({
 }) {
   const advertiseOptions = [
     {
+      label: <strong>- NATIONAL CAPITAL REGION -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Metro Manila',
+      label: 'Metro Manila',
+    },
+    {
+      label: <strong>- REGION I -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
       value: 'Abra',
       label: 'Abra',
-    },
-    {
-      value: 'Agusan Del Norte',
-      label: 'Agusan Del Norte',
-    },
-    {
-      value: 'Agusan Del Sur',
-      label: 'Agusan Del Sur',
-    },
-    {
-      value: 'Aklan',
-      label: 'Aklan',
-    },
-    {
-      value: 'Albay',
-      label: 'Albay',
-    },
-    {
-      value: 'Antique',
-      label: 'Antique',
     },
     {
       value: 'Apayao',
       label: 'Apayao',
     },
     {
-      value: 'Aurora',
-      label: 'Aurora',
-    },
-    {
-      value: 'Bataan',
-      label: 'Bataan',
-    },
-    {
-      value: 'Basilan',
-      label: 'Basilan',
-    },
-    {
-      value: 'Batanes',
-      label: 'Batanes',
-    },
-    {
-      value: 'Batangas',
-      label: 'Batangas',
-    },
-    {
       value: 'Benguet',
       label: 'Benguet',
     },
     {
-      value: 'Biliran',
-      label: 'Biliran',
-    },
-    {
-      value: 'Bohol',
-      label: 'Bohol',
-    },
-    {
-      value: 'Bukidnon',
-      label: 'Bukidnon',
-    },
-    {
-      value: 'Bulacan',
-      label: 'Bulacan',
-    },
-    {
-      value: 'Cagayan',
-      label: 'Cagayan',
-    },
-    {
-      value: 'Camarines Norte',
-      label: 'Camarines Norte',
-    },
-    {
-      value: 'Camarines Sur',
-      label: 'Camarines Sur',
-    },
-    {
-      value: 'Capiz',
-      label: 'Capiz',
-    },
-    {
-      value: 'Catanduanes',
-      label: 'Catanduanes',
-    },
-    {
-      value: 'Cavite',
-      label: 'Cavite',
-    },
-    {
-      value: 'Cebu',
-      label: 'Cebu',
-    },
-    {
-      value: 'Cotabato',
-      label: 'Cotabato',
-    },
-    {
-      value: 'Davao De Oro',
-      label: 'Davao De Oro',
-    },
-    {
-      value: 'Davao Del Norte',
-      label: 'Davao Del Norte',
-    },
-    {
-      value: 'Davao Del Sur',
-      label: 'Davao Del Sur',
-    },
-    {
-      value: 'Davao Occidental',
-      label: 'Davao Occidental',
-    },
-    {
-      value: 'Davao Oriental',
-      label: 'Davao Oriental',
-    },
-    {
-      value: 'Eastern Samar',
-      label: 'Eastern Samar',
-    },
-    {
-      value: 'Guimaras',
-      label: 'Guimaras',
-    },
-    {
       value: 'Ifugao',
       label: 'Ifugao',
+    },
+    {
+      value: 'Kalinga',
+      label: 'Kalinga',
+    },
+    {
+      value: 'Mountain Province',
+      label: 'Mountain Province',
+    },
+    {
+      label: <strong>- REGION II -</strong>,
+      value: null,
+      isDisabled: true,
     },
     {
       value: 'Ilocos Norte',
@@ -166,76 +77,79 @@ export default function CreateJobPageOne({
       label: 'Ilocos Sur',
     },
     {
-      value: 'Iloilo',
-      label: 'Iloilo',
+      value: 'La Union',
+      label: 'La Union',
     },
     {
-      value: 'Isabela',
-      label: 'Isabela',
+      value: 'Pangasinan',
+      label: 'Pangasinan',
     },
     {
-      value: 'Kalinga',
-      label: 'Kalinga',
+      label: <strong>- REGION III -</strong>,
+      value: null,
+      isDisabled: true,
     },
     {
-      value: 'Laguna',
-      label: 'Laguna',
+      value: 'Aurora',
+      label: 'Aurora',
     },
     {
-      value: 'Lanao Del Norte',
-      label: 'Lanao Del Norte',
+      value: 'Bataan',
+      label: 'Bataan',
     },
     {
-      value: 'Lanao Del Sur',
-      label: 'Lanao Del Sur',
-    },
-    {
-      value: 'Leyte',
-      label: 'Leyte',
-    },
-    {
-      value: 'Maguindanao',
-      label: 'Maguindanao',
-    },
-    {
-      value: 'Marinduque',
-      label: 'Marinduque',
-    },
-    {
-      value: 'Masbate',
-      label: 'Masbate',
-    },
-    {
-      value: 'Misamis Occidental',
-      label: 'Misamis Occidental',
-    },
-    {
-      value: 'Misamis Oriental',
-      label: 'Misamis Oriental',
-    },
-    {
-      value: 'Mountain Province',
-      label: 'Mountain Province',
-    },
-    {
-      value: 'Negros Occidental',
-      label: 'Negros Occidental',
-    },
-    {
-      value: 'Negros Oriental',
-      label: 'Negros Oriental',
-    },
-    {
-      value: 'Northern Samar',
-      label: 'Northern Samar',
+      value: 'Bulacan',
+      label: 'Bulacan',
     },
     {
       value: 'Nueva Ecija',
       label: 'Nueva Ecija',
     },
     {
-      value: 'Nueva Vizcaya',
-      label: 'Nueva Vizcaya',
+      value: 'Pampanga',
+      label: 'Pampanga',
+    },
+    {
+      value: 'Tarlac',
+      label: 'Tarlac',
+    },
+    {
+      value: 'Zambales',
+      label: 'Zambales',
+    },
+    {
+      label: <strong>- REGION IV-A -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Batangas',
+      label: 'Batangas',
+    },
+    {
+      value: 'Cavite',
+      label: 'Cavite',
+    },
+    {
+      value: 'Laguna',
+      label: 'Laguna',
+    },
+    {
+      value: 'Quezon',
+      label: 'Quezon',
+    },
+    {
+      value: 'Rizal',
+      label: 'Rizal',
+    },
+    {
+      label: <strong>- REGION IV-B -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Marinduque',
+      label: 'Marinduque',
     },
     {
       value: 'Occidental Mindoro',
@@ -250,92 +164,254 @@ export default function CreateJobPageOne({
       label: 'Palawan',
     },
     {
-      value: 'Pampanga',
-      label: 'Pampanga',
-    },
-    {
-      value: 'Pangasinan',
-      label: 'Pangasinan',
-    },
-    {
-      value: 'Quezon',
-      label: 'Quezon',
-    },
-    {
-      value: 'Quirino',
-      label: 'Quirino',
-    },
-    {
-      value: 'Rizal',
-      label: 'Rizal',
-    },
-    {
       value: 'Romblon',
       label: 'Romblon',
     },
     {
-      value: 'Samar',
-      label: 'Samar',
+      label: <strong>- REGION V -</strong>,
+      value: null,
+      isDisabled: true,
     },
     {
-      value: 'Sarangani',
-      label: 'Sarangani',
+      value: 'Albay',
+      label: 'Albay',
     },
     {
-      value: 'Siquijor',
-      label: 'Siquijor',
+      value: 'Camarines Norte',
+      label: 'Camarines Norte',
+    },
+    {
+      value: 'Camarines Sur',
+      label: 'Camarines Sur',
+    },
+    {
+      value: 'Catanduanes',
+      label: 'Catanduanes',
+    },
+    {
+      value: 'Masbate',
+      label: 'Masbate',
     },
     {
       value: 'Sorsogon',
       label: 'Sorsogon',
     },
     {
-      value: 'South Cotabato',
-      label: 'South Cotabato',
+      label: <strong>- REGION VI -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Aklan',
+      label: 'Aklan',
+    },
+    {
+      value: 'Antique',
+      label: 'Antique',
+    },
+    {
+      value: 'Capiz',
+      label: 'Capiz',
+    },
+    {
+      value: 'Guimaras',
+      label: 'Guimaras',
+    },
+    {
+      value: 'Iloilo',
+      label: 'Iloilo',
+    },
+    {
+      value: 'Negros Occidental',
+      label: 'Negros Occidental',
+    },
+    {
+      label: <strong>- REGION VII -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Bohol',
+      label: 'Bohol',
+    },
+    {
+      value: 'Cebu',
+      label: 'Cebu',
+    },
+    {
+      value: 'Negros Oriental',
+      label: 'Negros Oriental',
+    },
+    {
+      value: 'Siquijor',
+      label: 'Siquijor',
+    },
+    {
+      label: <strong>- REGION VIII -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Biliran',
+      label: 'Biliran',
+    },
+    {
+      value: 'Eastern Samar',
+      label: 'Eastern Samar',
+    },
+    {
+      value: 'Leyte',
+      label: 'Leyte',
+    },
+    {
+      value: 'Northern Samar',
+      label: 'Northern Samar',
+    },
+    {
+      value: 'Samar',
+      label: 'Samar',
     },
     {
       value: 'Southern Leyte',
       label: 'Southern Leyte',
     },
     {
-      value: 'Sultan Kudarat',
-      label: 'Sultan Kudarat',
+      label: <strong>- REGION IX -</strong>,
+      value: null,
+      isDisabled: true,
     },
     {
-      value: 'Sulu',
-      label: 'Sulu',
+      value: 'Zamboanga del Norte',
+      label: 'Zamboanga del Norte',
     },
     {
-      value: 'Surigao Del Norte',
-      label: 'Surigao Del Norte',
-    },
-    {
-      value: 'Surigao Del Sur',
-      label: 'Surigao Del Sur',
-    },
-    {
-      value: 'Tarlac',
-      label: 'Tarlac',
-    },
-    {
-      value: 'Tawi-Tawi',
-      label: 'Tawi-Tawi',
-    },
-    {
-      value: 'Zamboanga Del Norte',
-      label: 'Zamboanga Del Norte',
-    },
-    {
-      value: 'Zamboanga Del Sur',
-      label: 'Zamboanga Del Sur',
+      value: 'Zamboanga del Sur',
+      label: 'Zamboanga del Sur',
     },
     {
       value: 'Zamboanga Sibugay',
       label: 'Zamboanga Sibugay',
     },
     {
-      value: 'Zambales',
-      label: 'Zambales',
+      label: <strong>- REGION X -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Bukidnon',
+      label: 'Bukidnon',
+    },
+    {
+      value: 'Camiguin',
+      label: 'Camiguin',
+    },
+    {
+      value: 'Lanao del Norte',
+      label: 'Lanao del Norte',
+    },
+    {
+      value: 'Misamis Occidental',
+      label: 'Misamis Occidental',
+    },
+    {
+      value: 'Misamis Oriental',
+      label: 'Misamis Oriental',
+    },
+    {
+      label: <strong>- REGION XI -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Compostela Valley',
+      label: 'Compostela Valley',
+    },
+    {
+      value: 'Davao del Norte',
+      label: 'Davao del Norte',
+    },
+    {
+      value: 'Davao del Sur',
+      label: 'Davao del Sur',
+    },
+    {
+      value: 'Davao Occidental',
+      label: 'Davao Occidental',
+    },
+    {
+      value: 'Davao Oriental',
+      label: 'Davao Oriental',
+    },
+    {
+      label: <strong>- REGION XII -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Cotabato',
+      label: 'Cotabato',
+    },
+    {
+      value: 'Sarangani',
+      label: 'Sarangani',
+    },
+    {
+      value: 'South Cotabato',
+      label: 'South Cotabato',
+    },
+    {
+      value: 'Sultan Kudarat',
+      label: 'Sultan Kudarat',
+    },
+    {
+      label: <strong>- REGION XIII -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Agusan del Norte',
+      label: 'Agusan del Norte',
+    },
+    {
+      value: 'Agusan del Sur',
+      label: 'Agusan del Sur',
+    },
+    {
+      value: 'Dinagat Islands',
+      label: 'Dinagat Islands',
+    },
+    {
+      value: 'Surigao del Norte',
+      label: 'Surigao del Norte',
+    },
+    {
+      value: 'Surigao del Sur',
+      label: 'Surigao del Sur',
+    },
+    {
+      label: <strong>- AUTONOMOUS REGION OF MUSLIM MINDANAO -</strong>,
+      value: null,
+      isDisabled: true,
+    },
+    {
+      value: 'Basilan',
+      label: 'Basilan',
+    },
+    {
+      value: 'Lanao del Sur',
+      label: 'Lanao del Sur',
+    },
+    {
+      value: 'Maguindanao',
+      label: 'Maguindanao',
+    },
+    {
+      value: 'Sulu',
+      label: 'Sulu',
+    },
+    {
+      value: 'Tawi-tawi',
+      label: 'Tawi-tawi',
     },
   ];
 
