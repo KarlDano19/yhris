@@ -31,14 +31,13 @@ function Content() {
           if (data.login_type === 'sso') {
             postMessageData.token = data.token;
             postMessageData.email = data.email;
-            postMessageData.hasPendingTransaction = true;
-            postMessageData.hasActiveSubscription = true;
-            postMessageData.hasProfile = true;
+            postMessageData.hasPendingTransaction = data.has_pending_transaction;
+            postMessageData.hasActiveSubscription = data.has_active_subscription;
+            postMessageData.hasProfile = data.has_profile;
             postMessageData.isLoggedIn = true;
-            postMessageData.accountType = 'employer';
+            postMessageData.accountType = data.account_type;
           }
           broadcastChannel.postMessage(postMessageData);
-          debugger
           setTimeout(() => {
             window.close();
           }, 500);
