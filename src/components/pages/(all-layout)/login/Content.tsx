@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import useLogin from '@/components/pages/(all-layout)/login/hooks/useLogin';
+import updateSession from '@/helpers/updateSession';
 import CustomToast from '@/components/CustomToast';
 import SplitLayout from '@/components/SplitView';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
@@ -26,6 +27,7 @@ import { T_Login } from '@/types/globals';
 import YahshuaPayrollButton from './button/SignInWithYP';
 
 function Content() {
+  const broadcastChannel = new BroadcastChannel('settings-integration-channel');
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
@@ -34,16 +36,12 @@ function Content() {
   const { mutate, isLoading } = useLogin();
   const { register, getValues, handleSubmit } = useForm<T_Login>();
 
-  const onSubmit = handleSubmit(async (data: any) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: async (response: any) => {
-        if (response.is_granted) {
-          setSession(response.token);
-          
-          const returnTo = response.account_type === 'employer' ? '/dashboard' : '/apply-for-a-job';
-          window.location.href = returnTo;
-          
-          toast.custom(() => <CustomToast message='Login successful!' type='success' />, { duration: 4000 });
+      onSuccess: (data: any) => {
+        if (data.is_valid) {
+          setSession(data);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         } else {
           setEmailVerificationModal(true);
         }
@@ -58,8 +56,6 @@ function Content() {
   });
 
   const setSession = async (data: any) => {
-    localStorage.setItem('token', data.token);
-
     if (data.account_type === 'employer') {
       if (data.has_profile) {
         const returnTo = searchParams.get('redirect') || '/dashboard';
@@ -75,6 +71,30 @@ function Content() {
       }
     }
   };
+
+  const setSSOSession = async (data: any) => {
+      await updateSession({
+        token: data.token,
+        email: data.email,
+        hasPendingTransaction: data.has_pending_transaction,
+        hasActiveSubscription: data.has_active_subscription,
+        hasProfile: data.has_profile,
+        accountType: data.account_type,
+        isLoggedIn: true,
+      });
+      setSession(data);
+  };
+
+  useEffect(() => {
+    broadcastChannel.onmessage = (event) => {
+      if (event.data.isGranted) {
+        setSSOSession(event.data);
+      }
+    };
+    return () => {
+      broadcastChannel.close();
+    };
+  }, []);
 
   return (
     <>

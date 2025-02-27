@@ -24,7 +24,21 @@ function Content() {
       };
       const callbackRequest = {
         onSuccess: (data: any) => {
-          broadcastChannel.postMessage({ isGranted: data.is_granted, provider: params?.provider });
+          const postMessageData: any = {
+            isGranted: data.is_granted,
+            provider: params?.provider,
+          }
+          if (data.login_type === 'sso') {
+            postMessageData.token = data.token;
+            postMessageData.email = data.email;
+            postMessageData.hasPendingTransaction = true;
+            postMessageData.hasActiveSubscription = true;
+            postMessageData.hasProfile = true;
+            postMessageData.isLoggedIn = true;
+            postMessageData.accountType = 'employer';
+          }
+          broadcastChannel.postMessage(postMessageData);
+          debugger
           setTimeout(() => {
             window.close();
           }, 500);
@@ -42,21 +56,6 @@ function Content() {
       window.location.href = '/login';
     }, 5000);
     return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          window.location.href = '/login';
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
   }, []);
 
   return (
