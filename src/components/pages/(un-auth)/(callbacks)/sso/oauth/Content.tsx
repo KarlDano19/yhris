@@ -14,7 +14,7 @@ function Content() {
   const errorParam = searchParams.get('error');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const { mutate, isLoading, isError, isSuccess } = useVerifyOauth();
-  const [countdown, setCountdown] = useState(5);
+  const [countdown] = useState(5);
 
   useEffect(() => {
     if (code) {
@@ -31,11 +31,10 @@ function Content() {
           if (data.login_type === 'sso') {
             postMessageData.token = data.token;
             postMessageData.email = data.email;
-            postMessageData.hasPendingTransaction = data.has_pending_transaction;
-            postMessageData.hasActiveSubscription = data.has_active_subscription;
-            postMessageData.hasProfile = data.has_profile;
-            postMessageData.isLoggedIn = true;
-            postMessageData.accountType = data.account_type;
+            postMessageData.has_pending_transaction = data.has_pending_transaction;
+            postMessageData.has_active_subscription = data.has_active_subscription;
+            postMessageData.has_profile = data.has_profile;
+            postMessageData.account_type = data.account_type;
           }
           broadcastChannel.postMessage(postMessageData);
           setTimeout(() => {
