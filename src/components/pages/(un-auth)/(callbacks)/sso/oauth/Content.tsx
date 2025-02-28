@@ -11,10 +11,8 @@ function Content() {
   const params = useParams();
   const searchParams = useSearchParams();
   const code = searchParams.get('code') || '';
-  const errorParam = searchParams.get('error');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const { mutate, isLoading, isError, isSuccess } = useVerifyOauth();
-  const [countdown] = useState(5);
 
   useEffect(() => {
     if (code) {
@@ -47,13 +45,6 @@ function Content() {
       };
       mutate(data, callbackRequest);
     }
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      window.location.href = '/login';
-    }, 5000);
-    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -129,33 +120,6 @@ function Content() {
                   </div>
                   <h1 className='text-center text-[#d65846] text-[32px] font-bold'>ERROR</h1>
                   <h1 className='text-xl text-center'>{errorMessage}</h1>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {errorParam === 'access_denied' && (
-        <div className='w-screen h-screen flex justify-center items-center'>
-          <div className='fixed z-20 inset-0 overflow-y-auto'>
-            <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
-              <div className='fixed inset-0 transition-opacity'>
-                <div className='absolute inset-0 bg-gray-500 opacity-75'></div>
-              </div>
-              <span className='hidden sm:inline-block sm:align-middle sm:h-screen'></span>
-              <div className='inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:pb-6'>
-                <div className='text-center sm:text-left'>
-                  <div className='mt-2 sm:p-6 flex justify-center'>
-                    <svg width='56' height='83' viewBox='0 0 104 104' fill='d65846' xmlns='http://www.w3.org/2000/svg'>
-                      <path
-                        d='M51.5309 0C23.0704 0 0 23.0704 0 51.5309C0 79.9914 23.0704 103.062 51.5309 103.062C79.9914 103.062 103.062 79.9914 103.062 51.5309C103.062 23.0704 79.9914 0 51.5309 0ZM56.684 77.2964H46.3778V66.9902H56.684V77.2964ZM56.684 56.684H46.3778L43.8013 25.7655H59.2605L56.684 56.684Z'
-                        fill='#d65846'
-                      />
-                    </svg>
-                  </div>
-                  <h1 className='text-center text-[#d65846] text-[32px] font-bold'>Access Denied</h1>
-                  <h1 className='text-xl text-center'>You have denied access to the application.</h1>
-                  <h2 className='text-lg text-center'>Redirecting to login in {countdown} seconds...</h2>
                 </div>
               </div>
             </div>
