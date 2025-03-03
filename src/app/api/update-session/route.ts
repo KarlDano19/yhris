@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       'token',
       'email',
       'accountType',
+      'loginType',
       'isLoggedIn',
     ];
     for (const [key, value] of Object.entries(data)) {

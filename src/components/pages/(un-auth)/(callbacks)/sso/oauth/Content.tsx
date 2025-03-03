@@ -26,13 +26,14 @@ function Content() {
             isGranted: data.is_granted,
             provider: params?.provider,
           }
-          if (data.login_type === 'sso') {
+          if (['yahshua-payroll'].includes(data.login_type)) {
             postMessageData.token = data.token;
             postMessageData.email = data.email;
             postMessageData.has_pending_transaction = data.has_pending_transaction;
             postMessageData.has_active_subscription = data.has_active_subscription;
             postMessageData.has_profile = data.has_profile;
             postMessageData.account_type = data.account_type;
+            postMessageData.login_type = data.login_type;
           }
           broadcastChannel.postMessage(postMessageData);
           setTimeout(() => {

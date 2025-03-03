@@ -87,6 +87,7 @@ function Content() {
       hasActiveSubscription: data.has_active_subscription,
       hasProfile: data.has_profile,
       accountType: data.account_type,
+      loginType: data.login_type,
       isLoggedIn: true,
     });
     setSession(data);

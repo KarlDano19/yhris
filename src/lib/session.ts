@@ -5,6 +5,7 @@ export interface SessionData {
   token: string;
   email: string;
   accountType: string;
+  loginType: string;
   hasProfile: boolean;
   hasPendingTransaction: boolean;
   hasActiveSubscription: boolean;
@@ -15,6 +16,7 @@ export const defaultSession: SessionData = {
   token: '',
   email: '',
   accountType: '',
+  loginType: '',
   hasProfile: false,
   hasPendingTransaction: false,
   hasActiveSubscription: false,
