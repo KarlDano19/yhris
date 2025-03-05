@@ -10,6 +10,7 @@ import useAddEmployee from '../hooks/useAddEmployee';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import useGetLocationItems from '@/components/hooks/useGetLocationItems';
 
 export default function AddEmployeeModal({
   refetch,
@@ -22,6 +23,7 @@ export default function AddEmployeeModal({
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control } = useForm();
+  const { data: locationItems } = useGetLocationItems();
   const { mutate, isLoading: isLoadingAddEmployee } = useAddEmployee();
 
   const onSubmit = handleSubmit((data) => {
@@ -249,6 +251,29 @@ export default function AddEmployeeModal({
                               />
                             </div>
                           </div>
+                        </div>
+                        <div className='grid grid-cols-3 gap-6 mt-4'>
+                          
+                          <div>
+                            <label htmlFor='location' className='text-sm font-medium leading-6 text-gray-900'>
+                              Location<span className='text-red-500'>*</span>
+                            </label>
+                            <div className='relative mt-2'>
+                              <select
+                                id='location'
+                                {...register('location', { required: true })}
+                                className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
+                              >
+                                {locationItems && locationItems.map((item: any) => (
+                                  <option key={item.id} value={item.name}>{item.name}</option>
+                                ))}
+                              </select>
+                              <div className='absolute right-3 top-[14px]'>
+                                <SelectChevronDown />
+                              </div>
+                            </div>
+                          </div>
+                          
                         </div>
                       </div>
                       <hr />

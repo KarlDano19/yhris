@@ -22,6 +22,7 @@ import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIll
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import SelectBranchModal from './modals/SelectBranchModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -42,6 +43,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isCreateWorkAccidentIllnessReportModalOpen, setIsCreateWorkAccidentIllnessReportModalOpen] =
     useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -72,7 +75,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     {
       name: 'Generate Report',
       action: () => {
-        handlePrint();
+        setIsSelectBranchModalOpen(true);
       },
     },
   ];
@@ -106,6 +109,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     workAccidentIlnessReportsRefetch();
   }, [currentPage, pageSize]);
+
+  const handlePrintWithBranch = () => {
+    if (selectedBranch) {
+      const filteredItems = workAccidentIlnessReportsItems.filter((item: any) => item.branch === selectedBranch);
+      handlePrint();
+    }
+  };
 
   const handlePrint = () => {
     // Create a new div element
@@ -445,6 +455,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      {isSelectBranchModalOpen && (
+        <SelectBranchModal
+          isOpen={isSelectBranchModalOpen}
+          setIsOpen={setIsSelectBranchModalOpen}
+          onBranchSelect={(branch) => {
+            setSelectedBranch(branch);
+            handlePrintWithBranch();
+          }}
+        />
+      )}
       {isCreateWorkAccidentIllnessReportModalOpen && (
         <CreateWorkAccidentIllnessReportModal
           refetch={workAccidentIlnessReportsRefetch}
