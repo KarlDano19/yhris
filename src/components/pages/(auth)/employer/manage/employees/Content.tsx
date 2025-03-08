@@ -192,6 +192,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return employeeItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer' onClick={() => openEditEmployeeModal(item.id)}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.system_id}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_id}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
@@ -341,6 +343,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date Hired
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        System ID
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Employee ID
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         First Name
