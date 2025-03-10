@@ -338,43 +338,45 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
               <div className='py-2 sm:px-6 lg:px-8'>
-                <table className='divide-y divide-gray-300 text-center overflow-x-auto'>
-                  <thead>
-                    <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date Hired
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        System ID
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Employee ID
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        First Name
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Middle Name
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Last Name
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Email
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Contact No.
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Gender
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Address
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
-                </table>
+                <div className='overflow-x-auto'>
+                  <table className='divide-y divide-gray-300 text-center min-w-full'>
+                    <thead>
+                      <tr>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Date Hired
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          System ID
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Employee ID
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          First Name
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Middle Name
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Last Name
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Email
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Contact No.
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Gender
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Address
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
+                  </table>
+                </div>
                 <hr />
                 <Pagination
                   pagination={pagination}
