@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       await session.save();
       await sleep(250);
       const loginReturnData = {
+        token: data.token,
         is_valid: data.is_valid,
         account_type: data.account_type,
         has_profile: data.has_profile,
