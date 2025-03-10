@@ -336,9 +336,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300 text-center'>
+            <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
+              <div className='py-2 sm:px-6 lg:px-8'>
+                <table className='divide-y divide-gray-300 text-center overflow-x-auto'>
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
