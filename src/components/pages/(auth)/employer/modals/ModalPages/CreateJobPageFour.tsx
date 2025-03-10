@@ -12,23 +12,30 @@ export default function CreateJobPageFour({
   register,
   setPageNumber,
   onSubmit,
+  setFileProps,
+  hasSalaryRange,
 }: {
   register: any;
   setValue: any;
   getValues: any;
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
+  setFileProps: (fileProps: { fileName?: string; fileSize?: number; file?: File }) => void; // Update type definition
+  hasSalaryRange?: boolean;
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
     jobDescriptionFile: false,
     jobDescription: false,
     qualifications: false,
+    notesRemarks: false,
   });
-  const [fileProps, setFileProps] = useState<{
+  const [filePropsLocal, setFilePropsLocal] = useState<{
     fileName?: string;
     fileSize?: number;
+    file?: File;
   }>({});
+
   return (
     <>
       <div className='px-4 pb-6'>
@@ -50,13 +57,14 @@ export default function CreateJobPageFour({
               </label>
               <label className='block text-sm font-medium leading-6 text-savoy-blue'>or fill in the box below.</label>
             </div>
-            {fileProps.fileName && (
+            {filePropsLocal.fileName && (
               <>
                 <p className='block text-sm font-medium leading-6 text-gray-900'>
-                  <span>{fileProps.fileName}</span> /
-                  <span className='ml-1'>{`${(fileProps?.fileSize ? fileProps.fileSize / 1024 / 1024 : 0).toFixed(
-                    2
-                  )} MB`}</span>
+                  <span>{filePropsLocal.fileName}</span> /
+                  <span className='ml-1'>{`${(filePropsLocal?.fileSize
+                    ? filePropsLocal.fileSize / 1024 / 1024
+                    : 0
+                  ).toFixed(2)} MB`}</span>
                 </p>
                 <button
                   id='fileJobDescriptionBtn'
@@ -64,6 +72,7 @@ export default function CreateJobPageFour({
                   className='underline text-savoy-blue text-sm'
                   onClick={() => {
                     setValue('jobDescriptionFile', null);
+                    setFilePropsLocal({});
                     setFileProps({});
                   }}
                 >
@@ -82,14 +91,20 @@ export default function CreateJobPageFour({
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    const fileName = e.target.files?.[0].name;
-                    const fileSize = e.target.files?.[0].size;
+                    const fileName = file.name;
+                    const fileSize = file.size;
 
+                    setFilePropsLocal({
+                      fileName: fileName,
+                      fileSize: fileSize,
+                      file: file,
+                    });
+                    setValue('jobDescriptionFile', file);
                     setFileProps({
                       fileName: fileName,
                       fileSize: fileSize,
+                      file: file,
                     });
-                    setValue('jobDescriptionFile', file);
                   }
                 }}
               />
@@ -110,6 +125,12 @@ export default function CreateJobPageFour({
             />
           </div>
         </div>
+        <div className='relative mt-2 flex gap-2'>
+          <input type='checkbox' {...register('is_show_roles', { required: true })} id='is_show_roles' value='true' />
+          <label htmlFor='is_show_roles' className='ml-2'>
+            Show Roles
+          </label>
+        </div>
         <div className={`sm:col-span-4 mt-4 ${manualInputFocus.qualifications ? 'border-2 border-blue-700' : ''}`}>
           <label htmlFor='qualifications' className='block text-sm font-medium leading-6 text-gray-900'>
             Qualifications:
@@ -124,6 +145,31 @@ export default function CreateJobPageFour({
             />
           </div>
         </div>
+        <div className={`sm:col-span-4 mt-4 ${manualInputFocus.notesRemarks ? 'border-2 border-blue-700' : ''}`}>
+          <label htmlFor='notesRemarks' className='block text-sm font-medium leading-6 text-gray-900'>
+            Notes/Remarks (optional):
+          </label>
+          <div className='mt-2 h-32 mb-12'>
+            <ReactQuill
+              onChange={(value) => setValue('notesRemarks', value)}
+              formats={QUILL_FORMATS}
+              modules={QUILL_MODULES}
+              style={{ height: '100%', padding: '5px 8px !important' }}
+              value={getValues('notesRemarks')}
+            />
+          </div>
+        </div>
+        <div className='relative mt-2 flex gap-2'>
+          <input
+            type='checkbox'
+            {...register('is_show_remarks', { required: true })}
+            id='is_show_remarks'
+            value='true'
+          />
+          <label htmlFor='is_show_remarks' className='ml-2'>
+            Show Notes/Remarks
+          </label>
+        </div>
       </div>
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
@@ -135,10 +181,12 @@ export default function CreateJobPageFour({
             const jobDescriptionFile = getValues('jobDescriptionFile');
             const jobDescription = getValues('jobDescription');
             const qualifications = getValues('qualifications');
+            const notesRemarks = getValues('notesRemarks');
             const results = [
-              fileProps.fileName,
+              filePropsLocal.fileName,
               jobDescription !== '<ul><li><br></li></ul>' && jobDescription !== '<p><br></p>' && jobDescription,
               qualifications !== '<ul><li><br></li></ul>' && qualifications !== '<p><br></p>' && qualifications,
+              notesRemarks !== '<ul><li><br></li></ul>' && notesRemarks !== '<p><br></p>' && notesRemarks,
             ];
             const incomplete = results.every((item: boolean) => !item);
             if (!incomplete) {
@@ -148,6 +196,7 @@ export default function CreateJobPageFour({
                 jobDescriptionFile: !!!jobDescriptionFile,
                 jobDescription: !!!jobDescription,
                 qualifications: !!!qualifications,
+                notesRemarks: !!!notesRemarks,
               });
             }
           }}
@@ -158,7 +207,13 @@ export default function CreateJobPageFour({
           id='pageFourBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-          onClick={() => setPageNumber(2)}
+          onClick={() => {
+            if (hasSalaryRange) {
+              setPageNumber(3);
+            } else {
+              setPageNumber(2);
+            }
+          }}
         >
           Back
         </button>

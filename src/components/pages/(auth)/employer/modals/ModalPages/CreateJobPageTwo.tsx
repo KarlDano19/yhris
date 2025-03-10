@@ -14,6 +14,8 @@ export default function CreateJobPageTwo({
   setIsSalaryRangeModalOpen,
   handleSubmit,
   getValues,
+  hasSalaryRange,
+  secondFormSubmit,
 }: {
   control: any;
   register: any;
@@ -22,6 +24,8 @@ export default function CreateJobPageTwo({
   setIsSalaryRangeModalOpen: Dispatch<boolean>;
   handleSubmit: any;
   getValues: any;
+  hasSalaryRange?: boolean;
+  secondFormSubmit?: () => void;
 }) {
   const [otherJobType, setOtherJobType] = useState(false);
   const [otherSchedule, setOtherSchedule] = useState(false);
@@ -32,7 +36,6 @@ export default function CreateJobPageTwo({
   });
   const JobType = ['Full Time', 'Part Time', 'Internship/OJT', 'Project-based'];
   const Schedule = ['Flexible', '8 Hours', '12 Hours', 'Night Shift'];
-
   const handleData = (action: string, option: string, type: string) => {
     let data = getValues(type);
     data = data ? data : [];
@@ -47,7 +50,7 @@ export default function CreateJobPageTwo({
     return setValue(type, [...data, option]);
   };
 
-  const secondFormSubmit = handleSubmit((data: any) => {
+  const onSubmit = handleSubmit((data: any) => {
     const hireDate = getValues('hireDate');
     const hireCount = getValues('hireCount');
     let jobType = getValues('jobType');
@@ -77,14 +80,19 @@ export default function CreateJobPageTwo({
     const results = [!!hireDate, !!jobType, !!schedule];
     const incomplete = results.some((item: boolean) => !item);
     if (!incomplete) {
-      setIsSalaryRangeModalOpen(true);
+      if (!hasSalaryRange) {
+        setIsSalaryRangeModalOpen(true);
+      } else {
+        setPageNumber(3);
+        secondFormSubmit?.();
+      }
       setValue('jobType', jobType);
       setValue('schedule', schedule);
     }
   });
 
   return (
-    <form onSubmit={secondFormSubmit}>
+    <form onSubmit={onSubmit}>
       <div className='px-4 pb-6'>
         <div className='sm:col-span-4 mt-4'>
           <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>

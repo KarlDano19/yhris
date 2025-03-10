@@ -12,7 +12,6 @@ import PolicyAndComittee from "./tabs/PolicyAndComittee";
 import TechnicalAndSignature from "./tabs/TechnicalAndSignature";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type T_ModalData = {
     id: number;
@@ -127,7 +126,7 @@ function EditHealthAndSafetyReportModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Create Work Environment Measurement (WEM) Request
+                    Update Health and Safety Organization Report
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"

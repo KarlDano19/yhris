@@ -23,18 +23,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Auth>{children}</Auth>
         </ReactQueryWrapper>
         <Toaster position='top-right' />
+        <script type='text/javascript' id='hs-script-loader' async defer src='//js-na1.hs-scripts.com/23359629.js' />
+        <script async src='https://www.googletagmanager.com/gtag/js?id=G-0B8QK4ZCEJ'></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              (function (w, d, s) {
-                var a = d.getElementsByTagName('head')[0];
-                var r = d.createElement('script');
-                r.async = 1;
-                r.src = s;
-                r.setAttribute('id', 'usetifulScript');
-                r.dataset.token = "cfa81b468ad851421f13a6228543f669";
-                a.appendChild(r);
-              })(window, document, "https://www.usetiful.com/dist/usetiful.js");
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-0B8QK4ZCEJ');
             `,
           }}
         />

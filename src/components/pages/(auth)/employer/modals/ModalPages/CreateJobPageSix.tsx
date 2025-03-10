@@ -1,18 +1,26 @@
 import { Dispatch } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function CreateJobPageSix({
   firstFormGetValues,
   fourthFormGetValues,
   setPageNumber,
   onSubmit,
+  fileProps,
 }: {
   firstFormGetValues: any;
   fourthFormGetValues: any;
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
+  fileProps: any;
 }) {
   const markup = { __html: fourthFormGetValues('jobDescription') };
   const markup2 = { __html: fourthFormGetValues('qualifications') };
+
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
+
+  const cachedData: any = cachedProfile?.state?.data;
 
   return (
     <>
@@ -25,7 +33,7 @@ export default function CreateJobPageSix({
           <div className='relative flex flex-col space-y-2 mt-2 text-sm font-medium leading-6 text-gray-900 rounded-md border-2 border-text-gray-400 px-2 py-3'>
             <p className='font-bold'>{firstFormGetValues('jobTitle')}</p>
             <p>
-              The ABBA Initiative - <span>{firstFormGetValues('placeAdvertise')}</span>
+              {cachedData.name} - <span>{firstFormGetValues('placeAdvertise')}</span>
             </p>
             <span className='top-20 left-0 w-full border' />
             <div className='mt-[8rem]'>
@@ -36,6 +44,11 @@ export default function CreateJobPageSix({
               <p>Qualifications:</p>
               <p className='ql-editor !p-0' dangerouslySetInnerHTML={markup2}></p>
             </div>
+            {fileProps.fileName && (
+              <div className='mt-4'>
+                <object data={URL.createObjectURL(fileProps.file)} width='100%' height='500px' />
+              </div>
+            )}
           </div>
         </div>
       </div>

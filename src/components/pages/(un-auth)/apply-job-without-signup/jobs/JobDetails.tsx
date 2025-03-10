@@ -3,7 +3,14 @@ import { useState, useEffect } from 'react';
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from './hooks/useGetJobDetails';
 
-import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  BriefcaseIcon,
+  ClockIcon,
+  BanknotesIcon,
+  ClipboardDocumentIcon,
+  LinkIcon,
+} from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
@@ -32,6 +39,11 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
 
   const renderQualificationsDescription = (qualifications: any) => {
     const markup = { __html: qualifications };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+
+  const renderNotesRemarks = (notesRemarks: any) => {
+    const markup = { __html: notesRemarks };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
@@ -130,6 +142,30 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               <ul className='text-[13px] text-indigo-dye mt-1 ml-6'>
                 {!isLoading ? jobDetailData.offered_benefits : 'Loading benefits...'}
               </ul>
+            </>
+          )}
+          {/* notes/remarks */}
+          {jobDetailData.job_remark && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Notes/Remarks
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
+                {!isLoading ? renderNotesRemarks(jobDetailData?.job_remark) : 'Loading remarks...'}
+              </p>
+            </>
+          )}
+          {/* job url */}
+          {jobDetailData.job_url && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                <LinkIcon className='h-5 w-5 mr-1' />
+                Job URL
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
+                {!isLoading ? jobDetailData?.job_url : 'Loading job URL...'}
+              </p>
             </>
           )}
         </div>

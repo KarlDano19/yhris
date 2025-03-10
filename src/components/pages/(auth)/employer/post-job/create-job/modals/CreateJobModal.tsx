@@ -5,14 +5,14 @@ import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import SalaryRangeModal from './SalaryRangeModal';
-import CreateJobPageOne from './ModalPages/CreateJobPageOne';
-import CreateJobPageTwo from './ModalPages/CreateJobPageTwo';
-import CreateJobPageThree from './ModalPages/CreateJobPageThree';
-import CreateJobPageFour from './ModalPages/CreateJobPageFour';
-import CreateJobPageFive from './ModalPages/CreateJobPageFive';
-import CreateJobPageSix from './ModalPages/CreateJobPageSix';
-import CreateJobPageSeven from './ModalPages/CreateJobPageSeven';
+import SalaryRangeModal from '../../../modals/SalaryRangeModal';
+import CreateJobPageOne from '../../../modals/ModalPages/CreateJobPageOne';
+import CreateJobPageTwo from '../../../modals/ModalPages/CreateJobPageTwo';
+import CreateJobPageThree from '../../../modals/ModalPages/CreateJobPageThree';
+import CreateJobPageFour from '../../../modals/ModalPages/CreateJobPageFour';
+import CreateJobPageFive from '../../../modals/ModalPages/CreateJobPageFive';
+import CreateJobPageSix from '../../../modals/ModalPages/CreateJobPageSix';
+import CreateJobPageSeven from '../../../modals/ModalPages/CreateJobPageSeven';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -33,6 +33,7 @@ export default function CreateJobModal({
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
+  const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
   const firstForm = useForm<any>({
     defaultValues: {
       country: 'Philippines',
@@ -194,6 +195,7 @@ export default function CreateJobModal({
                       register={fourthForm.register}
                       setPageNumber={setPageNumber}
                       onSubmit={fourthFormSubmit}
+                      setFileProps={setFileProps}
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
@@ -212,6 +214,7 @@ export default function CreateJobModal({
                       fourthFormGetValues={fourthForm.getValues}
                       setPageNumber={setPageNumber}
                       onSubmit={sixthFormSubmit}
+                      fileProps={fileProps}
                     />
                   </div>
                   <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
@@ -219,6 +222,7 @@ export default function CreateJobModal({
                       isLoading={isLoading}
                       setValue={seventhForm.setValue}
                       setPageNumber={setPageNumber}
+                      register={seventhForm.register}
                       onSubmit={onSubmit}
                     />
                   </div>

@@ -20,7 +20,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 
-function Content() {
+function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { register, handleSubmit, setValue, control, watch } = useForm();
   const [selectedTab, setSelectedTab] = useState(1);
 
@@ -147,6 +147,7 @@ function Content() {
             <button
               className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
               onClick={onSubmit}
+              disabled={!hasActiveSubscription}
             >
               Save
             </button>

@@ -21,13 +21,14 @@ export default function ImportModal({
   const cancelButtonRef = useRef(null);
   const allowHeaders: any = {
     'Date Hired (mm/dd/yyyy)*': 'date_hired',
+    'Date Hired': 'date_hired',
     'First Name *': 'firstname',
     'Middle Name': 'middlename',
     'Last Name *': 'lastname',
-    'Contact Number *': 'mobile',
-    "Email *": 'email',
+    'Contact Number': 'mobile',
+    "Email": 'email',
     "Gender": 'gender',
-    "Address *": 'address',
+    "Address": 'address',
   };
   const importHeaders = {
     date_hired: 'Date Hired',
@@ -69,6 +70,7 @@ export default function ImportModal({
     if (file) {
       Papa.parse(file, {
         header: true,
+        skipEmptyLines: true,
         complete: (results: any) => {
           if (results.data) {
             const importData = [];
@@ -81,7 +83,13 @@ export default function ImportModal({
               for (const [key, value] of Object.entries(item)) {
                 const allowKey = allowHeaders[key];
                 if (allowKey) {
-                  importItem[allowKey] = value;
+                  if (key === 'Date Hired (mm/dd/yyyy)*' || key === 'Date Hired') {
+                    const dateValue = value as string;
+                    const [day, month, year] = dateValue.split('/');
+                    importItem[allowKey] = `${month}/${day}/${year}`;
+                  } else {
+                    importItem[allowKey] = value;
+                  }
                 }
               }
               importData.push(importItem);
@@ -211,7 +219,7 @@ export default function ImportModal({
                   </div>
                   {importJSON.length > 0 ? (
                     <>
-                      <div>
+                      <div className='overflow-x-auto'>
                         <table className='min-w-full divide-y divide-gray-300 text-center'>
                           <thead>
                             <tr>

@@ -1,4 +1,4 @@
-import { Dispatch, useState } from 'react';
+import { Dispatch, useState, useEffect } from 'react';
 
 import toast from 'react-hot-toast';
 
@@ -11,6 +11,7 @@ export default function CreateJobPageFive({
   getValues,
   isRangeBenefitsAdded,
   onSubmit,
+  pageNumber,
 }: {
   setValue: any;
   register: any;
@@ -18,6 +19,7 @@ export default function CreateJobPageFive({
   getValues: any;
   isRangeBenefitsAdded: boolean;
   onSubmit: () => void;
+  pageNumber?: number;
 }) {
   const [showInput, setShowInput] = useState(false);
   const [manualInputFocus, setManualInputFocus] = useState(false);
@@ -37,6 +39,12 @@ export default function CreateJobPageFive({
       setShowInput(true);
     }
   };
+
+  useEffect(() => {
+    if (getValues('postAs') === 'upload') {
+      setShowInput(true);
+    }
+  }, [pageNumber]);
 
   return (
     <>
@@ -75,6 +83,21 @@ export default function CreateJobPageFive({
               />
               <span className='ml-2 text-sm font-medium leading-6 text-gray-900'>Upload</span>
             </label>
+
+            {getValues('postAs') === 'upload' && getValues('uploaded_image') && !getValues('postAsUpload') && (
+              <div className='block ml-7 text-sm font-medium leading-6 text-gray-900'>
+                Current Uploaded Image:{' '}
+                <a
+                  href={getValues('uploaded_image')}
+                  className='text-savoy-blue underline'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  View Current Uploaded Image
+                </a>
+              </div>
+            )}
+
             <label
               htmlFor='postAsUpload'
               className={`block ml-7 text-sm font-normal text-gray-400 border w-fit p-2.5 border-gray-400 rounded-md ${
@@ -148,7 +171,11 @@ export default function CreateJobPageFive({
             if ((postAs && postAs !== 'upload') || (postAs === 'upload' && fileProps.fileName)) {
               onSubmit();
             } else {
-              setManualInputFocus(true);
+              if (getValues('uploaded_image')) {
+                onSubmit();
+              } else {
+                setManualInputFocus(true);
+              }
             }
           }}
         >

@@ -1,30 +1,47 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
-import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import RightClickMenu from '@/components/RightClickMenu';
+import Pagination from '@/components/Pagination';
 import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
 import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
-import useUpdateJobPostItems from './hooks/useUpdateJobPostItems';
+import UpdateJobModal from './modals/UpdateJobModal';
+import DeleteJobModal from './modals/DeleteModal';
+
+import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
+import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 import { T_JobPreviewModal } from '@/types/globals';
 
+type PaginationProps = {
+  totalRecords: number;
+  totalPages: number;
+};
+
 type ComponentMap = {
   [key: string]: React.ElementType;
+};
+
+type T_ModalData = {
+  id: number | null;
+  open: boolean;
 };
 
 const Content = () => {
@@ -41,6 +58,8 @@ const Content = () => {
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuOptions, setContextMenuOptions] = useState<any>([]);
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -48,8 +67,24 @@ const Content = () => {
   });
   const [isJobPreviewOpen, setIsJobPreviewOpen] = useState<T_JobPreviewModal | null>(null);
   const [isSetJobInactiveModalOpen, setIsSetJobInactiveModalOpen] = useState(false);
-  const { data: dataJobPost, isLoading: isGetJobPostLoading, refetch } = useGetJobPostItems(itemsFilter);
-  const { mutate } = useUpdateJobPostItems();
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationProps>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const {
+    data: dataJobPost,
+    isLoading: isGetJobPostLoading,
+    refetch,
+  } = useGetJobPostItems({
+    ...itemsFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
+  const { mutate } = useUpdateJobPostStatus();
+  const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
+  const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
 
   const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
@@ -90,6 +125,87 @@ const Content = () => {
     setSelectedJobId(jobPost.id);
   };
 
+  const handleSetAsInactive = (jobId: any, isActive: boolean) => {
+    let data: any = {};
+    data['jobId'] = jobId;
+    data['is_active'] = !isActive;
+    const successMessage = isActive ? 'Successfully set job as inactive.' : 'Successfully set job as active.';
+
+    const callbackReq = {
+      onSuccess: () => {
+        refetch();
+        toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+          duration: 5000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+
+    mutate(data, callbackReq);
+  };
+
+  const handleShowRoles = (jobId: any, isShowRoles: boolean) => {
+    let data: any = {};
+    data['jobId'] = jobId;
+    data['is_show_roles'] = !isShowRoles;
+    const successMessage = isShowRoles ? 'Successfully hide roles.' : 'Successfully show roles.';
+    const callbackReq = {
+      onSuccess: () => {
+        refetch();
+        toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+          duration: 5000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    mutate(data, callbackReq);
+  };
+
+  const handleShowSalary = (jobId: any, isShowSalary: boolean) => {
+    let data: any = {};
+    data['jobId'] = jobId;
+    data['is_show_salary'] = !isShowSalary;
+    const successMessage = isShowSalary ? 'Successfully hide salary.' : 'Successfully show salary.';
+    const callbackReq = {
+      onSuccess: () => {
+        refetch();
+        toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+          duration: 5000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    };
+    mutate(data, callbackReq);
+  };
+
+  const handleShowNotes = (jobId: any, isShowNotes: boolean) => {
+    let data: any = {};
+    data['jobId'] = jobId;
+    data['is_show_remarks'] = !isShowNotes;
+    const successMessage = isShowNotes ? 'Successfully hide notes.' : 'Successfully show notes.';
+    const callbackReq = {
+      onSuccess: () => {
+        refetch();
+        toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+          duration: 5000,
+        });
+      },
+    };
+    mutate(data, callbackReq);
+  };
+
   const handleCloseContextMenu = () => {
     setShowContextMenu(false);
   };
@@ -100,7 +216,7 @@ const Content = () => {
 
   useEffect(() => {
     if (dataJobPost && !isGetJobPostLoading) {
-      dataJobPost.map((jobPost: any) => {
+      dataJobPost.records.map((jobPost: any) => {
         jobPost['jobTitle'] = jobPost['job_title'];
         jobPost['jobType'] = jobPost['job_type'];
         jobPost['jobDescription'] = jobPost['job_description'];
@@ -109,11 +225,32 @@ const Content = () => {
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['isActive'] = jobPost['is_active'];
+        jobPost['isShowSalary'] = jobPost['is_show_salary'];
+        jobPost['isShowNotes'] = jobPost['is_show_remarks'];
+        jobPost['isShowRoles'] = jobPost['is_show_roles'];
         jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
       });
-      setJobPostHistoryItems(dataJobPost);
+      setJobPostHistoryItems(dataJobPost.records);
+      setPagination({
+        totalPages: dataJobPost.total_pages,
+        totalRecords: dataJobPost.total_records,
+      });
     }
   }, [dataJobPost]);
+
+  useEffect(() => {
+    refetch();
+  }, [currentPage, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   const socialMediaShare = (social: string, og_url: string) => {
     const encoded_url = encodeURIComponent(og_url);
@@ -225,28 +362,71 @@ const Content = () => {
             {jobPost.hireCount}
           </td>
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {jobPost.isActive ? ( // Check if jobPost is active
-              jobPost.postIn.map((social: any) => {
-                const DynamicComponent = componentMap[social];
-                return (
-                  <span
-                    key={social}
-                    className='cursor-pointer'
-                    onClick={() => {
-                      socialMediaShare(social, jobPost.og_url);
-                    }}
-                    data-tooltip-id='social-btn-tooltip'
-                    data-tooltip-content={`Share to ${social}`}
-                    data-tooltip-place='bottom'
-                  >
-                    <Tooltip id='social-btn-tooltip' style={{ fontSize: '10px' }} />
-                    <DynamicComponent />
-                  </span>
-                );
-              })
-            ) : (
-              <span className='text-gray-400'>Sharing disabled</span> // Message when inactive
-            )}
+            <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+              <div className='flex space-x-2'>
+                <button onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}>
+                  <EditIcon />
+                </button>
+                <button onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}>
+                  <DeleteIcon />
+                </button>
+                <button onClick={() => setMoreMenuOpen((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}>
+                  <MoreIconWithBorder />
+                </button>
+              </div>
+              {moreMenuOpen[jobPost.id] && (
+                <div className='absolute bg-white border rounded shadow-lg mt-2'>
+                  <ul className='py-1 text-left'>
+                    <li
+                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                      onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}
+                    >
+                      Share Post To <ChevronRightIcon className='inline h-4 w-4' />
+                    </li>
+                    {showShareOptions[jobPost.id] && (
+                      <div className='pl-4'>
+                        {jobPost.postIn.map((social: any) => {
+                          const DynamicComponent = componentMap[social];
+                          return (
+                            <span
+                              key={social}
+                              className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
+                              onClick={() => socialMediaShare(social, jobPost.og_url)}
+                            >
+                              <DynamicComponent />
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <li
+                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                      onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
+                    >
+                      {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
+                    </li>
+                    <li
+                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                      onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
+                    >
+                      {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                    </li>
+                    <li
+                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                      onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
+                    >
+                      {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                    </li>
+                    <li
+                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                      onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
+                    >
+                      {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </td>
         </tr>
       ));
@@ -390,14 +570,20 @@ const Content = () => {
                         No. of Hires Needed
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Social Media Sharing
+                        Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {jobPostHistoryItems.length}</p>
+                <Pagination
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={pageSizeChange}
+                  onPageChange={paginationChange}
+                />
               </div>
             </div>
           </div>
@@ -419,6 +605,10 @@ const Content = () => {
           setShowContextMenu={setShowContextMenu}
           selectedJobId={selectedJobId}
         />
+      )}
+      {isEditModalOpen?.open && <UpdateJobModal refetch={refetch} isOpen={isEditModalOpen} setIsOpen={setIsEditModalOpen} />}
+      {isDeleteModalOpen?.open && (
+        <DeleteJobModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
       )}
     </div>
   );

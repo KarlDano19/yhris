@@ -6,14 +6,21 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import useGetEvaluationHistoryItems from './hooks/useGetEvaluationHistoryItems';
+import EvaluationDetailsModal from './modals/EvaluationDetailsModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import classNames from '@/helpers/classNames';
+
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
+  const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -94,7 +101,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     if (evaluationHistoryItems && evaluationHistoryItems.length > 0) {
       return evaluationHistoryItems.map((item: any) => (
-        <tr key={item.id} className='cursor-pointer'>
+        <tr
+          key={item.id}
+          className='cursor-pointer'
+          onClick={() => setIsEvaluationDetailsModalOpen({ id: item.id, open: true })}
+        >
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_evaluation}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_period}</td>
@@ -105,12 +116,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </span>
             /<span>{item.total_score}</span>
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+          {/* Still not implemented */}
+          {/* <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <button
               className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
               disabled={!(item.form_total_score < item.passing_score)}
             >
               Enroll for Training
+            </button>
+          </td> */}
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+              View
             </button>
           </td>
         </tr>
@@ -222,8 +239,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Overall Rating
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      {/* Still not implemented */}
+                      {/* <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Recommendation
+                      </th> */}
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -236,6 +257,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      {isEvaluationDetailsModalOpen && (
+        <EvaluationDetailsModal
+          refetch={refetchEvaluationHistoryItems}
+          isOpen={isEvaluationDetailsModalOpen}
+          setIsOpen={setIsEvaluationDetailsModalOpen}
+        />
+      )}
     </>
   );
 };

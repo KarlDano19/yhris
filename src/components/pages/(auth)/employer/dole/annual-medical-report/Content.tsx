@@ -37,7 +37,7 @@ type T_ModalData = {
   open: boolean;
 };
 
-function Content() {
+function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [
     isDeleteAnnualMedicalReportModalOpen,
     setIsDeleteAnnualMedicalReportModalOpen,
@@ -369,6 +369,7 @@ function Content() {
               <button
                 className="bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
                 onClick={() => setIsCreateAnnualMedicalReportModalOpen(true)}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>

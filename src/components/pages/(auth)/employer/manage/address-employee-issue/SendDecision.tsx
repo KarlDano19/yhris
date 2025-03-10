@@ -1,7 +1,10 @@
-import classNames from '@/helpers/classNames';
-import ClipIcon from '@/svg/ClipIcon';
-import { T_SendDecisionModal } from '@/types/globals';
 import React, { Dispatch } from 'react';
+
+import classNames from '@/helpers/classNames';
+
+import { T_SendDecisionModal, T_DecisionAttachmentViewModal } from '@/types/globals';
+
+import ClipIcon from '@/svg/ClipIcon';
 
 const SendDecision = ({
   id,
@@ -9,6 +12,8 @@ const SendDecision = ({
   isDecisionReceived,
   decisionReceivedDate,
   setIsSendDecisionModalOpen,
+  setIsUploadDecisionAttachmentModalOpen,
+  setIsDecisionAttachmentViewModalOpen,
   setReleased,
   isLoading,
 }: {
@@ -17,9 +22,18 @@ const SendDecision = ({
   isDecisionReceived: boolean;
   decisionReceivedDate?: string;
   setIsSendDecisionModalOpen: Dispatch<T_SendDecisionModal>;
+  setIsUploadDecisionAttachmentModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
+  setIsDecisionAttachmentViewModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
   setReleased: any;
   isLoading: boolean;
 }) => {
+  const customOnclick = () => {
+    setIsUploadDecisionAttachmentModalOpen({
+      isOpen: true,
+      id,
+    });
+  };
+
   return (
     <div className='flex flex-col gap-2'>
       <div>
@@ -47,13 +61,13 @@ const SendDecision = ({
       <div>
         <button
           className={classNames(
-            isDecisionReceived
-              ? 'bg-savoy-blue text-white'
-              : 'bg-blue-100 text-blue-400',
+            isDecisionReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isDecisionSent || isDecisionReceived || isLoading}
-          onClick={() => setReleased(id, 'decision')}
+          onClick={() => {
+            customOnclick(), setReleased(id, 'decision');
+          }}
         >
           {isLoading && (
             <div role='status'>
@@ -82,7 +96,17 @@ const SendDecision = ({
       {isDecisionReceived ? (
         <div>
           <div className='flex gap-1 items-center justify-center'>
-            <ClipIcon />
+            <div
+              className='cursor-pointer'
+              onClick={() =>
+                setIsDecisionAttachmentViewModalOpen({
+                  isOpen: true,
+                  id,
+                })
+              }
+            >
+              <ClipIcon />
+            </div>
             <p className='ml-2 text-xs'>{decisionReceivedDate}</p>
           </div>
         </div>

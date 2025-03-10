@@ -1,8 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getHiredApplicants() {
+async function getHiredApplicants(filters: any) {
   try {
+    let newFilters = { ...filters };
+    if (filters.currentPage) newFilters.current_page = filters.currentPage;
+    if (filters.pageSize) newFilters.page_size = filters.pageSize;
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -12,7 +16,7 @@ async function getHiredApplicants() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -28,8 +32,8 @@ async function getHiredApplicants() {
   }
 }
 
-function useGetHiredApplicants() {
-  const query = useQuery(['hiredApplicantJobCache', {}], () => getHiredApplicants(), {
+function useGetHiredApplicants(filters: any) {
+  const query = useQuery(['hiredApplicantJobCache', filters], () => getHiredApplicants(filters), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
