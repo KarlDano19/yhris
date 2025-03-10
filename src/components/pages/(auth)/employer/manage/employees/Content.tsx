@@ -16,7 +16,8 @@ import EmployeesModal from './modals/EmployeesModal';
 import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
-import useGetEmployeeItems from './hooks/useGetEmployeeItems';
+import useGetEmployeeItemsList from './hooks/useGetEmployeeItems';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
@@ -64,7 +65,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     data: employeeListData,
     isLoading: isEmployeeListLoading,
     refetch: employeeListRefetch,
-  } = useGetEmployeeItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetEmployeeItemsList({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  const { data: employeeItemsAll } = useGetEmployeeItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
 
@@ -195,6 +197,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
@@ -289,9 +292,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={itemsFilter.search}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setItemsFilter({ ...itemsFilter, search: value });
+                    const filteredItems = employeeItemsAll.filter((item: any) =>
+                      item.firstname.toLowerCase().includes(value.toLowerCase()) ||
+                      item.lastname.toLowerCase().includes(value.toLowerCase())
+                    );
+                    setEmployeeItems(filteredItems); 
+                  }}
                   placeholder='Search ...'
                 />
+                {itemsFilter.search && (
+                  <ul className='absolute mt-10 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'>
+                    {employeeItemsAll.filter((item: any) =>
+                      item.firstname.toLowerCase().includes(itemsFilter.search.toLowerCase()) ||
+                      item.lastname.toLowerCase().includes(itemsFilter.search.toLowerCase())
+                    ).map((item: any) => (
+                      <li 
+                        key={item.id} 
+                        className='px-3 py-2 hover:bg-gray-200 cursor-pointer'
+                        onClick={() => {
+                          setItemsFilter({ ...itemsFilter, search: `${item.firstname} ${item.lastname}` }); 
+                          setEmployeeItems([item]); 
+                        }}
+                      >
+                        {item.firstname} {item.lastname}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
             <button
@@ -364,6 +395,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Last Name
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Location
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Email
