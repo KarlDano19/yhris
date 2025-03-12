@@ -15,7 +15,7 @@ import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
 const FloatingProgress = () => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: any } | undefined };
-  const [isProgressShow, setShowProgress] = useState(true);
+  const [isProgressShow, setShowProgress] = useState(false);
   const { mutate: syncEmployees, isLoading: isSyncingEmployees } = useSyncEmployees();
 
   const handleSyncEmployees = () => {
