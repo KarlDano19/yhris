@@ -5,26 +5,20 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
-import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
-import classNames from '@/helpers/classNames';
-
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
-import useGetEmployeeItemsList from '../../../manage/employees/hooks/useGetEmployeeItems';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
-import useUpdateEmployerAgreeExport from '../../../manage/employees/hooks/useUpdateEmployerAgreeExport';
 import AddUserAccountModal from '../accounts/modals/AddUserAccountModal';
 import useGetAccountsList from './hooks/useGetAccountsList';
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import UpdateUserAccountModal from './modals/UpdateUserAccountModal';
 import ResetPasswordModal from './modals/ResetPasswordModal';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import EditIcon from '@/svg/EditIcon';
 
 type PaginationProps = {
   totalRecords: number;

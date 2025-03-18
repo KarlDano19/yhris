@@ -8,20 +8,20 @@ import MenuItem from '../../../MenuItem';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
-import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
+import AccountsIcon from '@/svg/AccountsIcon';
 
 const menus = [
   {
-    icon: <GeneralSettingsLogo />,
+    icon: <AccountsIcon />,
     text: 'Accounts',
     link: '/settings/users/accounts',
     isAvailable: true,
   },
   {
     icon: <UserLogo />,
-    text: 'User Rights',
+    text: 'User Rights Mapping',
     link: '/settings/users/user-rights',
-    isAvailable: true,
+    isAvailable: false,
   },
 ];
 

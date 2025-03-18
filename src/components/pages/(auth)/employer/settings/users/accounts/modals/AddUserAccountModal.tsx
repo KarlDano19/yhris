@@ -1,15 +1,13 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import useAddAccounts from '../hooks/useAddAccounts';
 
-import { XCircleIcon } from '@heroicons/react/24/solid';
-import { EyeIcon } from '@heroicons/react/24/solid';
-import { EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeSlashIcon, EyeIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
 export default function AddUserAccountModal({
   refetch,
@@ -49,8 +47,8 @@ export default function AddUserAccountModal({
 
   const generateStrongPassword = () => {
     const length = 12; // Length of the password
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+';
-    let password = '';
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+    let password = "";
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
@@ -136,74 +134,70 @@ export default function AddUserAccountModal({
                               </div>
                             </div>
                             <div className='grid-item'>
-                              <div className='mb-2'>
-                                <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
-                                  Password
-                                  <span className='text-red-500'>*</span>
-                                </label>
-                                <div className='relative'>
-                                  <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id='password'
-                                    {...register('password', { required: true })}
-                                    className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                                    value={password}
-                                    onChange={(e) => setPassword(e.currentTarget.value)}
-                                  />
-                                  <button
-                                    type='button'
-                                    className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                                    onClick={() => {
-                                      setShowPassword(!showPassword);
-                                    }}
-                                  >
-                                    {showPassword ? (
-                                      <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                                    ) : (
-                                      <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                                    )}
-                                  </button>
-                                </div>
+                              <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                                Password
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='mt-2 relative'>
+                                <input
+                                  id='password'
+                                  {...register('password', { required: true })}
+                                  type={showPassword ? 'text' : 'password'}
+                                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                  onChange={(e) => setPassword(e.currentTarget.value)}
+                                />
+                                <button
+                                  type='button'
+                                  className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
+                                  onClick={() => {
+                                    setShowPassword(!showPassword);
+                                  }}
+                                >
+                                  {showPassword ? (
+                                    <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                                  ) : (
+                                    <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
+                                  )}
+                                </button>
                               </div>
                             </div>
                             <div className='grid-item'>
-                              <div className='mb-4'>
-                                <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
-                                  Confirm Password
-                                  <span className='text-red-500'>*</span>
-                                </label>
-                                <div className='relative'>
-                                  <input
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    id='confirm-password'
-                                    className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                                    value={confirmPassword}
-                                    {...register('confirmPassword', { required: true })}
-                                    onChange={(e) => setConfirmPassword(e.currentTarget.value)}
-                                  />
-                                  <button
-                                    type='button'
-                                    className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                                    onClick={() => {
-                                      setShowConfirmPassword(!showConfirmPassword);
-                                    }}
-                                  >
-                                    {showConfirmPassword ? (
-                                      <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                                    ) : (
-                                      <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                                    )}
-                                  </button>
-                                </div>
+                              <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                                Confirm Password
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='mt-2 relative'>
+                                <input
+                                  id='confirm_password'
+                                  {...register('confirm_password', { required: true })}
+                                  type={showConfirmPassword ? 'text' : 'password'}
+                                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                  onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                                />
+                                <button
+                                  type='button'
+                                  className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
+                                  onClick={() => {
+                                    setShowConfirmPassword(!showConfirmPassword);
+                                  }}
+                                >
+                                  {showConfirmPassword ? (
+                                    <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                                  ) : (
+                                    <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
+                                  )}
+                                </button>
                               </div>
                             </div>
-                            <button
-                              type='button'
-                              className='mt-3 inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300'
-                              onClick={generateStrongPassword}
-                            >
-                              Generate Strong Password
-                            </button>
+                            <div className='grid-item'>
+                              <button
+                                type='button'
+                                className='mt-3 inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300'
+                                onClick={generateStrongPassword}
+                              >
+                                Generate Strong Password
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -5,13 +5,10 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useAddAccounts from '../hooks/useAddAccounts';
-
-import { XCircleIcon } from '@heroicons/react/24/solid';
-import { EyeIcon } from '@heroicons/react/24/solid';
-import { EyeSlashIcon } from '@heroicons/react/24/outline';
 import useUpdateAccount from '../hooks/useUpdateAccount';
 import useGetAccountDetails from '../hooks/useGetAccountDetails';
+
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;

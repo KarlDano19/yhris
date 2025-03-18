@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useAddAccounts from '../hooks/useAddAccounts';
 import useUpdateAccount from '../hooks/useUpdateAccount';
 import useGetAccountDetails from '../hooks/useGetAccountDetails';
 
