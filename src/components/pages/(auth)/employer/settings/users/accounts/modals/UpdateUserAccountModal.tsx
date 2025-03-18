@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,13 @@ import useAddAccounts from '../hooks/useAddAccounts';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { EyeSlashIcon } from '@heroicons/react/24/outline';
+import useUpdateAccount from '../hooks/useUpdateAccount';
+import useGetAccountDetails from '../hooks/useGetAccountDetails';
+
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
 
 export default function AddUserAccountModal({
   refetch,
@@ -17,16 +24,30 @@ export default function AddUserAccountModal({
   setIsOpen,
 }: {
   refetch: any;
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
+  isOpen: T_ModalData;
+  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, control } = useForm();
-  const { mutate: addAccounts, isLoading: isLoadingAddAccounts } = useAddAccounts();
+  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const {
+    data: accountDetailsData,
+    refetch: refetchAccountDetails,
+    remove: removeAccount,
+  } = useGetAccountDetails(isOpen.id);
+  const { mutate: updateAccount, isLoading: isLoadingUpdateAccount } = useUpdateAccount();
+
+  useEffect(() => {
+    if (isOpen) {
+      refetchAccountDetails();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (accountDetailsData) {
+      setValue('name', accountDetailsData.name);
+      setValue('email', accountDetailsData.email);
+    }
+  }, [accountDetailsData]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -34,8 +55,7 @@ export default function AddUserAccountModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
-        setIsOpen(false);
-        reset();
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
@@ -44,25 +64,19 @@ export default function AddUserAccountModal({
         });
       },
     };
-    addAccounts(data, callbackReq);
+    updateAccount({ account_id: isOpen.id, data: data }, callbackReq);
   });
 
-  const generateStrongPassword = () => {
-    const length = 12; // Length of the password
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+';
-    let password = '';
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      password += charset[randomIndex];
-    }
-    setPassword(password);
-    setConfirmPassword(password);
+  const customCloseModal = () => {
+    reset();
+    removeAccount();
+    setIsOpen(null);
   };
 
   return (
     <>
-      <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(false)}>
+      <Transition.Root show={isOpen ? true : false} as={Fragment}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -88,8 +102,8 @@ export default function AddUserAccountModal({
               >
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-7xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Add User Account</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Update User Account</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
@@ -135,75 +149,6 @@ export default function AddUserAccountModal({
                                 />
                               </div>
                             </div>
-                            <div className='grid-item'>
-                              <div className='mb-2'>
-                                <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
-                                  Password
-                                  <span className='text-red-500'>*</span>
-                                </label>
-                                <div className='relative'>
-                                  <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id='password'
-                                    {...register('password', { required: true })}
-                                    className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                                    value={password}
-                                    onChange={(e) => setPassword(e.currentTarget.value)}
-                                  />
-                                  <button
-                                    type='button'
-                                    className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                                    onClick={() => {
-                                      setShowPassword(!showPassword);
-                                    }}
-                                  >
-                                    {showPassword ? (
-                                      <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                                    ) : (
-                                      <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                            <div className='grid-item'>
-                              <div className='mb-4'>
-                                <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
-                                  Confirm Password
-                                  <span className='text-red-500'>*</span>
-                                </label>
-                                <div className='relative'>
-                                  <input
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    id='confirm-password'
-                                    className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                                    value={confirmPassword}
-                                    {...register('confirmPassword', { required: true })}
-                                    onChange={(e) => setConfirmPassword(e.currentTarget.value)}
-                                  />
-                                  <button
-                                    type='button'
-                                    className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                                    onClick={() => {
-                                      setShowConfirmPassword(!showConfirmPassword);
-                                    }}
-                                  >
-                                    {showConfirmPassword ? (
-                                      <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                                    ) : (
-                                      <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                            <button
-                              type='button'
-                              className='mt-3 inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300'
-                              onClick={generateStrongPassword}
-                            >
-                              Generate Strong Password
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -212,9 +157,9 @@ export default function AddUserAccountModal({
                         <button
                           type='submit'
                           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-                          disabled={isLoadingAddAccounts}
+                          disabled={isLoadingUpdateAccount}
                         >
-                          {isLoadingAddAccounts && (
+                          {isLoadingUpdateAccount && (
                             <div role='status'>
                               <svg
                                 aria-hidden='true'
@@ -235,12 +180,12 @@ export default function AddUserAccountModal({
                               <span className='sr-only'>Loading...</span>
                             </div>
                           )}
-                          {!isLoadingAddAccounts && 'Save'}
+                          {!isLoadingUpdateAccount && 'Save'}
                         </button>
                         <button
                           type='button'
                           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                          onClick={() => setIsOpen(false)}
+                          onClick={() => customCloseModal()}
                           ref={cancelButtonRef}
                         >
                           Close

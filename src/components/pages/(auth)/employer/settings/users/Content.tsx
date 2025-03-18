@@ -14,7 +14,7 @@ const menus = [
   {
     icon: <GeneralSettingsLogo />,
     text: 'Accounts',
-    link: '/settings/users/user-rights',
+    link: '/settings/users/accounts',
     isAvailable: true,
   },
   {
