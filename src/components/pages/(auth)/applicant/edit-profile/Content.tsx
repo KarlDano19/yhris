@@ -50,7 +50,6 @@ const Content = () => {
     }
   }, [applicantProfileData]);
 
-  console.log(applicantProfileData);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
