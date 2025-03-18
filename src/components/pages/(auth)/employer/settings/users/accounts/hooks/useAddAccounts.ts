@@ -23,7 +23,7 @@ async function addAccounts(accounts: any, employer_id: string) {
       },
       body: JSON.stringify(data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user-accounts/create/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register/`, config);
     if (!res.ok) {
       throw res.json();
     }
