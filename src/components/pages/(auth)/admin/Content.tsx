@@ -12,6 +12,11 @@ const menus = [
     link: '/admin/client-monitoring',
   },
   {
+    icon: <PersonSearchLogo />,
+    text: 'Applicant Monitoring',
+    link: '/admin/applicant-monitoring',
+  },
+  {
     icon: <AccountBalanceLogo />,
     text: 'Management',
     link: '/admin/management',
