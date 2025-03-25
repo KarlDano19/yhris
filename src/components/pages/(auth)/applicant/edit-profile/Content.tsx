@@ -41,13 +41,15 @@ const Content = () => {
       setValue('civilStatus', applicantProfileData.civil_status);
       setValue('address', applicantProfileData.address);
       setValue('mobile', applicantProfileData.mobile);
-      setValue('landLineNo', applicantProfileData.land_line_no);
+      setValue('landLineNo', applicantProfileData.landline);
       setValue('contactPersonName', applicantProfileData.contact_person_name);
       setValue('contactPersonAddress', applicantProfileData.contact_person_address);
       setValue('contactPersonContactNo', applicantProfileData.contact_person_mobile);
       setValue('contactPersonRelationship', applicantProfileData.contact_person_relationship);
+      setValue('contactPersonAge', applicantProfileData.contact_person_age);
     }
   }, [applicantProfileData]);
+
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {

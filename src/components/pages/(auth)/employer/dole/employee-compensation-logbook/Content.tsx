@@ -18,10 +18,12 @@ import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensat
 import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
 import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
 import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
+import SelectBranchModal from './modals/SelectBranchModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 
 type PaginationProps = {
   totalRecords: number;
@@ -58,6 +60,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isEmployeeCompensationLogbookListLoading,
     refetch: employeeCompensationLogbookListRefetch,
   } = useGetEmployeeCompensationLogbookItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const {data: employeeItems} = useGetEmployeeItems();
+  const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
 
   const menuOptions = [
     {
@@ -69,7 +74,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     {
       name: 'Generate Report',
       action: () => {
-        handlePrint();
+        setIsSelectBranchModalOpen(true);
       },
     },
   ];
@@ -94,7 +99,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     employeeCompensationLogbookListRefetch();
   }, [currentPage, pageSize]);
 
-  const handlePrint = () => {
+  const handlePrint = (items: any) => {
     // Create a new div element
     const printDiv = document.createElement('div');
 
@@ -127,6 +132,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         newWindow?.print();
       }, 500);
     });
+  };
+
+  const handlePrintWithBranch = () => {
+    if (selectedBranch) {
+      const filteredItems = employeeItems.filter((item: any) => item.location === selectedBranch);
+      handlePrint(filteredItems);
+    }
   };
 
   const checkIfDateIsValid = () => {
@@ -375,7 +387,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Nature of Contingency
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        No. of Days of Employee’s Absence
+                        No. of Days of Employee&apos;s Absence
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Remarks
@@ -426,6 +438,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookDeleteModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookDeleteModalOpen}
+        />
+      )}
+      {isSelectBranchModalOpen && (
+        <SelectBranchModal
+          isOpen={isSelectBranchModalOpen}
+          setIsOpen={setIsSelectBranchModalOpen}
+          onBranchSelect={(branch) => {
+            setSelectedBranch(branch);
+            handlePrintWithBranch();
+          }}
         />
       )}
       {/* Print Section */}

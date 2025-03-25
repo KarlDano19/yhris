@@ -23,6 +23,7 @@ import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyRepo
 import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
 import SendEmailModal from './modals/SendEmailModal';
+import SelectBranchModal from './modals/SelectBranchModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -66,6 +67,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+
   const menuOptions = [
     {
       name: 'Export',
@@ -76,7 +80,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     {
       name: 'Generate Report',
       action: () => {
-        handlePrint();
+        setIsSelectBranchModalOpen(true);
       },
     },
   ];
@@ -101,6 +105,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     healthAndSafetyReportItemsRefetch();
   }, [currentPage, pageSize]);
+
+  const handlePrintWithBranch = () => {
+    if (selectedBranch) {
+      const filteredItems = healthAndSafetyReportItems.filter((item: any) => item.branch === selectedBranch);
+      handlePrint();
+    }
+  };
 
   const handlePrint = () => {
     // Create a new div element
@@ -416,6 +427,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      {isSelectBranchModalOpen && (
+        <SelectBranchModal
+          isOpen={isSelectBranchModalOpen}
+          setIsOpen={setIsSelectBranchModalOpen}
+          onBranchSelect={(branch) => {
+            setSelectedBranch(branch);
+            handlePrintWithBranch();
+          }}
+        />
+      )}
       {isCreateHealthAndSafetyReportModalOpen && (
         <CreateHealthAndSafetyReportModal
           refetch={null}

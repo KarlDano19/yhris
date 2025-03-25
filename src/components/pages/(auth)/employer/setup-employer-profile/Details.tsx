@@ -130,10 +130,12 @@ const Details = ({
               Mobile No.<span className='text-red-500'>*</span>
             </label>
             <input
-              type='text'
+              type='tel'
               id='mobileNumber'
               {...register('mobileNumber', { required: true })}
               className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+              pattern='[0-9]{11}'
+              inputMode='numeric'
             />
           </div>
           <div className='basis-1/3 mr-10'>
@@ -141,10 +143,12 @@ const Details = ({
               Landline No.
             </label>
             <input
-              type='text'
+              type='tel'
               id='landlineNumber'
               {...register('landlineNumber', { required: false })}
               className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+              pattern='[0-9]'
+              inputMode='numeric'
             />
           </div>
           <div className='basis-1/3'></div>

@@ -22,8 +22,8 @@ const menus = [
   {
     icon: <EmployeeIdLogo />,
     text: 'Employees',
-    link: '/settings/general-settings/',
-    isAvailable: false,
+    link: '/settings/general-settings/employees',
+    isAvailable: true,
   },
   {
     icon: <EnvelopeIcon />,
