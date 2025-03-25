@@ -5,7 +5,6 @@ import React from 'react';
 import MenuItem from '../MenuItem';
 import FloatingProgress from '../../../FloatingProgress';
 
-import { XMarkIcon } from '@heroicons/react/20/solid';
 import AddPostLogo from '@/svg/AddPostLogo';
 import ScreenApplicantsLogo from '@/svg/ScreenApplicantsLogo';
 import OrientLogo from '@/svg/OrientLogo';
@@ -16,8 +15,6 @@ import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
 import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
-import SyncingIcon from '@/svg/SyncingIcon';
-import ExitIcon from '@/svg/ExitIcon';
 
 const menus = [
   {
@@ -82,10 +79,10 @@ const menus = [
   },
 ];
 
-const Home = () => {
+const Home = ({ loginType }: { loginType: string }) => {
   return (
     <>
-      {/* <FloatingProgress /> */}
+      {loginType === 'yahshua-payroll' && <FloatingProgress />}
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>

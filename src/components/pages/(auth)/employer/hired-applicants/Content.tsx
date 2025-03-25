@@ -49,9 +49,12 @@ const Content = () => {
       <div className='px-2 md:px-8 lg:px-4'>
         <h2 className='text-xl font-bold text-indigo-dye'>Hired Applicants</h2>
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
-          {!isLoading && data
+          {!isLoading && data?.records
             ? data.records.map((hiredApplicant: any, index: number) => (
-                <div key={index} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
+                <div
+                  key={index}
+                  className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'
+                >
                   <h2 className='font-semibold text-xl'>{hiredApplicant.job_title}</h2>
                   <p className='text-[15px] mb-12'>{hiredApplicant.advertise_to}</p>
                   <Link

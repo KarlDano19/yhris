@@ -11,8 +11,16 @@ function Content() {
   const params = useParams();
   const searchParams = useSearchParams();
   const code = searchParams.get('code') || '';
+  const error = searchParams.get('error') || '';
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [hasError, setHasError] = useState<boolean>(false);
   const { mutate, isLoading, isError, isSuccess } = useVerifyOauth();
+
+  useEffect(() => {
+    if (isError) {
+      setHasError(true);
+    }
+  }, [isError]);
 
   useEffect(() => {
     if (code) {
@@ -22,16 +30,42 @@ function Content() {
       };
       const callbackRequest = {
         onSuccess: (data: any) => {
-          broadcastChannel.postMessage({isGranted: data.is_granted, provider: params?.provider});
+          const postMessageData: any = {
+            isGranted: data.is_granted,
+            provider: params?.provider,
+          };
+          if (['yahshua-payroll'].includes(data.login_type)) {
+            postMessageData.token = data.token;
+            postMessageData.email = data.email;
+            postMessageData.has_pending_transaction = data.has_pending_transaction;
+            postMessageData.has_active_subscription = data.has_active_subscription;
+            postMessageData.has_profile = data.has_profile;
+            postMessageData.account_type = data.account_type;
+            postMessageData.login_type = data.login_type;
+          }
+          broadcastChannel.postMessage(postMessageData);
           setTimeout(() => {
             window.close();
           }, 500);
         },
         onError: (err: any) => {
           setErrorMessage(err);
+          setTimeout(() => {
+            window.close();
+          }, 1000);
         },
       };
       mutate(data, callbackRequest);
+    } else if (error) {
+      if (error === 'access_denied') {
+        setErrorMessage('Access denied');
+      } else {
+        setErrorMessage(error);
+      }
+      setHasError(true);
+      setTimeout(() => {
+        window.close();
+      }, 1000);
     }
   }, []);
 
@@ -88,7 +122,7 @@ function Content() {
           </div>
         </div>
       )}
-      {isError && (
+      {hasError && (
         <div className='w-screen h-screen flex justify-center items-center'>
           <div className='fixed z-20 inset-0 overflow-y-auto'>
             <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
