@@ -47,16 +47,16 @@ export default function SelectBranchModal({ isOpen, setIsOpen, onBranchSelect }:
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-2xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Branch</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Location</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 <div className='mt-4 px-4'>
-                  <label htmlFor='branch' className='text-sm font-medium leading-6 text-gray-900'>
-                    Branch<span className='text-red-500'>*</span>
+                  <label htmlFor='location' className='text-sm font-medium leading-6 text-gray-900'>
+                    Location<span className='text-red-500'>*</span>
                   </label>
                   <div className='relative mt-2'>
                     <select
-                      id='branch'
+                      id='location'
                       onChange={handleBranchSelect}
                       className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
                     >

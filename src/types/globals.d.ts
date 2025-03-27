@@ -333,4 +333,5 @@ export type T_ApplicantProfile = {
   contactPersonAddress: string;
   contactPersonContactNo: string;
   contactPersonRelationship: string;
+  contactPersonAge: number;
 }
