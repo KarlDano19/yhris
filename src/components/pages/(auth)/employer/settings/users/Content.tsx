@@ -21,7 +21,7 @@ const menus = [
     icon: <UserLogo />,
     text: 'User Rights Mapping',
     link: '/settings/users/user-rights',
-    isAvailable: false,
+    isAvailable: true,
   },
 ];
 
