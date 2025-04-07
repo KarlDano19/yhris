@@ -125,24 +125,6 @@ export default function ImportModal({
         });
         displayedErrors.add('Last Name is required');
       }
-      if (!item.mobile && !displayedErrors.has('Contact Number is required')) {
-        toast.custom(() => <CustomToast message='Contact Number is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Contact Number is required');
-      }
-      if (!item.email && !displayedErrors.has('Email is required')) {
-        toast.custom(() => <CustomToast message='Email is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Email is required');
-      }
-      if (!item.address && !displayedErrors.has('Address is required')) {
-        toast.custom(() => <CustomToast message='Address is required' type='error' />, {
-          duration: 7000,
-        });
-        displayedErrors.add('Address is required');
-      }
     });
 
     // Check if any errors were shown
