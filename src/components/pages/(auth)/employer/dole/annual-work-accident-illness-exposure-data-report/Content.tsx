@@ -83,6 +83,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -272,6 +273,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <EditIcon />
               </button>
@@ -282,6 +284,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <EmailLogo />
               </button> 
@@ -465,7 +468,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 onClick={() =>
                   setIsSelectBranchModalOpen(true)
                 }
-                disabled={!hasActiveSubscription}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_wair}
               >
                 Generate Report
               </button>

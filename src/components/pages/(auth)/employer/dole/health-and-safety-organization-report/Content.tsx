@@ -24,6 +24,7 @@ import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyRepo
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
+import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
   totalRecords: number;
@@ -69,6 +70,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   const menuOptions = [
     {
@@ -227,6 +230,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <EditIcon />
               </button>
@@ -247,6 +251,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <DeleteIcon />
               </button>
@@ -345,7 +350,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
-                disabled={!hasActiveSubscription}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_health_safety_organization}
               >
                 CREATE
               </button>

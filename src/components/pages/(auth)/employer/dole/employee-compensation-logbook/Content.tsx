@@ -24,6 +24,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
   totalRecords: number;
@@ -63,6 +64,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const {data: employeeItems} = useGetEmployeeItems();
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   const menuOptions = [
     {
@@ -217,10 +220,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.remarks}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button onClick={() => setIsEmployeesCompensationLogbookEditModalOpen({ id: item.id, open: true })}>
+              <button 
+                onClick={() => setIsEmployeesCompensationLogbookEditModalOpen({ id: item.id, open: true })}
+                disabled={!cachedRigths?.state?.data?.edit_dole_employee_compensation}
+              >
                 <EditIcon />
               </button>
-              <button onClick={() => setIsEmployeesCompensationLogbookDeleteModalOpen({ id: item.id, open: true })}>
+              <button 
+                onClick={() => setIsEmployeesCompensationLogbookDeleteModalOpen({ id: item.id, open: true })}
+                disabled={!cachedRigths?.state?.data?.edit_dole_employee_compensation}
+              >
                 <DeleteIcon />
               </button>
             </div>
@@ -318,7 +327,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsEmployeesCompensationLogbookCreateModalOpen(true)}
-                disabled={!hasActiveSubscription}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_employee_compensation}
               >
                 CREATE
               </button>
