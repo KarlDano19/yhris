@@ -33,7 +33,8 @@ export async function middleware(request: NextRequest) {
     'admin',
     'train',
     'settings',
-    'dole'
+    'dole',
+    'audit-logs'
   ];
   const applicantRoutes: any = [
     'application-tracker',
@@ -74,7 +75,8 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'setup-employer-profile' ||
           firstRoute === 'train' ||
           firstRoute === 'settings' ||
-          firstRoute === 'dole'
+          firstRoute === 'dole' ||
+          firstRoute === 'audit-logs'
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {
