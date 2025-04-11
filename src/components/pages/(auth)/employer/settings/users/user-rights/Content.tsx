@@ -27,6 +27,8 @@ import DoleRightsModal from './modals/DoleRightsModal';
 import SettingsRightsModal from './modals/SettingsRightsModal';
 import AuditLogsRightsModal from './modals/AuditLogsRightsModal';
 import EmployeekitRightsModal from './modals/EmployeekitRightsModal';
+import EmployeeRightsModal from './modals/EmployeeRightsModal';
+import BenefitsRightsModal from './modals/BenefitsRightsModal';
 type PaginationProps = {
   totalRecords: number;
   totalPages: number;
@@ -52,6 +54,8 @@ const Content = () => {
   const [auditLogsRightsModal, setAuditLogsRightsModal] = useState<T_ModalData | null>(null);
   const [settingsRightsModal, setSettingsRightsModal] = useState<T_ModalData | null>(null);
   const [employeekitRightsModal, setEmployeekitRightsModal] = useState<T_ModalData | null>(null);
+  const [employeeRightsModal, setEmployeeRightsModal] = useState<T_ModalData | null>(null);
+  const [benefitsRightsModal, setBenefitsRightsModal] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -162,6 +166,12 @@ const Content = () => {
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <span onClick={() => setManageRightsModal({ id: item.id, open: true })}>Edit</span>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <span onClick={() => setEmployeeRightsModal({ id: item.id, open: true })}>Edit</span>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <span onClick={() => setBenefitsRightsModal({ id: item.id, open: true })}>Edit</span>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <span onClick={() => setTrainRightsModal({ id: item.id, open: true })}>Edit</span>
@@ -298,6 +308,12 @@ const Content = () => {
                         Manage
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Employee
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Benefits
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Train
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -409,6 +425,20 @@ const Content = () => {
         <EmployeekitRightsModal
           isOpen={employeekitRightsModal}
           setIsOpen={setEmployeekitRightsModal}
+          refetch={userRightsListRefetch}
+        />
+      )}
+      {employeeRightsModal && (
+        <EmployeeRightsModal
+          isOpen={employeeRightsModal}
+          setIsOpen={setEmployeeRightsModal}
+          refetch={userRightsListRefetch}
+        />
+      )}
+      {benefitsRightsModal && (
+        <BenefitsRightsModal
+          isOpen={benefitsRightsModal}
+          setIsOpen={setBenefitsRightsModal}
           refetch={userRightsListRefetch}
         />
       )}

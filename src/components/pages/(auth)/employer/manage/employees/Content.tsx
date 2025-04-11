@@ -49,6 +49,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
   const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);;
   const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -206,11 +208,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className="flex space-x-2">
               <button
                 onClick={() => setIsEmployeesEditModalOpen({ id: item.id, open: true })}
+                disabled={!cachedRigths?.state?.data?.edit_employee_kit}
               >
                 <EditIcon />
               </button>
               <button
                 onClick={() => setIsEmployeesDeleteModalOpen({ id: item.id, open: true })}
+                disabled={!cachedRigths?.state?.data?.edit_employee_kit}
               >
                 <DeleteIcon />
               </button>
@@ -335,6 +339,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 onClick={() => setIsAddEmployeeModalOpen(true)}
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                disabled={!cachedRigths?.state?.data?.create_employee_kit}
               >
                 CREATE
               </button>
