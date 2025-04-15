@@ -75,12 +75,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       action: () => {
         setIsExportProgressModalOpen(true);
       },
+      disabled: !cachedRigths?.state?.data?.export_dole_wair,
     },
     {
       name: 'Generate Report',
       action: () => {
         setIsSelectBranchModalOpen(true);
       },
+      disabled: !cachedRigths?.state?.data?.generate_dole_wair,
     },
   ];
 
@@ -398,9 +400,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             <span
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={item.action}
+                              onClick={() => {
+                                if (!item.disabled) {
+                                  item.action();
+                                }
+                              }}
                             >
                               {item.name}
                             </span>

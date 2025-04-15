@@ -17,7 +17,7 @@ type T_ModalData = {
 };
 
 export default function DoleRightsModal({
-  refetch, 
+  refetch,
   isOpen,
   setIsOpen,
 }: {
@@ -56,26 +56,26 @@ export default function DoleRightsModal({
 
   useEffect(() => {
     if (userRightDetailsData) {
-        setValue('create_dole_employee_compensation', userRightDetailsData.create_dole_employee_compensation);
-        setValue('edit_dole_employee_compensation', userRightDetailsData.edit_dole_employee_compensation);
-        setValue('create_dole_safety_health_policy', userRightDetailsData.create_dole_safety_health_policy);
-        setValue('edit_dole_safety_health_policy', userRightDetailsData.edit_dole_safety_health_policy);
-        setValue('create_dole_awair', userRightDetailsData.create_dole_awair);
-        setValue('edit_dole_awair', userRightDetailsData.edit_dole_awair);
-        setValue('create_dole_health_safety_organization', userRightDetailsData.create_dole_health_safety_organization);
-        setValue('edit_dole_health_safety_organization', userRightDetailsData.edit_dole_health_safety_organization);
-        setValue('create_dole_establishment_registration', userRightDetailsData.create_dole_establishment_registration);
-        setValue('edit_dole_establishment_registration', userRightDetailsData.edit_dole_establishment_registration);
-        setValue('create_dole_SHC_minute', userRightDetailsData.create_dole_SHC_minute);
-        setValue('edit_dole_SHC_minute', userRightDetailsData.edit_dole_SHC_minute);
-        setValue('create_dole_wair', userRightDetailsData.create_dole_wair);
-        setValue('edit_dole_wair', userRightDetailsData.edit_dole_wair);
-        setValue('create_dole_annual_medical_report', userRightDetailsData.create_dole_annual_medical_report);
-        setValue('edit_dole_annual_medical_report', userRightDetailsData.edit_dole_annual_medical_report);
-        setValue('create_dole_work_environment_request', userRightDetailsData.create_dole_work_environment_request);
-        setValue('edit_dole_work_environment_request', userRightDetailsData.edit_dole_work_environment_request);
-        setValue('create_dole_osh_program', userRightDetailsData.create_dole_osh_program);
-        setValue('edit_dole_osh_program', userRightDetailsData.edit_dole_osh_program);
+      setValue('create_dole_employee_compensation', userRightDetailsData.create_dole_employee_compensation);
+      setValue('edit_dole_employee_compensation', userRightDetailsData.edit_dole_employee_compensation);
+      setValue('create_dole_safety_health_policy', userRightDetailsData.create_dole_safety_health_policy);
+      setValue('edit_dole_safety_health_policy', userRightDetailsData.edit_dole_safety_health_policy);
+      setValue('create_dole_awair', userRightDetailsData.create_dole_awair);
+      setValue('edit_dole_awair', userRightDetailsData.edit_dole_awair);
+      setValue('create_dole_health_safety_organization', userRightDetailsData.create_dole_health_safety_organization);
+      setValue('edit_dole_health_safety_organization', userRightDetailsData.edit_dole_health_safety_organization);
+      setValue('create_dole_establishment_registration', userRightDetailsData.create_dole_establishment_registration);
+      setValue('edit_dole_establishment_registration', userRightDetailsData.edit_dole_establishment_registration);
+      setValue('create_dole_SHC_minute', userRightDetailsData.create_dole_SHC_minute);
+      setValue('edit_dole_SHC_minute', userRightDetailsData.edit_dole_SHC_minute);
+      setValue('create_dole_wair', userRightDetailsData.create_dole_wair);
+      setValue('edit_dole_wair', userRightDetailsData.edit_dole_wair);
+      setValue('create_dole_annual_medical_report', userRightDetailsData.create_dole_annual_medical_report);
+      setValue('edit_dole_annual_medical_report', userRightDetailsData.edit_dole_annual_medical_report);
+      setValue('create_dole_work_environment_request', userRightDetailsData.create_dole_work_environment_request);
+      setValue('edit_dole_work_environment_request', userRightDetailsData.edit_dole_work_environment_request);
+      setValue('create_dole_osh_program', userRightDetailsData.create_dole_osh_program);
+      setValue('edit_dole_osh_program', userRightDetailsData.edit_dole_osh_program);
     }
   }, [userRightDetailsData]);
 
@@ -111,10 +111,13 @@ export default function DoleRightsModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-2xl'>
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-3xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>DOLE User Rights</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen({ id: 0, open: false })} />
+                    <XCircleIcon
+                      className='w-8 h-8 text-white cursor-pointer'
+                      onClick={() => setIsOpen({ id: 0, open: false })}
+                    />
                   </div>
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
@@ -131,14 +134,15 @@ export default function DoleRightsModal({
                             </div>
                           </div>
                         </div>
-                        <div className='grid lg:grid-cols-6 gap-x-8 mt-2'>
-                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5'>
+                        <div className='grid lg:grid-cols-2 gap-x-8 gap-y-2 mt-2'>
+                          <h1 className='text-base font-semibold mb-2'>Employee Compensation</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
                             <div className='grid-item'>
                               <label
                                 htmlFor='create_dole_employee_compensation'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Dole Employee Compensation
+                                Create Employee Compensation
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -160,7 +164,7 @@ export default function DoleRightsModal({
                                 htmlFor='edit_dole_employee_compensation'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Edit Dole Employee Compensation
+                                Edit Employee Compensation
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -179,10 +183,57 @@ export default function DoleRightsModal({
                             </div>
                             <div className='grid-item'>
                               <label
+                                htmlFor='export_dole_employee_compensation'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Export Employee Compensation
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_dole_employee_compensation'
+                                  {...register('export_dole_employee_compensation', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='generate_dole_employee_compensation'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Generate Employee Compensation Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='generate_dole_employee_compensation'
+                                  {...register('generate_dole_employee_compensation', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Safety Health Policy</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
+                            <div className='grid-item'>
+                              <label
                                 htmlFor='create_dole_safety_health_policy'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Dole Safety Health Policy
+                                Create Safety Health Policy
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -204,7 +255,7 @@ export default function DoleRightsModal({
                                 htmlFor='edit_dole_safety_health_policy'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Edit Dole Safety Health Policy
+                                Edit Safety Health Policy
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -221,12 +272,15 @@ export default function DoleRightsModal({
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Annual Work Accident Incident</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
                             <div className='grid-item'>
                               <label
                                 htmlFor='create_dole_awair'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Dole Awair
+                                Create Annual Work Accident Incident
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -248,7 +302,7 @@ export default function DoleRightsModal({
                                 htmlFor='edit_dole_awair'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Edit Dole Awair
+                                Edit Annual Work Accident Incident
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -267,10 +321,35 @@ export default function DoleRightsModal({
                             </div>
                             <div className='grid-item'>
                               <label
+                                htmlFor='generate_dole_awair'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Generate Annual Work Accident Incident Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='generate_dole_awair'
+                                  {...register('generate_dole_awair', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Health Safety Organization</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
+                            <div className='grid-item'>
+                              <label
                                 htmlFor='create_dole_health_safety_organization'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Dole Health Safety Organization
+                                Create Health Safety Organization
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -292,7 +371,7 @@ export default function DoleRightsModal({
                                 htmlFor='edit_dole_health_safety_organization'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Edit Dole Health Safety Organization
+                                Edit Health Safety Organization
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -309,6 +388,53 @@ export default function DoleRightsModal({
                                 </div>
                               </div>
                             </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='export_dole_health_safety_organization'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Export Health Safety Organization
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_dole_health_safety_organization'
+                                  {...register('export_dole_health_safety_organization', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='generate_dole_health_safety_organization'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Generate Health Safety Organization Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='generate_dole_health_safety_organization'
+                                  {...register('generate_dole_health_safety_organization', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Establishment Registration</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
                             <div className='grid-item'>
                               <label
                                 htmlFor='create_dole_establishment_registration'
@@ -353,6 +479,9 @@ export default function DoleRightsModal({
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>SHC Minute</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
                             <div className='grid-item'>
                               <label
                                 htmlFor='create_dole_SHC_minute'
@@ -399,10 +528,35 @@ export default function DoleRightsModal({
                             </div>
                             <div className='grid-item'>
                               <label
+                                htmlFor='export_dole_SHC_minute'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Export SHC Minute Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_dole_SHC_minute'
+                                  {...register('export_dole_SHC_minute', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Work Accident Injury Report</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
+                            <div className='grid-item'>
+                              <label
                                 htmlFor='create_dole_wair'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Dole Wair
+                                Create Work Accident Injury Report
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -424,7 +578,7 @@ export default function DoleRightsModal({
                                 htmlFor='edit_employee_issue'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Edit Dole Wair
+                                Edit Work Accident Injury Report
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -443,10 +597,57 @@ export default function DoleRightsModal({
                             </div>
                             <div className='grid-item'>
                               <label
+                                htmlFor='export_dole_wair'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Export Work Accident Injury Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_dole_wair'
+                                  {...register('export_dole_wair', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='generate_dole_wair'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Generate Work Accident Injury Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='generate_dole_wair'
+                                  {...register('generate_dole_wair', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Annual Medical Report</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
+                            <div className='grid-item'>
+                              <label
                                 htmlFor='create_dole_annual_medical_report'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Dole Annual Medical Report
+                                Create Annual Medical Report
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -464,11 +665,8 @@ export default function DoleRightsModal({
                               </div>
                             </div>
                             <div className='grid-item'>
-                              <label
-                                htmlFor='edit_memo'
-                                className='block text-sm font-medium leading-6 text-gray-900'
-                              >
-                                Edit Dole Annual Medical Report
+                              <label htmlFor='edit_memo' className='block text-sm font-medium leading-6 text-gray-900'>
+                                Edit Annual Medical Report
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -486,11 +684,52 @@ export default function DoleRightsModal({
                               </div>
                             </div>
                             <div className='grid-item'>
+                              <label htmlFor='edit_memo' className='block text-sm font-medium leading-6 text-gray-900'>
+                                Export Annual Medical Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_dole_annual_medical_report'
+                                  {...register('export_dole_annual_medical_report', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label htmlFor='edit_memo' className='block text-sm font-medium leading-6 text-gray-900'>
+                                Generate Annual Medical Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='generate_dole_annual_medical_report'
+                                  {...register('generate_dole_annual_medical_report', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Work Environment Request</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5 border-b border-gray-200 pb-6'>
+                            <div className='grid-item'>
                               <label
                                 htmlFor='create_dole_work_environment_request'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Create Dole Work Environment Request
+                                Create Work Environment Request
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -512,7 +751,7 @@ export default function DoleRightsModal({
                                 htmlFor='edit_employee_issue'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
-                                Edit Dole Work Environment Request
+                                Edit Work Environment Request
                                 <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
@@ -529,6 +768,53 @@ export default function DoleRightsModal({
                                 </div>
                               </div>
                             </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='export_dole_work_environment_request'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Export Work Environment Request
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_dole_work_environment_request'
+                                  {...register('export_dole_work_environment_request', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='generate_dole_work_environment_request'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Generate Work Environment Report
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='generate_dole_work_environment_request'
+                                  {...register('generate_dole_work_environment_request', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h1 className='text-base font-semibold mb-2 mt-4'>Osh Program</h1>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5'>
                             <div className='grid-item'>
                               <label
                                 htmlFor='create_dole_osh_program'

@@ -87,12 +87,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       action: () => {
         setIsExportTemplateModalOpen(true);
       },
+      disabled: !cachedRigths?.state?.data?.import_employee,
     },
     {
       name: 'Import',
       action: () => {
         setIsImportModalOpen(true);
       },
+      disabled: !cachedRigths?.state?.data?.import_employee,
     },
     {
       name: 'Export',
@@ -107,6 +109,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           });
         }
       },
+      disabled: !cachedRigths?.state?.data?.export_employee,
     },
   ];
 
@@ -208,13 +211,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className="flex space-x-2">
               <button
                 onClick={() => setIsEmployeesEditModalOpen({ id: item.id, open: true })}
-                disabled={!cachedRigths?.state?.data?.edit_employee_kit}
+                disabled={!cachedRigths?.state?.data?.edit_employee}
               >
                 <EditIcon />
               </button>
               <button
                 onClick={() => setIsEmployeesDeleteModalOpen({ id: item.id, open: true })}
-                disabled={!cachedRigths?.state?.data?.edit_employee_kit}
+                disabled={!cachedRigths?.state?.data?.edit_employee}
               >
                 <DeleteIcon />
               </button>
@@ -339,7 +342,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 onClick={() => setIsAddEmployeeModalOpen(true)}
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled={!cachedRigths?.state?.data?.create_employee_kit}
+                disabled={!cachedRigths?.state?.data?.create_employee}
               >
                 CREATE
               </button>
@@ -367,9 +370,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             <span
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={item.action}
+                              onClick={() => {
+                                if (!item.disabled) {
+                                  item.action();
+                                }
+                              }}
                             >
                               {item.name}
                             </span>

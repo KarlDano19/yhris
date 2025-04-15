@@ -56,8 +56,10 @@ export default function EmployeeRightsModal({
 
   useEffect(() => {
     if (userRightDetailsData) {
-      setValue('create_employee_kit', userRightDetailsData.create_employee_kit);
-      setValue('edit_employee_kit', userRightDetailsData.edit_employee_kit);
+      setValue('create_employee', userRightDetailsData.create_employee);
+      setValue('edit_employee', userRightDetailsData.edit_employee);
+      setValue('import_employee', userRightDetailsData.import_employee);
+      setValue('export_employee', userRightDetailsData.export_employee);
     }
   }, [userRightDetailsData]);
 
@@ -114,19 +116,18 @@ export default function EmployeeRightsModal({
                           </div>
                         </div>
                         <div className='grid lg:grid-cols-6 gap-x-8 mt-2'>
-                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-x-8 gap-y-5'>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5'>
                             <div className='grid-item'>
                               <label
-                                htmlFor='create_employee_kit'
+                                htmlFor='create_employee'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
                                 Create Employee
-                                <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
                                 <select
-                                  id='create_employee_kit'
-                                  {...register('create_employee_kit', { required: true })}
+                                  id='create_employee'
+                                  {...register('create_employee', { required: true })}
                                   className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 >
                                   <option value='true'>Yes</option>
@@ -139,16 +140,57 @@ export default function EmployeeRightsModal({
                             </div>
                             <div className='grid-item'>
                               <label
-                                htmlFor='edit_employee_kit'
+                                htmlFor='edit_employee'
                                 className='block text-sm font-medium leading-6 text-gray-900'
                               >
                                 Edit Employee
-                                <span className='text-red-600'>*</span>
                               </label>
                               <div className='relative mt-2'>
                                 <select
-                                  id='edit_employee_kit'
-                                  {...register('edit_employee_kit', { required: true })}
+                                  id='edit_employee'
+                                  {...register('edit_employee', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='import_employee'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Import Employee
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='import_employee'
+                                  {...register('import_employee', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='export_employee'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Export Employee
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_employee'
+                                  {...register('export_employee', { required: true })}
                                   className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 >
                                   <option value='true'>Yes</option>

@@ -468,7 +468,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 onClick={() =>
                   setIsSelectBranchModalOpen(true)
                 }
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_wair}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.generate_dole_wair}
               >
                 Generate Report
               </button>
