@@ -83,7 +83,7 @@ const Home = () => {
       icon: <SettingsLogo />,
       text: 'Settings',
       link: '/settings',
-      isAvailable: cachedRigths?.state?.data?.edit_user_rights,
+      isAvailable: cachedRigths?.state?.data?.settings_access,
     },
   ];
 
