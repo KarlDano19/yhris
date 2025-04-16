@@ -32,7 +32,7 @@ type T_ModalData = {
 
 const Content = () => {
   const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [accountsItems, setAccountsItems] = useState<any>([]);
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState<boolean>(false);
   const [isUpdateAccountModalOpen, setIsUpdateAccountModalOpen] = useState<T_ModalData | null>(null);
@@ -237,6 +237,7 @@ const Content = () => {
               <button
                 onClick={() => setIsAddAccountModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                disabled={!cachedRigths?.state?.data?.settings_access}
               >
                 CREATE
               </button>

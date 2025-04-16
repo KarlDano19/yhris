@@ -21,9 +21,6 @@ import SyncingIcon from '@/svg/SyncingIcon';
 import ExitIcon from '@/svg/ExitIcon';
 
 const Home = () => {
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
   const menus = [
     {
       icon: <AddPostLogo />,
@@ -83,7 +80,7 @@ const Home = () => {
       icon: <SettingsLogo />,
       text: 'Settings',
       link: '/settings',
-      isAvailable: cachedRigths?.state?.data?.settings_access,
+      isAvailable: true,
     },
   ];
 
