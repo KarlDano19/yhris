@@ -90,7 +90,6 @@ const MainHeader = () => {
     if (userRightsData) {
       setUserRights(userRightsData);
     }
-    console.log(userRights);
   }, [userRightsData]);
 
   const MenuItems = ({ item }: any) => {
