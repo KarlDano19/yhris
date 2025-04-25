@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 import { useForm } from 'react-hook-form';
+import { setCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
 
 import useLogin from '@/components/pages/(all-layout)/login/hooks/useLogin';
+import updateSession from '@/helpers/updateSession';
 import CustomToast from '@/components/CustomToast';
 import SplitLayout from '@/components/SplitView';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
@@ -25,6 +27,7 @@ import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 import { T_Login } from '@/types/globals';
 
 function Content() {
+  const broadcastChannel = new BroadcastChannel('integration-channel');
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
@@ -53,6 +56,13 @@ function Content() {
   });
 
   const setSession = async (data: any) => {
+    setCookie('token', data.token, {
+      maxAge: 60 * 60 * 3,
+      sameSite: 'strict',
+      httpOnly: false,
+      secure: true,
+    });
+
     if (data.account_type === 'employer') {
       if (data.has_profile) {
         const returnTo = searchParams.get('redirect') || '/dashboard';
@@ -67,6 +77,46 @@ function Content() {
         location.href = '/setup-applicant-profile';
       }
     }
+  };
+
+  const setSSOSession = async (data: any) => {
+    await updateSession({
+      token: data.token,
+      email: data.email,
+      hasPendingTransaction: data.has_pending_transaction,
+      hasActiveSubscription: data.has_active_subscription,
+      hasProfile: data.has_profile,
+      accountType: data.account_type,
+      loginType: data.login_type,
+      isLoggedIn: true,
+    });
+    setSession(data);
+  };
+
+  useEffect(() => {
+    broadcastChannel.onmessage = (event) => {
+      if (event.data.isGranted) {
+        setSSOSession(event.data);
+      }
+    };
+    return () => {
+      broadcastChannel.close();
+    };
+  }, []);
+
+  const loginWithYahshuaPayroll = () => {
+    const left = (window.innerWidth - 900) / 2;
+    const top = (window.innerHeight - 700) / 2;
+    const popup = window.open(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth`,
+      'popup',
+      `width=900, height=900, left=${left}, top=${top}`
+    );
+    const checkOAuthStatus = setInterval(function () {
+      if (popup?.closed) {
+        clearInterval(checkOAuthStatus);
+      }
+    }, 1000);
   };
 
   return (
@@ -174,7 +224,7 @@ function Content() {
                       {!isLoading && 'Sign in'}
                     </button>
                     <p className='text-sm font-light text-gray-500 text-center mb-9'>
-                      Don’t have an account yet?{' '}
+                      Don&apos;t have an account yet?{' '}
                       <Link href='/register' className='font-semibold text-blue-600 hover:underline'>
                         Sign Up here
                       </Link>
@@ -200,11 +250,9 @@ function Content() {
                     </button>
                     <button
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
-                      disabled={true}
+                      onClick={() => loginWithYahshuaPayroll()}
                     >
-                      <div className='mx-1'>
-                        <YahshuaPayrollLogo />
-                      </div>{' '}
+                      <YahshuaPayrollLogo className='w-4 h-4 mr-2' />
                       YAHSHUA Payroll
                     </button>
                   </div>

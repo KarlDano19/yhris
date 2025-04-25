@@ -29,17 +29,10 @@ export async function POST(request: NextRequest) {
       session['hasPendingTransaction'] = data.has_pending_transaction;
       session['hasActiveSubscription'] = data.has_active_subscription;
       session['hasProfile'] = data.has_profile;
-      cookies().set({
-        name: 'token',
-        value: data.token,
-        maxAge: 60 * 60 * 3,
-        sameSite: "strict",
-        httpOnly: false,
-        secure: true,
-      });
       await session.save();
       await sleep(250);
       const loginReturnData = {
+        token: data.token,
         is_valid: data.is_valid,
         account_type: data.account_type,
         has_profile: data.has_profile,
