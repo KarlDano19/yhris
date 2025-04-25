@@ -63,8 +63,6 @@ const Content = () => {
     refetch: locationListRefetch,
   } = useGetLocationItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
 
-  const cachedData: any = cachedProfile?.state?.data;
-
   useEffect(() => {
     if (locationListData) {
       setLocationItems(locationListData.records);

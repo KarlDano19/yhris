@@ -25,6 +25,7 @@ import DeleteWemRequestModal from './modals/DeleteWemRequestModal';
 import EditWemRequestModal from './modals/EditWemRequestModal';
 import EmailLogo from '@/svg/EmailLogo';
 import SendEmailModal from './modals/SendEmailModal';
+import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
   totalRecords: number;
@@ -48,6 +49,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -74,12 +78,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       action: () => {
         setIsExportProgressModalOpen(true);
       },
+      disabled: !cachedRigths?.state?.data?.export_dole_work_environment_request,
     },
     {
       name: 'Generate Report',
       action: () => {
         handlePrint();
       },
+      disabled: !cachedRigths?.state?.data?.generate_dole_work_environment_request,
     },
   ];
 
@@ -235,6 +241,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <EditIcon />
               </button>
@@ -255,6 +262,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <DeleteIcon />
               </button>
@@ -353,7 +361,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
-                disabled={!hasActiveSubscription}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_work_environment_request}
               >
                 CREATE
               </button>
@@ -381,9 +389,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             <span
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={item.action}
+                              onClick={() => {
+                                if (!item.disabled) {
+                                  item.action();
+                                }
+                              }}
                             >
                               {item.name}
                             </span>

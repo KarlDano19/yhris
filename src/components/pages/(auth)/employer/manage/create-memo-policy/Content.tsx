@@ -15,6 +15,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import Link from 'next/link';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const { mutate, isLoading } = useDeleteDirectivesItem();
@@ -30,6 +31,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems(itemsFilter);
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   useEffect(() => {
     refetch();
@@ -136,6 +139,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       setIdToDelete(item.id);
                       setIsConfirmModalOpen(true);
                     }}
+                    disabled={!cachedProfile?.state?.data?.edit_memo}
                   >
                     <DeleteMemoLogo />
                   </button>
@@ -260,7 +264,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <div>
                   <Menu.Button
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
-                    disabled={!hasActiveSubscription}
+                    disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_memo}
                   >
                     CREATE
                   </Menu.Button>
