@@ -18,6 +18,7 @@ import Timer from '../../../Timer';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
+import useGetRights from '@/components/hooks/useGetRights';
 
 interface ErrorDetail {
   detail: string;
@@ -25,12 +26,15 @@ interface ErrorDetail {
 
 const MainHeader = () => {
   const [profile, setProfile] = useState<any>({});
+  const [userRights, setUserRights] = useState<any>({});
   const {
     data,
     isLoading: isProfileLoading,
     error,
   } = useGetEmployerProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
   const { mutate } = useLogout();
+
+  const { data: userRightsData, isLoading: isUserRightsLoading } = useGetRights() as { data: any; isLoading: boolean };
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -81,6 +85,12 @@ const MainHeader = () => {
       logout(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (userRightsData) {
+      setUserRights(userRightsData);
+    }
+  }, [userRightsData]);
 
   const MenuItems = ({ item }: any) => {
     return (

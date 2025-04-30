@@ -1,45 +1,110 @@
 'use client';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import React, { useEffect, useState, useRef } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
-import DesignBenefitsModal from './modals/DesignBenefitsModal';
-import Link from 'next/link';
-import useGetBenefitItems from './hooks/useGetBenefitItems';
-import { useQueryClient } from '@tanstack/react-query';
+'use client';
 
-const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
+import React, { useEffect, useState, Fragment } from 'react';
+
+import Link from 'next/link';
+
+import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+
+import Pagination from '@/components/Pagination';
+import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomToast from '@/components/CustomToast';
+import AddUserAccountModal from '../accounts/modals/AddUserAccountModal';
+import useGetAccountsList from './hooks/useGetAccountsList';
+import UpdateUserAccountModal from './modals/UpdateUserAccountModal';
+import ResetPasswordModal from './modals/ResetPasswordModal';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import EditIcon from '@/svg/EditIcon';
+
+type PaginationProps = {
+  totalRecords: number;
+  totalPages: number;
+};
+
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
+
+const Content = () => {
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [accountsItems, setAccountsItems] = useState<any>([]);
+  const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState<boolean>(false);
+  const [isUpdateAccountModalOpen, setIsUpdateAccountModalOpen] = useState<T_ModalData | null>(null);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState<T_ModalData | null>(null);
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationProps>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
   });
-  const { data: dataBenefits, isLoading: isGetBenefitsLoading, refetch } = useGetBenefitItems(itemsFilter);
-  const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
-  const date1InputRef = useRef(null);
-  const date2InputRef = useRef(null);
+  const {
+    data: accountsListData,
+    isLoading: isAccountsListLoading,
+    refetch: accountsListRefetch,
+  } = useGetAccountsList({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
 
   useEffect(() => {
-    refetch();
-  }, []);
-
-  useEffect(() => {
-    if (dataBenefits) {
-      dataBenefits.map((benefit: any) => {
-        benefit.date = Intl.DateTimeFormat('en-US').format(new Date(benefit.created_at));
-        return benefit;
+    if (accountsListData) {
+      setAccountsItems(accountsListData.records);
+      setPagination({
+        totalPages: accountsListData.total_pages,
+        totalRecords: accountsListData.total_records,
       });
-      setDesignBenefitsItems(dataBenefits);
     }
-  }, [dataBenefits]);
+  }, [accountsListData]);
+
+  useEffect(() => {
+    accountsListRefetch();
+  }, [currentPage, pageSize]);
+
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    accountsListRefetch();
+  };
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   const renderRows = () => {
-    if (isGetBenefitsLoading) {
+    if (isAccountsListLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -66,13 +131,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </tr>
       );
     }
-    if (designBenefitsItems && designBenefitsItems.length > 0) {
-      return designBenefitsItems.map((item: any) => (
-        <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.title}</td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.purpose}</td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.eligibility}</td>
+    if (accountsItems && accountsItems.length > 0) {
+      return accountsItems.map((item: any) => (
+        <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='flex space-x-2 justify-center'>
+              <button onClick={() => setIsUpdateAccountModalOpen({ id: item.id, open: true })}>
+                <EditIcon />
+              </button>
+              <button onClick={() => setIsResetPasswordModalOpen({ id: item.id, open: true })}>
+                <ArrowPathIcon className='h-10 w-10 text-gray-800 mx-auto border border-gray-400 p-1.5 rounded-md' />
+              </button>
+            </div>
+          </td>
         </tr>
       ));
     } else {
@@ -80,49 +153,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <tr>
           <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add employee.</h4>
           </td>
         </tr>
       );
     }
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetch();
-  };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+          <Link href='/settings/users' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Manage</h4>
+            <h4>Users</h4>
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Design Benefits</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Accounts</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
@@ -187,14 +235,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </button>
             <div className='flex-1 flex justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
-                onClick={() => setIsDesignBenefitsModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_orientation}
+                onClick={() => setIsAddAccountModalOpen(true)}
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                disabled={!cachedRigths?.state?.data?.settings_access}
               >
                 CREATE
               </button>
             </div>
           </div>
+
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
@@ -202,33 +251,52 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date
+                        Name
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Title
+                        Email
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Purpose
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Eligibility
+                        Action
                       </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {designBenefitsItems.length}</p>
+                <Pagination
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={pageSizeChange}
+                  onPageChange={paginationChange}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
-      <DesignBenefitsModal
-        isOpen={isDesignBenefitsModalOpen}
-        setIsOpen={setIsDesignBenefitsModalOpen}
-        refetch={refetch}
-      />
+      {isAddAccountModalOpen && (
+        <AddUserAccountModal
+          isOpen={isAddAccountModalOpen}
+          setIsOpen={setIsAddAccountModalOpen}
+          refetch={accountsListRefetch}
+        />
+      )}
+      {isUpdateAccountModalOpen && (
+        <UpdateUserAccountModal
+          isOpen={isUpdateAccountModalOpen}
+          setIsOpen={setIsUpdateAccountModalOpen}
+          refetch={accountsListRefetch}
+        />
+      )}
+      {isResetPasswordModalOpen && (
+        <ResetPasswordModal
+          isOpen={isResetPasswordModalOpen}
+          setIsOpen={setIsResetPasswordModalOpen}
+          refetch={accountsListRefetch}
+        />
+      )}
     </>
   );
 };

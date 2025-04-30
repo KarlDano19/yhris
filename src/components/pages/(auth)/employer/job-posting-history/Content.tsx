@@ -29,6 +29,7 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { T_JobPreviewModal } from '@/types/globals';
+import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
   totalRecords: number;
@@ -85,6 +86,8 @@ const Content = () => {
   const { mutate } = useUpdateJobPostStatus();
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
@@ -364,10 +367,16 @@ const Content = () => {
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
               <div className='flex space-x-2'>
-                <button onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}>
+                <button 
+                  onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
+                  disabled={!cachedProfile?.state?.data?.edit_job}
+                >
                   <EditIcon />
                 </button>
-                <button onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}>
+                <button 
+                  onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
+                  disabled={!cachedProfile?.state?.data?.edit_job}
+                >
                   <DeleteIcon />
                 </button>
                 <button onClick={() => setMoreMenuOpen((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}>
