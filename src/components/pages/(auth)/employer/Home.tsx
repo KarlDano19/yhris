@@ -16,6 +16,7 @@ import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
 import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
+import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 
 const Home = () => {
   const menus = [
@@ -77,6 +78,12 @@ const Home = () => {
       icon: <SettingsLogo />,
       text: 'Settings',
       link: '/settings',
+      isAvailable: true,
+    },
+    {
+      icon: <AuditLogsIcon />,
+      text: 'Audit Logs',
+      link: '/audit-logs',
       isAvailable: true,
     },
   ];
