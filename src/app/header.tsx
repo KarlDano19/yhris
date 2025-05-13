@@ -31,6 +31,7 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
     'train',
     'settings',
     'dole',
+    'audit-logs',
   ];
   const applicantRoutes: string[] = [
     'application-tracker',

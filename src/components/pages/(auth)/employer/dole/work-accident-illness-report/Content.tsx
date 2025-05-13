@@ -23,6 +23,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import SelectBranchModal from './modals/SelectBranchModal';
+import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
   totalRecords: number;
@@ -47,6 +48,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -71,12 +75,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       action: () => {
         setIsExportProgressModalOpen(true);
       },
+      disabled: !cachedRigths?.state?.data?.export_dole_wair,
     },
     {
       name: 'Generate Report',
       action: () => {
         setIsSelectBranchModalOpen(true);
       },
+      disabled: !cachedRigths?.state?.data?.generate_dole_wair,
     },
   ];
 
@@ -258,6 +264,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_wair}
               >
                 <EditIcon />
               </button>
@@ -268,6 +275,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={!cachedRigths?.state?.data?.edit_dole_wair}
               >
                 <DeleteIcon />
               </button>
@@ -364,7 +372,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkAccidentIllnessReportModalOpen(true)}
-                disabled={!hasActiveSubscription}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_wair}
               >
                 CREATE
               </button>
@@ -392,9 +400,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             <span
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={item.action}
+                              onClick={() => {
+                                if (!item.disabled) {
+                                  item.action();
+                                }
+                              }}
                             >
                               {item.name}
                             </span>

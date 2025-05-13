@@ -7,6 +7,7 @@ import CustomToast from '@/components/CustomToast';
 import DesignBenefitsModal from './modals/DesignBenefitsModal';
 import Link from 'next/link';
 import useGetBenefitItems from './hooks/useGetBenefitItems';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
@@ -17,6 +18,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
   const { data: dataBenefits, isLoading: isGetBenefitsLoading, refetch } = useGetBenefitItems(itemsFilter);
   const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
   const date1InputRef = useRef(null);
   const date2InputRef = useRef(null);
 
@@ -185,7 +189,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsDesignBenefitsModalOpen(true)}
-                disabled={!hasActiveSubscription}
+                disabled={!cachedRigths?.state?.data?.create_orientation}
               >
                 CREATE
               </button>
