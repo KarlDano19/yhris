@@ -251,6 +251,124 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
             </div>
           </div>
 
+          <div className='flex items-center gap-3 flex-wrap mb-8'>
+            <div className='text-indigo-dye flex-grow'>
+              <label htmlFor='date' className='block mb-2'>
+                Dates<span className='text-[#D65846]'>*</span>
+              </label>
+              <div className='border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative'>
+                <input
+                  onClick={() => dateRef.current?.showPicker()}
+                  ref={dateRef}
+                  type='date'
+                  name='date'
+                  onChange={(e) => setValue('date', e.target.value)}
+                  className='w-full focus:none outline-none'
+                  required
+                />
+                <CalendarIcon className='w-6 h-6 absolute right-4 pointer-events-none' />
+              </div>
+            </div>
+            <div className='text-indigo-dye flex-grow'>
+              <label htmlFor='startTime' className='block mb-2'>
+                Start Time<span className='text-[#D65846]'>*</span>
+              </label>
+
+              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <input
+                  onClick={() => timeRef.current?.showPicker()}
+                  ref={timeRef}
+                  type='time'
+                  id='startTime'
+                  onChange={(e) => setValue('startTime', e.target.value)}
+                  className='focus:none outline-none'
+                  required
+                />
+              </div>
+            </div>
+            <div className='text-indigo-dye flex-grow'>
+              <label htmlFor='duration' className='block mb-2'>
+                Duration<span className='text-[#D65846]'>*</span>
+              </label>
+
+              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <select
+                  {...register('duration')}
+                  id='duration'
+                  className='w-full py-2 px-4 focus:none outline-none rounded-full'
+                  defaultValue=''
+                >
+                  <option value='' disabled>Select...</option>
+                  <option value='30'>30 min</option>
+                  <option value='60'>1 hr</option>
+                  <option value='120'>2 hr</option>
+                </select>
+                <div className='absolute right-4 pointer-events-none'>
+                  <SelectChevronDown />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className='flex items-center gap-3 flex-wrap mb-8'>
+            <div className='text-indigo-dye flex-grow'>
+              <label htmlFor='date' className='block mb-2'>
+                Dates<span className='text-[#D65846]'>*</span>
+              </label>
+              <div className='border border-[#ACB9CB] focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0] rounded-md flex items-center justify-between py-2 px-4 relative'>
+                <input
+                  onClick={() => dateRef.current?.showPicker()}
+                  ref={dateRef}
+                  type='date'
+                  name='date'
+                  onChange={(e) => setValue('date', e.target.value)}
+                  className='w-full focus:none outline-none'
+                  required
+                />
+                <CalendarIcon className='w-6 h-6 absolute right-4 pointer-events-none' />
+              </div>
+            </div>
+            <div className='text-indigo-dye flex-grow'>
+              <label htmlFor='startTime' className='block mb-2'>
+                Start Time<span className='text-[#D65846]'>*</span>
+              </label>
+
+              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between py-2 px-4 focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <input
+                  onClick={() => timeRef.current?.showPicker()}
+                  ref={timeRef}
+                  type='time'
+                  id='startTime'
+                  onChange={(e) => setValue('startTime', e.target.value)}
+                  className='focus:none outline-none'
+                  required
+                />
+              </div>
+            </div>
+            <div className='text-indigo-dye flex-grow'>
+              <label htmlFor='duration' className='block mb-2'>
+                Duration<span className='text-[#D65846]'>*</span>
+              </label>
+
+              <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
+                <select
+                  {...register('duration')}
+                  id='duration'
+                  className='w-full py-2 px-4 focus:none outline-none rounded-full'
+                  defaultValue=''
+                >
+                  <option value='' disabled>Select...</option>
+                  <option value='30'>30 min</option>
+                  <option value='60'>1 hr</option>
+                  <option value='120'>2 hr</option>
+                </select>
+                <div className='absolute right-4 pointer-events-none'>
+                  <SelectChevronDown />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* format type */}
           <label htmlFor='type' className='block mb-2'>
             Format<span className='text-[#D65846]'>*</span>
