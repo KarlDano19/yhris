@@ -18,7 +18,7 @@ import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 
-const Home = () => {
+const Home = ({ loginType }: { loginType: string }) => {
   const menus = [
     {
       icon: <AddPostLogo />,
@@ -90,7 +90,7 @@ const Home = () => {
 
   return (
     <>
-      {/* {loginType === 'yahshua-payroll' && <FloatingProgress />} */}
+      {loginType === 'yahshua-payroll' && <FloatingProgress />}
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
