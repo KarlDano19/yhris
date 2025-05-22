@@ -84,6 +84,8 @@ export default function ResetPasswordModal({
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
     }
+    // Ensure no spaces in generated password
+    password = password.replace(/\s/g, '');
     setPassword(password);
     setConfirmPassword(password);
   };

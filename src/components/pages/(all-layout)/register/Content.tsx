@@ -21,16 +21,14 @@ import MainIconOnly from '@/svg/MainIconOnly';
 
 import { T_Register } from '@/types/globals';
 
-// Password policy check function
-const passwordPolicyCheck = (password: string) => {
-  const errors = [];
-  if (password.length < 12) errors.push('At least 12 characters');
-  if (!/[a-z]/.test(password)) errors.push('At least 1 lowercase letter');
-  if (!/[A-Z]/.test(password)) errors.push('At least 1 uppercase letter');
-  if (!/[0-9]/.test(password)) errors.push('At least 1 number');
-  if (!/[^A-Za-z0-9]/.test(password)) errors.push('At least 1 special character');
-  return errors;
-};
+const getPasswordRequirements = (pass: string) => ({
+  length: pass.length >= 12,
+  lowercase: /[a-z]/.test(pass),
+  uppercase: /[A-Z]/.test(pass),
+  digit: /[0-9]/.test(pass),
+  special: /[!@#$%^&*(),.?":{}|<>]/.test(pass),
+  noSpaces: !/\s/.test(pass),
+});
 
 const Content = () => {
   const router = useRouter();
@@ -47,20 +45,15 @@ const Content = () => {
   const [conformPassword, setConfirmPassword] = useState('');
   const { register, handleSubmit, reset, watch } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [backendPasswordError, setBackendPasswordError] = useState('');
+  const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
 
   const onSubmit = (data: T_Register) => {
-    const policyErrors = passwordPolicyCheck(password);
-    setPasswordErrors(policyErrors);
-    if (policyErrors.length > 0) {
-      toast.custom(() => <CustomToast message={'Password does not meet requirements.'} type='error' />, { duration: 7000 });
-      return;
-    }
     if (password !== '' || conformPassword !== '') {
       if (password === conformPassword) {
         const callBackReq = {
           onSuccess: (data: any) => {
+            setBackendPasswordError('');
             reset();
             toast.custom(() => <CustomToast message={data.message} type='success' />, {
               duration: 7000,
@@ -68,9 +61,11 @@ const Content = () => {
             router.push('/login');
           },
           onError: (err: any) => {
-            toast.custom(() => <CustomToast message={err} type='error' />, {
-              duration: 7000,
-            });
+            if (typeof err === 'string' && err.toLowerCase().includes('password')) {
+              setBackendPasswordError(err);
+            } else {
+              setBackendPasswordError('');
+            }
           },
         };
         if (agree) {
@@ -220,10 +215,9 @@ const Content = () => {
                           tabIndex={2}
                           onChange={(e) => {
                             setPassword(e.currentTarget.value);
-                            setPasswordErrors(passwordPolicyCheck(e.currentTarget.value));
+                            setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
+                            setBackendPasswordError('');
                           }}
-                          onFocus={() => setIsPasswordFocused(true)}
-                          onBlur={() => setIsPasswordFocused(false)}
                         />
                         <button
                           type='button'
@@ -239,10 +233,32 @@ const Content = () => {
                           )}
                         </button>
                       </div>
-                      {isPasswordFocused && password && passwordErrors.length > 0 && (
-                        <ul className="text-xs text-red-500 mt-1 list-disc ml-5">
-                          {passwordErrors.map((err, idx) => <li key={idx}>{err}</li>)}
-                        </ul>
+                      {backendPasswordError && (
+                        <p className="text-red-600 text-xs mt-1">{backendPasswordError}</p>
+                      )}
+                      {password && (
+                        <div className='mt-2 text-sm text-red-600'>
+                          <ul className='space-y-1'>
+                            {!passwordRequirements.length && (
+                              <li>• At least 12 characters</li>
+                            )}
+                            {!passwordRequirements.lowercase && (
+                              <li>• At least 1 lowercase letter (a-z)</li>
+                            )}
+                            {!passwordRequirements.uppercase && (
+                              <li>• At least 1 uppercase letter (A-Z)</li>
+                            )}
+                            {!passwordRequirements.digit && (
+                              <li>• At least 1 number (0-9)</li>
+                            )}
+                            {!passwordRequirements.special && (
+                              <li>• At least 1 special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                            )}
+                            {!passwordRequirements.noSpaces && (
+                              <li>• Spaces are not allowed</li>
+                            )}
+                          </ul>
+                        </div>
                       )}
                     </div>
                     <div className='mb-4'>
