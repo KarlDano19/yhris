@@ -21,6 +21,17 @@ import MainIconOnly from '@/svg/MainIconOnly';
 
 import { T_Register } from '@/types/globals';
 
+// Password policy check function
+const passwordPolicyCheck = (password: string) => {
+  const errors = [];
+  if (password.length < 12) errors.push('At least 12 characters');
+  if (!/[a-z]/.test(password)) errors.push('At least 1 lowercase letter');
+  if (!/[A-Z]/.test(password)) errors.push('At least 1 uppercase letter');
+  if (!/[0-9]/.test(password)) errors.push('At least 1 number');
+  if (!/[^A-Za-z0-9]/.test(password)) errors.push('At least 1 special character');
+  return errors;
+};
+
 const Content = () => {
   const router = useRouter();
   const accountType = [
@@ -36,8 +47,16 @@ const Content = () => {
   const [conformPassword, setConfirmPassword] = useState('');
   const { register, handleSubmit, reset, watch } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   const onSubmit = (data: T_Register) => {
+    const policyErrors = passwordPolicyCheck(password);
+    setPasswordErrors(policyErrors);
+    if (policyErrors.length > 0) {
+      toast.custom(() => <CustomToast message={'Password does not meet requirements.'} type='error' />, { duration: 7000 });
+      return;
+    }
     if (password !== '' || conformPassword !== '') {
       if (password === conformPassword) {
         const callBackReq = {
@@ -199,7 +218,12 @@ const Content = () => {
                           {...register('password', { required: true })}
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
-                          onChange={(e) => setPassword(e.currentTarget.value)}
+                          onChange={(e) => {
+                            setPassword(e.currentTarget.value);
+                            setPasswordErrors(passwordPolicyCheck(e.currentTarget.value));
+                          }}
+                          onFocus={() => setIsPasswordFocused(true)}
+                          onBlur={() => setIsPasswordFocused(false)}
                         />
                         <button
                           type='button'
@@ -215,6 +239,11 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                      {isPasswordFocused && password && passwordErrors.length > 0 && (
+                        <ul className="text-xs text-red-500 mt-1 list-disc ml-5">
+                          {passwordErrors.map((err, idx) => <li key={idx}>{err}</li>)}
+                        </ul>
+                      )}
                     </div>
                     <div className='mb-4'>
                       <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
