@@ -20,6 +20,14 @@ import { T_UserPassword } from '@/types/globals';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'next/navigation';
 
+const getPasswordRequirements = (pass: string) => ({
+  length: pass.length >= 12,
+  lowercase: /[a-z]/.test(pass),
+  uppercase: /[A-Z]/.test(pass),
+  digit: /[0-9]/.test(pass),
+  special: /[!@#$%^&*(),.?":{}|<>]/.test(pass),
+  noSpaces: !/\s/.test(pass),
+});
 
 
 const Content = () => {
@@ -28,6 +36,10 @@ const Content = () => {
   const [showSuccessModal, setSuccessModal] = useState(false);
   const { register, handleSubmit, reset } = useForm<T_UserPassword>();
   const { mutate: updatePassword, isLoading: isUpdating } = useUpdatePassword();
+  const [backendPasswordError, setBackendPasswordError] = useState('');
+  const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const params = useParams<{ id: string }>();
   const urlToken = params?.id;
   const { data: verifyToken, isLoading: isVerifying } =
@@ -132,6 +144,11 @@ const Content = () => {
                           className='bg-gray-50 border border-gray-300 text-gray-900 pl-11 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           placeholder='New Password'
                           tabIndex={1}
+                          onChange={(e) => {
+                            setPassword(e.currentTarget.value);
+                            setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
+                            setBackendPasswordError('');
+                          }}
                         />
                         <button
                           type='button'
@@ -147,6 +164,33 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                      {backendPasswordError && (
+                        <p className="text-red-600 text-xs mt-1">{backendPasswordError}</p>
+                      )}
+                      {password && (
+                        <div className='mt-2 text-sm text-red-600'>
+                          <ul className='space-y-1'>
+                            {!passwordRequirements.length && (
+                              <li>• At least 12 characters</li>
+                            )}
+                            {!passwordRequirements.lowercase && (
+                              <li>• At least 1 lowercase letter (a-z)</li>
+                            )}
+                            {!passwordRequirements.uppercase && (
+                              <li>• At least 1 uppercase letter (A-Z)</li>
+                            )}
+                            {!passwordRequirements.digit && (
+                              <li>• At least 1 number (0-9)</li>
+                            )}
+                            {!passwordRequirements.special && (
+                              <li>• At least 1 special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                            )}
+                            {!passwordRequirements.noSpaces && (
+                              <li>• Spaces are not allowed</li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                     <div className='mb-9'>
                       <div className='relative mx-auto'>
