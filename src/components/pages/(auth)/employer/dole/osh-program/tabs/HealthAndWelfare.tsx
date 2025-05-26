@@ -1,6 +1,6 @@
 "use client";
 
-import { Controller, useFieldArray } from "react-hook-form";
+import { Controller, useFieldArray, useWatch } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 
@@ -11,10 +11,12 @@ export default function HealthAndWelfare({
   control,
   register,
   validationMessage,
+  watch,
 }: {
   control: any;
   register: any;
   validationMessage?: string;
+  watch: any;
 }) {
   const {
     fields: safetyOfficerFields,
@@ -117,6 +119,7 @@ export default function HealthAndWelfare({
               {...register("routine_medical_surveillance")}
               id="cbc"
               value="CBC"
+              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("CBC")}
             />
             <label htmlFor="cbc" className="ml-2 mt-1">
               CBC
@@ -128,6 +131,7 @@ export default function HealthAndWelfare({
               {...register("routine_medical_surveillance")}
               id="chest_xray"
               value="Chest X-ray"
+              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Chest X-ray")}
             />
             <label htmlFor="chest_xray" className="ml-2 mt-1">
               Chest X-ray
@@ -139,6 +143,7 @@ export default function HealthAndWelfare({
               {...register("routine_medical_surveillance")}
               id="urinalysis"
               value="Urinalysis"
+              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Urinalysis")}
             />
             <label htmlFor="urinalysis" className="ml-2 mt-1">
               Urinalysis
@@ -150,6 +155,7 @@ export default function HealthAndWelfare({
               {...register("routine_medical_surveillance")}
               id="stool_examination"
               value="Stool Examination"
+              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Stool Examination")}
             />
             <label htmlFor="stool_examination" className="ml-2 mt-1">
               Stool Examination
@@ -171,8 +177,9 @@ export default function HealthAndWelfare({
               {...register("special_medical_surveillance")}
               id="blood_chemistry"
               value="Blood Chemistry"
+              checked={Array.isArray(watch("special_medical_surveillance")) && watch("special_medical_surveillance").includes("Blood Chemistry")}
             />
-            <label htmlFor="safety_officer_level_1" className="ml-2 mt-1">
+            <label htmlFor="blood_chemistry" className="ml-2 mt-1">
               Blood Chemistry
             </label>
           </div>
@@ -182,6 +189,7 @@ export default function HealthAndWelfare({
               {...register("special_medical_surveillance")}
               id="ecg"
               value="ECG"
+              checked={Array.isArray(watch("special_medical_surveillance")) && watch("special_medical_surveillance").includes("ECG")}
             />
             <label htmlFor="ecg" className="ml-2 mt-1">
               ECG
@@ -193,6 +201,7 @@ export default function HealthAndWelfare({
               {...register("special_medical_surveillance")}
               id="others"
               value="Others, please specify"
+              checked={Array.isArray(watch("special_medical_surveillance")) && watch("special_medical_surveillance").includes("Others, please specify")}
             />
             <label htmlFor="others" className="ml-2 mt-1">
               Other&apos;s, please specify
@@ -212,11 +221,12 @@ export default function HealthAndWelfare({
             <input
               type="checkbox"
               {...register("schedule_of_annual_medical_examination")}
-              id="q4"
-              value="Q4"
+              id="q1"
+              value="Q1"
+              checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q1")}
             />
-            <label htmlFor="q4" className="ml-2 mt-1">
-              Q4
+            <label htmlFor="q1" className="ml-2 mt-1">
+              Q1
             </label>
           </div>
           <div className="relative mt-2 pl-4 flex gap-2">
@@ -225,6 +235,7 @@ export default function HealthAndWelfare({
               {...register("schedule_of_annual_medical_examination")}
               id="q2"
               value="Q2"
+              checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q2")}
             />
             <label htmlFor="q2" className="ml-2 mt-1">
               Q2
@@ -236,6 +247,7 @@ export default function HealthAndWelfare({
               {...register("schedule_of_annual_medical_examination")}
               id="q3"
               value="Q3"
+              checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q3")}
             />
             <label htmlFor="q3" className="ml-2 mt-1">
               Q3
@@ -247,6 +259,7 @@ export default function HealthAndWelfare({
               {...register("schedule_of_annual_medical_examination")}
               id="q4"
               value="Q4"
+              checked={Array.isArray(watch("schedule_of_annual_medical_examination")) && watch("schedule_of_annual_medical_examination").includes("Q4")}
             />
             <label htmlFor="q4" className="ml-2 mt-1">
               Q4
@@ -266,6 +279,7 @@ export default function HealthAndWelfare({
             <Controller
               control={control}
               name="random_drug_testing"
+              defaultValue={null}
               render={({ field }) => (
                 <>
                   <input
@@ -285,6 +299,7 @@ export default function HealthAndWelfare({
             <Controller
               control={control}
               name="random_drug_testing"
+              defaultValue={null}
               render={({ field }) => (
                 <>
                   <input
@@ -672,6 +687,7 @@ export default function HealthAndWelfare({
             <Controller
               control={control}
               name="duties_and_responsibilities"
+              defaultValue={null}
               render={({ field }) => (
                 <>
                   <input
@@ -691,6 +707,7 @@ export default function HealthAndWelfare({
             <Controller
               control={control}
               name="duties_and_responsibilities"
+              defaultValue={null}
               render={({ field }) => (
                 <>
                   <input

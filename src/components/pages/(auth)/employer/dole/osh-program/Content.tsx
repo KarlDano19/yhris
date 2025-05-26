@@ -21,9 +21,11 @@ import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
-  const { register, handleSubmit, setValue, control, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors, reset } = useForm();
   const [selectedTab, setSelectedTab] = useState(1);
   const [validationMessage, setValidationMessage] = useState("");
+  const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
+  const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] = useState(false);
 
   const { data: oshProgramDetails } = useGetOshProgramDetails();
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
@@ -32,7 +34,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Define required fields for each tab
     const requiredFieldsByTab: { [key: number]: string[] } = {
       1: ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'],
-      2: ['date_policy', 'name_of_owner', 'signature'], 
+      2: ['date', 'name_of_owner'],
       3: ['emergency_and_disaster_preparedness'],
       4: ['no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace', 'hospitals_youre_affiliated_with', 
           'chairperson_less_than_ten', 'secretary_less_than_ten', 'member_less_than_ten', 
@@ -42,17 +44,39 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       6: ['others_name', 'name_of_owner_manager', 'employees_representative', 'date_filled']
     };
     
-    // Validate based on the current selected tab
+    // Only validate the current tab's fields
     const requiredFields = requiredFieldsByTab[selectedTab] || [];
     const missingFields = requiredFields.filter((field: string) => !data[field]);
     
+    // Special handling for signature in tab 2
+    if (selectedTab === 2 && !data.signature) {
+      setValidationMessage("Please provide a signature");
+      return;
+    }
+    
     if (missingFields.length > 0) {
-      setValidationMessage("Please fill out all required fields marked with *");
+      setValidationMessage(`Please fill out all required fields marked with * (Missing: ${missingFields.join(', ')})`);
       return;
     }
     
     // Create a new object with processed data
     const processedData = { ...data };
+
+    // Only include the signature field if we're in tab 2 or if it already exists
+    if (selectedTab !== 2) {
+      delete processedData.signature;
+    }
+
+    // Handle file uploads (signature and safety_signage)
+    if (processedData.safety_signage instanceof File) {
+      // Keep the File object as is for FormData
+      console.log('Safety signage is a File object');
+    } else if (typeof processedData.safety_signage === 'string' && !processedData.safety_signage.startsWith('data:')) {
+      // If it's a string but not a data URL, and we're not in safety measures tab, remove it
+      if (selectedTab !== 5) {
+        delete processedData.safety_signage;
+      }
+    }
     
     // Define all boolean fields
     const booleanFields = [
@@ -80,8 +104,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           // Keep the existing value from oshProgramDetails if it exists
           processedData[field] = oshProgramDetails[field];
         } else {
-          // Default to false only if we don't have an existing value
-          processedData[field] = false;
+          // Default to null if we don't have an existing value
+          processedData[field] = null;
         }
       }
     });
@@ -100,6 +124,155 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         processedData[field] = Number(processedData[field]);
       }
     });
+
+    // Handle business_description properly for multipart/form-data
+    if (processedData.business_description !== undefined) {
+      // Ensure it's an array
+      if (!Array.isArray(processedData.business_description)) {
+        // If it's a string, try to parse it if it's JSON
+        if (typeof processedData.business_description === 'string') {
+          try {
+            // Try to parse if it's already a JSON string
+            const parsed = JSON.parse(processedData.business_description);
+            if (Array.isArray(parsed)) {
+              processedData.business_description = parsed;
+            } else {
+              processedData.business_description = [processedData.business_description];
+            }
+          } catch (e) {
+            // If parsing fails, it's a regular string
+            processedData.business_description = [processedData.business_description];
+          }
+        } else if (processedData.business_description === null) {
+          // If null, set to empty array
+          processedData.business_description = [];
+        } else {
+          // For any other non-array type, wrap in array
+          processedData.business_description = [String(processedData.business_description)];
+        }
+      }
+      
+      // NOTE: Do not convert to JSON string here - let the hook handle that
+      // to ensure consistent handling
+      
+      // Ensure business_description field name is lowercase
+      if ('Business_description' in processedData) {
+        processedData.business_description = processedData.Business_description;
+        delete processedData.Business_description;
+      }
+    } else if (oshProgramDetails && oshProgramDetails.business_description) {
+      // When business_description is not provided but exists in the backend, use the existing value
+      if (typeof oshProgramDetails.business_description === 'string') {
+        try {
+          processedData.business_description = JSON.parse(oshProgramDetails.business_description);
+        } catch (e) {
+          // If parsing fails, use as is
+          processedData.business_description = oshProgramDetails.business_description;
+        }
+      } else {
+        processedData.business_description = oshProgramDetails.business_description;
+      }
+    }
+
+    // Handle emergency_and_disaster_preparedness separately since it has a specific structure
+    if (processedData.emergency_and_disaster_preparedness) {
+      // Ensure it's an array of objects with the required structure
+      if (Array.isArray(processedData.emergency_and_disaster_preparedness)) {
+        const validatedData = processedData.emergency_and_disaster_preparedness
+          .map(item => ({
+            task: String(item.task || ''),
+            hazard_identified: String(item.hazard_identified || ''),
+            risk_description: String(item.risk_description || ''),
+            priority: String(item.priority || ''),
+            control_measures: String(item.control_measures || '')
+          }))
+          .filter(item => 
+            item.task || 
+            item.hazard_identified || 
+            item.risk_description || 
+            item.priority || 
+            item.control_measures
+          ); // Filter out empty entries
+        processedData.emergency_and_disaster_preparedness = JSON.stringify(validatedData);
+      } else {
+        processedData.emergency_and_disaster_preparedness = JSON.stringify([]);
+      }
+    } else {
+      processedData.emergency_and_disaster_preparedness = JSON.stringify([]);
+    }
+
+    // Handle array fields 
+    const arrayFields = [
+      'routine_medical_surveillance',
+      'schedule_of_annual_medical_examination',
+      'special_medical_surveillance',
+      'safety_officer',
+      'health_personnel',
+      'health_training',
+      'risk_assessment',
+      'reported_incidents',
+      'safety_meeting'
+    ];
+
+    arrayFields.forEach(field => {
+      if (processedData[field]) {
+        // Ensure the field is always an array
+        let fieldValue = processedData[field];
+        
+        // If it's a string, try to parse it as JSON
+        if (typeof fieldValue === 'string') {
+          try {
+            fieldValue = JSON.parse(fieldValue);
+          } catch (e) {
+            // If parsing fails, split by comma
+            fieldValue = fieldValue.split(',').map((item: string) => item.trim());
+          }
+        }
+        
+        // If it's not an array yet, make it one
+        if (!Array.isArray(fieldValue)) {
+          fieldValue = [fieldValue];
+        }
+        
+        // Filter out any null, undefined, or empty string values
+        fieldValue = fieldValue.filter((item: any) => item !== null && item !== undefined && item !== '');
+        
+        // Convert to JSON string for storage
+        processedData[field] = JSON.stringify(fieldValue);
+      } else {
+        // Initialize as empty array if no value
+        processedData[field] = JSON.stringify([]);
+      }
+    });
+
+    // Handle JSON fields
+    const jsonFields = [
+      'drills',
+      'health_personnel',
+      'health_training',
+      'ppe',
+      'reported_incidents',
+      'risk_assessment',
+      'safety_meeting',
+      'safety_officer'
+    ];
+
+    jsonFields.forEach(field => {
+      if (processedData[field]) {
+        if (typeof processedData[field] === 'string') {
+          try {
+            const parsed = JSON.parse(processedData[field]);
+            processedData[field] = JSON.stringify(parsed);
+          } catch (e) {
+            processedData[field] = JSON.stringify({ data: processedData[field] });
+          }
+        } else {
+          processedData[field] = JSON.stringify(processedData[field]);
+        }
+      } else {
+        processedData[field] = JSON.stringify({});
+      }
+    });
     
     setValidationMessage("");
     const callbackReq = {
@@ -114,102 +287,119 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
 
   useEffect(() => {
-    // Clear validation message when changing tabs
-    setValidationMessage("");
-  }, [selectedTab]);
-
-  useEffect(() => {
     if (oshProgramDetails) {
-      setValue("adequate_sanitary_and_washing_facilities", oshProgramDetails.adequate_sanitary_and_washing_facilities);
-      setValue("adequate_sanitary_and_washing_facilities_remarks", oshProgramDetails.adequate_sanitary_and_washing_facilities_remarks);
-      setValue("adequate_supply_of_drinking_water", oshProgramDetails.adequate_supply_of_drinking_water);
-      setValue("adequate_supply_of_drinking_water_remarks", oshProgramDetails.adequate_supply_of_drinking_water_remarks);
-      setValue("agri_fishing_description", oshProgramDetails.agri_fishing_description);
-      setValue("annex_a_message", oshProgramDetails.annex_a_message);
-      setValue("bank_and_financial_institution_description", oshProgramDetails.bank_and_financial_institution_description);
-      setValue("basic_components", oshProgramDetails.basic_components);
-      setValue("business_description", oshProgramDetails.business_description);
-      setValue("chairperson_joint_coordinating", oshProgramDetails.chairperson_joint_coordinating);
-      setValue("chairperson_less_than_ten", oshProgramDetails.chairperson_less_than_ten);
-      setValue("chairperson_medium_to_high", oshProgramDetails.chairperson_medium_to_high);
-      setValue("company_commitment", oshProgramDetails.company_commitment);
-      setValue("company_name", oshProgramDetails.company_name);
-      setValue("company_owner", oshProgramDetails.company_owner);
-      setValue("complete_address", oshProgramDetails.complete_address);
-      setValue("construction_description", oshProgramDetails.construction_description);
-      setValue("date", oshProgramDetails.date);
-      setValue("date_established", oshProgramDetails.date_established);
-      setValue("date_filled", oshProgramDetails.date_filled);
-      setValue("drills", oshProgramDetails.drills);
-      setValue("duties_and_responsibilities", oshProgramDetails.duties_and_responsibilities);
-      setValue("emergency_and_disaster_preparedness", oshProgramDetails.emergency_and_disaster_preparedness);
-      setValue("employees_representative", oshProgramDetails.employees_representative);
-      setValue("ex_officio_members", oshProgramDetails.ex_officio_members);
-      setValue("fax_number", oshProgramDetails.fax_number);
-      setValue("health_personnel", oshProgramDetails.health_personnel);
-      setValue("health_training", oshProgramDetails.health_training);
-      setValue("hospitals_youre_affiliated_with", oshProgramDetails.hospitals_youre_affiliated_with);
-      setValue("lactation_station", oshProgramDetails.lactation_station);
-      setValue("lactation_station_remarks", oshProgramDetails.lactation_station_remarks);
-      setValue("machine_guards_cost", oshProgramDetails.machine_guards_cost);
-      setValue("machine_guards_description", oshProgramDetails.machine_guards_description);
-      setValue("maintenance_description", oshProgramDetails.maintenance_description);
-      setValue("manufacturing_description", oshProgramDetails.manufacturing_description);
-      setValue("medical_examinations_cost", oshProgramDetails.medical_examinations_cost);
-      setValue("medical_supplies_cost", oshProgramDetails.medical_supplies_cost);
-      setValue("member_less_than_ten", oshProgramDetails.member_less_than_ten);
-      setValue("members", oshProgramDetails.members);
-      setValue("name_of_owner", oshProgramDetails.name_of_owner);
-      setValue("name_of_owner_manager", oshProgramDetails.name_of_owner_manager);
-      setValue("no_of_clinics_in_the_workplace", oshProgramDetails.no_of_clinics_in_the_workplace);
-      setValue("no_of_treatment_rooms_first_aid_rooms", oshProgramDetails.no_of_treatment_rooms_first_aid_rooms);
-      setValue("number_of_female_employees", oshProgramDetails.number_of_female_employees);
-      setValue("number_of_male_employees", oshProgramDetails.number_of_male_employees);
-      setValue("osh_training_cost", oshProgramDetails.osh_training_cost);
-      setValue("other_workers_welfare_facilities", oshProgramDetails.other_workers_welfare_facilities);
-      setValue("other_workers_welfare_facilities_remarks", oshProgramDetails.other_workers_welfare_facilities_remarks);
-      setValue("others_cost", oshProgramDetails.others_cost);
-      setValue("others_description", oshProgramDetails.others_description);
-      setValue("others_name", oshProgramDetails.others_name);
-      setValue("phone_number", oshProgramDetails.phone_number);
-      setValue("polution_control_officer", oshProgramDetails.polution_control_officer);
-      setValue("ppe", oshProgramDetails.ppe);
-      setValue("ppe_cost", oshProgramDetails.ppe_cost);
-      setValue("ppe_description", oshProgramDetails.ppe_description);
-      setValue("product_description", oshProgramDetails.product_description);
-      setValue("prohibited_acts_and_penalties_message", oshProgramDetails.prohibited_acts_and_penalties_message);
-      setValue("ramps_railings_and_like", oshProgramDetails.ramps_railings_and_like);
-      setValue("ramps_railings_and_like_remarks", oshProgramDetails.ramps_railings_and_like_remarks);
-      setValue("random_drug_testing", oshProgramDetails.random_drug_testing);
-      setValue("reported_incidents", oshProgramDetails.reported_incidents);
-      setValue("risk_assessment", oshProgramDetails.risk_assessment);
-      setValue("routine_medical_surveillance", oshProgramDetails.routine_medical_surveillance);
-      setValue("safety_meeting", oshProgramDetails.safety_meeting);
-      setValue("safety_officer", oshProgramDetails.safety_officer);
-      setValue("safety_signages_cost", oshProgramDetails.safety_signages_cost);
-      setValue("safety_signature", oshProgramDetails.safety_signature);
-      setValue("schedule_of_annual_medical_examination", oshProgramDetails.schedule_of_annual_medical_examination);
-      setValue("secretary_joint_coordinating", oshProgramDetails.secretary_joint_coordinating);
-      setValue("secretary_less_than_ten", oshProgramDetails.secretary_less_than_ten);
-      setValue("secretary_medium_to_high", oshProgramDetails.secretary_medium_to_high);
-      setValue("security_agency_description", oshProgramDetails.security_agency_description);
-      setValue("separate_sanitary_washing_and_sleeping_facilities", oshProgramDetails.separate_sanitary_washing_and_sleeping_facilities);
-      setValue("separate_sanitary_washing_and_sleeping_facilities_remarks", oshProgramDetails.separate_sanitary_washing_and_sleeping_facilities_remarks);
-      setValue("service_description", oshProgramDetails.service_description);
-      setValue("services_description", oshProgramDetails.services_description);
-      setValue("signature", oshProgramDetails.signature);
-      setValue("special_medical_surveillance", oshProgramDetails.special_medical_surveillance);
-      setValue("suitable_living_accommodation", oshProgramDetails.suitable_living_accommodation);
-      setValue("suitable_living_accommodation_remarks", oshProgramDetails.suitable_living_accommodation_remarks);
-      setValue("total_number_of_employees", oshProgramDetails.total_number_of_employees);
-      setValue("utilities_description", oshProgramDetails.utilities_description);
-      setValue("waste_management_system_message", oshProgramDetails.waste_management_system_message);
-      setValue("website_url", oshProgramDetails.website_url);
-      setValue("wholesale_retail_description", oshProgramDetails.wholesale_retail_description);
-      setValue("written_emergency_and_disaster_program", oshProgramDetails.written_emergency_and_disaster_program);
-      setValue("written_pollution_control_program", oshProgramDetails.written_pollution_control_program);
+      // Process array fields before setting them
+      const arrayFields = [
+        'routine_medical_surveillance',
+        'schedule_of_annual_medical_examination',
+        'special_medical_surveillance',
+        'safety_officer',
+        'health_personnel',
+        'health_training',
+        'risk_assessment',
+        'reported_incidents',
+        'safety_meeting'
+      ];
+
+      // Process each array field
+      arrayFields.forEach(field => {
+        let fieldValue = oshProgramDetails[field];
+        if (fieldValue) {
+          try {
+            // If it's a string, try to parse it
+            if (typeof fieldValue === 'string') {
+              fieldValue = JSON.parse(fieldValue);
+            }
+            // Ensure it's an array
+            if (!Array.isArray(fieldValue)) {
+              fieldValue = [fieldValue];
+            }
+            // Filter out any null, undefined, or empty values
+            fieldValue = fieldValue.filter((item: any) => item !== null && item !== undefined && item !== '');
+            
+            // For checkbox fields, ensure we keep the raw values
+            if (['routine_medical_surveillance', 'special_medical_surveillance', 'schedule_of_annual_medical_examination'].includes(field)) {
+              fieldValue = fieldValue.map((item: any) => 
+                typeof item === 'object' ? item.value || item.toString() : item.toString()
+              );
+            }
+          } catch (e) {
+            // If parsing fails, convert to array
+            fieldValue = typeof fieldValue === 'string' ? fieldValue.split(',').map((item: string) => item.trim()) : [];
+          }
+          setValue(field, fieldValue);
+        } else {
+          // Initialize empty array if no value
+          setValue(field, []);
+        }
+      });
+
+      // Set other fields
+      Object.keys(oshProgramDetails).forEach(key => {
+        if (!arrayFields.includes(key)) {
+          setValue(key, oshProgramDetails[key]);
+        }
+      });
+
+      // Set safety signage state if it exists
+      if (oshProgramDetails.safety_signage) {
+        setSafetySignageUrl(oshProgramDetails.safety_signage);
+        setSafetySignageAttachmentExist(true);
+      }
     }
   }, [oshProgramDetails, setValue]);
+
+  // Function to handle tab changes
+  const handleTabChange = (tabIndex: number) => {
+    // Clear any validation errors
+    clearErrors();
+    // Clear validation message
+    setValidationMessage("");
+
+    // Get current form values
+    const currentValues = watch();
+
+    // Reset form data for the current tab before switching
+    if (oshProgramDetails) {
+      // Define array fields that should be preserved
+      const arrayFields = [
+        'routine_medical_surveillance',
+        'schedule_of_annual_medical_examination',
+        'special_medical_surveillance',
+        'safety_officer',
+        'health_personnel',
+        'health_training',
+        'risk_assessment',
+        'reported_incidents',
+        'safety_meeting'
+      ];
+
+      // Reset all form fields to their last saved values from oshProgramDetails
+      const fieldsToReset = Object.keys(oshProgramDetails).reduce((acc: any, key) => {
+        // For array fields, keep current values if they exist
+        if (arrayFields.includes(key) && currentValues[key]) {
+          acc[key] = currentValues[key];
+        } else {
+          acc[key] = oshProgramDetails[key];
+        }
+        return acc;
+      }, {});
+      
+      reset(fieldsToReset);
+    }
+
+    // Set the new tab
+    setSelectedTab(tabIndex);
+  };
+
+  // Custom submit handler
+  const submitCurrentTab = () => {
+    // First clear any existing validation messages
+    setValidationMessage("");
+    
+    // Trigger form validation and submission just for the current tab
+    onSubmit();
+  };
 
   return (
     <>
@@ -227,7 +417,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <HistoryIcon/>
             <button
               className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
-              onClick={onSubmit}
+              onClick={submitCurrentTab}
               disabled={!hasActiveSubscription}
             >
               Save
@@ -251,50 +441,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         )}
         
         <div className="mt-8 flex flex-row justify-between space-x-2">
-          <div onClick={() => {
-            setSelectedTab(1);
-            setValidationMessage("");
-          }} className="cursor-pointer">
+          <div onClick={() => handleTabChange(1)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Company Profile
             </h1>
           </div>
-          <div onClick={() => {
-            setSelectedTab(2);
-            setValidationMessage("");
-          }} className="cursor-pointer">
+          <div onClick={() => handleTabChange(2)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 2 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               OSH Program and Policy
             </h1>
           </div>
-          <div onClick={() => {
-            setSelectedTab(3);
-            setValidationMessage("");
-          }} className="cursor-pointer">
+          <div onClick={() => handleTabChange(3)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 3 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Risk Management
             </h1>
           </div>
-          <div onClick={() => {
-            setSelectedTab(4);
-            setValidationMessage("");
-          }} className="cursor-pointer">
+          <div onClick={() => handleTabChange(4)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 4 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Health and Welfare Program
             </h1>
           </div>
-          <div onClick={() => {
-            setSelectedTab(5);
-            setValidationMessage("");
-          }} className="cursor-pointer">
+          <div onClick={() => handleTabChange(5)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 5 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Safety Measures
             </h1>
           </div>
-          <div onClick={() => {
-            setSelectedTab(6);
-            setValidationMessage("");
-          }} className="cursor-pointer">
+          <div onClick={() => handleTabChange(6)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 6 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Compliance and Cost
             </h1>
@@ -331,6 +503,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             control={control}
             register={register}
             validationMessage={validationMessage}
+            watch={watch}
           />
         )}
         {selectedTab === 5 && (
@@ -340,6 +513,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             setValue={setValue}
             watch={watch}
             validationMessage={validationMessage}
+            safetySignageUrl={safetySignageUrl}
+            setSafetySignageUrl={setSafetySignageUrl}
+            safetySignageAttachmentExist={safetySignageAttachmentExist}
+            setSafetySignageAttachmentExist={setSafetySignageAttachmentExist}
           />
         )}
         {selectedTab === 6 && (

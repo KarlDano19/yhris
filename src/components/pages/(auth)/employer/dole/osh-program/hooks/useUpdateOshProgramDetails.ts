@@ -10,10 +10,31 @@ async function updateOshProgramDetails(data: any) {
 
         const cleanData = { ...data };
 
-        // Check for case sensitivity issues with company_name field
-        if ('Company_name' in cleanData && !('company_name' in cleanData)) {
-            cleanData.company_name = cleanData.Company_name;
-            delete cleanData.Company_name;
+        console.log("Original data for update:", cleanData);
+
+        // Check for case sensitivity issues with various fields
+        const fieldMappings = {
+            'Company_name': 'company_name',
+            'Business_description': 'business_description',
+            'Date_established': 'date_established',
+            'Complete_address': 'complete_address',
+            'Website_url': 'website_url',
+            'Number_of_male_employees': 'number_of_male_employees',
+            'Number_of_female_employees': 'number_of_female_employees',
+            'Total_number_of_employees': 'total_number_of_employees',
+            'Date': 'date',
+            'Name_of_owner': 'name_of_owner',
+            'Signature': 'signature',
+            'Date_policy': 'date_policy'
+        };
+
+        // Apply case sensitivity fixes
+        for (const [capitalizedKey, lowercaseKey] of Object.entries(fieldMappings)) {
+            if (capitalizedKey in cleanData && !(lowercaseKey in cleanData)) {
+                console.log(`Fixed case sensitivity for field: ${capitalizedKey} → ${lowercaseKey}`);
+                cleanData[lowercaseKey] = cleanData[capitalizedKey];
+                delete cleanData[capitalizedKey];
+            }
         }
 
         // Handle date formatting
@@ -53,139 +74,160 @@ async function updateOshProgramDetails(data: any) {
             }
         }
 
-        // Check if we have file uploads
-        const hasFileUploads = cleanData.signature instanceof File || 
-                              cleanData.safety_signature instanceof File;
-
-        let response;
+        // Use FormData for all requests since we have file uploads in the forms
+        const formData = new FormData();
         
-        if (hasFileUploads) {
-            // Use FormData for file uploads
-            const formData = new FormData();
-            
-            // Add all fields to FormData
-            for (const key in cleanData) {
-                if (cleanData[key] instanceof File) {
-                    // Add files directly
-                    formData.append(key, cleanData[key]);
-                } else if (key === 'business_description' && cleanData[key]) {
-                    // Handle business_description array field
-                    if (Array.isArray(cleanData[key])) {
-                        formData.append(key, JSON.stringify(cleanData[key]));
-                    } else {
-                        formData.append(key, JSON.stringify([cleanData[key]]));
-                    }
-                } else if (['routine_medical_surveillance', 'schedule_of_annual_medical_examination', 'special_medical_surveillance'].includes(key) && cleanData[key]) {
-                    // Handle array fields
-                    if (Array.isArray(cleanData[key])) {
-                        formData.append(key, JSON.stringify(cleanData[key]));
-                    } else if (typeof cleanData[key] === 'string') {
-                        const arrayValue = cleanData[key].split(',').map((item: string) => item.trim());
-                        formData.append(key, JSON.stringify(arrayValue));
-                    } else {
-                        formData.append(key, JSON.stringify([cleanData[key]]));
-                    }
-                } else if (['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 'safety_meeting', 'safety_officer'].includes(key) && cleanData[key]) {
-                    // Handle JSON fields
-                    if (typeof cleanData[key] === 'object') {
-                        formData.append(key, JSON.stringify(cleanData[key]));
-                    } else if (typeof cleanData[key] === 'string') {
-                        try {
-                            const jsonValue = JSON.parse(cleanData[key]);
-                            formData.append(key, JSON.stringify(jsonValue));
-                        } catch (e) {
-                            formData.append(key, JSON.stringify({}));
+        // Add all fields to FormData
+        for (const key in cleanData) {
+            if (cleanData[key] instanceof File) {
+                // Add files directly
+                console.log(`Adding file for field: ${key}`);
+                formData.append(key, cleanData[key]);
+                
+                // Add previous file information if available
+                const previousKey = `previous_${key}`;
+                if (cleanData[previousKey]) {
+                    console.log(`Adding previous file info for: ${key}`);
+                    formData.append(previousKey, cleanData[previousKey]);
+                }
+            } else if (key === 'signature' || key === 'safety_signage') {
+                // Only append signature/safety_signage if it exists and is not null/undefined
+                if (cleanData[key] && cleanData[key] !== 'null' && cleanData[key] !== 'undefined') {
+                    if (cleanData[key] instanceof File) {
+                        formData.append(key, cleanData[key]);
+                        
+                        // Add previous file information
+                        const previousKey = `previous_${key}`;
+                        if (cleanData[previousKey]) {
+                            formData.append(previousKey, cleanData[previousKey]);
                         }
-                    } else {
+                    } else if (typeof cleanData[key] === 'string' && cleanData[key].startsWith('data:')) {
+                        // Handle base64 data URL
+                        try {
+                            const response = await fetch(cleanData[key]);
+                            const blob = await response.blob();
+                            formData.append(key, blob, `${key}.png`);
+                            
+                            // Add previous file information
+                            const previousKey = `previous_${key}`;
+                            if (cleanData[previousKey]) {
+                                formData.append(previousKey, cleanData[previousKey]);
+                            }
+                        } catch (error) {
+                            console.error(`Error converting ${key} data URL to blob:`, error);
+                            formData.append(key, cleanData[key]);
+                        }
+                    } else if (typeof cleanData[key] === 'string') {
+                        // If it's a regular string (like a file path), only append if it's not empty
+                        if (cleanData[key].trim() !== '') {
+                            formData.append(key, cleanData[key]);
+                        }
+                    }
+                }
+            } else if (key.startsWith('previous_')) {
+                // Skip previous file fields as they're handled with their corresponding file fields
+                continue;
+            } else if (key === 'business_description' && cleanData[key] !== undefined) {
+                // Handle business_description array field
+                console.log(`Processing business_description: ${typeof cleanData[key]}`, cleanData[key]);
+                
+                // Always convert to array first
+                let arrayValue;
+                
+                if (Array.isArray(cleanData[key])) {
+                    arrayValue = cleanData[key];
+                } else if (typeof cleanData[key] === 'string') {
+                    try {
+                        // Try to parse if it's a JSON string
+                        const parsed = JSON.parse(cleanData[key]);
+                        arrayValue = Array.isArray(parsed) ? parsed : [cleanData[key]];
+                    } catch (e) {
+                        // If not JSON, use as string
+                        arrayValue = [cleanData[key]];
+                    }
+                } else if (cleanData[key] === null) {
+                    arrayValue = [];
+                } else {
+                    // For any other type
+                    arrayValue = [String(cleanData[key])];
+                }
+                
+                // Send the array directly, not as a JSON string
+                // The backend will handle the conversion
+                console.log(`Sending business_description as array:`, arrayValue);
+                
+                // Add each item individually if it's an array
+                if (Array.isArray(arrayValue)) {
+                    arrayValue.forEach((item, index) => {
+                        formData.append(`business_description[${index}]`, item);
+                    });
+                } else {
+                    // Fallback just in case
+                    formData.append('business_description', JSON.stringify(arrayValue));
+                }
+            } else if (['routine_medical_surveillance', 'schedule_of_annual_medical_examination', 'special_medical_surveillance'].includes(key) && cleanData[key]) {
+                // Handle array fields
+                console.log(`Processing array field ${key}: ${typeof cleanData[key]}`, cleanData[key]);
+                let fieldValue = cleanData[key];
+                try {
+                    // If it's already a string, try to parse it
+                    if (typeof fieldValue === 'string') {
+                        fieldValue = JSON.parse(fieldValue);
+                    }
+                    // Ensure it's an array
+                    if (!Array.isArray(fieldValue)) {
+                        fieldValue = [fieldValue];
+                    }
+                    // Convert back to JSON string for submission
+                    formData.append(key, JSON.stringify(fieldValue));
+                } catch (e) {
+                    // If parsing fails, treat as comma-separated string
+                    const arrayValue = typeof fieldValue === 'string' 
+                        ? fieldValue.split(',').map(item => item.trim())
+                        : [fieldValue];
+                    formData.append(key, JSON.stringify(arrayValue));
+                }
+            } else if (['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 'safety_meeting', 'safety_officer'].includes(key) && cleanData[key]) {
+                // Handle JSON fields
+                console.log(`Processing JSON field ${key}: ${typeof cleanData[key]}`);
+                if (typeof cleanData[key] === 'object') {
+                    formData.append(key, JSON.stringify(cleanData[key]));
+                } else if (typeof cleanData[key] === 'string') {
+                    try {
+                        const jsonValue = JSON.parse(cleanData[key]);
+                        formData.append(key, JSON.stringify(jsonValue));
+                    } catch (e) {
+                        console.warn(`Error parsing JSON for field ${key}:`, e);
                         formData.append(key, JSON.stringify({}));
                     }
-                } else if (cleanData[key] !== undefined && cleanData[key] !== null) {
-                    // Add other primitive values
-                    formData.append(key, cleanData[key]);
+                } else {
+                    formData.append(key, JSON.stringify({}));
                 }
+            } else if (cleanData[key] !== undefined && cleanData[key] !== null) {
+                // Add other primitive values
+                formData.append(key, cleanData[key]);
             }
-            
-            response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Authorization": `Token ${token}`
-                        // Don't set Content-Type header when using FormData
-                    },
-                    body: formData,
-                }
-            );
-        } else {
-            // Handle business_description array field
-            if (cleanData.business_description) {
-                if (!Array.isArray(cleanData.business_description)) {
-                    cleanData.business_description = [cleanData.business_description];
-                }
-            }
-
-            // Handle JSON fields
-            const jsonFields = [
-                'drills',
-                'emergency_and_disaster_preparedness',
-                'health_personnel',
-                'health_training',
-                'ppe',
-                'reported_incidents',
-                'risk_assessment',
-                'safety_meeting',
-                'safety_officer'
-            ];
-
-            for (const field of jsonFields) {
-                if (cleanData[field]) {
-                    // If it's already an object/array, keep it as is
-                    if (typeof cleanData[field] === 'object') {
-                        continue;
-                    }
-                    // If it's a string, try to parse it
-                    if (typeof cleanData[field] === 'string') {
-                        try {
-                            cleanData[field] = JSON.parse(cleanData[field]);
-                        } catch (e) {
-                            cleanData[field] = {};
-                        }
-                    }
-                }
-            }
-
-            // Handle array fields
-            const arrayFields = [
-                'routine_medical_surveillance',
-                'schedule_of_annual_medical_examination',
-                'special_medical_surveillance'
-            ];
-
-            for (const field of arrayFields) {
-                if (cleanData[field]) {
-                    if (!Array.isArray(cleanData[field])) {
-                        if (typeof cleanData[field] === 'string') {
-                            cleanData[field] = cleanData[field].split(',').map((item: string) => item.trim());
-                        } else {
-                            cleanData[field] = [cleanData[field]];
-                        }
-                    }
-                }
-            }
-
-            // Use JSON for non-file data
-            response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Token ${token}`
-                    },
-                    body: JSON.stringify(cleanData),
-                }
-            );
         }
+        
+        // Log the form data entries for debugging
+        const formDataEntries: Record<string, any> = {};
+        formData.forEach((value, key) => {
+            formDataEntries[key] = value;
+        });
+        console.log("Form data entries to be sent:", formDataEntries);
+        
+        console.log("Sending request to update OSH program...");
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Authorization": `Token ${token}`
+                    // Don't set Content-Type header when using FormData
+                },
+                body: formData,
+            }
+        );
 
         if (response.status === 401) {
             throw new Error("Authentication failed. Please log in again.");
@@ -195,24 +237,32 @@ async function updateOshProgramDetails(data: any) {
             let errorData;
             try {
                 errorData = await response.json();
+                console.error("Server error response:", errorData);
+                
+                // Check specifically for business_description issues
+                if (errorData.business_description) {
+                    console.error("Business description error:", errorData.business_description);
+                }
+                
+                throw new Error(
+                    errorData.message || 
+                    errorData.error || 
+                    errorData.detail || 
+                    'An error occurred while updating OSH Program'
+                );
             } catch (e) {
                 throw new Error(response.statusText || 'An error occurred while updating OSH Program');
             }
-            
-            throw new Error(
-                errorData.message || 
-                errorData.error || 
-                errorData.detail || 
-                'An error occurred while updating OSH Program'
-            );
         }
 
         try {
             const data = await response.json();
+            console.log("Update successful:", data);
             return data;
         } catch (e) {
             // If we can't parse the response but the status was ok,
             // we still consider it a success
+            console.log("Update successful but no JSON response");
             return { message: "OSH Program updated successfully" };
         }
     } catch (error: any) {

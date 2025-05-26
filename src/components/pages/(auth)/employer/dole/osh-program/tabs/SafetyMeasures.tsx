@@ -17,21 +17,27 @@ export default function SafetyMeasures({
   setValue,
   watch,
   validationMessage,
+  safetySignageUrl,
+  setSafetySignageUrl,
+  safetySignageAttachmentExist,
+  setSafetySignageAttachmentExist,
 }: {
   control: any;
   register: any;
   setValue: any;
   watch: any;
   validationMessage?: string;
+  safetySignageUrl: string;
+  setSafetySignageUrl: (url: string) => void;
+  safetySignageAttachmentExist: boolean;
+  setSafetySignageAttachmentExist: (exists: boolean) => void;
 }) {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
     []
   );
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
-  const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
-  const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] =
-    useState(false);
+  const [previousSignageFile, setPreviousSignageFile] = useState<string>("");
 
   useEffect(() => {
     if (safetySignageUrl) {
@@ -43,6 +49,14 @@ export default function SafetyMeasures({
       setSafetySignageUrl("");
     }
   }, [safetySignageUrl, setValue, drawSignatureModal]);
+
+  // Add effect to track previous signage file
+  useEffect(() => {
+    const currentSignage = watch("safety_signage");
+    if (typeof currentSignage === "string" && currentSignage !== previousSignageFile) {
+      setPreviousSignageFile(currentSignage);
+    }
+  }, [watch("safety_signage")]);
 
   const {
     fields: ppeFields,
@@ -65,21 +79,20 @@ export default function SafetyMeasures({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
-              </h3>
+        {validationMessage && (
+          <div className="rounded-md bg-red-50 p-4 mb-3">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  {validationMessage}
+                </h3>
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <div className="grid grid-cols-2 gap-6 mt-4">
           <div className="sm:col-span-4 mt-4 mb-4">
             <label
@@ -177,26 +190,42 @@ export default function SafetyMeasures({
             <div className="relative mt-2">
               <input
                 id="safety_signage"
-                {...register("safety_signage")}
-                onChange={(e) => {
-                  e.target.value ? setSafetySignageUrl("") : null;
-                  e.target.value ? setSafetySignageAttachmentExist(true) : null;
-                }}
                 type="file"
-                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    setValue("safety_signage", file);
+                    setValue("previous_safety_signage", previousSignageFile);
+                    setSafetySignageUrl("");
+                    setSafetySignageAttachmentExist(true);
+                  }
+                }}
+                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
-              {safetySignageAttachmentExist ? (
+              {safetySignageAttachmentExist && (
                 <button
                   type="button"
                   className="underline text-savoy-blue text-sm"
                   onClick={() => {
                     setValue("safety_signage", "");
+                    setValue("previous_safety_signage", previousSignageFile);
+                    setSafetySignageUrl("");
                     setSafetySignageAttachmentExist(false);
                   }}
                 >
                   Remove Attachment
                 </button>
-              ) : null}
+              )}
+              {safetySignageUrl && !safetySignageAttachmentExist && (
+                <div className="mt-2">
+                  <img 
+                    src={safetySignageUrl} 
+                    alt="Safety Signage" 
+                    className="max-w-xs rounded-md shadow-sm"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -281,25 +310,41 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="adequate_supply_yes"
+                        <Controller
+                          control={control}
                           name="adequate_supply_of_drinking_water"
-                          checked={watch("adequate_supply_of_drinking_water") === true}
-                          onChange={() => setValue("adequate_supply_of_drinking_water", true)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="adequate_supply_yes"
+                                checked={field.value === true}
+                                onChange={() => field.onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="adequate_supply_no"
+                        <Controller
+                          control={control}
                           name="adequate_supply_of_drinking_water"
-                          checked={watch("adequate_supply_of_drinking_water") === false}
-                          onChange={() => setValue("adequate_supply_of_drinking_water", false)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="adequate_supply_no"
+                                checked={field.value === false}
+                                onChange={() => field.onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
@@ -334,25 +379,41 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="adequate_sanitary_yes"
+                        <Controller
+                          control={control}
                           name="adequate_sanitary_and_washing_facilities"
-                          checked={watch("adequate_sanitary_and_washing_facilities") === true}
-                          onChange={() => setValue("adequate_sanitary_and_washing_facilities", true)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="adequate_sanitary_yes"
+                                checked={field.value === true}
+                                onChange={() => field.onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="adequate_sanitary_no"
+                        <Controller
+                          control={control}
                           name="adequate_sanitary_and_washing_facilities"
-                          checked={watch("adequate_sanitary_and_washing_facilities") === false}
-                          onChange={() => setValue("adequate_sanitary_and_washing_facilities", false)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="adequate_sanitary_no"
+                                checked={field.value === false}
+                                onChange={() => field.onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
@@ -389,25 +450,41 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="suitable_living_yes"
+                        <Controller
+                          control={control}
                           name="suitable_living_accommodation"
-                          checked={watch("suitable_living_accommodation") === true}
-                          onChange={() => setValue("suitable_living_accommodation", true)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="suitable_living_yes"
+                                checked={field.value === true}
+                                onChange={() => field.onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="suitable_living_no"
+                        <Controller
+                          control={control}
                           name="suitable_living_accommodation"
-                          checked={watch("suitable_living_accommodation") === false}
-                          onChange={() => setValue("suitable_living_accommodation", false)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="suitable_living_no"
+                                checked={field.value === false}
+                                onChange={() => field.onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
@@ -441,25 +518,41 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="separate_sanitary_yes"
+                        <Controller
+                          control={control}
                           name="separate_sanitary_washing_and_sleeping_facilities"
-                          checked={watch("separate_sanitary_washing_and_sleeping_facilities") === true}
-                          onChange={() => setValue("separate_sanitary_washing_and_sleeping_facilities", true)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="separate_sanitary_yes"
+                                checked={field.value === true}
+                                onChange={() => field.onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="separate_sanitary_no"
+                        <Controller
+                          control={control}
                           name="separate_sanitary_washing_and_sleeping_facilities"
-                          checked={watch("separate_sanitary_washing_and_sleeping_facilities") === false}
-                          onChange={() => setValue("separate_sanitary_washing_and_sleeping_facilities", false)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="separate_sanitary_no"
+                                checked={field.value === false}
+                                onChange={() => field.onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
@@ -496,25 +589,41 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="lactation_station_yes"
+                        <Controller
+                          control={control}
                           name="lactation_station"
-                          checked={watch("lactation_station") === true}
-                          onChange={() => setValue("lactation_station", true)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="lactation_station_yes"
+                                checked={field.value === true}
+                                onChange={() => field.onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="lactation_station_no"
+                        <Controller
+                          control={control}
                           name="lactation_station"
-                          checked={watch("lactation_station") === false}
-                          onChange={() => setValue("lactation_station", false)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="lactation_station_no"
+                                checked={field.value === false}
+                                onChange={() => field.onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
@@ -547,25 +656,41 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="ramps_railings_yes"
+                        <Controller
+                          control={control}
                           name="ramps_railings_and_like"
-                          checked={watch("ramps_railings_and_like") === true}
-                          onChange={() => setValue("ramps_railings_and_like", true)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="ramps_railings_yes"
+                                checked={field.value === true}
+                                onChange={() => field.onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="ramps_railings_no"
+                        <Controller
+                          control={control}
                           name="ramps_railings_and_like"
-                          checked={watch("ramps_railings_and_like") === false}
-                          onChange={() => setValue("ramps_railings_and_like", false)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="ramps_railings_no"
+                                checked={field.value === false}
+                                onChange={() => field.onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
@@ -599,25 +724,41 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="other_workers_yes"
+                        <Controller
+                          control={control}
                           name="other_workers_welfare_facilities"
-                          checked={watch("other_workers_welfare_facilities") === true}
-                          onChange={() => setValue("other_workers_welfare_facilities", true)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="other_workers_yes"
+                                checked={field.value === true}
+                                onChange={() => field.onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <div className="flex justify-center">
-                        <input
-                          type="radio"
-                          id="other_workers_no"
+                        <Controller
+                          control={control}
                           name="other_workers_welfare_facilities"
-                          checked={watch("other_workers_welfare_facilities") === false}
-                          onChange={() => setValue("other_workers_welfare_facilities", false)}
-                          className="w-4 h-4"
+                          defaultValue={null}
+                          render={({ field }) => (
+                            <>
+                              <input
+                                type="radio"
+                                id="other_workers_no"
+                                checked={field.value === false}
+                                onChange={() => field.onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            </>
+                          )}
                         />
                       </div>
                     </td>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
@@ -9,7 +9,6 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 export default function CompanyProfile({
   control,
   register,
-  errors,
   validationMessage,
   watch,
   setValue
@@ -21,7 +20,10 @@ export default function CompanyProfile({
   watch?: any;
   setValue?: any;
 }) {
-  // Watch business_description to log its value
+  // Initialize ref to track first render
+  const initializedRef = useRef(false);
+  
+  // Only watch business_description when this component is mounted
   const businessDescriptions = watch ? watch("business_description") || [] : [];
   
   // Watch male and female employee counts to calculate total
@@ -42,9 +44,32 @@ export default function CompanyProfile({
   
   // Ensure business_description is an array
   useEffect(() => {
-    if (setValue && businessDescriptions && !Array.isArray(businessDescriptions)) {
-      // Convert to array if it's not already
-      setValue("business_description", [businessDescriptions]);
+    if (!setValue || !businessDescriptions) return;
+    
+    // Skip if already an array to prevent infinite loops
+    if (Array.isArray(businessDescriptions)) return;
+    
+    // Only process if businessDescriptions is not an array
+    if (typeof businessDescriptions === 'string') {
+      try {
+        // Try to parse if it's a JSON string
+        const parsed = JSON.parse(businessDescriptions);
+        if (Array.isArray(parsed)) {
+          setValue("business_description", parsed, { shouldDirty: false });
+        } else {
+          // If parsed but not an array, convert to array with single item
+          setValue("business_description", [businessDescriptions], { shouldDirty: false });
+        }
+      } catch (e) {
+        // If parsing fails, treat as a single string value
+        setValue("business_description", [businessDescriptions], { shouldDirty: false });
+      }
+    } else if (businessDescriptions !== null && businessDescriptions !== undefined) {
+      // For any other type, convert to array with string representation
+      setValue("business_description", [String(businessDescriptions)], { shouldDirty: false });
+    } else {
+      // If null or undefined, set to empty array
+      setValue("business_description", [], { shouldDirty: false });
     }
   }, [businessDescriptions, setValue]);
   
@@ -56,15 +81,68 @@ export default function CompanyProfile({
     }
   }, [maleEmployees, femaleEmployees, setValue]);
 
+  // Function to handle checkbox changes for business_description
+  const handleBusinessDescriptionChange = (value: string, checked: boolean) => {
+    if (!setValue || !watch) return;
+    
+    // Get current array
+    const currentDesc = watch("business_description") || [];
+    const currentArray = Array.isArray(currentDesc) ? currentDesc : 
+                         (typeof currentDesc === 'string' ? [currentDesc] : []);
+    
+    if (checked) {
+      // Add value if it doesn't exist already
+      if (!currentArray.includes(value)) {
+        setValue("business_description", [...currentArray, value], { shouldDirty: true });
+      }
+    } else {
+      // Remove value if checked is false
+      setValue(
+        "business_description", 
+        currentArray.filter((item: string) => item !== value), 
+        { shouldDirty: true }
+      );
+    }
+  };
+
+  // Helper function to check if a value is in the business_description array
+  const isInBusinessDescription = (value: string) => {
+    if (!businessDescriptions) return false;
+    
+    if (Array.isArray(businessDescriptions)) {
+      return businessDescriptions.includes(value);
+    } else if (typeof businessDescriptions === 'string') {
+      try {
+        const parsed = JSON.parse(businessDescriptions);
+        if (Array.isArray(parsed)) {
+          return parsed.includes(value);
+        }
+      } catch (e) {
+        // If parsing fails, check if the string itself equals the value
+        return businessDescriptions === value;
+      }
+    }
+    return false;
+  };
+
   // Auto-check business description checkboxes when descriptions are filled
   useEffect(() => {
-    if (!setValue || !watch) return;
+    if (!setValue || !watch || !initializedRef.current) {
+      // Set the flag to true after first render to allow future updates
+      initializedRef.current = true;
+      return;
+    }
     
     const updateBusinessDescription = (description: string, value: string) => {
       if (description && description.trim() !== "") {
-        const currentDesc = Array.isArray(businessDescriptions) ? [...businessDescriptions] : [];
-        if (!currentDesc.includes(value)) {
-          setValue("business_description", [...currentDesc, value]);
+        // Get current value to check if we need to update
+        const currentDesc = watch("business_description") || [];
+        const currentArray = Array.isArray(currentDesc) ? currentDesc : 
+                            (typeof currentDesc === 'string' ? [currentDesc] : []);
+        
+        // Only update if this value isn't already in the array
+        if (!currentArray.includes(value)) {
+          setValue("business_description", [...currentArray, value], { shouldDirty: false });
         }
       }
     };
@@ -91,7 +169,6 @@ export default function CompanyProfile({
     constructionDescription,
     utilitiesDescription,
     othersDescription,
-    businessDescriptions,
     setValue,
     watch
   ]);
@@ -316,6 +393,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="manufacturing"
                 value="Manufacturing"
+                checked={isInBusinessDescription("Manufacturing")}
+                onChange={(e) => handleBusinessDescriptionChange("Manufacturing", e.target.checked)}
               />
               <label htmlFor="manufacturing" className="ml-2 mt-1">
                 Manufacturing
@@ -335,6 +414,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="bank_and_financial_institution"
                 value="Bank and Financial Institution"
+                checked={isInBusinessDescription("Bank and Financial Institution")}
+                onChange={(e) => handleBusinessDescriptionChange("Bank and Financial Institution", e.target.checked)}
               />
               <label
                 htmlFor="bank_and_financial_institution"
@@ -357,6 +438,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="service"
                 value="Service"
+                checked={isInBusinessDescription("Service")}
+                onChange={(e) => handleBusinessDescriptionChange("Service", e.target.checked)}
               />
               <label htmlFor="service" className="ml-2 mt-1">
                 Service
@@ -376,6 +459,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="security_agency"
                 value="Security Agency"
+                checked={isInBusinessDescription("Security Agency")}
+                onChange={(e) => handleBusinessDescriptionChange("Security Agency", e.target.checked)}
               />
               <label htmlFor="security_agency" className="ml-2 mt-1">
                 Security Agency
@@ -395,6 +480,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="agri_fishing"
                 value="Agri/ Fishing"
+                checked={isInBusinessDescription("Agri/ Fishing")}
+                onChange={(e) => handleBusinessDescriptionChange("Agri/ Fishing", e.target.checked)}
               />
               <label htmlFor="agri_fishing" className="ml-2 mt-1">
                 Agri/ Fishing
@@ -414,6 +501,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="maintenance"
                 value="Maintenance"
+                checked={isInBusinessDescription("Maintenance")}
+                onChange={(e) => handleBusinessDescriptionChange("Maintenance", e.target.checked)}
               />
               <label htmlFor="maintenance" className="ml-2 mt-1">
                 Maintenance
@@ -433,6 +522,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="wholesale_retail"
                 value="Wholesale/ Retail"
+                checked={isInBusinessDescription("Wholesale/ Retail")}
+                onChange={(e) => handleBusinessDescriptionChange("Wholesale/ Retail", e.target.checked)}
               />
               <label htmlFor="wholesale_retail" className="ml-2 mt-1">
                 Wholesale/ Retail
@@ -452,6 +543,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="construction"
                 value="Construction"
+                checked={isInBusinessDescription("Construction")}
+                onChange={(e) => handleBusinessDescriptionChange("Construction", e.target.checked)}
               />
               <label htmlFor="construction" className="ml-2 mt-1">
                 Construction
@@ -471,6 +564,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="utilities"
                 value="Utilities"
+                checked={isInBusinessDescription("Utilities")}
+                onChange={(e) => handleBusinessDescriptionChange("Utilities", e.target.checked)}
               />
               <label htmlFor="utilities" className="ml-2 mt-1">
                 Utilities
@@ -490,6 +585,8 @@ export default function CompanyProfile({
                 {...register("business_description")}
                 id="others"
                 value="Others (Please specify)"
+                checked={isInBusinessDescription("Others (Please specify)")}
+                onChange={(e) => handleBusinessDescriptionChange("Others (Please specify)", e.target.checked)}
               />
               <label htmlFor="others" className="ml-2 mt-1">
                 Others (Please specify)

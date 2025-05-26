@@ -32,6 +32,7 @@ export default function ProgramAndPolicy({
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
+  const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -46,6 +47,13 @@ export default function ProgramAndPolicy({
       setSignatureUrl("");
     }
   }, [signatureUrl, setValue, drawSignatureModal]);
+
+  useEffect(() => {
+    const currentSignature = watch("signature");
+    if (typeof currentSignature === "string" && currentSignature !== previousSignatureFile) {
+      setPreviousSignatureFile(currentSignature);
+    }
+  }, [watch("signature")]);
 
   return (
     <form>
@@ -134,10 +142,10 @@ export default function ProgramAndPolicy({
             <div className="relative mt-2">
               <Controller
                 control={control}
-                name="date_policy"
+                name="date"
                 render={({ field }) => (
                   <CustomDatePicker
-                    id="date_policy"
+                    id="date"
                     placeholder={"mm/dd/yyyy"}
                     className={
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
@@ -204,16 +212,18 @@ export default function ProgramAndPolicy({
             <div className="relative mt-2">
               <input
                 id="signature"
-                {...register("signature")}
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
-                    setValue("signature", e.target.files[0]);
+                    const file = e.target.files[0];
+                    setValue("signature", file);
+                    setValue("previous_signature", previousSignatureFile);
                     setSignatureUrl("");
                     setAttachmentExist(true);
                   }
                 }}
                 type="file"
-                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                accept="image/*"
+                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               {attachmentExist ? (
                 <button
@@ -221,6 +231,7 @@ export default function ProgramAndPolicy({
                   className="underline text-savoy-blue text-sm"
                   onClick={() => {
                     setValue("signature", "");
+                    setValue("previous_signature", previousSignatureFile);
                     setAttachmentExist(false);
                   }}
                 >
