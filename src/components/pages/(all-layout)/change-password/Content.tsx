@@ -124,7 +124,7 @@ const Content = () => {
                     </h1>
                     <p className='text-center text-[#6F829B]'>
                       Please make sure your password contains one lowercase
-                      letter, one number, and atleast 6 characters long.
+                      letter, one number, and atleast 12 characters long.
                     </p>
                   </div>
                   <form onSubmit={handleSubmit(onSubmit)}>
