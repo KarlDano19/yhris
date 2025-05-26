@@ -236,29 +236,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     arrayFields.forEach(field => {
       if (processedData[field]) {
-        // Ensure the field is always an array
-        let fieldValue = processedData[field];
-        
+        // If it's already an array, use it as is
+        if (Array.isArray(processedData[field])) {
+          processedData[field] = JSON.stringify(processedData[field]);
+        }
         // If it's a string, try to parse it as JSON
-        if (typeof fieldValue === 'string') {
+        else if (typeof processedData[field] === 'string') {
           try {
-            fieldValue = JSON.parse(fieldValue);
+            const parsed = JSON.parse(processedData[field]);
+            processedData[field] = JSON.stringify(Array.isArray(parsed) ? parsed : [processedData[field]]);
           } catch (e) {
-            // If parsing fails, split by comma
-            fieldValue = fieldValue.split(',').map((item: string) => item.trim());
+            // If parsing fails, wrap the string in an array
+            processedData[field] = JSON.stringify([processedData[field]]);
           }
         }
-        
-        // If it's not an array yet, make it one
-        if (!Array.isArray(fieldValue)) {
-          fieldValue = [fieldValue];
+        // For any other type, wrap in array
+        else {
+          processedData[field] = JSON.stringify([processedData[field]]);
         }
-        
-        // Filter out any null, undefined, or empty string values
-        fieldValue = fieldValue.filter((item: any) => item !== null && item !== undefined && item !== '');
-        
-        // Convert to JSON string for storage
-        processedData[field] = JSON.stringify(fieldValue);
       } else {
         // Initialize as empty array if no value
         processedData[field] = JSON.stringify([]);
@@ -345,7 +340,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       // Tab 4: Health and Welfare Program
         // Medical Surveillance Section
-        setValue("routine_medical_surveillance", oshProgramDetails.routine_medical_surveillance);
+        if (oshProgramDetails.routine_medical_surveillance) {
+          try {
+            const parsedValue = typeof oshProgramDetails.routine_medical_surveillance === 'string' 
+              ? JSON.parse(oshProgramDetails.routine_medical_surveillance)
+              : oshProgramDetails.routine_medical_surveillance;
+            setValue("routine_medical_surveillance", parsedValue);
+          } catch (e) {
+            setValue("routine_medical_surveillance", []);
+          }
+        }
         setValue("special_medical_surveillance", oshProgramDetails.special_medical_surveillance);
         setValue("schedule_of_annual_medical_examination", oshProgramDetails.schedule_of_annual_medical_examination);
         setValue("random_drug_testing", oshProgramDetails.random_drug_testing);
@@ -619,6 +623,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             register={register}
             validationMessage={validationMessage}
             watch={watch}
+            setValue={setValue}
           />
         )}
         {selectedTab === 5 && (

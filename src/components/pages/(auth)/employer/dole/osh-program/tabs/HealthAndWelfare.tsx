@@ -12,11 +12,13 @@ export default function HealthAndWelfare({
   register,
   validationMessage,
   watch,
+  setValue,
 }: {
   control: any;
   register: any;
   validationMessage?: string;
   watch: any;
+  setValue: any;
 }) {
   const {
     fields: safetyOfficerFields,
@@ -120,6 +122,15 @@ export default function HealthAndWelfare({
               id="cbc"
               value="CBC"
               checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("CBC")}
+              onChange={(e) => {
+                const currentValue = watch("routine_medical_surveillance") || [];
+                const value = e.target.value;
+                if (e.target.checked) {
+                  setValue("routine_medical_surveillance", [...currentValue, value]);
+                } else {
+                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
+                }
+              }}
             />
             <label htmlFor="cbc" className="ml-2 mt-1">
               CBC
@@ -132,6 +143,15 @@ export default function HealthAndWelfare({
               id="chest_xray"
               value="Chest X-ray"
               checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Chest X-ray")}
+              onChange={(e) => {
+                const currentValue = watch("routine_medical_surveillance") || [];
+                const value = e.target.value;
+                if (e.target.checked) {
+                  setValue("routine_medical_surveillance", [...currentValue, value]);
+                } else {
+                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
+                }
+              }}
             />
             <label htmlFor="chest_xray" className="ml-2 mt-1">
               Chest X-ray
@@ -144,6 +164,15 @@ export default function HealthAndWelfare({
               id="urinalysis"
               value="Urinalysis"
               checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Urinalysis")}
+              onChange={(e) => {
+                const currentValue = watch("routine_medical_surveillance") || [];
+                const value = e.target.value;
+                if (e.target.checked) {
+                  setValue("routine_medical_surveillance", [...currentValue, value]);
+                } else {
+                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
+                }
+              }}
             />
             <label htmlFor="urinalysis" className="ml-2 mt-1">
               Urinalysis
@@ -156,6 +185,15 @@ export default function HealthAndWelfare({
               id="stool_examination"
               value="Stool Examination"
               checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Stool Examination")}
+              onChange={(e) => {
+                const currentValue = watch("routine_medical_surveillance") || [];
+                const value = e.target.value;
+                if (e.target.checked) {
+                  setValue("routine_medical_surveillance", [...currentValue, value]);
+                } else {
+                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
+                }
+              }}
             />
             <label htmlFor="stool_examination" className="ml-2 mt-1">
               Stool Examination

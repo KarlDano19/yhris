@@ -203,20 +203,33 @@ export default function SafetyMeasures({
                 }}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
-              {safetySignageAttachmentExist && (
-                <button
-                  type="button"
-                  className="underline text-savoy-blue text-sm"
-                  onClick={() => {
-                    setValue("safety_signage", "");
-                    setValue("previous_safety_signage", previousSignageFile);
-                    setSafetySignageUrl("");
-                    setSafetySignageAttachmentExist(false);
-                  }}
-                >
-                  Remove Attachment
-                </button>
-              )}
+              <div className="flex items-center gap-4 mt-2">
+                {safetySignageAttachmentExist && (
+                  <button
+                    type="button"
+                    className="underline text-savoy-blue text-sm"
+                    onClick={() => {
+                      setValue("safety_signage", "");
+                      setValue("previous_safety_signage", previousSignageFile);
+                      setSafetySignageUrl("");
+                      setSafetySignageAttachmentExist(false);
+                    }}
+                  >
+                    Remove Attachment
+                  </button>
+                )}
+                {previousSignageFile && !safetySignageAttachmentExist && (
+                  <button
+                    type="button"
+                    className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
+                    onClick={() => {
+                      window.open(`${process.env.NEXT_PUBLIC_API_URL}/media/oshprogram/signage/${previousSignageFile.split('/').pop()}`, '_blank');
+                    }}
+                  >
+                    View Safety Signage
+                  </button>
+                )}
+              </div>
               {safetySignageUrl && !safetySignageAttachmentExist && (
                 <div className="mt-2">
                   <img 
@@ -313,15 +326,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_supply_of_drinking_water"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="adequate_supply_yes"
-                                checked={field.value === true}
-                                onChange={() => field.onChange(true)}
+                                checked={value === true}
+                                onChange={() => onChange(value === true ? undefined : true)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -333,15 +347,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_supply_of_drinking_water"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="adequate_supply_no"
-                                checked={field.value === false}
-                                onChange={() => field.onChange(false)}
+                                checked={value === false}
+                                onChange={() => onChange(value === false ? undefined : false)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -382,15 +397,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_sanitary_and_washing_facilities"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="adequate_sanitary_yes"
-                                checked={field.value === true}
-                                onChange={() => field.onChange(true)}
+                                checked={value === true}
+                                onChange={() => onChange(value === true ? undefined : true)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -402,15 +418,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_sanitary_and_washing_facilities"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="adequate_sanitary_no"
-                                checked={field.value === false}
-                                onChange={() => field.onChange(false)}
+                                checked={value === false}
+                                onChange={() => onChange(value === false ? undefined : false)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -453,15 +470,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="suitable_living_accommodation"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="suitable_living_yes"
-                                checked={field.value === true}
-                                onChange={() => field.onChange(true)}
+                                checked={value === true}
+                                onChange={() => onChange(value === true ? undefined : true)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -473,15 +491,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="suitable_living_accommodation"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="suitable_living_no"
-                                checked={field.value === false}
-                                onChange={() => field.onChange(false)}
+                                checked={value === false}
+                                onChange={() => onChange(value === false ? undefined : false)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -521,15 +540,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="separate_sanitary_washing_and_sleeping_facilities"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="separate_sanitary_yes"
-                                checked={field.value === true}
-                                onChange={() => field.onChange(true)}
+                                checked={value === true}
+                                onChange={() => onChange(value === true ? undefined : true)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -541,15 +561,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="separate_sanitary_washing_and_sleeping_facilities"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="separate_sanitary_no"
-                                checked={field.value === false}
-                                onChange={() => field.onChange(false)}
+                                checked={value === false}
+                                onChange={() => onChange(value === false ? undefined : false)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -592,15 +613,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="lactation_station"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="lactation_station_yes"
-                                checked={field.value === true}
-                                onChange={() => field.onChange(true)}
+                                checked={value === true}
+                                onChange={() => onChange(value === true ? undefined : true)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -612,15 +634,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="lactation_station"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="lactation_station_no"
-                                checked={field.value === false}
-                                onChange={() => field.onChange(false)}
+                                checked={value === false}
+                                onChange={() => onChange(value === false ? undefined : false)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -659,15 +682,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="ramps_railings_and_like"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="ramps_railings_yes"
-                                checked={field.value === true}
-                                onChange={() => field.onChange(true)}
+                                checked={value === true}
+                                onChange={() => onChange(value === true ? undefined : true)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -679,15 +703,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="ramps_railings_and_like"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="ramps_railings_no"
-                                checked={field.value === false}
-                                onChange={() => field.onChange(false)}
+                                checked={value === false}
+                                onChange={() => onChange(value === false ? undefined : false)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -727,15 +752,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="other_workers_welfare_facilities"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="other_workers_yes"
-                                checked={field.value === true}
-                                onChange={() => field.onChange(true)}
+                                checked={value === true}
+                                onChange={() => onChange(value === true ? undefined : true)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
@@ -747,15 +773,16 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="other_workers_welfare_facilities"
-                          defaultValue={null}
-                          render={({ field }) => (
+                          defaultValue={undefined}
+                          render={({ field: { value, onChange, ...field } }) => (
                             <>
                               <input
-                                type="radio"
+                                type="checkbox"
                                 id="other_workers_no"
-                                checked={field.value === false}
-                                onChange={() => field.onChange(false)}
+                                checked={value === false}
+                                onChange={() => onChange(value === false ? undefined : false)}
                                 className="w-4 h-4"
+                                {...field}
                               />
                             </>
                           )}
