@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { T_OshProgram } from "@/types/globals";
 
 import CustomToast from "@/components/CustomToast";
 import CompanyProfile from "./tabs/CompanyProfile";
@@ -20,8 +21,24 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 
+// Extend the base type with additional fields and make all fields optional for form handling
+type ExtendedOshProgram = Partial<T_OshProgram> & {
+  [key: string]: any;
+  id?: string;
+  business_description?: string | string[];
+  emergency_and_disaster_preparedness?: string | Array<{
+    task: string;
+    hazard_identified: string;
+    risk_description: string;
+    priority: string;
+    control_measures: string;
+  }>;
+  signature?: File | string;
+  safety_signage?: File | string;
+};
+
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
-  const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors, reset } = useForm();
+  const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors, reset } = useForm<ExtendedOshProgram>();
   const [selectedTab, setSelectedTab] = useState(1);
   const [validationMessage, setValidationMessage] = useState("");
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
@@ -30,7 +47,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: oshProgramDetails } = useGetOshProgramDetails();
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
     // Define required fields for each tab
     const requiredFieldsByTab: { [key: number]: string[] } = {
       1: ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'],
@@ -139,16 +156,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         // If it's a string, try to parse it if it's JSON
         if (typeof processedData.business_description === 'string') {
           try {
-            // Try to parse if it's already a JSON string
+            // Try to parse if it's a JSON string
             const parsed = JSON.parse(processedData.business_description);
-            if (Array.isArray(parsed)) {
-              processedData.business_description = parsed;
-            } else {
-              processedData.business_description = [processedData.business_description];
-            }
+            processedData.business_description = Array.isArray(parsed) ? parsed : [processedData.business_description];
           } catch (e) {
             // If parsing fails, it's a regular string
-            processedData.business_description = [processedData.business_description];
+            processedData.business_description = processedData.business_description;
           }
         } else if (processedData.business_description === null) {
           // If null, set to empty array
@@ -200,12 +213,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             item.priority || 
             item.control_measures
           ); // Filter out empty entries
-        processedData.emergency_and_disaster_preparedness = JSON.stringify(validatedData);
+        processedData.emergency_and_disaster_preparedness = validatedData;
       } else {
-        processedData.emergency_and_disaster_preparedness = JSON.stringify([]);
+        processedData.emergency_and_disaster_preparedness = [];
       }
     } else {
-      processedData.emergency_and_disaster_preparedness = JSON.stringify([]);
+      processedData.emergency_and_disaster_preparedness = [];
     }
 
     // Handle array fields 
@@ -290,7 +303,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
       }
     }
-    updateOshProgramDetails({ ...processedData, id: oshProgramDetails?.id }, callbackReq);
+    updateOshProgramDetails({ ...processedData, id: oshProgramDetails?.id } as ExtendedOshProgram, callbackReq);
   });
 
   useEffect(() => {
@@ -443,7 +456,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       // Set file fields
       if (oshProgramDetails.safety_signage) {
-        setSafetySignageUrl(oshProgramDetails.safety_signage);
+        if (typeof oshProgramDetails.safety_signage === 'string') {
+          setSafetySignageUrl(oshProgramDetails.safety_signage);
+        }
         setSafetySignageAttachmentExist(true);
       }
     }

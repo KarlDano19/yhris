@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+import { T_OshProgram } from "@/types/globals";
 
-async function getOshProgramDetails() {
+async function getOshProgramDetails(): Promise<T_OshProgram> {
     try {
         const token = getCookie("token");
         const config = {

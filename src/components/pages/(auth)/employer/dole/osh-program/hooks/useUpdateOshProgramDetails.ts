@@ -1,7 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+import { T_OshProgram } from "@/types/globals";
 
-async function updateOshProgramDetails(data: any) {
+type OshProgramData = Partial<T_OshProgram> & { id?: string } & {
+  [key: string]: any;  // Add index signature for dynamic access
+};
+
+function isFile(value: any): value is File {
+  return value instanceof File;
+}
+
+async function updateOshProgramDetails(data: OshProgramData) {
     try {
         const token = getCookie("token");
         if (!token) {
@@ -79,7 +88,7 @@ async function updateOshProgramDetails(data: any) {
         
         // Add all fields to FormData
         for (const key in cleanData) {
-            if (cleanData[key] instanceof File) {
+            if (isFile(cleanData[key])) {
                 // Add files directly
                 console.log(`Adding file for field: ${key}`);
                 formData.append(key, cleanData[key]);
@@ -93,7 +102,7 @@ async function updateOshProgramDetails(data: any) {
             } else if (key === 'signature' || key === 'safety_signage') {
                 // Only append signature/safety_signage if it exists and is not null/undefined
                 if (cleanData[key] && cleanData[key] !== 'null' && cleanData[key] !== 'undefined') {
-                    if (cleanData[key] instanceof File) {
+                    if (isFile(cleanData[key])) {
                         formData.append(key, cleanData[key]);
                         
                         // Add previous file information
