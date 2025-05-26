@@ -8,7 +8,7 @@ async function getOshProgramDetails() {
             method: "GET",
             headers: {
                 Authorization: `Token ${token}`,
-                Accept: "multipart/form-data, application/json",
+                Accept: "application/json",
             },
         };
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`, config);
@@ -19,14 +19,8 @@ async function getOshProgramDetails() {
 
         // Process file fields to ensure they're properly handled
         const fileFields = [
-            'safety_signage',
-            'adequate_supply_of_drinking_water_file',
-            'adequate_sanitary_and_washing_facilities_file',
-            'suitable_living_accommodation_file',
-            'separate_sanitary_washing_and_sleeping_facilities_file',
-            'lactation_station_file',
-            'ramps_railings_and_like_file',
-            'other_workers_welfare_facilities_file'
+            'signature',
+            'safety_signage'
         ];
 
         // Convert file data if present

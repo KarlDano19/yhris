@@ -116,7 +116,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       'no_of_clinics_in_the_workplace',
       'number_of_male_employees',
       'number_of_female_employees',
-      'total_number_of_employees'
+      'total_number_of_employees',
+      'medical_examinations_cost',
+      'medical_supplies_cost',
+      'osh_training_cost',
+      'ppe_cost',
+      'safety_signages_cost',
+      'machine_guards_cost',
+      'others_cost'
     ];
     
     numericFields.forEach(field => {
@@ -288,60 +295,153 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (oshProgramDetails) {
-      // Process array fields before setting them
-      const arrayFields = [
-        'routine_medical_surveillance',
-        'schedule_of_annual_medical_examination',
-        'special_medical_surveillance',
-        'safety_officer',
-        'health_personnel',
-        'health_training',
-        'risk_assessment',
-        'reported_incidents',
-        'safety_meeting'
-      ];
+      // Tab 1: Company Profile
+      setValue("company_name", oshProgramDetails.company_name);
+      setValue("date_established", oshProgramDetails.date_established);
+      setValue("complete_address", oshProgramDetails.complete_address);
+      setValue("phone_number", oshProgramDetails.phone_number);
+      setValue("fax_number", oshProgramDetails.fax_number);
+      setValue("website_url", oshProgramDetails.website_url);
+      setValue("company_owner", oshProgramDetails.company_owner);
+      setValue("number_of_male_employees", oshProgramDetails.number_of_male_employees);
+      setValue("number_of_female_employees", oshProgramDetails.number_of_female_employees);
+      setValue("total_number_of_employees", oshProgramDetails.total_number_of_employees);
+      setValue("business_description", oshProgramDetails.business_description);
+      setValue("manufacturing_description", oshProgramDetails.manufacturing_description);
+      setValue("bank_and_financial_institution_description", oshProgramDetails.bank_and_financial_institution_description);
+      setValue("service_description", oshProgramDetails.service_description);
+      setValue("security_agency_description", oshProgramDetails.security_agency_description);
+      setValue("agri_fishing_description", oshProgramDetails.agri_fishing_description);
+      setValue("maintenance_description", oshProgramDetails.maintenance_description);
+      setValue("wholesale_retail_description", oshProgramDetails.wholesale_retail_description);
+      setValue("construction_description", oshProgramDetails.construction_description);
+      setValue("utilities_description", oshProgramDetails.utilities_description);
+      setValue("others_description", oshProgramDetails.others_description);
+      setValue("product_description", oshProgramDetails.product_description);
+      setValue("services_description", oshProgramDetails.services_description);
 
-      // Process each array field
-      arrayFields.forEach(field => {
-        let fieldValue = oshProgramDetails[field];
-        if (fieldValue) {
-          try {
-            // If it's a string, try to parse it
-            if (typeof fieldValue === 'string') {
-              fieldValue = JSON.parse(fieldValue);
-            }
-            // Ensure it's an array
-            if (!Array.isArray(fieldValue)) {
-              fieldValue = [fieldValue];
-            }
-            // Filter out any null, undefined, or empty values
-            fieldValue = fieldValue.filter((item: any) => item !== null && item !== undefined && item !== '');
-            
-            // For checkbox fields, ensure we keep the raw values
-            if (['routine_medical_surveillance', 'special_medical_surveillance', 'schedule_of_annual_medical_examination'].includes(field)) {
-              fieldValue = fieldValue.map((item: any) => 
-                typeof item === 'object' ? item.value || item.toString() : item.toString()
-              );
-            }
-          } catch (e) {
-            // If parsing fails, convert to array
-            fieldValue = typeof fieldValue === 'string' ? fieldValue.split(',').map((item: string) => item.trim()) : [];
-          }
-          setValue(field, fieldValue);
-        } else {
-          // Initialize empty array if no value
-          setValue(field, []);
-        }
-      });
+      // Tab 2: OSH Program and Policy
+      setValue("basic_components", oshProgramDetails.basic_components);
+      setValue("company_commitment", oshProgramDetails.company_commitment);
+      setValue("date", oshProgramDetails.date);
+      setValue("name_of_owner", oshProgramDetails.name_of_owner);
+      setValue("signature", oshProgramDetails.signature);
 
-      // Set other fields
-      Object.keys(oshProgramDetails).forEach(key => {
-        if (!arrayFields.includes(key)) {
-          setValue(key, oshProgramDetails[key]);
-        }
-      });
+      // Tab 3: Risk Management
+      setValue("emergency_and_disaster_preparedness", oshProgramDetails.emergency_and_disaster_preparedness);
 
-      // Set safety signage state if it exists
+      // Tab 4: Health and Welfare Program
+        // Medical Surveillance Section
+        setValue("routine_medical_surveillance", oshProgramDetails.routine_medical_surveillance);
+        setValue("special_medical_surveillance", oshProgramDetails.special_medical_surveillance);
+        setValue("schedule_of_annual_medical_examination", oshProgramDetails.schedule_of_annual_medical_examination);
+        setValue("random_drug_testing", oshProgramDetails.random_drug_testing);
+
+        // First-Aid, Health Care Medicines and Equipment Facilities
+        setValue("no_of_treatment_rooms_first_aid_rooms", oshProgramDetails.no_of_treatment_rooms_first_aid_rooms);
+        setValue("no_of_clinics_in_the_workplace", oshProgramDetails.no_of_clinics_in_the_workplace);
+        setValue("hospitals_youre_affiliated_with", oshProgramDetails.hospitals_youre_affiliated_with);
+
+        // Committee Members
+          // A. For establishments with less than ten workers
+          setValue("chairperson_less_than_ten", oshProgramDetails.chairperson_less_than_ten);
+          setValue("secretary_less_than_ten", oshProgramDetails.secretary_less_than_ten);
+          setValue("member_less_than_ten", oshProgramDetails.member_less_than_ten);
+
+          // B. For medium to high risk establishments
+          setValue("chairperson_medium_to_high", oshProgramDetails.chairperson_medium_to_high);
+          setValue("secretary_medium_to_high", oshProgramDetails.secretary_medium_to_high);
+          setValue("ex_officio_members", oshProgramDetails.ex_officio_members);
+          setValue("ex_officio_members_1", oshProgramDetails.ex_officio_members_1);
+          setValue("ex_officio_members_2", oshProgramDetails.ex_officio_members_2);
+          setValue("members", oshProgramDetails.members);
+          setValue("members_2", oshProgramDetails.members_2);
+
+          // C. Joint Coordinating Committee
+          setValue("chairperson_joint_coordinating", oshProgramDetails.chairperson_joint_coordinating);
+          setValue("secretary_joint_coordinating", oshProgramDetails.secretary_joint_coordinating);
+          setValue("ex_officio_members_3", oshProgramDetails.ex_officio_members_3);
+          setValue("ex_officio_members_4", oshProgramDetails.ex_officio_members_4);
+
+        // Safety and Health Committee Minutes/Reports
+        setValue("duties_and_responsibilities", oshProgramDetails.duties_and_responsibilities);
+
+        // OSH Personnel and Facilities - Safety Officer
+        setValue("safety_officer", oshProgramDetails.safety_officer);
+
+        // Emergency Occupational Health Personnel and Facilities
+        setValue("health_personnel", oshProgramDetails.health_personnel);
+
+        // Safety and Health Promotion, training and education
+        setValue("health_training", oshProgramDetails.health_training);
+
+        // Risk Assessment Table
+        setValue("risk_assessment", oshProgramDetails.risk_assessment);
+
+        // Tool Box Meetings/Safety Meetings
+        setValue("safety_meeting", oshProgramDetails.safety_meeting);
+
+        // Accident/Incident/Injury Reports
+        setValue("reported_incidents", oshProgramDetails.reported_incidents);
+
+      // Tab 5: Safety Measures
+        // Provision and use of PPE Section
+        setValue("ppe", oshProgramDetails.ppe);
+        setValue("ppe_description", oshProgramDetails.ppe_description);
+        
+        // Safety Signage Section
+        setValue("safety_signage", oshProgramDetails.safety_signage);
+        
+        // Dust Control and Management Section - Facilities Table
+        setValue("adequate_supply_of_drinking_water", oshProgramDetails.adequate_supply_of_drinking_water);
+        setValue("adequate_supply_of_drinking_water_remarks", oshProgramDetails.adequate_supply_of_drinking_water_remarks);
+        setValue("adequate_sanitary_and_washing_facilities", oshProgramDetails.adequate_sanitary_and_washing_facilities);
+        setValue("adequate_sanitary_and_washing_facilities_remarks", oshProgramDetails.adequate_sanitary_and_washing_facilities_remarks);
+        setValue("suitable_living_accommodation", oshProgramDetails.suitable_living_accommodation);
+        setValue("suitable_living_accommodation_remarks", oshProgramDetails.suitable_living_accommodation_remarks);
+        setValue("separate_sanitary_washing_and_sleeping_facilities", oshProgramDetails.separate_sanitary_washing_and_sleeping_facilities);
+        setValue("separate_sanitary_washing_and_sleeping_facilities_remarks", oshProgramDetails.separate_sanitary_washing_and_sleeping_facilities_remarks);
+        setValue("lactation_station", oshProgramDetails.lactation_station);
+        setValue("lactation_station_remarks", oshProgramDetails.lactation_station_remarks);
+        setValue("ramps_railings_and_like", oshProgramDetails.ramps_railings_and_like);
+        setValue("ramps_railings_and_like_remarks", oshProgramDetails.ramps_railings_and_like_remarks);
+        setValue("other_workers_welfare_facilities", oshProgramDetails.other_workers_welfare_facilities);
+        setValue("other_workers_welfare_facilities_remarks", oshProgramDetails.other_workers_welfare_facilities_remarks);
+        
+        // Emergency and Disaster Preparedness Section
+        setValue("written_emergency_and_disaster_program", oshProgramDetails.written_emergency_and_disaster_program);
+        setValue("drills", oshProgramDetails.drills);
+        
+        // Solid Waste Management System Section
+        setValue("written_pollution_control_program", oshProgramDetails.written_pollution_control_program);
+        setValue("waste_management_system_message", oshProgramDetails.waste_management_system_message);
+        
+        // Prohibited Acts and Penalties Section
+        setValue("prohibited_acts_and_penalties_message", oshProgramDetails.prohibited_acts_and_penalties_message);
+
+      // Tab 6: Compliance and Cost
+        // Cost of implementing company OSH program
+        setValue("cost_osh_program", oshProgramDetails.cost_osh_program);
+        
+        // Annual estimated amount for OSH program implementation
+        setValue("ppe_cost", oshProgramDetails.ppe_cost);
+        setValue("osh_training_cost", oshProgramDetails.osh_training_cost);
+        setValue("safety_signages_cost", oshProgramDetails.safety_signages_cost);
+        setValue("machine_guards_cost", oshProgramDetails.machine_guards_cost);
+        setValue("medical_examinations_cost", oshProgramDetails.medical_examinations_cost);
+        setValue("medical_supplies_cost", oshProgramDetails.medical_supplies_cost);
+        setValue("others_name", oshProgramDetails.others_name);
+        setValue("others_cost", oshProgramDetails.others_cost);
+        
+        // ANNEX A Section
+        setValue("annex_a_message", oshProgramDetails.annex_a_message);
+        
+        // Signature Section
+        setValue("name_of_owner_manager", oshProgramDetails.name_of_owner_manager);
+        setValue("employees_representative", oshProgramDetails.employees_representative);
+        setValue("date_filled", oshProgramDetails.date_filled);
+
+      // Set file fields
       if (oshProgramDetails.safety_signage) {
         setSafetySignageUrl(oshProgramDetails.safety_signage);
         setSafetySignageAttachmentExist(true);
