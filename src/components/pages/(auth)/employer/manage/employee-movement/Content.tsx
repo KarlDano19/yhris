@@ -14,8 +14,10 @@ import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from "@/svg/EditIcon";
-import DeleteIcon from "@/svg/DeleteIcon";
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
+import useGetPersonelMovementList from './hooks/useGetPersonelMovementList';
+import CreatePersonelMovementModal from './modals/CreatePersonelMovementModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -30,23 +32,14 @@ type T_ModalData = {
 const Content = () => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState<boolean>(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
-  const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
-  const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
-  const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
-  const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);;
-  const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  const [isOpenCreatePersonelMovementModal, setIsOpenCreatePersonelMovementModal] = useState(false);
+  const [personelMovementList, setPersonelMovementList] = useState<any>([]);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
   });
-  const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -54,7 +47,112 @@ const Content = () => {
   });
 
   const cachedData: any = cachedProfile?.state?.data;
-  const hasAgreed = cachedData?.is_export_agreed;
+  const {
+    data: personelMovementListData,
+    isLoading: isLoadingPersonelMovementList,
+    refetch: personelMovementListRefetch,
+  } = useGetPersonelMovementList({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+
+  useEffect(() => {
+    if (personelMovementListData) {
+      personelMovementListData.records.map((item: any) => {
+        item.date_of_entry = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_entry));
+        item.date_of_notification = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_notification));
+        item.date_of_contingency = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_contingency));
+        return item;
+      });
+      setPersonelMovementList(personelMovementListData.records);
+      setPagination({
+        totalPages: personelMovementListData.total_pages,
+        totalRecords: personelMovementListData.total_records,
+      });
+    }
+  }, [personelMovementListData]);
+
+  useEffect(() => {
+    personelMovementListRefetch();
+  }, [currentPage, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
+  const renderRows = () => {
+    if (isLoadingPersonelMovementList) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div role='status' className='py-5 text-center'>
+              <svg
+                aria-hidden='true'
+                className='inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400'
+                viewBox='0 0 100 101'
+                fill='none'
+                xmlns='http://www.w3.org/2000/svg'
+              >
+                <path
+                  d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                  fill='currentColor'
+                />
+                <path
+                  d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
+                  fill='currentFill'
+                />
+              </svg>
+              <span className='sr-only'>Loading...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    if (personelMovementList && personelMovementList.length > 0) {
+      return personelMovementList.map((item: any) => (
+        <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_entry}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_notification}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_contingency}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.place_of_contingency}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.nature_of_contingency}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.days_of_employee_absence}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.remarks}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+            <div className='flex space-x-2'>
+              <button 
+                onClick={() => {}}
+                // disabled={!cachedRigths?.state?.data?.edit_dole_employee_compensation}
+              >
+                <EditIcon />
+              </button>
+              <button 
+                onClick={() => {}}
+                // disabled={!cachedRigths?.state?.data?.edit_dole_employee_compensation}
+              >
+                <DeleteIcon />
+              </button>
+            </div>
+          </td>
+        </tr>
+      ));
+    } else {
+      return (
+        <tr>
+          <td colSpan={7}>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>
+              Please click create to add employee compensation logbook.
+            </h4>
+          </td>
+        </tr>
+      );
+    }
+  };
 
   return (
     <>
@@ -119,7 +217,6 @@ const Content = () => {
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   value={itemsFilter.search}
-                  
                   placeholder='Search ...'
                 />
               </div>
@@ -132,7 +229,7 @@ const Content = () => {
             </button>
             <div className='flex-1 flex justify-end'>
               <button
-                onClick={() => setIsAddEmployeeModalOpen(true)}
+                onClick={() => setIsOpenCreatePersonelMovementModal(true)}
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 // disabled={!cachedRigths?.state?.data?.create_employee}
               >
@@ -199,7 +296,7 @@ const Content = () => {
                         Employee Name
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                       Position
+                        Position
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Reason
@@ -215,21 +312,24 @@ const Content = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='divide-y divide-gray-200'>
-                    {/* {renderRows()} */}
-                    </tbody>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                {/* <Pagination
+                <Pagination
                   pagination={pagination}
                   currentPage={currentPage}
                   pageSize={pageSize}
                   onPageSizeChange={pageSizeChange}
                   onPageChange={paginationChange}
-                /> */}
+                />
               </div>
             </div>
           </div>
+          <CreatePersonelMovementModal
+            refetch={personelMovementListRefetch}
+            isOpen={isOpenCreatePersonelMovementModal}
+            setIsOpen={setIsOpenCreatePersonelMovementModal}
+          />
         </div>
       </div>
     </>

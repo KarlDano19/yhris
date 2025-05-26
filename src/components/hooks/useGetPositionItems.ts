@@ -3,6 +3,8 @@ import { getCookie } from 'cookies-next';
 
 async function getPositionItems() {
   try {
+    let newFilters = { view_type: 'select' };
+    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -12,7 +14,7 @@ async function getPositionItems() {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/positions/`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/positions/?${searchParams}`, config);
       if (!res.ok) {
         throw res.json();
       }
