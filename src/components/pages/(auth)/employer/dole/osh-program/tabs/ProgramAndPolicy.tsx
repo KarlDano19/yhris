@@ -17,11 +17,13 @@ export default function ProgramAndPolicy({
   register,
   setValue,
   watch,
+  validationMessage,
 }: {
   control: any;
   register: any;
   setValue: any;
   watch: any;
+  validationMessage?: string;
 }) {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
@@ -38,8 +40,7 @@ export default function ProgramAndPolicy({
   useEffect(() => {
     if (signatureUrl) {
       setValue("signature", signatureUrl);
-    } else {
-      setSignatureUrl("");
+      setAttachmentExist(false);
     }
     if (!drawSignatureModal && signatureUrl) {
       setSignatureUrl("");
@@ -49,7 +50,7 @@ export default function ProgramAndPolicy({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon
@@ -59,7 +60,7 @@ export default function ProgramAndPolicy({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
+                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
               </h3>
             </div>
           </div>
@@ -142,7 +143,14 @@ export default function ProgramAndPolicy({
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                     }
                     selected={field.value ? new Date(field.value) : null}
-                    pickerOnChange={(date: any) => field.onChange(date)}
+                    pickerOnChange={(date: any) => {
+                      if (date) {
+                        const formattedDate = date.toISOString().split('T')[0];
+                        field.onChange(formattedDate);
+                      } else {
+                        field.onChange(null);
+                      }
+                    }}
                     inputOnChange={(value: any) => field.onChange(value)}
                     required={true}
                   />
@@ -198,8 +206,11 @@ export default function ProgramAndPolicy({
                 id="signature"
                 {...register("signature")}
                 onChange={(e) => {
-                  e.target.value ? setSignatureUrl("") : null;
-                  e.target.value ? setAttachmentExist(true) : null;
+                  if (e.target.files && e.target.files[0]) {
+                    setValue("signature", e.target.files[0]);
+                    setSignatureUrl("");
+                    setAttachmentExist(true);
+                  }
                 }}
                 type="file"
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"

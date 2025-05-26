@@ -10,9 +10,11 @@ import ClipIcon from "@/svg/ClipIcon";
 export default function HealthAndWelfare({
   control,
   register,
+  validationMessage,
 }: {
   control: any;
   register: any;
+  validationMessage?: string;
 }) {
   const {
     fields: safetyOfficerFields,
@@ -71,7 +73,7 @@ export default function HealthAndWelfare({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon
@@ -81,7 +83,7 @@ export default function HealthAndWelfare({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
+                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
               </h3>
             </div>
           </div>
@@ -96,8 +98,8 @@ export default function HealthAndWelfare({
           <h1 className="text-sm text-gray-500">
             The company will require all employees to undergo a baseline or
             initial medical health examination prior to assigning to a
-            potentially hazardous activity.  The examination will include but
-            not limited to the following: 
+            potentially hazardous activity.  The examination will include but
+            not limited to the following: 
           </h1>
         </div>
         <div className="mt-4">
@@ -261,26 +263,42 @@ export default function HealthAndWelfare({
         </div>
         <div className="grid grid-cols-4 gap-6">
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("random_drug_testing")}
-              id="yes"
-              value="Yes"
+            <Controller
+              control={control}
+              name="random_drug_testing"
+              render={({ field }) => (
+                <>
+                  <input
+                    type="radio"
+                    id="drug_test_yes"
+                    checked={field.value === true}
+                    onChange={() => field.onChange(true)}
+                  />
+                  <label htmlFor="drug_test_yes" className="ml-2 mt-1">
+                    Yes
+                  </label>
+                </>
+              )}
             />
-            <label htmlFor="yes" className="ml-2 mt-1">
-              Yes
-            </label>
           </div>
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("random_drug_testing")}
-              id="no"
-              value="No"
+            <Controller
+              control={control}
+              name="random_drug_testing"
+              render={({ field }) => (
+                <>
+                  <input
+                    type="radio"
+                    id="drug_test_no"
+                    checked={field.value === false}
+                    onChange={() => field.onChange(false)}
+                  />
+                  <label htmlFor="drug_test_no" className="ml-2 mt-1">
+                    No
+                  </label>
+                </>
+              )}
             />
-            <label htmlFor="no" className="ml-2 mt-1">
-              No
-            </label>
           </div>
         </div>
         <div className="mt-4">
@@ -297,12 +315,13 @@ export default function HealthAndWelfare({
               htmlFor="company_name"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              No. of treatment rooms/first aid rooms in the company*
+              No. of treatment rooms/first aid rooms in the company
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
-                type="text"
+                type="number"
+                min="0"
                 {...register("no_of_treatment_rooms_first_aid_rooms")}
                 id="no_of_treatment_rooms_first_aid_rooms"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -314,12 +333,13 @@ export default function HealthAndWelfare({
               htmlFor="company_name"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              No. of clinics in the workplace*
+              No. of clinics in the workplace
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
-                type="text"
+                type="number"
+                min="0"
                 {...register("no_of_clinics_in_the_workplace")}
                 id="no_of_clinics_in_the_workplace"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -331,7 +351,7 @@ export default function HealthAndWelfare({
               htmlFor="company_name"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Hospitals you’re affiliated with*
+              Hospitals you're affiliated with
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
@@ -353,7 +373,7 @@ export default function HealthAndWelfare({
           </label>
           <h1 className="text-sm text-gray-500">
             This refers to : Drug-free Workplace in compliance to RA 9165, Human
-            Immunodeficiency Syndrome (HIV/AIDS) in compliance to (RA 8504)  RA
+            Immunodeficiency Syndrome (HIV/AIDS) in compliance to (RA 8504)  RA
             11166, Tuberculosis in compliance to EO 187-03, Hepatitis B in
             compliance to DOLE Advisory No. 05 Series of 2010, Mental Health in
             compliance to RA 11036.
@@ -370,7 +390,7 @@ export default function HealthAndWelfare({
             The SHC of the company is responsible to plan, develop and implement
             OSH policies and programs, monitor and evaluate OSH programs and
             investigate all aspect of the work pertaining to the safety and
-            health of all the workers. SHC   shall be composed of the following
+            health of all the workers. SHC   shall be composed of the following
             in compliance with the law
           </h1>
         </div>
@@ -545,7 +565,7 @@ export default function HealthAndWelfare({
             htmlFor="message"
             className="block text-sm font-medium leading-6 text-gray-900"
           >
-            C) Joint Coordinating Committee:  For two (2) or more establishments
+            C) Joint Coordinating Committee:  For two (2) or more establishments
             housed under one building or complex including malls.
           </label>
         </div>
@@ -617,7 +637,7 @@ export default function HealthAndWelfare({
         <div className="gap-6 mt-4">
           <div>
             <h1 className="text-sm text-gray-500">
-              Name of two (2) workers’ representatives one from which must be
+              Name of two (2) workers' representatives one from which must be
               from a union if organized from any establishments under the
               building
             </h1>
@@ -640,7 +660,7 @@ export default function HealthAndWelfare({
         <div className="mt-4">
           <h1 className="text-sm text-gray-500">
             (All members of the HSC shall perform their duties and
-            responsibilities by the OSH law and its implementing guidelines.) 
+            responsibilities by the OSH law and its implementing guidelines.) 
           </h1>
           <h1 className="text-sm text-gray-500 mt-4">
             Safety and Health Committee Minutes/Reports submitted to DOLE (pls
@@ -649,26 +669,42 @@ export default function HealthAndWelfare({
         </div>
         <div className="grid grid-cols-4 gap-6">
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("duties_and_responsibilities")}
-              id="yes"
-              value="Yes"
+            <Controller
+              control={control}
+              name="duties_and_responsibilities"
+              render={({ field }) => (
+                <>
+                  <input
+                    type="radio"
+                    id="duties_yes"
+                    checked={field.value === true}
+                    onChange={() => field.onChange(true)}
+                  />
+                  <label htmlFor="duties_yes" className="ml-2 mt-1">
+                    Yes
+                  </label>
+                </>
+              )}
             />
-            <label htmlFor="yes" className="ml-2 mt-1">
-              Yes
-            </label>
           </div>
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("duties_and_responsibilities")}
-              id="no"
-              value="No"
+            <Controller
+              control={control}
+              name="duties_and_responsibilities"
+              render={({ field }) => (
+                <>
+                  <input
+                    type="radio"
+                    id="duties_no"
+                    checked={field.value === false}
+                    onChange={() => field.onChange(false)}
+                  />
+                  <label htmlFor="duties_no" className="ml-2 mt-1">
+                    No
+                  </label>
+                </>
+              )}
             />
-            <label htmlFor="no" className="ml-2 mt-1">
-              No
-            </label>
           </div>
         </div>
         <div className="mt-4">
@@ -961,7 +997,7 @@ export default function HealthAndWelfare({
                       scope="col"
                       className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                     >
-                      Name of OSH  Training/Orientation
+                      Name of OSH  Training/Orientation
                     </th>
                     <th
                       scope="col"
@@ -1153,7 +1189,7 @@ export default function HealthAndWelfare({
               htmlFor="message"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-               Conduct of Tool Box Meetings/ Safety Meetings (if applicable)
+               Conduct of Tool Box Meetings/ Safety Meetings (if applicable)
             </label>
             <div className="mt-4 w-2/3">
               <table className="min-w-full divide-y divide-gray-300 text-center">

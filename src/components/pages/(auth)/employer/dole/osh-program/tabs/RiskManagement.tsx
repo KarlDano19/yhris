@@ -6,9 +6,11 @@ import { MinusIcon, XCircleIcon } from "@heroicons/react/24/solid";
 export default function RiskManagement({
   control,
   register,
+  validationMessage,
 }: {
   control: any;
   register: any;
+  validationMessage?: string;
 }) {
   const { fields, append, remove } = useFieldArray({
     control: control,
@@ -18,7 +20,7 @@ export default function RiskManagement({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon
@@ -28,7 +30,7 @@ export default function RiskManagement({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
+                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
               </h3>
             </div>
           </div>

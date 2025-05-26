@@ -16,12 +16,14 @@ export default function ComplianceAndCost({
   setValue,
   watch,
   onSubmit,
+  validationMessage,
 }: {
   control: any;
   register: any;
   setValue: any;
   watch: any;
   onSubmit: any;
+  validationMessage?: string;
 }) {
 
   const ReactQuill = useMemo(
@@ -32,7 +34,7 @@ export default function ComplianceAndCost({
   return (
     <form onSubmit={onSubmit}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon
@@ -42,7 +44,7 @@ export default function ComplianceAndCost({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
+                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
               </h3>
             </div>
           </div>
@@ -239,7 +241,7 @@ export default function ComplianceAndCost({
       </div>
       <div className=" gap-6 mt-4">
             <h1 className="text-sm text-gray-500 mt-2">
-            This policy is formulated for everybody’s information. The company is committed to ensuring workers’ health and providing a healthy and safe workplace
+            This policy is formulated for everybody's information. The company is committed to ensuring workers' health and providing a healthy and safe workplace
             </h1>
       </div>
       <div className="grid grid-cols-3 gap-6 mt-4">
@@ -265,7 +267,7 @@ export default function ComplianceAndCost({
               htmlFor="type_of_industry"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-             Employees’ Representative
+             Employees' Representative
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
@@ -297,8 +299,16 @@ export default function ComplianceAndCost({
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                     }
                     selected={field.value ? new Date(field.value) : null}
-                    pickerOnChange={(date: any) => field.onChange(date)}
+                    pickerOnChange={(date: any) => {
+                      if (date) {
+                        const formattedDate = date.toISOString().split('T')[0];
+                        field.onChange(formattedDate);
+                      } else {
+                        field.onChange(null);
+                      }
+                    }}
                     inputOnChange={(value: any) => field.onChange(value)}
+                    required={true}
                   />
                 )}
               />

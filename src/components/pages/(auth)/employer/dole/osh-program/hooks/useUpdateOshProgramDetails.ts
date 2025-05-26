@@ -11,14 +11,13 @@ async function updateOshProgramDetails(data: any) {
         const cleanData = { ...data };
 
         // Check for case sensitivity issues with company_name field
-        // This fixes the issue where the backend expects "company_name" but might receive "Company_name"
         if ('Company_name' in cleanData && !('company_name' in cleanData)) {
             cleanData.company_name = cleanData.Company_name;
             delete cleanData.Company_name;
         }
 
         // Handle date formatting
-        const dateFields = ['date_established', 'date'];
+        const dateFields = ['date_established', 'date', 'date_policy'];
         for (const field of dateFields) {
             if (cleanData[field]) {
                 const dateObj = new Date(cleanData[field]);
@@ -28,73 +27,147 @@ async function updateOshProgramDetails(data: any) {
             }
         }
 
-        // Handle business_description array field
-        if (cleanData.business_description) {
-            if (!Array.isArray(cleanData.business_description)) {
-                cleanData.business_description = [cleanData.business_description];
+        // Handle boolean fields
+        if (cleanData.random_drug_testing !== undefined) {
+            // Convert string values like "Yes" to boolean true
+            if (typeof cleanData.random_drug_testing === 'string') {
+                cleanData.random_drug_testing = cleanData.random_drug_testing.toLowerCase() === 'yes';
             }
         }
 
-        // Handle JSON fields
-        const jsonFields = [
-            'drills',
-            'emergency_and_disaster_preparedness',
-            'health_personnel',
-            'health_training',
-            'ppe',
-            'reported_incidents',
-            'risk_assessment',
-            'safety_meeting',
-            'safety_officer'
-        ];
+        // Check if we have file uploads
+        const hasFileUploads = cleanData.signature instanceof File || 
+                              cleanData.safety_signature instanceof File;
 
-        for (const field of jsonFields) {
-            if (cleanData[field]) {
-                // If it's already an object/array, keep it as is
-                if (typeof cleanData[field] === 'object') {
-                    continue;
-                }
-                // If it's a string, try to parse it
-                if (typeof cleanData[field] === 'string') {
-                    try {
-                        cleanData[field] = JSON.parse(cleanData[field]);
-                    } catch (e) {
-                        cleanData[field] = {};
-                    }
-                }
-            }
-        }
-
-        // Handle array fields
-        const arrayFields = [
-            'routine_medical_surveillance',
-            'schedule_of_annual_medical_examination',
-            'special_medical_surveillance'
-        ];
-
-        for (const field of arrayFields) {
-            if (cleanData[field]) {
-                if (!Array.isArray(cleanData[field])) {
-                    if (typeof cleanData[field] === 'string') {
-                        cleanData[field] = cleanData[field].split(',').map((item: string) => item.trim());
+        let response;
+        
+        if (hasFileUploads) {
+            // Use FormData for file uploads
+            const formData = new FormData();
+            
+            // Add all fields to FormData
+            for (const key in cleanData) {
+                if (cleanData[key] instanceof File) {
+                    // Add files directly
+                    formData.append(key, cleanData[key]);
+                } else if (key === 'business_description' && cleanData[key]) {
+                    // Handle business_description array field
+                    if (Array.isArray(cleanData[key])) {
+                        formData.append(key, JSON.stringify(cleanData[key]));
                     } else {
-                        cleanData[field] = [cleanData[field]];
+                        formData.append(key, JSON.stringify([cleanData[key]]));
+                    }
+                } else if (['routine_medical_surveillance', 'schedule_of_annual_medical_examination', 'special_medical_surveillance'].includes(key) && cleanData[key]) {
+                    // Handle array fields
+                    if (Array.isArray(cleanData[key])) {
+                        formData.append(key, JSON.stringify(cleanData[key]));
+                    } else if (typeof cleanData[key] === 'string') {
+                        const arrayValue = cleanData[key].split(',').map((item: string) => item.trim());
+                        formData.append(key, JSON.stringify(arrayValue));
+                    } else {
+                        formData.append(key, JSON.stringify([cleanData[key]]));
+                    }
+                } else if (['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 'safety_meeting', 'safety_officer'].includes(key) && cleanData[key]) {
+                    // Handle JSON fields
+                    if (typeof cleanData[key] === 'object') {
+                        formData.append(key, JSON.stringify(cleanData[key]));
+                    } else if (typeof cleanData[key] === 'string') {
+                        try {
+                            const jsonValue = JSON.parse(cleanData[key]);
+                            formData.append(key, JSON.stringify(jsonValue));
+                        } catch (e) {
+                            formData.append(key, JSON.stringify({}));
+                        }
+                    } else {
+                        formData.append(key, JSON.stringify({}));
+                    }
+                } else if (cleanData[key] !== undefined && cleanData[key] !== null) {
+                    // Add other primitive values
+                    formData.append(key, cleanData[key]);
+                }
+            }
+            
+            response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": `Token ${token}`
+                        // Don't set Content-Type header when using FormData
+                    },
+                    body: formData,
+                }
+            );
+        } else {
+            // Handle business_description array field
+            if (cleanData.business_description) {
+                if (!Array.isArray(cleanData.business_description)) {
+                    cleanData.business_description = [cleanData.business_description];
+                }
+            }
+
+            // Handle JSON fields
+            const jsonFields = [
+                'drills',
+                'emergency_and_disaster_preparedness',
+                'health_personnel',
+                'health_training',
+                'ppe',
+                'reported_incidents',
+                'risk_assessment',
+                'safety_meeting',
+                'safety_officer'
+            ];
+
+            for (const field of jsonFields) {
+                if (cleanData[field]) {
+                    // If it's already an object/array, keep it as is
+                    if (typeof cleanData[field] === 'object') {
+                        continue;
+                    }
+                    // If it's a string, try to parse it
+                    if (typeof cleanData[field] === 'string') {
+                        try {
+                            cleanData[field] = JSON.parse(cleanData[field]);
+                        } catch (e) {
+                            cleanData[field] = {};
+                        }
                     }
                 }
             }
-        }
 
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Token ${token}`
-                },
-                body: JSON.stringify(cleanData),
+            // Handle array fields
+            const arrayFields = [
+                'routine_medical_surveillance',
+                'schedule_of_annual_medical_examination',
+                'special_medical_surveillance'
+            ];
+
+            for (const field of arrayFields) {
+                if (cleanData[field]) {
+                    if (!Array.isArray(cleanData[field])) {
+                        if (typeof cleanData[field] === 'string') {
+                            cleanData[field] = cleanData[field].split(',').map((item: string) => item.trim());
+                        } else {
+                            cleanData[field] = [cleanData[field]];
+                        }
+                    }
+                }
             }
-        );
+
+            // Use JSON for non-file data
+            response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Token ${token}`
+                    },
+                    body: JSON.stringify(cleanData),
+                }
+            );
+        }
 
         if (response.status === 401) {
             throw new Error("Authentication failed. Please log in again.");

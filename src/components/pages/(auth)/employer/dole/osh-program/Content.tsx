@@ -29,16 +29,135 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data) => {
-    // Only validate required company profile fields if we're on that tab
-    if (selectedTab === 1) {
-      const requiredFields = ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'];
-      const missingFields = requiredFields.filter(field => !data[field]);
-      
-      if (missingFields.length > 0) {
-        setValidationMessage("Please fill out all required fields marked with *");
-        return;
-      }
+    // Define required fields for each tab
+    const requiredFieldsByTab: { [key: number]: string[] } = {
+      1: ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'],
+      2: ['date_policy', 'name_of_owner', 'signature'], 
+      3: ['emergency_and_disaster_preparedness'],
+      4: ['no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace', 'hospitals_youre_affiliated_with', 
+          'chairperson_less_than_ten', 'secretary_less_than_ten', 'member_less_than_ten', 
+          'chairperson_medium_to_high', 'secretary_medium_to_high', 'ex_officio_members', 
+          'members', 'chairperson_joint_coordinating', 'secretary_joint_coordinating', 'ex_officio_members_1'],
+      5: [],
+      6: ['others_name', 'name_of_owner_manager', 'employees_representative', 'date_filled']
+    };
+    
+    // Validate based on the current selected tab
+    const requiredFields = requiredFieldsByTab[selectedTab] || [];
+    const missingFields = requiredFields.filter((field: string) => !data[field]);
+    
+    if (missingFields.length > 0) {
+      setValidationMessage("Please fill out all required fields marked with *");
+      return;
     }
+    
+    // Create a new object with processed data
+    const processedData = { ...data };
+    
+    // Ensure duties_and_responsibilities is a boolean
+    if (processedData.duties_and_responsibilities === "true" || processedData.duties_and_responsibilities === true) {
+      processedData.duties_and_responsibilities = true;
+    } else if (processedData.duties_and_responsibilities === "false" || processedData.duties_and_responsibilities === false) {
+      processedData.duties_and_responsibilities = false;
+    } else {
+      // Default to false if not set
+      processedData.duties_and_responsibilities = false;
+    }
+    
+    // Ensure random_drug_testing is a boolean
+    if (processedData.random_drug_testing === "true" || processedData.random_drug_testing === true) {
+      processedData.random_drug_testing = true;
+    } else if (processedData.random_drug_testing === "false" || processedData.random_drug_testing === false) {
+      processedData.random_drug_testing = false;
+    } else {
+      // Default to false if not set
+      processedData.random_drug_testing = false;
+    }
+    
+    // Ensure adequate_sanitary_and_washing_facilities is a boolean
+    if (processedData.adequate_sanitary_and_washing_facilities === "true" || processedData.adequate_sanitary_and_washing_facilities === true) {
+      processedData.adequate_sanitary_and_washing_facilities = true;
+    } else if (processedData.adequate_sanitary_and_washing_facilities === "false" || processedData.adequate_sanitary_and_washing_facilities === false) {
+      processedData.adequate_sanitary_and_washing_facilities = false;
+    } else {
+      // Default to false if not set
+      processedData.adequate_sanitary_and_washing_facilities = false;
+    }
+    
+    // Ensure adequate_supply_of_drinking_water is a boolean
+    if (processedData.adequate_supply_of_drinking_water === "true" || processedData.adequate_supply_of_drinking_water === true) {
+      processedData.adequate_supply_of_drinking_water = true;
+    } else if (processedData.adequate_supply_of_drinking_water === "false" || processedData.adequate_supply_of_drinking_water === false) {
+      processedData.adequate_supply_of_drinking_water = false;
+    } else {
+      // Default to false if not set
+      processedData.adequate_supply_of_drinking_water = false;
+    }
+    
+    // Ensure suitable_living_accommodation is a boolean
+    if (processedData.suitable_living_accommodation === "true" || processedData.suitable_living_accommodation === true) {
+      processedData.suitable_living_accommodation = true;
+    } else if (processedData.suitable_living_accommodation === "false" || processedData.suitable_living_accommodation === false) {
+      processedData.suitable_living_accommodation = false;
+    } else {
+      // Default to false if not set
+      processedData.suitable_living_accommodation = false;
+    }
+    
+    // Ensure separate_sanitary_washing_and_sleeping_facilities is a boolean
+    if (processedData.separate_sanitary_washing_and_sleeping_facilities === "true" || processedData.separate_sanitary_washing_and_sleeping_facilities === true) {
+      processedData.separate_sanitary_washing_and_sleeping_facilities = true;
+    } else if (processedData.separate_sanitary_washing_and_sleeping_facilities === "false" || processedData.separate_sanitary_washing_and_sleeping_facilities === false) {
+      processedData.separate_sanitary_washing_and_sleeping_facilities = false;
+    } else {
+      // Default to false if not set
+      processedData.separate_sanitary_washing_and_sleeping_facilities = false;
+    }
+    
+    // Ensure lactation_station is a boolean
+    if (processedData.lactation_station === "true" || processedData.lactation_station === true) {
+      processedData.lactation_station = true;
+    } else if (processedData.lactation_station === "false" || processedData.lactation_station === false) {
+      processedData.lactation_station = false;
+    } else {
+      // Default to false if not set
+      processedData.lactation_station = false;
+    }
+    
+    // Ensure ramps_railings_and_like is a boolean
+    if (processedData.ramps_railings_and_like === "true" || processedData.ramps_railings_and_like === true) {
+      processedData.ramps_railings_and_like = true;
+    } else if (processedData.ramps_railings_and_like === "false" || processedData.ramps_railings_and_like === false) {
+      processedData.ramps_railings_and_like = false;
+    } else {
+      // Default to false if not set
+      processedData.ramps_railings_and_like = false;
+    }
+    
+    // Ensure other_workers_welfare_facilities is a boolean
+    if (processedData.other_workers_welfare_facilities === "true" || processedData.other_workers_welfare_facilities === true) {
+      processedData.other_workers_welfare_facilities = true;
+    } else if (processedData.other_workers_welfare_facilities === "false" || processedData.other_workers_welfare_facilities === false) {
+      processedData.other_workers_welfare_facilities = false;
+    } else {
+      // Default to false if not set
+      processedData.other_workers_welfare_facilities = false;
+    }
+    
+    // Ensure numeric fields are properly converted to numbers
+    const numericFields = [
+      'no_of_treatment_rooms_first_aid_rooms',
+      'no_of_clinics_in_the_workplace',
+      'number_of_male_employees',
+      'number_of_female_employees',
+      'total_number_of_employees'
+    ];
+    
+    numericFields.forEach(field => {
+      if (processedData[field] !== undefined && processedData[field] !== null && processedData[field] !== '') {
+        processedData[field] = Number(processedData[field]);
+      }
+    });
     
     setValidationMessage("");
     const callbackReq = {
@@ -49,7 +168,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
       }
     }
-    updateOshProgramDetails({ ...data, id: oshProgramDetails?.id }, callbackReq);
+    updateOshProgramDetails({ ...processedData, id: oshProgramDetails?.id }, callbackReq);
   });
 
   useEffect(() => {
@@ -191,32 +310,50 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         )}
         
         <div className="mt-8 flex flex-row justify-between space-x-2">
-          <div onClick={() => setSelectedTab(1)} className="cursor-pointer">
+          <div onClick={() => {
+            setSelectedTab(1);
+            setValidationMessage("");
+          }} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Company Profile
             </h1>
           </div>
-          <div onClick={() => setSelectedTab(2)} className="cursor-pointer">
+          <div onClick={() => {
+            setSelectedTab(2);
+            setValidationMessage("");
+          }} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 2 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               OSH Program and Policy
             </h1>
           </div>
-          <div onClick={() => setSelectedTab(3)} className="cursor-pointer">
+          <div onClick={() => {
+            setSelectedTab(3);
+            setValidationMessage("");
+          }} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 3 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Risk Management
             </h1>
           </div>
-          <div onClick={() => setSelectedTab(4)} className="cursor-pointer">
+          <div onClick={() => {
+            setSelectedTab(4);
+            setValidationMessage("");
+          }} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 4 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Health and Welfare Program
             </h1>
           </div>
-          <div onClick={() => setSelectedTab(5)} className="cursor-pointer">
+          <div onClick={() => {
+            setSelectedTab(5);
+            setValidationMessage("");
+          }} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 5 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Safety Measures
             </h1>
           </div>
-          <div onClick={() => setSelectedTab(6)} className="cursor-pointer">
+          <div onClick={() => {
+            setSelectedTab(6);
+            setValidationMessage("");
+          }} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 6 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Compliance and Cost
             </h1>
@@ -238,18 +375,21 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             register={register}
             setValue={setValue}
             watch={watch}
+            validationMessage={validationMessage}
           />
         )}
         {selectedTab === 3 && (
           <RiskManagement
             control={control}
             register={register}
+            validationMessage={validationMessage}
           />
         )}
         {selectedTab === 4 && (
           <HealthAndWelfare
             control={control}
             register={register}
+            validationMessage={validationMessage}
           />
         )}
         {selectedTab === 5 && (
@@ -258,6 +398,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             register={register}
             setValue={setValue}
             watch={watch}
+            validationMessage={validationMessage}
           />
         )}
         {selectedTab === 6 && (
@@ -267,6 +408,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             setValue={setValue}
             watch={watch}
             onSubmit={onSubmit}
+            validationMessage={validationMessage}
           />
         )}
       </div>

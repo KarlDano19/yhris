@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useFieldArray } from "react-hook-form";
 import dynamic from "next/dynamic";
+import { Controller } from "react-hook-form";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
@@ -15,11 +16,13 @@ export default function SafetyMeasures({
   register,
   setValue,
   watch,
+  validationMessage,
 }: {
   control: any;
   register: any;
   setValue: any;
   watch: any;
+  validationMessage?: string;
 }) {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
@@ -62,7 +65,7 @@ export default function SafetyMeasures({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon
@@ -72,7 +75,7 @@ export default function SafetyMeasures({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
+                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
               </h3>
             </div>
           </div>
@@ -277,22 +280,28 @@ export default function SafetyMeasures({
                       Adequate supply of drinking water
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`adequate_supply_of_drinking_water`)}
-                        id={`adequate_supply_of_drinking_water`}
-                        value="Yes"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="adequate_supply_yes"
+                          name="adequate_supply_of_drinking_water"
+                          checked={watch("adequate_supply_of_drinking_water") === true}
+                          onChange={() => setValue("adequate_supply_of_drinking_water", true)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`adequate_supply_of_drinking_water`)}
-                        id={`adequate_supply_of_drinking_water`}
-                        value="No"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="adequate_supply_no"
+                          name="adequate_supply_of_drinking_water"
+                          checked={watch("adequate_supply_of_drinking_water") === false}
+                          onChange={() => setValue("adequate_supply_of_drinking_water", false)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
@@ -324,26 +333,28 @@ export default function SafetyMeasures({
                       Adequate sanitary and washing facilities
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(
-                          `adequate_sanitary_and_washing_facilities`
-                        )}
-                        id={`adequate_sanitary_and_washing_facilities`}
-                        value="Yes"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="adequate_sanitary_yes"
+                          name="adequate_sanitary_and_washing_facilities"
+                          checked={watch("adequate_sanitary_and_washing_facilities") === true}
+                          onChange={() => setValue("adequate_sanitary_and_washing_facilities", true)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(
-                          `adequate_sanitary_and_washing_facilities`
-                        )}
-                        id={`adequate_sanitary_and_washing_facilities`}
-                        value="No"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="adequate_sanitary_no"
+                          name="adequate_sanitary_and_washing_facilities"
+                          checked={watch("adequate_sanitary_and_washing_facilities") === false}
+                          onChange={() => setValue("adequate_sanitary_and_washing_facilities", false)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
@@ -377,22 +388,28 @@ export default function SafetyMeasures({
                       Suitable living accommodation (if applicable)
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`suitable_living_accommodation`)}
-                        id={`suitable_living_accommodation`}
-                        value="Yes"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="suitable_living_yes"
+                          name="suitable_living_accommodation"
+                          checked={watch("suitable_living_accommodation") === true}
+                          onChange={() => setValue("suitable_living_accommodation", true)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`suitable_living_accommodation`)}
-                        id={`suitable_living_accommodation`}
-                        value="No"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="suitable_living_no"
+                          name="suitable_living_accommodation"
+                          checked={watch("suitable_living_accommodation") === false}
+                          onChange={() => setValue("suitable_living_accommodation", false)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
@@ -423,26 +440,28 @@ export default function SafetyMeasures({
                       applicable)
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(
-                          `separate_sanitary_washing_and_sleeping_facilities`
-                        )}
-                        id={`separate_sanitary_washing_and_sleeping_facilities`}
-                        value="Yes"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="separate_sanitary_yes"
+                          name="separate_sanitary_washing_and_sleeping_facilities"
+                          checked={watch("separate_sanitary_washing_and_sleeping_facilities") === true}
+                          onChange={() => setValue("separate_sanitary_washing_and_sleeping_facilities", true)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(
-                          `separate_sanitary_washing_and_sleeping_facilities`
-                        )}
-                        id={`separate_sanitary_washing_and_sleeping_facilities`}
-                        value="No"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="separate_sanitary_no"
+                          name="separate_sanitary_washing_and_sleeping_facilities"
+                          checked={watch("separate_sanitary_washing_and_sleeping_facilities") === false}
+                          onChange={() => setValue("separate_sanitary_washing_and_sleeping_facilities", false)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
@@ -476,22 +495,28 @@ export default function SafetyMeasures({
                       Lactation station (in consonance with DOLE D.O. 143-15)
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`lactation_station`)}
-                        id={`lactation_station`}
-                        value="Yes"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="lactation_station_yes"
+                          name="lactation_station"
+                          checked={watch("lactation_station") === true}
+                          onChange={() => setValue("lactation_station", true)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`lactation_station`)}
-                        id={`lactation_station`}
-                        value="No"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="lactation_station_no"
+                          name="lactation_station"
+                          checked={watch("lactation_station") === false}
+                          onChange={() => setValue("lactation_station", false)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
@@ -521,22 +546,28 @@ export default function SafetyMeasures({
                       Ramps, railings, and the like
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`ramps_railings_and_like`)}
-                        id={`ramps_railings_and_like`}
-                        value="Yes"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="ramps_railings_yes"
+                          name="ramps_railings_and_like"
+                          checked={watch("ramps_railings_and_like") === true}
+                          onChange={() => setValue("ramps_railings_and_like", true)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`ramps_railings_and_like`)}
-                        id={`ramps_railings_and_like`}
-                        value="No"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="ramps_railings_no"
+                          name="ramps_railings_and_like"
+                          checked={watch("ramps_railings_and_like") === false}
+                          onChange={() => setValue("ramps_railings_and_like", false)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
@@ -563,26 +594,32 @@ export default function SafetyMeasures({
                   </tr>
                   <tr className="cursor-pointer border-b border-gray-200">
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Other workers’ welfare facilities as prescribed by OSHS
+                      Other workers' welfare facilities as prescribed by OSHS
                       and other related issuances
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`other_workers_welfare_facilities`)}
-                        id={`other_workers_welfare_facilities`}
-                        value="Yes"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="other_workers_yes"
+                          name="other_workers_welfare_facilities"
+                          checked={watch("other_workers_welfare_facilities") === true}
+                          onChange={() => setValue("other_workers_welfare_facilities", true)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="checkbox"
-                        {...register(`other_workers_welfare_facilities`)}
-                        id={`other_workers_welfare_facilities`}
-                        value="No"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
+                      <div className="flex justify-center">
+                        <input
+                          type="radio"
+                          id="other_workers_no"
+                          name="other_workers_welfare_facilities"
+                          checked={watch("other_workers_welfare_facilities") === false}
+                          onChange={() => setValue("other_workers_welfare_facilities", false)}
+                          className="w-4 h-4"
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input

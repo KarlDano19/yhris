@@ -152,7 +152,15 @@ export default function CompanyProfile({
                       "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                     }
                     selected={field.value ? new Date(field.value) : null}
-                    pickerOnChange={(date: any) => field.onChange(date)}
+                    pickerOnChange={(date: any) => {
+                      // Format the date as YYYY-MM-DD for backend compatibility
+                      if (date) {
+                        const formattedDate = date.toISOString().split('T')[0];
+                        field.onChange(formattedDate);
+                      } else {
+                        field.onChange(null);
+                      }
+                    }}
                     inputOnChange={(value: any) => field.onChange(value)}
                   />
                 )}
