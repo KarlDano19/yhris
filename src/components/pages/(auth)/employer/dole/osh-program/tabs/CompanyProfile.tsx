@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
@@ -8,15 +9,97 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 export default function CompanyProfile({
   control,
   register,
+  errors,
+  validationMessage,
+  watch,
+  setValue
 }: {
   control: any;
   register: any;
+  errors?: any;
+  validationMessage?: string;
+  watch?: any;
+  setValue?: any;
 }) {
+  // Watch business_description to log its value
+  const businessDescriptions = watch ? watch("business_description") || [] : [];
+  
+  // Watch male and female employee counts to calculate total
+  const maleEmployees = watch ? watch("number_of_male_employees") || 0 : 0;
+  const femaleEmployees = watch ? watch("number_of_female_employees") || 0 : 0;
+  
+  // Watch description fields to auto-check checkboxes
+  const manufacturingDescription = watch ? watch("manufacturing_description") : "";
+  const bankDescription = watch ? watch("bank_and_financial_institution_description") : "";
+  const serviceDescription = watch ? watch("service_description") : "";
+  const securityDescription = watch ? watch("security_agency_description") : "";
+  const agriDescription = watch ? watch("agri_fishing_description") : "";
+  const maintenanceDescription = watch ? watch("maintenance_description") : "";
+  const wholesaleDescription = watch ? watch("wholesale_retail_description") : "";
+  const constructionDescription = watch ? watch("construction_description") : "";
+  const utilitiesDescription = watch ? watch("utilities_description") : "";
+  const othersDescription = watch ? watch("others_description") : "";
+  
+  // Ensure business_description is an array
+  useEffect(() => {
+    if (setValue && businessDescriptions && !Array.isArray(businessDescriptions)) {
+      // Convert to array if it's not already
+      setValue("business_description", [businessDescriptions]);
+    }
+  }, [businessDescriptions, setValue]);
+  
+  // Calculate and update total employees whenever male or female counts change
+  useEffect(() => {
+    if (setValue) {
+      const total = Number(maleEmployees) + Number(femaleEmployees);
+      setValue("total_number_of_employees", total);
+    }
+  }, [maleEmployees, femaleEmployees, setValue]);
+
+  // Auto-check business description checkboxes when descriptions are filled
+  useEffect(() => {
+    if (!setValue || !watch) return;
+    
+    const updateBusinessDescription = (description: string, value: string) => {
+      if (description && description.trim() !== "") {
+        const currentDesc = Array.isArray(businessDescriptions) ? [...businessDescriptions] : [];
+        if (!currentDesc.includes(value)) {
+          setValue("business_description", [...currentDesc, value]);
+        }
+      }
+    };
+
+    updateBusinessDescription(manufacturingDescription, "Manufacturing");
+    updateBusinessDescription(bankDescription, "Bank and Financial Institution");
+    updateBusinessDescription(serviceDescription, "Service");
+    updateBusinessDescription(securityDescription, "Security Agency");
+    updateBusinessDescription(agriDescription, "Agri/ Fishing");
+    updateBusinessDescription(maintenanceDescription, "Maintenance");
+    updateBusinessDescription(wholesaleDescription, "Wholesale/ Retail");
+    updateBusinessDescription(constructionDescription, "Construction");
+    updateBusinessDescription(utilitiesDescription, "Utilities");
+    updateBusinessDescription(othersDescription, "Others (Please specify)");
+    
+  }, [
+    manufacturingDescription,
+    bankDescription,
+    serviceDescription,
+    securityDescription,
+    agriDescription,
+    maintenanceDescription,
+    wholesaleDescription,
+    constructionDescription,
+    utilitiesDescription,
+    othersDescription,
+    businessDescriptions,
+    setValue,
+    watch
+  ]);
 
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon
@@ -208,7 +291,8 @@ export default function CompanyProfile({
                 type="number"
                 {...register("total_number_of_employees")}
                 id="total_number_of_employees"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100"
+                disabled
               />
             </div>
           </div>

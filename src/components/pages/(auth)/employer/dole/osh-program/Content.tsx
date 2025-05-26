@@ -21,20 +21,41 @@ import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
-  const { register, handleSubmit, setValue, control, watch } = useForm();
+  const { register, handleSubmit, setValue, control, watch, formState: { errors } } = useForm();
   const [selectedTab, setSelectedTab] = useState(1);
+  const [validationMessage, setValidationMessage] = useState("");
 
   const { data: oshProgramDetails } = useGetOshProgramDetails();
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data) => {
+    // Only validate required company profile fields if we're on that tab
+    if (selectedTab === 1) {
+      const requiredFields = ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'];
+      const missingFields = requiredFields.filter(field => !data[field]);
+      
+      if (missingFields.length > 0) {
+        setValidationMessage("Please fill out all required fields marked with *");
+        return;
+      }
+    }
+    
+    setValidationMessage("");
     const callbackReq = {
       onSuccess: () => {
         toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+      },
+      onError: (error: any) => {
+        toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
       }
     }
-    updateOshProgramDetails({ data: { ...data, id: oshProgramDetails.id } }, callbackReq);
-  })
+    updateOshProgramDetails({ ...data, id: oshProgramDetails?.id }, callbackReq);
+  });
+
+  useEffect(() => {
+    // Clear validation message when changing tabs
+    setValidationMessage("");
+  }, [selectedTab]);
 
   useEffect(() => {
     if (oshProgramDetails) {
@@ -127,8 +148,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setValue("wholesale_retail_description", oshProgramDetails.wholesale_retail_description);
       setValue("written_emergency_and_disaster_program", oshProgramDetails.written_emergency_and_disaster_program);
       setValue("written_pollution_control_program", oshProgramDetails.written_pollution_control_program);
-  }
-}, [oshProgramDetails, setValue]);
+    }
+  }, [oshProgramDetails, setValue]);
 
   return (
     <>
@@ -153,6 +174,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </button>
           </div>
         </div>
+        
+        {/* Validation message */}
+        {validationMessage && (
+          <div className="mt-2 px-2 md:px-8 lg:px-4">
+            <div className="rounded-md bg-red-50 p-2">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    {validationMessage}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="mt-8 flex flex-row justify-between space-x-2">
           <div onClick={() => setSelectedTab(1)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
@@ -189,6 +226,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <CompanyProfile
             control={control}
             register={register}
+            errors={errors}
+            validationMessage={validationMessage}
+            watch={watch}
+            setValue={setValue}
           />
         )}
         {selectedTab === 2 && (
