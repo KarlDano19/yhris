@@ -19,6 +19,7 @@ import useGetEvaluationSchedulerItems from './hooks/useGetEvaluationSchedulerIte
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import { useQueryClient } from '@tanstack/react-query';
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [evaluationSchedulerItems, setEvaluationSchedulerItems] = useState<any>([]);
@@ -29,6 +30,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isConfirmSendEmailEvaluationSchedulerModalOpen, setIsConfirmSendEmailEvaluationSchedulerModalOpen] =
     useState(false);
   const [isCreateEvaluationSchedulerOpen, setIsCreateEvaluationSchedulerOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -170,7 +174,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className='max-w-[20px] max-h-[20px]'
                 />
               </button>
-              <button onClick={() => openEditEvaluationModal(item)}>
+              <button
+                onClick={() => openEditEvaluationModal(item)}
+                disabled={!cachedRigths?.state?.data?.edit_training}
+              >
                 <EditIcon />
               </button>
               <button onClick={() => openDeleteEvaluationModal(item)}>
@@ -301,7 +308,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateEvaluationSchedulerOpen(true)}
-                disabled={!hasActiveSubscription}
+                disabled={!cachedRigths?.state?.data?.create_training}
               >
                 CREATE
               </button>

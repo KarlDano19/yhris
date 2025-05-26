@@ -21,7 +21,7 @@ const menus = [
     icon: <UserLogo />,
     text: 'Users',
     link: '/settings/users',
-    isAvailable: false,
+    isAvailable: true,
   },
 ];
 

@@ -10,6 +10,7 @@ import ConfirmSocialShareModal from '../modals/ConfirmSocialShareModal';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import JobPostingHistory from '@/svg/JobPostingHistory';
 import CreateJob from '@/svg/CreateJob';
+import { useQueryClient } from '@tanstack/react-query';
 
 const menus = [
   {
@@ -26,6 +27,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSocialShareModalOpen, setIsSocialShareModalOpen] = useState(false);
   const [isSocialShareModalClosed, setIsSocialShareModalClosed] = useState(false);
   const isSocialShareModalClosedRef = useRef(isSocialShareModalClosed);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   useEffect(() => {
     isSocialShareModalClosedRef.current = isSocialShareModalClosed;
@@ -98,7 +101,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <button
               onClick={() => setIsCreateJobModalOpen(true)}
               className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center enabled:hover:shadow-md focus:shadow-none disabled:opacity-50'
-              disabled={!hasActiveSubscription}
+              disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_job}
             >
               <CreateJob />
               <h3 className='text-indigo-dye font-semibold text-center'>Create a Job</h3>

@@ -61,7 +61,7 @@ function EstablishmentRegistrationConfirmationModal({
                     type='button'
                     className='w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50'
                     onClick={() => {
-                      window.open('https://1020.dolexportal.com/pages/registerclient', '_blank');
+                      window.open('https://ers.ble.dole.gov.ph/ereg.php', '_blank');
                       setIsOpen(false);
                     }}
                     tabIndex={1}

@@ -28,8 +28,9 @@ import EmailLogo from "@/svg/EmailLogo";
 import SendEmailModal from "./SendEmailModal";
 import DownloadIcon from "@/svg/DownloadIcon";
 import PrintIcon from "@/svg/PrintIcon";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface CachedProfileData {
+interface cachedRigthsData {
   name: string;
   type_of_industry: string;
 }
@@ -67,6 +68,9 @@ function SafetyAndHealthPolicyModal({
     number | null
   >(null);
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
   const [isSendEmailModalOpen, setIsSendEmailModalOpen] =
     useState<T_ModalData | null>(null);
 
@@ -204,6 +208,7 @@ function SafetyAndHealthPolicyModal({
                   <div className="flex space-x-2 justify-end pr-6 pt-4">
                     <button
                       onClick={() => onEditClick()} // Pass the specific policy ID
+                      disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
                     >
                       <EditIcon />
                     </button>

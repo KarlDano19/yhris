@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import MenuItem from '../MenuItem';
 import FloatingProgress from '../../../FloatingProgress';
@@ -15,71 +16,78 @@ import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
 import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
-
-const menus = [
-  {
-    icon: <AddPostLogo />,
-    text: 'Post a Job',
-    link: '/post-job',
-    isAvailable: true,
-  },
-  {
-    icon: <ScreenApplicantsLogo />,
-    text: 'Screen Applicants',
-    link: '/screen-applicants',
-    isAvailable: true,
-  },
-  {
-    icon: <OrientLogo />,
-    text: 'Orient',
-    link: '/orient',
-    isAvailable: true,
-  },
-  {
-    icon: <ManageLogo />,
-    text: 'Manage',
-    link: '/manage',
-    isAvailable: true,
-  },
-  {
-    icon: <TrainLogo />,
-    text: 'Train',
-    link: '/train',
-    isAvailable: true,
-  },
-  {
-    icon: <PayrollLogo />,
-    text: 'Payroll',
-    link: '/payroll',
-    isAvailable: false,
-  },
-  {
-    icon: <EmployeeSeparationLogo />,
-    text: 'Employee Separation',
-    link: '/employee-separation',
-    isAvailable: true,
-  },
-  {
-    icon: <EmployeeKitLogo />,
-    text: 'Employee Kit',
-    link: '/branding-kit',
-    isAvailable: false,
-  },
-  {
-    icon: <DoleLogo />,
-    text: 'DOLE',
-    link: '/dole',
-    isAvailable: true,
-  },
-  {
-    icon: <SettingsLogo />,
-    text: 'Settings',
-    link: '/settings',
-    isAvailable: true,
-  },
-];
+import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 
 const Home = ({ loginType }: { loginType: string }) => {
+  const menus = [
+    {
+      icon: <AddPostLogo />,
+      text: 'Post a Job',
+      link: '/post-job',
+      isAvailable: true,
+    },
+    {
+      icon: <ScreenApplicantsLogo />,
+      text: 'Screen Applicants',
+      link: '/screen-applicants',
+      isAvailable: true,
+    },
+    {
+      icon: <OrientLogo />,
+      text: 'Orient',
+      link: '/orient',
+      isAvailable: true,
+    },
+    {
+      icon: <ManageLogo />,
+      text: 'Manage',
+      link: '/manage',
+      isAvailable: true,
+    },
+    {
+      icon: <TrainLogo />,
+      text: 'Train',
+      link: '/train',
+      isAvailable: true,
+    },
+    {
+      icon: <PayrollLogo />,
+      text: 'Payroll',
+      link: '/payroll',
+      isAvailable: false,
+    },
+    {
+      icon: <EmployeeSeparationLogo />,
+      text: 'Employee Separation',
+      link: '/employee-separation',
+      isAvailable: true,
+    },
+    {
+      icon: <EmployeeKitLogo />,
+      text: 'Employee Kit',
+      link: '/branding-kit',
+      isAvailable: false,
+    },
+    {
+      icon: <DoleLogo />,
+      text: 'DOLE',
+      link: '/dole',
+      isAvailable: true,
+    },
+    {
+      icon: <SettingsLogo />,
+      text: 'Settings',
+      link: '/settings',
+      isAvailable: true,
+    },
+    {
+      icon: <AuditLogsIcon />,
+      text: 'Audit Logs',
+      link: '/audit-logs',
+      isAvailable: true,
+    },
+  ];
+
   return (
     <>
       {loginType === 'yahshua-payroll' && <FloatingProgress />}

@@ -35,6 +35,7 @@ import {
 } from '@/types/globals';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
@@ -70,6 +71,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataDepartment } = useGetDepartmentItems();
   const { data: dataEmployee } = useGetEmployeeItems();
   const { data: dataPosition } = useGetPositionItems();
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -369,7 +372,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsIncidentReportModalOpen(true)}
-                disabled={!hasActiveSubscription}
+                disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_employee_issue}
               >
                 CREATE
               </button>
