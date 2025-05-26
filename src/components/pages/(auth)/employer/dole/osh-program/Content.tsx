@@ -54,95 +54,37 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Create a new object with processed data
     const processedData = { ...data };
     
-    // Ensure duties_and_responsibilities is a boolean
-    if (processedData.duties_and_responsibilities === "true" || processedData.duties_and_responsibilities === true) {
-      processedData.duties_and_responsibilities = true;
-    } else if (processedData.duties_and_responsibilities === "false" || processedData.duties_and_responsibilities === false) {
-      processedData.duties_and_responsibilities = false;
-    } else {
-      // Default to false if not set
-      processedData.duties_and_responsibilities = false;
-    }
+    // Define all boolean fields
+    const booleanFields = [
+      'duties_and_responsibilities',
+      'random_drug_testing',
+      'adequate_sanitary_and_washing_facilities',
+      'adequate_supply_of_drinking_water',
+      'suitable_living_accommodation',
+      'separate_sanitary_washing_and_sleeping_facilities',
+      'lactation_station',
+      'ramps_railings_and_like',
+      'other_workers_welfare_facilities'
+    ];
     
-    // Ensure random_drug_testing is a boolean
-    if (processedData.random_drug_testing === "true" || processedData.random_drug_testing === true) {
-      processedData.random_drug_testing = true;
-    } else if (processedData.random_drug_testing === "false" || processedData.random_drug_testing === false) {
-      processedData.random_drug_testing = false;
-    } else {
-      // Default to false if not set
-      processedData.random_drug_testing = false;
-    }
-    
-    // Ensure adequate_sanitary_and_washing_facilities is a boolean
-    if (processedData.adequate_sanitary_and_washing_facilities === "true" || processedData.adequate_sanitary_and_washing_facilities === true) {
-      processedData.adequate_sanitary_and_washing_facilities = true;
-    } else if (processedData.adequate_sanitary_and_washing_facilities === "false" || processedData.adequate_sanitary_and_washing_facilities === false) {
-      processedData.adequate_sanitary_and_washing_facilities = false;
-    } else {
-      // Default to false if not set
-      processedData.adequate_sanitary_and_washing_facilities = false;
-    }
-    
-    // Ensure adequate_supply_of_drinking_water is a boolean
-    if (processedData.adequate_supply_of_drinking_water === "true" || processedData.adequate_supply_of_drinking_water === true) {
-      processedData.adequate_supply_of_drinking_water = true;
-    } else if (processedData.adequate_supply_of_drinking_water === "false" || processedData.adequate_supply_of_drinking_water === false) {
-      processedData.adequate_supply_of_drinking_water = false;
-    } else {
-      // Default to false if not set
-      processedData.adequate_supply_of_drinking_water = false;
-    }
-    
-    // Ensure suitable_living_accommodation is a boolean
-    if (processedData.suitable_living_accommodation === "true" || processedData.suitable_living_accommodation === true) {
-      processedData.suitable_living_accommodation = true;
-    } else if (processedData.suitable_living_accommodation === "false" || processedData.suitable_living_accommodation === false) {
-      processedData.suitable_living_accommodation = false;
-    } else {
-      // Default to false if not set
-      processedData.suitable_living_accommodation = false;
-    }
-    
-    // Ensure separate_sanitary_washing_and_sleeping_facilities is a boolean
-    if (processedData.separate_sanitary_washing_and_sleeping_facilities === "true" || processedData.separate_sanitary_washing_and_sleeping_facilities === true) {
-      processedData.separate_sanitary_washing_and_sleeping_facilities = true;
-    } else if (processedData.separate_sanitary_washing_and_sleeping_facilities === "false" || processedData.separate_sanitary_washing_and_sleeping_facilities === false) {
-      processedData.separate_sanitary_washing_and_sleeping_facilities = false;
-    } else {
-      // Default to false if not set
-      processedData.separate_sanitary_washing_and_sleeping_facilities = false;
-    }
-    
-    // Ensure lactation_station is a boolean
-    if (processedData.lactation_station === "true" || processedData.lactation_station === true) {
-      processedData.lactation_station = true;
-    } else if (processedData.lactation_station === "false" || processedData.lactation_station === false) {
-      processedData.lactation_station = false;
-    } else {
-      // Default to false if not set
-      processedData.lactation_station = false;
-    }
-    
-    // Ensure ramps_railings_and_like is a boolean
-    if (processedData.ramps_railings_and_like === "true" || processedData.ramps_railings_and_like === true) {
-      processedData.ramps_railings_and_like = true;
-    } else if (processedData.ramps_railings_and_like === "false" || processedData.ramps_railings_and_like === false) {
-      processedData.ramps_railings_and_like = false;
-    } else {
-      // Default to false if not set
-      processedData.ramps_railings_and_like = false;
-    }
-    
-    // Ensure other_workers_welfare_facilities is a boolean
-    if (processedData.other_workers_welfare_facilities === "true" || processedData.other_workers_welfare_facilities === true) {
-      processedData.other_workers_welfare_facilities = true;
-    } else if (processedData.other_workers_welfare_facilities === "false" || processedData.other_workers_welfare_facilities === false) {
-      processedData.other_workers_welfare_facilities = false;
-    } else {
-      // Default to false if not set
-      processedData.other_workers_welfare_facilities = false;
-    }
+    // Process all boolean fields in a unified way
+    booleanFields.forEach(field => {
+      if (processedData[field] === "true" || processedData[field] === true) {
+        processedData[field] = true;
+      } else if (processedData[field] === "false" || processedData[field] === false) {
+        processedData[field] = false;
+      } else if (processedData[field] === undefined || processedData[field] === null) {
+        // Only set default if field is undefined or null
+        // This preserves values from other tabs
+        if (oshProgramDetails && oshProgramDetails[field] !== undefined) {
+          // Keep the existing value from oshProgramDetails if it exists
+          processedData[field] = oshProgramDetails[field];
+        } else {
+          // Default to false only if we don't have an existing value
+          processedData[field] = false;
+        }
+      }
+    });
     
     // Ensure numeric fields are properly converted to numbers
     const numericFields = [

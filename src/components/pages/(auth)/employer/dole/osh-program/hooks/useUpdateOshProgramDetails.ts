@@ -27,11 +27,29 @@ async function updateOshProgramDetails(data: any) {
             }
         }
 
-        // Handle boolean fields
-        if (cleanData.random_drug_testing !== undefined) {
-            // Convert string values like "Yes" to boolean true
-            if (typeof cleanData.random_drug_testing === 'string') {
-                cleanData.random_drug_testing = cleanData.random_drug_testing.toLowerCase() === 'yes';
+        // Handle all boolean fields
+        const booleanFields = [
+            'duties_and_responsibilities',
+            'random_drug_testing',
+            'adequate_sanitary_and_washing_facilities',
+            'adequate_supply_of_drinking_water',
+            'suitable_living_accommodation',
+            'separate_sanitary_washing_and_sleeping_facilities',
+            'lactation_station',
+            'ramps_railings_and_like',
+            'other_workers_welfare_facilities'
+        ];
+        
+        for (const field of booleanFields) {
+            if (cleanData[field] !== undefined) {
+                // Convert string values to boolean
+                if (typeof cleanData[field] === 'string') {
+                    const value = cleanData[field].toLowerCase();
+                    cleanData[field] = value === 'true' || value === 'yes';
+                } else {
+                    // Ensure it's a proper boolean
+                    cleanData[field] = Boolean(cleanData[field]);
+                }
             }
         }
 
