@@ -184,41 +184,41 @@ const Content = () => {
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
-              <div className='py-2 sm:px-6 lg:px-8'>
-                <div className='overflow-x-auto'>
-                  <table className='divide-y divide-gray-300 text-center min-w-full'>
-                    <thead>
-                      <tr>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                         Ref #
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Date
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Employee Name
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Position
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Reason
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Processed By
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Status
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className='divide-y divide-gray-200'></tbody>
-                  </table>
-                </div>
+            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
+                  <thead>
+                    <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Ref #
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Date
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Employee Name
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                       Position
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Reason
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Processed By
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className='divide-y divide-gray-200'>
+                    {/* {renderRows()} */}
+                    </tbody>
+                </table>
                 <hr />
                 {/* <Pagination
                   pagination={pagination}
