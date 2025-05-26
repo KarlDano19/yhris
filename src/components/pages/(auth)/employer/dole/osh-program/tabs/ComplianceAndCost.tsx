@@ -235,7 +235,7 @@ export default function ComplianceAndCost({
               height: "100%",
               padding: "5px 8px !important",
             }}
-            value={watch("annex_a_message")}
+            value={watch("annex_a_message") || ""}
           />
         </div>
       </div>

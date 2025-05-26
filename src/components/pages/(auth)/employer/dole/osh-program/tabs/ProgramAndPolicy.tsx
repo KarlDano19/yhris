@@ -91,7 +91,7 @@ export default function ProgramAndPolicy({
                   height: "100%",
                   padding: "5px 8px !important",
                 }}
-                value={watch("basic_components")}
+                value={watch("basic_components") || ""}
               />
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function ProgramAndPolicy({
                   height: "100%",
                   padding: "5px 8px !important",
                 }}
-                value={watch("company_commitment")}
+                value={watch("company_commitment") || ""}
               />
             </div>
           </div>
