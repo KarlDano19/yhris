@@ -116,84 +116,100 @@ export default function HealthAndWelfare({
         </div>
         <div className="grid grid-cols-4 gap-6">
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("routine_medical_surveillance")}
-              id="cbc"
-              value="CBC"
-              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("CBC")}
-              onChange={(e) => {
-                const currentValue = watch("routine_medical_surveillance") || [];
-                const value = e.target.value;
-                if (e.target.checked) {
-                  setValue("routine_medical_surveillance", [...currentValue, value]);
-                } else {
-                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
-                }
-              }}
+            <Controller
+              control={control}
+              name="routine_medical_surveillance"
+              render={({ field }) => (
+                <input
+                  type="checkbox"
+                  id="cbc"
+                  value="CBC"
+                  checked={Array.isArray(field.value) && field.value.includes("CBC")}
+                  onChange={(e) => {
+                    const currentValue = Array.isArray(field.value) ? field.value : [];
+                    if (e.target.checked) {
+                      field.onChange([...currentValue, e.target.value]);
+                    } else {
+                      field.onChange(currentValue.filter(item => item !== e.target.value));
+                    }
+                  }}
+                />
+              )}
             />
             <label htmlFor="cbc" className="ml-2 mt-1">
               CBC
             </label>
           </div>
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("routine_medical_surveillance")}
-              id="chest_xray"
-              value="Chest X-ray"
-              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Chest X-ray")}
-              onChange={(e) => {
-                const currentValue = watch("routine_medical_surveillance") || [];
-                const value = e.target.value;
-                if (e.target.checked) {
-                  setValue("routine_medical_surveillance", [...currentValue, value]);
-                } else {
-                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
-                }
-              }}
+            <Controller
+              control={control}
+              name="routine_medical_surveillance"
+              render={({ field }) => (
+                <input
+                  type="checkbox"
+                  id="chest_xray"
+                  value="Chest X-ray"
+                  checked={Array.isArray(field.value) && field.value.includes("Chest X-ray")}
+                  onChange={(e) => {
+                    const currentValue = Array.isArray(field.value) ? field.value : [];
+                    if (e.target.checked) {
+                      field.onChange([...currentValue, e.target.value]);
+                    } else {
+                      field.onChange(currentValue.filter(item => item !== e.target.value));
+                    }
+                  }}
+                />
+              )}
             />
             <label htmlFor="chest_xray" className="ml-2 mt-1">
               Chest X-ray
             </label>
           </div>
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("routine_medical_surveillance")}
-              id="urinalysis"
-              value="Urinalysis"
-              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Urinalysis")}
-              onChange={(e) => {
-                const currentValue = watch("routine_medical_surveillance") || [];
-                const value = e.target.value;
-                if (e.target.checked) {
-                  setValue("routine_medical_surveillance", [...currentValue, value]);
-                } else {
-                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
-                }
-              }}
+            <Controller
+              control={control}
+              name="routine_medical_surveillance"
+              render={({ field }) => (
+                <input
+                  type="checkbox"
+                  id="urinalysis"
+                  value="Urinalysis"
+                  checked={Array.isArray(field.value) && field.value.includes("Urinalysis")}
+                  onChange={(e) => {
+                    const currentValue = Array.isArray(field.value) ? field.value : [];
+                    if (e.target.checked) {
+                      field.onChange([...currentValue, e.target.value]);
+                    } else {
+                      field.onChange(currentValue.filter(item => item !== e.target.value));
+                    }
+                  }}
+                />
+              )}
             />
             <label htmlFor="urinalysis" className="ml-2 mt-1">
               Urinalysis
             </label>
           </div>
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("routine_medical_surveillance")}
-              id="stool_examination"
-              value="Stool Examination"
-              checked={Array.isArray(watch("routine_medical_surveillance")) && watch("routine_medical_surveillance").includes("Stool Examination")}
-              onChange={(e) => {
-                const currentValue = watch("routine_medical_surveillance") || [];
-                const value = e.target.value;
-                if (e.target.checked) {
-                  setValue("routine_medical_surveillance", [...currentValue, value]);
-                } else {
-                  setValue("routine_medical_surveillance", currentValue.filter((item: string) => item !== value));
-                }
-              }}
+            <Controller
+              control={control}
+              name="routine_medical_surveillance"
+              render={({ field }) => (
+                <input
+                  type="checkbox"
+                  id="stool_examination"
+                  value="Stool Examination"
+                  checked={Array.isArray(field.value) && field.value.includes("Stool Examination")}
+                  onChange={(e) => {
+                    const currentValue = Array.isArray(field.value) ? field.value : [];
+                    if (e.target.checked) {
+                      field.onChange([...currentValue, e.target.value]);
+                    } else {
+                      field.onChange(currentValue.filter(item => item !== e.target.value));
+                    }
+                  }}
+                />
+              )}
             />
             <label htmlFor="stool_examination" className="ml-2 mt-1">
               Stool Examination
