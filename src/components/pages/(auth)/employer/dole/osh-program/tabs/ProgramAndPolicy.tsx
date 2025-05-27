@@ -31,7 +31,7 @@ export default function ProgramAndPolicy({
   );
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
-  const [attachmentExist, setAttachmentExist] = useState(false);
+  const [signatureAttachmentExist, setSignatureAttachmentExist] = useState(false);
   const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
 
   const toggleDrawSignatureModal = () => {
@@ -41,7 +41,8 @@ export default function ProgramAndPolicy({
   useEffect(() => {
     if (signatureUrl) {
       setValue("signature", signatureUrl);
-      setAttachmentExist(false);
+      setValue("previous_signature", signatureUrl);
+      setSignatureAttachmentExist(true);
     }
     if (!drawSignatureModal && signatureUrl) {
       setSignatureUrl("");
@@ -50,8 +51,11 @@ export default function ProgramAndPolicy({
 
   useEffect(() => {
     const currentSignature = watch("signature");
+    console.log("Current signature:", currentSignature);
     if (typeof currentSignature === "string" && currentSignature !== previousSignatureFile) {
+      console.log("Setting previous signature file to:", currentSignature);
       setPreviousSignatureFile(currentSignature);
+      setSignatureAttachmentExist(true);
     }
   }, [watch("signature")]);
 
@@ -218,7 +222,7 @@ export default function ProgramAndPolicy({
                     setValue("signature", file);
                     setValue("previous_signature", previousSignatureFile);
                     setSignatureUrl("");
-                    setAttachmentExist(true);
+                    setSignatureAttachmentExist(true);
                   }
                 }}
                 type="file"
@@ -226,25 +230,16 @@ export default function ProgramAndPolicy({
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               <div className="flex items-center gap-4 mt-2">
-                {attachmentExist ? (
-                  <button
-                    type="button"
-                    className="underline text-savoy-blue text-sm"
-                    onClick={() => {
-                      setValue("signature", "");
-                      setValue("previous_signature", previousSignatureFile);
-                      setAttachmentExist(false);
-                    }}
-                  >
-                    Remove Attachment
-                  </button>
-                ) : null}
-                {previousSignatureFile && !attachmentExist && (
+                {previousSignatureFile && (
                   <button
                     type="button"
                     className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
                     onClick={() => {
-                      window.open(`${process.env.NEXT_PUBLIC_API_URL}/media/oshprogram/signatures/${previousSignatureFile.split('/').pop()}`, '_blank');
+                      const fileName = previousSignatureFile.split('/').pop();
+                      console.log("Opening signature:", fileName);
+                      const url = `${process.env.NEXT_PUBLIC_API_URL}/media/oshprogram/signatures/${fileName}`;
+                      console.log("URL:", url);
+                      window.open(url, '_blank');
                     }}
                   >
                     View Signature
