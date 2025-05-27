@@ -322,12 +322,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="adequate_supply_of_drinking_water"
                               id="adequate_supply_yes"
                               checked={value === true}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? true : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(true)}
                               className="w-4 h-4"
                             />
                           )}
@@ -343,12 +341,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="adequate_supply_of_drinking_water"
                               id="adequate_supply_no"
                               checked={value === false}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? false : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(false)}
                               className="w-4 h-4"
                             />
                           )}
@@ -393,12 +389,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="adequate_sanitary_and_washing_facilities"
                               id="adequate_sanitary_yes"
                               checked={value === true}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? true : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(true)}
                               className="w-4 h-4"
                             />
                           )}
@@ -414,12 +408,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="adequate_sanitary_and_washing_facilities"
                               id="adequate_sanitary_no"
                               checked={value === false}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? false : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(false)}
                               className="w-4 h-4"
                             />
                           )}
@@ -466,12 +458,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="suitable_living_accommodation"
                               id="suitable_living_yes"
                               checked={value === true}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? true : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(true)}
                               className="w-4 h-4"
                             />
                           )}
@@ -487,12 +477,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="suitable_living_accommodation"
                               id="suitable_living_no"
                               checked={value === false}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? false : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(false)}
                               className="w-4 h-4"
                             />
                           )}
@@ -536,12 +524,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="separate_sanitary_washing_and_sleeping_facilities"
                               id="separate_sanitary_yes"
                               checked={value === true}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? true : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(true)}
                               className="w-4 h-4"
                             />
                           )}
@@ -557,12 +543,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="separate_sanitary_washing_and_sleeping_facilities"
                               id="separate_sanitary_no"
                               checked={value === false}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? false : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(false)}
                               className="w-4 h-4"
                             />
                           )}
@@ -609,12 +593,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="lactation_station"
                               id="lactation_station_yes"
                               checked={value === true}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? true : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(true)}
                               className="w-4 h-4"
                             />
                           )}
@@ -630,12 +612,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="lactation_station"
                               id="lactation_station_no"
                               checked={value === false}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? false : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(false)}
                               className="w-4 h-4"
                             />
                           )}
@@ -678,12 +658,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="ramps_railings_and_like"
                               id="ramps_railings_yes"
                               checked={value === true}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? true : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(true)}
                               className="w-4 h-4"
                             />
                           )}
@@ -699,12 +677,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="ramps_railings_and_like"
                               id="ramps_railings_no"
                               checked={value === false}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? false : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(false)}
                               className="w-4 h-4"
                             />
                           )}
@@ -748,12 +724,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="other_workers_welfare_facilities"
                               id="other_workers_yes"
                               checked={value === true}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? true : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(true)}
                               className="w-4 h-4"
                             />
                           )}
@@ -769,12 +743,10 @@ export default function SafetyMeasures({
                           render={({ field: { value, onChange } }) => (
                             <input
                               type="checkbox"
+                              name="other_workers_welfare_facilities"
                               id="other_workers_no"
                               checked={value === false}
-                              onChange={(e) => {
-                                const newValue = e.target.checked ? false : null;
-                                onChange(newValue);
-                              }}
+                              onChange={() => onChange(false)}
                               className="w-4 h-4"
                             />
                           )}
@@ -856,7 +828,7 @@ export default function SafetyMeasures({
                 defaultValue={null}
                 render={({ field: { value, onChange } }) => (
                   <input
-                    type="checkbox"
+                    type="radio"
                     id="written_emergency_no"
                     checked={value === false}
                     onChange={(e) => {
@@ -976,7 +948,7 @@ export default function SafetyMeasures({
                 defaultValue={null}
                 render={({ field: { value, onChange } }) => (
                   <input
-                    type="checkbox"
+                    type="radio"
                     id="written_pollution_yes"
                     checked={value === true}
                     onChange={(e) => {
@@ -998,7 +970,7 @@ export default function SafetyMeasures({
                 defaultValue={null}
                 render={({ field: { value, onChange } }) => (
                   <input
-                    type="checkbox"
+                    type="radio"
                     id="written_pollution_no"
                     checked={value === false}
                     onChange={(e) => {

@@ -73,19 +73,31 @@ async function updateOshProgramDetails(data: OshProgramData) {
         ];
         
         for (const field of booleanFields) {
-            if (cleanData[field] !== undefined) {
-                if (cleanData[field] === null) {
-                    // Keep null values as null
-                    continue;
-                }
-                // Convert string values to boolean
-                if (typeof cleanData[field] === 'string') {
-                    const value = cleanData[field].toLowerCase();
-                    cleanData[field] = value === 'true' || value === 'yes';
+            // If the field is not in the data at all, don't include it in the update
+            if (!(field in cleanData)) {
+                continue;
+            }
+            
+            // If the field is in the data but is null/empty string, keep it as null
+            if (cleanData[field] === null || cleanData[field] === '') {
+                cleanData[field] = null;
+            } else if (typeof cleanData[field] === 'string') {
+                // Only convert explicit 'true' or 'false' strings
+                const value = cleanData[field].toLowerCase();
+                if (value === 'true') {
+                    cleanData[field] = true;
+                } else if (value === 'false') {
+                    cleanData[field] = false;
                 } else {
-                    // Ensure it's a proper boolean only if not null
-                    cleanData[field] = Boolean(cleanData[field]);
+                    // If it's any other string value, treat it as null
+                    cleanData[field] = null;
                 }
+            } else if (typeof cleanData[field] === 'boolean') {
+                // Keep boolean values as is
+                cleanData[field] = cleanData[field];
+            } else {
+                // For any other type of value, set to null
+                cleanData[field] = null;
             }
         }
 
@@ -218,6 +230,9 @@ async function updateOshProgramDetails(data: OshProgramData) {
                 } else {
                     formData.append(key, JSON.stringify({}));
                 }
+            } else if (booleanFields.includes(key)) {
+                // For boolean fields, explicitly append the value even if it's null
+                formData.append(key, cleanData[key] === null ? 'null' : String(cleanData[key]));
             } else if (cleanData[key] !== undefined && cleanData[key] !== null) {
                 // Add other primitive values
                 formData.append(key, cleanData[key]);

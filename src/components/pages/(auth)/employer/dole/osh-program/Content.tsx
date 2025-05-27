@@ -131,8 +131,28 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       processedData.id = oshProgramDetails.id;
     }
 
+    // Define all boolean fields
+    const allBooleanFields = [
+      'duties_and_responsibilities',
+      'random_drug_testing',
+      'adequate_sanitary_and_washing_facilities',
+      'adequate_supply_of_drinking_water',
+      'suitable_living_accommodation',
+      'separate_sanitary_washing_and_sleeping_facilities',
+      'lactation_station',
+      'ramps_railings_and_like',
+      'other_workers_welfare_facilities',
+      'written_emergency_and_disaster_program',
+      'written_pollution_control_program'
+    ];
+
     // Only process fields from the current tab
     currentTabFields.forEach((field: keyof T_OshProgram) => {
+      // Skip boolean fields if they're not in the current tab
+      if (allBooleanFields.includes(field as string) && ![4, 5].includes(selectedTab)) {
+        return;
+      }
+      
       if (data[field] !== undefined) {
         processedData[field] = data[field];
       }
@@ -450,6 +470,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
         setSafetySignageAttachmentExist(true);
       }
+
+      // Handle boolean fields - preserve null values
+      const booleanFields = [
+        'duties_and_responsibilities',
+        'random_drug_testing',
+        'adequate_sanitary_and_washing_facilities',
+        'adequate_supply_of_drinking_water',
+        'suitable_living_accommodation',
+        'separate_sanitary_washing_and_sleeping_facilities',
+        'lactation_station',
+        'ramps_railings_and_like',
+        'other_workers_welfare_facilities',
+        'written_emergency_and_disaster_program',
+        'written_pollution_control_program'
+      ];
+
+      booleanFields.forEach(field => {
+        // Only set the value if it exists in oshProgramDetails
+        if (field in oshProgramDetails) {
+          setValue(field, oshProgramDetails[field]);
+        } else {
+          setValue(field, null);
+        }
+      });
     }
   }, [oshProgramDetails, setValue]);
 
