@@ -2,46 +2,27 @@
 
 import { useEffect, useState } from "react";
 
-import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
-
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
 
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
-
 function Reccomendation({
-  control,
   register,
   onSubmit,
   setSelectedTab,
   setValue,
   isLoading,
+  hasHrRecommendation = false, // Add this new prop
 }: {
-  control: any;
   register: any;
   onSubmit: any;
   setSelectedTab: any;
   setValue: any;
   isLoading: boolean;
+  hasHrRecommendation?: boolean;
 }) {
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient
-    .getQueryCache()
-    .find(["employerProfileCache"]) as {
-    state: { data: CachedProfileData } | undefined;
-  };
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
-  const [totalDisablingInjuries, setTotalDisablingInjuries] =
-    useState<number>(0);
-  const [employeeHours, setEmployeeHours] = useState<number>(0);
-  const [daysLost, setDaysLost] = useState<number>(0);
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -49,33 +30,14 @@ function Reccomendation({
 
   useEffect(() => {
     if (signatureUrl) {
-      setValue("signature", signatureUrl);
+      setValue(hasHrRecommendation ? "manager_signature" : "signature", signatureUrl);
     } else {
       setSignatureUrl("");
     }
     if (!drawSignatureModal && signatureUrl) {
       setSignatureUrl("");
     }
-  }, [signatureUrl, setValue, drawSignatureModal]);
-
-  useEffect(() => {
-    if (employeeHours > 0) {
-      const calculatedFrequencyRate =
-        (totalDisablingInjuries * 1000000) / employeeHours;
-      setValue("frequency_rate", calculatedFrequencyRate);
-    } else {
-      setValue("frequency_rate", 0);
-    }
-  }, [totalDisablingInjuries, employeeHours, setValue]);
-
-  useEffect(() => {
-    if (employeeHours > 0) {
-      const calculatedSeverityRate = (daysLost * 1000000) / employeeHours;
-      setValue("severity_rate", calculatedSeverityRate);
-    } else {
-      setValue("severity_rate", 0);
-    }
-  }, [daysLost, employeeHours, setValue]);
+  }, [signatureUrl, setValue, drawSignatureModal, hasHrRecommendation]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -98,16 +60,16 @@ function Reccomendation({
         <div className="grid grid-cols-1 gap-6 mt-4 pb-6">
           <div>
             <label
-              htmlFor="hr_reccomendation"
+              htmlFor={hasHrRecommendation ? "manager_recommendation" : "hr_recommendation"}
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              HR Reccomendation
+              {hasHrRecommendation ? "Manager" : "HR"} Recommendation
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <textarea
-                {...register("hr_reccomendation")}
-                id="hr_reccomendation"
+                {...register(hasHrRecommendation ? "manager_recommendation" : "hr_recommendation")}
+                id={hasHrRecommendation ? "manager_recommendation" : "hr_recommendation"}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 rows={4}
               />
@@ -115,12 +77,12 @@ function Reccomendation({
           </div>
         </div>
         <div className="mt-4">
-          <h1 className="text-lg font-semibold">Signature</h1>
+          <h1 className="text-lg font-semibold">{hasHrRecommendation ? "Manager" : "HR"} Signature</h1>
         </div>
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
             <label
-              htmlFor="name_signature"
+              htmlFor={hasHrRecommendation ? "manager_name_signature" : "name_signature"}
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Name
@@ -129,17 +91,17 @@ function Reccomendation({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("name_signature", {
+                {...register(hasHrRecommendation ? "manager_name_signature" : "name_signature", {
                   required: true,
                 })}
-                id="naname_signatureme"
+                id={hasHrRecommendation ? "manager_name_signature" : "name_signature"}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
           <div>
             <label
-              htmlFor="draw_signature"
+              htmlFor={hasHrRecommendation ? "manager_draw_signature" : "draw_signature"}
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Draw Signature
@@ -156,15 +118,15 @@ function Reccomendation({
           </div>
           <div className="flex-1">
             <label
-              htmlFor="signature"
+              htmlFor={hasHrRecommendation ? "manager_signature" : "hr_signature"}
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Upload Signature
             </label>
             <div className="relative mt-2">
               <input
-                id="signature"
-                {...register("signature")}
+                id={hasHrRecommendation ? "manager_signature" : "hr_signature"}
+                {...register(hasHrRecommendation ? "manager_signature" : "hr_signature")}
                 onChange={(e) => {
                   e.target.value ? setSignatureUrl("") : null;
                   e.target.value ? setAttachmentExist(true) : null;
@@ -177,7 +139,7 @@ function Reccomendation({
                   type="button"
                   className="underline text-savoy-blue text-sm"
                   onClick={() => {
-                    setValue("signature", "");
+                    setValue(hasHrRecommendation ? "manager_signature" : "hr_signature", "");
                     setAttachmentExist(false);
                   }}
                 >

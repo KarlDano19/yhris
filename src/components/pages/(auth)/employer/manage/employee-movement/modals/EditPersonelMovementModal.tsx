@@ -9,22 +9,57 @@ import CustomToast from "@/components/CustomToast";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import EmployeeProfile from "./tabs/EmployeeProfile";
 import Reccomendation from "./tabs/Reccomendation";
-import useAddPersonelMovement from "../hooks/useAddPersonelMovement";
+import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
+import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 
-function CreatePersonelMovementModal({
+type T_ModalData = {
+    id: number;
+    open: boolean;
+  };
+
+function EditPersonelMovementModal({
   refetch,
   isOpen,
   setIsOpen,
 }: {
   refetch: any;
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
+  isOpen: T_ModalData;
+  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue, watch } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
-  const { mutate: addPersonelMovement, isLoading: isLoadingAddPersonelMovement } = useAddPersonelMovement();
+  const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
+  const { mutate: editPersonelMovement, isLoading: isLoadingEditPersonelMovement } = useEditPersonelMovementDetails();
+
+  useEffect(() => {
+    if (isOpen) {
+      refetchPersonelMovement();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (personelMovementData) {
+      setValue("date", personelMovementData.date);
+      setValue("employee", personelMovementData.employee);
+      setValue("position", personelMovementData.position);
+      setValue("reason", personelMovementData.reason);
+      setValue("status", personelMovementData.status);
+      setValue("processed_by", personelMovementData.processed_by);
+      setValue("start_date", personelMovementData.start_date);
+      setValue("hr_recommendation", personelMovementData.hr_recommendation);
+      setValue("manager_recommendation", personelMovementData.manager_recommendation);
+      setValue("manager_signature", personelMovementData.manager_signature);
+      setValue("hr_signature", personelMovementData.hr_signature);
+    }
+  }, [personelMovementData]);
+  
+  const customCloseModal = () => {
+    reset();
+    removePersonelMovement();
+    setIsOpen(null);
+  };
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -35,12 +70,11 @@ function CreatePersonelMovementModal({
             duration: 5000,
           }
         );
-        setIsOpen(false);
-        reset();
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
-        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
+        const errorMessage = err.message || "An unexpected error occurred.";
         toast.custom(
           () => <CustomToast message={errorMessage} type="error" />,
           {
@@ -50,16 +84,16 @@ function CreatePersonelMovementModal({
       },
     };
     console.log(data);
-    addPersonelMovement(data, callbackReq);
+    editPersonelMovement({ personel_movement_id: isOpen.id, data: data }, callbackReq);
   });
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition.Root show={isOpen.open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
+        onClose={() => customCloseModal()}
       >
         <Transition.Child
           as={Fragment}
@@ -91,7 +125,7 @@ function CreatePersonelMovementModal({
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => customCloseModal()}
                   />
                 </div>
                 {selectedTab === 1 && (
@@ -102,7 +136,7 @@ function CreatePersonelMovementModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    isLoading={isLoadingAddPersonelMovement}
+                    isLoading={isLoadingEditPersonelMovement}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -110,9 +144,9 @@ function CreatePersonelMovementModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
+                    isLoading={isLoadingEditPersonelMovement}
                     setValue={setValue}
-                    isLoading={isLoadingAddPersonelMovement}
-                    hasHrRecommendation={false}
+                    hasHrRecommendation={true}
                   />
                 )}
               </Dialog.Panel>
@@ -124,4 +158,4 @@ function CreatePersonelMovementModal({
   );
 }
 
-export default CreatePersonelMovementModal;
+export default EditPersonelMovementModal;

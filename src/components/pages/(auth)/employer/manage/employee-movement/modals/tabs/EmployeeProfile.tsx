@@ -12,16 +12,10 @@ import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
-
 function EmployeeProfile({
   control,
   register,
-  onSubmit,
+  handleSubmit,
   setSelectedTab,
   setValue,
   isLoading,
@@ -29,7 +23,7 @@ function EmployeeProfile({
 }: {
   control: any;
   register: any;
-  onSubmit: any;
+  handleSubmit: any;
   setSelectedTab: any;
   setValue: any;
   isLoading: boolean;
@@ -52,6 +46,10 @@ function EmployeeProfile({
       setPositionItems(positionData);
     }
   }, [positionData]);
+
+  const onSubmit = handleSubmit(() => {
+    setSelectedTab(2);
+  });
 
   return (
     <form onSubmit={onSubmit}>
@@ -113,8 +111,8 @@ function EmployeeProfile({
             </label>
             <div className='relative mt-2'>
               <select
-                id='position'
-                {...register('position', { required: true })}
+                id='current_position'
+                {...register('current_position', { required: true })}
                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
               >
                 <option value=''>Select...</option>
@@ -157,7 +155,7 @@ function EmployeeProfile({
             </div>
           </div>
           <div>
-            <label htmlFor='reason_for_movement' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
               Reason for Movement
               <span className='text-red-600'>*</span>
             </label>
@@ -166,7 +164,7 @@ function EmployeeProfile({
                 <div>
                   <input
                     type='radio'
-                    {...register('reason_for_movement', { required: true })}
+                    {...register('reason', { required: true })}
                     id='early_regularization'
                     value='Early Regularization'
                   />
@@ -177,7 +175,7 @@ function EmployeeProfile({
                 <div>
                   <input
                     type='radio'
-                    {...register('reason_for_movement', { required: true })}
+                    {...register('reason', { required: true })}
                     id='passed_probation'
                     value='Passed Probation Period'
                   />
@@ -188,7 +186,7 @@ function EmployeeProfile({
                 <div>
                   <input
                     type='radio'
-                    {...register('reason_for_movement', { required: true })}
+                    {...register('reason', { required: true })}
                     id='appointment'
                     value='Appointment'
                   />
@@ -253,10 +251,10 @@ function EmployeeProfile({
             <div className="relative mt-2">
                 <Controller
                   control={control}
-                  name="date_of_application"
+                  name="start_date"
                   render={({ field }) => (
                     <CustomDatePicker
-                      id="date_of_application"
+                      id="start_date"
                       placeholder={"mm/dd/yyyy"}
                       className={
                         "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"

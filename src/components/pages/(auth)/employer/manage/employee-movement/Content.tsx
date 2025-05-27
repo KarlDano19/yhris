@@ -6,18 +6,16 @@ import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import CustomToast from '@/components/CustomToast';
-import classNames from '@/helpers/classNames';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import useGetPersonelMovementList from './hooks/useGetPersonelMovementList';
 import CreatePersonelMovementModal from './modals/CreatePersonelMovementModal';
+import EditPersonelMovementModal from './modals/EditPersonelMovementModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -33,6 +31,7 @@ const Content = () => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [isOpenCreatePersonelMovementModal, setIsOpenCreatePersonelMovementModal] = useState(false);
+  const [isOpenEditPersonelMovementModal, setIsOpenEditPersonelMovementModal] = useState<T_ModalData | null>(null);
   const [personelMovementList, setPersonelMovementList] = useState<any>([]);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,9 +55,7 @@ const Content = () => {
   useEffect(() => {
     if (personelMovementListData) {
       personelMovementListData.records.map((item: any) => {
-        item.date_of_entry = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_entry));
-        item.date_of_notification = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_notification));
-        item.date_of_contingency = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_contingency));
+        item.date = Intl.DateTimeFormat('en-US').format(new Date(item.date));
         return item;
       });
       setPersonelMovementList(personelMovementListData.records);
@@ -114,19 +111,22 @@ const Content = () => {
     if (personelMovementList && personelMovementList.length > 0) {
       return personelMovementList.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_entry}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_notification}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.id}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_contingency}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.place_of_contingency}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.nature_of_contingency}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.days_of_employee_absence}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.remarks}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.reason}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.processed_by}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.status}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-            <div className='flex space-x-2'>
+            <div className='flex space-x-2 justify-center'>
               <button 
-                onClick={() => {}}
-                // disabled={!cachedRigths?.state?.data?.edit_dole_employee_compensation}
+                onClick={() => {
+                  setIsOpenEditPersonelMovementModal({
+                    id: item.id,
+                    open: true,
+                  });
+                }}
               >
                 <EditIcon />
               </button>
@@ -330,6 +330,13 @@ const Content = () => {
             isOpen={isOpenCreatePersonelMovementModal}
             setIsOpen={setIsOpenCreatePersonelMovementModal}
           />
+          {isOpenEditPersonelMovementModal && (
+            <EditPersonelMovementModal  
+              refetch={personelMovementListRefetch}
+              isOpen={isOpenEditPersonelMovementModal}
+              setIsOpen={setIsOpenEditPersonelMovementModal}
+            />
+          )}
         </div>
       </div>
     </>
