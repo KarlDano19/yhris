@@ -21,10 +21,18 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 
-// Extend the base type with additional fields and make all fields optional for form handling
+// Add these type definitions before tabFields
+type TabNumber = 1 | 2 | 3 | 4 | 5 | 6;
+
+// Helper type to get fields for a specific tab
+type TabFields = {
+  [K in TabNumber]: Array<keyof T_OshProgram>;
+};
+
+// Keep the original ExtendedOshProgram type
 type ExtendedOshProgram = Partial<T_OshProgram> & {
-  [key: string]: any;
   id?: string;
+  [key: string]: any;
   business_description?: string | string[];
   emergency_and_disaster_preparedness?: string | Array<{
     task: string;
@@ -37,9 +45,58 @@ type ExtendedOshProgram = Partial<T_OshProgram> & {
   safety_signage?: File | string;
 };
 
+// Add required fields mapping
+const requiredFieldsByTab: TabFields = {
+  1: ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'],
+  2: ['date', 'name_of_owner'],
+  3: ['emergency_and_disaster_preparedness'],
+  4: ['no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace', 'hospitals_youre_affiliated_with', 
+      'chairperson_less_than_ten', 'secretary_less_than_ten', 'member_less_than_ten', 
+      'chairperson_medium_to_high', 'secretary_medium_to_high', 'ex_officio_members', 
+      'members', 'chairperson_joint_coordinating', 'secretary_joint_coordinating', 'ex_officio_members_1'],
+  5: [],
+  6: ['others_name', 'name_of_owner_manager', 'employees_representative', 'date_filled']
+};
+
+// Update tabFields declaration with explicit field lists
+const tabFields: TabFields = {
+  1: ['company_name', 'date_established', 'complete_address', 'phone_number', 'fax_number', 
+      'website_url', 'company_owner', 'number_of_male_employees', 'number_of_female_employees', 
+      'total_number_of_employees', 'business_description', 'manufacturing_description', 
+      'bank_and_financial_institution_description', 'service_description', 'security_agency_description', 
+      'agri_fishing_description', 'maintenance_description', 'wholesale_retail_description', 
+      'construction_description', 'utilities_description', 'others_description', 'product_description', 
+      'services_description'] as Array<keyof T_OshProgram>,
+  2: ['basic_components', 'company_commitment', 'date', 'name_of_owner', 'signature'] as Array<keyof T_OshProgram>,
+  3: ['emergency_and_disaster_preparedness'] as Array<keyof T_OshProgram>,
+  4: ['routine_medical_surveillance', 'special_medical_surveillance', 'schedule_of_annual_medical_examination',
+      'random_drug_testing', 'no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace',
+      'hospitals_youre_affiliated_with', 'chairperson_less_than_ten', 'secretary_less_than_ten',
+      'member_less_than_ten', 'chairperson_medium_to_high', 'secretary_medium_to_high',
+      'ex_officio_members', 'ex_officio_members_1', 'ex_officio_members_2', 'members',
+      'members_2', 'chairperson_joint_coordinating', 'secretary_joint_coordinating',
+      'ex_officio_members_3', 'ex_officio_members_4', 'duties_and_responsibilities',
+      'safety_officer', 'health_personnel', 'health_training', 'risk_assessment',
+      'safety_meeting', 'reported_incidents'] as Array<keyof T_OshProgram>,
+  5: ['ppe', 'ppe_description', 'safety_signage', 'adequate_supply_of_drinking_water',
+      'adequate_supply_of_drinking_water_remarks', 'adequate_sanitary_and_washing_facilities',
+      'adequate_sanitary_and_washing_facilities_remarks', 'suitable_living_accommodation',
+      'suitable_living_accommodation_remarks', 'separate_sanitary_washing_and_sleeping_facilities',
+      'separate_sanitary_washing_and_sleeping_facilities_remarks', 'lactation_station',
+      'lactation_station_remarks', 'ramps_railings_and_like', 'ramps_railings_and_like_remarks',
+      'other_workers_welfare_facilities', 'other_workers_welfare_facilities_remarks',
+      'written_emergency_and_disaster_program', 'drills', 'written_pollution_control_program',
+      'polution_control_officer', 'waste_management_system_message',
+      'prohibited_acts_and_penalties_message'] as Array<keyof T_OshProgram>,
+  6: ['cost_osh_program', 'ppe_cost', 'osh_training_cost', 'safety_signages_cost',
+      'machine_guards_cost', 'medical_examinations_cost', 'medical_supplies_cost',
+      'others_name', 'others_cost', 'annex_a_message', 'name_of_owner_manager',
+      'employees_representative', 'date_filled'] as Array<keyof T_OshProgram>
+};
+
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors, reset } = useForm<ExtendedOshProgram>();
-  const [selectedTab, setSelectedTab] = useState(1);
+  const [selectedTab, setSelectedTab] = useState<TabNumber>(1);
   const [validationMessage, setValidationMessage] = useState("");
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
   const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] = useState(false);
@@ -48,221 +105,105 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
-    // Define required fields for each tab
-    const requiredFieldsByTab: { [key: number]: string[] } = {
-      1: ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'],
-      2: ['date', 'name_of_owner'],
-      3: ['emergency_and_disaster_preparedness'],
-      4: ['no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace', 'hospitals_youre_affiliated_with', 
-          'chairperson_less_than_ten', 'secretary_less_than_ten', 'member_less_than_ten', 
-          'chairperson_medium_to_high', 'secretary_medium_to_high', 'ex_officio_members', 
-          'members', 'chairperson_joint_coordinating', 'secretary_joint_coordinating', 'ex_officio_members_1'],
-      5: [],
-      6: ['others_name', 'name_of_owner_manager', 'employees_representative', 'date_filled']
-    };
-    
-    // Only validate the current tab's fields
+    // Validate required fields for current tab
     const requiredFields = requiredFieldsByTab[selectedTab] || [];
-    const missingFields = requiredFields.filter((field: string) => !data[field]);
-    
+    const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
+
     // Special handling for signature in tab 2
     if (selectedTab === 2 && !data.signature) {
       setValidationMessage("Please provide a signature");
       return;
     }
-    
+
     if (missingFields.length > 0) {
       setValidationMessage(`Please fill out all required fields marked with * (Missing: ${missingFields.join(', ')})`);
       return;
     }
-    
-    // Create a new object with processed data
-    const processedData = { ...data };
 
-    // Only include the signature field if we're in tab 2 or if it already exists
-    if (selectedTab !== 2) {
-      delete processedData.signature;
+    // Get the fields for the current tab
+    const currentTabFields = tabFields[selectedTab];
+    
+    // Create a new object with only the fields from the current tab
+    const processedData: ExtendedOshProgram = {};
+    
+    // Add the ID if it exists
+    if (oshProgramDetails?.id) {
+      processedData.id = oshProgramDetails.id;
     }
 
-    // Handle file uploads (signature and safety_signage)
-    if (processedData.safety_signage instanceof File) {
-      // Keep the File object as is for FormData
-      console.log('Safety signage is a File object');
-    } else if (typeof processedData.safety_signage === 'string' && !processedData.safety_signage.startsWith('data:')) {
-      // If it's a string but not a data URL, and we're not in safety measures tab, remove it
-      if (selectedTab !== 5) {
-        delete processedData.safety_signage;
-      }
-    }
-    
-    // Define all boolean fields
-    const booleanFields = [
-      'duties_and_responsibilities',
-      'random_drug_testing',
-      'adequate_sanitary_and_washing_facilities',
-      'adequate_supply_of_drinking_water',
-      'suitable_living_accommodation',
-      'separate_sanitary_washing_and_sleeping_facilities',
-      'lactation_station',
-      'ramps_railings_and_like',
-      'other_workers_welfare_facilities'
-    ];
-    
-    // Process all boolean fields in a unified way
-    booleanFields.forEach(field => {
-      if (processedData[field] === "true" || processedData[field] === true) {
-        processedData[field] = true;
-      } else if (processedData[field] === "false" || processedData[field] === false) {
-        processedData[field] = false;
-      } else if (processedData[field] === undefined || processedData[field] === null) {
-        // Only set default if field is undefined or null
-        // This preserves values from other tabs
-        if (oshProgramDetails && oshProgramDetails[field] !== undefined) {
-          // Keep the existing value from oshProgramDetails if it exists
-          processedData[field] = oshProgramDetails[field];
-        } else {
-          // Default to null if we don't have an existing value
-          processedData[field] = null;
-        }
-      }
-    });
-    
-    // Ensure numeric fields are properly converted to numbers
-    const numericFields = [
-      'no_of_treatment_rooms_first_aid_rooms',
-      'no_of_clinics_in_the_workplace',
-      'number_of_male_employees',
-      'number_of_female_employees',
-      'total_number_of_employees',
-      'medical_examinations_cost',
-      'medical_supplies_cost',
-      'osh_training_cost',
-      'ppe_cost',
-      'safety_signages_cost',
-      'machine_guards_cost',
-      'others_cost'
-    ];
-    
-    numericFields.forEach(field => {
-      if (processedData[field] !== undefined && processedData[field] !== null && processedData[field] !== '') {
-        processedData[field] = Number(processedData[field]);
+    // Only process fields from the current tab
+    currentTabFields.forEach((field: keyof T_OshProgram) => {
+      if (data[field] !== undefined) {
+        processedData[field] = data[field];
       }
     });
 
-    // Handle business_description properly for multipart/form-data
-    if (processedData.business_description !== undefined) {
-      // Ensure it's an array
-      if (!Array.isArray(processedData.business_description)) {
-        // If it's a string, try to parse it if it's JSON
-        if (typeof processedData.business_description === 'string') {
-          try {
-            // Try to parse if it's a JSON string
-            const parsed = JSON.parse(processedData.business_description);
-            processedData.business_description = Array.isArray(parsed) ? parsed : [processedData.business_description];
-          } catch (e) {
-            // If parsing fails, it's a regular string
-            processedData.business_description = processedData.business_description;
-          }
-        } else if (processedData.business_description === null) {
-          // If null, set to empty array
-          processedData.business_description = [];
-        } else {
-          // For any other non-array type, wrap in array
-          processedData.business_description = [String(processedData.business_description)];
-        }
+    // Special handling for boolean fields in tabs 4 and 5
+    if (selectedTab === 4) {
+      // Handle boolean fields for Health and Welfare tab
+      if ('duties_and_responsibilities' in processedData) {
+        const value = processedData.duties_and_responsibilities as boolean | string | null | undefined;
+        if (value === true || value === 'true') processedData.duties_and_responsibilities = true;
+        else if (value === false || value === 'false') processedData.duties_and_responsibilities = false;
       }
-      
-      // NOTE: Do not convert to JSON string here - let the hook handle that
-      // to ensure consistent handling
-      
-      // Ensure business_description field name is lowercase
-      if ('Business_description' in processedData) {
-        processedData.business_description = processedData.Business_description;
-        delete processedData.Business_description;
-      }
-    } else if (oshProgramDetails && oshProgramDetails.business_description) {
-      // When business_description is not provided but exists in the backend, use the existing value
-      if (typeof oshProgramDetails.business_description === 'string') {
-        try {
-          processedData.business_description = JSON.parse(oshProgramDetails.business_description);
-        } catch (e) {
-          // If parsing fails, use as is
-          processedData.business_description = oshProgramDetails.business_description;
-        }
-      } else {
-        processedData.business_description = oshProgramDetails.business_description;
+      if ('random_drug_testing' in processedData) {
+        const value = processedData.random_drug_testing as boolean | string | null | undefined;
+        if (value === true || value === 'true') processedData.random_drug_testing = true;
+        else if (value === false || value === 'false') processedData.random_drug_testing = false;
       }
     }
 
-    // Handle emergency_and_disaster_preparedness separately since it has a specific structure
-    if (processedData.emergency_and_disaster_preparedness) {
-      // Ensure it's an array of objects with the required structure
-      if (Array.isArray(processedData.emergency_and_disaster_preparedness)) {
-        const validatedData = processedData.emergency_and_disaster_preparedness
-          .map(item => ({
-            task: String(item.task || ''),
-            hazard_identified: String(item.hazard_identified || ''),
-            risk_description: String(item.risk_description || ''),
-            priority: String(item.priority || ''),
-            control_measures: String(item.control_measures || '')
-          }))
-          .filter(item => 
-            item.task || 
-            item.hazard_identified || 
-            item.risk_description || 
-            item.priority || 
-            item.control_measures
-          ); // Filter out empty entries
-        processedData.emergency_and_disaster_preparedness = validatedData;
-      } else {
-        processedData.emergency_and_disaster_preparedness = [];
-      }
-    } else {
-      processedData.emergency_and_disaster_preparedness = [];
+    if (selectedTab === 5) {
+      // Handle boolean fields for Safety Measures tab
+      const booleanFields = [
+        'adequate_supply_of_drinking_water',
+        'adequate_sanitary_and_washing_facilities',
+        'suitable_living_accommodation',
+        'separate_sanitary_washing_and_sleeping_facilities',
+        'lactation_station',
+        'ramps_railings_and_like',
+        'other_workers_welfare_facilities',
+        'written_emergency_and_disaster_program',
+        'written_pollution_control_program'
+      ];
+
+      booleanFields.forEach(field => {
+        if (field in processedData) {
+          // Preserve null values, only convert explicit true/false
+          const value = processedData[field] as boolean | string | null | undefined;
+          if (value === true || value === 'true') processedData[field] = true;
+          else if (value === false || value === 'false') processedData[field] = false;
+          // Leave null/undefined values as is
+        }
+      });
     }
 
-    // Handle array fields 
+    // Handle array fields if they exist in the current tab
     const arrayFields = [
       'routine_medical_surveillance',
-      'schedule_of_annual_medical_examination',
       'special_medical_surveillance',
-      'safety_officer',
-      'health_personnel',
-      'health_training',
-      'risk_assessment',
-      'reported_incidents',
-      'safety_meeting'
+      'schedule_of_annual_medical_examination',
+      'business_description'
     ];
 
     arrayFields.forEach(field => {
-      if (processedData[field]) {
-        // If it's already an array, use it as is
+      if (field in processedData) {
         if (Array.isArray(processedData[field])) {
-          processedData[field] = JSON.stringify(processedData[field]);
-        }
-        // If it's a string, try to parse it as JSON
-        else if (typeof processedData[field] === 'string') {
+          processedData[field] = processedData[field];
+        } else if (typeof processedData[field] === 'string') {
           try {
-            const parsed = JSON.parse(processedData[field]);
-            processedData[field] = JSON.stringify(Array.isArray(parsed) ? parsed : [processedData[field]]);
+            processedData[field] = JSON.parse(processedData[field]);
           } catch (e) {
-            // If parsing fails, wrap the string in an array
-            processedData[field] = JSON.stringify([processedData[field]]);
+            processedData[field] = [processedData[field]];
           }
         }
-        // For any other type, wrap in array
-        else {
-          processedData[field] = JSON.stringify([processedData[field]]);
-        }
-      } else {
-        // Initialize as empty array if no value
-        processedData[field] = JSON.stringify([]);
       }
     });
 
-    // Handle JSON fields
+    // Handle JSON fields if they exist in the current tab
     const jsonFields = [
       'drills',
+      'emergency_and_disaster_preparedness',
       'health_personnel',
       'health_training',
       'ppe',
@@ -273,22 +214,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     ];
 
     jsonFields.forEach(field => {
-      if (processedData[field]) {
-        if (typeof processedData[field] === 'string') {
-          try {
-            const parsed = JSON.parse(processedData[field]);
-            processedData[field] = JSON.stringify(parsed);
-          } catch (e) {
-            processedData[field] = JSON.stringify({ data: processedData[field] });
-          }
-        } else {
+      if (field in processedData) {
+        if (typeof processedData[field] === 'object') {
           processedData[field] = JSON.stringify(processedData[field]);
+        } else if (typeof processedData[field] === 'string') {
+          try {
+            JSON.parse(processedData[field]); // Validate it's valid JSON
+          } catch (e) {
+            processedData[field] = JSON.stringify({}); // Default to empty object if invalid
+          }
         }
-      } else {
-        processedData[field] = JSON.stringify({});
       }
     });
-    
+
+    // Handle file fields if they exist in the current tab
+    if (selectedTab === 2 && processedData.signature instanceof File) {
+      // Keep the File object as is for FormData
+    } else if (selectedTab === 5 && processedData.safety_signage instanceof File) {
+      // Keep the File object as is for FormData
+    }
+
     setValidationMessage("");
     const callbackReq = {
       onSuccess: () => {
@@ -298,7 +243,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
       }
     }
-    updateOshProgramDetails({ ...processedData, id: oshProgramDetails?.id } as ExtendedOshProgram, callbackReq);
+    updateOshProgramDetails(processedData, callbackReq);
   });
 
   useEffect(() => {
@@ -469,7 +414,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [oshProgramDetails, setValue]);
 
   // Function to handle tab changes
-  const handleTabChange = (tabIndex: number) => {
+  const handleTabChange = (tabIndex: TabNumber) => {
     // Clear any validation errors
     clearErrors();
     // Clear validation message
@@ -480,11 +425,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     // Reset form data for the current tab before switching
     if (oshProgramDetails) {
-      // Define array fields that should be preserved
-      const arrayFields = [
+      // Define fields that should be preserved from current form values
+      const preservedFields = [
         'routine_medical_surveillance',
         'schedule_of_annual_medical_examination',
         'special_medical_surveillance',
+        'emergency_and_disaster_preparedness',
         'safety_officer',
         'health_personnel',
         'health_training',
@@ -495,8 +441,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       // Reset all form fields to their last saved values from oshProgramDetails
       const fieldsToReset = Object.keys(oshProgramDetails).reduce((acc: any, key) => {
-        // For array fields, keep current values if they exist
-        if (arrayFields.includes(key) && currentValues[key]) {
+        // For preserved fields, keep current values if they exist
+        if (preservedFields.includes(key) && currentValues[key]) {
           acc[key] = currentValues[key];
         } else {
           acc[key] = oshProgramDetails[key];
@@ -560,32 +506,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         )}
         
         <div className="mt-8 flex flex-row justify-between space-x-2">
-          <div onClick={() => handleTabChange(1)} className="cursor-pointer">
+          <div onClick={() => handleTabChange(1 as TabNumber)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Company Profile
             </h1>
           </div>
-          <div onClick={() => handleTabChange(2)} className="cursor-pointer">
+          <div onClick={() => handleTabChange(2 as TabNumber)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 2 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               OSH Program and Policy
             </h1>
           </div>
-          <div onClick={() => handleTabChange(3)} className="cursor-pointer">
+          <div onClick={() => handleTabChange(3 as TabNumber)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 3 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Risk Management
             </h1>
           </div>
-          <div onClick={() => handleTabChange(4)} className="cursor-pointer">
+          <div onClick={() => handleTabChange(4 as TabNumber)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 4 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Health and Welfare Program
             </h1>
           </div>
-          <div onClick={() => handleTabChange(5)} className="cursor-pointer">
+          <div onClick={() => handleTabChange(5 as TabNumber)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 5 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Safety Measures
             </h1>
           </div>
-          <div onClick={() => handleTabChange(6)} className="cursor-pointer">
+          <div onClick={() => handleTabChange(6 as TabNumber)} className="cursor-pointer">
             <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 6 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
               Compliance and Cost
             </h1>

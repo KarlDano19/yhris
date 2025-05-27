@@ -67,17 +67,23 @@ async function updateOshProgramDetails(data: OshProgramData) {
             'separate_sanitary_washing_and_sleeping_facilities',
             'lactation_station',
             'ramps_railings_and_like',
-            'other_workers_welfare_facilities'
+            'other_workers_welfare_facilities',
+            'written_emergency_and_disaster_program',
+            'written_pollution_control_program'
         ];
         
         for (const field of booleanFields) {
             if (cleanData[field] !== undefined) {
+                if (cleanData[field] === null) {
+                    // Keep null values as null
+                    continue;
+                }
                 // Convert string values to boolean
                 if (typeof cleanData[field] === 'string') {
                     const value = cleanData[field].toLowerCase();
                     cleanData[field] = value === 'true' || value === 'yes';
                 } else {
-                    // Ensure it's a proper boolean
+                    // Ensure it's a proper boolean only if not null
                     cleanData[field] = Boolean(cleanData[field]);
                 }
             }

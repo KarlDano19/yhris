@@ -326,18 +326,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_supply_of_drinking_water"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="adequate_supply_yes"
-                                checked={value === true}
-                                onChange={() => onChange(value === true ? undefined : true)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="adequate_supply_yes"
+                              checked={value === true}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? true : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -347,18 +347,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_supply_of_drinking_water"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="adequate_supply_no"
-                                checked={value === false}
-                                onChange={() => onChange(value === false ? undefined : false)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="adequate_supply_no"
+                              checked={value === false}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? false : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -397,18 +397,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_sanitary_and_washing_facilities"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="adequate_sanitary_yes"
-                                checked={value === true}
-                                onChange={() => onChange(value === true ? undefined : true)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="adequate_sanitary_yes"
+                              checked={value === true}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? true : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -418,18 +418,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="adequate_sanitary_and_washing_facilities"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="adequate_sanitary_no"
-                                checked={value === false}
-                                onChange={() => onChange(value === false ? undefined : false)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="adequate_sanitary_no"
+                              checked={value === false}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? false : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -470,18 +470,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="suitable_living_accommodation"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="suitable_living_yes"
-                                checked={value === true}
-                                onChange={() => onChange(value === true ? undefined : true)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="suitable_living_yes"
+                              checked={value === true}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? true : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -491,18 +491,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="suitable_living_accommodation"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="suitable_living_no"
-                                checked={value === false}
-                                onChange={() => onChange(value === false ? undefined : false)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="suitable_living_no"
+                              checked={value === false}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? false : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -540,18 +540,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="separate_sanitary_washing_and_sleeping_facilities"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="separate_sanitary_yes"
-                                checked={value === true}
-                                onChange={() => onChange(value === true ? undefined : true)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="separate_sanitary_yes"
+                              checked={value === true}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? true : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -561,18 +561,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="separate_sanitary_washing_and_sleeping_facilities"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="separate_sanitary_no"
-                                checked={value === false}
-                                onChange={() => onChange(value === false ? undefined : false)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="separate_sanitary_no"
+                              checked={value === false}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? false : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -613,18 +613,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="lactation_station"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="lactation_station_yes"
-                                checked={value === true}
-                                onChange={() => onChange(value === true ? undefined : true)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="lactation_station_yes"
+                              checked={value === true}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? true : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -634,18 +634,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="lactation_station"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="lactation_station_no"
-                                checked={value === false}
-                                onChange={() => onChange(value === false ? undefined : false)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="lactation_station_no"
+                              checked={value === false}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? false : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -682,18 +682,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="ramps_railings_and_like"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="ramps_railings_yes"
-                                checked={value === true}
-                                onChange={() => onChange(value === true ? undefined : true)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="ramps_railings_yes"
+                              checked={value === true}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? true : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -703,18 +703,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="ramps_railings_and_like"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="ramps_railings_no"
-                                checked={value === false}
-                                onChange={() => onChange(value === false ? undefined : false)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="ramps_railings_no"
+                              checked={value === false}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? false : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -752,18 +752,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="other_workers_welfare_facilities"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="other_workers_yes"
-                                checked={value === true}
-                                onChange={() => onChange(value === true ? undefined : true)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="other_workers_yes"
+                              checked={value === true}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? true : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -773,18 +773,18 @@ export default function SafetyMeasures({
                         <Controller
                           control={control}
                           name="other_workers_welfare_facilities"
-                          defaultValue={undefined}
-                          render={({ field: { value, onChange, ...field } }) => (
-                            <>
-                              <input
-                                type="checkbox"
-                                id="other_workers_no"
-                                checked={value === false}
-                                onChange={() => onChange(value === false ? undefined : false)}
-                                className="w-4 h-4"
-                                {...field}
-                              />
-                            </>
+                          defaultValue={null}
+                          render={({ field: { value, onChange } }) => (
+                            <input
+                              type="checkbox"
+                              id="other_workers_no"
+                              checked={value === false}
+                              onChange={(e) => {
+                                const newValue = e.target.checked ? false : null;
+                                onChange(newValue);
+                              }}
+                              className="w-4 h-4"
+                            />
                           )}
                         />
                       </div>
@@ -836,24 +836,46 @@ export default function SafetyMeasures({
           </label>
           <div className="grid grid-cols-4 gap-10 pl-4">
             <div className="relative pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register(`written_emergency_and_disaster_program`)}
-                id={`written_emergency_and_disaster_program`}
-                value="Yes"
+              <Controller
+                control={control}
+                name="written_emergency_and_disaster_program"
+                defaultValue={null}
+                render={({ field: { value, onChange } }) => (
+                  <input
+                    type="checkbox"
+                    id="written_emergency_yes"
+                    checked={value === true}
+                    onChange={(e) => {
+                      const newValue = e.target.checked ? true : null;
+                      onChange(newValue);
+                    }}
+                    className="w-4 h-4"
+                  />
+                )}
               />
-              <label htmlFor="safety_officer_level_1" className="ml-2 ">
+              <label htmlFor="written_emergency_yes" className="ml-2">
                 Yes
               </label>
             </div>
             <div className="relative pl-4 flex gap-2">
-              <input
-                type="checkbox"
-                {...register(`written_emergency_and_disaster_program`)}
-                id={`written_emergency_and_disaster_program`}
-                value="No"
+              <Controller
+                control={control}
+                name="written_emergency_and_disaster_program"
+                defaultValue={null}
+                render={({ field: { value, onChange } }) => (
+                  <input
+                    type="checkbox"
+                    id="written_emergency_no"
+                    checked={value === false}
+                    onChange={(e) => {
+                      const newValue = e.target.checked ? false : null;
+                      onChange(newValue);
+                    }}
+                    className="w-4 h-4"
+                  />
+                )}
               />
-              <label htmlFor="safety_officer_level_1" className="ml-2 ">
+              <label htmlFor="written_emergency_no" className="ml-2">
                 No
               </label>
             </div>
@@ -956,30 +978,46 @@ export default function SafetyMeasures({
           </label>
           <div className="grid grid-cols-4 gap-10 pl-4">
             <div className="relative pl-4 flex gap-2 mb-6">
-              <input
-                type="checkbox"
-                {...register(`written_pollution_control_program`)}
-                id={`written_pollution_control_program`}
-                value="Yes"
+              <Controller
+                control={control}
+                name="written_pollution_control_program"
+                defaultValue={null}
+                render={({ field: { value, onChange } }) => (
+                  <input
+                    type="checkbox"
+                    id="written_pollution_yes"
+                    checked={value === true}
+                    onChange={(e) => {
+                      const newValue = e.target.checked ? true : null;
+                      onChange(newValue);
+                    }}
+                    className="w-4 h-4"
+                  />
+                )}
               />
-              <label
-                htmlFor="written_pollution_control_program"
-                className="ml-2 mt-0.5"
-              >
+              <label htmlFor="written_pollution_yes" className="ml-2 mt-0.5">
                 Yes
               </label>
             </div>
             <div className="relative pl-4 flex gap-2 mb-6">
-              <input
-                type="checkbox"
-                {...register(`written_pollution_control_program`)}
-                id={`written_pollution_control_program`}
-                value="No"
+              <Controller
+                control={control}
+                name="written_pollution_control_program"
+                defaultValue={null}
+                render={({ field: { value, onChange } }) => (
+                  <input
+                    type="checkbox"
+                    id="written_pollution_no"
+                    checked={value === false}
+                    onChange={(e) => {
+                      const newValue = e.target.checked ? false : null;
+                      onChange(newValue);
+                    }}
+                    className="w-4 h-4"
+                  />
+                )}
               />
-              <label
-                htmlFor="written_pollution_control_program"
-                className="ml-2 mt-0.5"
-              >
+              <label htmlFor="written_pollution_no" className="ml-2 mt-0.5">
                 No
               </label>
             </div>
