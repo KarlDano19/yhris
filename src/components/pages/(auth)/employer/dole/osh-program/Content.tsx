@@ -101,7 +101,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
   const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] = useState(false);
 
-  const { data: oshProgramDetails } = useGetOshProgramDetails();
+  const { data: oshProgramDetails, refetch } = useGetOshProgramDetails();
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
@@ -270,7 +270,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             setSafetySignageUrl("");
           }
         }
-        toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+        
+        // Refresh data from backend to ensure frontend state is in sync
+        refetch().then(() => {
+          toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+        }).catch(() => {
+          // Still show success message even if refetch fails
+          toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+        });
       },
       onError: (error: any) => {
         toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);

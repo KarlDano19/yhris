@@ -51,9 +51,7 @@ export default function ProgramAndPolicy({
 
   useEffect(() => {
     const currentSignature = watch("signature");
-    console.log("Current signature:", currentSignature);
     if (typeof currentSignature === "string" && currentSignature !== previousSignatureFile) {
-      console.log("Setting previous signature file to:", currentSignature);
       setPreviousSignatureFile(currentSignature);
       setSignatureAttachmentExist(true);
     }
@@ -236,9 +234,7 @@ export default function ProgramAndPolicy({
                     className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
                     onClick={() => {
                       const fileName = previousSignatureFile.split('/').pop();
-                      console.log("Opening signature:", fileName);
                       const url = `${process.env.NEXT_PUBLIC_API_URL}/media/oshprogram/signatures/${fileName}`;
-                      console.log("URL:", url);
                       window.open(url, '_blank');
                     }}
                   >
