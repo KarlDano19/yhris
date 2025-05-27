@@ -5,7 +5,16 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { T_OshProgram } from "@/types/globals";
+import { 
+  T_OshProgram, 
+  ExtendedOshProgram, 
+  OSH_PROGRAM_TAB_NUMBER as TabNumber, 
+  OSH_PROGRAM_TAB_FIELDS as tabFields, 
+  OSH_PROGRAM_REQUIRED_FIELDS_BY_TAB as requiredFieldsByTab,
+  OSH_PROGRAM_ALL_BOOLEAN_FIELDS as allBooleanFields,
+  OSH_PROGRAM_SAFETY_MEASURES_BOOLEAN_FIELDS as safetyMeasuresBooleanFields,
+  OSH_PROGRAM_JSON_FIELDS as jsonFields
+} from "@/types/osh-program";
 
 import CustomToast from "@/components/CustomToast";
 import CompanyProfile from "./tabs/CompanyProfile";
@@ -21,81 +30,8 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 
-// Add these type definitions before tabFields
-type TabNumber = 1 | 2 | 3 | 4 | 5 | 6;
-
-// Helper type to get fields for a specific tab
-type TabFields = {
-  [K in TabNumber]: Array<keyof T_OshProgram>;
-};
-
-// Keep the original ExtendedOshProgram type
-type ExtendedOshProgram = Partial<T_OshProgram> & {
-  id?: string;
-  [key: string]: any;
-  business_description?: string | string[];
-  emergency_and_disaster_preparedness?: string | Array<{
-    task: string;
-    hazard_identified: string;
-    risk_description: string;
-    priority: string;
-    control_measures: string;
-  }>;
-  signature?: File | string;
-  safety_signage?: File | string;
-};
-
-// Add required fields mapping
-const requiredFieldsByTab: TabFields = {
-  1: ['company_name', 'date_established', 'complete_address', 'website_url', 'number_of_male_employees', 'number_of_female_employees'],
-  2: ['date', 'name_of_owner'],
-  3: ['emergency_and_disaster_preparedness'],
-  4: ['no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace', 'hospitals_youre_affiliated_with', 
-      'chairperson_less_than_ten', 'secretary_less_than_ten', 'member_less_than_ten', 
-      'chairperson_medium_to_high', 'secretary_medium_to_high', 'ex_officio_members', 
-      'members', 'chairperson_joint_coordinating', 'secretary_joint_coordinating', 'ex_officio_members_1'],
-  5: [],
-  6: ['others_name', 'name_of_owner_manager', 'employees_representative', 'date_filled']
-};
-
-// Update tabFields declaration with explicit field lists
-const tabFields: TabFields = {
-  1: ['company_name', 'date_established', 'complete_address', 'phone_number', 'fax_number', 
-      'website_url', 'company_owner', 'number_of_male_employees', 'number_of_female_employees', 
-      'total_number_of_employees', 'business_description', 'manufacturing_description', 
-      'bank_and_financial_institution_description', 'service_description', 'security_agency_description', 
-      'agri_fishing_description', 'maintenance_description', 'wholesale_retail_description', 
-      'construction_description', 'utilities_description', 'others_description', 'product_description', 
-      'services_description'] as Array<keyof T_OshProgram>,
-  2: ['basic_components', 'company_commitment', 'date', 'name_of_owner', 'signature'] as Array<keyof T_OshProgram>,
-  3: ['emergency_and_disaster_preparedness'] as Array<keyof T_OshProgram>,
-  4: ['routine_medical_surveillance', 'special_medical_surveillance', 'schedule_of_annual_medical_examination',
-      'random_drug_testing', 'no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace',
-      'hospitals_youre_affiliated_with', 'chairperson_less_than_ten', 'secretary_less_than_ten',
-      'member_less_than_ten', 'chairperson_medium_to_high', 'secretary_medium_to_high',
-      'ex_officio_members', 'ex_officio_members_1', 'ex_officio_members_2', 'members',
-      'members_2', 'chairperson_joint_coordinating', 'secretary_joint_coordinating',
-      'ex_officio_members_3', 'ex_officio_members_4', 'duties_and_responsibilities',
-      'safety_officer', 'health_personnel', 'health_training', 'risk_assessment',
-      'safety_meeting', 'reported_incidents'] as Array<keyof T_OshProgram>,
-  5: ['ppe', 'ppe_description', 'safety_signage', 'adequate_supply_of_drinking_water',
-      'adequate_supply_of_drinking_water_remarks', 'adequate_sanitary_and_washing_facilities',
-      'adequate_sanitary_and_washing_facilities_remarks', 'suitable_living_accommodation',
-      'suitable_living_accommodation_remarks', 'separate_sanitary_washing_and_sleeping_facilities',
-      'separate_sanitary_washing_and_sleeping_facilities_remarks', 'lactation_station',
-      'lactation_station_remarks', 'ramps_railings_and_like', 'ramps_railings_and_like_remarks',
-      'other_workers_welfare_facilities', 'other_workers_welfare_facilities_remarks',
-      'written_emergency_and_disaster_program', 'drills', 'written_pollution_control_program',
-      'polution_control_officer', 'waste_management_system_message',
-      'prohibited_acts_and_penalties_message'] as Array<keyof T_OshProgram>,
-  6: ['cost_osh_program', 'ppe_cost', 'osh_training_cost', 'safety_signages_cost',
-      'machine_guards_cost', 'medical_examinations_cost', 'medical_supplies_cost',
-      'others_name', 'others_cost', 'annex_a_message', 'name_of_owner_manager',
-      'employees_representative', 'date_filled'] as Array<keyof T_OshProgram>
-};
-
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
-  const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors, reset } = useForm<ExtendedOshProgram>();
+  const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors } = useForm<ExtendedOshProgram>();
   const [selectedTab, setSelectedTab] = useState<TabNumber>(1);
   const [validationMessage, setValidationMessage] = useState("");
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
@@ -131,21 +67,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       processedData.id = oshProgramDetails.id;
     }
 
-    // Define all boolean fields
-    const allBooleanFields = [
-      'duties_and_responsibilities',
-      'random_drug_testing',
-      'adequate_sanitary_and_washing_facilities',
-      'adequate_supply_of_drinking_water',
-      'suitable_living_accommodation',
-      'separate_sanitary_washing_and_sleeping_facilities',
-      'lactation_station',
-      'ramps_railings_and_like',
-      'other_workers_welfare_facilities',
-      'written_emergency_and_disaster_program',
-      'written_pollution_control_program'
-    ];
-
     // Only process fields from the current tab
     currentTabFields.forEach((field: keyof T_OshProgram) => {
       // Skip boolean fields if they're not in the current tab
@@ -175,19 +96,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     if (selectedTab === 5) {
       // Handle boolean fields for Safety Measures tab
-      const booleanFields = [
-        'adequate_supply_of_drinking_water',
-        'adequate_sanitary_and_washing_facilities',
-        'suitable_living_accommodation',
-        'separate_sanitary_washing_and_sleeping_facilities',
-        'lactation_station',
-        'ramps_railings_and_like',
-        'other_workers_welfare_facilities',
-        'written_emergency_and_disaster_program',
-        'written_pollution_control_program'
-      ];
-
-      booleanFields.forEach(field => {
+      safetyMeasuresBooleanFields.forEach(field => {
         if (field in processedData) {
           // Preserve null values, only convert explicit true/false
           const value = processedData[field] as boolean | string | null | undefined;
@@ -198,41 +107,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
     }
 
-    // Handle array fields if they exist in the current tab
-    const arrayFields = [
-      'routine_medical_surveillance',
-      'special_medical_surveillance',
-      'schedule_of_annual_medical_examination',
-      'business_description'
-    ];
-
-    arrayFields.forEach(field => {
-      if (field in processedData) {
-        if (Array.isArray(processedData[field])) {
-          processedData[field] = processedData[field];
-        } else if (typeof processedData[field] === 'string') {
-          try {
-            processedData[field] = JSON.parse(processedData[field]);
-          } catch (e) {
-            processedData[field] = [processedData[field]];
-          }
-        }
-      }
-    });
-
     // Handle JSON fields if they exist in the current tab
-    const jsonFields = [
-      'drills',
-      'emergency_and_disaster_preparedness',
-      'health_personnel',
-      'health_training',
-      'ppe',
-      'reported_incidents',
-      'risk_assessment',
-      'safety_meeting',
-      'safety_officer'
-    ];
-
     jsonFields.forEach(field => {
       if (field in processedData) {
         if (typeof processedData[field] === 'object') {
@@ -472,21 +347,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       }
 
       // Handle boolean fields - preserve null values
-      const booleanFields = [
-        'duties_and_responsibilities',
-        'random_drug_testing',
-        'adequate_sanitary_and_washing_facilities',
-        'adequate_supply_of_drinking_water',
-        'suitable_living_accommodation',
-        'separate_sanitary_washing_and_sleeping_facilities',
-        'lactation_station',
-        'ramps_railings_and_like',
-        'other_workers_welfare_facilities',
-        'written_emergency_and_disaster_program',
-        'written_pollution_control_program'
-      ];
-
-      booleanFields.forEach(field => {
+      allBooleanFields.forEach(field => {
         // Only set the value if it exists in oshProgramDetails
         if (field in oshProgramDetails) {
           setValue(field, oshProgramDetails[field]);
@@ -503,39 +364,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     clearErrors();
     // Clear validation message
     setValidationMessage("");
-
-    // Get current form values
-    const currentValues = watch();
-
-    // Reset form data for the current tab before switching
-    if (oshProgramDetails) {
-      // Define fields that should be preserved from current form values
-      const preservedFields = [
-        'routine_medical_surveillance',
-        'schedule_of_annual_medical_examination',
-        'special_medical_surveillance',
-        'emergency_and_disaster_preparedness',
-        'safety_officer',
-        'health_personnel',
-        'health_training',
-        'risk_assessment',
-        'reported_incidents',
-        'safety_meeting'
-      ];
-
-      // Reset all form fields to their last saved values from oshProgramDetails
-      const fieldsToReset = Object.keys(oshProgramDetails).reduce((acc: any, key) => {
-        // For preserved fields, keep current values if they exist
-        if (preservedFields.includes(key) && currentValues[key]) {
-          acc[key] = currentValues[key];
-        } else {
-          acc[key] = oshProgramDetails[key];
-        }
-        return acc;
-      }, {});
-      
-      reset(fieldsToReset);
-    }
 
     // Set the new tab
     setSelectedTab(tabIndex);

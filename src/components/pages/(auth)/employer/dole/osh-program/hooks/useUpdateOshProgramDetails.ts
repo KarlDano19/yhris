@@ -1,6 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
-import { T_OshProgram } from "@/types/globals";
+import { 
+  OSH_PROGRAM_FIELD_MAPPINGS, 
+  OSH_PROGRAM_ALL_BOOLEAN_FIELDS, 
+  OSH_PROGRAM_FILE_FIELDS,
+  OSH_PROGRAM_DATE_FIELDS,
+  T_OshProgram 
+} from "@/types/osh-program";
 
 type OshProgramData = Partial<T_OshProgram> & { id?: string } & {
   [key: string]: any;  // Add index signature for dynamic access
@@ -21,24 +27,8 @@ async function updateOshProgramDetails(data: OshProgramData) {
 
         console.log("Original data for update:", cleanData);
 
-        // Check for case sensitivity issues with various fields
-        const fieldMappings = {
-            'Company_name': 'company_name',
-            'Business_description': 'business_description',
-            'Date_established': 'date_established',
-            'Complete_address': 'complete_address',
-            'Website_url': 'website_url',
-            'Number_of_male_employees': 'number_of_male_employees',
-            'Number_of_female_employees': 'number_of_female_employees',
-            'Total_number_of_employees': 'total_number_of_employees',
-            'Date': 'date',
-            'Name_of_owner': 'name_of_owner',
-            'Signature': 'signature',
-            'Date_policy': 'date_policy'
-        };
-
         // Apply case sensitivity fixes
-        for (const [capitalizedKey, lowercaseKey] of Object.entries(fieldMappings)) {
+        for (const [capitalizedKey, lowercaseKey] of Object.entries(OSH_PROGRAM_FIELD_MAPPINGS)) {
             if (capitalizedKey in cleanData && !(lowercaseKey in cleanData)) {
                 console.log(`Fixed case sensitivity for field: ${capitalizedKey} → ${lowercaseKey}`);
                 cleanData[lowercaseKey] = cleanData[capitalizedKey];
@@ -47,8 +37,7 @@ async function updateOshProgramDetails(data: OshProgramData) {
         }
 
         // Handle date formatting
-        const dateFields = ['date_established', 'date', 'date_policy'];
-        for (const field of dateFields) {
+        for (const field of OSH_PROGRAM_DATE_FIELDS) {
             if (cleanData[field]) {
                 const dateObj = new Date(cleanData[field]);
                 if (!isNaN(dateObj.getTime())) {
@@ -58,21 +47,7 @@ async function updateOshProgramDetails(data: OshProgramData) {
         }
 
         // Handle all boolean fields
-        const booleanFields = [
-            'duties_and_responsibilities',
-            'random_drug_testing',
-            'adequate_sanitary_and_washing_facilities',
-            'adequate_supply_of_drinking_water',
-            'suitable_living_accommodation',
-            'separate_sanitary_washing_and_sleeping_facilities',
-            'lactation_station',
-            'ramps_railings_and_like',
-            'other_workers_welfare_facilities',
-            'written_emergency_and_disaster_program',
-            'written_pollution_control_program'
-        ];
-        
-        for (const field of booleanFields) {
+        for (const field of OSH_PROGRAM_ALL_BOOLEAN_FIELDS) {
             // If the field is not in the data at all, don't include it in the update
             if (!(field in cleanData)) {
                 continue;
@@ -117,8 +92,8 @@ async function updateOshProgramDetails(data: OshProgramData) {
                     console.log(`Adding previous file info for: ${key}`);
                     formData.append(previousKey, cleanData[previousKey]);
                 }
-            } else if (key === 'signature' || key === 'safety_signage') {
-                // Only append signature/safety_signage if it exists and is not null/undefined
+            } else if (OSH_PROGRAM_FILE_FIELDS.includes(key)) {
+                // Only append file fields if they exist and are not null/undefined
                 if (cleanData[key] && cleanData[key] !== 'null' && cleanData[key] !== 'undefined') {
                     if (isFile(cleanData[key])) {
                         formData.append(key, cleanData[key]);
@@ -192,7 +167,7 @@ async function updateOshProgramDetails(data: OshProgramData) {
                         : [fieldValue];
                     formData.append(key, JSON.stringify(arrayValue));
                 }
-            } else if (booleanFields.includes(key)) {
+            } else if (OSH_PROGRAM_ALL_BOOLEAN_FIELDS.includes(key)) {
                 // For boolean fields, explicitly append the value even if it's null
                 formData.append(key, cleanData[key] === null ? 'null' : String(cleanData[key]));
             } else if (cleanData[key] !== undefined && cleanData[key] !== null) {

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
-import { T_OshProgram } from "@/types/globals";
+import { OSH_PROGRAM_FILE_FIELDS, T_OshProgram } from "@/types/osh-program";
 
 async function getOshProgramDetails(): Promise<T_OshProgram> {
     try {
@@ -18,14 +18,8 @@ async function getOshProgramDetails(): Promise<T_OshProgram> {
         }
         const data = await res.json();
 
-        // Process file fields to ensure they're properly handled
-        const fileFields = [
-            'signature',
-            'safety_signage'
-        ];
-
         // Convert file data if present
-        fileFields.forEach(field => {
+        OSH_PROGRAM_FILE_FIELDS.forEach(field => {
             if (data[field] && typeof data[field] === 'string') {
                 try {
                     // If it's a base64 string or URL, keep it as is

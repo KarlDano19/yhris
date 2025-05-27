@@ -250,17 +250,61 @@ export default function HealthAndWelfare({
             </label>
           </div>
           <div className="relative mt-2 pl-4 flex gap-2">
-            <input
-              type="checkbox"
-              {...register("special_medical_surveillance")}
-              id="others"
-              value="Others, please specify"
-              checked={Array.isArray(watch("special_medical_surveillance")) && watch("special_medical_surveillance").includes("Others, please specify")}
+            <Controller
+              control={control}
+              name="special_medical_surveillance"
+              render={({ field }) => (
+                <input
+                  type="checkbox"
+                  id="others"
+                  value="Others"
+                  checked={Array.isArray(field.value) && field.value.some((item: string) => item === "Others" || item.startsWith("Others:"))}
+                  onChange={(e) => {
+                    const currentValue = Array.isArray(field.value) ? 
+                      field.value.filter((item: string) => !item.startsWith("Others")) : [];
+                    
+                    if (e.target.checked) {
+                      // Initially just add "Others" - will be replaced with "Others: value" when input changes
+                      field.onChange([...currentValue, "Others"]);
+                    } else {
+                      // Remove any "Others" or "Others: something" values
+                      field.onChange(currentValue);
+                      setValue("special_medical_surveillance_other", "");
+                    }
+                  }}
+                />
+              )}
             />
             <label htmlFor="others" className="ml-2 mt-1">
-              Other&apos;s, please specify
+              Others, please specify
             </label>
           </div>
+          {Array.isArray(watch("special_medical_surveillance")) && 
+           watch("special_medical_surveillance").some((item: string) => item === "Others" || item.startsWith("Others:")) && (
+            <div className="mt-2 ml-10">
+              <input
+                type="text"
+                id="special_medical_surveillance_other"
+                placeholder="Please specify"
+                className="rounded-md w-full max-w-xs border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                value={watch("special_medical_surveillance_other") || ""}
+                onChange={(e) => {
+                  const otherValue = e.target.value;
+                  setValue("special_medical_surveillance_other", otherValue);
+                  
+                  // Update the special_medical_surveillance array
+                  const currentValues = Array.isArray(watch("special_medical_surveillance")) ? 
+                    watch("special_medical_surveillance").filter((item: string) => !item.startsWith("Others")) : [];
+                  
+                  if (otherValue.trim()) {
+                    setValue("special_medical_surveillance", [...currentValues, `Others: ${otherValue}`]);
+                  } else {
+                    setValue("special_medical_surveillance", [...currentValues, "Others"]);
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
         <div className="mt-4">
           <label
