@@ -154,43 +154,21 @@ async function updateOshProgramDetails(data: OshProgramData) {
             } else if (key.startsWith('previous_')) {
                 // Skip previous file fields as they're handled with their corresponding file fields
                 continue;
-            } else if (key === 'business_description' && cleanData[key] !== undefined) {
-                // Handle business_description array field
-                console.log(`Processing business_description: ${typeof cleanData[key]}`, cleanData[key]);
-                
-                // Always convert to array first
-                let arrayValue;
-                
-                if (Array.isArray(cleanData[key])) {
-                    arrayValue = cleanData[key];
+            } else if (['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 'safety_meeting', 'safety_officer', 'business_description'].includes(key) && cleanData[key]) {
+                // Handle JSON fields
+                console.log(`Processing JSON field ${key}: ${typeof cleanData[key]}`);
+                if (typeof cleanData[key] === 'object') {
+                    formData.append(key, JSON.stringify(cleanData[key]));
                 } else if (typeof cleanData[key] === 'string') {
                     try {
-                        // Try to parse if it's a JSON string
-                        const parsed = JSON.parse(cleanData[key]);
-                        arrayValue = Array.isArray(parsed) ? parsed : [cleanData[key]];
+                        const jsonValue = JSON.parse(cleanData[key]);
+                        formData.append(key, JSON.stringify(jsonValue));
                     } catch (e) {
-                        // If not JSON, use as string
-                        arrayValue = [cleanData[key]];
+                        console.warn(`Error parsing JSON for field ${key}:`, e);
+                        formData.append(key, JSON.stringify({}));
                     }
-                } else if (cleanData[key] === null) {
-                    arrayValue = [];
                 } else {
-                    // For any other type
-                    arrayValue = [String(cleanData[key])];
-                }
-                
-                // Send the array directly, not as a JSON string
-                // The backend will handle the conversion
-                console.log(`Sending business_description as array:`, arrayValue);
-                
-                // Add each item individually if it's an array
-                if (Array.isArray(arrayValue)) {
-                    arrayValue.forEach((item, index) => {
-                        formData.append(`business_description[${index}]`, item);
-                    });
-                } else {
-                    // Fallback just in case
-                    formData.append('business_description', JSON.stringify(arrayValue));
+                    formData.append(key, JSON.stringify({}));
                 }
             } else if (['routine_medical_surveillance', 'schedule_of_annual_medical_examination', 'special_medical_surveillance'].includes(key) && cleanData[key]) {
                 // Handle array fields
@@ -213,22 +191,6 @@ async function updateOshProgramDetails(data: OshProgramData) {
                         ? fieldValue.split(',').map(item => item.trim())
                         : [fieldValue];
                     formData.append(key, JSON.stringify(arrayValue));
-                }
-            } else if (['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 'safety_meeting', 'safety_officer'].includes(key) && cleanData[key]) {
-                // Handle JSON fields
-                console.log(`Processing JSON field ${key}: ${typeof cleanData[key]}`);
-                if (typeof cleanData[key] === 'object') {
-                    formData.append(key, JSON.stringify(cleanData[key]));
-                } else if (typeof cleanData[key] === 'string') {
-                    try {
-                        const jsonValue = JSON.parse(cleanData[key]);
-                        formData.append(key, JSON.stringify(jsonValue));
-                    } catch (e) {
-                        console.warn(`Error parsing JSON for field ${key}:`, e);
-                        formData.append(key, JSON.stringify({}));
-                    }
-                } else {
-                    formData.append(key, JSON.stringify({}));
                 }
             } else if (booleanFields.includes(key)) {
                 // For boolean fields, explicitly append the value even if it's null
