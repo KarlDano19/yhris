@@ -190,21 +190,6 @@ export const OSH_PROGRAM_JSON_FIELDS = [
   'schedule_of_annual_medical_examination'
 ];
 
-// Boolean fields that need special handling
-export const OSH_PROGRAM_BOOLEAN_FIELDS = [
-  'duties_and_responsibilities',
-  'random_drug_testing',
-  'adequate_sanitary_and_washing_facilities',
-  'adequate_supply_of_drinking_water',
-  'suitable_living_accommodation',
-  'separate_sanitary_washing_and_sleeping_facilities',
-  'lactation_station',
-  'ramps_railings_and_like',
-  'other_workers_welfare_facilities',
-  'written_emergency_and_disaster_program',
-  'written_pollution_control_program'
-];
-
 // Date fields that need formatting
 export const OSH_PROGRAM_DATE_FIELDS = [
   'date_established',

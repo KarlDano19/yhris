@@ -25,12 +25,9 @@ async function updateOshProgramDetails(data: OshProgramData) {
 
         const cleanData = { ...data };
 
-        console.log("Original data for update:", cleanData);
-
         // Apply case sensitivity fixes
         for (const [capitalizedKey, lowercaseKey] of Object.entries(OSH_PROGRAM_FIELD_MAPPINGS)) {
             if (capitalizedKey in cleanData && !(lowercaseKey in cleanData)) {
-                console.log(`Fixed case sensitivity for field: ${capitalizedKey} → ${lowercaseKey}`);
                 cleanData[lowercaseKey] = cleanData[capitalizedKey];
                 delete cleanData[capitalizedKey];
             }
@@ -83,13 +80,11 @@ async function updateOshProgramDetails(data: OshProgramData) {
         for (const key in cleanData) {
             if (isFile(cleanData[key])) {
                 // Add files directly
-                console.log(`Adding file for field: ${key}`);
                 formData.append(key, cleanData[key]);
                 
                 // Add previous file information if available
                 const previousKey = `previous_${key}`;
                 if (cleanData[previousKey]) {
-                    console.log(`Adding previous file info for: ${key}`);
                     formData.append(previousKey, cleanData[previousKey]);
                 }
             } else if (OSH_PROGRAM_FILE_FIELDS.includes(key)) {
@@ -116,7 +111,6 @@ async function updateOshProgramDetails(data: OshProgramData) {
                                 formData.append(previousKey, cleanData[previousKey]);
                             }
                         } catch (error) {
-                            console.error(`Error converting ${key} data URL to blob:`, error);
                             formData.append(key, cleanData[key]);
                         }
                     } else if (typeof cleanData[key] === 'string') {
@@ -131,7 +125,6 @@ async function updateOshProgramDetails(data: OshProgramData) {
                 continue;
             } else if (['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 'safety_meeting', 'safety_officer', 'business_description'].includes(key) && cleanData[key]) {
                 // Handle JSON fields
-                console.log(`Processing JSON field ${key}: ${typeof cleanData[key]}`);
                 if (typeof cleanData[key] === 'object') {
                     formData.append(key, JSON.stringify(cleanData[key]));
                 } else if (typeof cleanData[key] === 'string') {
@@ -139,7 +132,6 @@ async function updateOshProgramDetails(data: OshProgramData) {
                         const jsonValue = JSON.parse(cleanData[key]);
                         formData.append(key, JSON.stringify(jsonValue));
                     } catch (e) {
-                        console.warn(`Error parsing JSON for field ${key}:`, e);
                         formData.append(key, JSON.stringify({}));
                     }
                 } else {
@@ -147,7 +139,6 @@ async function updateOshProgramDetails(data: OshProgramData) {
                 }
             } else if (['routine_medical_surveillance', 'schedule_of_annual_medical_examination', 'special_medical_surveillance'].includes(key) && cleanData[key]) {
                 // Handle array fields
-                console.log(`Processing array field ${key}: ${typeof cleanData[key]}`, cleanData[key]);
                 let fieldValue = cleanData[key];
                 try {
                     // If it's already a string, try to parse it
@@ -176,14 +167,6 @@ async function updateOshProgramDetails(data: OshProgramData) {
             }
         }
         
-        // Log the form data entries for debugging
-        const formDataEntries: Record<string, any> = {};
-        formData.forEach((value, key) => {
-            formDataEntries[key] = value;
-        });
-        console.log("Form data entries to be sent:", formDataEntries);
-        
-        console.log("Sending request to update OSH program...");
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
             {
@@ -204,13 +187,6 @@ async function updateOshProgramDetails(data: OshProgramData) {
             let errorData;
             try {
                 errorData = await response.json();
-                console.error("Server error response:", errorData);
-                
-                // Check specifically for business_description issues
-                if (errorData.business_description) {
-                    console.error("Business description error:", errorData.business_description);
-                }
-                
                 throw new Error(
                     errorData.message || 
                     errorData.error || 
@@ -224,26 +200,20 @@ async function updateOshProgramDetails(data: OshProgramData) {
 
         try {
             const data = await response.json();
-            console.log("Update successful:", data);
             return data;
         } catch (e) {
             // If we can't parse the response but the status was ok,
             // we still consider it a success
-            console.log("Update successful but no JSON response");
             return { message: "OSH Program updated successfully" };
         }
     } catch (error: any) {
-        console.error("Error updating OSH Program:", error);
         throw error;
     }
 }
 
 function useUpdateOshProgramDetails() {
     return useMutation({
-        mutationFn: updateOshProgramDetails,
-        onError: (error: any) => {
-            console.error("Mutation error:", error);
-        },
+        mutationFn: updateOshProgramDetails
     });
 }
 
