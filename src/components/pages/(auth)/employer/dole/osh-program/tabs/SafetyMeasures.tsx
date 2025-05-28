@@ -10,6 +10,8 @@ import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import ClipIcon from "@/svg/ClipIcon";
+import { useImageUrlHelpers } from "../hooks/useImageUrlHelpers";
+import ImagePreviewModal from "../modals/ImagePreviewModal";
 
 export default function SafetyMeasures({
   control,
@@ -38,6 +40,10 @@ export default function SafetyMeasures({
   );
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [previousSignageFile, setPreviousSignageFile] = useState<string>("");
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
+  
+  const { getSignageImageUrl } = useImageUrlHelpers();
 
   useEffect(() => {
     if (safetySignageUrl) {
@@ -77,6 +83,12 @@ export default function SafetyMeasures({
     control,
     name: "drills",
   });
+
+  const openImagePreview = (fileName: string) => {
+    const imageUrl = getSignageImageUrl(fileName);
+    setCurrentImageUrl(imageUrl);
+    setIsImageModalOpen(true);
+  };
 
   return (
     <form>
@@ -213,9 +225,7 @@ export default function SafetyMeasures({
                     onClick={() => {
                       const fileName = previousSignageFile.split('/').pop();
                       console.log("Opening safety signage:", fileName); // Debug log
-                      const url = `${process.env.NEXT_PUBLIC_API_URL}/media/oshprogram/signages/${fileName}`;
-                      console.log("URL:", url); // Debug log
-                      window.open(url, '_blank');
+                      openImagePreview(fileName || "");
                     }}
                   >
                     View Safety Signage
@@ -234,6 +244,14 @@ export default function SafetyMeasures({
             </div>
           </div>
         </div>
+        {/* Image Preview Modal */}
+        <ImagePreviewModal
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          imageUrl={currentImageUrl}
+          title="Safety Signage"
+        />
+        
         <div className="grid grid-cols-2 gap-6 mt-4">
           <div className="sm:col-span-4 mt-4 mb-4">
             <label

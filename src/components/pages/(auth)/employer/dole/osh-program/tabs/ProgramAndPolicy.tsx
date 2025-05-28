@@ -8,6 +8,8 @@ import dynamic from "next/dynamic";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../modals/DrawSignatureModal";
+import { useImageUrlHelpers } from "../hooks/useImageUrlHelpers";
+import ImagePreviewModal from "../modals/ImagePreviewModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -33,6 +35,10 @@ export default function ProgramAndPolicy({
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [signatureAttachmentExist, setSignatureAttachmentExist] = useState(false);
   const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
+  
+  const { getSignatureImageUrl } = useImageUrlHelpers();
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -56,6 +62,12 @@ export default function ProgramAndPolicy({
       setSignatureAttachmentExist(true);
     }
   }, [watch("signature")]);
+
+  const openImagePreview = (fileName: string) => {
+    const imageUrl = getSignatureImageUrl(fileName);
+    setCurrentImageUrl(imageUrl);
+    setIsImageModalOpen(true);
+  };
 
   return (
     <form>
@@ -234,8 +246,7 @@ export default function ProgramAndPolicy({
                     className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
                     onClick={() => {
                       const fileName = previousSignatureFile.split('/').pop();
-                      const url = `${process.env.NEXT_PUBLIC_API_URL}/media/oshprogram/signatures/${fileName}`;
-                      window.open(url, '_blank');
+                      openImagePreview(fileName || "");
                     }}
                   >
                     View Signature
@@ -253,6 +264,13 @@ export default function ProgramAndPolicy({
           setSignatureUrl={setSignatureUrl}
         />
       )}
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        imageUrl={currentImageUrl}
+        title="Signature"
+      />
     </form>
   );
 }
