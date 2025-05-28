@@ -55,17 +55,30 @@ export default function ProgramAndPolicy({
     }
   }, [signatureUrl, setValue, drawSignatureModal]);
 
+  // Track signature file changes from form data
   useEffect(() => {
     const currentSignature = watch("signature");
     if (typeof currentSignature === "string" && currentSignature !== previousSignatureFile) {
       setPreviousSignatureFile(currentSignature);
       setSignatureAttachmentExist(true);
     }
-  }, [watch("signature")]);
+  }, [watch("signature"), previousSignatureFile]);
+  
+  // Add specific effect to refresh the image preview when signature changes after form submission
+  useEffect(() => {
+    // This will run whenever the form is submitted and data is refreshed
+    const signature = watch("signature");
+    if (typeof signature === "string") {
+      setPreviousSignatureFile(signature);
+      setSignatureAttachmentExist(true);
+    }
+  }, [watch]);
 
   const openImagePreview = (fileName: string) => {
     const imageUrl = getSignatureImageUrl(fileName);
-    setCurrentImageUrl(imageUrl);
+    // Add a timestamp query parameter to prevent caching
+    const timestamp = new Date().getTime();
+    setCurrentImageUrl(`${imageUrl}?t=${timestamp}`);
     setIsImageModalOpen(true);
   };
 

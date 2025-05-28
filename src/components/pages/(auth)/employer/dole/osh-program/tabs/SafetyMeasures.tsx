@@ -56,15 +56,23 @@ export default function SafetyMeasures({
     }
   }, [safetySignageUrl, setValue, drawSignatureModal]);
 
-  // Add effect to track previous signage file
+  // Track safety signage file changes from form data
   useEffect(() => {
     const currentSignage = watch("safety_signage");
-    console.log("Current signage:", currentSignage); // Debug log
     if (typeof currentSignage === "string" && currentSignage !== previousSignageFile) {
-      console.log("Setting previous signage file to:", currentSignage); // Debug log
       setPreviousSignageFile(currentSignage);
     }
-  }, [watch("safety_signage")]);
+  }, [watch("safety_signage"), previousSignageFile]);
+  
+  // Add specific effect to refresh the image preview when safety_signage changes after form submission
+  useEffect(() => {
+    // This will run whenever the form is submitted and data is refreshed
+    const signage = watch("safety_signage");
+    if (typeof signage === "string") {
+      setPreviousSignageFile(signage);
+      setSafetySignageAttachmentExist(true);
+    }
+  }, [watch, setSafetySignageAttachmentExist]);
 
   const {
     fields: ppeFields,
@@ -86,7 +94,9 @@ export default function SafetyMeasures({
 
   const openImagePreview = (fileName: string) => {
     const imageUrl = getSignageImageUrl(fileName);
-    setCurrentImageUrl(imageUrl);
+    // Add a timestamp query parameter to prevent caching
+    const timestamp = new Date().getTime();
+    setCurrentImageUrl(`${imageUrl}?t=${timestamp}`);
     setIsImageModalOpen(true);
   };
 

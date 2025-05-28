@@ -106,6 +106,7 @@ export default function ImagePreviewModal({
                       src={imageUrl} 
                       alt={title} 
                       className="max-h-[70vh] object-contain"
+                      key={imageUrl}
                     />
                   )}
                 </div>
