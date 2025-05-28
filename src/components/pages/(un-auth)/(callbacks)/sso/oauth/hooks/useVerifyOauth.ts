@@ -21,7 +21,7 @@ async function verifyOauth(data: DataType) {
       body: JSON.stringify(newData),
     };
     // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sso/complete/${data.provider}-oauth/`, config);
-    const res = await fetch(`https://staging1.dyti7zr0jrmva.amplifyapp.com/api/sso/complete/${data.provider}-oauth/`, config);
+    const res = await fetch(`https://yp2.yahshuasolutions.com/api/sso/complete/${data.provider}-oauth/`, config);
     if (!res.ok) {
       throw res.json();
     }
