@@ -101,7 +101,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <button
               onClick={() => setIsCreateJobModalOpen(true)}
               className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center enabled:hover:shadow-md focus:shadow-none disabled:opacity-50'
-              disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_job}
+              // disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_job}
             >
               <CreateJob />
               <h3 className='text-indigo-dye font-semibold text-center'>Create a Job</h3>
