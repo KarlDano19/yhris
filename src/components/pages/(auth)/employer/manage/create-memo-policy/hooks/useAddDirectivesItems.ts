@@ -27,9 +27,13 @@ async function addDirective(directive: DirectiveData) {
       }
     } else {
       data.append('is_responded', directive.is_responded ? 'yes' : 'no');
-      data.append('purpose', directive.purpose || '');
-      data.append('policy', directive.policy || '');
-      data.append('procedure', directive.procedure || '');
+      
+      // Add custom policy fields as JSON
+      if (directive.custom_policy_fields && directive.custom_policy_fields.length > 0) {
+        data.append('custom_policy_fields', JSON.stringify(directive.custom_policy_fields));
+      }
+      
+      // Add provisions
       data.append('eligibility', directive.eligibility || '');
       data.append('application', directive.application || '');
       data.append('coverage', directive.coverage || '');

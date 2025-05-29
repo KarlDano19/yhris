@@ -7,15 +7,12 @@ export interface DirectiveData {
   directive_type?: 'memo' | 'policy';
   title: string;
   is_responded?: boolean;
-  to?: string[]; 
+  to?: string | string[]; 
   is_active?: boolean;
 
   attachments?: string;
 
-  policyField: PolicyField[]
-  purpose?: string;
-  policy?: string;
-  procedure?: string;
+  custom_policy_fields?: PolicyField[];
   eligibility?: string;
   application?: string;
   coverage?: string;

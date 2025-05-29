@@ -27,12 +27,13 @@ export default function CreatePolicyModal({
   const cancelButtonRef = useRef(null);
   const [isNextForm, setIsNextForm] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [fieldToRemove, setFieldToRemove] = useState<number | null>(null);
   const [inputTo, setInputTo] = useState('');
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control } =
     useForm<DirectiveData>({
       defaultValues: {
-        policyField: [
+        custom_policy_fields: [
           {
             inputLabel: 'Purpose',
             inputName: '',
@@ -50,15 +51,20 @@ export default function CreatePolicyModal({
     });
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'policyField',
+    name: 'custom_policy_fields',
   });
   const { mutate, isLoading } = useAddDirectivesItems();
 
   const handleAddField = () => {
-    clearErrors('policyField');
+    clearErrors('custom_policy_fields');
   };
 
   const onSubmit = handleSubmit((data) => {
+    // Only process form submission if we're on the second form (provisions)
+    if (!isNextForm) {
+      return;
+    }
+    
     const callbackReq = {
       onSuccess: (data: any) => {
         setIsNextForm(false);
@@ -80,6 +86,39 @@ export default function CreatePolicyModal({
     data.is_responded = data.is_responded || false;
     mutate(data, callbackReq);
   });
+
+  // Separate handler for the Next button to avoid form submission
+  const handleNextClick = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent any potential form submission
+    
+    const title = await trigger('title');
+    const email = await trigger('to');
+    let results = null;
+    
+    // Check if tagsTo array exists and has at least one email
+    if (tagsTo.length === 0 || !tagsTo.some(email => email.indexOf('@') > 0)) {
+      results = [title, false];
+    } else {
+      results = [title, email];
+    }
+
+    const incomplete = results?.some((item: boolean) => !item);
+    if (!incomplete) {
+      setIsNextForm(true);
+    } else {
+      let message = '';
+      if (tagsTo.length === 0) {
+        message = 'Email address is required';
+      } else if (!tagsTo.some(email => email.indexOf('@') > 0)) {
+        message = 'Invalid email address';
+      } else {
+        message = 'You cannot proceed due to incomplete fields. Please review.';
+      }
+      toast.custom(() => <CustomToast message={message} type='error' />, {
+        duration: 5000,
+      });
+    }
+  };
 
   const increaseWidth = (text: HTMLInputElement) => {
     let textLength = text.value.length;
@@ -118,259 +157,223 @@ export default function CreatePolicyModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Policy</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
-                <form onSubmit={onSubmit}>
-                  {!isNextForm ? (
-                    <div key='1'>
-                      <div className='px-4 pt-4 pb-6'>
-                        <div
-                          className={`
-                         hidden rounded-md bg-red-50 p-4 mb-3`}
-                        >
-                          <div className='flex'>
-                            <div className='flex-shrink-0'>
-                              <XCircleIcon className='h-5 w-5 text-red-400' aria-hidden='true' />
-                            </div>
-                            <div className='ml-3'>
-                              <h3 className='text-sm font-medium text-red-800'>
-                                You cannot proceed due to incomplete fields. Please review.
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
-                        <div className='sm:col-span-4'>
-                          <label htmlFor='title' className='block text-sm font-medium leading-6 text-gray-900'>
-                            Title<span className='text-red-600'>*</span>
-                          </label>
-                          <div className='mt-2'>
-                            <input
-                              id='title'
-                              {...register('title', { required: true })}
-                              type='text'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            />
-                          </div>
-                        </div>
-                        <div className='sm:col-span-4 flex ml-4 mt-4'>
+                
+                {!isNextForm ? (
+                  // First Form Step - Just collect basic info and fields
+                  <div className="policy-form-step-1">
+                    <div className='px-4 pt-4 pb-6'>
+                      <div className='sm:col-span-4'>
+                        <label htmlFor='title' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Title<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='mt-2'>
                           <input
-                            id='is_responded'
-                            type='checkbox'
-                            {...register('is_responded')}
-                            className='form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white'
+                            id='title'
+                            {...register('title', { required: true })}
+                            type='text'
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
-                          <label
-                            htmlFor='is_responded'
-                            className='block text-sm font-medium leading-6 text-gray-900 ml-2'
-                          >
-                            With Response
-                          </label>
                         </div>
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                            To<span className='text-red-600'>*</span>
-                          </label>
-                          <div className='mt-2 flex rounded-md shadow-sm'>
-                            <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                              <div className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'>
-                                {tagsTo.map((tagTo: string) => (
-                                  <div
-                                    key={tagTo}
-                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                                  >
-                                    <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
-                                      <XMarkIcon className='w-4 h-4' />
-                                    </button>
-                                    <p>{tagTo}</p>
-                                  </div>
-                                ))}
-                                <input
-                                  type='text'
-                                  value={inputTo}
-                                  onKeyDown={handleKeyDownTo}
-                                  onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
-                                  className='focus:none outline-none px-2 py-1 grow rounded-md'
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        {fields.map((item: PolicyField, index: number) => (
-                          <div className='sm:col-span-4 mt-4' key={index}>
-                            <label
-                              htmlFor={`policyField.${index}.inputName`}
-                              className='flex justify-between text-sm font-medium leading-6 text-gray-900'
-                            >
-                              <div>
-                                <input
-                                  type='text'
-                                  defaultValue={item.inputLabel}
-                                  className=' w-[10ch]'
-                                  id={`title${index}`}
-                                  {...register(`policyField.${index}.inputLabel`)}
-                                  onInput={(e: any) => increaseWidth(e.currentTarget)}
-                                  disabled={true}
-                                />
-                                <button
-                                  type='button'
-                                  onClick={() => {
-                                    document.getElementById(`title${index}`)?.removeAttribute('disabled');
-                                    setFocus(`policyField.${index}.inputLabel`);
-                                  }}
+                      </div>
+                      <div className='sm:col-span-4 flex ml-4 mt-4'>
+                        <input
+                          id='is_responded'
+                          type='checkbox'
+                          {...register('is_responded')}
+                          className='form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white'
+                        />
+                        <label
+                          htmlFor='is_responded'
+                          className='block text-sm font-medium leading-6 text-gray-900 ml-2'
+                        >
+                          With Response
+                        </label>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          To<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='mt-2 flex rounded-md shadow-sm'>
+                          <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'>
+                              {tagsTo.map((tagTo: string) => (
+                                <div
+                                  key={tagTo}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
-                                  <PencilIcon className='h-3 text-gray-500 ml-2' />
-                                </button>
-                              </div>
-                              <button
-                                type='button'
-                                className='hover:t-red-500 text-white'
-                                onClick={() => setIsConfirmModalOpen(true)}
-                              >
-                                <MinusCircleIcon fill='gray' className='h-3' />
-                              </button>
-                            </label>
-                            <div className='mt-2'>
-                              <textarea
-                                rows={4}
-                                {...register(`policyField.${index}.inputName`)}
-                                placeholder={`Enter ${item.inputLabel}...`}
-                                id={`policyField.${index}.inputName`}
-                                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tagTo}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='text'
+                                value={inputTo}
+                                onKeyDown={handleKeyDownTo}
+                                onChange={(e) => setInputTo(e.target.value)}
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                             </div>
-                            <RemoveFieldConfirmModal
-                              message={`Are you sure you want to remove the ${item.inputLabel} field`}
-                              isOpen={isConfirmModalOpen}
-                              setIsOpen={setIsConfirmModalOpen}
-                              confirmAction={() => {
-                                remove(index);
-                                setIsConfirmModalOpen(false);
-                              }}
-                            />
                           </div>
-                        ))}
-                        <div className='sm:col-span-4 mt-4'>
-                          <button
-                            className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                            onClick={() => {
-                              append({
-                                inputLabel: 'Enter title',
-                                inputName: '',
-                              });
-                              handleAddField();
-                            }}
+                        </div>
+                      </div>
+                      {fields.map((item: PolicyField, index: number) => (
+                        <div className='sm:col-span-4 mt-4' key={index}>
+                          <label
+                            htmlFor={`custom_policy_fields.${index}.inputName`}
+                            className='flex justify-between text-sm font-medium leading-6 text-gray-900'
                           >
-                            <PlusIcon className='h-5 w-auto mr-2' />
-                            Add Field
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div key='2'>
-                      <div className='px-4 pb-6'>
-                        <p className='font-bold my-4'>Provisions</p>
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='eligibility' className='block text-sm font-medium leading-6 text-gray-900'>
-                            Eligibility
+                            <div>
+                              <input
+                                type='text'
+                                defaultValue={item.inputLabel}
+                                className=' w-[10ch]'
+                                id={`title${index}`}
+                                {...register(`custom_policy_fields.${index}.inputLabel`)}
+                                onInput={(e: any) => increaseWidth(e.currentTarget)}
+                                disabled={true}
+                              />
+                              <button
+                                type='button'
+                                onClick={() => {
+                                  document.getElementById(`title${index}`)?.removeAttribute('disabled');
+                                  setFocus(`custom_policy_fields.${index}.inputLabel`);
+                                }}
+                              >
+                                <PencilIcon className='h-3 text-gray-500 ml-2' />
+                              </button>
+                            </div>
+                            <button
+                              type='button'
+                              className='hover:t-red-500 text-white'
+                              onClick={() => {
+                                setFieldToRemove(index);
+                                setIsConfirmModalOpen(true);
+                              }}
+                            >
+                              <MinusCircleIcon fill='gray' className='h-3' />
+                            </button>
                           </label>
                           <div className='mt-2'>
                             <textarea
-                              rows={3}
-                              {...register('eligibility')}
-                              id='eligibility'
+                              rows={4}
+                              {...register(`custom_policy_fields.${index}.inputName`)}
+                              placeholder={`Enter ${item.inputLabel}...`}
+                              id={`custom_policy_fields.${index}.inputName`}
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
                           </div>
+                          <RemoveFieldConfirmModal
+                            message={`Are you sure you want to remove the ${item.inputLabel} field`}
+                            isOpen={isConfirmModalOpen && fieldToRemove === index}
+                            setIsOpen={setIsConfirmModalOpen}
+                            confirmAction={() => {
+                              if (fieldToRemove !== null) {
+                                remove(fieldToRemove);
+                                setFieldToRemove(null);
+                              }
+                              setIsConfirmModalOpen(false);
+                            }}
+                          />
                         </div>
-
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='application' className='block text-sm font-medium leading-6 text-gray-900'>
-                            Application
-                          </label>
-                          <div className='mt-2'>
-                            <textarea
-                              rows={3}
-                              {...register('application')}
-                              id='application'
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            />
-                          </div>
-                        </div>
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='coverage' className='block text-sm font-medium leading-6 text-gray-900'>
-                            Coverage
-                          </label>
-                          <div className='mt-2'>
-                            <textarea
-                              rows={3}
-                              id='coverage'
-                              {...register('coverage')}
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            />
-                          </div>
-                        </div>
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='termination' className='block text-sm font-medium leading-6 text-gray-900'>
-                            Termination
-                          </label>
-                          <div className='mt-2'>
-                            <textarea
-                              rows={3}
-                              id='termination'
-                              {...register('termination')}
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            />
-                          </div>
-                        </div>
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
-                            Upload File (Optional)
-                          </label>
-                          <DragDrop setValue={(value: never) => setValue('attachments', value)} />
-                          <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <hr />
-                  {!isNextForm ? (
-                    <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
-                      <span
-                        className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={async () => {
-                          const title = await trigger('title');
-                          const email = await trigger('to');
-                          let results = null;
-                          
-                          // Check if tagsTo array exists and has at least one email
-                          if (tagsTo.length === 0 || !tagsTo.some(email => email.indexOf('@') > 0)) {
-                            results = [title, false];
-                          } else {
-                            results = [title, email];
-                          }
-
-                          const incomplete = results?.some((item: boolean) => !item);
-                          if (!incomplete) {
-                            setIsNextForm(true);
-                          } else {
-                            let message = '';
-                            if (tagsTo.length === 0) {
-                              message = 'Email address is required';
-                            } else if (!tagsTo.some(email => email.indexOf('@') > 0)) {
-                              message = 'Invalid email address';
-                            } else {
-                              message = 'You cannot proceed due to incomplete fields. Please review.';
-                            }
-                            toast.custom(() => <CustomToast message={message} type='error' />, {
-                              duration: 5000,
+                      ))}
+                      <div className='sm:col-span-4 mt-4'>
+                        <button
+                          type="button"
+                          className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                          onClick={() => {
+                            append({
+                              inputLabel: 'Enter title',
+                              inputName: '',
                             });
-                          }
-                        }}
+                            handleAddField();
+                          }}
+                        >
+                          <PlusIcon className='h-5 w-auto mr-2' />
+                          Add Field
+                        </button>
+                      </div>
+                    </div>
+                    <hr />
+                    <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4 mb-4'>
+                      <button
+                        type="button"
+                        className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                        onClick={handleNextClick}
                       >
                         Next
-                      </span>
+                      </button>
                     </div>
-                  ) : (
-                    <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
+                  </div>
+                ) : (
+                  // Second Form Step - Final form with provisions and submit
+                  <form onSubmit={onSubmit}>
+                    <div className='px-4 pt-4 pb-6'>
+                      <p className='font-bold my-4'>Provisions</p>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='eligibility' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Eligibility
+                        </label>
+                        <div className='mt-2'>
+                          <textarea
+                            rows={3}
+                            {...register('eligibility')}
+                            id='eligibility'
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
+
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='application' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Application
+                        </label>
+                        <div className='mt-2'>
+                          <textarea
+                            rows={3}
+                            {...register('application')}
+                            id='application'
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='coverage' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Coverage
+                        </label>
+                        <div className='mt-2'>
+                          <textarea
+                            rows={3}
+                            id='coverage'
+                            {...register('coverage')}
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='termination' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Termination
+                        </label>
+                        <div className='mt-2'>
+                          <textarea
+                            rows={3}
+                            id='termination'
+                            {...register('termination')}
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
+                      <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
+                          Upload File (Optional)
+                        </label>
+                        <DragDrop setValue={(value: never) => setValue('attachments', value)} />
+                        <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
+                      </div>
+                    </div>
+                    <hr />
+                    <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4 mb-4'>
                       <button
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
@@ -399,15 +402,16 @@ export default function CreatePolicyModal({
                         )}
                         {!isLoading && 'Create'}
                       </button>
-                      <span
+                      <button
+                        type="button"
                         className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                         onClick={() => setIsNextForm(false)}
                       >
                         Back
-                      </span>
+                      </button>
                     </div>
-                  )}
-                </form>
+                  </form>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>

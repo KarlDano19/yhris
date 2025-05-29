@@ -180,40 +180,18 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
         </div>
       );
     } else {
-      // Policy type - check if any policy-specific fields are available
-      const hasSpecificFields = 
-        directive.purpose || 
-        directive.policy || 
-        directive.procedure || 
-        directive.eligibility || 
-        directive.application || 
-        directive.coverage || 
-        directive.termination;
-      
-      if (hasSpecificFields) {
+      // Policy type - first check for custom_policy_fields
+      if (directive.custom_policy_fields && Array.isArray(directive.custom_policy_fields) && directive.custom_policy_fields.length > 0) {
         return (
           <div className="prose max-w-none text-gray-700 leading-relaxed">
-            {directive.purpose && (
-              <div className="mb-6">
-                <h3 className="font-semibold text-lg">Purpose</h3>
-                <p>{directive.purpose}</p>
+            {directive.custom_policy_fields.map((field, index) => (
+              <div className="mb-6" key={index}>
+                <h3 className="font-semibold text-lg">{field.inputLabel}</h3>
+                <p>{field.inputName}</p>
               </div>
-            )}
+            ))}
             
-            {directive.policy && (
-              <div className="mb-6">
-                <h3 className="font-semibold text-lg">Policy</h3>
-                <p>{directive.policy}</p>
-              </div>
-            )}
-            
-            {directive.procedure && (
-              <div className="mb-6">
-                <h3 className="font-semibold text-lg">Procedure</h3>
-                <p>{directive.procedure}</p>
-              </div>
-            )}
-            
+            {/* Provisions sections */}
             {directive.eligibility && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Eligibility</h3>
@@ -243,13 +221,82 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
             )}
           </div>
         );
-      } else {
-        // If no specific policy fields, fall back to body
-        return (
-          <div className="prose max-w-none text-gray-700 leading-relaxed">
-            <p>{directive.body || 'No policy content available.'}</p>
-          </div>
-        );
+      } 
+      // For backward compatibility with existing policies
+      else {
+        // Use type assertion for legacy data
+        const directiveAny = directive as any;
+        
+        // Check for any non-standard fields that might be custom policy fields
+        const standardFields = ['id', 'title', 'directive_type', 'is_responded', 'to', 'is_active', 
+                               'attachments', 'eligibility', 'application', 'coverage', 'termination', 
+                               'body', 'name', 'position', 'signature', 'qr_code', 'created_at', 'updated_at',
+                               'employer', 'reads', 'read_count'];
+        
+        // Extract potential legacy policy fields from the directive object
+        const legacyPolicyFields = Object.keys(directiveAny)
+          .filter(key => !standardFields.includes(key) && directiveAny[key])
+          .map(key => ({
+            fieldName: key,
+            fieldValue: directiveAny[key]
+          }));
+        
+        const hasLegacyFields = legacyPolicyFields.length > 0;
+        const hasProvisionFields = 
+          directive.eligibility || 
+          directive.application || 
+          directive.coverage || 
+          directive.termination;
+        
+        if (hasLegacyFields || hasProvisionFields) {
+          return (
+            <div className="prose max-w-none text-gray-700 leading-relaxed">
+              {/* Render any legacy policy fields */}
+              {legacyPolicyFields.map((field, index) => (
+                <div className="mb-6" key={index}>
+                  <h3 className="font-semibold text-lg">{field.fieldName.charAt(0).toUpperCase() + field.fieldName.slice(1)}</h3>
+                  <p>{field.fieldValue}</p>
+                </div>
+              ))}
+              
+              {/* Render provision fields */}
+              {directive.eligibility && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-lg">Eligibility</h3>
+                  <p>{directive.eligibility}</p>
+                </div>
+              )}
+              
+              {directive.application && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-lg">Application</h3>
+                  <p>{directive.application}</p>
+                </div>
+              )}
+              
+              {directive.coverage && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-lg">Coverage</h3>
+                  <p>{directive.coverage}</p>
+                </div>
+              )}
+              
+              {directive.termination && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-lg">Termination</h3>
+                  <p>{directive.termination}</p>
+                </div>
+              )}
+            </div>
+          );
+        } else {
+          // If no specific policy fields, fall back to body
+          return (
+            <div className="prose max-w-none text-gray-700 leading-relaxed">
+              <p>{directive.body || 'No policy content available.'}</p>
+            </div>
+          );
+        }
       }
     }
   };
@@ -271,25 +318,27 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
             <div className="mb-20">
               {renderDirectiveContent()}
               
-              <div className="mt-20">
-                <div className="mb-1">
-                  {directive.signature ? (
-                    <img 
-                      src={directive.signature as string} 
-                      alt="Signature" 
-                      className="h-14 object-contain -mb-6 -ml-10 max-w-[120%]"
-                    />
-                  ) : (
-                    <div className="h-10 flex items-center -ml-5">
-                      <svg viewBox="0 0 200 50" className="w-32 -mb-1">
-                        <path d="M10,30 Q30,5 50,30 T90,30" stroke="black" fill="transparent" strokeWidth="2"/>
-                      </svg>
-                    </div>
-                  )}
+              {directiveType === 'memo' && (
+                <div className="mt-20">
+                  <div className="mb-1">
+                    {directive.signature ? (
+                      <img 
+                        src={directive.signature as string} 
+                        alt="Signature" 
+                        className="h-14 object-contain -mb-6 -ml-10 max-w-[120%]"
+                      />
+                    ) : (
+                      <div className="h-10 flex items-center -ml-5">
+                        <svg viewBox="0 0 200 50" className="w-32 -mb-1">
+                          <path d="M10,30 Q30,5 50,30 T90,30" stroke="black" fill="transparent" strokeWidth="2"/>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <p className="font-semibold text-sm mb-2">{directive.name}</p>
+                  <p className="text-gray-600 text-sm">{directive.position}</p>
                 </div>
-                <p className="font-semibold text-sm mb-2">{directive.name}</p>
-                <p className="text-gray-600 text-sm">{directive.position}</p>
-              </div>
+              )}
             </div>
             
             <div className="mt-20">
