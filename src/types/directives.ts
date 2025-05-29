@@ -42,6 +42,11 @@ export interface ReadData {
   };
 }
 
+export interface CheckReadStatusResponse {
+  has_read: boolean;
+  read_at?: string;
+}
+
 export interface ReadStatusData {
   read_count: number;
   unread_count: number;

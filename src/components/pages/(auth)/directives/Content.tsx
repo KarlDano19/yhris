@@ -31,22 +31,6 @@ const setEmailCookie = (email: string): void => {
   }
 };
 
-// Debug component
-const DebugInfo = () => {
-  const [apiUrl, setApiUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    setApiUrl(process.env.NEXT_PUBLIC_API_URL || 'Not set');
-  }, []);
-
-  return (
-    <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded shadow-lg opacity-80 z-50">
-      <h3 className="font-bold mb-2">Debug Info</h3>
-      <p><strong>API URL:</strong> {apiUrl}</p>
-    </div>
-  );
-};
-
 interface ContentProps {
   userEmail?: string;
 }

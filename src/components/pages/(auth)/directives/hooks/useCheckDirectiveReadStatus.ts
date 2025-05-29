@@ -1,10 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
-
-interface CheckReadStatusResponse {
-  has_read: boolean;
-  read_at?: string;
-}
+import { CheckReadStatusResponse } from '@/types/directives';
 
 /**
  * Hook to check if a directive has been read by a specific user
