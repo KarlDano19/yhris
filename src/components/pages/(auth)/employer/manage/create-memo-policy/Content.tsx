@@ -5,7 +5,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import ClipIcon from '@/svg/ClipIcon';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
-import EmployeeResponsesModal from './modals/EmployeeResponsesModal';
+import EmployeeResponsesModal from './modals/ResponsesModal';
 import CreateMemoChevronLogo from '@/svg/CreateMemoChevronLogo';
 import { Menu, Transition } from '@headlessui/react';
 import classNames from '@/helpers/classNames';

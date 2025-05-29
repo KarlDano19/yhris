@@ -2,7 +2,7 @@ import React, { Dispatch, Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import useDirectiveReadStatus from '../../../../../(auth)/directives/hooks/useDirectiveReadStatus';
+import useDirectiveReadStatus from '../../../../directives/hooks/useDirectiveReadStatus';
 import { ReadData } from '@/types/directives';
 import ReactPaginate from 'react-paginate';
 
