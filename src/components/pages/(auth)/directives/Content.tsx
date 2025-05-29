@@ -169,7 +169,7 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
   }
 
   // Determine the directive type (handle both API formats)
-  const directiveType = directive.type || directive.directive_type;
+  const directiveType = directive.directive_type;
 
   // Render different content based on directive type
   const renderDirectiveContent = () => {
@@ -275,7 +275,7 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
                 <div className="mb-1">
                   {directive.signature ? (
                     <img 
-                      src={directive.signature} 
+                      src={directive.signature as string} 
                       alt="Signature" 
                       className="h-14 object-contain -mb-6 -ml-10 max-w-[120%]"
                     />

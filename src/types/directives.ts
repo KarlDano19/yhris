@@ -4,15 +4,15 @@
 
 export interface DirectiveData {
   id: number;
-  title: string;
-  body?: string;
   directive_type?: 'memo' | 'policy';
-  type?: 'memo' | 'policy'; // For backward compatibility
-  name?: string;
-  position?: string;
-  signature?: string;
-  date?: string;
-  created_at?: string;
+  title: string;
+  is_responded?: boolean;
+  to?: string[]; 
+  is_active?: boolean;
+
+  attachments?: string;
+
+  policyField: PolicyField[]
   purpose?: string;
   policy?: string;
   procedure?: string;
@@ -20,12 +20,17 @@ export interface DirectiveData {
   application?: string;
   coverage?: string;
   termination?: string;
-  reads?: ReadData[];
-  read_count?: number;
-  to?: string; // JSON string of email addresses
-  is_responded?: boolean;
-  is_active?: boolean;
-  attachments?: string;
+
+  body?: string;
+  name?: string;
+  position?: string;
+  signature?: string | File;
+  qr_code?: string | File;
+}
+
+export interface PolicyField {
+  inputLabel: string;
+  inputName: string
 }
 
 export interface ReadData {
@@ -41,8 +46,6 @@ export interface ReadData {
 }
 
 export interface ReadStatusData {
-  directive_id: number;
-  total_recipients: number;
   read_count: number;
   unread_count: number;
   reads: ReadData[];

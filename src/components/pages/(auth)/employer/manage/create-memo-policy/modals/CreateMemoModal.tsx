@@ -15,7 +15,7 @@ import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-import { T_Directive } from '@/types/globals';
+import { DirectiveData } from '@/types/directives';
 
 export default function CreateMemoModal({
   isOpen,
@@ -34,7 +34,7 @@ export default function CreateMemoModal({
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [inputTo, setInputTo] = useState('');
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, trigger } = useForm<T_Directive>();
+  const { register, handleSubmit, setValue, reset, trigger } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
 
   const onSubmit = handleSubmit((data) => {
@@ -55,8 +55,9 @@ export default function CreateMemoModal({
         });
       },
     };
-    data['email'] = tagsTo;
-    data['type'] = 'memo';
+    data['to'] = tagsTo;
+    data.directive_type = 'memo';
+    data.is_responded = data.is_responded || false;
     mutate({ ...toSaveData, ...data }, callbackReq);
   });
 
@@ -64,7 +65,7 @@ export default function CreateMemoModal({
     const file = target.files[0];
     if (!file) return;
     if (file.size <= 5000000) {
-      setToSaveData({ ...toSaveData, qrCode: file });
+      setToSaveData({ ...toSaveData, qr_code: file });
       setQrCodeExist(true);
     } else {
       toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
@@ -147,12 +148,12 @@ export default function CreateMemoModal({
                     </div>
                     <div className='sm:col-span-4 flex ml-4 mt-4'>
                       <input
-                        id='withResponse'
+                        id='is_responded'
                         type='checkbox'
-                        {...register('withResponse')}
+                        {...register('is_responded')}
                         className='form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white'
                       />
-                      <label htmlFor='withResponse' className='block text-sm font-medium leading-6 text-gray-900 ml-2'>
+                      <label htmlFor='is_responded' className='block text-sm font-medium leading-6 text-gray-900 ml-2'>
                         With Response
                       </label>
                     </div>
@@ -281,12 +282,12 @@ export default function CreateMemoModal({
                       </div>
                     )}
                     <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='qrCode' className='block text-sm font-medium leading-6 text-gray-900'>
+                      <label htmlFor='qr_code' className='block text-sm font-medium leading-6 text-gray-900'>
                         QR Code
                       </label>
                       <div className='mt-2'>
                         <input
-                          id='qrCode'
+                          id='qr_code'
                           type='file'
                           onChange={uploadOnChange}
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
@@ -296,7 +297,7 @@ export default function CreateMemoModal({
                             type='button'
                             className='underline text-savoy-blue text-sm mt-1'
                             onClick={() => {
-                              delete toSaveData.qrCode;
+                              delete toSaveData.qr_code;
                               setToSaveData({ ...toSaveData });
                               setQrCodeExist(false);
                             }}
@@ -310,7 +311,7 @@ export default function CreateMemoModal({
                       <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
                         Upload File (Optional)
                       </label>
-                      <DragDrop setValue={(value: never) => setValue('file', value)} />
+                      <DragDrop setValue={(value: never) => setValue('attachments', value)} />
                       <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                     </div>
                   </div>
@@ -319,7 +320,7 @@ export default function CreateMemoModal({
                     <button
                       onClick={async () => {
                         const title = await trigger('title');
-                        const email = await trigger('email');
+                        const email = await trigger('to');
                         const results = [title, email];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {

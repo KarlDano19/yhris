@@ -13,7 +13,7 @@ import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MinusCircleIcon, PencilIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-import { T_Directive, T_PolicyField } from '@/types/globals';
+import { DirectiveData, PolicyField } from '@/types/directives';
 
 export default function CreatePolicyModal({
   isOpen,
@@ -30,7 +30,7 @@ export default function CreatePolicyModal({
   const [inputTo, setInputTo] = useState('');
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control } =
-    useForm<T_Directive>({
+    useForm<DirectiveData>({
       defaultValues: {
         policyField: [
           {
@@ -75,8 +75,9 @@ export default function CreatePolicyModal({
         });
       },
     };
-    data['email'] = tagsTo;
-    data['type'] = 'policy';
+    data['to'] = tagsTo;
+    data.directive_type = 'policy';
+    data.is_responded = data.is_responded || false;
     mutate(data, callbackReq);
   });
 
@@ -151,13 +152,13 @@ export default function CreatePolicyModal({
                         </div>
                         <div className='sm:col-span-4 flex ml-4 mt-4'>
                           <input
-                            id='withResponse'
+                            id='is_responded'
                             type='checkbox'
-                            {...register('withResponse')}
+                            {...register('is_responded')}
                             className='form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white'
                           />
                           <label
-                            htmlFor='withResponse'
+                            htmlFor='is_responded'
                             className='block text-sm font-medium leading-6 text-gray-900 ml-2'
                           >
                             With Response
@@ -192,7 +193,7 @@ export default function CreatePolicyModal({
                             </div>
                           </div>
                         </div>
-                        {fields.map((item: T_PolicyField, index: number) => (
+                        {fields.map((item: PolicyField, index: number) => (
                           <div className='sm:col-span-4 mt-4' key={index}>
                             <label
                               htmlFor={`policyField.${index}.inputName`}
@@ -324,7 +325,7 @@ export default function CreatePolicyModal({
                           <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
                             Upload File (Optional)
                           </label>
-                          <DragDrop setValue={(value: never) => setValue('file', value)} />
+                          <DragDrop setValue={(value: never) => setValue('attachments', value)} />
                           <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                         </div>
                       </div>
@@ -337,7 +338,7 @@ export default function CreatePolicyModal({
                         className='mt-3 inline-flex w-full justify-center cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
                         onClick={async () => {
                           const title = await trigger('title');
-                          const email = await trigger('email');
+                          const email = await trigger('to');
                           let results = null;
                           
                           // Check if tagsTo array exists and has at least one email
