@@ -2,6 +2,7 @@ import {
     Dispatch,
     Fragment,
     useRef,
+    useEffect,
   } from "react";
   import { Dialog, Transition } from "@headlessui/react";
   import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -11,17 +12,55 @@ import {
     isOpen,
     setIsOpen,
     setSignatureUrl,
+    setPreviewUrl,
   }: {
     isOpen: boolean;
     setIsOpen: Dispatch<boolean>;
     setSignatureUrl: any;
+    setPreviewUrl: (url: string) => void;
   }) {
     const signatureCanvasRef = useRef<any>(null);
     const cancelButtonRef = useRef(null);
   
     const clearSignature = () => {
       signatureCanvasRef.current.clear();
+      setPreviewUrl('');
     };
+
+    // Update preview whenever the signature changes
+    useEffect(() => {
+      const updatePreview = () => {
+        if (signatureCanvasRef.current && !signatureCanvasRef.current.isEmpty()) {
+          const dataUrl = signatureCanvasRef.current.toDataURL();
+          setPreviewUrl(dataUrl);
+        } else {
+          setPreviewUrl('');
+        }
+      };
+
+      if (signatureCanvasRef.current) {
+        signatureCanvasRef.current.off('endStroke');
+        signatureCanvasRef.current.on('endStroke', updatePreview);
+        // Also update on mouseup/touchend to catch single strokes
+        signatureCanvasRef.current.on('mouseup', updatePreview);
+        signatureCanvasRef.current.on('touchend', updatePreview);
+      }
+
+      return () => {
+        if (signatureCanvasRef.current) {
+          signatureCanvasRef.current.off('endStroke');
+          signatureCanvasRef.current.off('mouseup');
+          signatureCanvasRef.current.off('touchend');
+        }
+      };
+    }, [setPreviewUrl]);
+
+    // Clear preview when modal is closed
+    useEffect(() => {
+      if (!isOpen) {
+        setPreviewUrl('');
+      }
+    }, [isOpen, setPreviewUrl]);
   
     const saveSignature = () => {
       const dataUrl = signatureCanvasRef.current.toDataURL();
@@ -40,6 +79,7 @@ import {
       const file = new File([blob], "signature.png", { type: "image/png" });
       
       setSignatureUrl(file);
+      setPreviewUrl(dataUrl); // Keep the preview visible after saving
       setIsOpen(false);
     };
   

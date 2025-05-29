@@ -122,9 +122,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       }
     });
 
-    // Handle file fields if they exist in the current tab
-    if (selectedTab === 2 && processedData.signature instanceof File) {
-      // Keep the File object as is for FormData
+    // Special handling for file fields if they exist in the current tab
+    if (selectedTab === 2) {
+      const currentSignature = watch("signature");
+      const signatureSource = watch("signature_source");
+      
+      if (currentSignature instanceof File) {
+        // Keep the File object as is for FormData
+        processedData.signature = currentSignature;
+        processedData.signature_source = signatureSource;
+      } else if (typeof currentSignature === 'string') {
+        processedData.signature = currentSignature;
+        processedData.signature_source = signatureSource;
+      }
     } else if (selectedTab === 5 && processedData.safety_signage instanceof File) {
       // Keep the File object as is for FormData
     }
@@ -135,14 +145,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         // Reset file upload states after successful save
         if (selectedTab === 2) {
           const currentSignature = watch("signature");
+          const signatureSource = watch("signature_source");
+          
           if (currentSignature) {
             if (typeof currentSignature === 'string') {
               setValue("signature", currentSignature);
               setValue("previous_signature", currentSignature);
+              setValue("signature_source", signatureSource);
             } else if (currentSignature instanceof File) {
               // If it's a File, we need to wait for the backend to process it
               // The backend will return the URL in the next data fetch
               setValue("signature", currentSignature);
+              setValue("signature_source", signatureSource);
             }
           }
         } else if (selectedTab === 5) {
@@ -214,6 +228,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setValue("date", oshProgramDetails.date);
       setValue("name_of_owner", oshProgramDetails.name_of_owner);
       setValue("signature", oshProgramDetails.signature);
+      setValue("signature_source", oshProgramDetails.signature_source);
 
       // Tab 3: Risk Management
       setValue("emergency_and_disaster_preparedness", oshProgramDetails.emergency_and_disaster_preparedness);

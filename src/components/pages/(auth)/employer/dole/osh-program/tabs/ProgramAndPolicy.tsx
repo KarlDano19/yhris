@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-
+import Image from "next/image";
 import { Controller } from "react-hook-form";
 import dynamic from "next/dynamic";
 
@@ -12,7 +12,6 @@ import { useImageUrlHelpers } from "../hooks/useImageUrlHelpers";
 import ImagePreviewModal from "../modals/ImagePreviewModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-
 
 export default function ProgramAndPolicy({
   control,
@@ -33,6 +32,8 @@ export default function ProgramAndPolicy({
   );
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
+  const [drawnSignaturePreview, setDrawnSignaturePreview] = useState<string>("");
+  const [uploadedSignaturePreview, setUploadedSignaturePreview] = useState<string>("");
   const [signatureAttachmentExist, setSignatureAttachmentExist] = useState(false);
   const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -40,39 +41,111 @@ export default function ProgramAndPolicy({
   
   const { getSignatureImageUrl } = useImageUrlHelpers();
 
+  // Track current signature source and file
+  useEffect(() => {
+    const currentSignature = watch("signature");
+    const currentSource = watch("signature_source");
+    
+    if (currentSignature && typeof currentSignature === "string") {
+      setPreviousSignatureFile(currentSignature);
+      setSignatureAttachmentExist(true);
+      // Clear previews when we have a saved signature URL
+      setDrawnSignaturePreview("");
+      setUploadedSignaturePreview("");
+      return;
+    }
+
+    // Only show previews for unsaved signatures
+    if (currentSource === "draw") {
+      setUploadedSignaturePreview("");
+      if (currentSignature instanceof File) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setDrawnSignaturePreview(event.target.result as string);
+          }
+        };
+        reader.readAsDataURL(currentSignature);
+      }
+    } else if (currentSource === "upload") {
+      setDrawnSignaturePreview("");
+      if (currentSignature instanceof File) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setUploadedSignaturePreview(event.target.result as string);
+          }
+        };
+        reader.readAsDataURL(currentSignature);
+      }
+    }
+  }, [watch("signature"), watch("signature_source")]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("signature", file);
+      setValue("previous_signature", previousSignatureFile);
+      setValue("signature_source", "upload");
+      setSignatureUrl("");
+      setSignatureAttachmentExist(true);
+      setDrawnSignaturePreview(""); // Clear drawn signature preview
+
+      // Create preview URL for the uploaded file
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setUploadedSignaturePreview(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearDrawnSignature = () => {
+    setValue("signature", previousSignatureFile);
+    setValue("signature_source", null);
+    setDrawnSignaturePreview("");
+    setSignatureUrl("");
+  };
+
+  const clearUploadedSignature = () => {
+    setValue("signature", previousSignatureFile);
+    setValue("signature_source", null);
+    setUploadedSignaturePreview("");
+    setSignatureUrl("");
+  };
+
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
+    if (!drawSignatureModal) {
+      setUploadedSignaturePreview(""); // Clear uploaded preview when opening draw modal
+    }
   };
 
   useEffect(() => {
     if (signatureUrl) {
       setValue("signature", signatureUrl);
       setValue("previous_signature", signatureUrl);
+      setValue("signature_source", "draw");
       setSignatureAttachmentExist(true);
+      
+      // Handle both File objects and string URLs
+      if (typeof signatureUrl === 'string') {
+        setDrawnSignaturePreview(signatureUrl);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setDrawnSignaturePreview(event.target.result as string);
+          }
+        };
+        reader.readAsDataURL(signatureUrl);
+      }
+      
+      setUploadedSignaturePreview(""); // Clear uploaded preview when drawing
     }
-    if (!drawSignatureModal && signatureUrl) {
-      setSignatureUrl("");
-    }
-  }, [signatureUrl, setValue, drawSignatureModal]);
-
-  // Track signature file changes from form data
-  useEffect(() => {
-    const currentSignature = watch("signature");
-    if (typeof currentSignature === "string" && currentSignature !== previousSignatureFile) {
-      setPreviousSignatureFile(currentSignature);
-      setSignatureAttachmentExist(true);
-    }
-  }, [watch("signature"), previousSignatureFile]);
-  
-  // Add specific effect to refresh the image preview when signature changes after form submission
-  useEffect(() => {
-    // This will run whenever the form is submitted and data is refreshed
-    const signature = watch("signature");
-    if (typeof signature === "string") {
-      setPreviousSignatureFile(signature);
-      setSignatureAttachmentExist(true);
-    }
-  }, [watch]);
+  }, [signatureUrl, setValue]);
 
   const openImagePreview = (fileName: string) => {
     const imageUrl = getSignatureImageUrl(fileName);
@@ -80,6 +153,30 @@ export default function ProgramAndPolicy({
     const timestamp = new Date().getTime();
     setCurrentImageUrl(`${imageUrl}?t=${timestamp}`);
     setIsImageModalOpen(true);
+  };
+
+  // Function to render view signature button
+  const renderViewSignatureButton = () => {
+    const currentSignature = watch("signature");
+    const signatureSource = watch("signature_source");
+    
+    if (typeof currentSignature === "string" && signatureSource) {
+      return (
+        <div className="flex items-center gap-4 mt-2">
+          <button
+            type="button"
+            className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
+            onClick={() => {
+              const fileName = currentSignature.split('/').pop();
+              openImagePreview(fileName || "");
+            }}
+          >
+            View Signature
+          </button>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -226,6 +323,30 @@ export default function ProgramAndPolicy({
               >
                 Draw
               </button>
+              {drawnSignaturePreview && (
+                <div className="mt-3 border rounded-lg overflow-hidden bg-gray-50">
+                  <div className="p-3 border-b bg-white flex justify-between items-center">
+                    <p className="text-sm font-medium text-gray-700">Signature Preview</p>
+                    <button
+                      type="button"
+                      className="text-savoy-blue text-sm underline"
+                      onClick={clearDrawnSignature}
+                    >
+                      Remove Attachment
+                    </button>
+                  </div>
+                  <div className="p-4 flex justify-center items-center bg-white">
+                    <div className="relative w-full h-[100px]">
+                      <img
+                        src={drawnSignaturePreview}
+                        alt="Drawn Signature Preview"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!drawnSignaturePreview && watch("signature_source") === "draw" && renderViewSignatureButton()}
             </div>
           </div>
           <div className="flex-1">
@@ -239,33 +360,35 @@ export default function ProgramAndPolicy({
             <div className="relative mt-2">
               <input
                 id="signature"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    const file = e.target.files[0];
-                    setValue("signature", file);
-                    setValue("previous_signature", previousSignatureFile);
-                    setSignatureUrl("");
-                    setSignatureAttachmentExist(true);
-                  }
-                }}
+                onChange={handleFileUpload}
                 type="file"
                 accept="image/*"
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
-              <div className="flex items-center gap-4 mt-2">
-                {previousSignatureFile && (
-                  <button
-                    type="button"
-                    className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
-                    onClick={() => {
-                      const fileName = previousSignatureFile.split('/').pop();
-                      openImagePreview(fileName || "");
-                    }}
-                  >
-                    View Signature
-                  </button>
-                )}
-              </div>
+              {uploadedSignaturePreview && (
+                <div className="mt-3 border rounded-lg overflow-hidden bg-gray-50">
+                  <div className="p-3 border-b bg-white flex justify-between items-center">
+                    <p className="text-sm font-medium text-gray-700">Signature Preview</p>
+                    <button
+                      type="button"
+                      className="text-savoy-blue text-sm underline"
+                      onClick={clearUploadedSignature}
+                    >
+                      Remove Attachment
+                    </button>
+                  </div>
+                  <div className="p-4 flex justify-center items-center bg-white">
+                    <div className="relative w-full h-[100px]">
+                      <img
+                        src={uploadedSignaturePreview}
+                        alt="Uploaded Signature Preview"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!uploadedSignaturePreview && watch("signature_source") === "upload" && renderViewSignatureButton()}
             </div>
           </div>
         </div>
@@ -275,6 +398,7 @@ export default function ProgramAndPolicy({
           isOpen={drawSignatureModal}
           setIsOpen={setDrawSignatureModal}
           setSignatureUrl={setSignatureUrl}
+          setPreviewUrl={setDrawnSignaturePreview}
         />
       )}
       {/* Image Preview Modal */}

@@ -30,6 +30,7 @@ export type T_OshProgram = {
     date: string;
     name_of_owner: string;
     signature: File | string;
+    signature_source: 'draw' | 'upload' | null;
   
     // Tab 3: Risk Management
     emergency_and_disaster_preparedness: Array<{
