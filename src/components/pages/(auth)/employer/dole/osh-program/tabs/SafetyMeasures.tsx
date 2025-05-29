@@ -400,7 +400,7 @@ export default function SafetyMeasures({
                         htmlFor={`adequate_supply_of_drinking_water_file`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon />
+                        <ClipIcon hasFile={!!watch("adequate_supply_of_drinking_water_file")?.[0]} />
                       </label>
                     </td>
                   </tr>
@@ -469,7 +469,7 @@ export default function SafetyMeasures({
                         htmlFor={`adequate_sanitary_and_washing_facilities_file`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon />
+                        <ClipIcon hasFile={!!watch("adequate_sanitary_and_washing_facilities_file")?.[0]} />
                       </label>
                     </td>
                   </tr>
@@ -534,7 +534,7 @@ export default function SafetyMeasures({
                         htmlFor={`suitable_living_accommodation_file`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon />
+                        <ClipIcon hasFile={!!watch("suitable_living_accommodation_file")?.[0]} />
                       </label>
                     </td>
                   </tr>
@@ -604,7 +604,7 @@ export default function SafetyMeasures({
                         htmlFor={`separate_sanitary_washing_and_sleeping_facilities_file`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon />
+                        <ClipIcon hasFile={!!watch("separate_sanitary_washing_and_sleeping_facilities_file")?.[0]} />
                       </label>
                     </td>
                   </tr>
@@ -669,7 +669,7 @@ export default function SafetyMeasures({
                         htmlFor={`lactation_station_file`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon />
+                        <ClipIcon hasFile={!!watch("lactation_station_file")?.[0]} />
                       </label>
                     </td>
                   </tr>
@@ -734,7 +734,7 @@ export default function SafetyMeasures({
                         htmlFor={`ramps_railings_and_like_file`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon />
+                        <ClipIcon hasFile={!!watch("ramps_railings_and_like_file")?.[0]} />
                       </label>
                     </td>
                   </tr>
@@ -802,7 +802,7 @@ export default function SafetyMeasures({
                         htmlFor={`other_workers_welfare_facilities_file`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon />
+                        <ClipIcon hasFile={!!watch("other_workers_welfare_facilities_file")?.[0]} />
                       </label>
                     </td>
                   </tr>

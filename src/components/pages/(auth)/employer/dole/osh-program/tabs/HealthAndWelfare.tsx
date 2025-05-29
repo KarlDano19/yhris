@@ -901,7 +901,7 @@ export default function HealthAndWelfare({
                           htmlFor={`safety_officer.${index}.certificate`}
                           className="cursor-pointer items-center"
                         >
-                          <ClipIcon />
+                          <ClipIcon hasFile={!!watch(`safety_officer.${index}.certificate`)?.[0]} />
                         </label>
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
@@ -1063,7 +1063,7 @@ export default function HealthAndWelfare({
                           htmlFor={`health_personnel.${index}.certificate`}
                           className="cursor-pointer items-center"
                         >
-                          <ClipIcon />
+                          <ClipIcon hasFile={!!watch(`health_personnel.${index}.certificate`)?.[0]} />
                         </label>
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
