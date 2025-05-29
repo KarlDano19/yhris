@@ -5,6 +5,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import ClipIcon from '@/svg/ClipIcon';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
+import EmployeeResponsesModal from './modals/EmployeeResponsesModal';
 import CreateMemoChevronLogo from '@/svg/CreateMemoChevronLogo';
 import { Menu, Transition } from '@headlessui/react';
 import classNames from '@/helpers/classNames';
@@ -29,6 +30,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
   const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
+  const [isEmployeeResponsesModalOpen, setIsEmployeeResponsesModalOpen] = useState(false);
+  const [selectedMemoTitle, setSelectedMemoTitle] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems(itemsFilter);
   const queryClient = useQueryClient();
@@ -128,7 +131,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
                   <p
                     className='font-bold hover:underline cursor-pointer'
-                    onClick={() => alert('View responses clicked')}
+                    onClick={() => {
+                      setSelectedMemoTitle(item);
+                      setIsEmployeeResponsesModalOpen(true);
+                    }}
                   >
                     View Responses
                   </p>
@@ -139,7 +145,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       setIdToDelete(item.id);
                       setIsConfirmModalOpen(true);
                     }}
-                    disabled={!cachedProfile?.state?.data?.edit_memo}
+                    // disabled={!cachedProfile?.state?.data?.edit_memo}
                   >
                     <DeleteMemoLogo />
                   </button>
@@ -264,7 +270,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <div>
                   <Menu.Button
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
-                    disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_memo}
+                    // disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_memo}
                   >
                     CREATE
                   </Menu.Button>
@@ -355,12 +361,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
       <CreateMemoModal isOpen={isCreateMemoModalOpen} setIsOpen={setIsCreateMemoModalOpen} refetch={refetch} />
       <CreatePolicyModal isOpen={isCreatePolicyModalOpen} setIsOpen={setIsCreatePolicyModalOpen} refetch={refetch} />
+      <EmployeeResponsesModal 
+        isOpen={isEmployeeResponsesModalOpen} 
+        setIsOpen={setIsEmployeeResponsesModalOpen}
+        memoTitle={selectedMemoTitle}
+        directiveId={selectedMemoTitle?.id}
+      />
       <ConfirmModal
         message='Are you sure you want to delete this memo/policy?'
         isOpen={isConfirmModalOpen}
         setIsOpen={setIsConfirmModalOpen}
         confirmAction={deleteMemo}
-        isLoading={false}
+        // isLoading={false}
+        isLoading={isLoading}
       />
     </>
   );

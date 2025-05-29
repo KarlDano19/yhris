@@ -18,7 +18,7 @@ async function addDirective(directive: T_Directive) {
       data.append('body', directive.body);
       data.append('name', directive.name);
       data.append('position', directive.position);
-      if (directive.signature.length) {
+      if (directive.signature && directive.signature.length) {
         const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
         data.append('signature', signatureBlob, 'signature.jpg');
       }

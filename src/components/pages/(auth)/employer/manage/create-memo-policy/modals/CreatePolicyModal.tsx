@@ -324,7 +324,7 @@ export default function CreatePolicyModal({
                           <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
                             Upload File (Optional)
                           </label>
-                          <DragDrop setValue={(value: any) => setValue('file', value)} />
+                          <DragDrop setValue={(value: never) => setValue('file', value)} />
                           <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                         </div>
                       </div>
@@ -339,7 +339,9 @@ export default function CreatePolicyModal({
                           const title = await trigger('title');
                           const email = await trigger('email');
                           let results = null;
-                          if (getValues().email.indexOf('@') < 1) {
+                          
+                          // Check if tagsTo array exists and has at least one email
+                          if (tagsTo.length === 0 || !tagsTo.some(email => email.indexOf('@') > 0)) {
                             results = [title, false];
                           } else {
                             results = [title, email];
@@ -350,7 +352,9 @@ export default function CreatePolicyModal({
                             setIsNextForm(true);
                           } else {
                             let message = '';
-                            if (getValues().email.indexOf('@') < 1) {
+                            if (tagsTo.length === 0) {
+                              message = 'Email address is required';
+                            } else if (!tagsTo.some(email => email.indexOf('@') > 0)) {
                               message = 'Invalid email address';
                             } else {
                               message = 'You cannot proceed due to incomplete fields. Please review.';

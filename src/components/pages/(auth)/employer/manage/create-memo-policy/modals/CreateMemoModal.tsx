@@ -75,7 +75,7 @@ export default function CreateMemoModal({
 
   useEffect(() => {
     if (signatureUrl) {
-      setValue('signature', signatureUrl);
+      setValue('signature', signatureUrl as never);
     } else {
       setSignatureUrl('');
     }
@@ -260,7 +260,7 @@ export default function CreateMemoModal({
                             type='button'
                             className='underline text-savoy-blue text-sm'
                             onClick={() => {
-                              setValue('signature', '');
+                              setValue('signature', '' as never);
                               setAttachmentExist(false);
                             }}
                           >
@@ -310,7 +310,7 @@ export default function CreateMemoModal({
                       <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
                         Upload File (Optional)
                       </label>
-                      <DragDrop setValue={(value: any) => setValue('file', value)} />
+                      <DragDrop setValue={(value: never) => setValue('file', value)} />
                       <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                     </div>
                   </div>

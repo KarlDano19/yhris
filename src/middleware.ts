@@ -34,7 +34,8 @@ export async function middleware(request: NextRequest) {
     'train',
     'settings',
     'dole',
-    'audit-logs'
+    'audit-logs',
+    'directives'
   ];
   const applicantRoutes: any = [
     'application-tracker',
@@ -42,7 +43,8 @@ export async function middleware(request: NextRequest) {
     'edit-profile',
     'notification',
     'setup-applicant-profile',
-    'job-applicant-form'
+    'job-applicant-form',
+    'directives',
   ];
 
   if (bypassRoutes.includes(firstRoute)) {

@@ -32,6 +32,7 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
     'settings',
     'dole',
     'audit-logs',
+    'directives',
   ];
   const applicantRoutes: string[] = [
     'application-tracker',
@@ -40,6 +41,7 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
     'notification',
     'setup-applicant-profile',
     'job-applicant-form',
+    'directives',
   ];
   const noHeaderRoutes: string[] = ['generate-report'];
 
