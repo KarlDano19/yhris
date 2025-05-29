@@ -1026,7 +1026,8 @@ export default function HealthAndWelfare({
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                         <input
-                          type="text"
+                          type="number"
+                          min="0"
                           {...register(
                             `health_personnel.${index}.total_no_of_workers`
                           )}
@@ -1126,6 +1127,8 @@ export default function HealthAndWelfare({
                     >
                       Date
                     </th>
+                    <th>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -1146,7 +1149,8 @@ export default function HealthAndWelfare({
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                         <input
-                          type="text"
+                          type="number"
+                          min="0"
                           {...register(
                             `health_training.${index}.no_of_employees_in_attendance`
                           )}
@@ -1227,6 +1231,8 @@ export default function HealthAndWelfare({
                   className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                 >
                   Date
+                </th>
+                <th>
                 </th>
               </tr>
             </thead>
@@ -1324,6 +1330,8 @@ export default function HealthAndWelfare({
                       className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                     >
                       Date
+                    </th>
+                    <th>
                     </th>
                   </tr>
                 </thead>
@@ -1449,6 +1457,8 @@ export default function HealthAndWelfare({
                       className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                     >
                       Date
+                    </th>
+                    <th>
                     </th>
                   </tr>
                 </thead>

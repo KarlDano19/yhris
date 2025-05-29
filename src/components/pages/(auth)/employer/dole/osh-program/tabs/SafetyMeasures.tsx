@@ -12,6 +12,7 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import ClipIcon from "@/svg/ClipIcon";
 import { useImageUrlHelpers } from "../hooks/useImageUrlHelpers";
 import ImagePreviewModal from "../modals/ImagePreviewModal";
+import CustomDatePicker from "@/components/CustomDatePicker";
 
 export default function SafetyMeasures({
   control,
@@ -920,12 +921,28 @@ export default function SafetyMeasures({
                     />
                   </td>
                   <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                    <input
-                      type="text"
-                      {...register(`drills.${index}.date`)}
-                      id={`drills.${index}.date`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                    />
+                    <div className="relative mt-2">
+                      <Controller
+                        control={control}
+                        name={`drills.${index}.date`}
+                        render={({ field }) => (
+                          <CustomDatePicker
+                            id={`drills.${index}.date`}
+                            placeholder={"mm/dd/yyyy"}
+                            className={
+                              "block w-full py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                            }
+                            selected={
+                              field.value ? new Date(field.value) : null
+                            }
+                            pickerOnChange={(date: any) => field.onChange(date)}
+                            inputOnChange={(value: any) =>
+                              field.onChange(value)
+                            }
+                          />
+                        )}
+                      />
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                     <input
