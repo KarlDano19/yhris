@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function enrollEmployeeToYP(employeeId: string) {
+async function enrollEmployeeToYP(employeeData: { id: string; data: any }) {
   try {
     const token = getCookie('token');
     const config = {
@@ -10,8 +10,9 @@ async function enrollEmployeeToYP(employeeId: string) {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
+      body: JSON.stringify(employeeData.data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/sync-create`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/sync-create/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -26,7 +27,7 @@ async function enrollEmployeeToYP(employeeId: string) {
 }
 
 function useEnrollEmployeeToYP() {
-  const query = useMutation((employeeId: string) => enrollEmployeeToYP(employeeId));
+  const query = useMutation((employeeData: { id: string; data: any }) => enrollEmployeeToYP(employeeData));
 
   return query;
 }
