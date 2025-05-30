@@ -21,6 +21,15 @@ import MainIconOnly from '@/svg/MainIconOnly';
 
 import { T_Register } from '@/types/globals';
 
+const getPasswordRequirements = (pass: string) => ({
+  length: pass.length >= 12,
+  lowercase: /[a-z]/.test(pass),
+  uppercase: /[A-Z]/.test(pass),
+  digit: /[0-9]/.test(pass),
+  special: /[!@#$%^&*(),.?":{}|<>]/.test(pass),
+  noSpaces: !/\s/.test(pass),
+});
+
 const Content = () => {
   const router = useRouter();
   const accountType = [
@@ -36,12 +45,15 @@ const Content = () => {
   const [conformPassword, setConfirmPassword] = useState('');
   const { register, handleSubmit, reset, watch } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
+  const [backendPasswordError, setBackendPasswordError] = useState('');
+  const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
 
   const onSubmit = (data: T_Register) => {
     if (password !== '' || conformPassword !== '') {
       if (password === conformPassword) {
         const callBackReq = {
           onSuccess: (data: any) => {
+            setBackendPasswordError('');
             reset();
             toast.custom(() => <CustomToast message={data.message} type='success' />, {
               duration: 7000,
@@ -49,9 +61,11 @@ const Content = () => {
             router.push('/login');
           },
           onError: (err: any) => {
-            toast.custom(() => <CustomToast message={err} type='error' />, {
-              duration: 7000,
-            });
+            if (typeof err === 'string' && err.toLowerCase().includes('password')) {
+              setBackendPasswordError(err);
+            } else {
+              setBackendPasswordError('');
+            }
           },
         };
         if (agree) {
@@ -199,7 +213,11 @@ const Content = () => {
                           {...register('password', { required: true })}
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
-                          onChange={(e) => setPassword(e.currentTarget.value)}
+                          onChange={(e) => {
+                            setPassword(e.currentTarget.value);
+                            setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
+                            setBackendPasswordError('');
+                          }}
                         />
                         <button
                           type='button'
@@ -215,6 +233,33 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                      {backendPasswordError && (
+                        <p className="text-red-600 text-xs mt-1">{backendPasswordError}</p>
+                      )}
+                      {password && (
+                        <div className='mt-2 text-sm text-red-600'>
+                          <ul className='space-y-1'>
+                            {!passwordRequirements.length && (
+                              <li>• At least 12 characters</li>
+                            )}
+                            {!passwordRequirements.lowercase && (
+                              <li>• At least 1 lowercase letter (a-z)</li>
+                            )}
+                            {!passwordRequirements.uppercase && (
+                              <li>• At least 1 uppercase letter (A-Z)</li>
+                            )}
+                            {!passwordRequirements.digit && (
+                              <li>• At least 1 number (0-9)</li>
+                            )}
+                            {!passwordRequirements.special && (
+                              <li>• At least 1 special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                            )}
+                            {!passwordRequirements.noSpaces && (
+                              <li>• Spaces are not allowed</li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                     <div className='mb-4'>
                       <label htmlFor='confirm-password' className='text-sm leading-6 text-gray-900'>
