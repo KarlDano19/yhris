@@ -8,240 +8,323 @@ import {
   T_OshProgram 
 } from "@/types/osh-program";
 
-type OshProgramData = Partial<T_OshProgram> & { id?: string } & {
-  [key: string]: any;  // Add index signature for dynamic access
+type OshProgramData = Partial<T_OshProgram> & { 
+  id?: string;
+  [key: string]: any;
 };
 
+// Utility functions
 function isFile(value: any): value is File {
   return value instanceof File;
 }
 
-async function updateOshProgramDetails(data: OshProgramData) {
-    try {
-        const token = getCookie("token");
-        if (!token) {
-            throw new Error("Authentication token not found");
-        }
-
-        const cleanData = { ...data };
-
-        // Apply case sensitivity fixes
-        for (const [capitalizedKey, lowercaseKey] of Object.entries(OSH_PROGRAM_FIELD_MAPPINGS)) {
-            if (capitalizedKey in cleanData && !(lowercaseKey in cleanData)) {
-                cleanData[lowercaseKey] = cleanData[capitalizedKey];
-                delete cleanData[capitalizedKey];
-            }
-        }
-
-        // Handle date formatting
-        for (const field of OSH_PROGRAM_DATE_FIELDS) {
-            if (cleanData[field]) {
-                const dateObj = new Date(cleanData[field]);
-                if (!isNaN(dateObj.getTime())) {
-                    cleanData[field] = dateObj.toISOString().split('T')[0];
-                }
-            }
-        }
-
-        // Handle all boolean fields
-        for (const field of OSH_PROGRAM_ALL_BOOLEAN_FIELDS) {
-            // If the field is not in the data at all, don't include it in the update
-            if (!(field in cleanData)) {
-                continue;
-            }
-            
-            // If the field is in the data but is null/empty string, keep it as null
-            if (cleanData[field] === null || cleanData[field] === '') {
-                cleanData[field] = null;
-            } else if (typeof cleanData[field] === 'string') {
-                // Only convert explicit 'true' or 'false' strings
-                const value = cleanData[field].toLowerCase();
-                if (value === 'true') {
-                    cleanData[field] = true;
-                } else if (value === 'false') {
-                    cleanData[field] = false;
-                } else {
-                    // If it's any other string value, treat it as null
-                    cleanData[field] = null;
-                }
-            } else if (typeof cleanData[field] === 'boolean') {
-                // Keep boolean values as is
-                cleanData[field] = cleanData[field];
-            } else {
-                // For any other type of value, set to null
-                cleanData[field] = null;
-            }
-        }
-
-        // Use FormData for all requests since we have file uploads in the forms
-        const formData = new FormData();
-        
-        console.log('Preparing form data for submission:', cleanData);
-        
-        // Add all fields to FormData
-        for (const key in cleanData) {
-            if (isFile(cleanData[key])) {
-                // Add files directly
-                console.log(`Adding file directly: ${key}`, cleanData[key]);
-                formData.append(key, cleanData[key]);
-                
-                // Add previous file information if available
-                const previousKey = `previous_${key}`;
-                if (cleanData[previousKey]) {
-                    formData.append(previousKey, cleanData[previousKey]);
-                }
-            } else if (cleanData[key] && cleanData[key] instanceof FileList) {
-                // Handle FileList objects (from file inputs)
-                console.log(`Processing FileList for ${key}:`, cleanData[key]);
-                if (cleanData[key].length > 0) {
-                    console.log(`Adding file from FileList: ${key}`, cleanData[key][0]);
-                    formData.append(key, cleanData[key][0]);
-                    
-                    // Add previous file information if available
-                    const previousKey = `previous_${key}`;
-                    if (cleanData[previousKey]) {
-                        formData.append(previousKey, cleanData[previousKey]);
-                    }
-                }
-            } else if (OSH_PROGRAM_FILE_FIELDS.includes(key)) {
-                // Only append file fields if they exist and are not null/undefined
-                console.log(`Processing file field: ${key}`, cleanData[key]);
-                if (cleanData[key] && cleanData[key] !== 'null' && cleanData[key] !== 'undefined') {
-                    if (isFile(cleanData[key])) {
-                        console.log(`Adding file for ${key}:`, cleanData[key]);
-                        formData.append(key, cleanData[key]);
-                        
-                        // Add previous file information
-                        const previousKey = `previous_${key}`;
-                        if (cleanData[previousKey]) {
-                            formData.append(previousKey, cleanData[previousKey]);
-                        }
-                    } else if (typeof cleanData[key] === 'string' && cleanData[key].startsWith('data:')) {
-                        // Handle base64 data URL
-                        console.log(`Processing base64 data for ${key}`);
-                        try {
-                            const response = await fetch(cleanData[key]);
-                            const blob = await response.blob();
-                            formData.append(key, blob, `${key}.png`);
-                            
-                            // Add previous file information
-                            const previousKey = `previous_${key}`;
-                            if (cleanData[previousKey]) {
-                                formData.append(previousKey, cleanData[previousKey]);
-                            }
-                        } catch (error) {
-                            console.error(`Error processing base64 data for ${key}:`, error);
-                            formData.append(key, cleanData[key]);
-                        }
-                    } else if (typeof cleanData[key] === 'string') {
-                        // If it's a regular string (like a file path), only append if it's not empty
-                        if (cleanData[key].trim() !== '') {
-                            console.log(`Adding string file path for ${key}:`, cleanData[key]);
-                            formData.append(key, cleanData[key]);
-                        }
-                    }
-                }
-            } else if (key.startsWith('previous_')) {
-                // Skip previous file fields as they're handled with their corresponding file fields
-                continue;
-            } else if (['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 'safety_meeting', 'safety_officer', 'business_description'].includes(key) && cleanData[key]) {
-                // Handle JSON fields
-                if (typeof cleanData[key] === 'object') {
-                    formData.append(key, JSON.stringify(cleanData[key]));
-                } else if (typeof cleanData[key] === 'string') {
-                    try {
-                        const jsonValue = JSON.parse(cleanData[key]);
-                        formData.append(key, JSON.stringify(jsonValue));
-                    } catch (e) {
-                        formData.append(key, JSON.stringify({}));
-                    }
-                } else {
-                    formData.append(key, JSON.stringify({}));
-                }
-            } else if (['routine_medical_surveillance', 'schedule_of_annual_medical_examination', 'special_medical_surveillance'].includes(key) && cleanData[key]) {
-                // Handle array fields
-                let fieldValue = cleanData[key];
-                try {
-                    // If it's already a string, try to parse it
-                    if (typeof fieldValue === 'string') {
-                        fieldValue = JSON.parse(fieldValue);
-                    }
-                    // Ensure it's an array
-                    if (!Array.isArray(fieldValue)) {
-                        fieldValue = [fieldValue];
-                    }
-                    // Convert back to JSON string for submission
-                    formData.append(key, JSON.stringify(fieldValue));
-                } catch (e) {
-                    // If parsing fails, treat as comma-separated string
-                    const arrayValue = typeof fieldValue === 'string' 
-                        ? fieldValue.split(',').map(item => item.trim())
-                        : [fieldValue];
-                    formData.append(key, JSON.stringify(arrayValue));
-                }
-            } else if (OSH_PROGRAM_ALL_BOOLEAN_FIELDS.includes(key)) {
-                // For boolean fields, explicitly append the value even if it's null
-                formData.append(key, cleanData[key] === null ? 'null' : String(cleanData[key]));
-            } else if (cleanData[key] !== undefined && cleanData[key] !== null) {
-                // Add other primitive values
-                formData.append(key, cleanData[key]);
-            }
-        }
-        
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Authorization": `Token ${token}`
-                    // Don't set Content-Type header when using FormData
-                },
-                body: formData,
-            }
-        );
-
-        console.log('Server response status:', response.status);
-
-        if (response.status === 401) {
-            throw new Error("Authentication failed. Please log in again.");
-        }
-
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-                console.error('Server error response:', errorData);
-                throw new Error(
-                    errorData.message || 
-                    errorData.error || 
-                    errorData.detail || 
-                    'An error occurred while updating OSH Program'
-                );
-            } catch (e) {
-                console.error('Error parsing server error response:', e);
-                throw new Error(response.statusText || 'An error occurred while updating OSH Program');
-            }
-        }
-
-        try {
-            const data = await response.json();
-            console.log('Server success response:', data);
-            return data;
-        } catch (e) {
-            // If we can't parse the response but the status was ok,
-            // we still consider it a success
-            console.log('Response received but not parsed as JSON');
-            return { message: "OSH Program updated successfully" };
-        }
-    } catch (error: any) {
-        throw error;
-    }
+function ensureString(value: any): string {
+  if (value === null || value === undefined) return '';
+  return String(value);
 }
 
+async function updateOshProgramDetails(data: OshProgramData) {
+  try {
+    // Get authentication token
+    const token = getCookie("token");
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    // Create a clean copy of the data
+    const cleanData = { ...data };
+    
+    // Preprocess data
+    applyFieldMappings(cleanData);
+    formatDateFields(cleanData);
+    handleBooleanFields(cleanData);
+
+    // Create and populate FormData
+    const formData = new FormData();
+    console.log('Preparing form data for submission:', cleanData);
+    populateFormData(formData, cleanData);
+
+    // Send request and handle response
+    const response = await fetchOshProgram(token as string, formData);
+    return processResponse(response);
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+// Helper function to apply field mappings (fix case sensitivity issues)
+function applyFieldMappings(data: OshProgramData) {
+  for (const [capitalizedKey, lowercaseKey] of Object.entries(OSH_PROGRAM_FIELD_MAPPINGS)) {
+    if (capitalizedKey in data && !(lowercaseKey in data)) {
+      data[lowercaseKey] = data[capitalizedKey];
+      delete data[capitalizedKey];
+    }
+  }
+}
+
+// Helper function to format date fields
+function formatDateFields(data: OshProgramData) {
+  for (const field of OSH_PROGRAM_DATE_FIELDS) {
+    if (data[field]) {
+      const dateObj = new Date(data[field]);
+      if (!isNaN(dateObj.getTime())) {
+        data[field] = dateObj.toISOString().split('T')[0];
+      }
+    }
+  }
+}
+
+// Helper function to handle boolean fields
+function handleBooleanFields(data: OshProgramData) {
+  for (const field of OSH_PROGRAM_ALL_BOOLEAN_FIELDS) {
+    // Skip if field is not in data
+    if (!(field in data)) continue;
+    
+    const value = data[field];
+    
+    // Handle null or empty string values
+    if (value === null || value === '') {
+      data[field] = null;
+      continue;
+    }
+    
+    // Handle string values
+    if (typeof value === 'string') {
+      const strValue = value.toLowerCase();
+      // Use type assertion to avoid type error
+      if (strValue === 'true') {
+        data[field] = true as any;
+      } else if (strValue === 'false') {
+        data[field] = false as any;
+      } else {
+        data[field] = null;
+      }
+      continue;
+    }
+    
+    // If it's already a boolean, keep it
+    if (typeof value === 'boolean') {
+      continue;
+    }
+    
+    // For any other type, set to null
+    data[field] = null;
+  }
+}
+
+// Helper function to populate FormData with all field types
+function populateFormData(formData: FormData, data: OshProgramData) {
+  for (const key in data) {
+    // Handle file objects directly
+    if (isFile(data[key])) {
+      addFileToFormData(formData, key, data[key], data);
+      continue;
+    }
+    
+    // Handle FileList objects (from file inputs)
+    if (data[key] && data[key] instanceof FileList && data[key].length > 0) {
+      console.log(`Processing FileList for ${key}:`, data[key]);
+      addFileToFormData(formData, key, data[key][0], data);
+      continue;
+    }
+    
+    // Handle file fields (strings that might be file paths)
+    if (OSH_PROGRAM_FILE_FIELDS.includes(key)) {
+      handleFileField(formData, key, data[key], data);
+      continue;
+    }
+    
+    // Skip previous file fields - they're handled with their corresponding file
+    if (key.startsWith('previous_')) continue;
+    
+    // Handle JSON fields
+    const jsonFields = ['drills', 'emergency_and_disaster_preparedness', 'health_personnel', 
+                        'health_training', 'ppe', 'reported_incidents', 'risk_assessment', 
+                        'safety_meeting', 'safety_officer', 'business_description'];
+    if (jsonFields.includes(key) && data[key]) {
+      addJsonToFormData(formData, key, data[key]);
+      continue;
+    }
+    
+    // Handle array fields
+    const arrayFields = ['routine_medical_surveillance', 'schedule_of_annual_medical_examination', 
+                         'special_medical_surveillance'];
+    if (arrayFields.includes(key) && data[key]) {
+      addArrayToFormData(formData, key, data[key]);
+      continue;
+    }
+    
+    // Handle boolean fields
+    if (OSH_PROGRAM_ALL_BOOLEAN_FIELDS.includes(key)) {
+      formData.append(key, data[key] === null ? 'null' : String(data[key]));
+      continue;
+    }
+    
+    // Add other primitive values
+    if (data[key] !== undefined && data[key] !== null) {
+      formData.append(key, String(data[key]));
+    }
+  }
+}
+
+// Helper function for adding a file to FormData
+function addFileToFormData(formData: FormData, key: string, file: File, data: OshProgramData) {
+  console.log(`Adding file for ${key}:`, file);
+  formData.append(key, file);
+  
+  // Add previous file information if available
+  const previousKey = `previous_${key}`;
+  if (data[previousKey]) {
+    formData.append(previousKey, String(data[previousKey]));
+  }
+}
+
+// Helper function for handling file fields
+function handleFileField(formData: FormData, key: string, value: any, data: OshProgramData) {
+  console.log(`Processing file field: ${key}`, value);
+  
+  // Skip if no value or null/undefined strings
+  if (!value || value === 'null' || value === 'undefined') return;
+  
+  // Handle File objects
+  if (isFile(value)) {
+    addFileToFormData(formData, key, value, data);
+    return;
+  }
+  
+  // Handle base64 data URLs
+  if (typeof value === 'string' && value.startsWith('data:')) {
+    handleBase64File(formData, key, value, data);
+    return;
+  }
+  
+  // Handle string file paths
+  if (typeof value === 'string' && value.trim() !== '') {
+    console.log(`Adding string file path for ${key}:`, value);
+    formData.append(key, value);
+  }
+}
+
+// Helper function for handling base64 encoded files
+async function handleBase64File(formData: FormData, key: string, value: string, data: OshProgramData) {
+  console.log(`Processing base64 data for ${key}`);
+  try {
+    const response = await fetch(value);
+    const blob = await response.blob();
+    formData.append(key, blob, `${key}.png`);
+    
+    // Add previous file information
+    const previousKey = `previous_${key}`;
+    if (data[previousKey]) {
+      formData.append(previousKey, String(data[previousKey]));
+    }
+  } catch (error) {
+    console.error(`Error processing base64 data for ${key}:`, error);
+    formData.append(key, value);
+  }
+}
+
+// Helper function for adding JSON data to FormData
+function addJsonToFormData(formData: FormData, key: string, value: any) {
+  if (typeof value === 'object') {
+    formData.append(key, JSON.stringify(value));
+  } else if (typeof value === 'string') {
+    try {
+      const jsonValue = JSON.parse(value);
+      formData.append(key, JSON.stringify(jsonValue));
+    } catch (e) {
+      formData.append(key, JSON.stringify({}));
+    }
+  } else {
+    formData.append(key, JSON.stringify({}));
+  }
+}
+
+// Helper function for adding array data to FormData
+function addArrayToFormData(formData: FormData, key: string, value: any) {
+  let fieldValue = value;
+  try {
+    // Parse string to JSON if needed
+    if (typeof fieldValue === 'string') {
+      fieldValue = JSON.parse(fieldValue);
+    }
+    
+    // Ensure it's an array
+    if (!Array.isArray(fieldValue)) {
+      fieldValue = [fieldValue];
+    }
+    
+    // Convert to JSON string
+    formData.append(key, JSON.stringify(fieldValue));
+  } catch (e) {
+    // Fallback for parsing errors
+    const arrayValue = typeof fieldValue === 'string' 
+      ? fieldValue.split(',').map(item => item.trim())
+      : [fieldValue];
+    formData.append(key, JSON.stringify(arrayValue));
+  }
+}
+
+// Helper function to send the API request
+async function fetchOshProgram(token: string, formData: FormData) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/osh-programs/`,
+    {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Token ${token}`
+      },
+      body: formData,
+    }
+  );
+  
+  console.log('Server response status:', response.status);
+  return response;
+}
+
+// Helper function to process the API response
+async function processResponse(response: Response) {
+  if (response.status === 401) {
+    throw new Error("Authentication failed. Please log in again.");
+  }
+
+  if (!response.ok) {
+    return handleErrorResponse(response);
+  }
+
+  try {
+    const data = await response.json();
+    console.log('Server success response:', data);
+    return data;
+  } catch (e) {
+    // If we can't parse but status was ok, still consider success
+    console.log('Response received but not parsed as JSON');
+    return { message: "OSH Program updated successfully" };
+  }
+}
+
+// Helper function to handle error responses
+async function handleErrorResponse(response: Response) {
+  try {
+    const errorData = await response.json();
+    console.error('Server error response:', errorData);
+    throw new Error(
+      errorData.message || 
+      errorData.error || 
+      errorData.detail || 
+      'An error occurred while updating OSH Program'
+    );
+  } catch (e) {
+    console.error('Error parsing server error response:', e);
+    throw new Error(response.statusText || 'An error occurred while updating OSH Program');
+  }
+}
+
+// Hook for using the mutation
 function useUpdateOshProgramDetails() {
-    return useMutation({
-        mutationFn: updateOshProgramDetails
-    });
+  return useMutation({
+    mutationFn: updateOshProgramDetails
+  });
 }
 
 export default useUpdateOshProgramDetails;
