@@ -22,6 +22,7 @@ import IntroduceModal from './modals/IntroduceModal';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
+import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
@@ -40,6 +41,7 @@ const Content = () => {
   } = useGetApplicantOrient(Number(params.position), itemsFilter);
   const { mutate, isLoading } = useUpdateApplicantOrient();
   const { mutate: enrollToYP } = useEnrollEmployeeToYP();
+  const { mutate: syncEmployees } = useSyncEmployees();
   const [isSendContractModalOpen, setIsSendContractModalOpen] = useState(false);
   const [isOrientOptionModalOpen, setIsOrientOptionModalOpen] = useState(false);
   const [isSuccessSendContractModalOpen, setIsSuccessSendContractModalOpen] = useState(false);
@@ -122,35 +124,45 @@ const Content = () => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
-    // First enroll in payroll system
-    enrollToYP({
-      id,
-      data: {
-        first_name: orientItemCopy[itemIndex].firstname,
-        last_name: orientItemCopy[itemIndex].lastname,
-        email: orientItemCopy[itemIndex].email,
-      }
-    }, {
+    // First sync employees
+    syncEmployees(undefined, {
       onSuccess: () => {
-        // Then update the orientation status
-        orientItemCopy[itemIndex].id = id;
-        orientItemCopy[itemIndex].actionType = 'update_status';
-        orientItemCopy[itemIndex].emailType = 'enrolled';
-        orientItemCopy[itemIndex].isEnrolled = true;
-        
-        mutate(orientItemCopy[itemIndex], {
-          onSuccess: (data: any) => {
-            setOrientItems([...orientItemCopy]);
-            setIsEnrollModalOpen(true);
-            toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
-              duration: 5000,
+        // Then enroll in payroll system
+        enrollToYP({
+          id,
+          data: {
+            first_name: orientItemCopy[itemIndex].firstname,
+            last_name: orientItemCopy[itemIndex].lastname,
+            email: orientItemCopy[itemIndex].email,
+          }
+        }, {
+          onSuccess: () => {
+            // Then update the orientation status
+            orientItemCopy[itemIndex].id = id;
+            orientItemCopy[itemIndex].actionType = 'update_status';
+            orientItemCopy[itemIndex].emailType = 'enrolled';
+            orientItemCopy[itemIndex].isEnrolled = true;
+            
+            mutate(orientItemCopy[itemIndex], {
+              onSuccess: (data: any) => {
+                setOrientItems([...orientItemCopy]);
+                setIsEnrollModalOpen(true);
+                toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
+                  duration: 5000,
+                });
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, {
+                  duration: 7000,
+                });
+              },
             });
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
               duration: 7000,
             });
-          },
+          }
         });
       },
       onError: (err: any) => {
