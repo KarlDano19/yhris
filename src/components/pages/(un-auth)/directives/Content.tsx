@@ -1,56 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { useGetDirectiveById } from './hooks/useGetDirectiveById';
-import { useMarkDirectiveAsRead } from './hooks/useMarkDirectiveAsRead';
-import useCheckDirectiveReadStatus from './hooks/useCheckDirectiveReadStatus';
-import { getCookie } from 'cookies-next';
+import { useSendVerification } from './hooks/useSendVerification';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import EmailSelectionModal from './modals/EmailSelectionModal';
+import VerificationCodeModal from './modals/VerificationCodeModal';
+import useVerifyDirective from './hooks/useVerifyDirective';
 
-// Utility functions
-const getEmailFromUrl = (): string | null => {
-  if (typeof window !== 'undefined') {
-    const url = new URL(window.location.href);
-    const email = url.searchParams.get('email');
-    
-    if (email) {
-      localStorage.setItem('directive_reader_email', email);
-      return email;
-    }
-    
-    return localStorage.getItem('directive_reader_email');
-  }
-  return null;
-};
-
-const setEmailCookie = (email: string): void => {
-  if (typeof document !== 'undefined') {
-    document.cookie = `userEmail=${email}; path=/; max-age=${60 * 60 * 24 * 7}`;
-  }
-};
-
-interface ContentProps {
-  userEmail?: string;
-}
-
-const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
+const Content = () => {
   const params = useParams();
-  const searchParams = useSearchParams();
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(initialUserEmail || null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const directiveId = params.id as string;
-
-  // Get email from URL or localStorage on component mount
-  useEffect(() => {
-    const email = searchParams.get('email') || getEmailFromUrl();
-    if (email) {
-      setUserEmail(email);
-      setEmailCookie(email);
-    }
-  }, [searchParams, initialUserEmail]);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState('');
 
   // Fetch directive data using our custom hook
   const { 
@@ -59,55 +25,96 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
     error: directiveError 
   } = useGetDirectiveById(directiveId);
 
-  // Check if the directive has already been read by this user
-  const {
-    data: readStatus,
-    isLoading: isCheckingReadStatus
-  } = useCheckDirectiveReadStatus(directiveId, userEmail);
+  // Send verification code mutation
+  const { 
+    mutate: sendVerification,
+    isLoading: isSendingVerification 
+  } = useSendVerification(directiveId);
 
-  // Set confirmed state based on read status
-  useEffect(() => {
-    if (readStatus?.has_read) {
-      setIsConfirmed(true);
+  const { mutate: verifyDirective, isLoading: isVerifying } = useVerifyDirective();
+
+  // Get the list of recipient emails from directive data
+  const getRecipientEmails = (): string[] => {
+    if (!directive?.to) return [];
+    
+    // If to is already an array, return it
+    if (Array.isArray(directive.to)) {
+      return directive.to;
     }
-  }, [readStatus]);
-
-  // Mutation to mark directive as read using our custom hook
-  const { mutate: markAsRead, isLoading: isMarking } = useMarkDirectiveAsRead(directiveId);
-
-  const handleConfirm = () => {
-    if (userEmail) {
-      console.log('Marking directive as read with email:', userEmail);
-      console.log('Auth token:', getCookie('token'));
-      
-      markAsRead( 
-        { email: userEmail },
-        {
-          onSuccess: () => {
-            console.log('Successfully marked directive as read');
-            setIsConfirmed(true);
-            toast.custom(() => <CustomToast message="Successfully read & understood Memo/Policy." type='success' />, { duration: 5000 });
-            
-            // Redirect to homepage after a short delay to allow the toast to be visible
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 2000);
-          },
-          onError: (error) => {
-            console.error('Error marking directive as read:', error);
-            setErrorMessage(error.message);
-            toast.custom(() => <CustomToast message={error.message || "Error confirming read status"} type='error' />, { duration: 5000 });
-          }
-        }
-      );
-    } else {
-      toast.custom(() => <CustomToast message="Unable to identify your email. Please contact your administrator." type='error' />, { duration: 5000 });
+    
+    // If to is a string, try to parse it as JSON
+    try {
+      const parsed = JSON.parse(directive.to);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
     }
   };
 
-  const isLoading = isLoadingDirective || isCheckingReadStatus;
+  const handleConfirm = () => {
+    // const availableEmails = getRecipientEmails();
+    // if (availableEmails.length === 0) {
+    //   toast.custom(
+    //     () => <CustomToast message="No available emails found for this directive." type='warning' />,
+    //     { duration: 5000 }
+    //   );
+    //   return;
+    // }
+    setShowEmailModal(true);
+  };
 
-  if (isLoading) {
+  const handleEmailSelection = async (email: string) => {
+    setSelectedEmail(email);
+    setShowEmailModal(false);
+    
+    sendVerification(
+      { email },
+      {
+        onSuccess: () => {
+          toast.custom(() => <CustomToast message="Verification code sent to your email." type='success' />, { duration: 5000 });
+          setShowVerificationModal(true);
+        },
+        onError: (error) => {
+          toast.custom(() => <CustomToast message={error.message || "Failed to send verification code."} type='error' />, { duration: 5000 });
+          // Reopen email modal if there was an error
+          setShowEmailModal(true);
+        }
+      }
+    );
+  };
+
+  const handleVerificationSubmit = async (code: string) => {
+    verifyDirective(
+      { 
+        directiveId: Number(directiveId), 
+        email: selectedEmail, 
+        code 
+      },
+      {
+        onSuccess: () => {
+          setShowVerificationModal(false);
+          setIsConfirmed(true);
+          toast.custom(
+            () => <CustomToast message="Successfully verified and confirmed!" type='success' />,
+            { duration: 5000 }
+          );
+          
+          // Redirect to homepage after a short delay
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
+        },
+        onError: () => {
+          toast.custom(
+            () => <CustomToast message="Invalid verification code." type='error' />,
+            { duration: 5000 }
+          );
+        }
+      }
+    );
+  };
+
+  if (isLoadingDirective) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -205,10 +212,8 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
             )}
           </div>
         );
-      } 
-      // For backward compatibility with existing policies
-      else {
-        // Use type assertion for legacy data
+      } else {
+        // For backward compatibility with existing policies
         const directiveAny = directive as any;
         
         // Check for any non-standard fields that might be custom policy fields
@@ -286,11 +291,12 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
   };
 
   return (
-    <div className="flex justify-center items-center p-4" style={{
+    <div className="min-h-screen flex justify-center items-center p-4" style={{
       backgroundImage: "url('/assets/memo-policy_background.png')",
       backgroundSize: "cover",
       backgroundPosition: "center",
-      minHeight: "calc(100vh - 64px)" // Adjust based on header height
+      backgroundRepeat: "no-repeat",
+      backgroundAttachment: "fixed"
     }}>
       <div className="relative w-full max-w-4xl mx-auto my-8">
         <div className="bg-white rounded-lg overflow-hidden border border-[#ACB9CB]">
@@ -324,36 +330,37 @@ const Content = ({ userEmail: initialUserEmail }: ContentProps) => {
                 </div>
               )}
             </div>
-            
+
             <div className="mt-20">
-              {readStatus?.has_read ? (
-                <div className="py-6 px-6 rounded-md bg-green-500 text-white font-bold text-center">
-                  You have already read this {directiveType === 'memo' ? 'memo' : 'policy'} on {readStatus.read_at ? new Date(readStatus.read_at).toLocaleString() : 'a previous date'}
-                </div>
-              ) : (
-                <button
-                  onClick={handleConfirm}
-                  disabled={isConfirmed || !userEmail || isMarking}
-                  className={`py-4 px-6 rounded-md text-white font-medium transition-all duration-300 w-full ${
-                    isConfirmed 
-                      ? 'bg-green-500 cursor-not-allowed' 
-                      : !userEmail
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : isMarking
-                      ? 'bg-blue-400 cursor-not-allowed'
-                      : 'bg-[#355FD0]'
-                  }`}
-                >
-                  {isConfirmed 
-                    ? 'Thank you for confirming!' 
-                    : !userEmail
-                    ? 'Unable to identify user'
-                    : isMarking
-                    ? 'Confirming...'
-                    : 'I have read & understood the Memo/Policy'}
-                </button>
-              )}
+              <button
+                onClick={handleConfirm}
+                disabled={isConfirmed}
+                className={`py-4 px-6 rounded-md text-white font-medium transition-all duration-300 w-full ${
+                  isConfirmed 
+                    ? 'bg-green-500 cursor-not-allowed'
+                    : 'bg-[#355FD0] hover:bg-[#2347B2]'
+                }`}
+              >
+                {isConfirmed 
+                  ? 'Thank you for confirming!'
+                  : 'I have read & understood the Memo/Policy'}
+              </button>
             </div>
+
+            {/* Add the modals */}
+            <EmailSelectionModal
+              isOpen={showEmailModal}
+              onClose={() => setShowEmailModal(false)}
+              onSubmit={handleEmailSelection}
+              emails={getRecipientEmails()}
+            />
+
+            <VerificationCodeModal
+              isOpen={showVerificationModal}
+              onClose={() => setShowVerificationModal(false)}
+              onSubmit={handleVerificationSubmit}
+              email={selectedEmail}
+            />
           </div>
         </div>
       </div>

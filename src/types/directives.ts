@@ -30,31 +30,39 @@ export interface PolicyField {
   inputName: string
 }
 
+export interface SendVerificationRequest {
+  email: string;
+}
+
+export interface SendVerificationResponse {
+  message: string;
+}
+
+export interface SendVerificationError {
+  message: string;
+  status?: number;
+}
+
+export interface VerifyDirectiveParams {
+  directiveId: number;
+  email: string;
+  code: string;
+}
+
 export interface ReadData {
   id: number;
   email: string;
-  name?: string;
+  is_verified: boolean;
+  verified_at: string | null;
   read_at: string;
-  user?: {
-    id: number;
-    email: string;
-    name?: string;
-  };
-}
-
-export interface CheckReadStatusResponse {
-  has_read: boolean;
-  read_at?: string;
 }
 
 export interface ReadStatusData {
-  read_count: number;
-  unread_count: number;
-  reads: ReadData[];
-  unread_emails: string[];
-}
-
-export interface DirectiveReadRequest {
-  email: string;
+  responded_count: number;
+  unresponded_count: number;
+  responded_emails: string[];
+  unresponded_emails: string[];
+  verified_reads: ReadData[];
+  is_fully_responded: boolean;
 }
 

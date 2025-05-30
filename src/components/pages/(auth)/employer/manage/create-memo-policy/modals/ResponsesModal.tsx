@@ -47,14 +47,14 @@ export default function EmployeeResponsesModal({
   // Pagination for responded employees
   const indexOfLastResponded = currentPage * itemsPerPage;
   const indexOfFirstResponded = indexOfLastResponded - itemsPerPage;
-  const currentResponded = readStatus?.reads?.slice(indexOfFirstResponded, indexOfLastResponded) || [];
-  const totalRespondedPages = Math.ceil((readStatus?.reads?.length || 0) / itemsPerPage);
+  const currentResponded = readStatus?.verified_reads?.slice(indexOfFirstResponded, indexOfLastResponded) || [];
+  const totalRespondedPages = Math.ceil((readStatus?.verified_reads?.length || 0) / itemsPerPage);
 
   // Pagination for no response employees
   const indexOfLastNoResponse = noResponsePage * itemsPerPage;
   const indexOfFirstNoResponse = indexOfLastNoResponse - itemsPerPage;
-  const currentNoResponse = readStatus?.unread_emails?.slice(indexOfFirstNoResponse, indexOfLastNoResponse) || [];
-  const totalNoResponsePages = Math.ceil((readStatus?.unread_emails?.length || 0) / itemsPerPage);
+  const currentNoResponse = readStatus?.unresponded_emails?.slice(indexOfFirstNoResponse, indexOfLastNoResponse) || [];
+  const totalNoResponsePages = Math.ceil((readStatus?.unresponded_emails?.length || 0) / itemsPerPage);
 
   // Handle page change for responded employees
   const handleRespondedPageChange = (selectedItem: { selected: number }) => {
@@ -116,20 +116,16 @@ export default function EmployeeResponsesModal({
                           <table className='min-w-full'>
                             <thead>
                               <tr className="border-b border-gray-200">
-                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-1/2 pl-4'>Name</th>
-                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-1/2'>Email</th>
+                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-7/12 pl-4'>Email</th>
+                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-5/12'>Read At</th>
                               </tr>
                             </thead>
                             <tbody>
                               {currentResponded.length > 0 ? (
-                                currentResponded.map((employee: ReadData) => (
-                                  <tr key={employee.id} className="border-b border-gray-200">
-                                    <td className='py-4 text-sm text-gray-900 pl-4'>
-                                      {employee.user?.name || employee.name || 'N/A'}
-                                    </td>
-                                    <td className='py-4 text-sm text-gray-900'>
-                                      {employee.user?.email || employee.email}
-                                    </td>
+                                currentResponded.map((read: ReadData) => (
+                                  <tr key={read.id} className="border-b border-gray-200">
+                                    <td className='py-4 text-sm text-gray-900 pl-4'>{read.email}</td>
+                                    <td className='py-4 text-sm text-gray-900'>{read.read_at}</td>
                                   </tr>
                                 ))
                               ) : (
@@ -143,7 +139,7 @@ export default function EmployeeResponsesModal({
                           </table>
                         </div>
                         <div className='flex items-center justify-between mt-3'>
-                          <p className='text-sm text-gray-500'>Total Record/s: {readStatus?.read_count || 0}</p>
+                          <p className='text-sm text-gray-500'>Total Record/s: {readStatus?.responded_count || 0}</p>
                           <div className='flex items-center'>
                             <ReactPaginate
                               breakLabel='...'
@@ -171,22 +167,26 @@ export default function EmployeeResponsesModal({
                           <table className='min-w-full'>
                             <thead>
                               <tr className="border-b border-gray-200">
-                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-1/2 pl-4'>Name</th>
-                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-1/2'>Email</th>
+                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-7/12 pl-4'>Email</th>
+                                <th className='py-3 text-left text-sm font-medium text-gray-500 w-5/12'>Status</th>
                               </tr>
                             </thead>
                             <tbody>
                               {currentNoResponse.length > 0 ? (
                                 currentNoResponse.map((email: string, index: number) => (
                                   <tr key={index} className="border-b border-gray-200">
-                                    <td className='py-4 text-sm text-gray-900 pl-4'>N/A</td>
-                                    <td className='py-4 text-sm text-gray-900'>{email}</td>
+                                    <td className='py-4 text-sm text-gray-900 pl-4'>{email}</td>
+                                    <td className='py-4 text-sm text-gray-900'>
+                                      <span className='px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                                        Pending
+                                      </span>
+                                    </td>
                                   </tr>
                                 ))
                               ) : (
                                 <tr>
                                   <td colSpan={2} className='py-4 text-sm text-gray-500 text-center'>
-                                    No data available
+                                    No pending responses
                                   </td>
                                 </tr>
                               )}
@@ -194,7 +194,7 @@ export default function EmployeeResponsesModal({
                           </table>
                         </div>
                         <div className='flex items-center justify-between mt-3'>
-                          <p className='text-sm text-gray-500'>Total Record/s: {readStatus?.unread_count || 0}</p>
+                          <p className='text-sm text-gray-500'>Total Record/s: {readStatus?.unresponded_count || 0}</p>
                           <div className='flex items-center'>
                             <ReactPaginate
                               breakLabel='...'
