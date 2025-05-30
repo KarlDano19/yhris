@@ -173,6 +173,17 @@ function Content() {
                         className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                       />
                     </div>
+                    <div className='px-4 py-2'>
+                      <label htmlFor='sequence' className='block text-sm font-medium leading-6 text-gray-900'>
+                        Stage Order
+                      </label>
+                      <input
+                        {...register('sequence')}
+                        id='sequence'
+                        type='number'
+                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                      />
+                    </div>
                     <label htmlFor='approvers' className='block text-sm font-medium leading-6 text-gray-900 px-4 py-2'>
                       Approvers
                     </label>

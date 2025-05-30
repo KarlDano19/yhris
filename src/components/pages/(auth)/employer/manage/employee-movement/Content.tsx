@@ -55,7 +55,7 @@ const Content = () => {
   useEffect(() => {
     if (personelMovementListData) {
       personelMovementListData.records.map((item: any) => {
-        item.date = Intl.DateTimeFormat('en-US').format(new Date(item.date));
+        item.created_at = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
         return item;
       });
       setPersonelMovementList(personelMovementListData.records);
@@ -112,7 +112,7 @@ const Content = () => {
       return personelMovementList.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.id}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.reason}</td>

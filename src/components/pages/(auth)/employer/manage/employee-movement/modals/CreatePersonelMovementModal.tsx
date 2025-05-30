@@ -9,7 +9,7 @@ import CustomToast from "@/components/CustomToast";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import EmployeeProfile from "./tabs/EmployeeProfile";
 import Reccomendation from "./tabs/Reccomendation";
-import useAddPersonelMovement from "../hooks/useAddPersonelMovement";
+import useAddPersonnelMovement from "../hooks/useAddPersonnelMovement";
 
 function CreatePersonelMovementModal({
   refetch,
@@ -24,7 +24,7 @@ function CreatePersonelMovementModal({
   const { register, handleSubmit, reset, control, setValue, watch } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
-  const { mutate: addPersonelMovement, isLoading: isLoadingAddPersonelMovement } = useAddPersonelMovement();
+  const { mutate: addPersonnelMovement, isLoading: isLoadingAddPersonnelMovement } = useAddPersonnelMovement();
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -50,7 +50,7 @@ function CreatePersonelMovementModal({
       },
     };
     console.log(data);
-    addPersonelMovement(data, callbackReq);
+    addPersonnelMovement(data, callbackReq);
   });
 
   return (
@@ -102,7 +102,7 @@ function CreatePersonelMovementModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
-                    isLoading={isLoadingAddPersonelMovement}
+                    isLoading={isLoadingAddPersonnelMovement}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -111,7 +111,7 @@ function CreatePersonelMovementModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
-                    isLoading={isLoadingAddPersonelMovement}
+                    isLoading={isLoadingAddPersonnelMovement}
                     hasHrRecommendation={false}
                   />
                 )}
