@@ -41,6 +41,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
+    console.log('Form submitted with data:', data);
+    
     // Validate required fields for current tab
     const requiredFields = requiredFieldsByTab[selectedTab] || [];
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
@@ -78,6 +80,28 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         processedData[field] = data[field];
       }
     });
+
+    // Special handling for file attachments in Tab 4
+    if (selectedTab === 4) {
+      // Explicitly include file attachments for safety officer and health personnel
+      if (data.safety_officer_attachment !== undefined) {
+        processedData.safety_officer_attachment = data.safety_officer_attachment;
+        console.log('Including safety_officer_attachment:', data.safety_officer_attachment);
+      }
+      
+      if (data.health_personnel_attachment !== undefined) {
+        processedData.health_personnel_attachment = data.health_personnel_attachment;
+        console.log('Including health_personnel_attachment:', data.health_personnel_attachment);
+      }
+    }
+
+    console.log('Processed data for submission:', processedData);
+    
+    // For Tab 4, log file attachments
+    if (selectedTab === 4) {
+      console.log('Safety officer attachment:', processedData.safety_officer_attachment);
+      console.log('Health personnel attachment:', processedData.health_personnel_attachment);
+    }
 
     // Special handling for boolean fields in tabs 4 and 5
     if (selectedTab === 4) {
@@ -280,9 +304,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
         // OSH Personnel and Facilities - Safety Officer
         setValue("safety_officer", oshProgramDetails.safety_officer);
-
+        setValue("safety_officer_attachment", oshProgramDetails.safety_officer_attachment);
+        
         // Emergency Occupational Health Personnel and Facilities
         setValue("health_personnel", oshProgramDetails.health_personnel);
+        setValue("health_personnel_attachment", oshProgramDetails.health_personnel_attachment);
 
         // Safety and Health Promotion, training and education
         setValue("health_training", oshProgramDetails.health_training);
@@ -388,6 +414,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const submitCurrentTab = () => {
     // First clear any existing validation messages
     setValidationMessage("");
+    
+    // Debug the form values
+    console.log('------ DEBUG FORM VALUES ------');
+    console.log('Current tab:', selectedTab);
+    console.log('safety_officer_attachment value:', watch("safety_officer_attachment"));
+    console.log('health_personnel_attachment value:', watch("health_personnel_attachment"));
+    console.log('All form values:', watch());
+    console.log('------ END DEBUG ------');
     
     // Trigger form validation and submission just for the current tab
     onSubmit();

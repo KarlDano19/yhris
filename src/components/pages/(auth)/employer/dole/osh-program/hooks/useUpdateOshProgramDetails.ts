@@ -76,10 +76,13 @@ async function updateOshProgramDetails(data: OshProgramData) {
         // Use FormData for all requests since we have file uploads in the forms
         const formData = new FormData();
         
+        console.log('Preparing form data for submission:', cleanData);
+        
         // Add all fields to FormData
         for (const key in cleanData) {
             if (isFile(cleanData[key])) {
                 // Add files directly
+                console.log(`Adding file directly: ${key}`, cleanData[key]);
                 formData.append(key, cleanData[key]);
                 
                 // Add previous file information if available
@@ -87,10 +90,25 @@ async function updateOshProgramDetails(data: OshProgramData) {
                 if (cleanData[previousKey]) {
                     formData.append(previousKey, cleanData[previousKey]);
                 }
+            } else if (cleanData[key] && cleanData[key] instanceof FileList) {
+                // Handle FileList objects (from file inputs)
+                console.log(`Processing FileList for ${key}:`, cleanData[key]);
+                if (cleanData[key].length > 0) {
+                    console.log(`Adding file from FileList: ${key}`, cleanData[key][0]);
+                    formData.append(key, cleanData[key][0]);
+                    
+                    // Add previous file information if available
+                    const previousKey = `previous_${key}`;
+                    if (cleanData[previousKey]) {
+                        formData.append(previousKey, cleanData[previousKey]);
+                    }
+                }
             } else if (OSH_PROGRAM_FILE_FIELDS.includes(key)) {
                 // Only append file fields if they exist and are not null/undefined
+                console.log(`Processing file field: ${key}`, cleanData[key]);
                 if (cleanData[key] && cleanData[key] !== 'null' && cleanData[key] !== 'undefined') {
                     if (isFile(cleanData[key])) {
+                        console.log(`Adding file for ${key}:`, cleanData[key]);
                         formData.append(key, cleanData[key]);
                         
                         // Add previous file information
@@ -100,6 +118,7 @@ async function updateOshProgramDetails(data: OshProgramData) {
                         }
                     } else if (typeof cleanData[key] === 'string' && cleanData[key].startsWith('data:')) {
                         // Handle base64 data URL
+                        console.log(`Processing base64 data for ${key}`);
                         try {
                             const response = await fetch(cleanData[key]);
                             const blob = await response.blob();
@@ -111,11 +130,13 @@ async function updateOshProgramDetails(data: OshProgramData) {
                                 formData.append(previousKey, cleanData[previousKey]);
                             }
                         } catch (error) {
+                            console.error(`Error processing base64 data for ${key}:`, error);
                             formData.append(key, cleanData[key]);
                         }
                     } else if (typeof cleanData[key] === 'string') {
                         // If it's a regular string (like a file path), only append if it's not empty
                         if (cleanData[key].trim() !== '') {
+                            console.log(`Adding string file path for ${key}:`, cleanData[key]);
                             formData.append(key, cleanData[key]);
                         }
                     }
@@ -179,6 +200,8 @@ async function updateOshProgramDetails(data: OshProgramData) {
             }
         );
 
+        console.log('Server response status:', response.status);
+
         if (response.status === 401) {
             throw new Error("Authentication failed. Please log in again.");
         }
@@ -187,6 +210,7 @@ async function updateOshProgramDetails(data: OshProgramData) {
             let errorData;
             try {
                 errorData = await response.json();
+                console.error('Server error response:', errorData);
                 throw new Error(
                     errorData.message || 
                     errorData.error || 
@@ -194,16 +218,19 @@ async function updateOshProgramDetails(data: OshProgramData) {
                     'An error occurred while updating OSH Program'
                 );
             } catch (e) {
+                console.error('Error parsing server error response:', e);
                 throw new Error(response.statusText || 'An error occurred while updating OSH Program');
             }
         }
 
         try {
             const data = await response.json();
+            console.log('Server success response:', data);
             return data;
         } catch (e) {
             // If we can't parse the response but the status was ok,
             // we still consider it a success
+            console.log('Response received but not parsed as JSON');
             return { message: "OSH Program updated successfully" };
         }
     } catch (error: any) {

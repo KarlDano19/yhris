@@ -69,7 +69,9 @@ export type T_OshProgram = {
   
     // OSH Personnel
     safety_officer: any;
+    safety_officer_attachment: File | string;
     health_personnel: any;
+    health_personnel_attachment: File | string;
     health_training: any;
     risk_assessment: any;
     safety_meeting: any;
@@ -127,7 +129,9 @@ export type T_OshProgram = {
 // File fields that need special handling for uploads and display
 export const OSH_PROGRAM_FILE_FIELDS = [
   'signature',
-  'safety_signage'
+  'safety_signage',
+  'safety_officer_attachment',
+  'health_personnel_attachment'
 ];
 
 // Field mappings for case sensitivity issues
@@ -253,8 +257,8 @@ export const OSH_PROGRAM_TAB_FIELDS: OSH_PROGRAM_TAB_FIELDS = {
       'ex_officio_members', 'ex_officio_members_1', 'ex_officio_members_2', 'members',
       'members_2', 'chairperson_joint_coordinating', 'secretary_joint_coordinating',
       'ex_officio_members_3', 'ex_officio_members_4', 'duties_and_responsibilities',
-      'safety_officer', 'health_personnel', 'health_training', 'risk_assessment',
-      'safety_meeting', 'reported_incidents'],
+      'safety_officer', 'safety_officer_attachment', 'health_personnel', 'health_personnel_attachment', 
+      'health_training', 'risk_assessment', 'safety_meeting', 'reported_incidents'],
   5: ['ppe', 'ppe_description', 'safety_signage', 'adequate_supply_of_drinking_water',
       'adequate_supply_of_drinking_water_remarks', 'adequate_sanitary_and_washing_facilities',
       'adequate_sanitary_and_washing_facilities_remarks', 'suitable_living_accommodation',

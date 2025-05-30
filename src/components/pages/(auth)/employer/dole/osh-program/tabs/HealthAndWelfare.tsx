@@ -892,16 +892,24 @@ export default function HealthAndWelfare({
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                         <input
-                          id={`safety_officer.${index}.certificate`}
-                          {...register(`safety_officer.${index}.certificate`)}
+                          id={`safety_officer_attachment`}
+                          {...register(`safety_officer_attachment`)}
                           type="file"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              console.log('Safety officer attachment selected:', file);
+                              setValue('safety_officer_attachment', file);
+                              console.log('Form value after setting safety_officer_attachment:', watch('safety_officer_attachment'));
+                            }
+                          }}
                         />
                         <label
-                          htmlFor={`safety_officer.${index}.certificate`}
+                          htmlFor={`safety_officer_attachment`}
                           className="cursor-pointer items-center"
                         >
-                          <ClipIcon hasFile={!!watch(`safety_officer.${index}.certificate`)?.[0]} />
+                          <ClipIcon hasFile={!!watch(`safety_officer_attachment`)} />
                         </label>
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
@@ -1055,16 +1063,24 @@ export default function HealthAndWelfare({
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                         <input
-                          id={`health_personnel.${index}.certificate`}
-                          {...register(`health_personnel.${index}.certificate`)}
+                          id={`health_personnel_attachment`}
+                          {...register(`health_personnel_attachment`)}
                           type="file"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              console.log('Health personnel attachment selected:', file);
+                              setValue('health_personnel_attachment', file);
+                              console.log('Form value after setting health_personnel_attachment:', watch('health_personnel_attachment'));
+                            }
+                          }}
                         />
                         <label
-                          htmlFor={`health_personnel.${index}.certificate`}
+                          htmlFor={`health_personnel_attachment`}
                           className="cursor-pointer items-center"
                         >
-                          <ClipIcon hasFile={!!watch(`health_personnel.${index}.certificate`)?.[0]} />
+                          <ClipIcon hasFile={!!watch(`health_personnel_attachment`)} />
                         </label>
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
