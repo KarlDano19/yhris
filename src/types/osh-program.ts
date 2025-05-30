@@ -148,6 +148,17 @@ export const OSH_PROGRAM_FILE_FIELDS = [
   'other_workers_welfare_facilities_attachment'
 ];
 
+// Facility attachment fields
+export const OSH_PROGRAM_FACILITY_ATTACHMENT_FIELDS = [
+  'adequate_supply_of_drinking_water_attachment',
+  'adequate_sanitary_and_washing_facilities_attachment',
+  'suitable_living_accommodation_attachment',
+  'separate_sanitary_washing_and_sleeping_facilities_attachment',
+  'lactation_station_attachment',
+  'ramps_railings_and_like_attachment',
+  'other_workers_welfare_facilities_attachment'
+];
+
 // Field mappings for case sensitivity issues
 export const OSH_PROGRAM_FIELD_MAPPINGS: Record<string, string> = {
   'Company_name': 'company_name',

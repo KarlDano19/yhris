@@ -13,7 +13,8 @@ import {
   OSH_PROGRAM_REQUIRED_FIELDS_BY_TAB as requiredFieldsByTab,
   OSH_PROGRAM_ALL_BOOLEAN_FIELDS as allBooleanFields,
   OSH_PROGRAM_SAFETY_MEASURES_BOOLEAN_FIELDS as safetyMeasuresBooleanFields,
-  OSH_PROGRAM_JSON_FIELDS as jsonFields
+  OSH_PROGRAM_JSON_FIELDS as jsonFields,
+  OSH_PROGRAM_FACILITY_ATTACHMENT_FIELDS as facilityAttachmentFields
 } from "@/types/osh-program";
 
 import CustomToast from "@/components/CustomToast";
@@ -41,7 +42,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
-    
+    // Validate required fields
+    if (!validateRequiredFields(data)) return;
+
+    // Process form data
+    const processedData = processFormData(data);
+
+    // Submit data to server
+    submitDataToServer(processedData);
+  });
+
+  // Validate all required fields for the current tab
+  const validateRequiredFields = (data: ExtendedOshProgram): boolean => {
     // Validate required fields for current tab
     const requiredFields = requiredFieldsByTab[selectedTab] || [];
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
@@ -49,7 +61,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Special handling for signature in tab 2
     if (selectedTab === 2 && !data.signature) {
       setValidationMessage("Please provide a signature");
-      return;
+      return false;
     }
 
     // Remove safety_signage from required validation check
@@ -62,9 +74,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     if (missingFields.length > 0) {
       setValidationMessage(`Please fill out all required fields marked with * (Missing: ${missingFields.join(', ')})`);
-      return;
+      return false;
     }
 
+    return true;
+  };
+
+  // Process the form data for the current tab
+  const processFormData = (data: ExtendedOshProgram): ExtendedOshProgram => {
     // Get the fields for the current tab
     const currentTabFields = tabFields[selectedTab];
     
@@ -88,6 +105,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       }
     });
 
+    // Process file attachments based on tab
+    processAttachments(data, processedData);
+
+    // Process boolean fields based on tab
+    processBooleanFields(processedData);
+
+    // Handle JSON fields if they exist in the current tab
+    processJsonFields(processedData);
+
+    // Handle file fields
+    if (selectedTab === 2) {
+      processSignatureField(data, processedData);
+    }
+
+    return processedData;
+  };
+
+  // Process attachments based on the current tab
+  const processAttachments = (data: ExtendedOshProgram, processedData: ExtendedOshProgram): void => {
     // Special handling for file attachments in Tab 4
     if (selectedTab === 4) {
       // Explicitly include file attachments for safety officer and health personnel
@@ -103,23 +139,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Special handling for file attachments in Tab 5 (Safety Measures)
     if (selectedTab === 5) {
       // Include all the facility attachment fields
-      const facilityAttachmentFields = [
-        'adequate_supply_of_drinking_water_attachment',
-        'adequate_sanitary_and_washing_facilities_attachment',
-        'suitable_living_accommodation_attachment',
-        'separate_sanitary_washing_and_sleeping_facilities_attachment',
-        'lactation_station_attachment',
-        'ramps_railings_and_like_attachment',
-        'other_workers_welfare_facilities_attachment'
-      ];
-
       facilityAttachmentFields.forEach(field => {
         if (data[field] !== undefined) {
           processedData[field] = data[field];
         }
       });
     }
+  };
 
+  // Process boolean fields based on the current tab
+  const processBooleanFields = (processedData: ExtendedOshProgram): void => {
     // Special handling for boolean fields in tabs 4 and 5
     if (selectedTab === 4) {
       // Handle boolean fields for Health and Welfare tab
@@ -147,8 +176,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       });
     }
+  };
 
-    // Handle JSON fields if they exist in the current tab
+  // Process JSON fields
+  const processJsonFields = (processedData: ExtendedOshProgram): void => {
     jsonFields.forEach(field => {
       if (field in processedData) {
         if (typeof processedData[field] === 'object') {
@@ -162,79 +193,96 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       }
     });
+  };
 
-    // Special handling for file fields if they exist in the current tab
-    if (selectedTab === 2) {
-      const currentSignature = watch("signature");
-      const signatureSource = watch("signature_source");
-      
-      if (currentSignature instanceof File) {
-        // Keep the File object as is for FormData
-        processedData.signature = currentSignature;
-        processedData.signature_source = signatureSource;
-      } else if (typeof currentSignature === 'string') {
-        processedData.signature = currentSignature;
-        processedData.signature_source = signatureSource;
-      }
-    } else if (selectedTab === 5 && processedData.safety_signage instanceof File) {
+  // Process signature field for tab 2
+  const processSignatureField = (data: ExtendedOshProgram, processedData: ExtendedOshProgram): void => {
+    const currentSignature = watch("signature");
+    const signatureSource = watch("signature_source");
+    
+    if (currentSignature instanceof File) {
       // Keep the File object as is for FormData
+      processedData.signature = currentSignature;
+      processedData.signature_source = signatureSource;
+    } else if (typeof currentSignature === 'string') {
+      processedData.signature = currentSignature;
+      processedData.signature_source = signatureSource;
     }
+  };
 
+  // Submit the processed data to the server
+  const submitDataToServer = (processedData: ExtendedOshProgram): void => {
     setValidationMessage("");
     const callbackReq = {
       onSuccess: () => {
-        // Reset file upload states after successful save
-        if (selectedTab === 2) {
-          const currentSignature = watch("signature");
-          const signatureSource = watch("signature_source");
-          
-          if (currentSignature) {
-            if (typeof currentSignature === 'string') {
-              setValue("signature", currentSignature);
-              setValue("previous_signature", currentSignature);
-              setValue("signature_source", signatureSource);
-            } else if (currentSignature instanceof File) {
-              // If it's a File, we need to wait for the backend to process it
-              // The backend will return the URL in the next data fetch
-              setValue("signature", currentSignature);
-              setValue("signature_source", signatureSource);
-            }
-          }
-        } else if (selectedTab === 5) {
-          const currentSignage = watch("safety_signage");
-          if (currentSignage) {
-            if (typeof currentSignage === 'string') {
-              setValue("safety_signage", currentSignage);
-              setValue("previous_safety_signage", currentSignage);
-              setSafetySignageUrl(currentSignage);
-              setSafetySignageAttachmentExist(true);
-            } else if (currentSignage instanceof File) {
-              // If it's a File, we need to wait for the backend to process it
-              // The backend will return the URL in the next data fetch
-              setValue("safety_signage", currentSignage);
-              setSafetySignageAttachmentExist(true);
-              setSafetySignageUrl("");
-            }
-          } else {
-            setSafetySignageAttachmentExist(false);
-            setSafetySignageUrl("");
-          }
-        }
-        
-        // Refresh data from backend to ensure frontend state is in sync
-        refetch().then(() => {
-          toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
-        }).catch(() => {
-          // Still show success message even if refetch fails
-          toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
-        });
+        // Handle successful submission
+        handleSuccessfulSubmission();
       },
       onError: (error: any) => {
         toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
       }
-    }
+    };
     updateOshProgramDetails(processedData, callbackReq);
-  });
+  };
+
+  // Handle successful submission
+  const handleSuccessfulSubmission = (): void => {
+    // Reset file upload states after successful save
+    if (selectedTab === 2) {
+      handleSignatureReset();
+    } else if (selectedTab === 5) {
+      handleSafetySignageReset();
+    }
+    
+    // Refresh data from backend to ensure frontend state is in sync
+    refetch().then(() => {
+      toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+    }).catch(() => {
+      // Still show success message even if refetch fails
+      toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+    });
+  };
+
+  // Handle signature reset after submission
+  const handleSignatureReset = (): void => {
+    const currentSignature = watch("signature");
+    const signatureSource = watch("signature_source");
+    
+    if (currentSignature) {
+      if (typeof currentSignature === 'string') {
+        setValue("signature", currentSignature);
+        setValue("previous_signature", currentSignature);
+        setValue("signature_source", signatureSource);
+      } else if (currentSignature instanceof File) {
+        // If it's a File, we need to wait for the backend to process it
+        // The backend will return the URL in the next data fetch
+        setValue("signature", currentSignature);
+        setValue("signature_source", signatureSource);
+      }
+    }
+  };
+
+  // Handle safety signage reset after submission
+  const handleSafetySignageReset = (): void => {
+    const currentSignage = watch("safety_signage");
+    if (currentSignage) {
+      if (typeof currentSignage === 'string') {
+        setValue("safety_signage", currentSignage);
+        setValue("previous_safety_signage", currentSignage);
+        setSafetySignageUrl(currentSignage);
+        setSafetySignageAttachmentExist(true);
+      } else if (currentSignage instanceof File) {
+        // If it's a File, we need to wait for the backend to process it
+        // The backend will return the URL in the next data fetch
+        setValue("safety_signage", currentSignage);
+        setSafetySignageAttachmentExist(true);
+        setSafetySignageUrl("");
+      }
+    } else {
+      setSafetySignageAttachmentExist(false);
+      setSafetySignageUrl("");
+    }
+  };
 
   useEffect(() => {
     if (oshProgramDetails) {
@@ -276,16 +324,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       // Tab 4: Health and Welfare Program
         // Medical Surveillance Section
-        if (oshProgramDetails.routine_medical_surveillance) {
-          try {
-            const parsedValue = typeof oshProgramDetails.routine_medical_surveillance === 'string' 
-              ? JSON.parse(oshProgramDetails.routine_medical_surveillance)
-              : oshProgramDetails.routine_medical_surveillance;
-            setValue("routine_medical_surveillance", parsedValue);
-          } catch (e) {
-            setValue("routine_medical_surveillance", []);
-          }
-        }
+        setValue("routine_medical_surveillance", oshProgramDetails.routine_medical_surveillance);
         setValue("special_medical_surveillance", oshProgramDetails.special_medical_surveillance);
         setValue("schedule_of_annual_medical_examination", oshProgramDetails.schedule_of_annual_medical_examination);
         setValue("random_drug_testing", oshProgramDetails.random_drug_testing);
@@ -382,6 +421,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         
         // Solid Waste Management System Section
         setValue("written_pollution_control_program", oshProgramDetails.written_pollution_control_program);
+        setValue("polution_control_officer", oshProgramDetails.polution_control_officer);
         setValue("waste_management_system_message", oshProgramDetails.waste_management_system_message);
         
         // Prohibited Acts and Penalties Section
