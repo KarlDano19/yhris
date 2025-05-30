@@ -41,7 +41,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
-    console.log('Form submitted with data:', data);
     
     // Validate required fields for current tab
     const requiredFields = requiredFieldsByTab[selectedTab] || [];
@@ -94,12 +93,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Explicitly include file attachments for safety officer and health personnel
       if (data.safety_officer_attachment !== undefined) {
         processedData.safety_officer_attachment = data.safety_officer_attachment;
-        console.log('Including safety_officer_attachment:', data.safety_officer_attachment);
       }
       
       if (data.health_personnel_attachment !== undefined) {
         processedData.health_personnel_attachment = data.health_personnel_attachment;
-        console.log('Including health_personnel_attachment:', data.health_personnel_attachment);
       }
     }
 
@@ -119,17 +116,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       facilityAttachmentFields.forEach(field => {
         if (data[field] !== undefined) {
           processedData[field] = data[field];
-          console.log(`Including ${field}:`, data[field]);
         }
       });
-    }
-
-    console.log('Processed data for submission:', processedData);
-    
-    // For Tab 4, log file attachments
-    if (selectedTab === 4) {
-      console.log('Safety officer attachment:', processedData.safety_officer_attachment);
-      console.log('Health personnel attachment:', processedData.health_personnel_attachment);
     }
 
     // Special handling for boolean fields in tabs 4 and 5
@@ -456,28 +444,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const submitCurrentTab = () => {
     // First clear any existing validation messages
     setValidationMessage("");
-    
-    // Debug the form values
-    console.log('------ DEBUG FORM VALUES ------');
-    console.log('Current tab:', selectedTab);
-    
-    // Log attachments based on current tab
-    if (selectedTab === 4) {
-      console.log('safety_officer_attachment value:', watch("safety_officer_attachment"));
-      console.log('health_personnel_attachment value:', watch("health_personnel_attachment"));
-    } else if (selectedTab === 5) {
-      console.log('Safety Measure Attachments:');
-      console.log('adequate_supply_of_drinking_water_attachment:', watch("adequate_supply_of_drinking_water_attachment"));
-      console.log('adequate_sanitary_and_washing_facilities_attachment:', watch("adequate_sanitary_and_washing_facilities_attachment"));
-      console.log('suitable_living_accommodation_attachment:', watch("suitable_living_accommodation_attachment"));
-      console.log('separate_sanitary_washing_and_sleeping_facilities_attachment:', watch("separate_sanitary_washing_and_sleeping_facilities_attachment"));
-      console.log('lactation_station_attachment:', watch("lactation_station_attachment"));
-      console.log('ramps_railings_and_like_attachment:', watch("ramps_railings_and_like_attachment"));
-      console.log('other_workers_welfare_facilities_attachment:', watch("other_workers_welfare_facilities_attachment"));
-    }
-    
-    console.log('All form values:', watch());
-    console.log('------ END DEBUG ------');
     
     // Trigger form validation and submission just for the current tab
     onSubmit();

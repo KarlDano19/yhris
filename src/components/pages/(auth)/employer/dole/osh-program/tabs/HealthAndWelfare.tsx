@@ -899,9 +899,7 @@ export default function HealthAndWelfare({
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              console.log('Safety officer attachment selected:', file);
                               setValue('safety_officer_attachment', file);
-                              console.log('Form value after setting safety_officer_attachment:', watch('safety_officer_attachment'));
                             }
                           }}
                         />
@@ -1070,9 +1068,7 @@ export default function HealthAndWelfare({
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              console.log('Health personnel attachment selected:', file);
                               setValue('health_personnel_attachment', file);
-                              console.log('Form value after setting health_personnel_attachment:', watch('health_personnel_attachment'));
                             }
                           }}
                         />

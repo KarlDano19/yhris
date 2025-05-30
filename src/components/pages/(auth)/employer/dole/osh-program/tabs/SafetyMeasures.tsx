@@ -235,7 +235,6 @@ export default function SafetyMeasures({
                     className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
                     onClick={() => {
                       const fileName = previousSignageFile.split('/').pop();
-                      console.log("Opening safety signage:", fileName); // Debug log
                       openImagePreview(fileName || "");
                     }}
                   >
@@ -399,7 +398,6 @@ export default function SafetyMeasures({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            console.log('Adequate supply attachment selected:', file);
                             setValue('adequate_supply_of_drinking_water_attachment', file);
                           }
                         }}
@@ -475,7 +473,6 @@ export default function SafetyMeasures({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            console.log('Sanitary facilities attachment selected:', file);
                             setValue('adequate_sanitary_and_washing_facilities_attachment', file);
                           }
                         }}
@@ -547,7 +544,6 @@ export default function SafetyMeasures({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            console.log('Living accommodation attachment selected:', file);
                             setValue('suitable_living_accommodation_attachment', file);
                           }
                         }}
@@ -624,7 +620,6 @@ export default function SafetyMeasures({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            console.log('Separate facilities attachment selected:', file);
                             setValue('separate_sanitary_washing_and_sleeping_facilities_attachment', file);
                           }
                         }}
@@ -696,7 +691,6 @@ export default function SafetyMeasures({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            console.log('Lactation station attachment selected:', file);
                             setValue('lactation_station_attachment', file);
                           }
                         }}
@@ -768,7 +762,6 @@ export default function SafetyMeasures({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            console.log('Ramps and railings attachment selected:', file);
                             setValue('ramps_railings_and_like_attachment', file);
                           }
                         }}
@@ -843,7 +836,6 @@ export default function SafetyMeasures({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            console.log('Other welfare facilities attachment selected:', file);
                             setValue('other_workers_welfare_facilities_attachment', file);
                           }
                         }}
