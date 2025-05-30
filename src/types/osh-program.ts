@@ -85,18 +85,25 @@ export type T_OshProgram = {
     // Facilities
     adequate_supply_of_drinking_water: boolean;
     adequate_supply_of_drinking_water_remarks: string;
+    adequate_supply_of_drinking_water_attachment: File | string;
     adequate_sanitary_and_washing_facilities: boolean;
     adequate_sanitary_and_washing_facilities_remarks: string;
+    adequate_sanitary_and_washing_facilities_attachment: File | string;
     suitable_living_accommodation: boolean;
     suitable_living_accommodation_remarks: string;
+    suitable_living_accommodation_attachment: File | string;
     separate_sanitary_washing_and_sleeping_facilities: boolean;
     separate_sanitary_washing_and_sleeping_facilities_remarks: string;
+    separate_sanitary_washing_and_sleeping_facilities_attachment: File | string;
     lactation_station: boolean;
     lactation_station_remarks: string;
+    lactation_station_attachment: File | string;
     ramps_railings_and_like: boolean;
     ramps_railings_and_like_remarks: string;
+    ramps_railings_and_like_attachment: File | string;
     other_workers_welfare_facilities: boolean;
     other_workers_welfare_facilities_remarks: string;
+    other_workers_welfare_facilities_attachment: File | string;
   
     // Emergency and Disaster
     written_emergency_and_disaster_program: boolean;
@@ -131,7 +138,14 @@ export const OSH_PROGRAM_FILE_FIELDS = [
   'signature',
   'safety_signage',
   'safety_officer_attachment',
-  'health_personnel_attachment'
+  'health_personnel_attachment',
+  'adequate_supply_of_drinking_water_attachment',
+  'adequate_sanitary_and_washing_facilities_attachment',
+  'suitable_living_accommodation_attachment',
+  'separate_sanitary_washing_and_sleeping_facilities_attachment',
+  'lactation_station_attachment',
+  'ramps_railings_and_like_attachment',
+  'other_workers_welfare_facilities_attachment'
 ];
 
 // Field mappings for case sensitivity issues
@@ -259,13 +273,14 @@ export const OSH_PROGRAM_TAB_FIELDS: OSH_PROGRAM_TAB_FIELDS = {
       'ex_officio_members_3', 'ex_officio_members_4', 'duties_and_responsibilities',
       'safety_officer', 'safety_officer_attachment', 'health_personnel', 'health_personnel_attachment', 
       'health_training', 'risk_assessment', 'safety_meeting', 'reported_incidents'],
-  5: ['ppe', 'ppe_description', 'safety_signage', 'adequate_supply_of_drinking_water',
-      'adequate_supply_of_drinking_water_remarks', 'adequate_sanitary_and_washing_facilities',
-      'adequate_sanitary_and_washing_facilities_remarks', 'suitable_living_accommodation',
-      'suitable_living_accommodation_remarks', 'separate_sanitary_washing_and_sleeping_facilities',
-      'separate_sanitary_washing_and_sleeping_facilities_remarks', 'lactation_station',
-      'lactation_station_remarks', 'ramps_railings_and_like', 'ramps_railings_and_like_remarks',
-      'other_workers_welfare_facilities', 'other_workers_welfare_facilities_remarks',
+  5: ['ppe', 'ppe_description', 'safety_signage', 
+      'adequate_supply_of_drinking_water', 'adequate_supply_of_drinking_water_remarks', 'adequate_supply_of_drinking_water_attachment',
+      'adequate_sanitary_and_washing_facilities', 'adequate_sanitary_and_washing_facilities_remarks', 'adequate_sanitary_and_washing_facilities_attachment',
+      'suitable_living_accommodation', 'suitable_living_accommodation_remarks', 'suitable_living_accommodation_attachment',
+      'separate_sanitary_washing_and_sleeping_facilities', 'separate_sanitary_washing_and_sleeping_facilities_remarks', 'separate_sanitary_washing_and_sleeping_facilities_attachment',
+      'lactation_station', 'lactation_station_remarks', 'lactation_station_attachment',
+      'ramps_railings_and_like', 'ramps_railings_and_like_remarks', 'ramps_railings_and_like_attachment',
+      'other_workers_welfare_facilities', 'other_workers_welfare_facilities_remarks', 'other_workers_welfare_facilities_attachment',
       'written_emergency_and_disaster_program', 'drills', 'written_pollution_control_program',
       'polution_control_officer', 'waste_management_system_message',
       'prohibited_acts_and_penalties_message'],

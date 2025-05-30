@@ -53,6 +53,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return;
     }
 
+    // Remove safety_signage from required validation check
+    if (selectedTab === 5 && missingFields.includes('safety_signage')) {
+      const index = missingFields.indexOf('safety_signage');
+      if (index > -1) {
+        missingFields.splice(index, 1);
+      }
+    }
+
     if (missingFields.length > 0) {
       setValidationMessage(`Please fill out all required fields marked with * (Missing: ${missingFields.join(', ')})`);
       return;
@@ -93,6 +101,27 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         processedData.health_personnel_attachment = data.health_personnel_attachment;
         console.log('Including health_personnel_attachment:', data.health_personnel_attachment);
       }
+    }
+
+    // Special handling for file attachments in Tab 5 (Safety Measures)
+    if (selectedTab === 5) {
+      // Include all the facility attachment fields
+      const facilityAttachmentFields = [
+        'adequate_supply_of_drinking_water_attachment',
+        'adequate_sanitary_and_washing_facilities_attachment',
+        'suitable_living_accommodation_attachment',
+        'separate_sanitary_washing_and_sleeping_facilities_attachment',
+        'lactation_station_attachment',
+        'ramps_railings_and_like_attachment',
+        'other_workers_welfare_facilities_attachment'
+      ];
+
+      facilityAttachmentFields.forEach(field => {
+        if (data[field] !== undefined) {
+          processedData[field] = data[field];
+          console.log(`Including ${field}:`, data[field]);
+        }
+      });
     }
 
     console.log('Processed data for submission:', processedData);
@@ -333,18 +362,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         // Dust Control and Management Section - Facilities Table
         setValue("adequate_supply_of_drinking_water", oshProgramDetails.adequate_supply_of_drinking_water);
         setValue("adequate_supply_of_drinking_water_remarks", oshProgramDetails.adequate_supply_of_drinking_water_remarks);
+        setValue("adequate_supply_of_drinking_water_attachment", oshProgramDetails.adequate_supply_of_drinking_water_attachment);
+
         setValue("adequate_sanitary_and_washing_facilities", oshProgramDetails.adequate_sanitary_and_washing_facilities);
         setValue("adequate_sanitary_and_washing_facilities_remarks", oshProgramDetails.adequate_sanitary_and_washing_facilities_remarks);
+        setValue("adequate_sanitary_and_washing_facilities_attachment", oshProgramDetails.adequate_sanitary_and_washing_facilities_attachment);
+        
         setValue("suitable_living_accommodation", oshProgramDetails.suitable_living_accommodation);
         setValue("suitable_living_accommodation_remarks", oshProgramDetails.suitable_living_accommodation_remarks);
+        setValue("suitable_living_accommodation_attachment", oshProgramDetails.suitable_living_accommodation_attachment);
+        
         setValue("separate_sanitary_washing_and_sleeping_facilities", oshProgramDetails.separate_sanitary_washing_and_sleeping_facilities);
         setValue("separate_sanitary_washing_and_sleeping_facilities_remarks", oshProgramDetails.separate_sanitary_washing_and_sleeping_facilities_remarks);
+        setValue("separate_sanitary_washing_and_sleeping_facilities_attachment", oshProgramDetails.separate_sanitary_washing_and_sleeping_facilities_attachment);
+        
         setValue("lactation_station", oshProgramDetails.lactation_station);
         setValue("lactation_station_remarks", oshProgramDetails.lactation_station_remarks);
+        setValue("lactation_station_attachment", oshProgramDetails.lactation_station_attachment);
+        
         setValue("ramps_railings_and_like", oshProgramDetails.ramps_railings_and_like);
         setValue("ramps_railings_and_like_remarks", oshProgramDetails.ramps_railings_and_like_remarks);
+        setValue("ramps_railings_and_like_attachment", oshProgramDetails.ramps_railings_and_like_attachment);
+        
         setValue("other_workers_welfare_facilities", oshProgramDetails.other_workers_welfare_facilities);
         setValue("other_workers_welfare_facilities_remarks", oshProgramDetails.other_workers_welfare_facilities_remarks);
+        setValue("other_workers_welfare_facilities_attachment", oshProgramDetails.other_workers_welfare_facilities_attachment);
         
         // Emergency and Disaster Preparedness Section
         setValue("written_emergency_and_disaster_program", oshProgramDetails.written_emergency_and_disaster_program);
@@ -418,8 +460,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Debug the form values
     console.log('------ DEBUG FORM VALUES ------');
     console.log('Current tab:', selectedTab);
-    console.log('safety_officer_attachment value:', watch("safety_officer_attachment"));
-    console.log('health_personnel_attachment value:', watch("health_personnel_attachment"));
+    
+    // Log attachments based on current tab
+    if (selectedTab === 4) {
+      console.log('safety_officer_attachment value:', watch("safety_officer_attachment"));
+      console.log('health_personnel_attachment value:', watch("health_personnel_attachment"));
+    } else if (selectedTab === 5) {
+      console.log('Safety Measure Attachments:');
+      console.log('adequate_supply_of_drinking_water_attachment:', watch("adequate_supply_of_drinking_water_attachment"));
+      console.log('adequate_sanitary_and_washing_facilities_attachment:', watch("adequate_sanitary_and_washing_facilities_attachment"));
+      console.log('suitable_living_accommodation_attachment:', watch("suitable_living_accommodation_attachment"));
+      console.log('separate_sanitary_washing_and_sleeping_facilities_attachment:', watch("separate_sanitary_washing_and_sleeping_facilities_attachment"));
+      console.log('lactation_station_attachment:', watch("lactation_station_attachment"));
+      console.log('ramps_railings_and_like_attachment:', watch("ramps_railings_and_like_attachment"));
+      console.log('other_workers_welfare_facilities_attachment:', watch("other_workers_welfare_facilities_attachment"));
+    }
+    
     console.log('All form values:', watch());
     console.log('------ END DEBUG ------');
     

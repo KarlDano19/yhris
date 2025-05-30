@@ -392,16 +392,23 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
-                        id={`adequate_supply_of_drinking_water_file`}
-                        {...register(`adequate_supply_of_drinking_water_file`)}
+                        id={`adequate_supply_of_drinking_water_attachment`}
+                        {...register(`adequate_supply_of_drinking_water_attachment`)}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Adequate supply attachment selected:', file);
+                            setValue('adequate_supply_of_drinking_water_attachment', file);
+                          }
+                        }}
                       />
                       <label
-                        htmlFor={`adequate_supply_of_drinking_water_file`}
+                        htmlFor={`adequate_supply_of_drinking_water_attachment`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon hasFile={!!watch("adequate_supply_of_drinking_water_file")?.[0]} />
+                        <ClipIcon hasFile={!!watch("adequate_supply_of_drinking_water_attachment")} />
                       </label>
                     </td>
                   </tr>
@@ -459,18 +466,25 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
-                        id={`adequate_sanitary_and_washing_facilities_file`}
+                        id={`adequate_sanitary_and_washing_facilities_attachment`}
                         {...register(
-                          `adequate_sanitary_and_washing_facilities_file`
+                          `adequate_sanitary_and_washing_facilities_attachment`
                         )}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Sanitary facilities attachment selected:', file);
+                            setValue('adequate_sanitary_and_washing_facilities_attachment', file);
+                          }
+                        }}
                       />
                       <label
-                        htmlFor={`adequate_sanitary_and_washing_facilities_file`}
+                        htmlFor={`adequate_sanitary_and_washing_facilities_attachment`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon hasFile={!!watch("adequate_sanitary_and_washing_facilities_file")?.[0]} />
+                        <ClipIcon hasFile={!!watch("adequate_sanitary_and_washing_facilities_attachment")} />
                       </label>
                     </td>
                   </tr>
@@ -526,16 +540,23 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
-                        id={`suitable_living_accommodation_file`}
-                        {...register(`suitable_living_accommodation_file`)}
+                        id={`suitable_living_accommodation_attachment`}
+                        {...register(`suitable_living_accommodation_attachment`)}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Living accommodation attachment selected:', file);
+                            setValue('suitable_living_accommodation_attachment', file);
+                          }
+                        }}
                       />
                       <label
-                        htmlFor={`suitable_living_accommodation_file`}
+                        htmlFor={`suitable_living_accommodation_attachment`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon hasFile={!!watch("suitable_living_accommodation_file")?.[0]} />
+                        <ClipIcon hasFile={!!watch("suitable_living_accommodation_attachment")} />
                       </label>
                     </td>
                   </tr>
@@ -594,18 +615,25 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
-                        id={`separate_sanitary_washing_and_sleeping_facilities_file`}
+                        id={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
                         {...register(
-                          `separate_sanitary_washing_and_sleeping_facilities_file`
+                          `separate_sanitary_washing_and_sleeping_facilities_attachment`
                         )}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Separate facilities attachment selected:', file);
+                            setValue('separate_sanitary_washing_and_sleeping_facilities_attachment', file);
+                          }
+                        }}
                       />
                       <label
-                        htmlFor={`separate_sanitary_washing_and_sleeping_facilities_file`}
+                        htmlFor={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon hasFile={!!watch("separate_sanitary_washing_and_sleeping_facilities_file")?.[0]} />
+                        <ClipIcon hasFile={!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment")} />
                       </label>
                     </td>
                   </tr>
@@ -661,16 +689,23 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
-                        id={`lactation_station_file`}
-                        {...register(`lactation_station_file`)}
+                        id={`lactation_station_attachment`}
+                        {...register(`lactation_station_attachment`)}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Lactation station attachment selected:', file);
+                            setValue('lactation_station_attachment', file);
+                          }
+                        }}
                       />
                       <label
-                        htmlFor={`lactation_station_file`}
+                        htmlFor={`lactation_station_attachment`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon hasFile={!!watch("lactation_station_file")?.[0]} />
+                        <ClipIcon hasFile={!!watch("lactation_station_attachment")} />
                       </label>
                     </td>
                   </tr>
@@ -726,16 +761,23 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
-                        id={`ramps_railings_and_like_file`}
-                        {...register(`ramps_railings_and_like_file`)}
+                        id={`ramps_railings_and_like_attachment`}
+                        {...register(`ramps_railings_and_like_attachment`)}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Ramps and railings attachment selected:', file);
+                            setValue('ramps_railings_and_like_attachment', file);
+                          }
+                        }}
                       />
                       <label
-                        htmlFor={`ramps_railings_and_like_file`}
+                        htmlFor={`ramps_railings_and_like_attachment`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon hasFile={!!watch("ramps_railings_and_like_file")?.[0]} />
+                        <ClipIcon hasFile={!!watch("ramps_railings_and_like_attachment")} />
                       </label>
                     </td>
                   </tr>
@@ -794,16 +836,23 @@ export default function SafetyMeasures({
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
-                        id={`other_workers_welfare_facilities_file`}
-                        {...register(`other_workers_welfare_facilities_file`)}
+                        id={`other_workers_welfare_facilities_attachment`}
+                        {...register(`other_workers_welfare_facilities_attachment`)}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Other welfare facilities attachment selected:', file);
+                            setValue('other_workers_welfare_facilities_attachment', file);
+                          }
+                        }}
                       />
                       <label
-                        htmlFor={`other_workers_welfare_facilities_file`}
+                        htmlFor={`other_workers_welfare_facilities_attachment`}
                         className="cursor-pointer items-center"
                       >
-                        <ClipIcon hasFile={!!watch("other_workers_welfare_facilities_file")?.[0]} />
+                        <ClipIcon hasFile={!!watch("other_workers_welfare_facilities_attachment")} />
                       </label>
                     </td>
                   </tr>
@@ -835,14 +884,14 @@ export default function SafetyMeasures({
                 defaultValue={null}
                 render={({ field: { value, onChange } }) => (
                   <input
-                    type="checkbox"
+                    type="radio"
                     id="written_emergency_yes"
                     checked={value === true}
                     onChange={(e) => {
                       const newValue = e.target.checked ? true : null;
                       onChange(newValue);
                     }}
-                    className="w-4 h-4"
+                    className="w-4 h-4 mt-1"
                   />
                 )}
               />
@@ -864,7 +913,7 @@ export default function SafetyMeasures({
                       const newValue = e.target.checked ? false : null;
                       onChange(newValue);
                     }}
-                    className="w-4 h-4"
+                    className="w-4 h-4 mt-1"
                   />
                 )}
               />
@@ -1000,7 +1049,7 @@ export default function SafetyMeasures({
                       const newValue = e.target.checked ? true : null;
                       onChange(newValue);
                     }}
-                    className="w-4 h-4"
+                    className="w-4 h-4 mt-1"
                   />
                 )}
               />
@@ -1022,7 +1071,7 @@ export default function SafetyMeasures({
                       const newValue = e.target.checked ? false : null;
                       onChange(newValue);
                     }}
-                    className="w-4 h-4"
+                    className="w-4 h-4 mt-1"
                   />
                 )}
               />
@@ -1042,7 +1091,7 @@ export default function SafetyMeasures({
               type="text"
               {...register("polution_control_officer")}
               id="companypolution_control_officer_name"
-              className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 mb-4"
+              className="rounded-md w-full border border-gray-300 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 mb-4"
             />
           </div>
         </div>
