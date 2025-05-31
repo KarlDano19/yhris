@@ -11,6 +11,8 @@ import EmployeeProfile from "./tabs/EmployeeProfile";
 import Reccomendation from "./tabs/Reccomendation";
 import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
+import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
+import useSubmitApproval from "../hooks/useSubmitApproval";
 
 type T_ModalData = {
     id: number;
@@ -32,10 +34,13 @@ function EditPersonelMovementModal({
   const [selectedTab, setSelectedTab] = useState(1);
   const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
   const { mutate: editPersonelMovement, isLoading: isLoadingEditPersonelMovement } = useEditPersonelMovementDetails();
+  const { approvals, currentUserApproval, refetch: refetchApprovals } = useGetPersonnelMovementApprovals(isOpen.id);
+  const { mutate: submitApproval, isLoading: isLoadingSubmitApproval } = useSubmitApproval();
 
   useEffect(() => {
     if (isOpen) {
       refetchPersonelMovement();
+      refetchApprovals();
     }
   }, [isOpen]);
 
@@ -48,12 +53,15 @@ function EditPersonelMovementModal({
       setValue("status", personelMovementData.status);
       setValue("processed_by", personelMovementData.processed_by);
       setValue("start_date", personelMovementData.start_date);
-      setValue("hr_recommendation", personelMovementData.hr_recommendation);
-      setValue("manager_recommendation", personelMovementData.manager_recommendation);
-      setValue("manager_signature", personelMovementData.manager_signature);
-      setValue("hr_signature", personelMovementData.hr_signature);
     }
   }, [personelMovementData]);
+
+  useEffect(() => {
+    if (currentUserApproval) {
+      setValue("recommendation", currentUserApproval.recommendation || "");
+      setValue("signature", currentUserApproval.signature || "");
+    }
+  }, [currentUserApproval]);
   
   const customCloseModal = () => {
     reset();
@@ -70,8 +78,11 @@ function EditPersonelMovementModal({
             duration: 5000,
           }
         );
-        customCloseModal();
+        // Refetch all necessary data
+        refetchApprovals();
+        refetchPersonelMovement();
         refetch();
+        customCloseModal();
       },
       onError: (err: any) => {
         const errorMessage = err.message || "An unexpected error occurred.";
@@ -83,8 +94,37 @@ function EditPersonelMovementModal({
         );
       },
     };
-    console.log(data);
-    editPersonelMovement({ personel_movement_id: isOpen.id, data: data }, callbackReq);
+
+    if (currentUserApproval) {
+      // If there's a current approval, submit the approval
+      submitApproval(
+        { 
+          personnel_movement_id: isOpen.id, 
+          data: {
+            recommendation: data.recommendation,
+            signature: data.signature,
+            status: data.status || "approved"
+          }
+        }, 
+        callbackReq
+      );
+    } else {
+      // Otherwise, update the PMF details
+      editPersonelMovement(
+        { 
+          personel_movement_id: isOpen.id, 
+          data: {
+            employee: data.employee,
+            current_position: data.current_position,
+            new_position: data.new_position,
+            reason: data.reason,
+            start_date: data.start_date,
+            proposed_rate: data.proposed_rate
+          }
+        }, 
+        callbackReq
+      );
+    }
   });
 
   return (
@@ -144,9 +184,11 @@ function EditPersonelMovementModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
-                    isLoading={isLoadingEditPersonelMovement}
+                    isLoading={isLoadingSubmitApproval}
                     setValue={setValue}
                     hasHrRecommendation={true}
+                    approvals={approvals}
+                    currentUserApproval={currentUserApproval}
                   />
                 )}
               </Dialog.Panel>

@@ -21,7 +21,7 @@ async function getPersonnelMovementApprovals(personnelMovementId: number) {
       }
       return res.json();
     }
-    return [];
+    return { approvals: [], current_user_approval: null };
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -41,7 +41,11 @@ function useGetPersonnelMovementApprovals(personnelMovementId: number) {
     }
   );
 
-  return query;
+  return {
+    ...query,
+    approvals: query.data?.approvals || [],
+    currentUserApproval: query.data?.current_user_approval || null,
+  };
 }
 
 export default useGetPersonnelMovementApprovals;
