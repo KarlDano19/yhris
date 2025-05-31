@@ -20,6 +20,7 @@ function EmployeeProfile({
   setValue,
   isLoading,
   watch,
+  isEdit,
 }: {
   control: any;
   register: any;
@@ -28,6 +29,7 @@ function EmployeeProfile({
   setValue: any;
   isLoading: boolean;
   watch: any;
+  isEdit: boolean;
 }) {
   const queryClient = useQueryClient();
   const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -47,12 +49,30 @@ function EmployeeProfile({
     }
   }, [positionData]);
 
-  const onSubmit = handleSubmit(() => {
-    setSelectedTab(2);
-  });
+  const onSubmit = (data: any) => {
+    if (isEdit) {
+      setSelectedTab(2);
+    } else {
+      handleSubmit(data);
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = {
+      employee: watch('employee'),
+      current_position: watch('current_position'),
+      new_position: watch('new_position'),
+      reason: watch('reason'),
+      start_date: watch('start_date'),
+      proposed_rate: watch('proposed_rate'),
+      percentage_increase: watch('percentage_increase')
+    };
+    onSubmit(formData);
+  };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={!isEdit ? handleFormSubmit : onSubmit}>
       <div className='px-4 pt-4 pb-6'>
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className='flex'>

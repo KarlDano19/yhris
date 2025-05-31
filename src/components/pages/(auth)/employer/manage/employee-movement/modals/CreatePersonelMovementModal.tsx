@@ -26,7 +26,7 @@ function CreatePersonelMovementModal({
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addPersonnelMovement, isLoading: isLoadingAddPersonnelMovement } = useAddPersonnelMovement();
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = (data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -40,7 +40,7 @@ function CreatePersonelMovementModal({
         refetch();
       },
       onError: (err: any) => {
-        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
+        const errorMessage = err.message || "An unexpected error occurred.";
         toast.custom(
           () => <CustomToast message={errorMessage} type="error" />,
           {
@@ -51,7 +51,7 @@ function CreatePersonelMovementModal({
     };
     console.log(data);
     addPersonnelMovement(data, callbackReq);
-  });
+  };
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -100,19 +100,10 @@ function CreatePersonelMovementModal({
                     watch={watch}
                     setValue={setValue}
                     register={register}
-                    handleSubmit={handleSubmit}
+                    handleSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingAddPersonnelMovement}
-                  />
-                )}
-                {selectedTab === 2 && (
-                  <Reccomendation
-                    register={register}
-                    onSubmit={onSubmit}
-                    setSelectedTab={setSelectedTab}
-                    setValue={setValue}
-                    isLoading={isLoadingAddPersonnelMovement}
-                    hasHrRecommendation={false}
+                    isEdit={false}
                   />
                 )}
               </Dialog.Panel>

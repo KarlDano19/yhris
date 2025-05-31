@@ -177,6 +177,7 @@ function EditPersonelMovementModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingEditPersonelMovement}
+                    isEdit={true}
                   />
                 )}
                 {selectedTab === 2 && (
