@@ -11,7 +11,7 @@ async function deleteDirective(directive_id: any) {
       },
     };
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directive_id}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directive_id}/delete/`,
       config
     );
     if (!res.ok) {

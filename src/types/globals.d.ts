@@ -221,32 +221,6 @@ export type T_Investigation = {
   attachments: File;
 };
 
-export type T_Directive = {
-  type: string;
-  title: string;
-  email: string[];
-  withResponse: boolean;
-  file: Array | never;
-  body: string;
-  name: string;
-  position: string;
-  signature: string | File;
-  qrCode: any;
-  policyField: T_PolicyField[]
-  eligibility: string;
-  application: string;
-  coverage: string;
-  termination: string;
-  purpose: string;
-  policy: string;
-  procedure: string;
-};
-
-export type T_PolicyField ={
-  inputLabel: string;
-  inputName: string
-}
-
 export type T_Benefit = {
   title: string;
   email: string[];
