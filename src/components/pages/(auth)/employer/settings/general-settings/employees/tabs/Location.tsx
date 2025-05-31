@@ -5,17 +5,17 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
-import Pagination from '@/components/Pagination';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import CustomToast from '@/components/CustomToast';
-
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
 import useGetLocationItems from '../hooks/useGetLocationItems';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
+import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
+import CustomDatePicker from '@/components/CustomDatePicker';
+
+import DeleteIcon from '@/svg/DeleteIcon';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import EditIcon from '@/svg/EditIcon';
 
 type PaginationProps = {
   totalRecords: number;

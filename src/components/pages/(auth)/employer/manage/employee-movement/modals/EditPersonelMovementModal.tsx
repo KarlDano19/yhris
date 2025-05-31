@@ -5,14 +5,14 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-
-import { XCircleIcon } from "@heroicons/react/24/solid";
 import EmployeeProfile from "./tabs/EmployeeProfile";
 import Reccomendation from "./tabs/Reccomendation";
 import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
 import useSubmitApproval from "../hooks/useSubmitApproval";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 type T_ModalData = {
     id: number;

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function ReccomendationPrint({
   register,

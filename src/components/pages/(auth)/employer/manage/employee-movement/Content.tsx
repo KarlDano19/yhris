@@ -9,7 +9,6 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
-
 import useGetPersonelMovementList from './hooks/useGetPersonelMovementList';
 import CreatePersonelMovementModal from './modals/CreatePersonelMovementModal';
 import EditPersonelMovementModal from './modals/EditPersonelMovementModal';

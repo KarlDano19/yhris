@@ -2,23 +2,20 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 
-import Link from 'next/link';
-
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import CustomToast from '@/components/CustomToast';
-import classNames from '@/helpers/classNames';
-
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
+import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '../hooks/position/useGetPositionItems';
+
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 
 type PaginationProps = {

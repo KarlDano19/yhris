@@ -1,14 +1,14 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Dispatch, Fragment, useRef, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-
-import { XCircleIcon } from "@heroicons/react/24/solid";
 import EmployeeProfile from "./tabs/EmployeeProfile";
 import useAddPersonnelMovement from "../hooks/useAddPersonnelMovement";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function CreatePersonelMovementModal({
   refetch,

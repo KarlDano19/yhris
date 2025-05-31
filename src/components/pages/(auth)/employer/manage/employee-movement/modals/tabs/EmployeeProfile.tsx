@@ -5,13 +5,12 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
-
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
+import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
 function EmployeeProfile({
   control,
   register,

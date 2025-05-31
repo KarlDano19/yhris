@@ -1,8 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
-
-import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -10,15 +8,14 @@ import toast from 'react-hot-toast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
-import classNames from '@/helpers/classNames';
+import useGetDepartmentItems from '../hooks/department/useGetDepartmentItems';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
-import useGetDepartmentItems from '../hooks/department/useGetDepartmentItems';
 
 
 type PaginationProps = {
