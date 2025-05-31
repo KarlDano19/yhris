@@ -129,26 +129,7 @@ function Reccomendation({
             <div className="mt-4">
               <h1 className="text-lg font-semibold">Your Signature</h1>
             </div>
-            <div className="grid grid-cols-3 gap-6 mt-4">
-              <div>
-                <label
-                  htmlFor="name_signature"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Name
-                  <span className="text-red-600">*</span>
-                </label>
-                <div className="relative mt-2">
-                  <input
-                    type="text"
-                    {...register("name_signature", {
-                      required: true,
-                    })}
-                    id="name_signature"
-                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-6 mt-4">
               <div>
                 <label
                   htmlFor="draw_signature"

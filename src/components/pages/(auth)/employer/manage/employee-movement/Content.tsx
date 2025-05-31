@@ -116,8 +116,21 @@ const Content = () => {
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.reason}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.processed_by}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.status}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <span
+              className={
+                item.status === 'approved'
+                  ? 'text-green-700 font-bold'
+                  : item.status === 'pending'
+                  ? 'text-yellow-600 font-bold'
+                  : item.status === 'rejected'
+                  ? 'text-red-600 font-bold'
+                  : 'text-gray-700 font-bold'
+              }
+            >
+              {item.status}
+            </span>
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
               <button 
@@ -217,6 +230,7 @@ const Content = () => {
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   value={itemsFilter.search}
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
               </div>
@@ -300,9 +314,6 @@ const Content = () => {
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Reason
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Processed By
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Status

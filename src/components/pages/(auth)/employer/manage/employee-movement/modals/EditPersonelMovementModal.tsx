@@ -48,7 +48,8 @@ function EditPersonelMovementModal({
     if (personelMovementData) {
       setValue("date", personelMovementData.date);
       setValue("employee", personelMovementData.employee);
-      setValue("position", personelMovementData.position);
+      setValue("current_position", personelMovementData.current_position);
+      setValue("new_position", personelMovementData.new_position);
       setValue("reason", personelMovementData.reason);
       setValue("status", personelMovementData.status);
       setValue("processed_by", personelMovementData.processed_by);
