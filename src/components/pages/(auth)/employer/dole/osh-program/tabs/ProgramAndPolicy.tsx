@@ -365,6 +365,7 @@ export default function ProgramAndPolicy({
                 accept="image/*"
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
+              <p className="mt-1 text-sm text-gray-500">Maximum file size: 10 MB</p>
               {uploadedSignaturePreview && (
                 <div className="mt-3 border rounded-lg overflow-hidden bg-gray-50">
                   <div className="p-3 border-b bg-white flex justify-between items-center">

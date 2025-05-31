@@ -228,6 +228,7 @@ export default function SafetyMeasures({
                 }}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
+              <p className="mt-1 text-sm text-gray-500">Maximum file size: 10 MB</p>
               <div className="flex items-center gap-4 mt-2">
                 {previousSignageFile && (
                   <button
