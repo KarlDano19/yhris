@@ -5,6 +5,23 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Link from "next/link";
+
+import CustomToast from "@/components/CustomToast";
+
+import CompanyProfile from "./tabs/CompanyProfile";
+import ProgramAndPolicy from "./tabs/ProgramAndPolicy";
+import RiskManagement from "./tabs/RiskManagement";
+import SafetyMeasures from "./tabs/SafetyMeasures";
+import ComplianceAndCost from "./tabs/ComplianceAndCost";
+import HealthAndWelfare from "./tabs/HealthAndWelfare";
+
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import HistoryIcon from "@/svg/HistoryIcon";
+import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
+
+import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
+import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
+
 import { 
   T_OshProgram, 
   ExtendedOshProgram, 
@@ -17,19 +34,6 @@ import {
   OSH_PROGRAM_FACILITY_ATTACHMENT_FIELDS as facilityAttachmentFields
 } from "@/types/osh-program";
 
-import CustomToast from "@/components/CustomToast";
-import CompanyProfile from "./tabs/CompanyProfile";
-import ProgramAndPolicy from "./tabs/ProgramAndPolicy";
-import RiskManagement from "./tabs/RiskManagement";
-import SafetyMeasures from "./tabs/SafetyMeasures";
-import ComplianceAndCost from "./tabs/ComplianceAndCost";
-import HealthAndWelfare from "./tabs/HealthAndWelfare";
-import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
-import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
-
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
-import HistoryIcon from "@/svg/HistoryIcon";
-import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors } = useForm<ExtendedOshProgram>();
