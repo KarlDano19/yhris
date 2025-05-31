@@ -10,14 +10,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
 import useGetPersonelMovementList from './hooks/useGetPersonelMovementList';
 import CreatePersonelMovementModal from './modals/CreatePersonelMovementModal';
 import EditPersonelMovementModal from './modals/EditPersonelMovementModal';
-import PrintIcon from '@/svg/PrintIcon';
 import PrintModal from './modals/PrintModal';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import PrintIcon from '@/svg/PrintIcon';
+import EditIcon from '@/svg/EditIcon';
 
 type PaginationProps = {
   totalRecords: number;

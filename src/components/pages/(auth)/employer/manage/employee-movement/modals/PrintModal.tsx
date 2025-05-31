@@ -1,11 +1,14 @@
 import { Dispatch, Fragment, useRef, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+
 import { useForm } from "react-hook-form";
-import { XCircleIcon, PrinterIcon } from "@heroicons/react/24/solid";
+
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
 import EmployeeProfilePrint from "./print/EmployeeProfilePrint";
 import ReccomendationPrint from "./print/ReccomendationPrint";
+
+import { XCircleIcon, PrinterIcon } from "@heroicons/react/24/solid";
 
 type T_ModalData = {
   id: number;

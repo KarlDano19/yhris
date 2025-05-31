@@ -8,7 +8,6 @@ import CustomToast from "@/components/CustomToast";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import EmployeeProfile from "./tabs/EmployeeProfile";
-import Reccomendation from "./tabs/Reccomendation";
 import useAddPersonnelMovement from "../hooks/useAddPersonnelMovement";
 
 function CreatePersonelMovementModal({
