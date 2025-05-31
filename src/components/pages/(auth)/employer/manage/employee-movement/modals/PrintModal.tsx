@@ -1,25 +1,18 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
-
+import { Dispatch, Fragment, useRef, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-
-import CustomToast from "@/components/CustomToast";
-
-import { XCircleIcon } from "@heroicons/react/24/solid";
-import EmployeeProfile from "./tabs/EmployeeProfile";
-import Reccomendation from "./tabs/Reccomendation";
-import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
+import { XCircleIcon, PrinterIcon } from "@heroicons/react/24/solid";
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
-import useSubmitApproval from "../hooks/useSubmitApproval";
+import EmployeeProfilePrint from "./print/EmployeeProfilePrint";
+import ReccomendationPrint from "./print/ReccomendationPrint";
 
 type T_ModalData = {
-    id: number;
-    open: boolean;
-  };
+  id: number;
+  open: boolean;
+};
 
-function PrintPersonelMovementModal({
+function PrintModal({
   refetch,
   isOpen,
   setIsOpen,
@@ -29,13 +22,10 @@ function PrintPersonelMovementModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } =
-    useForm();
-  const [selectedTab, setSelectedTab] = useState(1);
+  const printRef = useRef<HTMLDivElement>(null);
+  const { register, control, setValue, watch } = useForm();
   const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
-  const { mutate: editPersonelMovement, isLoading: isLoadingEditPersonelMovement } = useEditPersonelMovementDetails();
   const { approvals, currentUserApproval, refetch: refetchApprovals } = useGetPersonnelMovementApprovals(isOpen.id);
-  const { mutate: submitApproval, isLoading: isLoadingSubmitApproval } = useSubmitApproval();
 
   useEffect(() => {
     if (isOpen) {
@@ -64,6 +54,7 @@ function PrintPersonelMovementModal({
       setValue("start_date", personelMovementData.start_date);
       setValue("proposed_rate", personelMovementData.proposed_rate);
       setValue("percentage_increase", personelMovementData.percentage_increase);
+      setValue('approvals', personelMovementData.approvals);
     }
   }, [personelMovementData]);
 
@@ -75,68 +66,52 @@ function PrintPersonelMovementModal({
   }, [currentUserApproval]);
   
   const customCloseModal = () => {
-    reset();
     removePersonelMovement();
     setIsOpen(null);
   };
 
-  const onSubmit = handleSubmit((data) => {
-    const callbackReq = {
-      onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
-          {
-            duration: 5000,
-          }
-        );
-        // Refetch all necessary data
-        refetchApprovals();
-        refetchPersonelMovement();
-        refetch();
-        customCloseModal();
-      },
-      onError: (err: any) => {
-        const errorMessage = err.message || "An unexpected error occurred.";
-        toast.custom(
-          () => <CustomToast message={errorMessage} type="error" />,
-          {
-            duration: 7000,
-          }
-        );
-      },
-    };
+  const handlePrint = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const printContent = printRef.current?.innerHTML;
+    if (!printContent) return;
 
-    if (currentUserApproval) {
-      // If there's a current approval, submit the approval
-      submitApproval(
-        { 
-          personnel_movement_id: isOpen.id, 
-          data: {
-            recommendation: data.recommendation,
-            signature: data.signature,
-            status: data.status || "approved"
-          }
-        }, 
-        callbackReq
-      );
-    } else {
-      // Otherwise, update the PMF details
-      editPersonelMovement(
-        { 
-          personel_movement_id: isOpen.id, 
-          data: {
-            employee: data.employee,
-            current_position: data.current_position,
-            new_position: data.new_position,
-            reason: data.reason,
-            start_date: data.start_date,
-            proposed_rate: data.proposed_rate
-          }
-        }, 
-        callbackReq
-      );
-    }
-  });
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Print Personal Movement Form (PMF)</title>
+          <style>
+            body { 
+              padding: 20px;
+              font-family: Arial, sans-serif;
+            }
+            @media print {
+              body { 
+                padding: 0;
+                margin: 0;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    
+    // Wait for content to load before printing
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
 
   return (
     <Transition.Root show={isOpen.open} as={Fragment}>
@@ -172,37 +147,45 @@ function PrintPersonelMovementModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Personal Movement Form (PMF)
+                    Print Personal Movement Form (PMF)
                   </h3>
-                  <XCircleIcon
-                    className="w-8 h-8 text-white cursor-pointer"
-                    onClick={() => customCloseModal()}
-                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handlePrint(e);
+                      }}
+                      className="p-1 text-white hover:bg-savoy-blue/80 rounded"
+                    >
+                      <PrinterIcon className="w-6 h-6" />
+                    </button>
+                    <XCircleIcon
+                      className="w-8 h-8 text-white cursor-pointer"
+                      onClick={() => customCloseModal()}
+                    />
+                  </div>
                 </div>
-                {selectedTab === 1 && (
-                  <EmployeeProfile
+                <div ref={printRef} className="p-4">
+                  <EmployeeProfilePrint
                     control={control}
                     watch={watch}
                     setValue={setValue}
                     register={register}
-                    handleSubmit={handleSubmit}
-                    setSelectedTab={setSelectedTab}
-                    isLoading={isLoadingEditPersonelMovement}
-                    isEdit={true}
+                    handleSubmit={() => {}}
+                    isLoading={false}
+                    isEdit={false}
                   />
-                )}
-                {selectedTab === 2 && (
-                  <Reccomendation
+                  <ReccomendationPrint
                     register={register}
-                    onSubmit={onSubmit}
-                    setSelectedTab={setSelectedTab}
-                    isLoading={isLoadingSubmitApproval}
+                    onSubmit={() => {}}
+                    isLoading={false}
                     setValue={setValue}
-                    hasHrRecommendation={true}
                     approvals={approvals}
                     currentUserApproval={currentUserApproval}
                   />
-                )}
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
@@ -212,4 +195,4 @@ function PrintPersonelMovementModal({
   );
 }
 
-export default PrintPersonelMovementModal;
+export default PrintModal;

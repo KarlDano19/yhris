@@ -7,7 +7,10 @@ async function addPersonnelMovement(data: any) {
     if (data.start_date) {
       const startDate = new Date(data.start_date);
       if (!isNaN(startDate.getTime())) {
-        data.start_date = startDate.toISOString().split("T")[0];
+        // Adjust for timezone offset to preserve local date
+        const offset = startDate.getTimezoneOffset();
+        const adjustedDate = new Date(startDate.getTime() - offset * 60000);
+        data.start_date = adjustedDate.toISOString().split("T")[0];
       }
     }
     

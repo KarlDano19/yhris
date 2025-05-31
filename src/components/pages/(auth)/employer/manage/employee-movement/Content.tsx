@@ -16,6 +16,8 @@ import DeleteIcon from '@/svg/DeleteIcon';
 import useGetPersonelMovementList from './hooks/useGetPersonelMovementList';
 import CreatePersonelMovementModal from './modals/CreatePersonelMovementModal';
 import EditPersonelMovementModal from './modals/EditPersonelMovementModal';
+import PrintIcon from '@/svg/PrintIcon';
+import PrintModal from './modals/PrintModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -32,6 +34,7 @@ const Content = () => {
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [isOpenCreatePersonelMovementModal, setIsOpenCreatePersonelMovementModal] = useState(false);
   const [isOpenEditPersonelMovementModal, setIsOpenEditPersonelMovementModal] = useState<T_ModalData | null>(null);
+  const [isOpenPrintPersonelMovementModal, setIsOpenPrintPersonelMovementModal] = useState<T_ModalData | null>(null);
   const [personelMovementList, setPersonelMovementList] = useState<any>([]);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -144,10 +147,14 @@ const Content = () => {
                 <EditIcon />
               </button>
               <button 
-                onClick={() => {}}
-                // disabled={!cachedRigths?.state?.data?.edit_dole_employee_compensation}
+                onClick={() => {
+                  setIsOpenPrintPersonelMovementModal({
+                    id: item.id,
+                    open: true,
+                  });
+                }}
               >
-                <DeleteIcon />
+                <PrintIcon />
               </button>
             </div>
           </td>
@@ -346,6 +353,13 @@ const Content = () => {
               refetch={personelMovementListRefetch}
               isOpen={isOpenEditPersonelMovementModal}
               setIsOpen={setIsOpenEditPersonelMovementModal}
+            />
+          )}
+          {isOpenPrintPersonelMovementModal && (
+            <PrintModal
+              refetch={personelMovementListRefetch}
+              isOpen={isOpenPrintPersonelMovementModal}
+              setIsOpen={setIsOpenPrintPersonelMovementModal}
             />
           )}
         </div>

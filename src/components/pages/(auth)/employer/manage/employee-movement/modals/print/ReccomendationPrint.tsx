@@ -5,22 +5,18 @@ import { useEffect, useState } from "react";
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
 
-function Reccomendation({
+function ReccomendationPrint({
   register,
   onSubmit,
-  setSelectedTab,
   setValue,
   isLoading,
-  hasHrRecommendation = false,
   approvals = [],
   currentUserApproval = null,
 }: {
   register: any;
   onSubmit: any;
-  setSelectedTab: any;
   setValue: any;
   isLoading: boolean;
-  hasHrRecommendation?: boolean;
   approvals?: any[];
   currentUserApproval?: any;
 }) {
@@ -65,7 +61,7 @@ function Reccomendation({
         {/* Previous Approvals */}
         {approvals.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Previous Approvals</h3>
+            <h3 className="text-lg font-semibold mb-4">Approvals</h3>
             <div className="space-y-4">
               {approvals.map((approval, index) => (
                 <div key={index} className="border rounded-lg p-4">
@@ -196,7 +192,6 @@ function Reccomendation({
         <button
           type="button"
           className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          onClick={() => setSelectedTab(1)}
         >
           Back
         </button>
@@ -273,4 +268,4 @@ function Reccomendation({
   );
 }
 
-export default Reccomendation;
+export default ReccomendationPrint;
