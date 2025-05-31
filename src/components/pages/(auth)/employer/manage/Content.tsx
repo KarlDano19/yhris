@@ -7,6 +7,7 @@ import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import BenefitsLogo from '@/svg/BenefitsLogo';
 import EmployeeLogo from '@/svg/EmployeeLogo';
 import EvaluationHistoryLogo from '@/svg/EvalHistoryLogo';
+import EmployeeMovementLogo from '@/svg/EmployeeMovementLogo';
 
 const menus = [
   {
@@ -33,6 +34,11 @@ const menus = [
     icon: <EvaluationHistoryLogo />,
     text: 'Evaluation History',
     link: '/manage/evaluation-history',
+  },
+  {
+    icon: <EmployeeMovementLogo />,
+    text: 'Employee Movement',
+    link: '/manage/employee-movement',
   },
 ];
 
