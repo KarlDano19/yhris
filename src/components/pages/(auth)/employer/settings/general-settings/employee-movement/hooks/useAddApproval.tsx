@@ -1,20 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getPositionItems() {
+async function addApproval(approval: any) {
   try {
-    let newFilters = { view_type: 'select' };
-    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
+      body: JSON.stringify(approval),
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/positions/?${searchParams}`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/approval-stages/`, config);
       if (!res.ok) {
         throw res.json();
       }
@@ -30,13 +29,9 @@ async function getPositionItems() {
   }
 }
 
-function useGetPositionItems() {
-  const query = useQuery(['positionItemsCache'], () => getPositionItems(), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
-
+function useAddApproval() {
+  const query = useMutation((approval: any) => addApproval(approval));
   return query;
 }
 
-export default useGetPositionItems;
+export default useAddApproval;
