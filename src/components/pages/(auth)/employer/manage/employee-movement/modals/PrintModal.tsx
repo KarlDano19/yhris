@@ -201,12 +201,8 @@ function PrintModal({
                     isEdit={false}
                   />
                   <ReccomendationPrint
-                    register={register}
                     onSubmit={() => {}}
-                    isLoading={false}
-                    setValue={setValue}
                     approvals={approvals}
-                    currentUserApproval={currentUserApproval}
                   />
                 </div>
               </Dialog.Panel>

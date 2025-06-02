@@ -11,6 +11,7 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+
 function EmployeeProfile({
   control,
   register,

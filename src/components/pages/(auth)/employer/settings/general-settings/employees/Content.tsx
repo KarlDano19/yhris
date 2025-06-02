@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useState } from 'react';
 
 import Link from 'next/link';
-
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import Location from './tabs/Location';
 import Department from './tabs/Department';
 import Position from './tabs/Position';
+
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 const Content = () => {
   const [activeTab, setActiveTab] = useState('location');

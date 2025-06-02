@@ -13,8 +13,8 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
-import DeleteIcon from '@/svg/DeleteIcon';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import DeleteIcon from '@/svg/DeleteIcon';
 import EditIcon from '@/svg/EditIcon';
 
 type PaginationProps = {
@@ -241,7 +241,7 @@ const Content = () => {
             <div className='flex-1 flex justify-end'>
               <button
                 onClick={() => setIsAddLocationModalOpen(true)}
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
               >
                 CREATE
               </button>
