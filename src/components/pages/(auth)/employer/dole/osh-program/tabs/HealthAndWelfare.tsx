@@ -306,7 +306,11 @@ export default function HealthAndWelfare({
                   id="special_medical_surveillance_other"
                   placeholder="Please specify"
                   className="rounded-md w-full max-w-xs border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                  value={watch("special_medical_surveillance_other") || ""}
+                  value={(() => {
+                    const values = watch("special_medical_surveillance") || [];
+                    const othersValue = values.find((item: string) => item && item.startsWith("Others:"));
+                    return othersValue ? othersValue.replace("Others: ", "") : "";
+                  })()}
                   onChange={(e) => {
                     const otherValue = e.target.value;
                     setValue("special_medical_surveillance_other", otherValue);
