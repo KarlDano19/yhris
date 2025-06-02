@@ -60,6 +60,9 @@ export default function SafetyMeasures({
     const currentSignage = watch("safety_signage");
     if (typeof currentSignage === "string" && currentSignage !== previousSignageFile) {
       setPreviousSignageFile(currentSignage);
+      // Update currentFileUrl with the new signage URL and timestamp
+      const timestamp = new Date().getTime();
+      setCurrentFileUrl(`${currentSignage}?t=${timestamp}`);
     }
   }, [watch("safety_signage"), previousSignageFile]);
   
@@ -70,6 +73,9 @@ export default function SafetyMeasures({
     if (typeof signage === "string") {
       setPreviousSignageFile(signage);
       setSafetySignageAttachmentExist(true);
+      // Update currentFileUrl with the new signage URL and timestamp
+      const timestamp = new Date().getTime();
+      setCurrentFileUrl(`${signage}?t=${timestamp}`);
     }
   }, [watch, setSafetySignageAttachmentExist]);
 

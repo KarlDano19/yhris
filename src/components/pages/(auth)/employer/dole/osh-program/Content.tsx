@@ -231,13 +231,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Handle successful submission
   const handleSuccessfulSubmission = (): void => {
-    // Reset file upload states after successful save
-    if (selectedTab === 2) {
-      handleSignatureReset();
-    } else if (selectedTab === 5) {
-      handleSafetySignageReset();
-    }
-    
     // Refresh data from backend to ensure frontend state is in sync
     refetch().then(() => {
       toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
@@ -245,47 +238,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Still show success message even if refetch fails
       toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
     });
-  };
-
-  // Handle signature reset after submission
-  const handleSignatureReset = (): void => {
-    const currentSignature = watch("signature");
-    const signatureSource = watch("signature_source");
-    
-    if (currentSignature) {
-      if (typeof currentSignature === 'string') {
-        setValue("signature", currentSignature);
-        setValue("previous_signature", currentSignature);
-        setValue("signature_source", signatureSource);
-      } else if (currentSignature instanceof File) {
-        // If it's a File, we need to wait for the backend to process it
-        // The backend will return the URL in the next data fetch
-        setValue("signature", currentSignature);
-        setValue("signature_source", signatureSource);
-      }
-    }
-  };
-
-  // Handle safety signage reset after submission
-  const handleSafetySignageReset = (): void => {
-    const currentSignage = watch("safety_signage");
-    if (currentSignage) {
-      if (typeof currentSignage === 'string') {
-        setValue("safety_signage", currentSignage);
-        setValue("previous_safety_signage", currentSignage);
-        setSafetySignageUrl(currentSignage);
-        setSafetySignageAttachmentExist(true);
-      } else if (currentSignage instanceof File) {
-        // If it's a File, we need to wait for the backend to process it
-        // The backend will return the URL in the next data fetch
-        setValue("safety_signage", currentSignage);
-        setSafetySignageAttachmentExist(true);
-        setSafetySignageUrl("");
-      }
-    } else {
-      setSafetySignageAttachmentExist(false);
-      setSafetySignageUrl("");
-    }
   };
 
   useEffect(() => {

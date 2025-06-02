@@ -50,6 +50,10 @@ export default function ProgramAndPolicy({
       // Clear previews when we have a saved signature URL
       setDrawnSignaturePreview("");
       setUploadedSignaturePreview("");
+      
+      // Update currentFileUrl with the new signature URL
+      const timestamp = new Date().getTime();
+      setCurrentFileUrl(`${currentSignature}?t=${timestamp}`);
       return;
     }
 
@@ -148,7 +152,8 @@ export default function ProgramAndPolicy({
   const openImagePreview = (imageUrl: string) => {
     // Add a timestamp query parameter to prevent caching
     const timestamp = new Date().getTime();
-    setCurrentFileUrl(`${imageUrl}?t=${timestamp}`);
+    const urlWithTimestamp = `${imageUrl}?t=${timestamp}`;
+    setCurrentFileUrl(urlWithTimestamp);
     setIsFileModalOpen(true);
   };
 
