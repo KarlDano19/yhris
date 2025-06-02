@@ -25,7 +25,6 @@ export default function FilePreviewModal({
   const [hasError, setHasError] = useState(false);
   const [normalizedUrl, setNormalizedUrl] = useState('');
   const [fileType, setFileType] = useState<'image' | 'pdf' | 'other'>('other');
-  const [pdfDisplayMethod, setPdfDisplayMethod] = useState<'iframe' | 'object'>('iframe');
   const cancelButtonRef = useRef(null);
   
   // Use imageUrl if fileUrl is not provided (for backward compatibility)
@@ -170,29 +169,13 @@ export default function FilePreviewModal({
     } else if (fileType === 'pdf') {
       return (
         <div className="w-full h-[70vh] flex flex-col">
-          {pdfDisplayMethod === 'iframe' ? (
-            <iframe 
-              src={`${normalizedUrl}#toolbar=1&view=FitH`} 
-              className="w-full h-full border-0"
-              title={fileName || "PDF Preview"}
-              allowFullScreen
-            />
-          ) : (
-            <object
-              data={normalizedUrl}
-              type="application/pdf"
-              className="w-full h-full"
-            >
-              <p>It appears your browser doesn't support PDF viewing.</p>
-            </object>
-          )}
-          <div className="mt-2 text-center flex justify-center gap-4">
-            <button
-              onClick={() => setPdfDisplayMethod(prev => prev === 'iframe' ? 'object' : 'iframe')}
-              className="text-savoy-blue hover:underline text-sm"
-            >
-              {pdfDisplayMethod === 'iframe' ? 'Try alternative viewer' : 'Switch to standard viewer'}
-            </button>
+          <iframe 
+            src={`${normalizedUrl}#toolbar=1&view=FitH`} 
+            className="w-full h-full border-0"
+            title={fileName || "PDF Preview"}
+            allowFullScreen
+          />
+          <div className="mt-2 text-center">
             <a 
               href={normalizedUrl} 
               target="_blank" 
