@@ -7,14 +7,12 @@ import { Controller } from "react-hook-form";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
 
 import ClipIcon from "@/svg/ClipIcon";
 
-import ImagePreviewModal from "../modals/ImagePreviewModal";
+import FilePreviewModal from "../modals/FilePreviewModal";
 import CustomDatePicker from "@/components/CustomDatePicker";
-
-import { useImageUrlHelpers } from "../hooks/useImageUrlHelpers";
 
 export default function SafetyMeasures({
   control,
@@ -41,23 +39,21 @@ export default function SafetyMeasures({
     () => dynamic(() => import("react-quill"), { ssr: false }),
     []
   );
-  const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [previousSignageFile, setPreviousSignageFile] = useState<string>("");
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [currentImageUrl, setCurrentImageUrl] = useState("");
   
-  const { getSignageImageUrl } = useImageUrlHelpers();
+  // For file preview - consolidated for both images and other files
+  const [isFileModalOpen, setIsFileModalOpen] = useState(false);
+  const [currentFileUrl, setCurrentFileUrl] = useState("");
+  const [currentFileName, setCurrentFileName] = useState("");
+  const [previewTitle, setPreviewTitle] = useState("Attachment Preview");
 
   useEffect(() => {
     if (safetySignageUrl) {
-      setValue("signature", safetySignageUrl);
+      setValue("safety_signage", safetySignageUrl);
     } else {
       setSafetySignageUrl("");
     }
-    if (!drawSignatureModal && safetySignageUrl) {
-      setSafetySignageUrl("");
-    }
-  }, [safetySignageUrl, setValue, drawSignatureModal]);
+  }, [safetySignageUrl, setValue]);
 
   // Track safety signage file changes from form data
   useEffect(() => {
@@ -95,12 +91,16 @@ export default function SafetyMeasures({
     name: "drills",
   });
 
-  const openImagePreview = (fileName: string) => {
-    const imageUrl = getSignageImageUrl(fileName);
+  // Unified file preview function for both images and other files
+  const openFilePreview = (fileUrl: string, fileName: string = '', title: string = 'Attachment Preview') => {
+    if (!fileUrl) return;
+    
     // Add a timestamp query parameter to prevent caching
     const timestamp = new Date().getTime();
-    setCurrentImageUrl(`${imageUrl}?t=${timestamp}`);
-    setIsImageModalOpen(true);
+    setCurrentFileUrl(`${fileUrl}?t=${timestamp}`);
+    setCurrentFileName(fileName);
+    setPreviewTitle(title);
+    setIsFileModalOpen(true);
   };
 
   return (
@@ -237,8 +237,7 @@ export default function SafetyMeasures({
                     type="button"
                     className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
                     onClick={() => {
-                      const fileName = previousSignageFile.split('/').pop();
-                      openImagePreview(fileName || "");
+                      openFilePreview(previousSignageFile, '', 'Safety Signage');
                     }}
                   >
                     View Safety Signage
@@ -257,14 +256,6 @@ export default function SafetyMeasures({
             </div>
           </div>
         </div>
-        {/* Image Preview Modal */}
-        <ImagePreviewModal
-          isOpen={isImageModalOpen}
-          onClose={() => setIsImageModalOpen(false)}
-          imageUrl={currentImageUrl}
-          title="Safety Signage"
-        />
-        
         <div className="grid grid-cols-2 gap-6 mt-4">
           <div className="sm:col-span-4 mt-4 mb-4">
             <label
@@ -405,12 +396,21 @@ export default function SafetyMeasures({
                           }
                         }}
                       />
-                      <label
-                        htmlFor={`adequate_supply_of_drinking_water_attachment`}
-                        className="cursor-pointer items-center"
-                      >
-                        <ClipIcon hasFile={!!watch("adequate_supply_of_drinking_water_attachment")} />
-                      </label>
+                      <div className="flex items-center justify-center gap-2">
+                        <label
+                          htmlFor={`adequate_supply_of_drinking_water_attachment`}
+                          className="cursor-pointer"
+                        >
+                          <ClipIcon hasFile={!!watch("adequate_supply_of_drinking_water_attachment")} />
+                        </label>
+                        
+                        {!!watch("adequate_supply_of_drinking_water_attachment") && typeof watch("adequate_supply_of_drinking_water_attachment") === 'string' && (
+                          <EyeIcon 
+                            className="h-5 w-5 text-savoy-blue cursor-pointer"
+                            onClick={() => openFilePreview(watch("adequate_supply_of_drinking_water_attachment"))}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                   <tr className="cursor-pointer border-b border-gray-200">
@@ -468,9 +468,7 @@ export default function SafetyMeasures({
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                       <input
                         id={`adequate_sanitary_and_washing_facilities_attachment`}
-                        {...register(
-                          `adequate_sanitary_and_washing_facilities_attachment`
-                        )}
+                        {...register(`adequate_sanitary_and_washing_facilities_attachment`)}
                         type="file"
                         className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                         onChange={(e) => {
@@ -480,12 +478,21 @@ export default function SafetyMeasures({
                           }
                         }}
                       />
-                      <label
-                        htmlFor={`adequate_sanitary_and_washing_facilities_attachment`}
-                        className="cursor-pointer items-center"
-                      >
-                        <ClipIcon hasFile={!!watch("adequate_sanitary_and_washing_facilities_attachment")} />
-                      </label>
+                      <div className="flex items-center justify-center gap-2">
+                        <label
+                          htmlFor={`adequate_sanitary_and_washing_facilities_attachment`}
+                          className="cursor-pointer"
+                        >
+                          <ClipIcon hasFile={!!watch("adequate_sanitary_and_washing_facilities_attachment")} />
+                        </label>
+                        
+                        {!!watch("adequate_sanitary_and_washing_facilities_attachment") && typeof watch("adequate_sanitary_and_washing_facilities_attachment") === 'string' && (
+                          <EyeIcon 
+                            className="h-5 w-5 text-savoy-blue cursor-pointer"
+                            onClick={() => openFilePreview(watch("adequate_sanitary_and_washing_facilities_attachment"))}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                   <tr className="cursor-pointer border-b border-gray-200">
@@ -551,12 +558,21 @@ export default function SafetyMeasures({
                           }
                         }}
                       />
-                      <label
-                        htmlFor={`suitable_living_accommodation_attachment`}
-                        className="cursor-pointer items-center"
-                      >
-                        <ClipIcon hasFile={!!watch("suitable_living_accommodation_attachment")} />
-                      </label>
+                      <div className="flex items-center justify-center gap-2">
+                        <label
+                          htmlFor={`suitable_living_accommodation_attachment`}
+                          className="cursor-pointer"
+                        >
+                          <ClipIcon hasFile={!!watch("suitable_living_accommodation_attachment")} />
+                        </label>
+                        
+                        {!!watch("suitable_living_accommodation_attachment") && typeof watch("suitable_living_accommodation_attachment") === 'string' && (
+                          <EyeIcon 
+                            className="h-5 w-5 text-savoy-blue cursor-pointer"
+                            onClick={() => openFilePreview(watch("suitable_living_accommodation_attachment"))}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                   <tr className="cursor-pointer border-b border-gray-200">
@@ -627,12 +643,21 @@ export default function SafetyMeasures({
                           }
                         }}
                       />
-                      <label
-                        htmlFor={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
-                        className="cursor-pointer items-center"
-                      >
-                        <ClipIcon hasFile={!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment")} />
-                      </label>
+                      <div className="flex items-center justify-center gap-2">
+                        <label
+                          htmlFor={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
+                          className="cursor-pointer"
+                        >
+                          <ClipIcon hasFile={!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment")} />
+                        </label>
+                        
+                        {!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment") && typeof watch("separate_sanitary_washing_and_sleeping_facilities_attachment") === 'string' && (
+                          <EyeIcon 
+                            className="h-5 w-5 text-savoy-blue cursor-pointer"
+                            onClick={() => openFilePreview(watch("separate_sanitary_washing_and_sleeping_facilities_attachment"))}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                   <tr className="cursor-pointer border-b border-gray-200">
@@ -698,12 +723,21 @@ export default function SafetyMeasures({
                           }
                         }}
                       />
-                      <label
-                        htmlFor={`lactation_station_attachment`}
-                        className="cursor-pointer items-center"
-                      >
-                        <ClipIcon hasFile={!!watch("lactation_station_attachment")} />
-                      </label>
+                      <div className="flex items-center justify-center gap-2">
+                        <label
+                          htmlFor={`lactation_station_attachment`}
+                          className="cursor-pointer"
+                        >
+                          <ClipIcon hasFile={!!watch("lactation_station_attachment")} />
+                        </label>
+                        
+                        {!!watch("lactation_station_attachment") && typeof watch("lactation_station_attachment") === 'string' && (
+                          <EyeIcon 
+                            className="h-5 w-5 text-savoy-blue cursor-pointer"
+                            onClick={() => openFilePreview(watch("lactation_station_attachment"))}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                   <tr className="cursor-pointer border-b border-gray-200">
@@ -769,12 +803,21 @@ export default function SafetyMeasures({
                           }
                         }}
                       />
-                      <label
-                        htmlFor={`ramps_railings_and_like_attachment`}
-                        className="cursor-pointer items-center"
-                      >
-                        <ClipIcon hasFile={!!watch("ramps_railings_and_like_attachment")} />
-                      </label>
+                      <div className="flex items-center justify-center gap-2">
+                        <label
+                          htmlFor={`ramps_railings_and_like_attachment`}
+                          className="cursor-pointer"
+                        >
+                          <ClipIcon hasFile={!!watch("ramps_railings_and_like_attachment")} />
+                        </label>
+                        
+                        {!!watch("ramps_railings_and_like_attachment") && typeof watch("ramps_railings_and_like_attachment") === 'string' && (
+                          <EyeIcon 
+                            className="h-5 w-5 text-savoy-blue cursor-pointer"
+                            onClick={() => openFilePreview(watch("ramps_railings_and_like_attachment"))}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                   <tr className="cursor-pointer border-b border-gray-200">
@@ -843,12 +886,21 @@ export default function SafetyMeasures({
                           }
                         }}
                       />
-                      <label
-                        htmlFor={`other_workers_welfare_facilities_attachment`}
-                        className="cursor-pointer items-center"
-                      >
-                        <ClipIcon hasFile={!!watch("other_workers_welfare_facilities_attachment")} />
-                      </label>
+                      <div className="flex items-center justify-center gap-2">
+                        <label
+                          htmlFor={`other_workers_welfare_facilities_attachment`}
+                          className="cursor-pointer"
+                        >
+                          <ClipIcon hasFile={!!watch("other_workers_welfare_facilities_attachment")} />
+                        </label>
+                        
+                        {!!watch("other_workers_welfare_facilities_attachment") && typeof watch("other_workers_welfare_facilities_attachment") === 'string' && (
+                          <EyeIcon 
+                            className="h-5 w-5 text-savoy-blue cursor-pointer"
+                            onClick={() => openFilePreview(watch("other_workers_welfare_facilities_attachment"))}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -1164,6 +1216,15 @@ export default function SafetyMeasures({
           </div>
         </div>
       </div>
+      
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        isOpen={isFileModalOpen}
+        onClose={() => setIsFileModalOpen(false)}
+        fileUrl={currentFileUrl}
+        fileName={currentFileName}
+        title={previewTitle}
+      />
     </form>
   );
 }

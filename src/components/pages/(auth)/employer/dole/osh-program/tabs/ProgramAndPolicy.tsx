@@ -9,9 +9,7 @@ import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import CustomDatePicker from "@/components/CustomDatePicker";
 
 import DrawSignatureModal from "../modals/DrawSignatureModal";
-import ImagePreviewModal from "../modals/ImagePreviewModal";
-
-import { useImageUrlHelpers } from "../hooks/useImageUrlHelpers";
+import FilePreviewModal from "../modals/FilePreviewModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -38,10 +36,8 @@ export default function ProgramAndPolicy({
   const [uploadedSignaturePreview, setUploadedSignaturePreview] = useState<string>("");
   const [signatureAttachmentExist, setSignatureAttachmentExist] = useState(false);
   const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [currentImageUrl, setCurrentImageUrl] = useState("");
-  
-  const { getSignatureImageUrl } = useImageUrlHelpers();
+  const [isFileModalOpen, setIsFileModalOpen] = useState(false);
+  const [currentFileUrl, setCurrentFileUrl] = useState("");
 
   // Track current signature source and file
   useEffect(() => {
@@ -149,12 +145,11 @@ export default function ProgramAndPolicy({
     }
   }, [signatureUrl, setValue]);
 
-  const openImagePreview = (fileName: string) => {
-    const imageUrl = getSignatureImageUrl(fileName);
+  const openImagePreview = (imageUrl: string) => {
     // Add a timestamp query parameter to prevent caching
     const timestamp = new Date().getTime();
-    setCurrentImageUrl(`${imageUrl}?t=${timestamp}`);
-    setIsImageModalOpen(true);
+    setCurrentFileUrl(`${imageUrl}?t=${timestamp}`);
+    setIsFileModalOpen(true);
   };
 
   // Function to render view signature button
@@ -169,8 +164,8 @@ export default function ProgramAndPolicy({
             type="button"
             className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
             onClick={() => {
-              const fileName = currentSignature.split('/').pop();
-              openImagePreview(fileName || "");
+              // Use the complete URL directly
+              openImagePreview(currentSignature);
             }}
           >
             View Signature
@@ -404,11 +399,11 @@ export default function ProgramAndPolicy({
           setPreviewUrl={setDrawnSignaturePreview}
         />
       )}
-      {/* Image Preview Modal */}
-      <ImagePreviewModal
-        isOpen={isImageModalOpen}
-        onClose={() => setIsImageModalOpen(false)}
-        imageUrl={currentImageUrl}
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        isOpen={isFileModalOpen}
+        onClose={() => setIsFileModalOpen(false)}
+        fileUrl={currentFileUrl}
         title="Signature"
       />
     </form>
