@@ -48,6 +48,18 @@ const Content = () => {
   const onSubmit = (data: T_UserPassword) => {
     data.code = urlToken;
     if (data.password !== '' || data.confirmPassword !== '') {
+      // Check if password meets all requirements
+      const requirements = getPasswordRequirements(data.password);
+      const allRequirementsMet = Object.values(requirements).every(req => req === true);
+      
+      if (!allRequirementsMet) {
+        toast.custom(
+          () => <CustomToast message={'Password does not meet all requirements'} type='error' />,
+          { duration: 4000 }
+        );
+        return;
+      }
+      
       if (data.password === data.confirmPassword) {
         const callBackReq = {
           onSuccess: (data: any) => {
@@ -122,10 +134,10 @@ const Content = () => {
                     <h1 className='text-xl text-center font-bold leading-none tracking-tight text-indigo-dye lg:text-3xl mb-2'>
                       Change Your Password
                     </h1>
-                    <p className='text-center text-[#6F829B]'>
+                    {/* <p className='text-center text-[#6F829B]'>
                       Please make sure your password contains one lowercase
                       letter, one number, and atleast 12 characters long.
-                    </p>
+                    </p> */}
                   </div>
                   <form onSubmit={handleSubmit(onSubmit)}>
                     <div className='mb-6'>
