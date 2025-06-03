@@ -33,37 +33,19 @@ export default function FilePreviewModal({
   // Normalize the URL to prevent duplicate URLs
   useEffect(() => {
     if (effectiveUrl) {
-      // Check if the URL is already a duplicate
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const mediaPrefix = '/media/';
+      // Add a cache-busting timestamp to prevent browser caching
+      const timestamp = new Date().getTime();
       
-      // Check for duplicate URLs (URL contains itself)
-      if (effectiveUrl.includes(apiUrl + mediaPrefix) && effectiveUrl.indexOf(apiUrl + mediaPrefix) !== effectiveUrl.lastIndexOf(apiUrl + mediaPrefix)) {
-        // Extract the last valid URL part
-        const lastUrlStart = effectiveUrl.lastIndexOf(apiUrl + mediaPrefix);
-        setNormalizedUrl(effectiveUrl.substring(lastUrlStart));
-      } 
-      // Check for URLs that start with http:// or https:// twice
-      else if ((effectiveUrl.startsWith('http://') || effectiveUrl.startsWith('https://')) &&
-               (effectiveUrl.indexOf('http://', 1) > 0 || effectiveUrl.indexOf('https://', 1) > 0)) {
-        const secondHttpIndex = Math.max(
-          effectiveUrl.indexOf('http://', 1), 
-          effectiveUrl.indexOf('https://', 1)
-        );
-        setNormalizedUrl(effectiveUrl.substring(secondHttpIndex));
-      }
-      // Check for URLs that start with /media/ twice
-      else if (effectiveUrl.startsWith(mediaPrefix) && effectiveUrl.indexOf(mediaPrefix, 1) > 0) {
-        const secondMediaIndex = effectiveUrl.indexOf(mediaPrefix, 1);
-        setNormalizedUrl(effectiveUrl.substring(secondMediaIndex));
-      }
-      else {
-        setNormalizedUrl(effectiveUrl);
-      }
+      // Remove any existing query parameters before adding timestamp
+      const baseUrl = effectiveUrl.includes('?') 
+        ? effectiveUrl.split('?')[0] 
+        : effectiveUrl;
+      
+      setNormalizedUrl(`${baseUrl}?t=${timestamp}`);
       
       // If imageUrl is provided, assume it's an image
       if (imageUrl && !fileUrl) {
-        setFileType('image');
+        setFileType('image');                                                                                                                                                                                                                                                                                                                                 
         return;
       }
       
