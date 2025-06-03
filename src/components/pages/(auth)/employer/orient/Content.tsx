@@ -68,7 +68,6 @@ const Content = () => {
     if (cachedUserDetails?.state?.data) {
       setLoginType(cachedUserDetails.state.data.login_type);
     }
-    console.log(cachedUserDetails);
   }, [cachedUserDetails]);
 
   useEffect(() => {
