@@ -1178,8 +1178,10 @@ export default function SafetyMeasures({
             Compliance with Reportorial Government Requirements
           </label>
           <h1 className="text-sm text-gray-500 mt-2">
-            Please refer to Accident/Incident/Injury investigation recording and
-            reporting
+            Please refer to <span> </span>
+            <span className="text-[#355FD0] underline cursor-pointer font-medium"
+            >Accident/Incident/Injury investigation recording and reporting
+            </span>
           </h1>
         </div>
         <div className="mt-2">
@@ -1190,7 +1192,10 @@ export default function SafetyMeasures({
             Control and management of hazards
           </label>
           <h1 className="text-sm text-gray-500 mt-2">
-            Please Refer to accomplished to HIRAC
+            Please Refer to accomplished to <span> </span>
+            <span className="text-[#355FD0] underline cursor-pointer font-medium"
+            >HIRAC
+            </span>
           </h1>
         </div>
         <div className="sm:col-span-4 mt-4">
