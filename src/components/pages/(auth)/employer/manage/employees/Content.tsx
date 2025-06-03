@@ -25,8 +25,8 @@ import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from "@/svg/EditIcon";
-import DeleteIcon from "@/svg/DeleteIcon";
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 type PaginationProps = {
   totalRecords: number;
@@ -47,7 +47,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isAgreementAccepted, setIsAgreementAccepted] = useState<boolean>(false);
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
-  const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);;
+  const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
@@ -83,7 +83,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const menuOptions = [
     {
-      name: "Download Template",
+      name: 'Download Template',
       action: () => {
         setIsExportTemplateModalOpen(true);
       },
@@ -130,7 +130,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     employeeListRefetch();
   }, [currentPage, pageSize]);
-
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -208,9 +207,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>{item.address}</td>
-          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
-            <div className="flex space-x-2">
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
+            {item.address}
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+            <div className='flex space-x-2'>
               <button
                 onClick={() => setIsEmployeesEditModalOpen({ id: item.id, open: true })}
                 disabled={!cachedRigths?.state?.data?.edit_employee}
@@ -250,14 +251,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employees</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
+          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
@@ -277,7 +278,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
@@ -294,53 +295,59 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 />
               </div>
             </div>
-            <div className='flex-none lg:w-1/3'>
-              <div className='relative flex items-center'>
-                <input
-                  type='text'
-                  name='search'
-                  id='search'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  value={itemsFilter.search}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setItemsFilter({ ...itemsFilter, search: value });
-                    const filteredItems = employeeItemsAll.filter((item: any) =>
-                      item.firstname.toLowerCase().includes(value.toLowerCase()) ||
-                      item.lastname.toLowerCase().includes(value.toLowerCase())
-                    );
-                    setEmployeeItems(filteredItems); 
-                  }}
-                  placeholder='Search ...'
-                />
-                {itemsFilter.search && (
-                  <ul className='absolute mt-10 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'>
-                    {employeeItemsAll.filter((item: any) =>
-                      item.firstname.toLowerCase().includes(itemsFilter.search.toLowerCase()) ||
-                      item.lastname.toLowerCase().includes(itemsFilter.search.toLowerCase())
-                    ).map((item: any) => (
-                      <li 
-                        key={item.id} 
-                        className='px-3 py-2 hover:bg-gray-200 cursor-pointer'
-                        onClick={() => {
-                          setItemsFilter({ ...itemsFilter, search: `${item.firstname} ${item.lastname}` }); 
-                          setEmployeeItems([item]); 
-                        }}
-                      >
-                        {item.firstname} {item.lastname}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+            <div className='flex gap-2 lg:w-1/3'>
+              <div className='flex-none w-11/12 lg:w-1/3'>
+                <div className='relative flex items-center'>
+                  <input
+                    type='text'
+                    name='search'
+                    id='search'
+                    className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                    value={itemsFilter.search}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setItemsFilter({ ...itemsFilter, search: value });
+                      const filteredItems = employeeItemsAll.filter(
+                        (item: any) =>
+                          item.firstname.toLowerCase().includes(value.toLowerCase()) ||
+                          item.lastname.toLowerCase().includes(value.toLowerCase())
+                      );
+                      setEmployeeItems(filteredItems);
+                    }}
+                    placeholder='Search ...'
+                  />
+                  {itemsFilter.search && (
+                    <ul className='absolute mt-10 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'>
+                      {employeeItemsAll
+                        .filter(
+                          (item: any) =>
+                            item.firstname.toLowerCase().includes(itemsFilter.search.toLowerCase()) ||
+                            item.lastname.toLowerCase().includes(itemsFilter.search.toLowerCase())
+                        )
+                        .map((item: any) => (
+                          <li
+                            key={item.id}
+                            className='px-3 py-2 hover:bg-gray-200 cursor-pointer'
+                            onClick={() => {
+                              setItemsFilter({ ...itemsFilter, search: `${item.firstname} ${item.lastname}` });
+                              setEmployeeItems([item]);
+                            }}
+                          >
+                            {item.firstname} {item.lastname}
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                </div>
               </div>
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={checkIfDateIsValid}
+              >
+                <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
             </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
-              <MagnifyingGlassIcon className='h-5 w-5' />
-            </button>
-            <div className='flex-1 flex justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 onClick={() => setIsAddEmployeeModalOpen(true)}
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
