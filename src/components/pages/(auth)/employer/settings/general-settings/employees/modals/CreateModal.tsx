@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useState, useRef, useEffect } from 'react';
+import { Dispatch, Fragment, useState, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
@@ -8,43 +8,25 @@ import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import useAddLocation from '../hooks/useAddLocation';
 import CustomToast from '@/components/CustomToast';
-import useEditLocationDetails from '../hooks/useEditLocationDetails';
-import useGetLocationDetails from '../hooks/useGetLocationDetails';
+import useAddDepartment from '../hooks/department/useAddDepartment';
+import useAddPosition from '../hooks/position/useAddPosition';
 
-type T_ModalData = {
-  id: number;
-  open: boolean;
-};
-
-export default function EditLocationModal({
-  refetch,
+export default function CreateLocationModal({
+  module,
   isOpen,
   setIsOpen,
+  refetch,
 }: {
+  module: string;
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
   refetch: any;
-  isOpen: T_ModalData;
-  setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
-  const {
-    data: locationDetailsData,
-    refetch: refetchLocationDetails,
-    remove: removeLocation,
-  } = useGetLocationDetails(isOpen.id);
-  const { mutate: editLocation, isLoading: isLoadingEditLocation } = useEditLocationDetails();
-
-  useEffect(() => {
-    if (isOpen) {
-      refetchLocationDetails();
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (locationDetailsData) {
-      setValue('name', locationDetailsData.name);
-    }
-  }, [locationDetailsData]);
+  const { register, handleSubmit, reset, control } = useForm();
+  const { mutate: addLocation, isLoading: isLoadingAddLocation } = useAddLocation();
+  const { mutate: addDepartment, isLoading: isLoadingAddDepartment } = useAddDepartment();
+  const { mutate: addPosition, isLoading: isLoadingAddPosition } = useAddPosition();
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -52,6 +34,8 @@ export default function EditLocationModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
+        setIsOpen(false);
+        reset();
         refetch();
       },
       onError: (err: any) => {
@@ -60,18 +44,18 @@ export default function EditLocationModal({
         });
       },
     };
-    editLocation({ location_id: isOpen.id, data: data }, callbackReq);
+    if (module === 'location') {
+      addLocation(data, callbackReq);
+    } if (module === 'department') {
+      addDepartment(data, callbackReq);
+    } if (module === 'position') {
+      addPosition(data, callbackReq);
+    }
   });
 
-  const customCloseModal = () => {
-    reset();
-    removeLocation();
-    setIsOpen(null);
-  };
-
   return (
-    <Transition.Root show={isOpen ? true : false} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(false)}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -92,15 +76,15 @@ export default function EditLocationModal({
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               enterTo='opacity-100 translate-y-0 sm:scale-100'
               leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+              leaveFrom='opacity-100 translate-y-0 sm:scale-100'  
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Location</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Create {module}</h3>
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
-                <form onSubmit={onSubmit}>
+                <form onSubmit={onSubmit}>      
                   <div className='px-4 pt-4 pb-6'>
                     <label htmlFor='name' className='block text-sm font-medium leading-6 text-gray-900'>
                       Name<span className='text-red-600'> *</span>
@@ -117,7 +101,7 @@ export default function EditLocationModal({
                       <button
                         type='button'
                         className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                        onClick={() => customCloseModal()}
+                        onClick={() => setIsOpen(false)}
                       >
                         Cancel
                       </button>
@@ -125,9 +109,9 @@ export default function EditLocationModal({
                     <button
                       type='submit'
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-                      disabled={isLoadingEditLocation}
+                      disabled={isLoadingAddLocation || isLoadingAddDepartment || isLoadingAddPosition}
                     >
-                      {isLoadingEditLocation && (
+                      {isLoadingAddLocation || isLoadingAddDepartment || isLoadingAddPosition && (
                         <div role='status'>
                           <svg
                             aria-hidden='true'
@@ -148,7 +132,7 @@ export default function EditLocationModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoadingEditLocation && 'Save'}
+                      {!isLoadingAddLocation && !isLoadingAddDepartment && !isLoadingAddPosition && 'Save'}
                     </button>
                   </div>
                 </form>

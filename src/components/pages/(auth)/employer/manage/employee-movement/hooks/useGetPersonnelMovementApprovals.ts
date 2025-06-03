@@ -1,0 +1,51 @@
+import { useQuery } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
+
+async function getPersonnelMovementApprovals(personnelMovementId: number) {
+  try {
+    const token = getCookie('token');
+    const config = {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Token ${token}`,
+      },
+    };
+    if (token) {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/personnel-movements/${personnelMovementId}/approvals/`,
+        config
+      );
+      if (!res.ok) {
+        throw res.json();
+      }
+      return res.json();
+    }
+    return { approvals: [], current_user_approval: null };
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
+  }
+}
+
+function useGetPersonnelMovementApprovals(personnelMovementId: number) {
+  const query = useQuery(
+    ['personnelMovementApprovalsCache', personnelMovementId],
+    () => getPersonnelMovementApprovals(personnelMovementId),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
+
+  return {
+    ...query,
+    approvals: query.data?.approvals || [],
+    currentUserApproval: query.data?.current_user_approval || null,
+  };
+}
+
+export default useGetPersonnelMovementApprovals;

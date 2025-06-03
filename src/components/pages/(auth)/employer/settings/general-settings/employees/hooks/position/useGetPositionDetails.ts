@@ -1,10 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getPositionItems() {
+async function getPositionDetails(position_id: number | null) {
   try {
-    let newFilters = { view_type: 'select' };
-    const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -13,14 +11,11 @@ async function getPositionItems() {
         Authorization: `Token ${token}`,
       },
     };
-    if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/positions/?${searchParams}`, config);
-      if (!res.ok) {
-        throw res.json();
-      }
-      return res.json();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/positions/${position_id}/`, config);
+    if (!res.ok) {
+      throw res.json();
     }
-    return [];
+    return res.json();
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -30,13 +25,13 @@ async function getPositionItems() {
   }
 }
 
-function useGetPositionItems() {
-  const query = useQuery(['positionItemsCache'], () => getPositionItems(), {
+function useGetPositionDetails(position_id: number | null) {
+  const query = useQuery(['positionDetailsCache'], () => getPositionDetails(position_id), {
+    enabled: false,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
-
   return query;
 }
 
-export default useGetPositionItems;
+export default useGetPositionDetails;

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
@@ -21,6 +22,8 @@ import NoticeModal from './modals/NoticeModal';
 import IntroduceModal from './modals/IntroduceModal';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
+import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
+import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
@@ -38,6 +41,9 @@ const Content = () => {
     refetch,
   } = useGetApplicantOrient(Number(params.position), itemsFilter);
   const { mutate, isLoading } = useUpdateApplicantOrient();
+  const { mutate: enrollToYP } = useEnrollEmployeeToYP();
+  const { mutate: syncEmployees } = useSyncEmployees();
+  const [loginType, setLoginType] = useState<string | null>(null);
   const [isSendContractModalOpen, setIsSendContractModalOpen] = useState(false);
   const [isOrientOptionModalOpen, setIsOrientOptionModalOpen] = useState(false);
   const [isSuccessSendContractModalOpen, setIsSuccessSendContractModalOpen] = useState(false);
@@ -55,6 +61,14 @@ const Content = () => {
   const [isSuccessIntroducedModalOpen, setSuccessIsIntroducedModalOpen] = useState(false);
   const [isSignInPayrollModalOpen, setIsSignInPayrollModalOpen] = useState(false);
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+
+  useEffect(() => {
+    if (cachedUserDetails?.state?.data) {
+      setLoginType(cachedUserDetails.state.data.login_type);
+    }
+  }, [cachedUserDetails]);
 
   useEffect(() => {
     if (applicationOrient) {
@@ -119,25 +133,62 @@ const Content = () => {
   const setEnrolled = (id: any) => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
-    orientItemCopy[itemIndex].id = id;
-    orientItemCopy[itemIndex].actionType = 'update_status';
-    orientItemCopy[itemIndex].emailType = 'enrolled';
-    orientItemCopy[itemIndex].isEnrolled = true;
-    const callbackReq = {
-      onSuccess: (data: any) => {
-        setOrientItems([...orientItemCopy]);
-        setIsEnrollModalOpen(true);
-        toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
-          duration: 5000,
-        });
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
-      },
+    
+    const updateOrientationStatus = () => {
+      orientItemCopy[itemIndex].id = id;
+      orientItemCopy[itemIndex].actionType = 'update_status';
+      orientItemCopy[itemIndex].emailType = 'enrolled';
+      orientItemCopy[itemIndex].isEnrolled = true;
+      
+      mutate(orientItemCopy[itemIndex], {
+        onSuccess: (data: any) => {
+          setOrientItems([...orientItemCopy]);
+          setIsEnrollModalOpen(true);
+          toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
+            duration: 5000,
+          });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
     };
-    mutate(orientItemCopy[itemIndex], callbackReq);
+
+    if (loginType !== 'password') {
+      // First sync employees if not password login type
+      syncEmployees(undefined, {
+        onSuccess: () => {
+          // Then enroll in payroll system
+          enrollToYP({
+            id,
+            data: {
+              first_name: orientItemCopy[itemIndex].firstname,
+              last_name: orientItemCopy[itemIndex].lastname,
+              email: orientItemCopy[itemIndex].email,
+            }
+          }, {
+            onSuccess: () => {
+              updateOrientationStatus();
+            },
+            onError: (err: any) => {
+              toast.custom(() => <CustomToast message={err} type='error' />, {
+                duration: 7000,
+              });
+            }
+          });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        }
+      });
+    } else {
+      // Skip sync employees and enrollment if password login type
+      updateOrientationStatus();
+    }
   };
 
   const setOriented = () => {
@@ -520,7 +571,7 @@ const Content = () => {
       </NoticeModal>
       <NoticeModal isOpen={isSendOrientLink} setIsOpen={setIsSendOrientLink}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-          Would you like send the orientation link to the New Hire’s registered email or send to his/her new company
+          Would you like send the orientation link to the New Hire's registered email or send to his/her new company
           email?
         </h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
