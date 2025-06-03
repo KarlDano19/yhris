@@ -44,7 +44,7 @@ export default function ComplianceAndCost({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
+                You cannot proceed due to incomplete fields. Please review.
               </h3>
             </div>
           </div>
