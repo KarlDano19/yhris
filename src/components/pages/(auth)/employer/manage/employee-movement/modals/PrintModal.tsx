@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-
 import { useForm } from "react-hook-form";
+import html2canvas from 'html2canvas';
 
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
@@ -77,43 +77,63 @@ function PrintModal({
     e.preventDefault();
     e.stopPropagation();
     
-    const printContent = printRef.current?.innerHTML;
-    if (!printContent) return;
+    // Create a new div element
+    const printDiv = document.createElement('div');
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    // Copy the content of the printRef
+    if (printRef.current) {
+      printDiv.innerHTML = printRef.current.innerHTML;
+    }
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Print Personal Movement Form (PMF)</title>
-          <style>
-            body { 
-              padding: 20px;
-              font-family: Arial, sans-serif;
-            }
-            @media print {
+    // Style the new div to be off-screen
+    printDiv.style.width = '1080px';
+    printDiv.style.height = '100%';
+    printDiv.style.position = 'absolute';
+    printDiv.style.left = '-9999px';
+    printDiv.style.top = '-9999px';
+
+    // Add the new div to the body
+    document.body.appendChild(printDiv);
+
+    // Use html2canvas on the new div
+    html2canvas(printDiv).then((canvas) => {
+      // Remove the temporary div
+      document.body.removeChild(printDiv);
+
+      const imgData = canvas.toDataURL('image/png');
+      const newWindow = window.open('', '_blank');
+      newWindow?.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Print Personal Movement Form (PMF)</title>
+            <style>
               body { 
-                padding: 0;
-                margin: 0;
+                padding: 20px;
+                font-family: Arial, sans-serif;
               }
-            }
-          </style>
-        </head>
-        <body>
-          ${printContent}
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-    
-    // Wait for content to load before printing
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+              @media print {
+                body { 
+                  padding: 0;
+                  margin: 0;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${imgData}" style="width:100%;height:auto;">
+          </body>
+        </html>
+      `);
+      
+      newWindow?.document.close();
+      
+      // Wait for content to load before printing
+      setTimeout(() => {
+        newWindow?.print();
+        newWindow?.close();
+      }, 500);
+    });
   };
 
   return (
@@ -181,12 +201,8 @@ function PrintModal({
                     isEdit={false}
                   />
                   <ReccomendationPrint
-                    register={register}
                     onSubmit={() => {}}
-                    isLoading={false}
-                    setValue={setValue}
                     approvals={approvals}
-                    currentUserApproval={currentUserApproval}
                   />
                 </div>
               </Dialog.Panel>

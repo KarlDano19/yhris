@@ -242,7 +242,7 @@ const Position = () => {
             <div className='flex-1 flex justify-end'>
               <button
                 onClick={() => setIsAddPositionModalOpen(true)}
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
               >
                 CREATE
               </button>

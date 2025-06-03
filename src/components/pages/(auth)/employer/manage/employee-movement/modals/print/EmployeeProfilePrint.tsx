@@ -109,7 +109,8 @@ function EmployeeProfilePrint({
               <span className='text-red-600'>*</span>
             </label>
             <div className='relative mt-2'>
-              <select
+              <h1>{watch('employee') ? `${employeeItems.find((item: any) => item.id === watch('employee'))?.firstname} ${employeeItems.find((item: any) => item.id === watch('employee'))?.lastname}` : ''}</h1>
+              {/* <select
                 disabled={isEdit}
                 id='employee'
                 {...register('employee', { required: true })}
@@ -122,7 +123,7 @@ function EmployeeProfilePrint({
               </select>
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
-              </div>
+              </div> */}
             </div>
           </div>
           <div>
@@ -131,7 +132,8 @@ function EmployeeProfilePrint({
               <span className='text-red-600'>*</span>
             </label>
             <div className='relative mt-2'>
-              <select
+              <h1>{watch('current_position') ? positionItems.find((item: any) => item.id === watch('current_position'))?.name : ''}</h1>
+              {/* <select
                 id='current_position'
                 {...register('current_position', { required: true })}
                 disabled={isEdit}
@@ -148,7 +150,7 @@ function EmployeeProfilePrint({
               </select>
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
-              </div>
+              </div> */}
             </div>
           </div>
           <div>
@@ -157,7 +159,8 @@ function EmployeeProfilePrint({
               <span className='text-red-600'>*</span>
             </label>
             <div className='relative mt-2'>
-              <select
+              <h1>{watch('new_position') ? positionItems.find((item: any) => item.id === watch('new_position'))?.name : ''}</h1>
+              {/* <select
                 id='new_position'
                 {...register('new_position', { required: true })}
                 disabled={isEdit}
@@ -174,7 +177,7 @@ function EmployeeProfilePrint({
               </select>
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
-              </div>
+              </div> */}
             </div>
           </div>
           <div>
@@ -183,7 +186,8 @@ function EmployeeProfilePrint({
               <span className='text-red-600'>*</span>
             </label>
             <div className='relative mt-2'>
-              <div className='space-y-2'>
+              <h1>{watch('reason')}</h1>
+              {/* <div className='space-y-2'>
                 <div>
                   <input
                     type='radio'
@@ -220,15 +224,17 @@ function EmployeeProfilePrint({
                     Appointment
                   </label>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           <div>
-            <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='proposed_rate' className='block text-sm font-medium leading-6 text-gray-900'>
               Proposed Rate
               <span className='text-red-600'>*</span>
             </label>
-            <div className='relative mt-2'>
+            <h1>{watch('proposed_rate')}</h1>
+            <h1>{watch('percentage_increase')}</h1>
+            {/* <div className='relative mt-2'>
               <div className='space-y-2'>
                 <div>
                   <input
@@ -269,7 +275,7 @@ function EmployeeProfilePrint({
                   <span className='ml-2 text-sm text-gray-500'>%</span>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
           <div>
             <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -277,7 +283,8 @@ function EmployeeProfilePrint({
               <span className='text-red-600'>*</span>
             </label>
             <div className="relative mt-2">
-                <Controller
+              <h1>{watch('start_date')}</h1>
+                {/* <Controller
                   control={control}
                   name="start_date"
                   render={({ field }) => (
@@ -294,7 +301,7 @@ function EmployeeProfilePrint({
                       disabled={isEdit}
                     />
                   )}
-                />
+                /> */}
               </div>
           </div>
         </div>
