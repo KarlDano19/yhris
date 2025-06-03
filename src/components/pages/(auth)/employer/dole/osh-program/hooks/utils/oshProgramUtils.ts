@@ -1,9 +1,5 @@
 import { 
-  OSH_PROGRAM_FIELD_MAPPINGS, 
-  OSH_PROGRAM_ALL_BOOLEAN_FIELDS, 
-  OSH_PROGRAM_FILE_FIELDS,
-  OSH_PROGRAM_DATE_FIELDS,
-  OSH_PROGRAM_JSON_FIELDS,
+  OSH_PROGRAM_FIELDS,
   T_OshProgram 
 } from "@/types/osh-program";
 
@@ -14,9 +10,9 @@ export type OshProgramData = Partial<T_OshProgram> & {
 
 // Helper function to apply field mappings (fix case sensitivity issues)
 export function applyFieldMappings(data: OshProgramData): void {
-  for (const [key, value] of Object.entries(OSH_PROGRAM_FIELD_MAPPINGS)) {
+  for (const [key, value] of Object.entries(OSH_PROGRAM_FIELDS.FIELD_MAPPINGS)) {
     if (key in data) {
-      data[value] = data[key];
+      data[value as string] = data[key];
       delete data[key];
     }
   }
@@ -24,7 +20,7 @@ export function applyFieldMappings(data: OshProgramData): void {
 
 // Helper function to format date fields
 export function formatDateFields(data: OshProgramData): void {
-  OSH_PROGRAM_DATE_FIELDS.forEach(field => {
+  OSH_PROGRAM_FIELDS.DATE_FIELDS.forEach(field => {
     if (field in data && data[field]) {
       if (data[field] instanceof Date) {
         data[field] = data[field].toISOString().split('T')[0]; // Format as YYYY-MM-DD
@@ -35,7 +31,7 @@ export function formatDateFields(data: OshProgramData): void {
 
 // Helper function to handle boolean fields
 export function handleBooleanFields(data: OshProgramData): void {
-  OSH_PROGRAM_ALL_BOOLEAN_FIELDS.forEach(field => {
+  OSH_PROGRAM_FIELDS.BOOLEAN_FIELDS.forEach(field => {
     if (field in data) {
       // Convert string 'true'/'false' to boolean
       if (data[field] === 'true') data[field] = true;
@@ -60,7 +56,7 @@ export function populateFormData(formData: FormData, data: OshProgramData): void
       // Add each safety officer with a unique ID
       formData.append('safety_officers', JSON.stringify(
         value.map(officer => ({
-          id: officer.id || `new_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: officer.id || `new_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
           name: officer.name,
           training_and_hours: officer.training_and_hours
         }))
@@ -81,7 +77,7 @@ export function populateFormData(formData: FormData, data: OshProgramData): void
       // Add each health personnel with a unique ID
       formData.append('health_personnel', JSON.stringify(
         value.map(personnel => ({
-          id: personnel.id || `new_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: personnel.id || `new_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
           shift_area_department: personnel.shift_area_department,
           total_workers: personnel.total_workers,
           health_personnel_name: personnel.health_personnel_name,
@@ -101,7 +97,7 @@ export function populateFormData(formData: FormData, data: OshProgramData): void
     }
 
     // Handle other JSON fields
-    if (OSH_PROGRAM_JSON_FIELDS.includes(key) && value !== null) {
+    if (OSH_PROGRAM_FIELDS.JSON_FIELDS.includes(key) && value !== null) {
       if (typeof value === 'object') {
         formData.append(key, JSON.stringify(value));
       } else {

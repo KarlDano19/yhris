@@ -69,6 +69,8 @@ export default function ComplianceAndCost({
                 <div className="relative mt-2">
                 <input
                     type="number"
+                    min="0"
+                    defaultValue={0}
                     {...register("cost_osh_program")}
                     id="cost_osh_program"
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -112,6 +114,8 @@ export default function ComplianceAndCost({
               <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                 <input
                   type="number"
+                  min="0"
+                  defaultValue={0}
                   {...register("ppe_cost")}
                   id="ppe_cost"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -125,6 +129,8 @@ export default function ComplianceAndCost({
               <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                 <input
                   type="number"
+                  min="0"
+                  defaultValue={0}
                   {...register("osh_training_cost")}
                   id="osh_training_cost"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -138,6 +144,8 @@ export default function ComplianceAndCost({
               <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                 <input
                   type="number"
+                  min="0"
+                  defaultValue={0}
                   {...register("safety_signages_cost")}
                   id="safety_signages_cost"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -151,6 +159,8 @@ export default function ComplianceAndCost({
               <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                 <input
                   type="number"
+                  min="0"
+                  defaultValue={0}
                   {...register("machine_guards_cost")}
                   id="machine_guards_cost"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -164,6 +174,8 @@ export default function ComplianceAndCost({
               <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                 <input
                   type="number"
+                  min="0"
+                  defaultValue={0}
                   {...register("medical_examinations_cost")}
                   id="medical_examinations_cost"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -177,6 +189,8 @@ export default function ComplianceAndCost({
               <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                 <input
                   type="number"
+                  min="0"
+                  defaultValue={0}
                   {...register("medical_supplies_cost")}
                   id="medical_supplies_cost"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -204,6 +218,8 @@ export default function ComplianceAndCost({
               <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                 <input
                   type="number"
+                  min="0"
+                  defaultValue={0}
                   {...register("others_cost")}
                   id="others_cost"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"

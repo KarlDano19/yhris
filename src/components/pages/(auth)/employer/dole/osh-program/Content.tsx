@@ -24,16 +24,17 @@ import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
 
 import { 
   T_OshProgram, 
-  ExtendedOshProgram, 
   OSH_PROGRAM_TAB_NUMBER as TabNumber, 
-  OSH_PROGRAM_TAB_FIELDS as tabFields, 
-  OSH_PROGRAM_REQUIRED_FIELDS_BY_TAB as requiredFieldsByTab,
-  OSH_PROGRAM_ALL_BOOLEAN_FIELDS as allBooleanFields,
-  OSH_PROGRAM_SAFETY_MEASURES_BOOLEAN_FIELDS as safetyMeasuresBooleanFields,
-  OSH_PROGRAM_JSON_FIELDS as jsonFields,
-  OSH_PROGRAM_FACILITY_ATTACHMENT_FIELDS as facilityAttachmentFields
+  OSH_PROGRAM_TABS,
+  OSH_PROGRAM_FIELDS,
+  getFacilityFields
 } from "@/types/osh-program";
 
+// Define ExtendedOshProgram type within the file
+type ExtendedOshProgram = Partial<T_OshProgram> & {
+  id?: string;
+  [key: string]: any;
+};
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors } = useForm<ExtendedOshProgram>();
@@ -59,7 +60,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Validate all required fields for the current tab
   const validateRequiredFields = (data: ExtendedOshProgram): boolean => {
     // Validate required fields for current tab
-    const requiredFields = requiredFieldsByTab[selectedTab] || [];
+    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
 
     // Special handling for signature in tab 2
@@ -87,7 +88,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Process the form data for the current tab
   const processFormData = (data: ExtendedOshProgram): ExtendedOshProgram => {
     // Get the fields for the current tab
-    const currentTabFields = tabFields[selectedTab];
+    const currentTabFields = OSH_PROGRAM_TABS.FIELDS[selectedTab];
     
     // Create a new object with only the fields from the current tab
     const processedData: ExtendedOshProgram = {};
@@ -100,7 +101,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Only process fields from the current tab
     currentTabFields.forEach((field: keyof T_OshProgram) => {
       // Skip boolean fields if they're not in the current tab
-      if (allBooleanFields.includes(field as string) && ![4, 5].includes(selectedTab)) {
+      if (OSH_PROGRAM_FIELDS.BOOLEAN_FIELDS.includes(field as string) && ![4, 5].includes(selectedTab)) {
         return;
       }
       
@@ -148,7 +149,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Special handling for file attachments in Tab 5 (Safety Measures)
     if (selectedTab === 5) {
       // Include all the facility attachment fields
-      facilityAttachmentFields.forEach(field => {
+      getFacilityFields().forEach(field => {
         if (data[field] !== undefined) {
           processedData[field] = data[field];
         }
@@ -175,7 +176,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     if (selectedTab === 5) {
       // Handle boolean fields for Safety Measures tab
-      safetyMeasuresBooleanFields.forEach(field => {
+      OSH_PROGRAM_FIELDS.SAFETY_MEASURES_BOOLEAN_FIELDS.forEach(field => {
         if (field in processedData) {
           // Preserve null values, only convert explicit true/false
           const value = processedData[field] as boolean | string | null | undefined;
@@ -189,7 +190,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Process JSON fields
   const processJsonFields = (processedData: ExtendedOshProgram): void => {
-    jsonFields.forEach(field => {
+    OSH_PROGRAM_FIELDS.JSON_FIELDS.forEach(field => {
       if (field in processedData) {
         if (typeof processedData[field] === 'object') {
           processedData[field] = JSON.stringify(processedData[field]);
@@ -441,7 +442,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       }
 
       // Handle boolean fields - preserve null values
-      allBooleanFields.forEach(field => {
+      OSH_PROGRAM_FIELDS.BOOLEAN_FIELDS.forEach(field => {
         // Only set the value if it exists in oshProgramDetails
         if (field in oshProgramDetails) {
           setValue(field, oshProgramDetails[field]);

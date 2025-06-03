@@ -172,6 +172,8 @@ export default function SafetyMeasures({
                       </td>
                       <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                         <input
+                          min="0"
+                          defaultValue={0}
                           type="number"
                           {...register(`ppe.${index}.no_of_workers`)}
                           id={`ppe.${index}.no_of_workers`}
