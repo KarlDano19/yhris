@@ -123,6 +123,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       processSignatureField(data, processedData);
     }
 
+    // Handle safety officers and health personnel arrays
+    if (selectedTab === 4) {
+      processPersonnelData(processedData);
+    }
+
     return processedData;
   };
 
@@ -211,6 +216,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else if (typeof currentSignature === 'string') {
       processedData.signature = currentSignature;
       processedData.signature_source = signatureSource;
+    }
+  };
+
+  // Process safety officers and health personnel data
+  const processPersonnelData = (processedData: ExtendedOshProgram): void => {
+    // Process safety officers
+    if (processedData.safety_officers && Array.isArray(processedData.safety_officers)) {
+      // Filter out empty entries
+      processedData.safety_officers = processedData.safety_officers.filter(officer => 
+        officer && (officer.name || officer.training_and_hours || officer.certificate)
+      );
+    }
+    
+    // Process health personnel
+    if (processedData.health_personnel && Array.isArray(processedData.health_personnel)) {
+      // Filter out empty entries
+      processedData.health_personnel = processedData.health_personnel.filter(personnel => 
+        personnel && (
+          personnel.shift_area_department || 
+          personnel.health_personnel_name || 
+          personnel.facilities || 
+          personnel.attachment
+        )
+      );
     }
   };
 
@@ -315,12 +344,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setValue("duties_and_responsibilities", oshProgramDetails.duties_and_responsibilities);
 
         // OSH Personnel and Facilities - Safety Officer
-        setValue("safety_officer", oshProgramDetails.safety_officer);
-        setValue("safety_officer_attachment", oshProgramDetails.safety_officer_attachment);
+        setValue("safety_officers", oshProgramDetails.safety_officers || []);
         
         // Emergency Occupational Health Personnel and Facilities
-        setValue("health_personnel", oshProgramDetails.health_personnel);
-        setValue("health_personnel_attachment", oshProgramDetails.health_personnel_attachment);
+        setValue("health_personnel", oshProgramDetails.health_personnel || []);
 
         // Safety and Health Promotion, training and education
         setValue("health_training", oshProgramDetails.health_training);

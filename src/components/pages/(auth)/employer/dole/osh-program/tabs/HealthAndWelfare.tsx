@@ -44,7 +44,7 @@ export default function HealthAndWelfare({
     remove: safetyOfficerRemove,
   } = useFieldArray({
     control,
-    name: "safety_officer",
+    name: "safety_officers",
   });
 
   const {
@@ -884,7 +884,9 @@ export default function HealthAndWelfare({
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      ></th>
+                      >
+                        Certificate
+                      </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
@@ -900,44 +902,46 @@ export default function HealthAndWelfare({
                         <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <input
                             type="text"
-                            {...register(`safety_officer.${index}.name`)}
-                            id={`safety_officer.${index}.name`}
+                            {...register(`safety_officers.${index}.name`)}
+                            id={`safety_officers.${index}.name`}
                             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           />
                         </td>
                         <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <input
                             type="text"
-                            {...register(`safety_officer.${index}.training`)}
-                            id={`safety_officer.${index}.training`}
+                            {...register(`safety_officers.${index}.training_and_hours`)}
+                            id={`safety_officers.${index}.training_and_hours`}
                             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           />
                         </td>
                         <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <div className="flex items-center justify-center gap-2">
                             <input
-                              id={`safety_officer_attachment`}
-                              {...register(`safety_officer_attachment`)}
+                              id={`certificate_${item.id || index}`}
                               type="file"
                               className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  setValue('safety_officer_attachment', file);
+                                  // Create a new file with a unique name to prevent browser caching
+                                  const uniqueFileName = `${Date.now()}_${file.name}`;
+                                  const uniqueFile = new File([file], uniqueFileName, { type: file.type });
+                                  setValue(`safety_officers.${index}.certificate`, uniqueFile);
                                 }
                               }}
                             />
                             <label
-                              htmlFor={`safety_officer_attachment`}
+                              htmlFor={`certificate_${item.id || index}`}
                               className="cursor-pointer"
                             >
-                              <ClipIcon hasFile={!!watch(`safety_officer_attachment`)} />
+                              <ClipIcon hasFile={!!watch(`safety_officers.${index}.certificate`)} />
                             </label>
                             
-                            {!!watch(`safety_officer_attachment`) && typeof watch(`safety_officer_attachment`) === 'string' && (
+                            {!!watch(`safety_officers.${index}.certificate`) && typeof watch(`safety_officers.${index}.certificate`) === 'string' && (
                               <EyeIcon 
                                 className="h-5 w-5 text-savoy-blue cursor-pointer"
-                                onClick={() => openFilePreview(watch(`safety_officer_attachment`))}
+                                onClick={() => openFilePreview(watch(`safety_officers.${index}.certificate`))}
                               />
                             )}
                           </div>
@@ -962,8 +966,13 @@ export default function HealthAndWelfare({
                 <button
                   type="button"
                   onClick={(e) => {
-                    e.preventDefault(); // Prevent any default action
-                    safetyOfficerAppend({ id: safetyOfficerAppend.length }); // Add new line
+                    e.preventDefault();
+                    safetyOfficerAppend({ 
+                      id: `new_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                      name: '',
+                      training_and_hours: '',
+                      certificate: null
+                    });
                   }}
                   className="bg-savoy-blue text-white px-4 py-2 rounded-md"
                 >
@@ -1003,32 +1012,7 @@ export default function HealthAndWelfare({
                       </th>
                       <th
                         scope="col"
-                        colSpan={2}
-                        className="px-3py-3.5 text-sm font-semibold text-gray-900"
-                      >
-                        Health Personnel & Facilities
-                      </th>
-                      <th
-                        scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      ></th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      ></th>
-                    </tr>
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      ></th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      ></th>
-                      <th
-                        scope="col"
-                        className="px-3 col-span-2 py-3.5 text-sm font-semibold text-gray-900"
                       >
                         Health Personnel
                       </th>
@@ -1041,7 +1025,9 @@ export default function HealthAndWelfare({
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                      ></th>
+                      >
+                        Attachment
+                      </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
@@ -1057,8 +1043,8 @@ export default function HealthAndWelfare({
                         <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <input
                             type="text"
-                            {...register(`health_personnel.${index}.shift`)}
-                            id={`health_personnel.${index}.shift`}
+                            {...register(`health_personnel.${index}.shift_area_department`)}
+                            id={`health_personnel.${index}.shift_area_department`}
                             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           />
                         </td>
@@ -1067,19 +1053,18 @@ export default function HealthAndWelfare({
                             type="number"
                             min="0"
                             {...register(
-                              `health_personnel.${index}.total_no_of_workers`
+                              `health_personnel.${index}.total_workers`, 
+                              { valueAsNumber: true }
                             )}
-                            id={`health_personnel.${index}.total_no_of_workers`}
+                            id={`health_personnel.${index}.total_workers`}
                             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           />
                         </td>
                         <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <input
                             type="text"
-                            {...register(
-                              `health_personnel.${index}.health_personnel`
-                            )}
-                            id={`health_personnel.${index}.health_personnel`}
+                            {...register(`health_personnel.${index}.health_personnel_name`)}
+                            id={`health_personnel.${index}.health_personnel_name`}
                             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           />
                         </td>
@@ -1094,28 +1079,30 @@ export default function HealthAndWelfare({
                         <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <div className="flex items-center justify-center gap-2">
                             <input
-                              id={`health_personnel_attachment`}
-                              {...register(`health_personnel_attachment`)}
+                              id={`attachment_${item.id || index}`}
                               type="file"
                               className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  setValue('health_personnel_attachment', file);
+                                  // Create a new file with a unique name to prevent browser caching
+                                  const uniqueFileName = `${Date.now()}_${file.name}`;
+                                  const uniqueFile = new File([file], uniqueFileName, { type: file.type });
+                                  setValue(`health_personnel.${index}.attachment`, uniqueFile);
                                 }
                               }}
                             />
                             <label
-                              htmlFor={`health_personnel_attachment`}
+                              htmlFor={`attachment_${item.id || index}`}
                               className="cursor-pointer"
                             >
-                              <ClipIcon hasFile={!!watch(`health_personnel_attachment`)} />
+                              <ClipIcon hasFile={!!watch(`health_personnel.${index}.attachment`)} />
                             </label>
                             
-                            {!!watch(`health_personnel_attachment`) && typeof watch(`health_personnel_attachment`) === 'string' && (
+                            {!!watch(`health_personnel.${index}.attachment`) && typeof watch(`health_personnel.${index}.attachment`) === 'string' && (
                               <EyeIcon 
                                 className="h-5 w-5 text-savoy-blue cursor-pointer"
-                                onClick={() => openFilePreview(watch(`health_personnel_attachment`))}
+                                onClick={() => openFilePreview(watch(`health_personnel.${index}.attachment`))}
                               />
                             )}
                           </div>
@@ -1139,8 +1126,15 @@ export default function HealthAndWelfare({
               <div className="flex justify-start mt-4">
                 <button
                   onClick={(e) => {
-                    e.preventDefault(); // Prevent any default action
-                    healthPersonnelAppend({ id: healthPersonnelAppend.length }); // Add new line
+                    e.preventDefault();
+                    healthPersonnelAppend({
+                      id: `new_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                      shift_area_department: '',
+                      total_workers: 0,
+                      health_personnel_name: '',
+                      facilities: '',
+                      attachment: null
+                    });
                   }}
                   className="bg-savoy-blue text-white px-4 py-2 rounded-md"
                 >

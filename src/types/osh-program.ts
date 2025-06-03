@@ -1,3 +1,19 @@
+export type T_SafetyOfficer = {
+  id?: number | string;
+  name: string;
+  training_and_hours: string;
+  certificate?: File | string | null;
+};
+
+export type T_HealthPersonnel = {
+  id?: number | string;
+  shift_area_department: string;
+  total_workers: number;
+  health_personnel_name: string;
+  facilities: string;
+  attachment?: File | string | null;
+};
+
 export type T_OshProgram = {
     // Tab 1: Company Profile
     company_name: string;
@@ -68,10 +84,8 @@ export type T_OshProgram = {
     duties_and_responsibilities: boolean;
   
     // OSH Personnel
-    safety_officer: any;
-    safety_officer_attachment: File | string;
-    health_personnel: any;
-    health_personnel_attachment: File | string;
+    safety_officers: T_SafetyOfficer[];
+    health_personnel: T_HealthPersonnel[];
     health_training: any;
     risk_assessment: any;
     safety_meeting: any;
@@ -137,8 +151,6 @@ export type T_OshProgram = {
 export const OSH_PROGRAM_FILE_FIELDS = [
   'signature',
   'safety_signage',
-  'safety_officer_attachment',
-  'health_personnel_attachment',
   'adequate_supply_of_drinking_water_attachment',
   'adequate_sanitary_and_washing_facilities_attachment',
   'suitable_living_accommodation_attachment',
@@ -207,13 +219,11 @@ export const OSH_PROGRAM_SAFETY_MEASURES_BOOLEAN_FIELDS = [
 export const OSH_PROGRAM_JSON_FIELDS = [
   'drills',
   'emergency_and_disaster_preparedness',
-  'health_personnel',
   'health_training',
   'ppe',
   'reported_incidents',
   'risk_assessment',
   'safety_meeting',
-  'safety_officer',
   'business_description',
   'routine_medical_surveillance',
   'special_medical_surveillance',
@@ -249,6 +259,8 @@ export type ExtendedOshProgram = Partial<T_OshProgram> & {
   }>;
   signature?: File | string;
   safety_signage?: File | string;
+  safety_officers?: T_SafetyOfficer[];
+  health_personnel?: T_HealthPersonnel[];
 };
 
 // Required fields by tab
@@ -282,7 +294,7 @@ export const OSH_PROGRAM_TAB_FIELDS: OSH_PROGRAM_TAB_FIELDS = {
       'ex_officio_members', 'ex_officio_members_1', 'ex_officio_members_2', 'members',
       'members_2', 'chairperson_joint_coordinating', 'secretary_joint_coordinating',
       'ex_officio_members_3', 'ex_officio_members_4', 'duties_and_responsibilities',
-      'safety_officer', 'safety_officer_attachment', 'health_personnel', 'health_personnel_attachment', 
+      'safety_officers', 'health_personnel', 
       'health_training', 'risk_assessment', 'safety_meeting', 'reported_incidents'],
   5: ['ppe', 'ppe_description', 'safety_signage', 
       'adequate_supply_of_drinking_water', 'adequate_supply_of_drinking_water_remarks', 'adequate_supply_of_drinking_water_attachment',
