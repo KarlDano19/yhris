@@ -7,6 +7,8 @@ import CustomToast from '@/components/CustomToast';
 import useDeleteLocation from '../hooks/useDeleteLocation';
 
 import WarningRed from '@/svg/WarningRed';
+import useDeleteDepartment from '../hooks/department/useDeleteDepartments';
+import useDeletePosition from '../hooks/position/useDeletePosition';
 
 type T_ModalData = {
   id: number;
@@ -14,17 +16,21 @@ type T_ModalData = {
   code?: string;
 };
 
-export default function DeleteLocationModal({
+export default function DeleteModal({
+  module,
   refetch,
   isOpen,
   setIsOpen,
 }: {
+  module: string;
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { mutate, isLoading } = useDeleteLocation();
+  const { mutate: mutateLocation, isLoading: isLocationLoading } = useDeleteLocation();
+  const { mutate: mutateDepartment, isLoading: isDepartmentLoading } = useDeleteDepartment();
+  const { mutate: mutatePosition, isLoading: isPositionLoading } = useDeletePosition();
 
   const onSubmit = () => {
     const callbackReq = {
@@ -37,7 +43,13 @@ export default function DeleteLocationModal({
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    mutate(isOpen.id, callbackReq);
+    if (module === 'location') {
+      mutateLocation(isOpen.id, callbackReq);
+    } else if (module === 'department') {
+      mutateDepartment(isOpen.id, callbackReq);
+    } else if (module === 'position') {
+      mutatePosition(isOpen.id, callbackReq);
+    }
   };
 
   const customCloseModal = () => {
@@ -94,9 +106,9 @@ export default function DeleteLocationModal({
                       type='button'
                       className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
                       onClick={() => onSubmit()}
-                      disabled={isLoading}
+                      disabled={isLocationLoading || isDepartmentLoading}
                     >
-                      {isLoading && (
+                      {isLocationLoading || isDepartmentLoading || isPositionLoading && (
                         <div role='status'>
                           <svg
                             aria-hidden='true'
@@ -117,7 +129,7 @@ export default function DeleteLocationModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoading && 'Yes'}
+                      {!isLocationLoading && !isDepartmentLoading && !isPositionLoading && 'Yes'}
                     </button>
                   </span>
                 </div>

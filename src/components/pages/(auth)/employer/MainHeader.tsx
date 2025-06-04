@@ -19,6 +19,8 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
 import useGetRights from '@/components/hooks/useGetRights';
+import useGetUsers from '@/components/hooks/useGetUsers';
+import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 
 interface ErrorDetail {
   detail: string;
@@ -27,11 +29,13 @@ interface ErrorDetail {
 const MainHeader = () => {
   const [profile, setProfile] = useState<any>({});
   const [userRights, setUserRights] = useState<any>({});
+  const [userDetails, setUserDetails] = useState<any>({});
   const {
     data,
     isLoading: isProfileLoading,
     error,
   } = useGetEmployerProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
+  const { data: usersData, isLoading: isUsersLoading } = useGetUserDetails() as { data: any; isLoading: boolean };
   const { mutate } = useLogout();
 
   const { data: userRightsData, isLoading: isUserRightsLoading } = useGetRights() as { data: any; isLoading: boolean };
@@ -91,6 +95,12 @@ const MainHeader = () => {
       setUserRights(userRightsData);
     }
   }, [userRightsData]);
+
+  useEffect(() => {
+    if (usersData) {
+      setUserDetails(usersData);
+    }
+  }, [usersData]);
 
   const MenuItems = ({ item }: any) => {
     return (

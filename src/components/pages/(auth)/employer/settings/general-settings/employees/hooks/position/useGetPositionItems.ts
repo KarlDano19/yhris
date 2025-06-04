@@ -1,15 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getPositionItems() {
+interface newFiltersProps {
+  search?: string;
+  from?: string;
+  to?: string;
+  current_page?: number;
+  page_size?: number;
+}
+
+async function getPositionItems(filters: any) {
   try {
-    let newFilters = { view_type: 'select' };
-    const searchParams = new URLSearchParams(newFilters);
+    let newFilters: newFiltersProps = {};
+    if (filters.currentPage) newFilters.current_page = filters.currentPage;
+    if (filters.pageSize) newFilters.page_size = filters.pageSize;
+    if (filters.search) newFilters.search = filters.search;
+    const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie('token');
     const config = {
       method: 'GET',
       headers: {
-        'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
     };
@@ -30,12 +40,11 @@ async function getPositionItems() {
   }
 }
 
-function useGetPositionItems() {
-  const query = useQuery(['positionItemsCache'], () => getPositionItems(), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
+function useGetPositionItems(filters: any) {
+  const query = useQuery({
+    queryKey: ['positionItems'],
+    queryFn: () => getPositionItems(filters),
   });
-
   return query;
 }
 
