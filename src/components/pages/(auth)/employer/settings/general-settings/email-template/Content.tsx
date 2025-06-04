@@ -149,10 +149,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
-            <div className='flex-none lg:w-1/3'>
-              <div className='relative flex items-center'>
-                <input
+          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+            <div className='flex gap-2 lg:w-1/3'>
+              <div className='flex-none w-11/12 lg:w-1/3'>
+                <div className='relative flex items-center'>
+                  <input
                   type='text'
                   name='search'
                   id='search'
@@ -166,9 +167,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
               onClick={() => refetchEmailTemplate()}
             >
-              <MagnifyingGlassIcon className='h-5 w-5' />
-            </button>
-            <div className='flex-1 flex justify-end'>
+                <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
+            </div>
+            <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateModalOpen(true)}
