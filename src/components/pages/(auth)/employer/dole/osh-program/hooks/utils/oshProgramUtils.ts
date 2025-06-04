@@ -23,7 +23,13 @@ export function formatDateFields(data: OshProgramData): void {
   OSH_PROGRAM_FIELDS.DATE_FIELDS.forEach(field => {
     if (field in data && data[field]) {
       if (data[field] instanceof Date) {
-        data[field] = data[field].toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        const date = new Date(data[field]);
+        if (!isNaN(date.getTime())) {
+          // Adjust for timezone offset to preserve local date
+          const offset = date.getTimezoneOffset();
+          const adjustedDate = new Date(date.getTime() - offset * 60000);
+          data[field] = adjustedDate.toISOString().split('T')[0];
+        }
       }
     }
   });
