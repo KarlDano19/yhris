@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useGetDirectiveById } from './hooks/useGetDirectiveById';
 import { useSendVerification } from './hooks/useSendVerification';
@@ -8,7 +8,9 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import EmailSelectionModal from './modals/EmailSelectionModal';
 import VerificationCodeModal from './modals/VerificationCodeModal';
+import FilePreviewModal from './modals/FilePreviewModal';
 import useVerifyDirective from './hooks/useVerifyDirective';
+import DropDownArrow from '@/svg/DropDownArrow';
 
 const Content = () => {
   const params = useParams();
@@ -17,6 +19,25 @@ const Content = () => {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState('');
+  
+  // File preview states
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showFilePreviewModal, setShowFilePreviewModal] = useState(false);
+  const [filePreviewUrl, setFilePreviewUrl] = useState('');
+  const [filePreviewTitle, setFilePreviewTitle] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Fetch directive data using our custom hook
   const { 
@@ -48,6 +69,21 @@ const Content = () => {
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
+    }
+  };
+  
+  // Handle file preview
+  const handlePreviewFile = (fileType: 'qr_code' | 'attachments') => {
+    setIsDropdownOpen(false);
+    
+    if (fileType === 'qr_code' && directive?.qr_code) {
+      setFilePreviewUrl(directive.qr_code as string);
+      setFilePreviewTitle('QR Code');
+      setShowFilePreviewModal(true);
+    } else if (fileType === 'attachments' && directive?.attachments) {
+      setFilePreviewUrl(directive.attachments as string);
+      setFilePreviewTitle('Attachment');
+      setShowFilePreviewModal(true);
     }
   };
 
@@ -113,6 +149,9 @@ const Content = () => {
       }
     );
   };
+  
+  // Check if directive has viewable files
+  const hasViewableFiles = directive && (directive.qr_code || directive.signature || directive.attachments);
 
   if (isLoadingDirective) {
     return (
@@ -331,6 +370,51 @@ const Content = () => {
               )}
             </div>
 
+            {/* Attachments dropdown menu */}
+            {hasViewableFiles && (
+              <div className="mb-6 relative w-48" ref={dropdownRef}>
+                <div className="w-full">
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`flex items-center justify-between w-full px-4 py-2.5 text-sm text-gray-900 shadow-sm ${
+                      isDropdownOpen 
+                        ? 'ring-2 ring-inset ring-black focus:ring-black' 
+                        : 'ring-1 ring-inset ring-gray-300'
+                    } rounded-md bg-white hover:bg-gray-50 transition-all`}
+                  >
+                    <span>View Attachments</span>
+                    <span className="ml-2">
+                      <DropDownArrow />
+                    </span>
+                  </button>
+                </div>
+
+                {isDropdownOpen && (
+                  <div className="absolute z-10 mt-1 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1" role="menu" aria-orientation="vertical">
+                      {directive.qr_code && (
+                        <button
+                          className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => handlePreviewFile('qr_code')}
+                        >
+                          View QR Code
+                        </button>
+                      )}
+                      
+                      {directive.attachments && (
+                        <button
+                          className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => handlePreviewFile('attachments')}
+                        >
+                          View Uploaded File
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="mt-20">
               <button
                 onClick={handleConfirm}
@@ -360,6 +444,14 @@ const Content = () => {
               onClose={() => setShowVerificationModal(false)}
               onSubmit={handleVerificationSubmit}
               email={selectedEmail}
+            />
+            
+            {/* File Preview Modal */}
+            <FilePreviewModal
+              isOpen={showFilePreviewModal}
+              onClose={() => setShowFilePreviewModal(false)}
+              fileUrl={filePreviewUrl}
+              title={filePreviewTitle}
             />
           </div>
         </div>
