@@ -38,6 +38,14 @@ export default function CreateMemoModal({
   const { mutate, isLoading } = useAddDirectivesItems();
 
   const onSubmit = handleSubmit((data) => {
+    // Check if To field has any entries
+    if (tagsTo.length === 0) {
+      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, {
+        duration: 5000,
+      });
+      return; // Prevent form submission
+    }
+
     const callbackReq = {
       onSuccess: () => {
         toast.custom(
@@ -358,12 +366,14 @@ export default function CreateMemoModal({
                   <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                     <button
-                      onClick={async () => {
+                      onClick={async (e) => {
                         const title = await trigger('title');
-                        const email = await trigger('to');
-                        const results = [title, email];
+                        // Check tagsTo length directly instead of triggering 'to'
+                        const toFieldValid = tagsTo.length > 0;
+                        const results = [title, toFieldValid];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
+                          e.preventDefault(); // Prevent form submission
                           toast.custom(
                             () => (
                               <CustomToast
@@ -375,6 +385,7 @@ export default function CreateMemoModal({
                               duration: 5000,
                             }
                           );
+                          return false;
                         }
                       }}
                       type='submit'

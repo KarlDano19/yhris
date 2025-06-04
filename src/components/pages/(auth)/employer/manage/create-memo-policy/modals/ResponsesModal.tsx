@@ -125,7 +125,7 @@ export default function EmployeeResponsesModal({
                                 currentResponded.map((read: ReadData) => (
                                   <tr key={read.id} className="border-b border-gray-200">
                                     <td className='py-4 text-sm text-gray-900 pl-4'>{read.email}</td>
-                                    <td className='py-4 text-sm text-gray-900'>{read.read_at}</td>
+                                    <td className='py-4 text-sm text-gray-900' dangerouslySetInnerHTML={{ __html: read.read_at }}></td>
                                   </tr>
                                 ))
                               ) : (
