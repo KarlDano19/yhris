@@ -5,6 +5,7 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      //Localhost
       {
         protocol: 'http',
         hostname: '127.0.0.1',
@@ -17,15 +18,17 @@ const nextConfig = {
         port: '9000',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'yahshua-hris-bucket.s3.amazonaws.com',
-        port: '',
-        pathname: '/**',
-      },
+      //Staging
       {
         protocol: 'https',
         hostname: 'https://s1-api.yahshuahris.com',
+        port: '',
+        pathname: '/**',
+      },
+      //Production
+      {
+        protocol: 'https',
+        hostname: 'yahshua-hris-bucket.s3.amazonaws.com',
         port: '',
         pathname: '/**',
       },
