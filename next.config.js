@@ -21,7 +21,7 @@ const nextConfig = {
       //Staging
       {
         protocol: 'https',
-        hostname: 'https://s1-api.yahshuahris.com',
+        hostname: 's1-api.yahshuahris.com',
         port: '',
         pathname: '/**',
       },
