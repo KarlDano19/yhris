@@ -306,14 +306,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <h2 className="text-xl font-bold text-indigo-dye">
             Annual Medical Report
           </h2>
-          <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
-            <div className="flex-none flex flex-col lg:flex-row items-center gap-2">
+          <div className="mt-6 flex flex-col lg:flex-row items-left gap-4">
+            <div className="flex-none flex flex-col lg:flex-row items-left gap-2">
               <div className="relative">
                 <CustomDatePicker
                   id="from-datepicker"
                   placeholder={"mm/dd/yyyy"}
                   className={
-                    "appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6"
+                    "appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6"
                   }
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
@@ -334,7 +334,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   id="to-datepicker"
                   placeholder={"mm/dd/yyyy"}
                   className={
-                    "appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6"
+                    "appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6"
                   }
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
@@ -352,10 +352,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 />
               </div>
             </div>
-            <div className="flex-none lg:w-1/3">
-              <div className="relative flex items-center">
-                <input
-                  type="text"
+            <div className="flex gap-2 lg:w-1/3">
+              <div className="flex-none w-full lg:w-1/3">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
                   name="search"
                   id="search"
                   className="block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -370,9 +371,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               className="bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100"
               onClick={checkIfDateIsValid}
             >
-              <MagnifyingGlassIcon className="h-5 w-5" />
-            </button>
-            <div className="flex-1 flex justify-end">
+                <MagnifyingGlassIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 flex justify-start lg:justify-end">
               <button
                 className="bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
                 onClick={() => setIsCreateAnnualMedicalReportModalOpen(true)}

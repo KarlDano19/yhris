@@ -27,6 +27,13 @@ export default function AddEmployeeModal({
   const { mutate, isLoading: isLoadingAddEmployee } = useAddEmployee();
 
   const onSubmit = handleSubmit((data) => {
+    if (!data.location) {
+      toast.custom(() => <CustomToast message="Please create a location first" type='error' />, {
+        duration: 5000,
+      });
+      return;
+    }
+
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -260,7 +267,7 @@ export default function AddEmployeeModal({
                             <div className='relative mt-2'>
                               <select
                                 id='location'
-                                {...register('location', { required: "Please create a location" })}
+                                {...register('location')}
                                 className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
                               >
                                 {locationItems && locationItems.map((item: any) => (
@@ -271,9 +278,6 @@ export default function AddEmployeeModal({
                                 <SelectChevronDown />
                               </div>
                             </div>
-                            {errors.location && (
-                              <p className="mt-2 text-sm text-red-600">{errors.location.message as string}</p>
-                            )}
                           </div>
                         </div>
                       </div>
