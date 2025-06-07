@@ -26,8 +26,7 @@ export default function EmployeeResponsesModal({
   const { 
     data: readStatus, 
     isLoading, 
-    error,
-    refetch
+    error
   } = useDirectiveReadStatus(directiveId || 0, {
     enabled: isOpen && !!directiveId // Only fetch when modal is open and directiveId is available
   });
@@ -37,12 +36,9 @@ export default function EmployeeResponsesModal({
     if (isOpen) {
       setCurrentPage(1);
       setNoResponsePage(1);
-      // Manually trigger fetch when modal opens
-      if (directiveId) {
-        refetch();
-      }
+      // We don't need to manually refetch since the query is already enabled when the modal is open
     }
-  }, [isOpen, directiveId, refetch]);
+  }, [isOpen]);
 
   // Pagination for responded employees
   const indexOfLastResponded = currentPage * itemsPerPage;
