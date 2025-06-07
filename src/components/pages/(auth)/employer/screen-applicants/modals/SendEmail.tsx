@@ -69,14 +69,15 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   };
 
   const handleOnSubmit = (data: any) => {
-    const template = dataEmailTemplate.find(
+    const template = data.template ? dataEmailTemplate.find(
       (item: any) => item.id === parseInt(data.template)
-    );
+    ) : null;
+    
     data.email = tagsTo;
     data.cc = tagsCc;
     data.bcc = tagsBcc;
-    data.subject = customSubject || template.subject;
-    data.template = template.subject;
+    data.subject = customSubject || (template?.subject || '');
+    data.template = template?.subject || '';
     handleFormSubmit(data, setIsOpen);
   };
 
@@ -89,42 +90,47 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
               htmlFor="template"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Email Template<span className="text-red-600">*</span>
+              Email Template
             </label>
             <div className="relative mt-2">
               <select
-                {...register("template", { required: true })}
+                {...register("template")}
                 id="template"
                 className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                 onChange={(event) => {
                   const templateId = parseInt(event.target.value);
-                  const template = dataEmailTemplate.find(
-                    (item: any) => item.id === templateId
-                  );
-                  if (template) {
-                    if (actionState.email) {
-                      setTagsTo([actionState.email, ...template.to]);
-                    } else {
-                      setTagsTo(template.to);
+                  if (templateId) {
+                    const template = dataEmailTemplate.find(
+                      (item: any) => item.id === templateId
+                    );
+                    if (template) {
+                      if (actionState.email) {
+                        setTagsTo([actionState.email, ...template.to]);
+                      } else {
+                        setTagsTo(template.to);
+                      }
+                      if (template.bcc) {
+                        setIsBCCOpen(true);
+                        setTagsBcc(template.bcc);
+                      }
+                      if (template.cc) {
+                        setIsCCOPen(true);
+                        setTagsCc(template.cc);
+                      }
+                      setValue("message", template.body);
+                      setValue("subject", template.subject);
                     }
-                    if (template.bcc) {
-                      setIsBCCOpen(true);
-                      setTagsBcc(template.bcc);
-                    }
-                    if (template.cc) {
-                      setIsCCOPen(true);
-                      setTagsCc(template.cc);
-                    }
-                    setValue("message", template.body);
-                    setValue("subject", template.subject);
                   } else {
-                    console.error("Template not found for ID:", templateId);
+                    // Clear template-related fields if no template is selected
+                    setTagsTo(actionState.email ? [actionState.email] : []);
+                    setTagsCc([]);
+                    setTagsBcc([]);
+                    setValue("message", "");
+                    setValue("subject", "");
                   }
                 }}
               >
-                <option value="" disabled>
-                  Select...
-                </option>
+                <option value="">Select...</option>
                 {(dataEmailTemplate || []).map((item: any) => (
                   <option key={item.id} value={item.id}>
                     {item.subject}
