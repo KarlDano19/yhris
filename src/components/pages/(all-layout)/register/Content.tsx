@@ -43,7 +43,7 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch } = useForm<T_Register>();
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
@@ -117,7 +117,7 @@ const Content = () => {
                       </label>
                       <select
                         id='role'
-                        {...register('accountType', { required: true })}
+                        {...register('accountType', { required: "Please select an account type" })}
                         className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
                         defaultValue=''
                         placeholder='Select...'
@@ -131,6 +131,9 @@ const Content = () => {
                       <div className='absolute right-4 top-[46px]'>
                         <DropDownArrow />
                       </div>
+                      {errors.accountType && (
+                        <p className="text-red-600 text-xs mt-1">{errors.accountType.message}</p>
+                      )}
                     </div>
                     <div className='mb-2'>
                       <label htmlFor='email' className='text-sm leading-6 text-gray-900'>
@@ -140,10 +143,13 @@ const Content = () => {
                       <input
                         type='email'
                         id='email'
-                        {...register('email', { required: true })}
+                        {...register('email', { required: "Please enter an email address" })}
                         className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                         tabIndex={2}
                       />
+                      {errors.email && (
+                        <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>
+                      )}
                     </div>
                     {watch('accountType') === 'Applicant' ? (
                       <>
@@ -155,10 +161,13 @@ const Content = () => {
                           <input
                             type='text'
                             id='firstname'
-                            {...register('firstname', { required: true })}
+                            {...register('firstname', { required: "Please enter a first name" })}
                             className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                             tabIndex={2}
                           />
+                          {errors.firstname && (
+                            <p className="text-red-600 text-xs mt-1">{errors.firstname.message}</p>
+                          )}
                         </div>
                         <div className='mb-2'>
                           <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
@@ -180,10 +189,13 @@ const Content = () => {
                           <input
                             type='text'
                             id='lastname'
-                            {...register('lastname', { required: true })}
+                            {...register('lastname', { required: "Please enter a last name" })}
                             className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                             tabIndex={2}
                           />
+                          {errors.lastname && (
+                            <p className="text-red-600 text-xs mt-1">{errors.lastname.message}</p>
+                          )}
                         </div>
                       </>
                     ) : (
@@ -195,10 +207,13 @@ const Content = () => {
                         <input
                           type='text'
                           id='name'
-                          {...register('name', { required: true })}
+                          {...register('name', { required: "Please enter a name" })}
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
                         />
+                        {errors.name && (
+                          <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
+                        )}
                       </div>
                     )}
                     <div className='mb-2'>

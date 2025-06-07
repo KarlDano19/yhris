@@ -11,6 +11,7 @@ import StateContext from '../contexts/StateContext';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import { ContextTypes, StageRequirementsTypes as PropTypes } from '../types';
+import InfoIcon from '@/svg/InfoIcon';
 
 export default function StageRequirements({ title, requirements, handleFormSubmit }: PropTypes) {
   const { setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
@@ -35,9 +36,25 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
     <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
       <form onSubmit={handleOnSubmit}>
         <div className='p-4'>
-          <label htmlFor='requirements' className='text-[15px] block mb-2'>
-            Requirements
-          </label>
+          <div className='flex items-center gap-2'>
+            <label htmlFor='requirements' className='text-[15px] block mb-2'>
+              Requirements
+            </label>
+            <div className='cursor-pointer mb-2' data-tooltip-id='stage-tooltip' data-tooltip-place='bottom'>
+              <InfoIcon />
+            </div>
+            <Tooltip
+              id='stage-tooltip'
+              opacity={1}
+              style={{ fontSize: '10px'}}
+            >
+              <div>
+                <h2 className='text-[12px] font-medium'>
+                  Press enter key or click add button to insert
+                </h2>
+              </div>
+            </Tooltip>
+          </div>
           <div className='border border-[#ACB9CB] p-2 rounded-md flex items-center gap-3 flex-wrap'>
             <input
               value={input}
@@ -53,7 +70,11 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
               data-tooltip-place='bottom'
             />
             <Tooltip id='stage-input-tooltip' style={{ fontSize: '10px' }} />
-            <button type='button' onClick={onClickAdd} className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'>
+            <button
+              type='button'
+              onClick={onClickAdd}
+              className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'
+            >
               ADD
             </button>
           </div>
@@ -80,7 +101,11 @@ export default function StageRequirements({ title, requirements, handleFormSubmi
           >
             Close
           </button>
-          <button type='submit' className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'>
+          <button
+            type='submit'
+            onClick={onClickAdd}
+            className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'
+          >
             Save
           </button>
         </ModalFooterLayout>
