@@ -83,6 +83,12 @@ export default function SendEmailModal({
                 }
                 setValue('message', template.body);
             }
+        } else {
+            // Clear template-related fields if no template is selected
+            setTagsTo(employeeEmail ? [employeeEmail] : []);
+            setTagsCc([]);
+            setTagsBcc([]);
+            setValue('message', '');
         }
     }, [selectedTemplate, dataEmailTemplate, employeeEmail, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
@@ -142,20 +148,18 @@ export default function SendEmailModal({
                         <div className='px-4 pt-4 pb-6'>
                           <div className='sm:col-span-4'>
                             <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                              Email Template<span className='text-red-600'>*</span>
+                              Email Template
                             </label>
                             <div className='relative mt-2'>
                               <select
                                 id='template'
-                                {...register('template', { required: true })}
+                                {...register('template')}
                                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 onChange={(event) => {
                                     setSelectedTemplate(event.target.value);
                                 }}
                               >
-                                <option value='' disabled>
-                                  Select...
-                                </option>
+                                <option value=''>Select...</option>
                                 {(dataEmailTemplate || []).map((item: any) => (
                                   <option key={item.id} value={item.id}>
                                     {item.subject}
