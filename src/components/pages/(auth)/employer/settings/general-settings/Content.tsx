@@ -11,6 +11,7 @@ import EnvelopeIcon from '@/svg/EnvelopeIcon';
 import EmployeeIdLogo from '@/svg/EmployeeIdLogo';
 import HiringLogo from '@/svg/HiringLogo';
 import ThirdPartyPlaformLogo from '@/svg/ThirdPartyPlaformLogo';
+import EmployeeMovementIcon from '@/svg/EmployeeMovementIcon';
 
 const menus = [
   {
@@ -35,6 +36,12 @@ const menus = [
     icon: <ThirdPartyPlaformLogo />,
     text: 'Third Party Platform',
     link: '/settings/general-settings/third-party-platform',
+    isAvailable: true,
+  },
+  {
+    icon: <EmployeeMovementIcon />,
+    text: 'Employee Movement Settings',
+    link: '/settings/general-settings/employee-movement',
     isAvailable: true,
   },
 ];

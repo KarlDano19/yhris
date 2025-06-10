@@ -38,6 +38,14 @@ export default function CreateMemoModal({
   const { mutate, isLoading } = useAddDirectivesItems();
 
   const onSubmit = handleSubmit((data) => {
+    // Check if To field has any entries
+    if (tagsTo.length === 0) {
+      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, {
+        duration: 5000,
+      });
+      return; // Prevent form submission
+    }
+
     const callbackReq = {
       onSuccess: () => {
         toast.custom(
@@ -74,6 +82,22 @@ export default function CreateMemoModal({
     }
   };
 
+  // Handle file attachment upload
+  const handleAttachmentUpload = ({ target }: { target: any }) => {
+    const file = target.files[0];
+    if (!file) return;
+    
+    if (file.size <= 5000000) {
+      // Set the file in the form
+      setValue('attachments', file);
+      setAttachmentExist(true);
+    } else {
+      toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+        duration: 5000,
+      });
+    }
+  };
+
   useEffect(() => {
     if (signatureUrl) {
       setValue('signature', signatureUrl as never);
@@ -83,7 +107,12 @@ export default function CreateMemoModal({
     if (!isOpen && signatureUrl) {
       setSignatureUrl('');
     }
-  }, [signatureUrl, setValue]);
+    
+    // Reset form when modal closes
+    if (!isOpen) {
+      setAttachmentExist(false);
+    }
+  }, [signatureUrl, setValue, isOpen]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -308,22 +337,43 @@ export default function CreateMemoModal({
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
-                        Upload File (Optional)
+                      <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
+                        Attachment
                       </label>
-                      <DragDrop setValue={(value: never) => setValue('attachments', value)} />
+                      <div className='mt-2'>
+                        <input
+                          id='attachments'
+                          type='file'
+                          onChange={handleAttachmentUpload}
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                        />
+                        {attachmentExist ? (
+                          <button
+                            type='button'
+                            className='underline text-savoy-blue text-sm mt-1'
+                            onClick={() => {
+                              setValue('attachments', undefined as any);
+                              setAttachmentExist(false);
+                            }}
+                          >
+                            Remove Attachment
+                          </button>
+                        ) : null}
+                      </div>
                       <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                     </div>
                   </div>
                   <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                     <button
-                      onClick={async () => {
+                      onClick={async (e) => {
                         const title = await trigger('title');
-                        const email = await trigger('to');
-                        const results = [title, email];
+                        // Check tagsTo length directly instead of triggering 'to'
+                        const toFieldValid = tagsTo.length > 0;
+                        const results = [title, toFieldValid];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
+                          e.preventDefault(); // Prevent form submission
                           toast.custom(
                             () => (
                               <CustomToast
@@ -335,6 +385,7 @@ export default function CreateMemoModal({
                               duration: 5000,
                             }
                           );
+                          return false;
                         }
                       }}
                       type='submit'

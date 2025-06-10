@@ -5,7 +5,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import DragDrop from '@/components/DragDrop';
 import useTagTo from '@/components/hooks/useTagTo';
 import RemoveFieldConfirmModal from './RemoveFieldConfirmModal';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
@@ -28,6 +27,7 @@ export default function CreatePolicyModal({
   const [isNextForm, setIsNextForm] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [fieldToRemove, setFieldToRemove] = useState<number | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
   const [inputTo, setInputTo] = useState('');
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control } =
@@ -126,6 +126,30 @@ export default function CreatePolicyModal({
       text.style.width = textLength + 'ch';
     }
   };
+
+  // Handle file attachment upload
+  const handleAttachmentUpload = ({ target }: { target: any }) => {
+    const file = target.files[0];
+    if (!file) return;
+    
+    if (file.size <= 5000000) {
+      // Set the file in the form
+      setValue('attachments', file);
+      setAttachmentExist(true);
+    } else {
+      toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+        duration: 5000,
+      });
+    }
+  };
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setAttachmentExist(false);
+    }
+  }, [isOpen]);
+
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
@@ -365,10 +389,29 @@ export default function CreatePolicyModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
-                          Upload File (Optional)
+                        <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachment
                         </label>
-                        <DragDrop setValue={(value: never) => setValue('attachments', value)} />
+                        <div className='mt-2'>
+                          <input
+                            id='attachments'
+                            type='file'
+                            onChange={handleAttachmentUpload}
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                          />
+                          {attachmentExist ? (
+                            <button
+                              type='button'
+                              className='underline text-savoy-blue text-sm mt-1'
+                              onClick={() => {
+                                setValue('attachments', undefined as any);
+                                setAttachmentExist(false);
+                              }}
+                            >
+                              Remove Attachment
+                            </button>
+                          ) : null}
+                        </div>
                         <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                       </div>
                     </div>

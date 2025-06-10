@@ -10,9 +10,15 @@ async function addDirective(directive: DirectiveData) {
     data.append('directive_type', directive.directive_type || '');
     data.append('title', directive.title);
     data.append('to', JSON.stringify(directive.to));
-    // for (const [index, file] of directive.file.entries()) {
-    //   data.append(`file${index}`, file);
-    // }
+    
+    // Handle attachments as FileField
+    if (directive.attachments) {
+      // For File objects, append directly
+      if (typeof directive.attachments === 'object' && directive.attachments !== null) {
+        data.append('attachments', directive.attachments as any);
+      }
+    }
+    
     if (directive.directive_type === 'memo') {
       data.append('is_responded', directive.is_responded ? 'yes' : 'no');
       data.append('body', directive.body || '');

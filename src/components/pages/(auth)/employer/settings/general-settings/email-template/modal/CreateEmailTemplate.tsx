@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
@@ -14,6 +15,7 @@ import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import InfoIcon from '@/svg/InfoIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
@@ -129,9 +131,23 @@ export default function EmailTemplateModal({
                         className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                       />
                       <div className='sm:col-span-4 mt-4'>
-                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          To<span className='text-red-600'> *</span>
-                        </label>
+                        <div className='flex items-center gap-2'>
+                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            To<span className='text-red-600'> *</span>
+                          </label>
+                          <div
+                            className='cursor-pointer'
+                            data-tooltip-id='to-tooltip'
+                            data-tooltip-place='right'
+                          >
+                            <InfoIcon />
+                          </div>
+                          <Tooltip id='to-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+                            <div>
+                              <h2 className='text-[12px] font-medium'>Press enter key or tab key to insert email address</h2>
+                            </div>
+                          </Tooltip>
+                        </div>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                             <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>

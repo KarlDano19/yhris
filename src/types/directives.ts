@@ -10,8 +10,6 @@ export interface DirectiveData {
   to?: string | string[]; 
   is_active?: boolean;
 
-  attachments?: string;
-
   custom_policy_fields?: PolicyField[];
   eligibility?: string;
   application?: string;
@@ -23,6 +21,7 @@ export interface DirectiveData {
   position?: string;
   signature?: string | File;
   qr_code?: string | File;
+  attachments?: string | File;
 }
 
 export interface PolicyField {

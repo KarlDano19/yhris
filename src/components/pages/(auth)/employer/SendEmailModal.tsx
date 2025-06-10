@@ -5,6 +5,7 @@ import ReactQuill from 'react-quill';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useForm } from 'react-hook-form';
+import { Tooltip } from 'react-tooltip';
 
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 
@@ -14,6 +15,7 @@ import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import { T_DocumentsModal } from '@/types/globals';
 
 import 'react-quill/dist/quill.snow.css';
+import InfoIcon from '@/svg/InfoIcon';
 
 type FormValues = {
   template: string;
@@ -90,12 +92,12 @@ export default function QuitclaimModal({
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Email Template<span className='text-red-600'>*</span>
+                          Email Template
                         </label>
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(event) => {
                               const template = dataEmailTemplate.find(
@@ -122,9 +124,23 @@ export default function QuitclaimModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          To<span className='text-red-600'>*</span>
-                        </label>
+                        <div className='flex items-center gap-2'>
+                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            To<span className='text-red-600'>*</span>
+                          </label>
+                          <div
+                            className='cursor-pointer'
+                            data-tooltip-id='to-tooltip'
+                            data-tooltip-place='right'
+                          >
+                            <InfoIcon />
+                          </div>
+                          <Tooltip id='to-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+                            <div>
+                              <h2 className='text-[12px] font-medium'>Press enter key or tab key to insert email address</h2>
+                            </div>
+                          </Tooltip>
+                        </div>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                             <input

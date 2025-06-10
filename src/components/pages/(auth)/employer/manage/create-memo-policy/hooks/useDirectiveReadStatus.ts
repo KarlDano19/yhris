@@ -3,6 +3,33 @@ import { getCookie } from 'cookies-next';
 import { ReadStatusData } from '@/types/directives';
 
 /**
+ * Format ISO datetime string to local timezone
+ */
+const formatDateTimeToLocal = (isoString: string | null): string => {
+  if (!isoString) return '';
+  
+  // Parse the ISO string to a Date object
+  const date = new Date(isoString);
+  
+  // Extract date components
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  
+  // Format time in 12-hour format with AM/PM (using local timezone)
+  const options = {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  } as Intl.DateTimeFormatOptions;
+  
+  const timeString = date.toLocaleTimeString('en-US', options);
+  
+  // Return formatted string with HTML tags
+  return `<strong>Date:</strong> ${month}/${day}/${year}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Time:</strong> ${timeString}`;
+};
+
+/**
  * Hook to fetch directive read status
  */
 const useDirectiveReadStatus = (
@@ -30,7 +57,18 @@ const useDirectiveReadStatus = (
           throw new Error(errorData.message || `Failed to fetch read status: ${response.status}`);
         }
         
-        return response.json();
+        const data = await response.json();
+        
+        // Process timestamps in verified_reads to convert to local time
+        if (data.verified_reads) {
+          data.verified_reads = data.verified_reads.map((read: any) => ({
+            ...read,
+            read_at_original: read.read_at, // Keep original timestamp
+            read_at: formatDateTimeToLocal(read.read_at) // Format for display
+          }));
+        }
+        
+        return data;
       } catch (err: any) {
         console.error('Error fetching directive read status:', err);
         throw err;

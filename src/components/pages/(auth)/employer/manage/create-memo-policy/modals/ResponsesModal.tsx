@@ -26,8 +26,7 @@ export default function EmployeeResponsesModal({
   const { 
     data: readStatus, 
     isLoading, 
-    error,
-    refetch
+    error
   } = useDirectiveReadStatus(directiveId || 0, {
     enabled: isOpen && !!directiveId // Only fetch when modal is open and directiveId is available
   });
@@ -37,12 +36,9 @@ export default function EmployeeResponsesModal({
     if (isOpen) {
       setCurrentPage(1);
       setNoResponsePage(1);
-      // Manually trigger fetch when modal opens
-      if (directiveId) {
-        refetch();
-      }
+      // We don't need to manually refetch since the query is already enabled when the modal is open
     }
-  }, [isOpen, directiveId, refetch]);
+  }, [isOpen]);
 
   // Pagination for responded employees
   const indexOfLastResponded = currentPage * itemsPerPage;
@@ -125,7 +121,7 @@ export default function EmployeeResponsesModal({
                                 currentResponded.map((read: ReadData) => (
                                   <tr key={read.id} className="border-b border-gray-200">
                                     <td className='py-4 text-sm text-gray-900 pl-4'>{read.email}</td>
-                                    <td className='py-4 text-sm text-gray-900'>{read.read_at}</td>
+                                    <td className='py-4 text-sm text-gray-900' dangerouslySetInnerHTML={{ __html: read.read_at }}></td>
                                   </tr>
                                 ))
                               ) : (

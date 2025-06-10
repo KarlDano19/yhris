@@ -49,12 +49,8 @@ const InstructionModal = ({ open, onClose, name }: InstructionModalProps) => {
                   </h3>
                   <EnvelopeIcon className="h-20 w-20 text-savoy-blue mx-auto mt-3" />
                   <p className="text-center text-indigo-dye px-2 font-medium">
-                    We sent instructions to change your password to{" "}
-                    <span className="text-savoy-blue font-semibold">
-                      {name}
-                    </span>{" "}
-                    Please check your inbox or spam folder. Thank you and GOD
-                    bless!
+                    If this email is registered, instructions will be sent. {""} 
+                    Thank you and GOD bless!
                   </p>
                   <Link href="/login">
                     <button
