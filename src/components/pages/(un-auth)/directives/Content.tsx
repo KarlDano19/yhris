@@ -206,7 +206,7 @@ const Content = () => {
     if (directiveType === 'memo') {
       return (
         <div className="prose max-w-none text-gray-700 leading-relaxed">
-          <p>{directive.body || 'No memo content available.'}</p>
+          <p className="text-justify indent-8">{directive.body || 'No memo content available.'}</p>
         </div>
       );
     } else {
