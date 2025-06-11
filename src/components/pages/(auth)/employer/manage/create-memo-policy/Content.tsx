@@ -1,12 +1,11 @@
 'use client';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import React, { useEffect, useState, useRef, Fragment } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import ClipIcon from '@/svg/ClipIcon';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
-import CreateMemoChevronLogo from '@/svg/CreateMemoChevronLogo';
 import { Menu, Transition } from '@headlessui/react';
 import classNames from '@/helpers/classNames';
 import DeleteMemoLogo from '@/svg/DeleteMemoLogo';
@@ -17,6 +16,12 @@ import Link from 'next/link';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 import { useQueryClient } from '@tanstack/react-query';
+import Pagination from '@/components/Pagination';
+
+type PaginationProps = {
+  totalRecords: number;
+  totalPages: number;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const { mutate, isLoading } = useDeleteDirectivesItem();
@@ -33,7 +38,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEmployeeResponsesModalOpen, setIsEmployeeResponsesModalOpen] = useState(false);
   const [selectedMemoTitle, setSelectedMemoTitle] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems(itemsFilter);
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationProps>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  
+  const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems({
+    ...itemsFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
+  
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
@@ -42,14 +59,52 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, []);
 
   useEffect(() => {
+    refetch();
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
     if (dataDirectives) {
-      dataDirectives.map((directive: any) => {
-        directive.date = Intl.DateTimeFormat('en-US').format(new Date(directive.date));
-        return directive;
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataDirectives.records) {
+        items = dataDirectives.records.map((directive: any) => {
+          return {
+            ...directive,
+            date: Intl.DateTimeFormat('en-US').format(new Date(directive.date))
+          };
+        });
+        totalPages = dataDirectives.total_pages || 1;
+        totalRecords = dataDirectives.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataDirectives)) {
+        items = dataDirectives.map((directive: any) => {
+          return {
+            ...directive,
+            date: Intl.DateTimeFormat('en-US').format(new Date(directive.date))
+          };
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+        
+        // Manual pagination on client side if needed
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        items = items.slice(startIndex, endIndex);
+      }
+
+      setCreateMemoPolicyItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setCreateMemoPolicyItems(dataDirectives);
     }
-  }, [dataDirectives]);
+  }, [dataDirectives, pageSize, currentPage]);
 
   const deleteMemo = () => {
     if (idToDelete) {
@@ -66,6 +121,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           setIsConfirmModalOpen(false);
           setCreateMemoPolicyItems([...updatedItems]);
+          
+          // Refresh data after deletion to maintain pagination consistency
+          // If we're on a page with only one item and we delete it, go back to previous page
+          if (updatedItems.filter((item: any) => !item.isDeleted).length === 0 && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+          } else {
+            refetch();
+          }
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -75,6 +138,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       };
       mutate(idToDelete, callbackReq);
     }
+  };
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
   };
 
   const renderRows = () => {
@@ -179,6 +252,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    // Reset to first page when searching
+    setCurrentPage(1);
     refetch();
   };
 
@@ -340,9 +415,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>
-                  Total record/s: {createMemoPolicyItems.filter((item: any) => !item.isDeleted).length}
-                </p>
+                <Pagination
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={pageSizeChange}
+                  onPageChange={paginationChange}
+                />
               </div>
             </div>
           </div>

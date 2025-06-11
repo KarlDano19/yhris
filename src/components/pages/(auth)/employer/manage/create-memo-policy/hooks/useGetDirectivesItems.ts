@@ -1,12 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
+interface DirectivesFiltersProps {
+  search?: string;
+  from?: string;
+  to?: string;
+  currentPage?: number;
+  pageSize?: number;
+}
+
 async function getDirectivesItems(filters: any) {
   try {
-    let newFilters = {...filters};
+    let newFilters: DirectivesFiltersProps = {};
+    if (filters.currentPage) newFilters.currentPage = filters.currentPage;
+    if (filters.pageSize) newFilters.pageSize = filters.pageSize;
+    if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
-    const searchParams = new URLSearchParams(newFilters);
+    
+    const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie('token');
     const config = {
       method: 'GET',

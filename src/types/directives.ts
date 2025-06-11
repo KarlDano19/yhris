@@ -63,5 +63,10 @@ export interface ReadStatusData {
   unresponded_emails: string[];
   verified_reads: ReadData[];
   is_fully_responded: boolean;
+  total_pages?: number;
+  total_records?: number;
+  current_page?: number;
+  starting?: number;
+  ending?: number;
 }
 

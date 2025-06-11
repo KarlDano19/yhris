@@ -1,4 +1,4 @@
-import React, { Dispatch, Fragment, useRef, useState } from 'react';
+import React, { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -20,33 +20,37 @@ export default function EmployeeResponsesModal({
   const cancelButtonRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [noResponsePage, setNoResponsePage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
-  // Use our custom hook to fetch read status - only enabled when modal is open
+  // Use our custom hook to fetch read status
   const { 
     data: readStatus, 
     isLoading, 
-    error
+    error,
+    refetch 
   } = useDirectiveReadStatus(directiveId || 0, {
-    enabled: isOpen && !!directiveId // Only fetch when modal is open and directiveId is available
+    currentPage: 1,  // Always get all data (backend pagination is different than what we need)
+    pageSize: 1000   // Use a large value to get all records
+  }, {
+    enabled: isOpen && !!directiveId
   });
 
   // Reset pagination when modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setCurrentPage(1);
       setNoResponsePage(1);
-      // We don't need to manually refetch since the query is already enabled when the modal is open
+      refetch();
     }
-  }, [isOpen]);
+  }, [isOpen, refetch]);
 
-  // Pagination for responded employees
+  // Client-side pagination for responded employees
   const indexOfLastResponded = currentPage * itemsPerPage;
   const indexOfFirstResponded = indexOfLastResponded - itemsPerPage;
   const currentResponded = readStatus?.verified_reads?.slice(indexOfFirstResponded, indexOfLastResponded) || [];
   const totalRespondedPages = Math.ceil((readStatus?.verified_reads?.length || 0) / itemsPerPage);
 
-  // Pagination for no response employees
+  // Client-side pagination for no response employees
   const indexOfLastNoResponse = noResponsePage * itemsPerPage;
   const indexOfFirstNoResponse = indexOfLastNoResponse - itemsPerPage;
   const currentNoResponse = readStatus?.unresponded_emails?.slice(indexOfFirstNoResponse, indexOfLastNoResponse) || [];
