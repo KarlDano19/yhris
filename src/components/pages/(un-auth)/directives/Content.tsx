@@ -256,7 +256,7 @@ const Content = () => {
         const directiveAny = directive as any;
         
         // Check for any non-standard fields that might be custom policy fields
-        const standardFields = ['id', 'title', 'directive_type', 'is_responded', 'to', 'is_active', 
+        const standardFields = ['id', 'title', 'directive_type', 'to', 'is_active', 
                                'attachments', 'eligibility', 'application', 'coverage', 'termination', 
                                'body', 'name', 'position', 'signature', 'qr_code', 'created_at', 'updated_at',
                                'employer', 'reads', 'read_count'];

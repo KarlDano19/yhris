@@ -6,7 +6,6 @@ export interface DirectiveData {
   id: number;
   directive_type?: 'memo' | 'policy';
   title: string;
-  is_responded?: boolean;
   to?: string | string[]; 
   is_active?: boolean;
 

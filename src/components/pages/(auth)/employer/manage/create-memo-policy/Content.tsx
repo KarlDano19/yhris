@@ -45,7 +45,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (dataDirectives) {
       dataDirectives.map((directive: any) => {
         directive.date = Intl.DateTimeFormat('en-US').format(new Date(directive.date));
-        directive.withResponse = directive.is_responded;
         return directive;
       });
       setCreateMemoPolicyItems(dataDirectives);
@@ -118,15 +117,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <div className='flex gap-2 justify-center'>
                     <span>{item.title}</span> <ClipIcon />
                   </div>
-                </td>
-                <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-                  <input
-                    type='checkbox'
-                    checked={item.withResponse}
-                    className={`form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white ${
-                      !item.withResponse && 'opacity-30'
-                    }`}
-                  />
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
                   <p
@@ -336,17 +326,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
                         Title
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        With Response
+                      <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
+                        Responses
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Response/s
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Action
+                      <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
+                        <span className='sr-only'>Delete</span>
                       </th>
                     </tr>
                   </thead>

@@ -83,8 +83,7 @@ export default function CreatePolicyModal({
     };
     data['to'] = tagsTo;
     data.directive_type = 'policy';
-    data.is_responded = data.is_responded || false;
-    mutate(data, callbackReq);
+    mutate({ ...data }, callbackReq);
   });
 
   // Separate handler for the Next button to avoid form submission
@@ -195,23 +194,9 @@ export default function CreatePolicyModal({
                             id='title'
                             {...register('title', { required: true })}
                             type='text'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                           />
                         </div>
-                      </div>
-                      <div className='sm:col-span-4 flex ml-4 mt-4'>
-                        <input
-                          id='is_responded'
-                          type='checkbox'
-                          {...register('is_responded')}
-                          className='form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white'
-                        />
-                        <label
-                          htmlFor='is_responded'
-                          className='block text-sm font-medium leading-6 text-gray-900 ml-2'
-                        >
-                          With Response
-                        </label>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>

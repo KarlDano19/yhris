@@ -20,7 +20,6 @@ async function addDirective(directive: DirectiveData) {
     }
     
     if (directive.directive_type === 'memo') {
-      data.append('is_responded', directive.is_responded ? 'yes' : 'no');
       data.append('body', directive.body || '');
       data.append('name', directive.name || '');
       data.append('position', directive.position || '');
@@ -32,8 +31,6 @@ async function addDirective(directive: DirectiveData) {
         data.append('qr_code', directive.qr_code as File);
       }
     } else {
-      data.append('is_responded', directive.is_responded ? 'yes' : 'no');
-      
       // Add custom policy fields as JSON
       if (directive.custom_policy_fields && directive.custom_policy_fields.length > 0) {
         data.append('custom_policy_fields', JSON.stringify(directive.custom_policy_fields));
