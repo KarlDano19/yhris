@@ -6,11 +6,10 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import CustomToast from '@/components/CustomToast';
-import DragDrop from '@/components/DragDrop';
 import useTagTo from '@/components/hooks/useTagTo';
-import SignatureModal from './SignatureModal';
+import CustomToast from '@/components/CustomToast';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
+import SignatureModal from './SignatureModal';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';

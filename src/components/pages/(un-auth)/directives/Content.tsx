@@ -1,15 +1,19 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+
 import { useParams } from 'next/navigation';
+
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import { useGetDirectiveById } from './hooks/useGetDirectiveById';
 import { useSendVerification } from './hooks/useSendVerification';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
+import useVerifyDirective from './hooks/useVerifyDirective';
 import EmailSelectionModal from './modals/EmailSelectionModal';
 import VerificationCodeModal from './modals/VerificationCodeModal';
 import FilePreviewModal from './modals/FilePreviewModal';
-import useVerifyDirective from './hooks/useVerifyDirective';
+
 import DropDownArrow from '@/svg/DropDownArrow';
 
 const Content = () => {

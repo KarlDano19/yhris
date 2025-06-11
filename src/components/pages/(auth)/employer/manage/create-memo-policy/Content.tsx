@@ -1,22 +1,28 @@
 'use client';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 import React, { useEffect, useState, Fragment } from 'react';
+
+import Link from 'next/link';
+
+import { useQueryClient } from '@tanstack/react-query';
+import { Menu, Transition } from '@headlessui/react';
+import toast from 'react-hot-toast';
+
+import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import ClipIcon from '@/svg/ClipIcon';
+import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '@/components/ConfirmModal';
+import useGetDirectivesItems from './hooks/useGetDirectivesItems';
+import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
-import { Menu, Transition } from '@headlessui/react';
-import classNames from '@/helpers/classNames';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import ClipIcon from '@/svg/ClipIcon';
 import DeleteMemoLogo from '@/svg/DeleteMemoLogo';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
-import ConfirmModal from '@/components/ConfirmModal';
-import Link from 'next/link';
-import useGetDirectivesItems from './hooks/useGetDirectivesItems';
-import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
-import { useQueryClient } from '@tanstack/react-query';
-import Pagination from '@/components/Pagination';
+
+import classNames from '@/helpers/classNames';
 
 type PaginationProps = {
   totalRecords: number;

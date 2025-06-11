@@ -1,10 +1,14 @@
 import React, { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
+import ReactPaginate from 'react-paginate';
+
+import useDirectiveReadStatus from '../hooks/useDirectiveReadStatus';
+
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import useDirectiveReadStatus from '../hooks/useDirectiveReadStatus';
+
 import { ReadData } from '@/types/directives';
-import ReactPaginate from 'react-paginate';
 
 export default function EmployeeResponsesModal({
   isOpen,

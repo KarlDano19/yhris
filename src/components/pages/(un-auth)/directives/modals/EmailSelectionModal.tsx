@@ -1,7 +1,9 @@
 'use client';
 
 import { Fragment, useState } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
+
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import DropDownArrow from '@/svg/DropDownArrow';
 

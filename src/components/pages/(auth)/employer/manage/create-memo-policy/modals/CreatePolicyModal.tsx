@@ -6,8 +6,8 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
-import RemoveFieldConfirmModal from './RemoveFieldConfirmModal';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
+import RemoveFieldConfirmModal from './RemoveFieldConfirmModal';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MinusCircleIcon, PencilIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';

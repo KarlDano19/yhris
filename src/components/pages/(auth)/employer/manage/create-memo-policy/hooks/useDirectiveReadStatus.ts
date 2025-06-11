@@ -1,5 +1,6 @@
 import { useQuery, UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
+
 import { ReadStatusData } from '@/types/directives';
 
 /**
