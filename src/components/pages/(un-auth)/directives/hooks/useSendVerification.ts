@@ -39,6 +39,8 @@ export const useSendVerification = (directiveId: string | number): UseMutationRe
         throw {
           message: data.message || 'Failed to send verification code',
           status: response.status,
+          // If there's a cooldown_remaining in the response but not a 429, still include it
+          ...(data.cooldown_remaining && { cooldown_remaining: data.cooldown_remaining })
         };
       }
 

@@ -103,14 +103,19 @@ const Content = () => {
     setSelectedEmail(email);
     setShowEmailModal(false);
     
+    // Show verification modal immediately with loading state
+    setShowVerificationModal(true);
+    
     sendVerification(
       { email },
       {
         onSuccess: () => {
           toast.custom(() => <CustomToast message="Verification code sent to your email." type='success' />, { duration: 5000 });
-          setShowVerificationModal(true);
+          // Modal is already open with initialLoading=true
         },
         onError: (error) => {
+          // Close the verification modal if there's an error
+          setShowVerificationModal(false);
           toast.custom(() => <CustomToast message={error.message || "Failed to send verification code."} type='error' />, { duration: 5000 });
           // Reopen email modal if there was an error
           setShowEmailModal(true);
@@ -130,13 +135,13 @@ const Content = () => {
               resolve();
             },
             onError: (error) => {
-              // Check if this is a rate limit error with cooldown information
-              if (error.status === 429 && error.cooldown_remaining) {
-                // Return the cooldown information so the modal can update its timer
+              // Always reject with cooldown_remaining if available to trigger modal timer
+              if (error.cooldown_remaining) {
                 reject({ cooldown_remaining: error.cooldown_remaining });
               } else {
                 toast.custom(() => <CustomToast message={error.message || "Failed to resend verification code."} type='error' />, { duration: 5000 });
-                reject(error);
+                // Reject with a default cooldown to prevent immediate retries
+                reject({ cooldown_remaining: 5 });
               }
             }
           }
@@ -471,6 +476,7 @@ const Content = () => {
               onSubmit={handleVerificationSubmit}
               email={selectedEmail}
               onResendCode={handleResendCode}
+              initialLoading={true}
             />
             
             {/* File Preview Modal */}

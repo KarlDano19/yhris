@@ -10,12 +10,13 @@ interface VerificationCodeModalProps {
   onSubmit: (code: string) => void;
   email: string;
   onResendCode?: () => void;
+  initialLoading?: boolean;
 }
 
-const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email, onResendCode }: VerificationCodeModalProps) => {
+const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email, onResendCode, initialLoading = false }: VerificationCodeModalProps) => {
   const [verificationCode, setVerificationCode] = useState<string>('');
   const [cooldown, setCooldown] = useState<number>(0);
-  const [isResending, setIsResending] = useState<boolean>(false);
+  const [isResending, setIsResending] = useState<boolean>(initialLoading);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -26,6 +27,25 @@ const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email, onResendCode 
       if (timer) clearTimeout(timer);
     };
   }, [cooldown]);
+
+  useEffect(() => {
+    if (isOpen && initialLoading) {
+      setIsResending(true);
+      
+      const initialLoadingDelay = 500;
+      
+      const timer = setTimeout(() => {
+        setIsResending(false);
+        setCooldown(30);
+      }, initialLoadingDelay);
+      
+      return () => clearTimeout(timer);
+    } else if (!isOpen) {
+      setVerificationCode('');
+      setIsResending(false);
+      setCooldown(0);
+    }
+  }, [isOpen, initialLoading]);
 
   const handleSubmit = () => {
     if (verificationCode) {
@@ -38,9 +58,8 @@ const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email, onResendCode 
       setIsResending(true);
       try {
         await onResendCode();
-        setCooldown(30); // Set default 30 second cooldown
+        setCooldown(30);
       } catch (error: any) {
-        // If the server returned a specific cooldown time, use that instead
         if (error && typeof error.cooldown_remaining === 'number') {
           setCooldown(error.cooldown_remaining);
         }
@@ -108,7 +127,7 @@ const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email, onResendCode 
                         type="button"
                         onClick={handleResendCode}
                         disabled={cooldown > 0 || isResending}
-                        className="text-sm text-[#355FD0] hover:text-[#2347B2] disabled:text-gray-400 disabled:cursor-not-allowed"
+                        className={`text-sm text-[#355FD0] hover:text-[#2347B2] ${(cooldown > 0 || isResending) ? 'text-gray-400 cursor-not-allowed pointer-events-none' : ''}`}
                       >
                         {isResending ? (
                           <span className="flex items-center">
