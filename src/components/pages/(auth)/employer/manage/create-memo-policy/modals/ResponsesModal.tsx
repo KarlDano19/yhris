@@ -29,10 +29,9 @@ export default function EmployeeResponsesModal({
     error,
     refetch 
   } = useDirectiveReadStatus(directiveId || 0, {
-    currentPage: 1,  // Always get all data (backend pagination is different than what we need)
-    pageSize: 1000   // Use a large value to get all records
-  }, {
-    enabled: isOpen && !!directiveId
+    enabled: isOpen && !!directiveId,
+    // Query params can be added to the key for cache invalidation
+    queryKey: ['directive-read-status', directiveId, { pageSize: 1000 }]
   });
 
   // Reset pagination when modal opens
