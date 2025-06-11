@@ -1,11 +1,9 @@
-import {
-  Dispatch,
-  Fragment,
-  useRef,
-} from "react";
+import { Dispatch, Fragment, useRef } from "react";
+
 import { Dialog, Transition } from "@headlessui/react";
-import { XCircleIcon } from "@heroicons/react/24/solid";
 import SignatureCanvas from "react-signature-canvas";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function SignatureModal({
   isOpen,

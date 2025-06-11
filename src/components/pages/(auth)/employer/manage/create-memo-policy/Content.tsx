@@ -1,21 +1,33 @@
 'use client';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import React, { useEffect, useState, useRef, Fragment } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import ClipIcon from '@/svg/ClipIcon';
-import CreateMemoModal from './modals/CreateMemoModal';
-import CreatePolicyModal from './modals/CreatePolicyModal';
-import CreateMemoChevronLogo from '@/svg/CreateMemoChevronLogo';
+
+import React, { useEffect, useState, Fragment } from 'react';
+
+import Link from 'next/link';
+
+import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
-import classNames from '@/helpers/classNames';
-import DeleteMemoLogo from '@/svg/DeleteMemoLogo';
 import toast from 'react-hot-toast';
+
+import Pagination from '@/components/Pagination';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
-import Link from 'next/link';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
-import { useQueryClient } from '@tanstack/react-query';
+import CreateMemoModal from './modals/CreateMemoModal';
+import CreatePolicyModal from './modals/CreatePolicyModal';
+import EmployeeResponsesModal from './modals/ResponsesModal';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import ClipIcon from '@/svg/ClipIcon';
+import DeleteMemoLogo from '@/svg/DeleteMemoLogo';
+
+import classNames from '@/helpers/classNames';
+
+type PaginationProps = {
+  totalRecords: number;
+  totalPages: number;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const { mutate, isLoading } = useDeleteDirectivesItem();
@@ -29,8 +41,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
   const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
+  const [isEmployeeResponsesModalOpen, setIsEmployeeResponsesModalOpen] = useState(false);
+  const [selectedMemoTitle, setSelectedMemoTitle] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems(itemsFilter);
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationProps>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  
+  const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems({
+    ...itemsFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
+  
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
@@ -39,15 +65,52 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, []);
 
   useEffect(() => {
+    refetch();
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
     if (dataDirectives) {
-      dataDirectives.map((directive: any) => {
-        directive.date = Intl.DateTimeFormat('en-US').format(new Date(directive.date));
-        directive.withResponse = directive.is_responded;
-        return directive;
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataDirectives.records) {
+        items = dataDirectives.records.map((directive: any) => {
+          return {
+            ...directive,
+            date: Intl.DateTimeFormat('en-US').format(new Date(directive.date))
+          };
+        });
+        totalPages = dataDirectives.total_pages || 1;
+        totalRecords = dataDirectives.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataDirectives)) {
+        items = dataDirectives.map((directive: any) => {
+          return {
+            ...directive,
+            date: Intl.DateTimeFormat('en-US').format(new Date(directive.date))
+          };
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+        
+        // Manual pagination on client side if needed
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        items = items.slice(startIndex, endIndex);
+      }
+
+      setCreateMemoPolicyItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setCreateMemoPolicyItems(dataDirectives);
     }
-  }, [dataDirectives]);
+  }, [dataDirectives, pageSize, currentPage]);
 
   const deleteMemo = () => {
     if (idToDelete) {
@@ -64,6 +127,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           setIsConfirmModalOpen(false);
           setCreateMemoPolicyItems([...updatedItems]);
+          
+          // Refresh data after deletion to maintain pagination consistency
+          // If we're on a page with only one item and we delete it, go back to previous page
+          if (updatedItems.filter((item: any) => !item.isDeleted).length === 0 && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+          } else {
+            refetch();
+          }
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -73,6 +144,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       };
       mutate(idToDelete, callbackReq);
     }
+  };
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
   };
 
   const renderRows = () => {
@@ -116,19 +197,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     <span>{item.title}</span> <ClipIcon />
                   </div>
                 </td>
-                <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-                  <input
-                    type='checkbox'
-                    checked={item.withResponse}
-                    className={`form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white ${
-                      !item.withResponse && 'opacity-30'
-                    }`}
-                  />
-                </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
                   <p
                     className='font-bold hover:underline cursor-pointer'
-                    onClick={() => alert('View responses clicked')}
+                    onClick={() => {
+                      setSelectedMemoTitle(item);
+                      setIsEmployeeResponsesModalOpen(true);
+                    }}
                   >
                     View Responses
                   </p>
@@ -139,7 +214,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       setIdToDelete(item.id);
                       setIsConfirmModalOpen(true);
                     }}
-                    disabled={!cachedProfile?.state?.data?.edit_memo}
+                    // disabled={!cachedProfile?.state?.data?.edit_memo}
                   >
                     <DeleteMemoLogo />
                   </button>
@@ -183,6 +258,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    // Reset to first page when searching
+    setCurrentPage(1);
     refetch();
   };
 
@@ -266,7 +343,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <div>
                   <Menu.Button
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
-                    disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_memo}
+                    // disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_memo}
                   >
                     CREATE
                   </Menu.Button>
@@ -330,26 +407,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
                         Title
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        With Response
+                      <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
+                        Responses
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Response/s
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Action
+                      <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
+                        <span className='sr-only'>Delete</span>
                       </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>
-                  Total record/s: {createMemoPolicyItems.filter((item: any) => !item.isDeleted).length}
-                </p>
+                <Pagination
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={pageSizeChange}
+                  onPageChange={paginationChange}
+                />
               </div>
             </div>
           </div>
@@ -357,12 +435,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
       <CreateMemoModal isOpen={isCreateMemoModalOpen} setIsOpen={setIsCreateMemoModalOpen} refetch={refetch} />
       <CreatePolicyModal isOpen={isCreatePolicyModalOpen} setIsOpen={setIsCreatePolicyModalOpen} refetch={refetch} />
+      <EmployeeResponsesModal 
+        isOpen={isEmployeeResponsesModalOpen} 
+        setIsOpen={setIsEmployeeResponsesModalOpen}
+        memoTitle={selectedMemoTitle}
+        directiveId={selectedMemoTitle?.id}
+      />
       <ConfirmModal
         message='Are you sure you want to delete this memo/policy?'
         isOpen={isConfirmModalOpen}
         setIsOpen={setIsConfirmModalOpen}
         confirmAction={deleteMemo}
-        isLoading={false}
+        // isLoading={false}
+        isLoading={isLoading}
       />
     </>
   );
