@@ -38,9 +38,13 @@ export default function CreateMemoModal({
   const { mutate, isLoading } = useAddDirectivesItems();
 
   const onSubmit = handleSubmit((data) => {
-    // Check if To field has any entries
-    if (tagsTo.length === 0) {
-      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, {
+    // Check if To field has any entries with valid email format
+    if (tagsTo.length === 0 || !tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'))) {
+      let message = tagsTo.length === 0 
+        ? 'To field is required' 
+        : 'Only valid email addresses with format example@domain.com are allowed';
+      
+      toast.custom(() => <CustomToast message={message} type='error' />, {
         duration: 5000,
       });
       return; // Prevent form submission
@@ -356,23 +360,23 @@ export default function CreateMemoModal({
                     <button
                       onClick={async (e) => {
                         const title = await trigger('title');
-                        // Check tagsTo length directly instead of triggering 'to'
-                        const toFieldValid = tagsTo.length > 0;
+                        // Check if tagsTo array exists and has at least one valid email
+                        const toFieldValid = tagsTo.length > 0 && tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'));
                         const results = [title, toFieldValid];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
                           e.preventDefault(); // Prevent form submission
-                          toast.custom(
-                            () => (
-                              <CustomToast
-                                message={'You cannot proceed due to incomplete fields. Please review.'}
-                                type='error'
-                              />
-                            ),
-                            {
-                              duration: 5000,
-                            }
-                          );
+                          let message = '';
+                          if (tagsTo.length === 0) {
+                            message = 'Email address is required';
+                          } else if (!tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'))) {
+                            message = 'Only valid email addresses with format example@domain.com are allowed';
+                          } else {
+                            message = 'You cannot proceed due to incomplete fields. Please review.';
+                          }
+                          toast.custom(() => <CustomToast message={message} type='error' />, {
+                            duration: 5000,
+                          });
                           return false;
                         }
                       }}
