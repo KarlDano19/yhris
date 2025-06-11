@@ -119,6 +119,32 @@ const Content = () => {
     );
   };
 
+  const handleResendCode = async () => {
+    if (selectedEmail) {
+      return new Promise<void>((resolve, reject) => {
+        sendVerification(
+          { email: selectedEmail },
+          {
+            onSuccess: () => {
+              toast.custom(() => <CustomToast message="Verification code resent to your email." type='success' />, { duration: 5000 });
+              resolve();
+            },
+            onError: (error) => {
+              // Check if this is a rate limit error with cooldown information
+              if (error.status === 429 && error.cooldown_remaining) {
+                // Return the cooldown information so the modal can update its timer
+                reject({ cooldown_remaining: error.cooldown_remaining });
+              } else {
+                toast.custom(() => <CustomToast message={error.message || "Failed to resend verification code."} type='error' />, { duration: 5000 });
+                reject(error);
+              }
+            }
+          }
+        );
+      });
+    }
+  };
+
   const handleVerificationSubmit = async (code: string) => {
     verifyDirective(
       { 
@@ -444,6 +470,7 @@ const Content = () => {
               onClose={() => setShowVerificationModal(false)}
               onSubmit={handleVerificationSubmit}
               email={selectedEmail}
+              onResendCode={handleResendCode}
             />
             
             {/* File Preview Modal */}

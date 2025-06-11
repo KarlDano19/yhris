@@ -26,6 +26,16 @@ export const useSendVerification = (directiveId: string | number): UseMutationRe
       const data = await response.json();
 
       if (!response.ok) {
+        // Check if this is a rate limit error with cooldown information
+        if (response.status === 429 && data.cooldown_remaining) {
+          throw {
+            message: data.message || 'Please wait before requesting another code',
+            status: response.status,
+            cooldown_remaining: data.cooldown_remaining
+          };
+        }
+        
+        // Regular error
         throw {
           message: data.message || 'Failed to send verification code',
           status: response.status,

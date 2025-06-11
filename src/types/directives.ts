@@ -39,6 +39,7 @@ export interface SendVerificationResponse {
 export interface SendVerificationError {
   message: string;
   status?: number;
+  cooldown_remaining?: number;
 }
 
 export interface VerifyDirectiveParams {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -9,14 +9,44 @@ interface VerificationCodeModalProps {
   onClose: () => void;
   onSubmit: (code: string) => void;
   email: string;
+  onResendCode?: () => void;
 }
 
-const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email }: VerificationCodeModalProps) => {
+const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email, onResendCode }: VerificationCodeModalProps) => {
   const [verificationCode, setVerificationCode] = useState<string>('');
+  const [cooldown, setCooldown] = useState<number>(0);
+  const [isResending, setIsResending] = useState<boolean>(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [cooldown]);
 
   const handleSubmit = () => {
     if (verificationCode) {
       onSubmit(verificationCode);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (onResendCode && cooldown === 0) {
+      setIsResending(true);
+      try {
+        await onResendCode();
+        setCooldown(30); // Set default 30 second cooldown
+      } catch (error: any) {
+        // If the server returned a specific cooldown time, use that instead
+        if (error && typeof error.cooldown_remaining === 'number') {
+          setCooldown(error.cooldown_remaining);
+        }
+      } finally {
+        setIsResending(false);
+      }
     }
   };
 
@@ -71,6 +101,29 @@ const VerificationCodeModal = ({ isOpen, onClose, onSubmit, email }: Verificatio
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVerificationCode(e.target.value)}
                         className="rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
+                    </div>
+
+                    <div className="flex items-center justify-between mt-4">
+                      <button
+                        type="button"
+                        onClick={handleResendCode}
+                        disabled={cooldown > 0 || isResending}
+                        className="text-sm text-[#355FD0] hover:text-[#2347B2] disabled:text-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {isResending ? (
+                          <span className="flex items-center">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[#355FD0]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Sending verification code...
+                          </span>
+                        ) : cooldown > 0 ? (
+                          `Wait ${cooldown}s to resend code`
+                        ) : (
+                          "Didn't receive a code? Click to resend"
+                        )}
+                      </button>
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">
