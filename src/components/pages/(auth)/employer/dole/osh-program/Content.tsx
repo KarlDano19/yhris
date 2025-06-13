@@ -62,14 +62,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
 
-    // Remove safety_signage from required validation check
-    if (selectedTab === 5 && missingFields.includes('safety_signage')) {
-      const index = missingFields.indexOf('safety_signage');
-      if (index > -1) {
-        missingFields.splice(index, 1);
-      }
-    }
-
     if (missingFields.length > 0) {
       setValidationMessage(`Please fill out all required fields marked with * (Missing: ${missingFields.join(', ')})`);
       return false;
