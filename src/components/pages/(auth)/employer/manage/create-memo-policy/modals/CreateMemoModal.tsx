@@ -38,12 +38,17 @@ export default function CreateMemoModal({
 
   const onSubmit = handleSubmit((data) => {
     // Check if To field has any entries with valid email format
-    if (tagsTo.length === 0 || !tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'))) {
-      let message = tagsTo.length === 0 
-        ? 'To field is required' 
-        : 'Only valid email addresses with format example@domain.com are allowed';
-      
-      toast.custom(() => <CustomToast message={message} type='error' />, {
+    if (tagsTo.length === 0) {
+      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, {
+        duration: 5000,
+      });
+      return; // Prevent form submission
+    }
+    
+    // Validate that all email addresses in tagsTo are valid
+    const invalidEmails = tagsTo.filter(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'));
+    if (invalidEmails.length > 0) {
+      toast.custom(() => <CustomToast message={'Only valid email addresses with format example@domain.com are allowed'} type='error' />, {
         duration: 5000,
       });
       return; // Prevent form submission
@@ -359,8 +364,8 @@ export default function CreateMemoModal({
                     <button
                       onClick={async (e) => {
                         const title = await trigger('title');
-                        // Check if tagsTo array exists and has at least one valid email
-                        const toFieldValid = tagsTo.length > 0 && tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'));
+                        // Check if tagsTo array exists and validate all emails
+                        const toFieldValid = tagsTo.length > 0 && tagsTo.every(email => email.includes('@') && email.toLowerCase().endsWith('.com'));
                         const results = [title, toFieldValid];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
@@ -368,7 +373,7 @@ export default function CreateMemoModal({
                           let message = '';
                           if (tagsTo.length === 0) {
                             message = 'Email address is required';
-                          } else if (!tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'))) {
+                          } else if (tagsTo.some(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'))) {
                             message = 'Only valid email addresses with format example@domain.com are allowed';
                           } else {
                             message = 'You cannot proceed due to incomplete fields. Please review.';
