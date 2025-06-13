@@ -252,7 +252,17 @@ export default function CompanyProfile({
                           field.onChange(null);
                         }
                       }}
-                      inputOnChange={(value: any) => field.onChange(value)}
+                      inputOnChange={(date: any) => {
+                        // Handle Date object from manual input
+                        if (date && date instanceof Date && !isNaN(date.getTime())) {
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          field.onChange(`${year}-${month}-${day}`);
+                        } else {
+                          field.onChange(null);
+                        }
+                      }}
                     />
                   );
                 }}
