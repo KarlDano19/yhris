@@ -221,26 +221,32 @@ export default function CompanyProfile({
               <Controller
                 control={control}
                 name="date_established"
-                render={({ field }) => (
-                  <CustomDatePicker
-                    id="date-established-datepicker"
-                    placeholder={"mm/dd/yyyy"}
-                    className={
-                      "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                    }
-                    selected={field.value ? new Date(field.value) : null}
-                    pickerOnChange={(date: any) => {
-                      // Format the date as YYYY-MM-DD for backend compatibility
-                      if (date) {
-                        const formattedDate = date.toISOString().split('T')[0];
-                        field.onChange(formattedDate);
-                      } else {
-                        field.onChange(null);
+                render={({ field }: { field: any }) => {
+                  // Parse as local date (not UTC)
+                  const selectedDate = field.value ? new Date(field.value + 'T00:00:00') : null;
+                  return (
+                    <CustomDatePicker
+                      id="date-established-datepicker"
+                      placeholder={"mm/dd/yyyy"}
+                      className={
+                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
                       }
-                    }}
-                    inputOnChange={(value: any) => field.onChange(value)}
-                  />
-                )}
+                      selected={selectedDate}
+                      pickerOnChange={(date: any) => {
+                        // Format date in local time
+                        if (date) {
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          field.onChange(`${year}-${month}-${day}`);
+                        } else {
+                          field.onChange(null);
+                        }
+                      }}
+                      inputOnChange={(value: any) => field.onChange(value)}
+                    />
+                  );
+                }}
               />
             </div>
           </div>
