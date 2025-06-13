@@ -312,11 +312,11 @@ export const OSH_PROGRAM_TABS = {
   REQUIRED_FIELDS: {
     1: [
       'company_name', 'date_established', 'complete_address', 'website_url', 
-      'number_of_male_employees', 'number_of_female_employees'
+      'number_of_male_employees', 'number_of_female_employees', 'product_description', 'services_description'
     ] as (keyof T_OshProgram)[],
     
     2: [
-      'date', 'name_of_owner'
+      'date', 'name_of_owner', 'signature' 
     ] as (keyof T_OshProgram)[],
     
     3: [

@@ -62,12 +62,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
 
-    // Special handling for signature in tab 2
-    if (selectedTab === 2 && !data.signature) {
-      setValidationMessage("Please provide a signature");
-      return false;
-    }
-
     // Remove safety_signage from required validation check
     if (selectedTab === 5 && missingFields.includes('safety_signage')) {
       const index = missingFields.indexOf('safety_signage');
