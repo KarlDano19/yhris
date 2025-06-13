@@ -7,6 +7,7 @@ import {
   
   import { Dialog, Transition } from "@headlessui/react";
   import { XCircleIcon } from "@heroicons/react/24/solid";
+  
   import SignatureCanvas from "react-signature-canvas";
   
   export default function SignatureModal({

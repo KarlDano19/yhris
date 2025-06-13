@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useFieldArray } from "react-hook-form";
-import dynamic from "next/dynamic";
-import { Controller } from "react-hook-form";
+import { useFieldArray, Controller } from "react-hook-form";
 
-import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
+import dynamic from "next/dynamic";
 
 import { XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
 
-import ClipIcon from "@/svg/ClipIcon";
-
 import FilePreviewModal from "../modals/FilePreviewModal";
 import CustomDatePicker from "@/components/CustomDatePicker";
+import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
+
+import ClipIcon from "@/svg/ClipIcon";
 
 export default function SafetyMeasures({
   control,

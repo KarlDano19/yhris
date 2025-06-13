@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+
 import { T_OshProgram } from "@/types/osh-program";
 
 async function getOshProgramDetails(): Promise<T_OshProgram> {
