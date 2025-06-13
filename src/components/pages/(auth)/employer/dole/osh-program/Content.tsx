@@ -39,6 +39,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { register, handleSubmit, setValue, control, watch, formState: { errors }, clearErrors } = useForm<ExtendedOshProgram>();
   const [selectedTab, setSelectedTab] = useState<TabNumber>(1);
   const [validationMessage, setValidationMessage] = useState("");
+  const [missingFields, setMissingFields] = useState<string[]>([]);
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
   const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] = useState(false);
 
@@ -47,7 +48,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
     // Validate required fields
-    if (!validateRequiredFields(data)) return;
+    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
+    const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
+
+    if (missingFields.length > 0) {
+      // Store missing fields for UI highlighting
+      setMissingFields(missingFields as string[]);
+      setValidationMessage(`Please fill out all required fields marked with *`);
+      return;
+    }
+
+    // Clear missing fields if validation passes
+    setMissingFields([]);
+    setValidationMessage("");
 
     // Process form data
     const processedData = processFormData(data);
@@ -63,7 +76,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
 
     if (missingFields.length > 0) {
-      setValidationMessage(`Please fill out all required fields marked with * (Missing: ${missingFields.join(', ')})`);
+      setValidationMessage(`Please fill out all required fields marked with *`);
       return false;
     }
 
@@ -442,8 +455,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleTabChange = (tabIndex: TabNumber) => {
     // Clear any validation errors
     clearErrors();
-    // Clear validation message
+    // Clear validation message and missing fields
     setValidationMessage("");
+    setMissingFields([]);
 
     // Set the new tab
     setSelectedTab(tabIndex);
@@ -453,6 +467,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const submitCurrentTab = () => {
     // First clear any existing validation messages
     setValidationMessage("");
+    setMissingFields([]);
     
     // Trigger form validation and submission just for the current tab
     onSubmit();
@@ -537,6 +552,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             validationMessage={validationMessage}
             watch={watch}
             setValue={setValue}
+            missingFields={missingFields}
           />
         )}
         {selectedTab === 2 && (
@@ -546,6 +562,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             setValue={setValue}
             watch={watch}
             validationMessage={validationMessage}
+            missingFields={missingFields}
           />
         )}
         {selectedTab === 3 && (
@@ -562,6 +579,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             validationMessage={validationMessage}
             watch={watch}
             setValue={setValue}
+            missingFields={missingFields}
           />
         )}
         {selectedTab === 5 && (
@@ -585,6 +603,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             watch={watch}
             onSubmit={onSubmit}
             validationMessage={validationMessage}
+            missingFields={missingFields}
           />
         )}
       </div>

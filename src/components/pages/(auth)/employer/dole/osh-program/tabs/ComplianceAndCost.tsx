@@ -18,6 +18,7 @@ export default function ComplianceAndCost({
   watch,
   onSubmit,
   validationMessage,
+  missingFields = []
 }: {
   control: any;
   register: any;
@@ -25,12 +26,18 @@ export default function ComplianceAndCost({
   watch: any;
   onSubmit: any;
   validationMessage?: string;
+  missingFields?: string[];
 }) {
 
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
     []
   );
+
+  // Helper function to check if a field is missing
+  const isMissingField = (fieldName: string) => {
+    return missingFields.includes(fieldName);
+  };
 
   return (
     <form onSubmit={onSubmit}>
@@ -212,7 +219,7 @@ export default function ComplianceAndCost({
                 type="text"
                 {...register("others_name")}
                 id="others_name"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('others_name') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
               </td>
@@ -275,7 +282,7 @@ export default function ComplianceAndCost({
                 type="text"
                 {...register("name_of_owner_manager")}
                 id="name_of_owner_manager"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('name_of_owner_manager') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -292,7 +299,7 @@ export default function ComplianceAndCost({
                 type="text"
                 {...register("employees_representative")}
                 id="employees_representative"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('employees_representative') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -316,7 +323,7 @@ export default function ComplianceAndCost({
                       id="date_filled"
                       placeholder={"mm/dd/yyyy"}
                       className={
-                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                        `block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('date_filled') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
                       }
                       selected={selectedDate}
                       pickerOnChange={(date: any) => {

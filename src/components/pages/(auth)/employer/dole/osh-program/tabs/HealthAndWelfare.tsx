@@ -16,12 +16,14 @@ export default function HealthAndWelfare({
   validationMessage,
   watch,
   setValue,
+  missingFields = []
 }: {
   control: any;
   register: any;
   validationMessage?: string;
   watch: any;
   setValue: any;
+  missingFields?: string[];
 }) {
   // State for file preview modal
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
@@ -92,6 +94,11 @@ export default function HealthAndWelfare({
     control,
     name: "safety_meeting",
   });
+
+  // Helper function to check if a field is missing
+  const isMissingField = (fieldName: string) => {
+    return missingFields.includes(fieldName);
+  };
 
   return (
     <>
@@ -462,7 +469,7 @@ export default function HealthAndWelfare({
                   defaultValue={0}
                   {...register("no_of_treatment_rooms_first_aid_rooms")}
                   id="no_of_treatment_rooms_first_aid_rooms"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('no_of_treatment_rooms_first_aid_rooms') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -480,7 +487,7 @@ export default function HealthAndWelfare({
                   min="0"
                   {...register("no_of_clinics_in_the_workplace")}
                   id="no_of_clinics_in_the_workplace"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('no_of_clinics_in_the_workplace') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -497,7 +504,7 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("hospitals_youre_affiliated_with")}
                   id="hospitals_youre_affiliated_with"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('hospitals_youre_affiliated_with') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -555,8 +562,8 @@ export default function HealthAndWelfare({
                 <input
                   type="text"
                   {...register("chairperson_less_than_ten")}
-                  id="chairperson_less_than_ten "
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  id="chairperson_less_than_ten"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('chairperson_less_than_ten') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -573,7 +580,7 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("secretary_less_than_ten")}
                   id="secretary_less_than_ten"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('secretary_less_than_ten') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -590,7 +597,7 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("member_less_than_ten")}
                   id="member_less_than_ten"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('member_less_than_ten') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -620,7 +627,7 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("chairperson_medium_to_high")}
                   id="chairperson_medium_to_high"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('chairperson_medium_to_high') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -637,7 +644,7 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("secretary_medium_to_high")}
                   id="secretary_medium_to_high"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('secretary_medium_to_high') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -656,19 +663,19 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("ex_officio_members")}
                   id="ex_officio_members"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('ex_officio_members') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
                 <input
                   type="text"
                   {...register("ex_officio_members_2")}
                   id="ex_officio_members_2"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('ex_officio_members_2') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
                 <input
                   type="text"
                   {...register("ex_officio_members_3")}
                   id="ex_officio_members_3"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('ex_officio_members_3') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -687,13 +694,13 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("members")}
                   id="members"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('members') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
                 <input
                   type="text"
                   {...register("members_2")}
                   id="members_2"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('members_2') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -721,7 +728,7 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("chairperson_joint_coordinating")}
                   id="chairperson_joint_coordinating"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('chairperson_joint_coordinating') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -738,7 +745,7 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("secretary_joint_coordinating")}
                   id="secretary_joint_coordinating"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('secretary_joint_coordinating') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -761,13 +768,13 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("ex_officio_members_1")}
                   id="ex_officio_members_1"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('ex_officio_members_1') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
                 <input
                   type="text"
                   {...register("ex_officio_members_2")}
                   id="ex_officio_members_2"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('ex_officio_members_2') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>
@@ -784,13 +791,13 @@ export default function HealthAndWelfare({
                   type="text"
                   {...register("ex_officio_members_3")}
                   id="ex_officio_members_3"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('ex_officio_members_3') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
                 <input
                   type="text"
                   {...register("ex_officio_members_4")}
                   id="ex_officio_members_4"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('ex_officio_members_4') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
                 />
               </div>
             </div>

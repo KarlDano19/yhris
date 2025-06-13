@@ -11,7 +11,8 @@ export default function CompanyProfile({
   register,
   validationMessage,
   watch,
-  setValue
+  setValue,
+  missingFields = []
 }: {
   control: any;
   register: any;
@@ -19,6 +20,7 @@ export default function CompanyProfile({
   validationMessage?: string;
   watch?: any;
   setValue?: any;
+  missingFields?: string[];
 }) {
   // Initialize ref to track first render
   const initializedRef = useRef(false);
@@ -173,6 +175,11 @@ export default function CompanyProfile({
     watch
   ]);
 
+  // Helper function to check if a field is missing
+  const isMissingField = (fieldName: string) => {
+    return missingFields.includes(fieldName);
+  };
+
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
@@ -205,7 +212,8 @@ export default function CompanyProfile({
                 type="text"
                 {...register("company_name")}
                 id="company_name"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
+                  ${isMissingField('company_name') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -229,7 +237,8 @@ export default function CompanyProfile({
                       id="date-established-datepicker"
                       placeholder={"mm/dd/yyyy"}
                       className={
-                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                        `block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset 
+                        ${isMissingField('date_established') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
                       }
                       selected={selectedDate}
                       pickerOnChange={(date: any) => {
@@ -263,7 +272,8 @@ export default function CompanyProfile({
                 type="text"
                 {...register("complete_address")}
                 id="complete_address"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
+                  ${isMissingField('complete_address') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -279,7 +289,7 @@ export default function CompanyProfile({
                 type="text"
                 {...register("phone_number")}
                 id="phone_number"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -297,7 +307,7 @@ export default function CompanyProfile({
                 type="text"
                 {...register("fax_number")}
                 id="fax_number"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -314,7 +324,7 @@ export default function CompanyProfile({
                 type="text"
                 {...register("website_url")}
                 id="website_url"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('website_url') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -330,7 +340,7 @@ export default function CompanyProfile({
                 type="text"
                 {...register("company_owner")}
                 id="company_owner"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -349,7 +359,7 @@ export default function CompanyProfile({
                 type="number"
                 {...register("number_of_male_employees")}
                 id="number_of_male_employees"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('number_of_male_employees') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -366,7 +376,7 @@ export default function CompanyProfile({
                 type="number"
                 {...register("number_of_female_employees")}
                 id="number_of_female_employees"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('number_of_female_employees') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -382,7 +392,7 @@ export default function CompanyProfile({
                 type="number"
                 {...register("total_number_of_employees")}
                 id="total_number_of_employees"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100`}
                 disabled
               />
             </div>
@@ -410,7 +420,7 @@ export default function CompanyProfile({
               type="text"
               {...register("manufacturing_description")}
               id="manufacturing_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -434,7 +444,7 @@ export default function CompanyProfile({
               type="text"
               {...register("bank_and_financial_institution_description")}
               id="bank_and_financial_institution_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset  ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -455,7 +465,7 @@ export default function CompanyProfile({
               type="text"
               {...register("service_description")}
               id="service_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-ins ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -476,7 +486,7 @@ export default function CompanyProfile({
               type="text"
               {...register("security_agency_description")}
               id="security_agency_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -497,7 +507,7 @@ export default function CompanyProfile({
               type="text"
               {...register("agri_fishing_description")}
               id="agri_fishing_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -518,7 +528,7 @@ export default function CompanyProfile({
               type="text"
               {...register("maintenance_description")}
               id="maintenance_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset $ ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -539,7 +549,7 @@ export default function CompanyProfile({
               type="text"
               {...register("wholesale_retail_description")}
               id="wholesale_retail_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -560,7 +570,7 @@ export default function CompanyProfile({
               type="text"
               {...register("construction_description")}
               id="construction_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -581,7 +591,7 @@ export default function CompanyProfile({
               type="text"
               {...register("utilities_description")}
               id="utilities_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
           <div className="relative mt-2 pl-4 flex gap-2 justify-between">
@@ -602,14 +612,14 @@ export default function CompanyProfile({
               type="text"
               {...register("others_description")}
               id="others_description"
-              className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-in ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6 mt-10">
           <div>
             <label
-              htmlFor="type_of_industry"
+              htmlFor="product_description"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Product Description
@@ -619,13 +629,13 @@ export default function CompanyProfile({
               <textarea
                 {...register("product_description")}
                 id="product_description"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('product_description') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
           <div>
             <label
-              htmlFor="type_of_industry"
+              htmlFor="services_description"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Services Description
@@ -635,7 +645,7 @@ export default function CompanyProfile({
               <textarea
                 {...register("services_description")}
                 id="services_description"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('services_description') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
