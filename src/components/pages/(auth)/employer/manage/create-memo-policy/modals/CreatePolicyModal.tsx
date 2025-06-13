@@ -94,11 +94,17 @@ export default function CreatePolicyModal({
     const email = await trigger('to');
     let results = null;
     
-    // Check if tagsTo array exists and has at least one valid email
-    if (tagsTo.length === 0 || !tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'))) {
+    // Check if tagsTo array exists and all emails are valid
+    if (tagsTo.length === 0) {
       results = [title, false];
     } else {
-      results = [title, email];
+      // Check if any email is invalid
+      const invalidEmails = tagsTo.filter(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'));
+      if (invalidEmails.length > 0) {
+        results = [title, false];
+      } else {
+        results = [title, email];
+      }
     }
 
     const incomplete = results?.some((item: boolean) => !item);
@@ -108,7 +114,7 @@ export default function CreatePolicyModal({
       let message = '';
       if (tagsTo.length === 0) {
         message = 'Email address is required';
-      } else if (!tagsTo.some(email => email.includes('@') && email.toLowerCase().endsWith('.com'))) {
+      } else if (tagsTo.some(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'))) {
         message = 'Only valid email addresses with format example@domain.com are allowed';
       } else {
         message = 'You cannot proceed due to incomplete fields. Please review.';
