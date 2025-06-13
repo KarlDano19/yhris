@@ -1,39 +1,46 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_Directive } from '@/types/globals';
+import { DirectiveData } from '@/types/directives';
 
-async function addDirective(directive: T_Directive) {
+async function addDirective(directive: DirectiveData) {
   try {
     const token = getCookie('token');
     const data = new FormData();
-    data.append('directive_type', directive.type);
+    data.append('directive_type', directive.directive_type || '');
     data.append('title', directive.title);
-    data.append('to', JSON.stringify(directive.email));
-    // for (const [index, file] of directive.file.entries()) {
-    //   data.append(`file${index}`, file);
-    // }
-    if (directive.type === 'memo') {
-      data.append('is_responded', directive.withResponse ? 'yes' : 'no');
-      data.append('body', directive.body);
-      data.append('name', directive.name);
-      data.append('position', directive.position);
-      if (directive.signature.length) {
+    data.append('to', JSON.stringify(directive.to));
+    
+    // Handle attachments as FileField
+    if (directive.attachments) {
+      // For File objects, append directly
+      if (typeof directive.attachments === 'object' && directive.attachments !== null) {
+        data.append('attachments', directive.attachments as any);
+      }
+    }
+    
+    if (directive.directive_type === 'memo') {
+      data.append('body', directive.body || '');
+      data.append('name', directive.name || '');
+      data.append('position', directive.position || '');
+      if (directive.signature && typeof directive.signature === 'string' && directive.signature.length) {
         const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
         data.append('signature', signatureBlob, 'signature.jpg');
       }
-      if (directive.qrCode) {
-        data.append('qr_code', directive.qrCode);
+      if (directive.qr_code) {
+        data.append('qr_code', directive.qr_code as File);
       }
     } else {
-      data.append('is_responded', directive.withResponse ? 'yes' : 'no');
-      data.append('purpose', directive.purpose);
-      data.append('policy', directive.policy);
-      data.append('procedure', directive.procedure);
-      data.append('eligibility', directive.eligibility);
-      data.append('application', directive.application);
-      data.append('coverage', directive.coverage);
-      data.append('termination', directive.termination);
+      // Add custom policy fields as JSON
+      if (directive.custom_policy_fields && directive.custom_policy_fields.length > 0) {
+        data.append('custom_policy_fields', JSON.stringify(directive.custom_policy_fields));
+      }
+      
+      // Add provisions
+      data.append('eligibility', directive.eligibility || '');
+      data.append('application', directive.application || '');
+      data.append('coverage', directive.coverage || '');
+      data.append('termination', directive.termination || '');
     }
     const config = {
       method: 'POST',
@@ -57,7 +64,7 @@ async function addDirective(directive: T_Directive) {
 }
 
 function useAddDirectivesItems() {
-  const query = useMutation((directive: T_Directive) => addDirective(directive));
+  const query = useMutation((directive: DirectiveData) => addDirective(directive));
 
   return query;
 }

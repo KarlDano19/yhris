@@ -41,7 +41,7 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
     'setup-applicant-profile',
     'job-applicant-form',
   ];
-  const noHeaderRoutes: string[] = ['generate-report'];
+  const noHeaderRoutes: string[] = ['generate-report', 'directives'];
 
   return (
     <>
