@@ -2,30 +2,86 @@ import {
     Dispatch,
     Fragment,
     useRef,
+    useEffect,
   } from "react";
+  
   import { Dialog, Transition } from "@headlessui/react";
   import { XCircleIcon } from "@heroicons/react/24/solid";
+  
   import SignatureCanvas from "react-signature-canvas";
   
   export default function SignatureModal({
     isOpen,
     setIsOpen,
     setSignatureUrl,
+    setPreviewUrl,
   }: {
     isOpen: boolean;
     setIsOpen: Dispatch<boolean>;
     setSignatureUrl: any;
+    setPreviewUrl: (url: string) => void;
   }) {
     const signatureCanvasRef = useRef<any>(null);
     const cancelButtonRef = useRef(null);
   
     const clearSignature = () => {
       signatureCanvasRef.current.clear();
+      setPreviewUrl('');
     };
+
+    // Update preview whenever the signature changes
+    useEffect(() => {
+      const updatePreview = () => {
+        if (signatureCanvasRef.current && !signatureCanvasRef.current.isEmpty()) {
+          const dataUrl = signatureCanvasRef.current.toDataURL();
+          setPreviewUrl(dataUrl);
+        } else {
+          setPreviewUrl('');
+        }
+      };
+
+      if (signatureCanvasRef.current) {
+        signatureCanvasRef.current.off('endStroke');
+        signatureCanvasRef.current.on('endStroke', updatePreview);
+        // Also update on mouseup/touchend to catch single strokes
+        signatureCanvasRef.current.on('mouseup', updatePreview);
+        signatureCanvasRef.current.on('touchend', updatePreview);
+      }
+
+      return () => {
+        if (signatureCanvasRef.current) {
+          signatureCanvasRef.current.off('endStroke');
+          signatureCanvasRef.current.off('mouseup');
+          signatureCanvasRef.current.off('touchend');
+        }
+      };
+    }, [setPreviewUrl]);
+
+    // Clear preview when modal is closed
+    useEffect(() => {
+      if (!isOpen) {
+        setPreviewUrl('');
+      }
+    }, [isOpen, setPreviewUrl]);
   
     const saveSignature = () => {
       const dataUrl = signatureCanvasRef.current.toDataURL();
-      setSignatureUrl(dataUrl);
+      
+      // Convert data URL to File object
+      const byteString = atob(dataUrl.split(',')[1]);
+      const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      
+      const blob = new Blob([ab], { type: mimeString });
+      const file = new File([blob], "signature.png", { type: "image/png" });
+      
+      setSignatureUrl(file);
+      setPreviewUrl(dataUrl); // Keep the preview visible after saving
       setIsOpen(false);
     };
   

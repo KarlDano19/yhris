@@ -34,7 +34,7 @@ function Content() {
   const [showEmailVerificationModal, setEmailVerificationModal] = useState(false);
 
   const { mutate, isLoading } = useLogin();
-  const { register, getValues, handleSubmit } = useForm<T_Login>();
+  const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
@@ -146,18 +146,23 @@ function Content() {
                     <p className='text-center text-[#6F829B]'>Start managing your people faster and better.</p>
                   </div>
                   <form method='POST' onSubmit={onSubmit}>
-                    <div className='relative mb-5'>
-                      <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                        <EnvelopeIcon className='h-5 w-5 text-savoy-blue' aria-hidden='true' />
+                    <div className='mb-5'>
+                      <div className='relative'>
+                        <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+                          <EnvelopeIcon className='h-5 w-5 text-savoy-blue' aria-hidden='true' />
+                        </div>
+                        <input
+                          type='email'
+                          id='email'
+                          {...register('email', { required: "Please enter an email address" })}
+                          className='bg-gray-50 border border-gray-300 text-gray-900 pl-11 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                          placeholder='Email'
+                          tabIndex={1}
+                        />
                       </div>
-                      <input
-                        type='email'
-                        id='email'
-                        {...register('email', { required: true })}
-                        className='bg-gray-50 border border-gray-300 text-gray-900 pl-11 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                        placeholder='Email'
-                        tabIndex={1}
-                      />
+                      {errors.email && (
+                        <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>
+                      )}
                     </div>
                     <div className='mb-3'>
                       <div className='relative mx-auto'>
@@ -167,7 +172,7 @@ function Content() {
                         <input
                           type={showPassword ? 'text' : 'password'}
                           id='password'
-                          {...register('password', { required: true })}
+                          {...register('password', { required: "Please enter your password" })}
                           className='bg-gray-50 border border-gray-300 text-gray-900 pl-11 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           placeholder='Password'
                           tabIndex={2}
@@ -186,6 +191,9 @@ function Content() {
                           )}
                         </button>
                       </div>
+                      {errors.password && (
+                        <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>
+                      )}
                     </div>
                     <Link
                       href='/forgot-password'

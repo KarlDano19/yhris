@@ -105,6 +105,7 @@ function Content() {
       text: 'OSH Program',
       link: '/dole/osh-program',
       isAvailable: true,
+      // isAvailable: cachedRigths?.state?.data?.create_dole_osh_program,
     },
   ];
   return (
