@@ -485,8 +485,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className="px-2 md:px-8 lg:px-4">
           <h2 className="text-xl font-bold text-indigo-dye">OSH Program</h2>
           <div className="flex-1 flex justify-end space-x-4">
-            <DownloadBorderIcon/>
-            <HistoryIcon/>
+            {/* Commented out for now */}
+            
+            {/* <DownloadBorderIcon/> */}
+            {/* <HistoryIcon/> */}
             <button
               className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
               onClick={submitCurrentTab}
