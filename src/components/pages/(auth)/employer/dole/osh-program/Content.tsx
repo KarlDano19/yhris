@@ -42,8 +42,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
   const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] = useState(false);
-
-  const { data: oshProgramDetails, refetch } = useGetOshProgramDetails();
+  
+  // Only fetch once on initial mount, then rely on manual refetch
+  const { data: oshProgramDetails, refetch, isLoading } = useGetOshProgramDetails(true);
   const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
   const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
@@ -468,8 +469,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // First clear any existing validation messages
     setValidationMessage("");
     setMissingFields([]);
-    
-    // Trigger form validation and submission just for the current tab
+
+    // Directly trigger form validation and submission
+    // No need to fetch before submitting
     onSubmit();
   };
 
