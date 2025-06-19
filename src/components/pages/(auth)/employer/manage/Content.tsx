@@ -8,6 +8,7 @@ import BenefitsLogo from '@/svg/BenefitsLogo';
 import EmployeeLogo from '@/svg/EmployeeLogo';
 import EvaluationHistoryLogo from '@/svg/EvalHistoryLogo';
 import EmployeeMovementLogo from '@/svg/EmployeeMovementLogo';
+import DocumentGeneratorLogo from '@/svg/DocumentGeneratorLogo';
 
 const menus = [
   {
@@ -39,6 +40,11 @@ const menus = [
     icon: <EmployeeMovementLogo />,
     text: 'Employee Movement',
     link: '/manage/employee-movement',
+  },
+  {
+    icon: <DocumentGeneratorLogo />,
+    text: 'Document Generator',
+    link: '/manage/document-generator',
   },
 ];
 
