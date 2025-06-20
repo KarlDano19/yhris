@@ -44,7 +44,7 @@ export const printNoticeToExplain = (data: NoticeToExplainFormData, options: Pri
   
   // Check required fields
   if (!data.employeeName || !data.date) {
-    toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
+    toast.custom(() => <CustomToast message="Please fill in all required fields marked with *" type="error" />);
     return Promise.resolve(null);
   }
   

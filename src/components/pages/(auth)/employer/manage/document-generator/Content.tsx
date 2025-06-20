@@ -649,7 +649,7 @@ export default function Content() {
                 onOpenSignatureModal={handleOpenSignatureModal}
                 onOpenLetterheadModal={handleOpenLetterheadModal}
                 onOpenLogoModal={handleOpenLogoModal}
-                onProceed={employeeIssueItems && employeeIssueItems.length > 0 ? handleProceed : undefined}
+                onProceed={employeeId && employeeIssueItems && employeeIssueItems.length > 0 && documentType === 'notice-to-explain' ? handleProceed : undefined}
                 isDocumentTypeDisabled={isDocumentTypeDisabled}
                 isFieldDisabled={isFieldDisabled}
               />

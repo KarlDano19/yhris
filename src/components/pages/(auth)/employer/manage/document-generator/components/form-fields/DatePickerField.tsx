@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -12,6 +12,7 @@ interface DatePickerFieldProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  isSubmitted?: boolean;
 }
 
 export const DatePickerField = ({
@@ -23,14 +24,19 @@ export const DatePickerField = ({
   required = false,
   placeholder = "mm/dd/yyyy",
   disabled = false,
-  className = ''
+  className = '',
+  isSubmitted = false
 }: DatePickerFieldProps) => {
-  // Add touched state
-  const [isTouched, setIsTouched] = useState(false);
+  // Local state to track validation style
+  const [showValidation, setShowValidation] = useState(false);
+  
+  // Update local validation state when isSubmitted changes
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && required && !value);
+  }, [isSubmitted, required, value]);
   
   // Create a custom handler to adapt the CustomDatePicker to the field's handleInputChange
   const handleDateChange = (date: Date | null) => {
-    setIsTouched(true);
     if (date) {
       // Format date in local time to avoid timezone issues
       const year = date.getFullYear();
@@ -45,13 +51,19 @@ export const DatePickerField = ({
         }
       } as ChangeEvent<HTMLInputElement>;
       handleInputChange(e);
+    } else {
+      // Handle clearing the date
+      const e = {
+        target: {
+          name,
+          value: ''
+        }
+      } as ChangeEvent<HTMLInputElement>;
+      handleInputChange(e);
     }
   };
   
   const selectedDate = value ? new Date(value) : null;
-  
-  // Only show validation if the field has been touched
-  const isInvalid = isTouched && required && !value;
   
   return (
     <div className={`mb-4 ${className}`}>
@@ -66,11 +78,13 @@ export const DatePickerField = ({
           inputOnChange={handleDateChange}
           placeholder={placeholder}
           disabled={disabled}
-          className={`w-full px-3 py-2 border rounded-md ${
+          className={`w-full px-3 py-2 rounded-md focus:outline-none ${
             disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
           } ${
-            isInvalid ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500'
-          } focus:outline-none focus:ring-2`}
+            showValidation 
+              ? 'border border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+              : 'border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+          }`}
           required={required}
         />
       </div>

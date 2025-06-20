@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
@@ -8,6 +8,7 @@ interface FieldProps {
   formData: NoticeToExplainFormData;
   handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   disabled?: boolean;
+  isSubmitted?: boolean;
 }
 
 interface LogoFieldProps extends FieldProps {
@@ -72,7 +73,7 @@ export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleIn
   );
 };
 
-export const DateField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+export const DateField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => (
   <DatePickerField 
     id="date"
     label="Date"
@@ -81,31 +82,43 @@ export const DateField = ({ formData, handleInputChange, disabled }: FieldProps)
     handleInputChange={handleInputChange as any}
     required={true}
     disabled={disabled}
+    isSubmitted={isSubmitted}
   />
 );
 
-export const PlaceField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div className="mb-4">
-    <label htmlFor="place" className="block text-sm font-medium text-gray-700 mb-1">
-      Place <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="text"
-      id="place"
-      name="place"
-      value={formData.place}
-      onChange={handleInputChange}
-      className={`w-full px-3 py-2 border rounded-md ${
-        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-      placeholder="Enter place"
-      required
-      disabled={disabled}
-    />
-  </div>
-);
+export const PlaceField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
+  const [showValidation, setShowValidation] = useState(false);
+  
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && !formData.place);
+  }, [isSubmitted, formData.place]);
+  
+  return (
+    <div className="mb-4">
+      <label htmlFor="place" className="block text-sm font-medium text-gray-700 mb-1">
+        Place <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        id="place"
+        name="place"
+        placeholder="Enter place"
+        value={formData.place}
+        onChange={handleInputChange}
+        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
+          disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+        } ${
+          showValidation
+            ? 'border-red-500 focus:border-red-500'
+            : 'border-gray-300 focus:border-blue-500'
+        }`}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
 
-export const IncidentDateField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+export const IncidentDateField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => (
   <DatePickerField 
     id="incidentDate"
     label="Date of Incident"
@@ -114,50 +127,73 @@ export const IncidentDateField = ({ formData, handleInputChange, disabled }: Fie
     handleInputChange={handleInputChange as any}
     required={true}
     disabled={disabled}
+    isSubmitted={isSubmitted}
   />
 );
 
-export const IncidentPlaceField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div className="mb-4">
-    <label htmlFor="incidentPlace" className="block text-sm font-medium text-gray-700 mb-1">
-      Place of Incident <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="text"
-      id="incidentPlace"
-      name="incidentPlace"
-      value={formData.incidentPlace}
-      onChange={handleInputChange}
-      className={`w-full px-3 py-2 border rounded-md ${
-        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-      placeholder="Enter place of incident"
-      required
-      disabled={disabled}
-    />
-  </div>
-);
+export const IncidentPlaceField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
+  const [showValidation, setShowValidation] = useState(false);
+  
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && !formData.incidentPlace);
+  }, [isSubmitted, formData.incidentPlace]);
+  
+  return (
+    <div className="mb-4">
+      <label htmlFor="incidentPlace" className="block text-sm font-medium text-gray-700 mb-1">
+        Place of Incident <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        id="incidentPlace"
+        name="incidentPlace"
+        placeholder="Enter place of incident"
+        value={formData.incidentPlace}
+        onChange={handleInputChange}
+        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
+          disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+        } ${
+          showValidation
+            ? 'border-red-500 focus:border-red-500'
+            : 'border-gray-300 focus:border-blue-500'
+        }`}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
 
-export const BriefBackgroundField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div className="mb-4 w-full">
-    <label htmlFor="briefBackground" className="block text-sm font-medium text-gray-700 mb-1">
-      Brief Background <span className="text-red-500">*</span>
-    </label>
-    <textarea
-      id="briefBackground"
-      name="briefBackground"
-      value={formData.briefBackground}
-      onChange={handleInputChange}
-      className={`w-full px-3 py-2 border rounded-md ${
-        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-      placeholder="Enter brief background"
-      rows={6}
-      required
-      disabled={disabled}
-    />
-  </div>
-);
+export const BriefBackgroundField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
+  const [showValidation, setShowValidation] = useState(false);
+  
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && !formData.briefBackground);
+  }, [isSubmitted, formData.briefBackground]);
+  
+  return (
+    <div className="mb-4">
+      <label htmlFor="briefBackground" className="block text-sm font-medium text-gray-700 mb-1">
+        Brief Background <span className="text-red-500">*</span>
+      </label>
+      <textarea
+        id="briefBackground"
+        name="briefBackground"
+        placeholder="Enter brief background"
+        value={formData.briefBackground}
+        onChange={handleInputChange}
+        rows={4}
+        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
+          disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+        } ${
+          showValidation
+            ? 'border-red-500 focus:border-red-500'
+            : 'border-gray-300 focus:border-blue-500'
+        }`}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
 
 export const PreparedByField = ({ formData, handleInputChange, disabled }: FieldProps) => (
   <div className="mb-4">

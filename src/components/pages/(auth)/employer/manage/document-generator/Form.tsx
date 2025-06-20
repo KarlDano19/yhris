@@ -75,6 +75,10 @@ export default function Form({
     '#FFC107'
   );
 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  // Add a key state to force complete re-render of form fields
+  const [formKey, setFormKey] = useState(0);
+
   // Update local formData when initialData changes from parent
   useEffect(() => {
     if (initialData) {
@@ -123,6 +127,11 @@ export default function Form({
     
     // Handle document type change
     if (name === 'documentType') {
+      // Reset validation state when changing document type
+      setIsSubmitted(false);
+      // Increment form key to force re-render of all fields with clean validation
+      setFormKey(prevKey => prevKey + 1);
+      
       onDocumentTypeChange(value as DocumentType);
       return;
     }
@@ -159,7 +168,22 @@ export default function Form({
     onFormChange(updatedData);
   };
 
+  const handlePrint = () => {
+    setIsSubmitted(true);
+    onPrint();
+  };
+
+  const handleProceed = () => {
+    setIsSubmitted(true);
+    if (onProceed) {
+      onProceed();
+    }
+  };
+
   const handleReset = () => {
+    // First, set isSubmitted to false to remove validation highlighting
+    setIsSubmitted(false);
+    
     // Reset based on document type
     if (documentType === 'employee-certificate') {
       const resetData: EmployeeCertificateFormData = {
@@ -180,6 +204,7 @@ export default function Form({
         borderColor: '#FFC107'
       };
       setFormData(resetData);
+      setColorValue('#FFC107'); // Make sure color picker is also reset
       onFormChange(resetData);
     } else if (documentType === 'employment-agreement') {
       const resetData: EmploymentAgreementFormData = {
@@ -224,8 +249,12 @@ export default function Form({
         borderColor: '#FFC107'
       };
       setFormData(resetData);
+      setColorValue('#FFC107'); // Make sure color picker is also reset
       onFormChange(resetData);
     }
+
+    // Force a complete re-render of all form fields by incrementing the key
+    setFormKey(prevKey => prevKey + 1);
   };
   
   // Get letterhead display name
@@ -266,200 +295,211 @@ export default function Form({
     <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 max-w-full mx-auto transition-all duration-300">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-black">Details</h2>
       
-      {/* Document Type Selector */}
-      <DocumentTypeField 
-        documentType={documentType} 
-        formData={formData}
-        handleInputChange={handleInputChange}
-        disabled={isDocumentTypeDisabled} 
-      />
-      
-      {/* Letterhead Section - Only show for document type */}
-      {(documentType === 'employee-certificate') && (
-        <LetterheadField 
-          formData={formData as EmployeeCertificateFormData}
-          letterheadDisplayName={letterheadDisplayName}
-          handleInputChange={handleInputChange}
-          onOpenLetterheadModal={onOpenLetterheadModal}
-          disabled={isFormDisabled}
-        />
-      )}
-      
-      {/* Logo Section - Only show for notice-to-explain */}
-      {documentType === 'notice-to-explain' && (
-        <LogoField 
-          formData={formData as NoticeToExplainFormData}
-          logoDisplayName={logoDisplayName}
-          handleInputChange={handleInputChange}
-          onOpenLogoModal={onOpenLogoModal}
-          disabled={isFormDisabled}
-        />
-      )}
-      
-      {/* Border Color - Only show for document type and notice-to-explain */}
-      {(documentType === 'employee-certificate' || documentType === 'notice-to-explain') && (
-        <ColorField 
-          formData={formData}
-          colorValue={colorValue}
-          handleInputChange={handleInputChange}
-          disabled={isFormDisabled}
-        />
-      )}
-      
-      {/* Common Fields */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        <CommonFields 
+      {/* Use the key to force re-render of all form fields */}
+      <div key={formKey}>
+        {/* Document Type Selector */}
+        <DocumentTypeField 
+          documentType={documentType} 
           formData={formData}
           handleInputChange={handleInputChange}
-          documentType={documentType}
-          disabled={isFieldDisabled ? isFieldDisabled('employeeName') : isFormDisabled}
+          disabled={isDocumentTypeDisabled} 
         />
         
-        {/* Employment Agreement specific field */}
-        {documentType === 'employment-agreement' && (
-          <CompanyAddressField 
-            formData={formData}
+        {/* Letterhead Section - Only show for document type */}
+        {(documentType === 'employee-certificate') && (
+          <LetterheadField 
+            formData={formData as EmployeeCertificateFormData}
+            letterheadDisplayName={letterheadDisplayName}
             handleInputChange={handleInputChange}
+            onOpenLetterheadModal={onOpenLetterheadModal}
             disabled={isFormDisabled}
           />
         )}
         
-        {/* Document-specific fields */}
-        {documentType === 'employee-certificate' && (
-          <EndDateField 
-            formData={formData}
-            handleInputChange={handleInputChange}
-            disabled={isFormDisabled}
-          />
-        )}
-        
-        {/* Employment Agreement specific fields */}
-        {documentType === 'employment-agreement' && (
-          <>
-            <ProbationPeriodField 
-              formData={formData}
-              handleInputChange={handleInputChange}
-              disabled={isFormDisabled}
-            />
-            
-            <WorkingHoursField 
-              formData={formData}
-              handleInputChange={handleInputChange}
-              disabled={isFormDisabled}
-            />
-            
-            <DailySalaryField 
-              formData={formData}
-              handleInputChange={handleInputChange}
-              disabled={isFormDisabled}
-            />
-          </>
-        )}
-        
-        {/* Notice to Explain specific fields */}
+        {/* Logo Section - Only show for notice-to-explain */}
         {documentType === 'notice-to-explain' && (
-          <>
-            <DateField 
-              formData={formData as NoticeToExplainFormData}
+          <LogoField 
+            formData={formData as NoticeToExplainFormData}
+            logoDisplayName={logoDisplayName}
+            handleInputChange={handleInputChange}
+            onOpenLogoModal={onOpenLogoModal}
+            disabled={isFormDisabled}
+          />
+        )}
+        
+        {/* Border Color - Only show for document type and notice-to-explain */}
+        {(documentType === 'employee-certificate' || documentType === 'notice-to-explain') && (
+          <ColorField 
+            formData={formData}
+            colorValue={colorValue}
+            handleInputChange={handleInputChange}
+            disabled={isFormDisabled}
+          />
+        )}
+        
+        {/* Common Fields */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <CommonFields 
+            formData={formData}
+            handleInputChange={handleInputChange}
+            documentType={documentType}
+            disabled={isFieldDisabled ? isFieldDisabled('employeeName') : isFormDisabled}
+            isSubmitted={isSubmitted}
+          />
+          
+          {/* Employment Agreement specific field */}
+          {documentType === 'employment-agreement' && (
+            <CompanyAddressField 
+              formData={formData}
               handleInputChange={handleInputChange}
               disabled={isFormDisabled}
             />
-            
-            <PlaceField 
-              formData={formData as NoticeToExplainFormData}
+          )}
+          
+          {/* Document-specific fields */}
+          {documentType === 'employee-certificate' && (
+            <EndDateField 
+              formData={formData}
               handleInputChange={handleInputChange}
               disabled={isFormDisabled}
             />
-            
-            <IncidentDateField 
-              formData={formData as NoticeToExplainFormData}
-              handleInputChange={handleInputChange}
-              disabled={isFieldDisabled ? isFieldDisabled('incidentDate') : isFormDisabled}
-            />
-            
-            <IncidentPlaceField 
-              formData={formData as NoticeToExplainFormData}
-              handleInputChange={handleInputChange}
-              disabled={isFieldDisabled ? isFieldDisabled('incidentPlace') : isFormDisabled}
-            />
-            
-            {/* Make Brief Background take full width */}
-            <div className="sm:col-span-2">
-              <BriefBackgroundField 
+          )}
+          
+          {/* Employment Agreement specific fields */}
+          {documentType === 'employment-agreement' && (
+            <>
+              <ProbationPeriodField 
+                formData={formData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+              />
+              
+              <WorkingHoursField 
+                formData={formData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+              />
+              
+              <DailySalaryField 
+                formData={formData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+              />
+            </>
+          )}
+          
+          {/* Notice to Explain specific fields */}
+          {documentType === 'notice-to-explain' && (
+            <>
+              <DateField 
                 formData={formData as NoticeToExplainFormData}
                 handleInputChange={handleInputChange}
-                // Brief background should remain editable
+                disabled={isFormDisabled}
+                isSubmitted={isSubmitted}
+              />
+              
+              <PlaceField 
+                formData={formData as NoticeToExplainFormData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+                isSubmitted={isSubmitted}
+              />
+              
+              <IncidentDateField 
+                formData={formData as NoticeToExplainFormData}
+                handleInputChange={handleInputChange}
+                disabled={isFieldDisabled ? isFieldDisabled('incidentDate') : isFormDisabled}
+                isSubmitted={isSubmitted}
+              />
+              
+              <IncidentPlaceField 
+                formData={formData as NoticeToExplainFormData}
+                handleInputChange={handleInputChange}
+                disabled={isFieldDisabled ? isFieldDisabled('incidentPlace') : isFormDisabled}
+                isSubmitted={isSubmitted}
+              />
+              
+              {/* Make Brief Background take full width */}
+              <div className="sm:col-span-2">
+                <BriefBackgroundField 
+                  formData={formData as NoticeToExplainFormData}
+                  handleInputChange={handleInputChange}
+                  // Brief background should remain editable
+                  disabled={false}
+                  isSubmitted={isSubmitted}
+                />
+              </div>
+              
+              {/* Place Prepared By and Reviewed By side by side */}
+              <PreparedByField 
+                formData={formData as NoticeToExplainFormData}
+                handleInputChange={handleInputChange}
                 disabled={false}
               />
-            </div>
-            
-            {/* Place Prepared By and Reviewed By side by side */}
-            <PreparedByField 
-              formData={formData as NoticeToExplainFormData}
+              
+              <ReviewedByField 
+                formData={formData as NoticeToExplainFormData}
+                handleInputChange={handleInputChange}
+                disabled={false}
+              />
+            </>
+          )}
+          
+          {/* Document-specific field */}
+          {documentType === 'employee-certificate' && (
+            <PurposeField 
+              formData={formData}
               handleInputChange={handleInputChange}
-              disabled={false}
+              disabled={isFormDisabled}
             />
-            
-            <ReviewedByField 
-              formData={formData as NoticeToExplainFormData}
-              handleInputChange={handleInputChange}
-              disabled={false}
-            />
-          </>
-        )}
+          )}
+          
+          {/* Common fields continued */}
+          {(documentType === 'employee-certificate' || documentType === 'employment-agreement') && (
+            <>
+              <DateIssuanceField 
+                formData={formData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+                isSubmitted={isSubmitted}
+              />
+              
+              <PlaceIssuanceField 
+                formData={formData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+              />
+              
+              <SignatoryNameField 
+                formData={formData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+              />
+              
+              <SignatoryPositionField 
+                formData={formData}
+                handleInputChange={handleInputChange}
+                disabled={isFormDisabled}
+              />
+            </>
+          )}
+        </div>
         
-        {/* Document-specific field */}
-        {documentType === 'employee-certificate' && (
-          <PurposeField 
-            formData={formData}
-            handleInputChange={handleInputChange}
-            disabled={isFormDisabled}
-          />
-        )}
-        
-        {/* Common fields continued */}
-        {(documentType === 'employee-certificate' || documentType === 'employment-agreement') && (
-          <>
-            <DateIssuanceField 
-              formData={formData}
-              handleInputChange={handleInputChange}
-              disabled={isFormDisabled}
-            />
-            
-            <PlaceIssuanceField 
-              formData={formData}
-              handleInputChange={handleInputChange}
-              disabled={isFormDisabled}
-            />
-            
-            <SignatoryNameField 
-              formData={formData}
-              handleInputChange={handleInputChange}
-              disabled={isFormDisabled}
-            />
-            
-            <SignatoryPositionField 
-              formData={formData}
-              handleInputChange={handleInputChange}
-              disabled={isFormDisabled}
-            />
-          </>
-        )}
+        {/* Signature Section */}
+        <SignatureField 
+          formData={formData}
+          handleInputChange={handleInputChange}
+          onOpenSignatureModal={onOpenSignatureModal}
+          disabled={isFormDisabled}
+          isSubmitted={isSubmitted}
+        />
       </div>
-      
-      {/* Signature Section */}
-      <SignatureField 
-        formData={formData}
-        handleInputChange={handleInputChange}
-        onOpenSignatureModal={onOpenSignatureModal}
-        disabled={isFormDisabled}
-      />
       
       {/* Action Buttons */}
       <ActionButtons 
         handleReset={handleReset}
-        onPrint={onPrint}
-        onProceed={onProceed}
+        onPrint={handlePrint}
+        onProceed={onProceed ? handleProceed : undefined}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import DropDownArrow from '@/svg/DropDownArrow';
@@ -13,6 +13,7 @@ export interface FieldProps {
   formData: EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData;
   handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   disabled?: boolean;
+  isSubmitted?: boolean;
 }
 
 interface DocumentTypeFieldProps extends FieldProps {
@@ -146,6 +147,7 @@ interface CommonFieldsProps {
   handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   documentType: DocumentType;
   disabled?: boolean;
+  isSubmitted?: boolean;
 }
 
 export function CommonFields({
@@ -153,6 +155,7 @@ export function CommonFields({
   handleInputChange,
   documentType,
   disabled = false,
+  isSubmitted = false,
 }: CommonFieldsProps) {
   // Get the correct employeeName and position based on document type
   let employeeName = '';
@@ -178,6 +181,16 @@ export function CommonFields({
     position = noticeData.position;
   }
 
+  // Add local state for validation
+  const [showEmployeeNameValidation, setShowEmployeeNameValidation] = useState(false);
+  const [showPositionValidation, setShowPositionValidation] = useState(false);
+  
+  // Update validation state when isSubmitted or field values change
+  useEffect(() => {
+    setShowEmployeeNameValidation(isSubmitted === true && !employeeName);
+    setShowPositionValidation(isSubmitted === true && !position);
+  }, [isSubmitted, employeeName, position]);
+
   return (
     <>
       <div className="mb-4">
@@ -192,7 +205,11 @@ export function CommonFields({
           onChange={handleInputChange}
           className={`w-full px-3 py-2 border rounded-md ${
             disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } ${
+            showEmployeeNameValidation
+              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+              : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+          }`}
           placeholder="Enter employee name"
           required
           disabled={disabled}
@@ -232,7 +249,11 @@ export function CommonFields({
           onChange={handleInputChange}
           className={`w-full px-3 py-2 border rounded-md ${
             disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } ${
+            showPositionValidation
+              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+              : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+          }`}
           placeholder="Enter position or title"
           required
           disabled={disabled}
@@ -248,13 +269,14 @@ export function CommonFields({
           handleInputChange={handleInputChange}
           required={true}
           disabled={disabled}
+          isSubmitted={isSubmitted}
         />
       )}
     </>
   );
 }
 
-export const DateIssuanceField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+export const DateIssuanceField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => (
   <DatePickerField
     id="dateOfIssuance"
     label="Date of Issuance"
@@ -263,6 +285,7 @@ export const DateIssuanceField = ({ formData, handleInputChange, disabled }: Fie
     handleInputChange={handleInputChange}
     required={true}
     disabled={disabled}
+    isSubmitted={isSubmitted}
   />
 );
 
@@ -323,17 +346,19 @@ export const SignatoryPositionField = ({ formData, handleInputChange, disabled }
 
 interface SignatureFieldProps extends FieldProps {
   onOpenSignatureModal: () => void;
+  isSubmitted?: boolean;
 }
 
-export const SignatureField = ({ formData, onOpenSignatureModal, disabled }: SignatureFieldProps) => {
-  // Add state to track if signature field has been interacted with
-  const [hasInteracted, setHasInteracted] = useState(false);
+export const SignatureField = ({ formData, onOpenSignatureModal, disabled, isSubmitted = false }: SignatureFieldProps) => {
+  // Use local state to track validation
+  const [showValidation, setShowValidation] = useState(false);
   
-  // Check if signature is missing only after interaction
-  const isInvalid = hasInteracted && !formData.signature;
+  // Update validation state when isSubmitted or signature changes
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && !formData.signature);
+  }, [isSubmitted, formData.signature]);
 
   const handleSignatureClick = () => {
-    setHasInteracted(true);
     onOpenSignatureModal();
   };
 
@@ -345,7 +370,7 @@ export const SignatureField = ({ formData, onOpenSignatureModal, disabled }: Sig
       <div className={`border-2 border-dashed rounded-md p-3 sm:p-6 flex flex-col items-center justify-center ${
         disabled ? 'bg-gray-100 cursor-not-allowed' : ''
       } ${
-        isInvalid ? 'border-red-500' : 'border-gray-300'
+        showValidation ? 'border-red-500' : 'border-gray-300'
       }`}>
         {formData.signature ? (
           <div className="flex flex-col items-center w-full">
@@ -376,12 +401,12 @@ export const SignatureField = ({ formData, onOpenSignatureModal, disabled }: Sig
             data-signature-button
             disabled={disabled}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`sm:w-12 sm:h-12 ${isInvalid ? 'text-red-400' : 'text-gray-400'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`sm:w-12 sm:h-12 ${showValidation ? 'text-red-400' : 'text-gray-400'}`}>
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
               <polyline points="10 17 15 12 10 7"></polyline>
               <line x1="15" y1="12" x2="3" y2="12"></line>
             </svg>
-            <span className={`hover:underline focus:outline-none text-sm sm:text-base text-center ${isInvalid ? 'text-red-500' : 'text-blue-500'}`}>
+            <span className={`hover:underline focus:outline-none text-sm sm:text-base text-center ${showValidation ? 'text-red-500' : 'text-blue-500'}`}>
               Click to add signature
             </span>
           </button>
