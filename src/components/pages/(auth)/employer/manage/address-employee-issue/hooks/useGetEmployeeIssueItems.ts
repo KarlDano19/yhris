@@ -37,7 +37,7 @@ async function getEmployeeIssueItems(filters: any) {
 
 function useGetEmployeeIssueItems(filters: any) {
   const query = useQuery(
-    ['employeeIssueItemCache'],
+    ['employeeIssueItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
     () => getEmployeeIssueItems(filters),
     {
       enabled: false,
