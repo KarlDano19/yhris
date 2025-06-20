@@ -12,7 +12,7 @@ import NoticeToExplainPreview from "./components/previews/NoticeToExplainPreview
 import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
-import Form from "@/components/Form";
+import Form from "@/components/pages/(auth)/employer/manage/document-generator/Form";
 import CustomToast from "@/components/CustomToast";
 
 import { EmployeeCertificateFormData } from "@/types/document-generator/documents";
