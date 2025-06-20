@@ -17,7 +17,7 @@ import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { XCircleIcon, EyeIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import ClipIcon from '@/svg/ClipIcon';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
@@ -69,21 +69,34 @@ export default function SendNTEModal({
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
-  // Set up email and check for attachment from the employee issue items
+  // Reset all form data when modal opens or closes
   useEffect(() => {
-    if (isOpen && isOpen.id) {
+    // Reset all tags and inputs first
+    setTagsTo([]);
+    setTagsCc([]);
+    setTagsBcc([]);
+    setInputTo('');
+    setInputCc('');
+    setInputBcc('');
+    setIsCCOpen(false);
+    setIsBCCOpen(false);
+    setApplicantEmail(null);
+    reset();
+
+    // Only set email data if modal is opening with an ID AND we have valid data
+    if (isOpen?.id && employeeIssueItems?.length > 0) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
-      if (employeeIssueItemsCopy[itemIndex]) {
-        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+      // Don't auto-populate the To field
+      if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
+        setApplicantEmail(employeeIssueItems[itemIndex].email);
+        // Removed setTagsTo here to prevent auto-population
       }
     }
-  }, [isOpen, employeeIssueItems, setTagsTo]);
-  
+  }, [isOpen?.id, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
+
   // Get attachment from the server if available
   useEffect(() => {
-    if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
+    if (employeeIssueDetails?.nte_attachment) {
       setPdfAttachment(employeeIssueDetails.nte_attachment);
     }
   }, [employeeIssueDetails]);
@@ -107,6 +120,7 @@ export default function SendNTEModal({
       employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
       // Include PDF attachment if available
       if (pdfAttachment) {
+        employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;
         employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment = pdfAttachment;
       }
       employeeIssueItemsCopy[itemIndex].isNTESent = true;
@@ -186,11 +200,9 @@ export default function SendNTEModal({
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
-                                if (applicantEmail) {
-                                  setTagsTo([applicantEmail, ...template.to]);
-                                } else {
-                                  setTagsTo(template.to);
-                                }
+                                // Just set the template's to addresses directly
+                                setTagsTo(template.to || []);
+                                
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);

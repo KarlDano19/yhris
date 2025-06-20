@@ -123,7 +123,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const openNteModal = searchParams.get('openNteModal');
     const employeeId = searchParams.get('employeeId');
     
-    if (openNteModal === 'true' && employeeId && employeeIssueItems.length > 0) {
+    // Only open if we have both parameters and employeeIssueItems is loaded
+    // AND we're not in the process of creating a new incident report
+    if (openNteModal === 'true' && 
+        employeeId && 
+        employeeIssueItems.length > 0 && 
+        !isIncidentReportModalOpen) {
       // Find the employee issue item
       const employeeIssue = employeeIssueItems.find((item: any) => item.id.toString() === employeeId);
       
@@ -134,7 +139,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         });
       }
     }
-  }, [searchParams, employeeIssueItems]);
+  }, [searchParams, employeeIssueItems, isIncidentReportModalOpen]); // Add isIncidentReportModalOpen to dependencies
 
   useEffect(() => {
     if (dataDepartment) {

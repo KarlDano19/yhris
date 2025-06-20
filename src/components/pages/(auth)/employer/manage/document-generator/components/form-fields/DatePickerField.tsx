@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useState } from 'react';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -25,8 +25,12 @@ export const DatePickerField = ({
   disabled = false,
   className = ''
 }: DatePickerFieldProps) => {
+  // Add touched state
+  const [isTouched, setIsTouched] = useState(false);
+  
   // Create a custom handler to adapt the CustomDatePicker to the field's handleInputChange
   const handleDateChange = (date: Date | null) => {
+    setIsTouched(true);
     if (date) {
       // Format date in local time to avoid timezone issues
       const year = date.getFullYear();
@@ -46,6 +50,9 @@ export const DatePickerField = ({
   
   const selectedDate = value ? new Date(value) : null;
   
+  // Only show validation if the field has been touched
+  const isInvalid = isTouched && required && !value;
+  
   return (
     <div className={`mb-4 ${className}`}>
       <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
@@ -61,7 +68,9 @@ export const DatePickerField = ({
           disabled={disabled}
           className={`w-full px-3 py-2 border rounded-md ${
             disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } ${
+            isInvalid ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500'
+          } focus:outline-none focus:ring-2`}
           required={required}
         />
       </div>

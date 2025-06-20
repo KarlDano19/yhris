@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useState } from 'react';
 import Image from 'next/image';
 
 import DropDownArrow from '@/svg/DropDownArrow';
@@ -268,7 +268,7 @@ export const DateIssuanceField = ({ formData, handleInputChange, disabled }: Fie
 
 export const PlaceIssuanceField = ({ formData, handleInputChange, disabled }: FieldProps) => (
   <div>
-    <label className="block mb-2 text-black">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
       Place of Issuance
     </label>
     <input
@@ -277,7 +277,9 @@ export const PlaceIssuanceField = ({ formData, handleInputChange, disabled }: Fi
       value={formData.placeOfIssuance}
       onChange={handleInputChange}
       placeholder="Enter place of issuance (e.g., city)"
-      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+      className={`w-full px-3 py-2 border rounded-md ${
+        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
       disabled={disabled}
     />
   </div>
@@ -323,54 +325,71 @@ interface SignatureFieldProps extends FieldProps {
   onOpenSignatureModal: () => void;
 }
 
-export const SignatureField = ({ formData, onOpenSignatureModal, disabled }: SignatureFieldProps) => (
-  <div className="mt-4 sm:mt-6">
-    <label className="block mb-2 text-black">
-      Signature <span className="text-red-500">*</span>
-    </label>
-    <div className={`border-2 border-dashed border-gray-300 rounded-md p-3 sm:p-6 flex flex-col items-center justify-center ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
-      {formData.signature ? (
-        <div className="flex flex-col items-center w-full">
-          <Image 
-            src={typeof formData.signature === 'string' 
-              ? formData.signature 
-              : URL.createObjectURL(formData.signature as File)} 
-            alt="Signature Preview" 
-            width={160}
-            height={80}
-            style={{ maxHeight: '6rem', width: 'auto', objectFit: 'contain' }}
-            className="mb-3 sm:mb-4"
-            unoptimized={true}
-          />
-          {!disabled && (
-            <button 
-              onClick={onOpenSignatureModal}
-              className="text-blue-500 text-xs sm:text-sm hover:underline focus:outline-none"
-            >
-              Change Signature
-            </button>
-          )}
-        </div>
-      ) : (
-        <button 
-          onClick={onOpenSignatureModal}
-          className="flex flex-col items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3"
-          data-signature-button
-          disabled={disabled}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 sm:w-12 sm:h-12">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-            <polyline points="10 17 15 12 10 7"></polyline>
-            <line x1="15" y1="12" x2="3" y2="12"></line>
-          </svg>
-          <span className="text-blue-500 hover:underline focus:outline-none text-sm sm:text-base text-center">
-            Click to add signature
-          </span>
-        </button>
-      )}
+export const SignatureField = ({ formData, onOpenSignatureModal, disabled }: SignatureFieldProps) => {
+  // Add state to track if signature field has been interacted with
+  const [hasInteracted, setHasInteracted] = useState(false);
+  
+  // Check if signature is missing only after interaction
+  const isInvalid = hasInteracted && !formData.signature;
+
+  const handleSignatureClick = () => {
+    setHasInteracted(true);
+    onOpenSignatureModal();
+  };
+
+  return (
+    <div className="mt-4 sm:mt-6">
+      <label className="block mb-2 text-black">
+        Signature <span className="text-red-500">*</span>
+      </label>
+      <div className={`border-2 border-dashed rounded-md p-3 sm:p-6 flex flex-col items-center justify-center ${
+        disabled ? 'bg-gray-100 cursor-not-allowed' : ''
+      } ${
+        isInvalid ? 'border-red-500' : 'border-gray-300'
+      }`}>
+        {formData.signature ? (
+          <div className="flex flex-col items-center w-full">
+            <Image 
+              src={typeof formData.signature === 'string' 
+                ? formData.signature 
+                : URL.createObjectURL(formData.signature as File)} 
+              alt="Signature Preview" 
+              width={160}
+              height={80}
+              style={{ maxHeight: '6rem', width: 'auto', objectFit: 'contain' }}
+              className="mb-3 sm:mb-4"
+              unoptimized={true}
+            />
+            {!disabled && (
+              <button 
+                onClick={handleSignatureClick}
+                className="text-blue-500 text-xs sm:text-sm hover:underline focus:outline-none"
+              >
+                Change Signature
+              </button>
+            )}
+          </div>
+        ) : (
+          <button 
+            onClick={handleSignatureClick}
+            className="flex flex-col items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3"
+            data-signature-button
+            disabled={disabled}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`sm:w-12 sm:h-12 ${isInvalid ? 'text-red-400' : 'text-gray-400'}`}>
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <span className={`hover:underline focus:outline-none text-sm sm:text-base text-center ${isInvalid ? 'text-red-500' : 'text-blue-500'}`}>
+              Click to add signature
+            </span>
+          </button>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface ActionButtonsProps {
   handleReset: () => void;
@@ -403,16 +422,18 @@ export const ActionButtons = ({ handleReset, onPrint, onProceed }: ActionButtons
         Print
       </button>
       
-      <button
-        onClick={onProceed}
-        className="flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-green-500 text-white rounded-full hover:bg-green-600 w-full sm:w-auto mt-3 sm:mt-0"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
-          <path d="M5 12h14"/>
-          <path d="m12 5 7 7-7 7"/>
-        </svg>
-        Proceed
-      </button>
+      {onProceed && (
+        <button
+          onClick={onProceed}
+          className="flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-green-500 text-white rounded-full hover:bg-green-600 w-full sm:w-auto mt-3 sm:mt-0"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+          </svg>
+          Proceed
+        </button>
+      )}
     </div>
   </div>
 ); 

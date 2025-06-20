@@ -122,6 +122,70 @@ export default function Content() {
     initColorPolyfill();
   }, []);
   
+  // Reset form data when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset all form data to initial state when component unmounts
+      setEmployeeCertificateData({
+        employeeName: '',
+        companyName: '',
+        position: '',
+        startDate: '',
+        endDate: '',
+        purpose: '',
+        dateOfIssuance: '',
+        placeOfIssuance: '',
+        signatoryName: '',
+        signatoryPosition: '',
+        letterheadImage: null,
+        sampleLetterheadPath: '',
+        signature: null,
+        documentTitle: 'Certificate of Employment',
+        borderColor: '#FFC107'
+      });
+      
+      setEmploymentAgreementData({
+        employeeName: '',
+        companyName: '',
+        position: '',
+        startDate: '',
+        probationPeriod: '6',
+        workingHours: '8',
+        dailySalary: '1',
+        dateOfIssuance: '',
+        placeOfIssuance: '',
+        signatoryName: '',
+        signatoryPosition: '',
+        companyAddress: '',
+        signature: null,
+      });
+      
+      setNoticeToExplainData({
+        employeeName: '',
+        position: '',
+        date: '',
+        place: '',
+        dateOfIssuance: '',
+        placeOfIssuance: '',
+        signatoryName: '',
+        signatoryPosition: '',
+        incidentDate: '',
+        incidentPlace: '',
+        briefBackground: '',
+        preparedBy: '',
+        reviewedBy: '',
+        receivedBy: '',
+        employeeExplanation: '',
+        hearingNotes: '',
+        managementDecision: '',
+        logoImage: null,
+        sampleLogoPath: '',
+        signature: null,
+        borderColor: '#FFC107'
+      });
+    };
+  }, []);
+  
   // Fetch employee issue data
   useEffect(() => {
     if (employeeId) {
@@ -280,6 +344,21 @@ export default function Content() {
               height: auto !important;
               overflow: visible !important;
             }
+            
+            /* Enhance signature spacing */
+            .signatures-grid {
+              margin-top: 30px !important;
+              margin-bottom: 25px !important;
+            }
+            
+            .signature-block {
+              padding-bottom: 15px !important;
+            }
+            
+            .signature-line {
+              margin-top: 8px !important;
+              margin-bottom: 8px !important;
+            }
           `
         );
         
@@ -305,11 +384,11 @@ export default function Content() {
           // Get the body element from the iframe
           const content = iframeDoc.body;
           
-          // Wait for all resources to load
+          // Wait longer for all resources and styles to load completely
           setTimeout(() => {
             // Use html2canvas to capture the content with improved settings
             html2canvas(content, {
-              scale: 2, // Higher scale for better quality
+              scale: 2.5, // Higher scale for better quality (increased from 2)
               useCORS: true,
               allowTaint: true,
               backgroundColor: '#ffffff',
@@ -318,7 +397,9 @@ export default function Content() {
               height: content.scrollHeight,
               // Disable scrolling capture to prevent blank pages
               scrollX: 0,
-              scrollY: 0
+              scrollY: 0,
+              // Improve font rendering
+              logging: false
             }).then((canvas) => {
               try {
                 // Create a new PDF document with 1cm margins
@@ -400,7 +481,7 @@ export default function Content() {
               toast.dismiss(loadingToast);
               toast.custom(() => <CustomToast message="Error capturing document. Please try again." type="error" />, { duration: 3000 });
             });
-          }, 1500); // Increased wait time for fonts and images to load
+          }, 2500); // Increased wait time from 1500ms to 2500ms for fonts and styles to load completely
         };
       } catch (error) {
         console.error('Error setting up PDF generation:', error);
@@ -568,7 +649,7 @@ export default function Content() {
                 onOpenSignatureModal={handleOpenSignatureModal}
                 onOpenLetterheadModal={handleOpenLetterheadModal}
                 onOpenLogoModal={handleOpenLogoModal}
-                onProceed={handleProceed}
+                onProceed={employeeIssueItems && employeeIssueItems.length > 0 ? handleProceed : undefined}
                 isDocumentTypeDisabled={isDocumentTypeDisabled}
                 isFieldDisabled={isFieldDisabled}
               />
