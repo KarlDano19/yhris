@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
@@ -326,10 +327,12 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       {/* Logo at the top */}
       <div className="flex justify-center mb-4">
         {logoSrc ? (
-          <img 
+          <Image 
             src={logoSrc} 
             alt="Company Logo" 
             className="h-16 object-contain"
+            width={150}
+            height={64}
           />
         ) : (
           <div className="h-16"></div>
@@ -391,17 +394,20 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       <div className="grid grid-cols-3 gap-3 mb-6 text-black text-xs">
         <div className="text-center">
           <div className="font-bold mb-1">Prepared by:</div>
-          <div className="border-t border-black pt-1 mt-6">{data.preparedBy || '[HR Representative]'}</div>
+          <div className="mb-1">{data.preparedBy || '[Name]'}</div>
+          <div className="border-t font-bold border-black pt-1">HR Representative</div>
         </div>
         
         <div className="text-center">
           <div className="font-bold mb-1">Reviewed by:</div>
-          <div className="border-t border-black pt-1 mt-6">{data.reviewedBy || '[HR Manager]'}</div>
+          <div className="mb-1">{data.reviewedBy || '[Name]'}</div>
+          <div className="border-t font-bold border-black pt-1">Immediate Supervisor/Manager</div>
         </div>
         
         <div className="text-center">
           <div className="font-bold mb-1">Received by:</div>
-          <div className="border-t border-black pt-1 mt-6">{data.receivedBy || data.employeeName || '[Employee Name]'}</div>
+          <div className="mb-1">{data.receivedBy || data.employeeName || '[Name]'}</div>
+          <div className="border-t font-bold border-black pt-1">Employee Name</div>
         </div>
       </div>
 
@@ -442,19 +448,25 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       <div className="text-center">
         <div style={{ height: '30px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
           {signatureUrl && (
-            <img src={signatureUrl} alt="Signature" className="h-12 object-contain" />
+            <Image 
+              src={signatureUrl} 
+              alt="Signature" 
+              className="h-12 object-contain" 
+              width={150}
+              height={48}
+            />
           )}
         </div>
+        <div className="mb-1">{data.reviewedBy || '[Name]'}</div>
         <div className="border-t border-black pt-1 mb-1"></div>
-        <div className="text-center text-xs">Manager</div>
-        <div className="text-center text-xs">Signature</div>
+        <div className="text-center text-xs font-bold">Immediate Supervisor/Manager Signature</div>
       </div>
       
       <div className="text-center">
         <div style={{ height: '30px' }}></div>
+        <div className="text-center mb-1">{data.employeeName || '[Employee Name]'}</div>
         <div className="border-t border-black pt-1 mb-1"></div>
-        <div className="text-center text-xs">{data.employeeName || 'Sample Employee'}</div>
-        <div className="text-center text-xs">Signature</div>
+        <div className="text-center text-xs font-bold">Employee Signature</div>
       </div>
     </div>
   );
@@ -462,17 +474,19 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
   const renderContinuedHeader = () => (
     <>
       {/* Logo at the top */}
-        <div className="flex justify-center mb-4">
+      <div className="flex justify-center mb-4">
         {logoSrc ? (
-          <img 
+          <Image 
             src={logoSrc} 
             alt="Company Logo" 
             className="h-16 object-contain"
+            width={150}
+            height={64}
           />
         ) : (
           <div className="h-16"></div>
         )}
-        </div>
+      </div>
       
       <div className="text-center mb-6">
         <h1 className="text-base font-bold uppercase text-black">NOTICE TO EXPLAIN</h1>

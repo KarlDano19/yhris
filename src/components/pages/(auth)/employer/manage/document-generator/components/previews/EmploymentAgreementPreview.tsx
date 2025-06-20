@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
+import Image from 'next/image';
 import { format } from 'date-fns';
 
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
@@ -317,7 +317,7 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
               <div className="mb-16">
                 <div className="w-1/3 mx-auto">
                   <div className="border-t border-gray-400 pt-2">
-                    <p className="text-center text-xs text-black">Employee</p>
+                    <p className="text-center text-xs text-black font-bold">Employee</p>
                   </div>
                 </div>
               </div>
@@ -328,17 +328,19 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
                   {/* Signature Image */}
                   {signatureUrl && (
                     <div className="text-center mb-2">
-                      <img 
+                      <Image 
                         src={signatureUrl}
                         alt="Signature" 
-                        className="h-12 object-contain mx-auto" 
+                        className="h-12 object-contain mx-auto"
+                        width={150}
+                        height={48}
                       />
                     </div>
                   )}
+                  <p className="text-center text-xs text-black">{formData.signatoryName || '[Signatory Name]'}</p>
                   <div className="border-t border-gray-400 pt-2">
-                    <p className="text-center text-xs font-bold text-black">{formData.signatoryName || '[Signatory Name]'}</p>
-                    <p className="text-center text-xs text-black">{formData.signatoryPosition || '[Position]'}</p>
-                    <p className="text-center text-xs text-black">{formData.companyName || '[Company Name]'}</p>
+                    <p className="text-center text-xs text-black font-bold">{formData.signatoryPosition || '[Position]'}</p>
+                    <p className="text-center text-xs text-black font-bold">{formData.companyName || '[Company Name]'}</p>
                   </div>
                 </div>
               </div>
@@ -349,12 +351,12 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
                 <div className="flex justify-between">
                   <div className="w-1/2 pr-4">
                     <div className="border-t border-gray-400 pt-2">
-                      <p className="text-center text-xs text-black">Witness</p>
+                      <p className="text-center text-xs text-black font-bold">Witness</p>
                     </div>
                   </div>
                   <div className="w-1/2 pl-4">
                     <div className="border-t border-gray-400 pt-2">
-                      <p className="text-center text-xs text-black">Witness</p>
+                      <p className="text-center text-xs text-black font-bold">Witness</p>
                     </div>
                   </div>
                 </div>
