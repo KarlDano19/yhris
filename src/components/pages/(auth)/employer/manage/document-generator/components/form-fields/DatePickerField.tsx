@@ -28,7 +28,12 @@ export const DatePickerField = ({
   // Create a custom handler to adapt the CustomDatePicker to the field's handleInputChange
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+      // Format date in local time to avoid timezone issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+      
       const e = {
         target: {
           name,
