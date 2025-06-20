@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useSearchParams, useRouter } from 'next/navigation';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 import Link from "next/link";
 import 'react-datepicker/dist/react-datepicker.css';
@@ -26,7 +28,7 @@ import { DocumentType } from "@/types/document-generator/form";
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import { print } from './utils/print/index';
-import { printNoticeToExplain } from './utils/print/notice-to-explain';
+import { generateNoticeToExplainHTML } from './utils/print/notice-to-explain';
 import initColorPolyfill from './utils/colorPolyfill';
 import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
 
@@ -244,49 +246,174 @@ export default function Content() {
   const handleProceed = () => {
     // Only for notice-to-explain with an employee ID
     if (documentType === 'notice-to-explain' && employeeId) {
-      // First call the print function to generate and save the document
       const options = {
         elementId: 'notice-to-explain-preview',
         title: 'Notice to Explain',
         fileName: `notice-to-explain-${employeeId}`
       };
       
-      // Generate and save the document
-      printNoticeToExplain(currentData as NoticeToExplainFormData, options, true)
-        .then(result => {
-          // Wait a brief moment to ensure the file is fully saved
-          setTimeout(() => {
-            // Get the file name from result if available
-            const fileResult = result as unknown as { name: string, type: string };
-            const pdfFileName = fileResult?.name || `notice-to-explain-${employeeId}.pdf`;
-            
-            // Make sure we have a valid blob
-            if (result) {
-              // Convert blob to file
-              const htmlFile = new File([result], `notice-to-explain-${employeeId}.html`, { type: 'text/html' });
-              
-              // Upload the attachment to the server
-              uploadAttachment(
-              {
-                employee_issue_id: parseInt(employeeId),
-                nte_attachment: htmlFile
-              },
-              {
-                onSuccess: () => {
-                  toast.custom(() => <CustomToast message="Document created and uploaded. Ready to send." type="success" />, { duration: 3000 });
-                  
-                  // Redirect to the address-employee-issue page with parameter to open the modal
-                  router.push(`/manage/address-employee-issue?openNteModal=true&employeeId=${employeeId}`);
-                },
-                onError: (error) => {
-                  console.error('Upload error:', error);
-                  toast.custom(() => <CustomToast message="Error uploading document. Please try again." type="error" />, { duration: 3000 });
-                }
-              }
-            );
+      // Show loading toast
+      const loadingToast = toast.custom(() => <CustomToast message="Generating PDF document..." type="info" />);
+      
+      try {
+        // First, create a hidden container to hold the iframe content
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.left = '-9999px';
+        container.style.top = '-9999px';
+        container.style.margin = '1cm'; // Use margin instead of padding
+        document.body.appendChild(container);
+        
+        // Get the HTML content for the document
+        const htmlContent = generateNoticeToExplainHTML(currentData as NoticeToExplainFormData);
+        
+        // Add additional styles for better PDF rendering
+        const enhancedHtmlContent = htmlContent.replace(
+          '<style>',
+          `<style>
+            /* Override styles for PDF generation */
+            body {
+              margin: 0;
+              padding: 0;
             }
-          }, 500); // Half-second delay to ensure file is saved
-        });
+            
+            @page {
+              size: A4;
+              margin: 1cm;
+            }
+            
+            /* Fix for blank pages by resizing content to fit better */
+            html, body {
+              height: auto !important;
+              overflow: visible !important;
+            }
+          `
+        );
+        
+        // Create an iframe inside our container to render the HTML content
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '210mm';  // A4 width
+        iframe.style.height = '297mm'; // A4 height
+        iframe.style.border = '0';
+        container.appendChild(iframe);
+        
+        const iframeDoc = iframe.contentWindow?.document;
+        if (!iframeDoc) {
+          document.body.removeChild(container);
+          toast.dismiss(loadingToast);
+          toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
+          return;
+        }
+        
+        // Write the enhanced HTML content to the iframe
+        iframeDoc.open();
+        iframeDoc.write(enhancedHtmlContent);
+        iframeDoc.close();
+        
+        // Wait for iframe to load
+        iframe.onload = () => {
+          // Get the body element from the iframe
+          const content = iframeDoc.body;
+          
+          // Wait for all resources to load
+          setTimeout(() => {
+            // Use html2canvas to capture the content with improved settings
+            html2canvas(content, {
+              scale: 2, // Higher scale for better quality
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: '#ffffff',
+              // Set dimensions to avoid cropping
+              width: content.scrollWidth,
+              height: content.scrollHeight,
+              // Disable scrolling capture to prevent blank pages
+              scrollX: 0,
+              scrollY: 0
+            }).then((canvas) => {
+              try {
+                // Create a new PDF document with 1cm margins
+                const pdf = new jsPDF({
+                  orientation: 'portrait',
+                  unit: 'mm',
+                  format: 'a4',
+                  compress: true
+                });
+                
+                // Get the image data
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Calculate dimensions, accounting for margins
+                const imgWidth = 210 - 20; // A4 width minus 2cm margins
+                const pageHeight = 297 - 20; // A4 height minus 2cm margins
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                // Add the image to the PDF with margins
+                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                
+                // Handle multi-page content, but only if it's significantly larger than one page
+                // This prevents blank pages
+                let heightLeft = imgHeight - pageHeight;
+                
+                // Only add additional pages if there's substantial content overflow (more than 5mm)
+                if (heightLeft > 5) {
+                  let position = -(pageHeight - 10); // Start position for next pages
+                  
+                  while (heightLeft > 0) {
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                    position -= pageHeight;
+                  }
+                }
+                
+                // Convert the PDF to a blob
+                const pdfBlob = pdf.output('blob');
+                
+                // Convert blob to file
+                const pdfFile = new File([pdfBlob], `notice-to-explain-${employeeId}.pdf`, { type: 'application/pdf' });
+                
+                // Upload the attachment to the server
+                uploadAttachment(
+                  {
+                    employee_issue_id: parseInt(employeeId),
+                    nte_attachment: pdfFile
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.custom(() => <CustomToast message="PDF document created and uploaded. Ready to send." type="success" />, { duration: 3000 });
+                      
+                      // Redirect to the address-employee-issue page with parameter to open the modal
+                      router.push(`/manage/address-employee-issue?openNteModal=true&employeeId=${employeeId}`);
+                    },
+                    onError: (error) => {
+                      console.error('Upload error:', error);
+                      toast.custom(() => <CustomToast message="Error uploading document. Please try again." type="error" />, { duration: 3000 });
+                    }
+                  }
+                );
+                
+                // Clean up
+                document.body.removeChild(container);
+                toast.dismiss(loadingToast);
+              } catch (pdfError) {
+                console.error('PDF creation error:', pdfError);
+                document.body.removeChild(container);
+                toast.dismiss(loadingToast);
+                toast.custom(() => <CustomToast message="Error creating PDF. Please try again." type="error" />, { duration: 3000 });
+              }
+            }).catch(canvasError => {
+              console.error('Canvas capture error:', canvasError);
+              document.body.removeChild(container);
+              toast.dismiss(loadingToast);
+              toast.custom(() => <CustomToast message="Error capturing document. Please try again." type="error" />, { duration: 3000 });
+            });
+          }, 1500); // Increased wait time for fonts and images to load
+        };
+      } catch (error) {
+        console.error('Error setting up PDF generation:', error);
+        toast.dismiss(loadingToast);
+        toast.custom(() => <CustomToast message="Error generating PDF. Please try again." type="error" />, { duration: 3000 });
+      }
     }
   };
   
