@@ -1,4 +1,5 @@
 import { ChangeEvent } from 'react';
+import Image from 'next/image';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
@@ -20,12 +21,16 @@ export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleIn
       <div className="border-2 border-dashed border-gray-300 rounded-md p-3 sm:p-6 flex flex-col items-center justify-center">
         {logoDisplayName ? (
           <div className="flex flex-col items-center w-full">
-            <img 
+            <Image 
               src={formData.logoImage 
                 ? URL.createObjectURL(formData.logoImage)
                 : formData.sampleLogoPath} 
               alt="Logo Preview" 
-              className="max-h-32 sm:max-h-40 object-contain mb-3 sm:mb-4"
+              width={200}
+              height={100}
+              style={{ maxHeight: '10rem', width: 'auto', objectFit: 'contain' }}
+              className="mb-3 sm:mb-4"
+              unoptimized={formData.logoImage ? true : false}
             />
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-2 text-center sm:text-left">
               <p className="text-xs sm:text-sm text-green-600">
