@@ -1,7 +1,9 @@
 import { ChangeEvent } from 'react';
 import Image from 'next/image';
+import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
+import DatePickerField from './DatePickerField';
 
 interface FieldProps {
   formData: NoticeToExplainFormData;
@@ -68,20 +70,14 @@ export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleIn
 };
 
 export const DateField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label htmlFor="date" className="block mb-2 text-black">
-      Date <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="date"
-      id="date"
-      name="date"
-      value={formData.date || ''}
-      onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-      required
-    />
-  </div>
+  <DatePickerField
+    id="date"
+    label="Date"
+    name="date"
+    value={formData.date}
+    handleInputChange={handleInputChange}
+    required={true}
+  />
 );
 
 export const PlaceField = ({ formData, handleInputChange }: FieldProps) => (
@@ -102,20 +98,14 @@ export const PlaceField = ({ formData, handleInputChange }: FieldProps) => (
 );
 
 export const IncidentDateField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label htmlFor="incidentDate" className="block mb-2 text-black">
-      Date of Incident <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="date"
-      id="incidentDate"
-      name="incidentDate"
-      value={formData.incidentDate || ''}
-      onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-      required
-    />
-  </div>
+  <DatePickerField
+    id="incidentDate"
+    label="Date of Incident"
+    name="incidentDate"
+    value={formData.incidentDate}
+    handleInputChange={handleInputChange}
+    required={true}
+  />
 );
 
 export const IncidentPlaceField = ({ formData, handleInputChange }: FieldProps) => (

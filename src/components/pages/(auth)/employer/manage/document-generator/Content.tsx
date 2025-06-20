@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
 import Link from "next/link";
+import 'react-datepicker/dist/react-datepicker.css';
 
 import EmployeeCertificatePreview from "./components/previews/EmployeeCertificatePreview";
 import EmploymentAgreementPreview from "./components/previews/EmploymentAgreementPreview";

@@ -1,4 +1,5 @@
 import { FieldProps } from './common';
+import DatePickerField from './DatePickerField';
 
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 
@@ -22,18 +23,14 @@ export const DocumentTitleField = ({ formData, handleInputChange }: FieldProps) 
 );
 
 export const EndDateField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label className="block mb-2 text-black">
-      End Date
-    </label>
-    <input
-      type="date"
-      name="endDate"
-      value={(formData as EmployeeCertificateFormData).endDate || ''}
-      onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-    />
-  </div>
+  <DatePickerField
+    id="endDate"
+    label="End Date"
+    name="endDate"
+    value={(formData as EmployeeCertificateFormData).endDate}
+    handleInputChange={handleInputChange}
+    required={false}
+  />
 );
 
 export const PurposeField = ({ formData, handleInputChange }: FieldProps) => (

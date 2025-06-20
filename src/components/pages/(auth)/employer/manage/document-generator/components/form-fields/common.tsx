@@ -7,6 +7,7 @@ import { DocumentType } from '@/types/document-generator/form';
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
+import DatePickerField from './DatePickerField';
 
 export interface FieldProps {
   formData: EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData;
@@ -186,37 +187,27 @@ export const CommonFields = ({ formData, handleInputChange, documentType }: Comm
     </div>
     
     {(documentType === 'employee-certificate' || documentType === 'employment-agreement') && (
-      <div>
-        <label className="block mb-2 text-black">
-          Start Date <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          name="startDate"
-          value={(formData as EmployeeCertificateFormData | EmploymentAgreementFormData).startDate || ''}
-          onChange={handleInputChange}
-          className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-          required
-        />
-      </div>
+      <DatePickerField
+        id="startDate"
+        label="Start Date"
+        name="startDate"
+        value={(formData as EmployeeCertificateFormData | EmploymentAgreementFormData).startDate}
+        handleInputChange={handleInputChange}
+        required={true}
+      />
     )}
   </>
 );
 
 export const DateIssuanceField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label className="block mb-2 text-black">
-      Date of Issuance <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="date"
-      name="dateOfIssuance"
-      value={formData.dateOfIssuance}
-      onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-      required
-    />
-  </div>
+  <DatePickerField
+    id="dateOfIssuance"
+    label="Date of Issuance"
+    name="dateOfIssuance"
+    value={formData.dateOfIssuance}
+    handleInputChange={handleInputChange}
+    required={true}
+  />
 );
 
 export const PlaceIssuanceField = ({ formData, handleInputChange }: FieldProps) => (
