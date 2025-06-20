@@ -1,4 +1,5 @@
 import { toast } from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
@@ -43,7 +44,7 @@ export const validateRequiredFields = (formData: FormDataType): boolean => {
     });
     
     // Show a generic toast message
-    toast.error('Please fill in all required fields marked with *');
+    toast.custom(() => <CustomToast message="Please fill in all required fields marked with *" type="error" />);
     return false;
   }
 
@@ -64,7 +65,7 @@ export const validateRequiredFields = (formData: FormDataType): boolean => {
       }
     }
     
-    toast.error('Please add a signature to the document');
+    toast.custom(() => <CustomToast message="Please add a signature to the document" type="error" />);
     return false;
   }
   
@@ -83,7 +84,7 @@ export const prepareDocumentFrame = (
   // Get the document preview content
   const documentElement = document.getElementById(elementId);
   if (!documentElement) {
-    toast.error('Document preview not found.');
+    toast.custom(() => <CustomToast message="Document preview not found" type="error" />);
     return null;
   }
   
@@ -107,9 +108,9 @@ export const prepareDocumentFrame = (
   if (!frameDoc) {
     document.body.removeChild(frame);
     if (toastId) {
-      toast.error('Could not create document frame.');
+      toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
     } else {
-      toast.error('Could not create document frame.');
+      toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
     }
     return null;
   }

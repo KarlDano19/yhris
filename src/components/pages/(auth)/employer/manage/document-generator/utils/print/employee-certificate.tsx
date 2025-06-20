@@ -1,4 +1,5 @@
 import { toast } from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 import { validateRequiredFields, prepareDocumentFrame } from '../../helper/documents';
 
@@ -17,12 +18,12 @@ export const printEmployeeCertificate = (formData: EmployeeCertificateFormData, 
   // Validate required fields first
   if (!validateRequiredFields(formData)) return;
   
-  const printToastId = toast.loading('Preparing certificate for printing...');
+  const printToastId = toast.custom(() => <CustomToast message="Preparing certificate for printing..." type="info" />);
   
   // Prepare the document frame
   const documentFrame = prepareDocumentFrame(options.elementId, options.title, formData, printToastId);
   if (!documentFrame) {
-    toast.error('Failed to prepare certificate for printing');
+    toast.custom(() => <CustomToast message="Failed to prepare certificate for printing" type="error" />);
     return;
   }
   
@@ -33,7 +34,7 @@ export const printEmployeeCertificate = (formData: EmployeeCertificateFormData, 
     try {
       // Wait a moment for any images to load fully
       setTimeout(() => {
-        toast.loading('Print dialog opening...');
+        toast.custom(() => <CustomToast message="Print dialog opening..." type="info" />);
         
         // Get the border color or use default
         const borderColor = formData.borderColor || '#FFC107';
@@ -213,14 +214,14 @@ export const printEmployeeCertificate = (formData: EmployeeCertificateFormData, 
           // Remove the iframe after printing completes or is cancelled
           setTimeout(() => {
             document.body.removeChild(frame);
-            toast.success('Your document was saved successfully and is ready for use.');
+            toast.custom(() => <CustomToast message="Your document was saved successfully and is ready for use" type="success" />);
           }, 1000);
         }, 200);
       }, 800); // Longer delay to ensure images load properly
     } catch (error) {
       console.error('Print error:', error);
       document.body.removeChild(frame);
-      toast.error('There was an error printing. Please try again.');
+      toast.custom(() => <CustomToast message="There was an error printing. Please try again" type="error" />);
     }
   };
 }; 

@@ -1,4 +1,5 @@
 import { toast } from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 import { formatDate } from '../date';
@@ -42,11 +43,11 @@ export const printNoticeToExplain = (data: NoticeToExplainFormData, options: Pri
   
   // Check required fields
   if (!data.employeeName || !data.date) {
-    toast.error('Please fill in all required fields');
+    toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
     return;
   }
   
-  const printToastId = toast.loading('Preparing notice to explain for printing...');
+  const printToastId = toast.custom(() => <CustomToast message="Preparing notice to explain for printing..." type="info" />);
   
   try {
     // Create a hidden iframe for printing
@@ -67,7 +68,7 @@ export const printNoticeToExplain = (data: NoticeToExplainFormData, options: Pri
     const frameDoc = frame.contentWindow?.document;
     if (!frameDoc) {
       document.body.removeChild(frame);
-      toast.error('Could not create document frame.');
+      toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
       return;
     }
     
@@ -92,7 +93,7 @@ export const printNoticeToExplain = (data: NoticeToExplainFormData, options: Pri
         frame.style.zIndex = '-1000'; // Behind everything else
         
         setTimeout(() => {
-          toast.loading('Print dialog opening...');
+          toast.custom(() => <CustomToast message="Print dialog opening..." type="info" />);
           
           // Print the document
           frame.contentWindow?.focus();
@@ -116,18 +117,18 @@ export const printNoticeToExplain = (data: NoticeToExplainFormData, options: Pri
             // Remove the iframe
             document.body.removeChild(frame);
             
-            toast.success('Your document was saved successfully and is ready for use.');
+            toast.custom(() => <CustomToast message="Your document was saved successfully and is ready for use" type="success" />);
           }, 1000);
         }, 500);
       } catch (error) {
         console.error('Print error:', error);
         document.body.removeChild(frame);
-        toast.error('There was an error printing. Please try again.');
+        toast.custom(() => <CustomToast message="There was an error printing. Please try again" type="error" />);
       }
     };
   } catch (error) {
     console.error('Print setup error:', error);
-    toast.error('There was an error setting up the print. Please try again.');
+    toast.custom(() => <CustomToast message="There was an error setting up the print. Please try again" type="error" />);
   }
 };
 

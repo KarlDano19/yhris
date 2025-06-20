@@ -1,4 +1,5 @@
 import { toast } from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 import { validateRequiredFields } from '../../helper/documents';
 
@@ -17,7 +18,7 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
   // Validate required fields first
   if (!validateRequiredFields(formData)) return;
   
-  const printToastId = toast.loading('Preparing employment agreement for printing...');
+  const printToastId = toast.custom(() => <CustomToast message="Preparing employment agreement for printing..." type="info" />);
   
   try {
     // Create a hidden iframe for printing
@@ -37,7 +38,7 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
     const frameDoc = frame.contentWindow?.document;
     if (!frameDoc) {
       document.body.removeChild(frame);
-      toast.error('Could not create document frame.');
+      toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
       return;
     }
     
@@ -535,7 +536,7 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
     frame.onload = () => {
       try {
         setTimeout(() => {
-          toast.loading('Print dialog opening...');
+          toast.custom(() => <CustomToast message="Print dialog opening..." type="info" />);
           
           // Print the document
           frame.contentWindow?.focus();
@@ -551,17 +552,17 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
             // Remove the iframe
             document.body.removeChild(frame);
             
-            toast.success('Your document was saved successfully and is ready for use.');
+            toast.custom(() => <CustomToast message="Your document was saved successfully and is ready for use" type="success" />);
           }, 1000);
         }, 500);
       } catch (error) {
         console.error('Print error:', error);
         document.body.removeChild(frame);
-        toast.error('There was an error printing. Please try again.');
+        toast.custom(() => <CustomToast message="There was an error printing. Please try again" type="error" />);
       }
     };
   } catch (error) {
     console.error('Print setup error:', error);
-    toast.error('There was an error setting up the print. Please try again.');
+    toast.custom(() => <CustomToast message="There was an error setting up the print. Please try again" type="error" />);
   }
 }; 

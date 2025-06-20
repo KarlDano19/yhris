@@ -1,6 +1,5 @@
 import { ChangeEvent } from 'react';
 import Image from 'next/image';
-import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 import DatePickerField from './DatePickerField';

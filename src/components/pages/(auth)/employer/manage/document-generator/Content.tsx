@@ -13,6 +13,7 @@ import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
 import Form from "@/components/Form";
+import CustomToast from "@/components/CustomToast";
 
 import { EmployeeCertificateFormData } from "@/types/document-generator/documents";
 import { EmploymentAgreementFormData } from "@/types/document-generator/documents";
@@ -175,10 +176,7 @@ export default function Content() {
       // Toast is now handled in the individual print functions
     } catch (error) {
       console.error('Print error:', error);
-      toast.error('There was an error preparing your document. Please try again.', {
-        position: "top-right",
-        duration: 5000,
-      });
+      toast.custom(() => <CustomToast message="There was an error preparing your document. Please try again." type="error" />);
     }
   };
   
