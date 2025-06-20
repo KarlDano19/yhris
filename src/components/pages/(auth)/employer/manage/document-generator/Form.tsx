@@ -58,7 +58,11 @@ export default function Form({
   onPrint,
   onOpenSignatureModal,
   onOpenLetterheadModal,
-  onOpenLogoModal
+  onOpenLogoModal,
+  onProceed,
+  isDocumentTypeDisabled,
+  isFormDisabled,
+  isFieldDisabled
 }: FormProps) {
   const [formData, setFormData] = useState<EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData>(initialData);
   
@@ -126,6 +130,11 @@ export default function Form({
     // Handle color picker separately to prevent lag
     if (name === 'borderColor') {
       setColorValue(value);
+      return;
+    }
+    
+    // If field is disabled based on the isFieldDisabled function, don't allow changes
+    if (isFieldDisabled && isFieldDisabled(name)) {
       return;
     }
     
@@ -261,7 +270,8 @@ export default function Form({
       <DocumentTypeField 
         documentType={documentType} 
         formData={formData}
-        handleInputChange={handleInputChange} 
+        handleInputChange={handleInputChange}
+        disabled={isDocumentTypeDisabled} 
       />
       
       {/* Letterhead Section - Only show for document type */}
@@ -271,6 +281,7 @@ export default function Form({
           letterheadDisplayName={letterheadDisplayName}
           handleInputChange={handleInputChange}
           onOpenLetterheadModal={onOpenLetterheadModal}
+          disabled={isFormDisabled}
         />
       )}
       
@@ -281,6 +292,7 @@ export default function Form({
           logoDisplayName={logoDisplayName}
           handleInputChange={handleInputChange}
           onOpenLogoModal={onOpenLogoModal}
+          disabled={isFormDisabled}
         />
       )}
       
@@ -290,6 +302,7 @@ export default function Form({
           formData={formData}
           colorValue={colorValue}
           handleInputChange={handleInputChange}
+          disabled={isFormDisabled}
         />
       )}
       
@@ -299,6 +312,7 @@ export default function Form({
           formData={formData}
           handleInputChange={handleInputChange}
           documentType={documentType}
+          disabled={isFieldDisabled ? isFieldDisabled('employeeName') : isFormDisabled}
         />
         
         {/* Employment Agreement specific field */}
@@ -306,6 +320,7 @@ export default function Form({
           <CompanyAddressField 
             formData={formData}
             handleInputChange={handleInputChange}
+            disabled={isFormDisabled}
           />
         )}
         
@@ -314,6 +329,7 @@ export default function Form({
           <EndDateField 
             formData={formData}
             handleInputChange={handleInputChange}
+            disabled={isFormDisabled}
           />
         )}
         
@@ -323,16 +339,19 @@ export default function Form({
             <ProbationPeriodField 
               formData={formData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
             
             <WorkingHoursField 
               formData={formData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
             
             <DailySalaryField 
               formData={formData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
           </>
         )}
@@ -343,36 +362,48 @@ export default function Form({
             <DateField 
               formData={formData as NoticeToExplainFormData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
             
             <PlaceField 
               formData={formData as NoticeToExplainFormData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
             
             <IncidentDateField 
               formData={formData as NoticeToExplainFormData}
               handleInputChange={handleInputChange}
+              disabled={isFieldDisabled ? isFieldDisabled('incidentDate') : isFormDisabled}
             />
             
             <IncidentPlaceField 
               formData={formData as NoticeToExplainFormData}
               handleInputChange={handleInputChange}
+              disabled={isFieldDisabled ? isFieldDisabled('incidentPlace') : isFormDisabled}
             />
             
-            <BriefBackgroundField 
-              formData={formData as NoticeToExplainFormData}
-              handleInputChange={handleInputChange}
-            />
+            {/* Make Brief Background take full width */}
+            <div className="sm:col-span-2">
+              <BriefBackgroundField 
+                formData={formData as NoticeToExplainFormData}
+                handleInputChange={handleInputChange}
+                // Brief background should remain editable
+                disabled={false}
+              />
+            </div>
             
+            {/* Place Prepared By and Reviewed By side by side */}
             <PreparedByField 
               formData={formData as NoticeToExplainFormData}
               handleInputChange={handleInputChange}
+              disabled={false}
             />
             
             <ReviewedByField 
               formData={formData as NoticeToExplainFormData}
               handleInputChange={handleInputChange}
+              disabled={false}
             />
           </>
         )}
@@ -382,6 +413,7 @@ export default function Form({
           <PurposeField 
             formData={formData}
             handleInputChange={handleInputChange}
+            disabled={isFormDisabled}
           />
         )}
         
@@ -391,21 +423,25 @@ export default function Form({
             <DateIssuanceField 
               formData={formData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
             
             <PlaceIssuanceField 
               formData={formData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
             
             <SignatoryNameField 
               formData={formData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
             
             <SignatoryPositionField 
               formData={formData}
               handleInputChange={handleInputChange}
+              disabled={isFormDisabled}
             />
           </>
         )}
@@ -416,12 +452,14 @@ export default function Form({
         formData={formData}
         handleInputChange={handleInputChange}
         onOpenSignatureModal={onOpenSignatureModal}
+        disabled={isFormDisabled}
       />
       
       {/* Action Buttons */}
       <ActionButtons 
         handleReset={handleReset}
         onPrint={onPrint}
+        onProceed={onProceed}
       />
     </div>
   );

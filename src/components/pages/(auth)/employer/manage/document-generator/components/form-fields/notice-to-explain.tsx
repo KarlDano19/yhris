@@ -2,11 +2,12 @@ import { ChangeEvent } from 'react';
 import Image from 'next/image';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-import DatePickerField from './DatePickerField';
+import { DatePickerField } from './DatePickerField';
 
 interface FieldProps {
   formData: NoticeToExplainFormData;
   handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  disabled?: boolean;
 }
 
 interface LogoFieldProps extends FieldProps {
@@ -14,12 +15,12 @@ interface LogoFieldProps extends FieldProps {
   onOpenLogoModal: () => void;
 }
 
-export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleInputChange }: LogoFieldProps) => {
+export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleInputChange, disabled }: LogoFieldProps) => {
   return (
     <div className="mb-4 sm:mb-6">
       <label className="block mb-2 text-black">Logo</label>
       
-      <div className="border-2 border-dashed border-gray-300 rounded-md p-3 sm:p-6 flex flex-col items-center justify-center">
+      <div className={`border-2 border-dashed border-gray-300 rounded-md p-3 sm:p-6 flex flex-col items-center justify-center ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
         {logoDisplayName ? (
           <div className="flex flex-col items-center w-full">
             <Image 
@@ -37,18 +38,21 @@ export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleIn
               <p className="text-xs sm:text-sm text-green-600">
                 {logoDisplayName}
               </p>
-              <button 
-                onClick={onOpenLogoModal}
-                className="text-blue-500 text-xs sm:text-sm hover:underline focus:outline-none"
-              >
-                Change Logo
-              </button>
+              {!disabled && (
+                <button 
+                  onClick={onOpenLogoModal}
+                  className="text-blue-500 text-xs sm:text-sm hover:underline focus:outline-none"
+                >
+                  Change Logo
+                </button>
+              )}
             </div>
           </div>
         ) : (
           <button 
             onClick={onOpenLogoModal}
             className="flex flex-col items-center justify-center gap-2 py-2 sm:py-3"
+            disabled={disabled}
           >
             <div className="text-gray-400 mb-1 sm:mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-12 sm:h-12">
@@ -68,115 +72,134 @@ export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleIn
   );
 };
 
-export const DateField = ({ formData, handleInputChange }: FieldProps) => (
-  <DatePickerField
+export const DateField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+  <DatePickerField 
     id="date"
     label="Date"
     name="date"
     value={formData.date}
-    handleInputChange={handleInputChange}
+    handleInputChange={handleInputChange as any}
     required={true}
+    disabled={disabled}
   />
 );
 
-export const PlaceField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label htmlFor="place" className="block mb-2 text-black">
-      Place
+export const PlaceField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+  <div className="mb-4">
+    <label htmlFor="place" className="block text-sm font-medium text-gray-700 mb-1">
+      Place <span className="text-red-500">*</span>
     </label>
     <input
       type="text"
       id="place"
       name="place"
-      value={formData.place || ''}
+      value={formData.place}
       onChange={handleInputChange}
-      placeholder="Enter place (e.g., Carmen)"
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
+      className={`w-full px-3 py-2 border rounded-md ${
+        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+      placeholder="Enter place"
+      required
+      disabled={disabled}
     />
   </div>
 );
 
-export const IncidentDateField = ({ formData, handleInputChange }: FieldProps) => (
-  <DatePickerField
+export const IncidentDateField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+  <DatePickerField 
     id="incidentDate"
     label="Date of Incident"
     name="incidentDate"
     value={formData.incidentDate}
-    handleInputChange={handleInputChange}
+    handleInputChange={handleInputChange as any}
     required={true}
+    disabled={disabled}
   />
 );
 
-export const IncidentPlaceField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label htmlFor="incidentPlace" className="block mb-2 text-black">
-      Place of Incident
+export const IncidentPlaceField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+  <div className="mb-4">
+    <label htmlFor="incidentPlace" className="block text-sm font-medium text-gray-700 mb-1">
+      Place of Incident <span className="text-red-500">*</span>
     </label>
     <input
       type="text"
       id="incidentPlace"
       name="incidentPlace"
-      value={formData.incidentPlace || ''}
+      value={formData.incidentPlace}
       onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
+      className={`w-full px-3 py-2 border rounded-md ${
+        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
       placeholder="Enter place of incident"
+      required
+      disabled={disabled}
     />
   </div>
 );
 
-export const BriefBackgroundField = ({ formData, handleInputChange }: FieldProps) => (
-  <div className="sm:col-span-2">
-    <label htmlFor="briefBackground" className="block mb-2 text-black">
-      Brief Background
+export const BriefBackgroundField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+  <div className="mb-4 w-full">
+    <label htmlFor="briefBackground" className="block text-sm font-medium text-gray-700 mb-1">
+      Brief Background <span className="text-red-500">*</span>
     </label>
     <textarea
       id="briefBackground"
       name="briefBackground"
-      value={formData.briefBackground || ''}
+      value={formData.briefBackground}
       onChange={handleInputChange}
-      rows={4}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-      placeholder="Enter brief background of the incident"
-      style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
+      className={`w-full px-3 py-2 border rounded-md ${
+        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+      placeholder="Enter brief background"
+      rows={6}
+      required
+      disabled={disabled}
     />
   </div>
 );
 
-export const PreparedByField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label htmlFor="preparedBy" className="block mb-2 text-black">
+export const PreparedByField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+  <div className="mb-4">
+    <label htmlFor="preparedBy" className="block text-sm font-medium text-gray-700 mb-1">
       Prepared By
     </label>
     <input
       type="text"
       id="preparedBy"
       name="preparedBy"
-      value={formData.preparedBy || ''}
+      value={formData.preparedBy}
       onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-      placeholder="HR Representative"
+      className={`w-full px-3 py-2 border rounded-md ${
+        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+      placeholder="Enter preparer's name"
+      disabled={disabled}
     />
   </div>
 );
 
-export const ReviewedByField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label htmlFor="reviewedBy" className="block mb-2 text-black">
+export const ReviewedByField = ({ formData, handleInputChange, disabled }: FieldProps) => (
+  <div className="mb-4">
+    <label htmlFor="reviewedBy" className="block text-sm font-medium text-gray-700 mb-1">
       Reviewed By
     </label>
     <input
       type="text"
       id="reviewedBy"
       name="reviewedBy"
-      value={formData.reviewedBy || ''}
+      value={formData.reviewedBy}
       onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
-      placeholder="HR Manager"
+      className={`w-full px-3 py-2 border rounded-md ${
+        disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+      placeholder="Enter reviewer's name"
+      disabled={disabled}
     />
   </div>
 );
 
-export const EmployeeExplanationField = ({ formData, handleInputChange }: FieldProps) => (
+export const EmployeeExplanationField = ({ formData, handleInputChange, disabled }: FieldProps) => (
   <div className="sm:col-span-2">
     <label htmlFor="employeeExplanation" className="block mb-2 text-black">
       Employee Explanation
@@ -187,14 +210,15 @@ export const EmployeeExplanationField = ({ formData, handleInputChange }: FieldP
       value={formData.employeeExplanation || ''}
       onChange={handleInputChange}
       rows={4}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
+      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
       placeholder="Employee's explanation will be written here"
       style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
+      disabled={disabled}
     />
   </div>
 );
 
-export const HearingNotesField = ({ formData, handleInputChange }: FieldProps) => (
+export const HearingNotesField = ({ formData, handleInputChange, disabled }: FieldProps) => (
   <div className="sm:col-span-2">
     <label htmlFor="hearingNotes" className="block mb-2 text-black">
       Hearing Notes
@@ -205,14 +229,15 @@ export const HearingNotesField = ({ formData, handleInputChange }: FieldProps) =
       value={formData.hearingNotes || ''}
       onChange={handleInputChange}
       rows={4}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
+      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
       placeholder="Notes from the hearing"
       style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
+      disabled={disabled}
     />
   </div>
 );
 
-export const ManagementDecisionField = ({ formData, handleInputChange }: FieldProps) => (
+export const ManagementDecisionField = ({ formData, handleInputChange, disabled }: FieldProps) => (
   <div className="sm:col-span-2">
     <label htmlFor="managementDecision" className="block mb-2 text-black">
       Management Decision
@@ -223,9 +248,10 @@ export const ManagementDecisionField = ({ formData, handleInputChange }: FieldPr
       value={formData.managementDecision || ''}
       onChange={handleInputChange}
       rows={4}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
+      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
       placeholder="Management's decision will be written here"
       style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
+      disabled={disabled}
     />
   </div>
 ); 

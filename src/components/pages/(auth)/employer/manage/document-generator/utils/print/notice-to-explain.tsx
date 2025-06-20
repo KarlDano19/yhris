@@ -1,5 +1,6 @@
 import { toast } from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import { saveAs } from 'file-saver';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 import { formatDate } from '../date';
@@ -38,98 +39,148 @@ interface Page {
 /**
  * Print the Notice to Explain document
  */
-export const printNoticeToExplain = (data: NoticeToExplainFormData, options: PrintOptions): void => {
+export const printNoticeToExplain = (data: NoticeToExplainFormData, options: PrintOptions, saveOnly: boolean = false): Promise<Blob | null> => {
   const { title, fileName = 'notice-to-explain' } = options;
   
   // Check required fields
   if (!data.employeeName || !data.date) {
     toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
-    return;
+    return Promise.resolve(null);
   }
   
-  const printToastId = toast.custom(() => <CustomToast message="Preparing notice to explain for printing..." type="info" />);
+  const printToastId = toast.custom(() => <CustomToast message="Preparing notice to explain..." type="info" />);
   
-  try {
-    // Create a hidden iframe for printing
-    const frame = document.createElement('iframe');
-    frame.style.position = 'fixed';
-    frame.style.right = '0';
-    frame.style.bottom = '0';
-    frame.style.width = '210mm'; // A4 width
-    frame.style.height = '297mm'; // A4 height
-    frame.style.border = '0';
-    frame.style.opacity = '0';
-    frame.style.visibility = 'hidden';
-    frame.style.overflow = 'hidden';
-    
-    document.body.appendChild(frame);
-    
-    // Get the document for the iframe
-    const frameDoc = frame.contentWindow?.document;
-    if (!frameDoc) {
-      document.body.removeChild(frame);
-      toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
-      return;
-    }
-    
-    // Generate HTML content with pagination that matches the preview
-    const htmlContent = generateNoticeToExplainHTML(data);
-    
-    // Write HTML content to the iframe
-    frameDoc.open();
-    frameDoc.write(htmlContent);
-    frameDoc.close();
-    
-    // Wait for the iframe to load
-    frame.onload = () => {
-      try {
-        // Force iframe to be visible temporarily for proper rendering
-        frame.style.width = '100%';
-        frame.style.height = '100%';
-        frame.style.visibility = 'visible';
-        frame.style.position = 'fixed';
-        frame.style.top = '0';
-        frame.style.left = '0';
-        frame.style.zIndex = '-1000'; // Behind everything else
-        
-        setTimeout(() => {
-          toast.custom(() => <CustomToast message="Print dialog opening..." type="info" />);
-          
-          // Print the document
-          frame.contentWindow?.focus();
-          frame.contentWindow?.print();
-          
-          // Clean up
-          setTimeout(() => {
-            // Hide the iframe again
-            frame.style.width = '0';
-            frame.style.height = '0';
-            frame.style.visibility = 'hidden';
-            
-            // Revoke any object URLs we created
-            if (data.signature instanceof File) {
-              URL.revokeObjectURL(URL.createObjectURL(data.signature));
-            }
-            if (data.logoImage instanceof File) {
-              URL.revokeObjectURL(URL.createObjectURL(data.logoImage));
-            }
-            
-            // Remove the iframe
-            document.body.removeChild(frame);
-            
-            toast.custom(() => <CustomToast message="Your document was saved successfully and is ready for use" type="success" />);
-          }, 1000);
-        }, 500);
-      } catch (error) {
-        console.error('Print error:', error);
+  return new Promise((resolve, reject) => {
+    try {
+      // Create a hidden iframe for printing or saving
+      const frame = document.createElement('iframe');
+      frame.style.position = 'fixed';
+      frame.style.right = '0';
+      frame.style.bottom = '0';
+      frame.style.width = '210mm'; // A4 width
+      frame.style.height = '297mm'; // A4 height
+      frame.style.border = '0';
+      frame.style.opacity = '0';
+      frame.style.visibility = 'hidden';
+      frame.style.overflow = 'hidden';
+      
+      document.body.appendChild(frame);
+      
+      // Get the document for the iframe
+      const frameDoc = frame.contentWindow?.document;
+      if (!frameDoc) {
         document.body.removeChild(frame);
-        toast.custom(() => <CustomToast message="There was an error printing. Please try again" type="error" />);
+        toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
+        reject(new Error("Could not create document frame"));
+        return;
       }
-    };
-  } catch (error) {
-    console.error('Print setup error:', error);
-    toast.custom(() => <CustomToast message="There was an error setting up the print. Please try again" type="error" />);
-  }
+      
+      // Generate HTML content with pagination that matches the preview
+      const htmlContent = generateNoticeToExplainHTML(data);
+      
+      // Write HTML content to the iframe
+      frameDoc.open();
+      frameDoc.write(htmlContent);
+      frameDoc.close();
+      
+      // Wait for the iframe to load
+      frame.onload = () => {
+        try {
+          // Force iframe to be visible temporarily for proper rendering
+          frame.style.width = '100%';
+          frame.style.height = '100%';
+          frame.style.visibility = 'visible';
+          frame.style.position = 'fixed';
+          frame.style.top = '0';
+          frame.style.left = '0';
+          frame.style.zIndex = '-1000'; // Behind everything else
+          
+          setTimeout(() => {
+            if (saveOnly) {
+              // Create an HTML blob for direct downloading
+              try {
+                // Create a blob of the HTML content
+                const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+                
+                // Save the file for automatic download
+                saveAs(htmlBlob, `${fileName}.html`);
+                
+                toast.custom(() => <CustomToast message="Document created successfully" type="success" />, {
+                  duration: 3000,
+                });
+                
+                // Resolve with the blob for further processing
+                resolve(htmlBlob);
+                
+                // Clean up
+                setTimeout(() => {
+                  // Hide the iframe again
+                  frame.style.width = '0';
+                  frame.style.height = '0';
+                  frame.style.visibility = 'hidden';
+                  
+                  // Revoke any object URLs we created
+                  if (data.signature instanceof File) {
+                    URL.revokeObjectURL(URL.createObjectURL(data.signature));
+                  }
+                  if (data.logoImage instanceof File) {
+                    URL.revokeObjectURL(URL.createObjectURL(data.logoImage));
+                  }
+                  
+                  // Remove the iframe
+                  document.body.removeChild(frame);
+                  
+                  toast.custom(() => <CustomToast message="Your document was saved successfully and is ready for use" type="success" />);
+                }, 500);
+              } catch (error) {
+                console.error('Save error:', error);
+                document.body.removeChild(frame);
+                toast.custom(() => <CustomToast message="There was an error saving. Please try again" type="error" />);
+                reject(error);
+              }
+            } else {
+              toast.custom(() => <CustomToast message="Print dialog opening..." type="info" />);
+              
+              // Print the document
+              frame.contentWindow?.focus();
+              frame.contentWindow?.print();
+              
+              // Clean up
+              setTimeout(() => {
+                // Hide the iframe again
+                frame.style.width = '0';
+                frame.style.height = '0';
+                frame.style.visibility = 'hidden';
+                
+                // Revoke any object URLs we created
+                if (data.signature instanceof File) {
+                  URL.revokeObjectURL(URL.createObjectURL(data.signature));
+                }
+                if (data.logoImage instanceof File) {
+                  URL.revokeObjectURL(URL.createObjectURL(data.logoImage));
+                }
+                
+                // Remove the iframe
+                document.body.removeChild(frame);
+                
+                toast.custom(() => <CustomToast message="Your document was saved successfully and is ready for use" type="success" />);
+                resolve(null); // Resolve with null for print-only case
+              }, 1000);
+            }
+          }, 500);
+        } catch (error) {
+          console.error('Print/save error:', error);
+          document.body.removeChild(frame);
+          toast.custom(() => <CustomToast message="There was an error processing the document. Please try again" type="error" />);
+          reject(error);
+        }
+      };
+    } catch (error) {
+      console.error('Print/save setup error:', error);
+      toast.custom(() => <CustomToast message="There was an error setting up the document. Please try again" type="error" />);
+      reject(error);
+    }
+  });
 };
 
 // Split text into chunks that fit on a page

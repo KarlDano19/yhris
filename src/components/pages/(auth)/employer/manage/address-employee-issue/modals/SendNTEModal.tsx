@@ -13,6 +13,7 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -61,7 +62,12 @@ export default function SendNTEModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
+  
+  // Fetch employee issue details to get attachment
+  const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
+  // Set up email and check for attachment from the employee issue items
   useEffect(() => {
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
@@ -69,9 +75,22 @@ export default function SendNTEModal({
       if (employeeIssueItemsCopy[itemIndex]) {
         setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
         setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+        
+        // Check if the item already has an attachment from the previous step
+        if (employeeIssueItemsCopy[itemIndex].issueNTEForm && 
+            employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment) {
+          setPdfAttachment(employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment);
+        }
       }
     }
-  }, [isOpen]);
+  }, [isOpen, employeeIssueItems]);
+  
+  // Get attachment from the server if available
+  useEffect(() => {
+    if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
+      setPdfAttachment(employeeIssueDetails.nte_attachment);
+    }
+  }, [employeeIssueDetails]);
 
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
@@ -90,11 +109,16 @@ export default function SendNTEModal({
         employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
       }
       employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
+      // Include PDF attachment if available
+      if (pdfAttachment) {
+        employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment = pdfAttachment;
+      }
       employeeIssueItemsCopy[itemIndex].isNTESent = true;
       const callbackReq = {
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
           setIsOpen(null);
+          setPdfAttachment(null); // Clear attachment state
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           reset();
         },
@@ -142,6 +166,22 @@ export default function SendNTEModal({
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Send NTE</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
+                  
+                  {/* Display attachment info if available */}
+                  {pdfAttachment && (
+                    <div className="mx-4 mt-2 p-3 bg-gray-100 rounded-md flex items-center justify-between">
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">PDF Attachment: {pdfAttachment}</span>
+                          <span className="text-xs text-gray-500">This PDF will be attached to the email when you click Send</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
@@ -391,7 +431,7 @@ export default function SendNTEModal({
                             <span className='sr-only'>Loading...</span>
                           </div>
                         )}
-                        {!isLoading && 'Send'}
+                        {!isLoading && 'Send & Mark as Sent'}
                       </button>
                       <button
                         type='button'
@@ -402,6 +442,31 @@ export default function SendNTEModal({
                         Close
                       </button>
                     </div>
+                    
+                    {/* Display file attachment if available */}
+                    {pdfAttachment && (
+                      <div className="mt-4 border-t pt-4">
+                        <h4 className="text-sm font-semibold mb-2">Attachment</h4>
+                        <div className="flex items-center space-x-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4z" clipRule="evenodd" />
+                            <path fillRule="evenodd" d="M7 5a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 4a1 1 0 011-1h2a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-sm">{pdfAttachment.split('/').pop() || "Notice to Explain Document"}</span>
+                          <a 
+                            href={pdfAttachment}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 text-xs hover:underline"
+                          >
+                            View
+                          </a>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs text-gray-500">This document will be attached to the email when you click "Send & Mark as Sent"</p>
+                        </div>
+                      </div>
+                    )}
                   </form>
                 </Dialog.Panel>
               </Transition.Child>

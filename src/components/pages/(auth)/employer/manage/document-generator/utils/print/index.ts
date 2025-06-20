@@ -19,7 +19,7 @@ interface PrintOptions {
 export const print = (
   formData: EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData, 
   options: PrintOptions
-): void => {
+): Promise<Blob | null> => {
   // Determine the document type based on the formData structure
   const documentType: DocumentType = 
     'incidentDate' in formData && 'incidentPlace' in formData && 'briefBackground' in formData
@@ -31,14 +31,15 @@ export const print = (
   // Route to the appropriate print function
   switch (documentType) {
     case 'notice-to-explain':
-      printNoticeToExplain(formData as NoticeToExplainFormData, options);
-      break;
+      return printNoticeToExplain(formData as NoticeToExplainFormData, options);
     case 'employment-agreement':
       printEmploymentAgreement(formData as EmploymentAgreementFormData, options);
-      break;
+      return Promise.resolve(null);
     case 'employee-certificate':
       printEmployeeCertificate(formData as EmployeeCertificateFormData, options);
-      break;
+      return Promise.resolve(null);
+    default:
+      return Promise.resolve(null);
   }
 };
 

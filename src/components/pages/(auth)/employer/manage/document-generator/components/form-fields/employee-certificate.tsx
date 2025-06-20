@@ -1,5 +1,5 @@
 import { FieldProps } from './common';
-import DatePickerField from './DatePickerField';
+import { DatePickerField } from './DatePickerField';
 
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 

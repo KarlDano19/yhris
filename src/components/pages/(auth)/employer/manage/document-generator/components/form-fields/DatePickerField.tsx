@@ -6,59 +6,60 @@ interface DatePickerFieldProps {
   id: string;
   label: string;
   name: string;
-  value: string | null | undefined;
-  handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  value: string;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   placeholder?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
-const DatePickerField = ({ 
-  id, 
-  label, 
-  name, 
-  value, 
-  handleInputChange, 
+export const DatePickerField = ({
+  id,
+  label,
+  name,
+  value,
+  handleInputChange,
   required = false,
-  placeholder = "mm/dd/yyyy"
+  placeholder = "mm/dd/yyyy",
+  disabled = false,
+  className = ''
 }: DatePickerFieldProps) => {
-  
+  // Create a custom handler to adapt the CustomDatePicker to the field's handleInputChange
   const handleDateChange = (date: Date | null) => {
-    if (!date) return;
-    
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    const e = {
-      target: {
-        name,
-        value: `${year}-${month}-${day}`
-      }
-    } as ChangeEvent<HTMLInputElement>;
-    
-    handleInputChange(e);
+    if (date) {
+      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const e = {
+        target: {
+          name,
+          value: formattedDate
+        }
+      } as ChangeEvent<HTMLInputElement>;
+      handleInputChange(e);
+    }
   };
   
-  const selectedDate = value ? new Date(value + 'T00:00:00') : null;
+  const selectedDate = value ? new Date(value) : null;
   
   return (
-    <div>
-      <label htmlFor={id} className="block mb-2 text-black">
+    <div className={`mb-4 ${className}`}>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
         <CustomDatePicker
           id={id}
-          placeholder={placeholder}
-          className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base"
           selected={selectedDate}
           pickerOnChange={handleDateChange}
           inputOnChange={handleDateChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`w-full px-3 py-2 border rounded-md ${
+            disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           required={required}
         />
       </div>
     </div>
   );
-};
-
-export default DatePickerField; 
+}; 

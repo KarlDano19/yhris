@@ -13,4 +13,8 @@ export interface FormProps {
   onOpenSignatureModal: () => void;
   onOpenLetterheadModal: () => void;
   onOpenLogoModal: () => void;
+  onProceed?: () => void;
+  isDocumentTypeDisabled?: boolean;
+  isFormDisabled?: boolean;
+  isFieldDisabled?: (fieldName: string) => boolean;
 } 

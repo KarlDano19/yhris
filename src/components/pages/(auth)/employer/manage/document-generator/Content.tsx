@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import Link from "next/link";
 import 'react-datepicker/dist/react-datepicker.css';
@@ -14,6 +15,8 @@ import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
 import Form from "@/components/pages/(auth)/employer/manage/document-generator/Form";
 import CustomToast from "@/components/CustomToast";
+import usePatchEmployeeIssueItems from '@/components/pages/(auth)/employer/manage/address-employee-issue/hooks/usePatchEmployeeIssueItems';
+import useGetEmployeeIssueItems from '@/components/pages/(auth)/employer/manage/address-employee-issue/hooks/useGetEmployeeIssueItems';
 
 import { EmployeeCertificateFormData } from "@/types/document-generator/documents";
 import { EmploymentAgreementFormData } from "@/types/document-generator/documents";
@@ -23,11 +26,30 @@ import { DocumentType } from "@/types/document-generator/form";
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import { print } from './utils/print/index';
+import { printNoticeToExplain } from './utils/print/notice-to-explain';
 import initColorPolyfill from './utils/colorPolyfill';
+import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
 
 export default function Content() {
-  // Always default to employee certificate type
-  const [documentType, setDocumentType] = useState<DocumentType>('employee-certificate');
+  const { mutate: uploadAttachment } = useUploadEmployeeIssueAttachments();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlDocType = searchParams.get('type') as DocumentType | null;
+  const employeeId = searchParams.get('employee');
+  
+  // Always default to employee certificate type, unless specified in URL
+  const [documentType, setDocumentType] = useState<DocumentType>(
+    urlDocType && ['employee-certificate', 'employment-agreement', 'notice-to-explain'].includes(urlDocType) 
+      ? urlDocType 
+      : 'employee-certificate'
+  );
+
+  // Fetch employee issue data if employeeId is provided
+  const { data: employeeIssueItems, refetch: refetchEmployeeIssues } = useGetEmployeeIssueItems({});
+  const [selectedEmployeeIssue, setSelectedEmployeeIssue] = useState<any>(null);
+  
+  // No longer needed as we're using more granular field disabling
+  // const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false);
   
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
@@ -98,6 +120,52 @@ export default function Content() {
     initColorPolyfill();
   }, []);
   
+  // Fetch employee issue data
+  useEffect(() => {
+    if (employeeId) {
+      refetchEmployeeIssues();
+    }
+  }, [employeeId, refetchEmployeeIssues]);
+  
+  // Set selected employee issue when data is loaded
+  useEffect(() => {
+    if (employeeId && employeeIssueItems && employeeIssueItems.length > 0) {
+      const employeeIssue = employeeIssueItems.find((item: any) => item.id.toString() === employeeId);
+      if (employeeIssue) {
+        setSelectedEmployeeIssue(employeeIssue);
+      }
+    }
+  }, [employeeId, employeeIssueItems]);
+  
+  // Populate form with employee data if employeeId is provided
+  useEffect(() => {
+    if (documentType === 'notice-to-explain' && employeeId && selectedEmployeeIssue) {
+      // Format the incident date from API date format
+      const incidentDate = selectedEmployeeIssue.incident_date 
+        ? new Date(selectedEmployeeIssue.incident_date).toISOString().split('T')[0]
+        : '';
+      
+      // Find the employee info
+      const employeeName = selectedEmployeeIssue.name || '';
+      const position = selectedEmployeeIssue.position || '';
+      const department = selectedEmployeeIssue.department || '';
+      const incidentPlace = selectedEmployeeIssue.place_of_incident || '';
+      
+      // Update form data
+      setNoticeToExplainData(prev => ({
+        ...prev,
+        employeeName,
+        position,
+        department,
+        incidentDate,
+        incidentPlace,
+        briefBackground: selectedEmployeeIssue.brief_background || '',
+        receivedBy: employeeName,
+        dateOfIssuance: new Date().toISOString().split('T')[0],
+      }));
+    }
+  }, [documentType, employeeId, selectedEmployeeIssue]);
+  
   // Get current data based on document type
   const getCurrentData = () => {
     switch (documentType) {
@@ -148,7 +216,77 @@ export default function Content() {
         noticeData.receivedBy = noticeData.employeeName;
       }
       
-      setNoticeToExplainData(noticeData);
+      // If coming from employee issues, preserve the disabled fields
+      if (isDocumentTypeDisabled) {
+        setNoticeToExplainData(prev => ({
+          ...prev,
+          // Only update fields that should remain editable
+          briefBackground: noticeData.briefBackground,
+          preparedBy: noticeData.preparedBy,
+          reviewedBy: noticeData.reviewedBy,
+          date: noticeData.date,
+          place: noticeData.place,
+          signature: noticeData.signature,
+          borderColor: noticeData.borderColor,
+          logoImage: noticeData.logoImage,
+          sampleLogoPath: noticeData.sampleLogoPath,
+        }));
+      } else {
+        setNoticeToExplainData(noticeData);
+      }
+    }
+  };
+  
+  // For handling employee issue update
+  const { mutate: updateEmployeeIssue, isLoading: isUpdatingIssue } = usePatchEmployeeIssueItems();
+  
+  // Handle proceeding (marking as sent and returning to employee issues)
+  const handleProceed = () => {
+    // Only for notice-to-explain with an employee ID
+    if (documentType === 'notice-to-explain' && employeeId) {
+      // First call the print function to generate and save the document
+      const options = {
+        elementId: 'notice-to-explain-preview',
+        title: 'Notice to Explain',
+        fileName: `notice-to-explain-${employeeId}`
+      };
+      
+      // Generate and save the document
+      printNoticeToExplain(currentData as NoticeToExplainFormData, options, true)
+        .then(result => {
+          // Wait a brief moment to ensure the file is fully saved
+          setTimeout(() => {
+            // Get the file name from result if available
+            const fileResult = result as unknown as { name: string, type: string };
+            const pdfFileName = fileResult?.name || `notice-to-explain-${employeeId}.pdf`;
+            
+            // Make sure we have a valid blob
+            if (result) {
+              // Convert blob to file
+              const htmlFile = new File([result], `notice-to-explain-${employeeId}.html`, { type: 'text/html' });
+              
+              // Upload the attachment to the server
+              uploadAttachment(
+              {
+                employee_issue_id: parseInt(employeeId),
+                nte_attachment: htmlFile
+              },
+              {
+                onSuccess: () => {
+                  toast.custom(() => <CustomToast message="Document created and uploaded. Ready to send." type="success" />, { duration: 3000 });
+                  
+                  // Redirect to the address-employee-issue page with parameter to open the modal
+                  router.push(`/manage/address-employee-issue?openNteModal=true&employeeId=${employeeId}`);
+                },
+                onError: (error) => {
+                  console.error('Upload error:', error);
+                  toast.custom(() => <CustomToast message="Error uploading document. Please try again." type="error" />, { duration: 3000 });
+                }
+              }
+            );
+            }
+          }, 500); // Half-second delay to ensure file is saved
+        });
     }
   };
   
@@ -173,7 +311,11 @@ export default function Content() {
             : 'notice-to-explain'
       };
       
-      print(currentData, options);
+      print(currentData, options)
+        .catch(error => {
+          console.error('Print error:', error);
+          toast.custom(() => <CustomToast message="There was an error preparing your document. Please try again." type="error" />);
+        });
       
       // Toast is now handled in the individual print functions
     } catch (error) {
@@ -266,6 +408,24 @@ export default function Content() {
     setIsLogoModalOpen(false);
   };
 
+  // Only allow "notice-to-explain" document type if coming from address-employee-issue page
+  const isDocumentTypeDisabled = !!employeeId;
+
+  // Custom function to determine if specific field should be disabled
+  const isFieldDisabled = (fieldName: string): boolean => {
+    if (!isDocumentTypeDisabled) return false; // If not coming from employee issues, nothing is disabled
+    
+    // Fields that should be disabled when populated from employee issue data
+    const disabledFields = [
+      'employeeName',
+      'position',
+      'incidentDate',
+      'incidentPlace'
+    ];
+    
+    return disabledFields.includes(fieldName);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -288,6 +448,9 @@ export default function Content() {
                 onOpenSignatureModal={handleOpenSignatureModal}
                 onOpenLetterheadModal={handleOpenLetterheadModal}
                 onOpenLogoModal={handleOpenLogoModal}
+                onProceed={handleProceed}
+                isDocumentTypeDisabled={isDocumentTypeDisabled}
+                isFieldDisabled={isFieldDisabled}
               />
             </div>
             <div className="transition-all duration-300">

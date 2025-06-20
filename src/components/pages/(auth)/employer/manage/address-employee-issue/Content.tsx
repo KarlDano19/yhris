@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -73,6 +74,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataPosition } = useGetPositionItems();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const searchParams = useSearchParams();
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -115,6 +117,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     refetch();
   }, []);
+
+  // Handle opening the NTE modal when redirected from document generator
+  useEffect(() => {
+    const openNteModal = searchParams.get('openNteModal');
+    const employeeId = searchParams.get('employeeId');
+    
+    if (openNteModal === 'true' && employeeId && employeeIssueItems.length > 0) {
+      // Find the employee issue item
+      const employeeIssue = employeeIssueItems.find((item: any) => item.id.toString() === employeeId);
+      
+      if (employeeIssue) {
+        // Open the modal with the employee ID - the attachment will be loaded from the server
+        setIsSendNTEModalOpen({
+          id: parseInt(employeeId)
+        });
+      }
+    }
+  }, [searchParams, employeeIssueItems]);
 
   useEffect(() => {
     if (dataDepartment) {

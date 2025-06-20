@@ -1,5 +1,5 @@
 import React, { Dispatch } from 'react';
-
+import { useRouter } from 'next/navigation';
 import classNames from '@/helpers/classNames';
 
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
@@ -27,11 +27,21 @@ const SendNTE = ({
   setReleased: any;
   isLoading: boolean;
 }) => {
+  const router = useRouter();
+  
   const customOnclick = () => {
     setIsUploadEmployeeIssueAttachmentModalOpen({
       isOpen: true,
       id,
     });
+  };
+
+  const handleSendClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isNTESent) {
+      // Redirect to document generator with Notice to Explain document type
+      router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
+    }
   };
 
   return (
@@ -45,15 +55,7 @@ const SendNTE = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={isNTESent}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isNTESent) {
-              setIsSendNTEModalOpen({
-                isOpen: true,
-                id,
-              });
-            }
-          }}
+          onClick={handleSendClick}
         >
           {isNTESent ? 'Sent' : 'Send'}
         </button>
