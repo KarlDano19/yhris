@@ -316,6 +316,7 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
               {/* Employee row */}
               <div className="mb-16">
                 <div className="w-1/3 mx-auto">
+                  <p className="text-center text-xs text-black">{formData.employeeName || '[Employee Name]'}</p>
                   <div className="border-t border-gray-400 pt-2">
                     <p className="text-center text-xs text-black font-bold">Employee</p>
                   </div>

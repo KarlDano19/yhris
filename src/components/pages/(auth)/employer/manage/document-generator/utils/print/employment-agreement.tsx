@@ -165,7 +165,7 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
             .witness-section {
               display: flex;
               justify-content: space-between;
-              margin-top: 3rem;
+              margin-top: 4rem;
             }
             .witness {
               width: 45%;
@@ -186,22 +186,24 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
             .employee-signature-container {
               width: 33%;
               margin: 0 auto;
-              margin-bottom: 3rem;
+              margin-bottom: 5rem;
             }
             .employee-signature-line {
               border-top: 1px solid #000;
-              width: 100%;
+              width: 45%;
+              margin: 0 auto;
               padding-top: 0.5rem;
               text-align: center;
             }
             .signatory-container {
               width: 50%;
               margin: 0 auto;
-              margin-bottom: 3rem;
+              margin-bottom: 5rem;
             }
             .signatory-line {
               border-top: 1px solid #000;
-              width: 100%;
+              width: 45%;
+              margin: 0 auto;
               padding-top: 0.5rem;
               text-align: center;
             }
@@ -491,20 +493,25 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
             </div>
             
             <div class="signature-section">
-              <!-- Employee signature line -->
-              <div class="employee-signature-container">
-                <div class="employee-signature-line">
-                  <p>Employee</p>
+              <!-- Employee row -->
+              <div style="margin-bottom: 4rem;">
+                <div class="w-1/2 mx-auto">
+                  <p class="text-center text-xs">${formData.employeeName || '[Employee Name]'}</p>
+                  <div class="employee-signature-line">
+                    <p class="text-center text-xs font-bold">Employee</p>
+                  </div>
                 </div>
               </div>
               
               <!-- Signatory with signature -->
-              <div class="signatory-container">
-                ${signatureUrl ? `<img src="${signatureUrl}" class="signature-image" alt="Signature" />` : ''}
-                <div class="signatory-line">
-                  <p class="signature-name">${formData.signatoryName || '[Signatory Name]'}</p>
-                  <p class="signature-position">${formData.signatoryPosition || '[Position]'}</p>
-                  <p class="signature-company">${formData.companyName || '[Company Name]'}</p>
+              <div style="margin-bottom: 4rem;">
+                <div class="w-1/2 mx-auto">
+                  ${signatureUrl ? `<img src="${signatureUrl}" class="signature-image" alt="Signature" />` : ''}
+                  <p class="text-center text-xs">${formData.signatoryName || '[Signatory Name]'}</p>
+                  <div class="signatory-line">
+                    <p class="text-center text-xs font-bold">${formData.signatoryPosition || '[Position]'}</p>
+                    <p class="text-center text-xs font-bold">${formData.companyName || '[Company Name]'}</p>
+                  </div>
                 </div>
               </div>
               
@@ -513,12 +520,12 @@ export const printEmploymentAgreement = (formData: EmploymentAgreementFormData, 
               <div class="witness-section">
                 <div class="witness">
                   <div class="witness-line">
-                    <p>Witness</p>
+                    <p class="text-center text-xs font-bold">Witness</p>
                   </div>
                 </div>
                 <div class="witness">
                   <div class="witness-line">
-                    <p>Witness</p>
+                    <p class="text-center text-xs font-bold">Witness</p>
                   </div>
                 </div>
               </div>

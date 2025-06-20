@@ -581,7 +581,6 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         
         .signature-line {
           border-top: 1px solid #000;
-          margin-top: 30px;
           margin-bottom: 5px;
         }
         
@@ -763,20 +762,23 @@ const renderHeaderWithContent = (
     <div class="signatures-grid">
       <div class="signature-block">
         <div class="detail-label">Prepared by:</div>
+        <div>${data.preparedBy || '[Name]'}</div>
         <div class="signature-line"></div>
-        <div>${data.preparedBy || '[HR Representative]'}</div>
+        <div style="font-weight: bold;">HR Representative</div>
       </div>
       
       <div class="signature-block">
         <div class="detail-label">Reviewed by:</div>
+        <div>${data.reviewedBy || '[Name]'}</div>
         <div class="signature-line"></div>
-        <div>${data.reviewedBy || '[HR Manager]'}</div>
+        <div style="font-weight: bold;">Immediate Supervisor/Manager</div>
       </div>
       
       <div class="signature-block">
         <div class="detail-label">Received by:</div>
+        <div>${data.receivedBy || data.employeeName || '[Name]'}</div>
         <div class="signature-line"></div>
-        <div>${data.receivedBy || data.employeeName || '[Employee Name]'}</div>
+        <div style="font-weight: bold;">Employee Name</div>
       </div>
     </div>
     
@@ -840,16 +842,16 @@ const renderSignatures = (data: NoticeToExplainFormData, signatureSrc: string) =
               <img src="${signatureSrc}" style="max-width: 150px; max-height: 50px; object-fit: contain;" alt="Signature">
             </div>
           ` : '<div style="height: 30px;"></div>'}
+          <div>${data.reviewedBy || '[Name]'}</div>
           <div style="border-top: 1px solid #000; margin-top: 5px;"></div>
-          <div style="text-align: center; margin-top: 5px;">Manager</div>
-          <div style="text-align: center;">Signature</div>
+          <div style="font-weight: bold; text-align: center; margin-top: 5px;">Immediate Supervisor/Manager Signature</div>
         </td>
         
         <td style="width: 50%; padding: 0 0 0 12px; text-align: center; vertical-align: bottom;">
           <div style="height: 30px;"></div>
+          <div>${data.employeeName || '[Employee Name]'}</div>
           <div style="border-top: 1px solid #000; margin-top: 5px;"></div>
-          <div style="text-align: center; margin-top: 5px;">${data.employeeName || 'Sample Employee'}</div>
-          <div style="text-align: center;">Signature</div>
+          <div style="font-weight: bold; text-align: center; margin-top: 5px;">Employee Signature</div>
         </td>
       </tr>
     </table>

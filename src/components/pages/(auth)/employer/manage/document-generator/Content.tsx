@@ -20,6 +20,8 @@ import { EmploymentAgreementFormData } from "@/types/document-generator/document
 import { NoticeToExplainFormData } from "@/types/document-generator/documents";
 import { DocumentType } from "@/types/document-generator/form";
 
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+
 import { print } from './utils/print/index';
 import initColorPolyfill from './utils/colorPolyfill';
 
@@ -267,14 +269,14 @@ export default function Content() {
   return (
     <div className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-black">Document Generator</h1>
-          <Link 
-            href="/manage" 
-            className="text-blue-600 hover:underline"
-          >
-            Go Back
+        <div className='flex p-4'>
+          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+            <ArrowLeftIcon className='h-5 w-5' />
+            <h4>Manage</h4>
           </Link>
+        </div>
+        <div className="flex justify-between items-center">
+          <h2 className='text-xl font-bold text-indigo-dye'>Document Generator</h2>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
