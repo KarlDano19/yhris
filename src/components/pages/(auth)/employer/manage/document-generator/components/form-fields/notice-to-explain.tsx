@@ -176,24 +176,6 @@ export const ReviewedByField = ({ formData, handleInputChange }: FieldProps) => 
   </div>
 );
 
-export const ReceivedByField = ({ formData, handleInputChange }: FieldProps) => (
-  <div>
-    <label htmlFor="receivedBy" className="block mb-2 text-black">
-      Received By
-    </label>
-    <input
-      type="text"
-      disabled
-      id="receivedBy"
-      name="receivedBy"
-      value={formData.receivedBy || ''}
-      onChange={handleInputChange}
-      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base cursor-not-allowed"
-      placeholder={formData.employeeName || "Employee Name"}
-    />
-  </div>
-);
-
 export const EmployeeExplanationField = ({ formData, handleInputChange }: FieldProps) => (
   <div className="sm:col-span-2">
     <label htmlFor="employeeExplanation" className="block mb-2 text-black">

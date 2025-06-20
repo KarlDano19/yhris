@@ -267,45 +267,44 @@ export default function Content() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className='flex p-4'>
-          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex p-4">
+          <Link href="/manage" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+            <ArrowLeftIcon className="h-5 w-5" />
             <h4>Manage</h4>
           </Link>
         </div>
-        <div className="flex justify-between items-center">
-          <h2 className='text-xl font-bold text-indigo-dye'>Document Generator</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="transition-all duration-300">
-            <Form 
-              documentType={documentType}
-              onDocumentTypeChange={handleDocumentTypeChange}
-              onFormChange={handleFormChange} 
-              initialData={currentData} 
-              onPrint={handlePrint}
-              onOpenSignatureModal={handleOpenSignatureModal}
-              onOpenLetterheadModal={handleOpenLetterheadModal}
-              onOpenLogoModal={handleOpenLogoModal}
-            />
-          </div>
-          <div className="transition-all duration-300">
-            {documentType === 'employee-certificate' ? (
-              <div id="employee-certificate-preview">
-                <EmployeeCertificatePreview formData={employeeCertificateData} />
-              </div>
-            ) : documentType === 'employment-agreement' ? (
-              <div id="agreement-preview">
-                <EmploymentAgreementPreview formData={employmentAgreementData} />
-              </div>
-            ) : (
-              <div id="notice-to-explain-preview">
-                <NoticeToExplainPreview data={noticeToExplainData} />
-              </div>
-            )}
+        <div className="px-2 md:px-8 lg:px-4">
+          <h2 className="text-xl font-bold text-indigo-dye">Document Generator</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+            <div className="transition-all duration-300">
+              <Form 
+                documentType={documentType}
+                onDocumentTypeChange={handleDocumentTypeChange}
+                onFormChange={handleFormChange} 
+                initialData={currentData} 
+                onPrint={handlePrint}
+                onOpenSignatureModal={handleOpenSignatureModal}
+                onOpenLetterheadModal={handleOpenLetterheadModal}
+                onOpenLogoModal={handleOpenLogoModal}
+              />
+            </div>
+            <div className="transition-all duration-300">
+              {documentType === 'employee-certificate' ? (
+                <div id="employee-certificate-preview">
+                  <EmployeeCertificatePreview formData={employeeCertificateData} />
+                </div>
+              ) : documentType === 'employment-agreement' ? (
+                <div id="agreement-preview">
+                  <EmploymentAgreementPreview formData={employmentAgreementData} />
+                </div>
+              ) : (
+                <div id="notice-to-explain-preview">
+                  <NoticeToExplainPreview data={noticeToExplainData} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

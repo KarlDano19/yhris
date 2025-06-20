@@ -44,8 +44,7 @@ import {
   IncidentPlaceField,
   BriefBackgroundField,
   PreparedByField,
-  ReviewedByField,
-  ReceivedByField
+  ReviewedByField
 } from '../components/pages/(auth)/employer/manage/document-generator/components/form-fields/notice-to-explain';
 
 // Import DatePicker styles
@@ -372,11 +371,6 @@ export default function Form({
             />
             
             <ReviewedByField 
-              formData={formData as NoticeToExplainFormData}
-              handleInputChange={handleInputChange}
-            />
-            
-            <ReceivedByField 
               formData={formData as NoticeToExplainFormData}
               handleInputChange={handleInputChange}
             />

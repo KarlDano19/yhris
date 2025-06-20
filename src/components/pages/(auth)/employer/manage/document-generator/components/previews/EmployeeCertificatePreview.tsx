@@ -1,4 +1,5 @@
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
+import Image from 'next/image';
 
 interface EmployeeCertificatePreviewProps {
   formData: EmployeeCertificateFormData;
@@ -67,15 +68,16 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
           <div className="absolute inset-0 rounded-lg from-white to-amber-50 certificate-glow print-hide"></div>
           
           {/* Letterhead as full background */}
-          <div className="relative min-h-[495px] md:min-h-[883px] letterhead-background">
+          <div className="relative min-h-[515px] md:min-h-[815px] letterhead-background">
             {/* Letterhead background image - custom uploaded */}
             {formData.letterheadImage && (
               <div className="absolute inset-0 letterhead-image-container">
-                <img 
+                <Image 
                   src={URL.createObjectURL(formData.letterheadImage)}
                   alt="Letterhead Background"
-                  className="w-full h-full object-contain"
-                  style={{ opacity: 1, position: 'absolute', zIndex: 0 }}
+                  fill
+                  style={{ objectFit: 'contain', opacity: 1, position: 'absolute', zIndex: 0 }}
+                  priority
                 />
               </div>
             )}
@@ -83,11 +85,12 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
             {/* Letterhead background image - sample */}
             {!formData.letterheadImage && formData.sampleLetterheadPath && (
               <div className="absolute inset-0 letterhead-image-container">
-                <img 
+                <Image 
                   src={formData.sampleLetterheadPath}
                   alt="Sample Letterhead Background"
-                  className="w-full h-full object-contain"
-                  style={{ opacity: 1, position: 'absolute', zIndex: 0 }}
+                  fill
+                  style={{ objectFit: 'contain', opacity: 1, position: 'absolute', zIndex: 0 }}
+                  priority
                 />
               </div>
             )}
@@ -139,13 +142,15 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
               <div className="mt-6 sm:mt-8 md:mt-10 pt-3 sm:pt-4 md:pt-6 text-black certificate-signature">
                 {/* Signature Image */}
                 {formData.signature && (
-                  <div className="-mb-2 sm:-mb-3">
-                    <img 
+                  <div className="-mb-1 sm:-mb-1 relative h-12">
+                    <Image 
                       src={typeof formData.signature === 'string' 
                         ? formData.signature 
                         : URL.createObjectURL(formData.signature as File)}
                       alt="Signature" 
-                      className="h-8 sm:h-10 md:h-12 object-contain" 
+                      width={150}
+                      height={48}
+                      style={{ objectFit: 'contain', height: '3rem' }}
                     />
                   </div>
                 )}
