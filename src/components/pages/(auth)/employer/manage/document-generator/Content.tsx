@@ -195,10 +195,15 @@ export default function Content() {
   
   // Set selected employee issue when data is loaded
   useEffect(() => {
-    if (employeeId && employeeIssueItems && employeeIssueItems.length > 0) {
-      const employeeIssue = employeeIssueItems.find((item: any) => item.id.toString() === employeeId);
-      if (employeeIssue) {
-        setSelectedEmployeeIssue(employeeIssue);
+    if (employeeId && employeeIssueItems) {
+      // Handle both paginated and non-paginated responses
+      const items = employeeIssueItems.records || employeeIssueItems;
+      
+      if (items && items.length > 0) {
+        const employeeIssue = items.find((item: any) => item.id.toString() === employeeId);
+        if (employeeIssue) {
+          setSelectedEmployeeIssue(employeeIssue);
+        }
       }
     }
   }, [employeeId, employeeIssueItems]);
@@ -631,7 +636,10 @@ export default function Content() {
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex p-4">
-          <Link href="/manage" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+          <Link 
+            href={employeeId ? "/manage/address-employee-issue" : "/manage"} 
+            className="flex-none flex gap-3 items-center hover:bg-gray-200"
+          >
             <ArrowLeftIcon className="h-5 w-5" />
             <h4>Manage</h4>
           </Link>

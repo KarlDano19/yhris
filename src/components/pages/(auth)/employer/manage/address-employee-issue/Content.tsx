@@ -130,6 +130,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch();
   }, []);
 
+  // // Handle opening the NTE modal when redirected from document generator
+  // useEffect(() => {
+  //   const openNteModal = searchParams.get('openNteModal');
+  //   const employeeId = searchParams.get('employeeId');
+    
+  //   // Only open if we have both parameters and employeeIssueItems is loaded
+  //   // AND we're not in the process of creating a new incident report
+  //   if (openNteModal === 'true' && 
+  //       employeeId && 
+  //       employeeIssueItems.length > 0 && 
+  //       !isIncidentReportModalOpen) {
+  //     // Find the employee issue item
+  //     const employeeIssue = employeeIssueItems.find((item: any) => item.id.toString() === employeeId);
+      
+  //     if (employeeIssue) {
+  //       // Open the modal with the employee ID - the attachment will be loaded from the server
+  //       setIsSendNTEModalOpen({
+  //         id: parseInt(employeeId)
+  //       });
+  //     }
+  //   }
+  // }, [searchParams, employeeIssueItems, isIncidentReportModalOpen]); // Add isIncidentReportModalOpen to dependencies
+
+
   useEffect(() => {
     refetch();
   }, [currentPage, pageSize]);
