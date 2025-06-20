@@ -1,6 +1,6 @@
-import { printEmployeeCertificate } from './employee-certificate';
-import { printEmploymentAgreement } from './employment-agreement';
-import { printNoticeToExplain } from './notice-to-explain';
+import { printEmployeeCertificate } from './EmployeeCertificate';
+import { printEmploymentAgreement } from './EmploymentAgreement';
+import { printNoticeToExplain } from './NoticeToExplain';
 
 import { DocumentType } from '@/types/document-generator/form';
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';

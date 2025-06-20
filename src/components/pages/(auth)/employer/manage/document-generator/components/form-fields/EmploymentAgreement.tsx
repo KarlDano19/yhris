@@ -1,4 +1,4 @@
-import { FieldProps } from './common';
+import { FieldProps } from './Common';
 
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
 

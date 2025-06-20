@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
-import { formatDate } from '../../utils/date';
+import { formatDate } from '../../../../../../../../helpers/date';
 
 interface NoticeToExplainPreviewProps {
   data: NoticeToExplainFormData;

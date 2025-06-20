@@ -28,8 +28,8 @@ import { DocumentType } from "@/types/document-generator/form";
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import { print } from './utils/print/index';
-import { generateNoticeToExplainHTML } from './utils/print/notice-to-explain';
-import initColorPolyfill from './utils/colorPolyfill';
+import { generateNoticeToExplainHTML } from './utils/print/NoticeToExplain';
+import initColorPolyfill from '../../../../../../helpers/colorPolyfill';
 import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
 
 export default function Content() {

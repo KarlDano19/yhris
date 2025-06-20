@@ -3,7 +3,7 @@ import CustomToast from '@/components/CustomToast';
 import { saveAs } from 'file-saver';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-import { formatDate } from '../date';
+import { formatDate } from '../../../../../../../../helpers/date';
 
 interface PrintOptions {
   elementId: string;
