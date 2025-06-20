@@ -1,8 +1,9 @@
-import React, { Dispatch } from 'react';
+import React, { Dispatch, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import classNames from '@/helpers/classNames';
 
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
+import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -28,6 +29,8 @@ const SendNTE = ({
   isLoading: boolean;
 }) => {
   const router = useRouter();
+  const [checkingAttachment, setCheckingAttachment] = useState(false);
+  const { data: employeeIssueDetails, isLoading: isLoadingDetails } = useGetEmployeeIssueDetails(id);
   
   const customOnclick = () => {
     setIsUploadEmployeeIssueAttachmentModalOpen({
@@ -36,11 +39,26 @@ const SendNTE = ({
     });
   };
 
-  const handleSendClick = (e: React.MouseEvent) => {
+  const handleSendClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isNTESent) {
-      // Redirect to document generator with Notice to Explain document type
-      router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
+      setCheckingAttachment(true);
+      
+      try {
+        // Check if there's an attachment
+        if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
+          // If there's an attachment, open the modal with attachment data
+          setIsSendNTEModalOpen({
+            id,
+            attachment: employeeIssueDetails.nte_attachment
+          });
+        } else {
+          // If no attachment, redirect to document generator
+          router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
+        }
+      } finally {
+        setCheckingAttachment(false);
+      }
     }
   };
 
@@ -54,10 +72,10 @@ const SendNTE = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={isNTESent}
+          disabled={isNTESent || checkingAttachment || isLoadingDetails}
           onClick={handleSendClick}
         >
-          {isNTESent ? 'Sent' : 'Send'}
+          {isNTESent ? 'Sent' : (checkingAttachment || isLoadingDetails ? 'Checking...' : 'Send')}
         </button>
       </div>
       <div>

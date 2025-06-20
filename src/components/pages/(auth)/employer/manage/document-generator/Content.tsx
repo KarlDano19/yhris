@@ -246,25 +246,18 @@ export default function Content() {
   const handleProceed = () => {
     // Only for notice-to-explain with an employee ID
     if (documentType === 'notice-to-explain' && employeeId) {
-      const options = {
-        elementId: 'notice-to-explain-preview',
-        title: 'Notice to Explain',
-        fileName: `notice-to-explain-${employeeId}`
-      };
-      
       // Show loading toast
       const loadingToast = toast.custom(() => <CustomToast message="Generating PDF document..." type="info" />);
       
       try {
-        // First, create a hidden container to hold the iframe content
+        // Create a hidden container to hold the iframe content
         const container = document.createElement('div');
         container.style.position = 'fixed';
         container.style.left = '-9999px';
         container.style.top = '-9999px';
-        container.style.margin = '1cm'; // Use margin instead of padding
         document.body.appendChild(container);
         
-        // Get the HTML content for the document
+        // Get the HTML content for the document - use the same function as the print feature
         const htmlContent = generateNoticeToExplainHTML(currentData as NoticeToExplainFormData);
         
         // Add additional styles for better PDF rendering
@@ -299,13 +292,10 @@ export default function Content() {
         
         const iframeDoc = iframe.contentWindow?.document;
         if (!iframeDoc) {
-          document.body.removeChild(container);
-          toast.dismiss(loadingToast);
-          toast.custom(() => <CustomToast message="Could not create document frame" type="error" />);
-          return;
+          throw new Error('Could not access iframe document');
         }
         
-        // Write the enhanced HTML content to the iframe
+        // Write the HTML content to the iframe
         iframeDoc.open();
         iframeDoc.write(enhancedHtmlContent);
         iframeDoc.close();
@@ -384,6 +374,9 @@ export default function Content() {
                       
                       // Redirect to the address-employee-issue page with parameter to open the modal
                       router.push(`/manage/address-employee-issue?openNteModal=true&employeeId=${employeeId}`);
+                      
+                      // After successful upload, the NTE attachment can be viewed directly from the server
+                      // using the API endpoint we created: /api/employee-issues/nte-attachment/{employee_issue_id}/
                     },
                     onError: (error) => {
                       console.error('Upload error:', error);

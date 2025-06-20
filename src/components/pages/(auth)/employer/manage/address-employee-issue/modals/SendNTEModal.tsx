@@ -15,9 +15,12 @@ import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItem
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
 import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
+
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, EyeIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import { T_SendNTEModal } from '@/types/globals';
@@ -46,7 +49,7 @@ export default function SendNTEModal({
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
-  const [isCCOpen, setIsCCOPen] = useState(false);
+  const [isCCOpen, setIsCCOpen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
@@ -63,7 +66,6 @@ export default function SendNTEModal({
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
-  
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
@@ -75,15 +77,9 @@ export default function SendNTEModal({
       if (employeeIssueItemsCopy[itemIndex]) {
         setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
         setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
-        
-        // Check if the item already has an attachment from the previous step
-        if (employeeIssueItemsCopy[itemIndex].issueNTEForm && 
-            employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment) {
-          setPdfAttachment(employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment);
-        }
       }
     }
-  }, [isOpen, employeeIssueItems]);
+  }, [isOpen, employeeIssueItems, setTagsTo]);
   
   // Get attachment from the server if available
   useEffect(() => {
@@ -134,6 +130,13 @@ export default function SendNTEModal({
     }
   });
 
+  // Get filename from attachment URL
+  const getFilenameFromUrl = (url: string) => {
+    if (!url) return '';
+    const urlParts = url.split('/');
+    return urlParts[urlParts.length - 1];
+  };
+
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
@@ -167,21 +170,6 @@ export default function SendNTEModal({
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
                   
-                  {/* Display attachment info if available */}
-                  {pdfAttachment && (
-                    <div className="mx-4 mt-2 p-3 bg-gray-100 rounded-md flex items-center justify-between">
-                      <div className="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600 mr-3" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                        </svg>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium">PDF Attachment: {pdfAttachment}</span>
-                          <span className="text-xs text-gray-500">This PDF will be attached to the email when you click Send</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
@@ -208,7 +196,7 @@ export default function SendNTEModal({
                                   setTagsBcc(template.bcc);
                                 }
                                 if (template.cc) {
-                                  setIsCCOPen(true);
+                                  setIsCCOpen(true);
                                   setTagsCc(template.cc);
                                 }
                                 setValue('message', template.body);
@@ -272,7 +260,7 @@ export default function SendNTEModal({
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
                               isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
-                            onClick={() => setIsCCOPen(!isCCOpen)}
+                            onClick={() => setIsCCOpen(!isCCOpen)}
                           >
                             CC
                           </button>
@@ -371,7 +359,7 @@ export default function SendNTEModal({
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
-                        <div className='mt-2 h-72 mb-12'>
+                        <div className='mt-2 h-72'>
                           <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('message', value)}
@@ -382,6 +370,33 @@ export default function SendNTEModal({
                           />
                         </div>
                       </div>
+                      
+                      {/* Attachment section with ClipIcon - moved outside the quill container */}
+                      <div className="mt-10 border-t pt-4">
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachment
+                        </label>
+                        <div className="mt-2 flex items-center">
+                          <div className="flex items-center gap-2 pl-2 cursor-pointer">
+                            <ClipIcon hasFile={!!pdfAttachment} />
+                            {pdfAttachment && (
+                              <>
+                                <span className="text-sm text-gray-600">
+                                  {getFilenameFromUrl(pdfAttachment)}
+                                </span>
+                                <ArrowTopRightOnSquareIcon 
+                                  className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
+                                  onClick={() => window.open(pdfAttachment, '_blank')}
+                                />
+                              </>
+                            )}
+                            {!pdfAttachment && (
+                              <span className="text-sm text-gray-400">No attachment</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
                     </div>
                     <hr />
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
@@ -442,31 +457,6 @@ export default function SendNTEModal({
                         Close
                       </button>
                     </div>
-                    
-                    {/* Display file attachment if available */}
-                    {pdfAttachment && (
-                      <div className="mt-4 border-t pt-4">
-                        <h4 className="text-sm font-semibold mb-2">Attachment</h4>
-                        <div className="flex items-center space-x-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4z" clipRule="evenodd" />
-                            <path fillRule="evenodd" d="M7 5a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 4a1 1 0 011-1h2a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" />
-                          </svg>
-                          <span className="text-sm">{pdfAttachment.split('/').pop() || "Notice to Explain Document"}</span>
-                          <a 
-                            href={pdfAttachment}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 text-xs hover:underline"
-                          >
-                            View
-                          </a>
-                        </div>
-                        <div className="mt-2">
-                          <p className="text-xs text-gray-500">This document will be attached to the email when you click "Send & Mark as Sent"</p>
-                        </div>
-                      </div>
-                    )}
                   </form>
                 </Dialog.Panel>
               </Transition.Child>
