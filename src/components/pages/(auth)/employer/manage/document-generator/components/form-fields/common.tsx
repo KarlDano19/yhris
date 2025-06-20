@@ -313,9 +313,10 @@ export const SignatureField = ({ formData, onOpenSignatureModal }: SignatureFiel
 interface ActionButtonsProps {
   handleReset: () => void;
   onPrint: () => void;
+  onProceed?: () => void;
 }
 
-export const ActionButtons = ({ handleReset, onPrint }: ActionButtonsProps) => (
+export const ActionButtons = ({ handleReset, onPrint, onProceed }: ActionButtonsProps) => (
   <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 justify-between mt-6 sm:mt-8">
     <button
       onClick={handleReset}
@@ -327,16 +328,29 @@ export const ActionButtons = ({ handleReset, onPrint }: ActionButtonsProps) => (
       Reset Form
     </button>
     
-    <button
-      onClick={onPrint}
-      className="flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 w-full sm:w-auto mt-3 sm:mt-0"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
-        <path d="M6 9V2h12v7"/>
-        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-        <path d="M6 14h12v8H6z"/>
-      </svg>
-      Print / Save as PDF
-    </button>
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+      <button
+        onClick={onPrint}
+        className="flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 w-full sm:w-auto mt-3 sm:mt-0"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
+          <path d="M6 9V2h12v7"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <path d="M6 14h12v8H6z"/>
+        </svg>
+        Print
+      </button>
+      
+      <button
+        onClick={onProceed}
+        className="flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-green-500 text-white rounded-full hover:bg-green-600 w-full sm:w-auto mt-3 sm:mt-0"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
+          <path d="M5 12h14"/>
+          <path d="m12 5 7 7-7 7"/>
+        </svg>
+        Proceed
+      </button>
+    </div>
   </div>
 ); 
