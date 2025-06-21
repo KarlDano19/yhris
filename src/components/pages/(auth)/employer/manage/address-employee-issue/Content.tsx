@@ -49,6 +49,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [searchText, setSearchText] = useState('');
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<{
@@ -129,30 +130,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     refetch();
   }, []);
-
-  // // Handle opening the NTE modal when redirected from document generator
-  // useEffect(() => {
-  //   const openNteModal = searchParams.get('openNteModal');
-  //   const employeeId = searchParams.get('employeeId');
-    
-  //   // Only open if we have both parameters and employeeIssueItems is loaded
-  //   // AND we're not in the process of creating a new incident report
-  //   if (openNteModal === 'true' && 
-  //       employeeId && 
-  //       employeeIssueItems.length > 0 && 
-  //       !isIncidentReportModalOpen) {
-  //     // Find the employee issue item
-  //     const employeeIssue = employeeIssueItems.find((item: any) => item.id.toString() === employeeId);
-      
-  //     if (employeeIssue) {
-  //       // Open the modal with the employee ID - the attachment will be loaded from the server
-  //       setIsSendNTEModalOpen({
-  //         id: parseInt(employeeId)
-  //       });
-  //     }
-  //   }
-  // }, [searchParams, employeeIssueItems, isIncidentReportModalOpen]); // Add isIncidentReportModalOpen to dependencies
-
 
   useEffect(() => {
     refetch();
@@ -309,7 +286,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
+    // Check date validity first
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -323,7 +301,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         duration: 5000,
       });
     }
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       return toast.custom(
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
         {
@@ -331,9 +309,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    
+    // Update itemsFilter with the current searchText
+    setItemsFilter((prev: {from: string; to: string; search: string}) => ({
+      ...prev,
+      search: searchText
+    }));
+    
     // Reset to first page when searching
     setCurrentPage(1);
-    refetch();
+    
+    // Explicitly call refetch to trigger the search with all filters
+    setTimeout(() => {
+      refetch();
+    }, 0);
   };
 
   const renderRows = () => {
@@ -486,14 +475,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
               </div>
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
