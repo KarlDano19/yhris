@@ -16,6 +16,7 @@ interface DatePickerFieldProps {
   disabled?: boolean;
   className?: string;
   isSubmitted?: boolean;
+  customValidation?: boolean;
 }
 
 export const DatePickerField = ({
@@ -28,15 +29,16 @@ export const DatePickerField = ({
   placeholder = "mm/dd/yyyy",
   disabled = false,
   className = '',
-  isSubmitted = false
+  isSubmitted = false,
+  customValidation = false
 }: DatePickerFieldProps) => {
   // Local state to track validation style
   const [showValidation, setShowValidation] = useState(false);
   
-  // Update local validation state when isSubmitted changes
+  // Update local validation state when isSubmitted changes or customValidation is true
   useEffect(() => {
-    setShowValidation(isSubmitted === true && required && !value);
-  }, [isSubmitted, required, value]);
+    setShowValidation((isSubmitted === true && required && !value) || customValidation);
+  }, [isSubmitted, required, value, customValidation]);
   
   // Create a custom handler to adapt the CustomDatePicker to the field's handleInputChange
   const handleDateChange = (date: Date | null) => {

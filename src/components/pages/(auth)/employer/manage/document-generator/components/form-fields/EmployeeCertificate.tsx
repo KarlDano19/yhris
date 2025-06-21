@@ -1,5 +1,6 @@
 import { FieldProps } from './Common';
 import { DatePickerField } from './DatePickerField';
+import { useState, useEffect } from 'react';
 
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 
@@ -22,16 +23,35 @@ export const DocumentTitleField = ({ formData, handleInputChange }: FieldProps) 
   </div>
 );
 
-export const EndDateField = ({ formData, handleInputChange }: FieldProps) => (
-  <DatePickerField
-    id="endDate"
-    label="End Date"
-    name="endDate"
-    value={(formData as EmployeeCertificateFormData).endDate}
-    handleInputChange={handleInputChange}
-    required={false}
-  />
-);
+export const EndDateField = ({ formData, handleInputChange, disabled }: FieldProps) => {
+  const [isInvalidDate, setIsInvalidDate] = useState(false);
+  const certData = formData as EmployeeCertificateFormData;
+  
+  // Validate dates whenever start date or end date changes
+  useEffect(() => {
+    if (certData.startDate && certData.endDate) {
+      const startDate = new Date(certData.startDate);
+      const endDate = new Date(certData.endDate);
+      setIsInvalidDate(endDate < startDate);
+    } else {
+      setIsInvalidDate(false);
+    }
+  }, [certData.startDate, certData.endDate]);
+
+  return (
+    <DatePickerField
+      id="endDate"
+      label="End Date"
+      name="endDate"
+      value={certData.endDate}
+      handleInputChange={handleInputChange}
+      required={false}
+      disabled={disabled}
+      className={isInvalidDate ? 'date-error' : ''}
+      customValidation={isInvalidDate}
+    />
+  );
+};
 
 export const PurposeField = ({ formData, handleInputChange }: FieldProps) => (
   <div className="sm:col-span-2">

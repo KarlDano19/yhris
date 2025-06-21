@@ -49,6 +49,8 @@ import {
 
 // Import DatePicker styles
 import 'react-datepicker/dist/react-datepicker.css';
+import { toast } from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 export default function Form({
   documentType,
@@ -164,17 +166,60 @@ export default function Form({
       }
     }
     
+    // Check for date validation when changing endDate for employee certificate
+    if (documentType === 'employee-certificate' && name === 'endDate' && value) {
+      const certData = formData as EmployeeCertificateFormData;
+      if (certData.startDate) {
+        const startDate = new Date(certData.startDate);
+        const endDate = new Date(value);
+        
+        if (endDate < startDate) {
+          toast.custom(() => <CustomToast message="Invalid date: End date must be after start date" type="error" />);
+        }
+      }
+    }
+    
     setFormData(updatedData);
     onFormChange(updatedData);
   };
 
   const handlePrint = () => {
     setIsSubmitted(true);
+    
+    // Validate dates for employee certificate
+    if (documentType === 'employee-certificate') {
+      const certData = formData as EmployeeCertificateFormData;
+      if (certData.startDate && certData.endDate) {
+        const startDate = new Date(certData.startDate);
+        const endDate = new Date(certData.endDate);
+        
+        if (endDate < startDate) {
+          toast.custom(() => <CustomToast message="Invalid date: End date must be after start date" type="error" />);
+          return;
+        }
+      }
+    }
+    
     onPrint();
   };
 
   const handleProceed = () => {
     setIsSubmitted(true);
+    
+    // Validate dates for employee certificate
+    if (documentType === 'employee-certificate') {
+      const certData = formData as EmployeeCertificateFormData;
+      if (certData.startDate && certData.endDate) {
+        const startDate = new Date(certData.startDate);
+        const endDate = new Date(certData.endDate);
+        
+        if (endDate < startDate) {
+          toast.custom(() => <CustomToast message="Invalid date: End date must be after start date" type="error" />);
+          return;
+        }
+      }
+    }
+    
     if (onProceed) {
       onProceed();
     }
@@ -362,6 +407,7 @@ export default function Form({
               formData={formData}
               handleInputChange={handleInputChange}
               disabled={isFormDisabled}
+              isSubmitted={isSubmitted}
             />
           )}
           
