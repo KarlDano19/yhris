@@ -343,6 +343,10 @@ export default function Content() {
               size: A4;
               margin: 1cm;
             }
+
+            .document-subtitle {
+              margin-bottom: 20px !important;
+            }
             
             /* Fix for blank pages by resizing content to fit better */
             html, body {
@@ -363,6 +367,58 @@ export default function Content() {
             .signature-line {
               margin-top: 8px !important;
               margin-bottom: 8px !important;
+            }
+            
+            /* Match signature styling from renderSignatures function */
+            .signature-table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+              font-size: 12px !important;
+              color: #000 !important;
+              margin-top: 30px !important;
+              margin-bottom: 20px !important;
+            }
+            
+            .signature-cell {
+              width: 50% !important;
+              padding: 0 12px !important;
+              text-align: center !important;
+              vertical-align: bottom !important;
+            }
+            
+            .signature-cell-left {
+              padding-right: 12px !important;
+              padding-left: 0 !important;
+            }
+            
+            .signature-cell-right {
+              padding-left: 12px !important;
+              padding-right: 0 !important;
+            }
+            
+            .signature-image-container-table {
+              height: 30px !important;
+              display: flex !important;
+              align-items: flex-end !important;
+              justify-content: center !important;
+            }
+            
+            .signature-image-table {
+              max-width: 150px !important;
+              max-height: 50px !important;
+              object-fit: contain !important;
+            }
+            
+            .signature-name {
+              margin-top: 5px !important;
+            }
+            
+            .signature-title {
+              font-weight: bold !important;
+              text-align: center !important;
+              margin-top: 5px !important;
+              margin-bottom: 10px !important;
+              padding-bottom: 5px !important;
             }
           `
         );
@@ -657,7 +713,7 @@ export default function Content() {
                 onOpenSignatureModal={handleOpenSignatureModal}
                 onOpenLetterheadModal={handleOpenLetterheadModal}
                 onOpenLogoModal={handleOpenLogoModal}
-                onProceed={employeeId && employeeIssueItems && employeeIssueItems.length > 0 && documentType === 'notice-to-explain' ? handleProceed : undefined}
+                onProceed={employeeId && documentType === 'notice-to-explain' ? handleProceed : undefined}
                 isDocumentTypeDisabled={isDocumentTypeDisabled}
                 isFieldDisabled={isFieldDisabled}
               />

@@ -682,6 +682,55 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           text-align: center;
         }
         
+        /* Signature table styles */
+        .signature-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 12px;
+          color: #000;
+          margin-bottom: 10px;
+        }
+        
+        .signature-cell {
+          width: 50%;
+          padding: 0 12px;
+          text-align: center;
+          vertical-align: bottom;
+        }
+        
+        .signature-cell-left {
+          padding-right: 12px;
+          padding-left: 0;
+        }
+
+        .signature-image-container-table {
+          height: 30px;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+        }
+
+        .signature-image-table {
+          max-width: 150px;
+          max-height: 50px;
+          object-fit: contain;
+        }
+        
+        .signature-cell-right {
+          padding-left: 12px;
+          padding-right: 0;
+        }
+        
+        .signature-name {
+          margin-top: 5px;
+        }
+        
+        .signature-title {
+          font-weight: bold;
+          text-align: center;
+          margin-top: 5px;
+        }
+        
         @media print {
           body {
             padding: 0;
@@ -888,24 +937,24 @@ const renderDecision = (content: string) => {
 
 const renderSignatures = (data: NoticeToExplainFormData, signatureSrc: string) => {
   return `
-    <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000;">
+    <table class="signature-table">
       <tr>
-        <td style="width: 50%; padding: 0 12px 0 0; text-align: center; vertical-align: bottom;">
+        <td class="signature-cell signature-cell-left">
           ${signatureSrc ? `
-            <div style="height: 30px; display: flex; align-items: flex-end; justify-content: center;">
-              <img src="${signatureSrc}" style="max-width: 150px; max-height: 50px; object-fit: contain;" alt="Signature">
+            <div class="signature-image-container-table">
+              <img src="${signatureSrc}" class="signature-image-table" alt="Signature">
             </div>
-          ` : '<div style="height: 30px;"></div>'}
-          <div>${data.reviewedBy || '[Name]'}</div>
-          <div style="border-top: 1px solid #000; margin-top: 5px;"></div>
-          <div style="font-weight: bold; text-align: center; margin-top: 5px;">Immediate Supervisor/Manager Signature</div>
+          ` : '<div class="signature-image-container-table"></div>'}
+          <div class="signature-name">${data.reviewedBy || '[Name]'}</div>
+          <div class="signature-line"></div>
+          <div class="signature-title">Immediate Supervisor/Manager Signature</div>
         </td>
         
-        <td style="width: 50%; padding: 0 0 0 12px; text-align: center; vertical-align: bottom;">
-          <div style="height: 30px;"></div>
-          <div>${data.employeeName || '[Employee Name]'}</div>
-          <div style="border-top: 1px solid #000; margin-top: 5px;"></div>
-          <div style="font-weight: bold; text-align: center; margin-top: 5px;">Employee Signature</div>
+        <td class="signature-cell signature-cell-right">
+          <div class="signature-image-container-table"></div>
+          <div class="signature-name">${data.employeeName || '[Employee Name]'}</div>
+          <div class="signature-line"></div>
+          <div class="signature-title">Employee Signature</div>
         </td>
       </tr>
     </table>
