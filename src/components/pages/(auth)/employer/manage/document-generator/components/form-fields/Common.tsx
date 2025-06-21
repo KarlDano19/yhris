@@ -480,7 +480,7 @@ export const ActionButtons = ({ handleReset, onPrint, onProceed }: ActionButtons
               <path d="M6 14h12v8H6z"/>
             </svg>
           )}
-          {printLoading ? 'Printing...' : 'Print'}
+          {printLoading ? '' : 'Print'}
         </button>
         
         {onProceed && (
@@ -500,7 +500,7 @@ export const ActionButtons = ({ handleReset, onPrint, onProceed }: ActionButtons
                 <path d="m12 5 7 7-7 7"/>
               </svg>
             )}
-            {proceedLoading ? 'Processing...' : 'Proceed'}
+            {proceedLoading ? '' : 'Proceed'}
           </button>
         )}
       </div>

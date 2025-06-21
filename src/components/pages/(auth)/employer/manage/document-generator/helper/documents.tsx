@@ -45,7 +45,7 @@ export const validateRequiredFields = (formData: FormDataType): boolean => {
     });
     
     // Show a generic toast message
-    toast.custom(() => <CustomToast message="Please fill in all required fields marked with *" type="error" />);
+    toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
     return false;
   }
 

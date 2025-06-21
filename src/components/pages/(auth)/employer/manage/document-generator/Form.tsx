@@ -183,41 +183,69 @@ export default function Form({
     onFormChange(updatedData);
   };
 
-  const handlePrint = () => {
+  // Helper function to validate form data
+  const validateForm = (): boolean => {
+    // Set isSubmitted to true to show validation errors
     setIsSubmitted(true);
     
-    // Validate dates for employee certificate
+    // Common validation for all document types
+    if (!formData.employeeName || !formData.position || !formData.signature) {
+      toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
+      return false;
+    }
+    
+    // Document type specific validation
     if (documentType === 'employee-certificate') {
       const certData = formData as EmployeeCertificateFormData;
+      
+      // Check required fields
+      if (!certData.companyName || !certData.startDate || !certData.dateOfIssuance) {
+        toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
+        return false;
+      }
+      
+      // Validate dates
       if (certData.startDate && certData.endDate) {
         const startDate = new Date(certData.startDate);
         const endDate = new Date(certData.endDate);
         
         if (endDate < startDate) {
           toast.custom(() => <CustomToast message="Invalid date: End date must be after start date" type="error" />);
-          return;
+          return false;
         }
       }
+    } else if (documentType === 'employment-agreement') {
+      const agreementData = formData as EmploymentAgreementFormData;
+      
+      // Check required fields
+      if (!agreementData.companyName || !agreementData.startDate || !agreementData.dateOfIssuance) {
+        toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
+        return false;
+      }
+    } else if (documentType === 'notice-to-explain') {
+      const noticeData = formData as NoticeToExplainFormData;
+      
+      // Check required fields
+      if (!noticeData.incidentDate || !noticeData.incidentPlace || !noticeData.briefBackground) {
+        toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const handlePrint = () => {
+    if (!validateForm()) {
+      return;
     }
     
     onPrint();
   };
 
   const handleProceed = () => {
-    setIsSubmitted(true);
-    
-    // Validate dates for employee certificate
-    if (documentType === 'employee-certificate') {
-      const certData = formData as EmployeeCertificateFormData;
-      if (certData.startDate && certData.endDate) {
-        const startDate = new Date(certData.startDate);
-        const endDate = new Date(certData.endDate);
-        
-        if (endDate < startDate) {
-          toast.custom(() => <CustomToast message="Invalid date: End date must be after start date" type="error" />);
-          return;
-        }
-      }
+    if (!validateForm()) {
+      return;
     }
     
     if (onProceed) {
