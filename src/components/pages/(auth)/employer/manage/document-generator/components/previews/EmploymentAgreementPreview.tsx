@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import Image from 'next/image';
+
 import { format } from 'date-fns';
 
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';

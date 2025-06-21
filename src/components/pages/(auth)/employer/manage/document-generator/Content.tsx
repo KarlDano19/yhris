@@ -1,36 +1,36 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-import { useSearchParams, useRouter } from 'next/navigation';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 import Link from "next/link";
+import { useSearchParams, useRouter } from 'next/navigation';
+
+import { toast } from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import 'react-datepicker/dist/react-datepicker.css';
 
+import Form from "./Form";
+import CustomToast from "@/components/CustomToast";
 import EmployeeCertificatePreview from "./components/previews/EmployeeCertificatePreview";
 import EmploymentAgreementPreview from "./components/previews/EmploymentAgreementPreview";
 import NoticeToExplainPreview from "./components/previews/NoticeToExplainPreview";
+import usePatchEmployeeIssueItems from '../address-employee-issue/hooks/usePatchEmployeeIssueItems';
+import useGetEmployeeIssueItems from '../address-employee-issue/hooks/useGetEmployeeIssueItems';
+import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
 import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
-import Form from "@/components/pages/(auth)/employer/manage/document-generator/Form";
-import CustomToast from "@/components/CustomToast";
-import usePatchEmployeeIssueItems from '@/components/pages/(auth)/employer/manage/address-employee-issue/hooks/usePatchEmployeeIssueItems';
-import useGetEmployeeIssueItems from '@/components/pages/(auth)/employer/manage/address-employee-issue/hooks/useGetEmployeeIssueItems';
 
 import { EmployeeCertificateFormData } from "@/types/document-generator/documents";
 import { EmploymentAgreementFormData } from "@/types/document-generator/documents";
 import { NoticeToExplainFormData } from "@/types/document-generator/documents";
 import { DocumentType } from "@/types/document-generator/form";
-
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-
 import { print } from './utils/print/index';
 import { generateNoticeToExplainHTML } from './utils/print/NoticeToExplain';
-import initColorPolyfill from '../../../../../../helpers/colorPolyfill';
-import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
+import initColorPolyfill from '@/helpers/colorPolyfill';
+
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 export default function Content() {
   const { mutate: uploadAttachment } = useUploadEmployeeIssueAttachments();

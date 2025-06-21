@@ -1,8 +1,10 @@
 import { ChangeEvent, useEffect, useState } from 'react';
+
 import Image from 'next/image';
 
-import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 import { DatePickerField } from './DatePickerField';
+
+import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
 interface FieldProps {
   formData: NoticeToExplainFormData;

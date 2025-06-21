@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
 import Image from 'next/image';
+
+import { formatDate } from '@/helpers/date';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
-import { formatDate } from '../../../../../../../../helpers/date';
 
 interface NoticeToExplainPreviewProps {
   data: NoticeToExplainFormData;

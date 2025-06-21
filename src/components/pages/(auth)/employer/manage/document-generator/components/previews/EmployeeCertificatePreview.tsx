@@ -1,5 +1,6 @@
-import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 import Image from 'next/image';
+
+import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 
 interface EmployeeCertificatePreviewProps {
   formData: EmployeeCertificateFormData;

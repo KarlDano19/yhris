@@ -1,9 +1,12 @@
 import { toast } from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
+
 import { saveAs } from 'file-saver';
 
+import CustomToast from '@/components/CustomToast';
+
+import { formatDate } from '@/helpers/date';
+
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-import { formatDate } from '../../../../../../../../helpers/date';
 
 interface PrintOptions {
   elementId: string;

@@ -1,13 +1,15 @@
 import { ChangeEvent, useState, useEffect } from 'react';
+
 import Image from 'next/image';
 
-import DropDownArrow from '@/svg/DropDownArrow';
+import { DatePickerField } from './DatePickerField';
 
 import { DocumentType } from '@/types/document-generator/form';
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-import { DatePickerField } from './DatePickerField';
+
+import DropDownArrow from '@/svg/DropDownArrow';
 
 export interface FieldProps {
   formData: EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData;

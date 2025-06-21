@@ -1,4 +1,5 @@
 import { toast } from 'react-hot-toast';
+
 import CustomToast from '@/components/CustomToast';
 
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';

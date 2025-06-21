@@ -1,6 +1,9 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
+
 import 'react-datepicker/dist/react-datepicker.css';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
+
 
 interface DatePickerFieldProps {
   id: string;
