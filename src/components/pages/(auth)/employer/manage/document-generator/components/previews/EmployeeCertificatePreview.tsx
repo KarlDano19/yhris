@@ -112,11 +112,11 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
               {/* Certificate Body */}
               <div className="space-y-4 sm:space-y-5 md:space-y-6 text-black certificate-body mx-auto max-w-3xl text-left">
                 <p className="text-xs sm:text-sm">
-                  This is to certify that <span className="font-semibold">
+                  This is to certify that <span className="font-semibold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     {formData.employeeName || '[Employee Name]'}
-                  </span> has been employed by <span className="font-semibold">
+                  </span> has been employed by <span className="font-semibold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     {formData.companyName || '[Company Name]'}
-                  </span> as <span className="font-semibold">
+                  </span> as <span className="font-semibold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     {formData.position || '[Position]'}
                   </span> from <span className="font-semibold">
                     {formattedStartDate}
@@ -125,7 +125,7 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
                   </span>.
                 </p>
                 
-                <p className="text-xs sm:text-sm">
+                <p className="text-xs sm:text-sm" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                   {formData.purpose 
                     ? formData.purpose 
                     : 'This certificate is issued upon the request of the employee for whatever legal purpose it may serve.'}
@@ -155,9 +155,9 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
                     />
                   </div>
                 )}
-                <p className="font-semibold mb-1 certificate-signature-name text-sm sm:text-base">{formData.signatoryName || '[Signatory Name]'}</p>
-                <p className="text-xs mb-1 certificate-signature-position">{formData.signatoryPosition || '[Position]'}</p>
-                <p className="text-xs certificate-signature-company">{formData.companyName || '[Company Name]'}</p>
+                <p className="font-semibold mb-1 certificate-signature-name text-sm sm:text-base" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.signatoryName || '[Signatory Name]'}</p>
+                <p className="text-xs mb-1 certificate-signature-position" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.signatoryPosition || '[Position]'}</p>
+                <p className="text-xs certificate-signature-company" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.companyName || '[Company Name]'}</p>
               </div>
             </div>
           </div>

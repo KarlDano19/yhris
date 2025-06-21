@@ -350,19 +350,19 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       <div className="w-full border-b mb-2 sm:mb-4 md:mb-6 certificate-border" style={{ borderColor }}></div>
       
       <div className="grid grid-cols-2 gap-2">
-        <div className="text-black text-xs">
+        <div className="text-black text-xs" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
           <span className="font-bold">Name of Employee :</span> {data.employeeName || '[Employee Name]'}
         </div>
-        <div className="text-black text-xs">
+        <div className="text-black text-xs" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
           <span className="font-bold">Date:</span> {formattedDate || '[Date]'}
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-2 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-4" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
         <div className="text-black text-xs">
           <span className="font-bold">Position :</span> {data.position || '[Position]'}
         </div>
-        <div className="text-black text-xs">
+        <div className="text-black text-xs" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
           <span className="font-bold">Place:</span> {data.place || '[Place]'}
         </div>
       </div>
@@ -396,19 +396,19 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       <div className="grid grid-cols-3 gap-3 mb-6 text-black text-xs">
         <div className="text-center">
           <div className="font-bold mb-1">Prepared by:</div>
-          <div className="mb-1">{data.preparedBy || '[Name]'}</div>
+          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.preparedBy || '[Name]'}</div>
           <div className="border-t font-bold border-black pt-1">HR Representative</div>
         </div>
         
         <div className="text-center">
           <div className="font-bold mb-1">Reviewed by:</div>
-          <div className="mb-1">{data.reviewedBy || '[Name]'}</div>
+          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.reviewedBy || '[Name]'} </div>
           <div className="border-t font-bold border-black pt-1">Immediate Supervisor/Manager</div>
         </div>
         
         <div className="text-center">
           <div className="font-bold mb-1">Received by:</div>
-          <div className="mb-1">{data.receivedBy || data.employeeName || '[Name]'}</div>
+          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.receivedBy || data.employeeName || '[Name]'}</div>
           <div className="border-t font-bold border-black pt-1">Employee Name</div>
         </div>
       </div>
@@ -459,14 +459,14 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
             />
           )}
         </div>
-        <div className="mb-1">{data.reviewedBy || '[Name]'}</div>
+        <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.reviewedBy || '[Name]'}</div>
         <div className="border-t border-black pt-1 mb-1"></div>
         <div className="text-center text-xs font-bold">Immediate Supervisor/Manager Signature</div>
       </div>
       
       <div className="text-center">
         <div style={{ height: '30px' }}></div>
-        <div className="text-center mb-1">{data.employeeName || '[Employee Name]'}</div>
+        <div className="text-center mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.employeeName || '[Employee Name]'}</div>
         <div className="border-t border-black pt-1 mb-1"></div>
         <div className="text-center text-xs font-bold">Employee Signature</div>
       </div>
@@ -492,7 +492,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       
       <div className="text-center mb-6">
         <h1 className="text-base font-bold uppercase text-black">NOTICE TO EXPLAIN</h1>
-        <p className="text-xs text-gray-600">{data.place || '[Place]'}</p>
+        <p className="text-xs text-gray-600" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.place || '[Place]'}</p>
       </div>
     </>
   );

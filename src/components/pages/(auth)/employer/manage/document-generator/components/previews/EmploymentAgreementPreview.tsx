@@ -61,13 +61,13 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
             
             {/* Page 1 - Matches exactly what's in the first image */}
             <div className="mb-6">
-              <p className="text-xs text-black mb-4">
+              <p className="text-xs text-black mb-4" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                 This Employment Agreement (&quot;Agreement&quot;) is made and entered into on {formData.dateOfIssuance ? formatDate(formData.dateOfIssuance) : '[Date of Issuance]'} in {formData.placeOfIssuance || '[Place of Issuance]'} between {formData.companyName || '[Company Name]'} (hereinafter referred to as &quot;Employer&quot;)
               </p>
               <p className="text-xs text-black mb-4">
                 and
               </p>
-              <p className="text-xs text-black mb-4">
+              <p className="text-xs text-black mb-4" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                 {formData.employeeName || '[Employee Name]'} (hereinafter referred to as Employee&quot;)
               </p>
               <p className="text-xs text-black mb-4">
@@ -78,7 +78,7 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
             
             <div className="mb-6">
               <h2 className="text-sm font-bold mb-2 text-black">1. Position and Employment Period</h2>
-              <p className="text-xs text-black mb-4">
+              <p className="text-xs text-black mb-4" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                 That the Employee is set to commence employment on {formData.startDate ? formatDate(formData.startDate) : '[Start Date]'} with {formData.probationPeriod || '[Probation Period]'} months under
                 Probationary status as {formData.position || '[Position]'}.
               </p>
@@ -340,10 +340,10 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
                       />
                     </div>
                   )}
-                  <p className="text-center text-xs text-black">{formData.signatoryName || '[Signatory Name]'}</p>
+                  <p className="text-center text-xs text-black" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.signatoryName || '[Signatory Name]'}</p>
                   <div className="border-t border-gray-400 pt-2">
-                    <p className="text-center text-xs text-black font-bold">{formData.signatoryPosition || '[Position]'}</p>
-                    <p className="text-center text-xs text-black font-bold">{formData.companyName || '[Company Name]'}</p>
+                    <p className="text-center text-xs text-black font-bold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.signatoryPosition || '[Position]'}</p>
+                    <p className="text-center text-xs text-black font-bold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.companyName || '[Company Name]'}</p>
                   </div>
                 </div>
               </div>
@@ -393,8 +393,8 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
             <div className="relative preview-container" style={{ minHeight: '883px' }}>
               {/* Company header */}
               <div className="text-center mb-8">
-                  <h2 className="text-md font-bold text-black">{formData.companyName || '[Company Name]'}</h2>
-                  <p className="text-xs text-gray-600">{formData.companyAddress || '[Company Address]'}</p>
+                  <h2 className="text-md font-bold text-black" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.companyName || '[Company Name]'}</h2>
+                  <p className="text-xs text-gray-600" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{formData.companyAddress || '[Company Address]'}</p>
               </div>
               
               {/* Dynamic content based on current page */}
