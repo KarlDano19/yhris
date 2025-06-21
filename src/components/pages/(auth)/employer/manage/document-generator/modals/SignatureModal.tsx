@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Fragment } from 'react';
 
+import { Dialog, Transition } from "@headlessui/react";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import SignatureCanvas from 'react-signature-canvas';
 
 interface SignatureModalProps {
@@ -14,6 +16,7 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
   const [signatureMode, setSignatureMode] = useState<'draw' | 'upload'>('draw');
   const [uploadedSignature, setUploadedSignature] = useState<File | null>(null);
   const signatureRef = useRef<SignatureCanvas | null>(null);
+  const cancelButtonRef = useRef(null);
   
   // Clear signature canvas when opening modal
   useEffect(() => {
@@ -116,128 +119,171 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
   };
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop with blur effect */}
-      <div 
-        className="fixed inset-0 bg-black/50"
-        onClick={onClose}
-      ></div>
-      
-      {/* Modal content */}
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl z-10 relative">
-        <h2 className="text-xl font-bold mb-4 text-black">Signature</h2>
-        
-        <div className="flex space-x-4 mb-4">
-          <button
-            onClick={() => setSignatureMode('draw')}
-            className={`px-4 py-2 rounded-md ${
-              signatureMode === 'draw' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-800'
-            }`}
-          >
-            Draw Signature
-          </button>
-          <button
-            onClick={() => setSignatureMode('upload')}
-            className={`px-4 py-2 rounded-md ${
-              signatureMode === 'upload' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-800'
-            }`}
-          >
-            Upload Signature
-          </button>
-        </div>
-        
-        {signatureMode === 'draw' ? (
-          <div className="border border-gray-300 rounded-md mb-4">
-            <SignatureCanvas
-              ref={signatureRef}
-              canvasProps={{
-                width: 500,
-                height: 200,
-                className: 'signature-canvas w-full'
-              }}
-              backgroundColor="white"
-            />
-          </div>
-        ) : (
-          <div className="mb-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center">
-              {uploadedSignature ? (
-                <div className="flex flex-col items-center w-full">
-                  <img 
-                    src={URL.createObjectURL(uploadedSignature)} 
-                    alt="Signature Preview" 
-                    className="max-h-32 object-contain mb-4"
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog
+        as="div"
+        className="relative z-20"
+        initialFocus={cancelButtonRef}
+        onClose={onClose}
+      >
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:max-w-lg w-full">
+                <div className="flex bg-savoy-blue p-2 items-center">
+                  <h3 className="flex-1 text-white ml-2 font-semibold">
+                    {signatureMode === 'draw' ? 'Draw Signature' : 'Upload Signature'}
+                  </h3>
+                  <XCircleIcon
+                    className="w-8 h-8 text-white cursor-pointer"
+                    onClick={onClose}
                   />
-                  <div className="flex gap-3 mb-2">
-                    <p className="text-sm text-green-600">
-                      {uploadedSignature.name}
-                    </p>
-                    <label 
-                      className="text-blue-500 text-sm hover:underline focus:outline-none cursor-pointer"
-                    >
-                      Change
-                      <input 
-                        type="file"
-                        accept="image/png,image/jpeg,image/gif"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                      />
-                    </label>
-                  </div>
                 </div>
-              ) : (
-                <>
-                  <div className="text-gray-400 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="12" y1="18" x2="12" y2="12"></line>
-                      <line x1="9" y1="15" x2="15" y2="15"></line>
-                    </svg>
+                
+                <div className="p-4">
+                  {/* Toggle between draw and upload */}
+                  <div className="flex space-x-4 mb-4">
+                    <button
+                      onClick={() => setSignatureMode('draw')}
+                      className={`px-4 py-2 rounded-md ${
+                        signatureMode === 'draw' 
+                          ? 'bg-savoy-blue text-white' 
+                          : 'bg-gray-200 text-gray-800'
+                      }`}
+                    >
+                      Draw Signature
+                    </button>
+                    <button
+                      onClick={() => setSignatureMode('upload')}
+                      className={`px-4 py-2 rounded-md ${
+                        signatureMode === 'upload' 
+                          ? 'bg-savoy-blue text-white' 
+                          : 'bg-gray-200 text-gray-800'
+                      }`}
+                    >
+                      Upload Signature
+                    </button>
                   </div>
-                  <label className="text-blue-500 hover:underline focus:outline-none cursor-pointer">
-                    Click to upload signature image
-                    <input 
-                      type="file"
-                      accept="image/png,image/jpeg,image/gif"
-                      className="hidden"
-                      onChange={handleFileUpload}
-                    />
-                  </label>
-                  <p className="text-sm text-gray-500 mt-1">PNG, JPG, GIF up to 2MB</p>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-        
-        <div className="flex justify-between">
-          <button
-            onClick={handleClearSignature}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700"
-          >
-            Clear
-          </button>
-          <div className="flex space-x-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700"
-            >
-              Cancel
-            </button>
-            <button
-              onMouseDown={handleSaveSignature}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md"
-            >
-              Save Signature
-            </button>
+                  
+                  {/* Clear button */}
+                  <div className="text-right mb-2">
+                    <button
+                      className="underline text-savoy-blue"
+                      onClick={handleClearSignature}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  
+                  {signatureMode === 'draw' ? (
+                    <div className="block w-full rounded-md border border-gray-300 text-gray-900 sm:text-sm sm:leading-6">
+                      <SignatureCanvas
+                        ref={signatureRef}
+                        canvasProps={{
+                          width: 470,
+                          height: 200,
+                          className: "w-full h-full"
+                        }}
+                        backgroundColor="white"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="block w-full rounded-md border border-gray-300 text-gray-900 sm:text-sm sm:leading-6 p-6">
+                        {uploadedSignature ? (
+                          <div className="flex flex-col items-center w-full">
+                            <img 
+                              src={URL.createObjectURL(uploadedSignature)} 
+                              alt="Signature Preview" 
+                              className="max-h-32 object-contain mb-4"
+                            />
+                            <div className="flex gap-3 mb-2">
+                              <p className="text-sm text-green-600">
+                                {uploadedSignature.name}
+                              </p>
+                              <label 
+                                className="text-savoy-blue text-sm hover:underline focus:outline-none cursor-pointer"
+                              >
+                                Change
+                                <input 
+                                  type="file"
+                                  accept="image/png,image/jpeg,image/gif"
+                                  className="hidden"
+                                  onChange={handleFileUpload}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-[200px]">
+                            <div className="text-gray-400 mb-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="12" y1="18" x2="12" y2="12"></line>
+                                <line x1="9" y1="15" x2="15" y2="15"></line>
+                              </svg>
+                            </div>
+                            <label className="text-savoy-blue hover:underline focus:outline-none cursor-pointer">
+                              Click to upload signature image
+                              <input 
+                                type="file"
+                                accept="image/png,image/jpeg,image/gif"
+                                className="hidden"
+                                onChange={handleFileUpload}
+                              />
+                            </label>
+                            <p className="text-sm text-gray-500 mt-1">PNG, JPG, GIF up to 2MB</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <hr />
+                <div className="mt-4 sm:flex sm:flex-row-reverse px-4">
+                  <button
+                    type="submit"
+                    className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
+                    onClick={handleSaveSignature}
+                  >
+                    {signatureMode === 'draw' ? 'Sign' : 'Upload'}
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                    onClick={onClose}
+                    ref={cancelButtonRef}
+                  >
+                    Close
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
         </div>
-      </div>
-    </div>
+      </Dialog>
+    </Transition.Root>
   );
 } 
