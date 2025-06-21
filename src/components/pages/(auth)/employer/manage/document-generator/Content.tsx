@@ -383,7 +383,7 @@ export default function Content() {
             
             .signature-line {
               margin-top: 8px !important;
-              margin-bottom: 8px !important;
+              margin-bottom: 5px !important;
             }
             
             /* Match signature styling from renderSignatures function */
@@ -433,9 +433,7 @@ export default function Content() {
             .signature-title {
               font-weight: bold !important;
               text-align: center !important;
-              margin-top: 5px !important;
               margin-bottom: 10px !important;
-              padding-bottom: 5px !important;
             }
           `
         );
