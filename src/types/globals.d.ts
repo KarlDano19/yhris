@@ -76,8 +76,8 @@ export type T_Separation = {
 };
 
 export type T_SendNTEModal = {
-  isOpen: boolean;
   id: number;
+  attachment?: string;
 };
 
 export type T_SendDecisionModal = {

@@ -1,11 +1,13 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
@@ -47,6 +49,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] = useState(false);
   const [isSendNTEModalOpen, setIsSendNTEModalOpen] = useState<T_SendNTEModal | null>(null);
   const [isInvestigateModalOpen, setIsInvestigateModalOpen] = useState<T_InvestigationModal | null>(null);
@@ -61,18 +73,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isUploadDecisionAttachmentModalOpen, setIsUploadDecisionAttachmentModalOpen] =
     useState<T_DecisionAttachmentViewModal | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
-  const date1InputRef = useRef(null);
-  const date2InputRef = useRef(null);
   const {
     data: dataEmployeeIssues,
     isLoading: isGetEmployeeIssuesLoading,
     refetch,
-  } = useGetEmployeeIssueItems(itemsFilter);
+  } = useGetEmployeeIssueItems({
+    ...itemsFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
   const { data: dataDepartment } = useGetDepartmentItems();
   const { data: dataEmployee } = useGetEmployeeItems();
   const { data: dataPosition } = useGetPositionItems();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const searchParams = useSearchParams();
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -117,6 +132,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, []);
 
   useEffect(() => {
+    refetch();
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
     if (dataDepartment) {
       setDepartmentItems(dataDepartment);
     }
@@ -127,63 +146,148 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setPositionItems(dataPosition);
     }
     if (dataEmployeeIssues) {
-      dataEmployeeIssues.map((employeeIssue: any) => {
-        employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric',
-        }).format(new Date(employeeIssue.incident_date));
-        employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
-        employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
-        employeeIssue['incidentReceivedDate'] =
-          employeeIssue.incident_received_date &&
-          new Intl.DateTimeFormat('en-US', {
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataEmployeeIssues.records) {
+        items = dataEmployeeIssues.records.map((employeeIssue: any) => {
+          employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
             month: '2-digit',
             day: '2-digit',
             year: 'numeric',
-          }).format(new Date(employeeIssue.incident_received_date));
-        employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
-        employeeIssue['investigatedDate'] = employeeIssue.investigate
-          ? Intl.DateTimeFormat('en-US', {
+          }).format(new Date(employeeIssue.incident_date));
+          employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
+          employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
+          employeeIssue['incidentReceivedDate'] =
+            employeeIssue.incident_received_date &&
+            new Intl.DateTimeFormat('en-US', {
               month: '2-digit',
               day: '2-digit',
               year: 'numeric',
-            }).format(new Date(employeeIssue.investigate.date_of_investigation))
-          : '';
-        employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
-        employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
-        employeeIssue['decisionReceivedDate'] =
-          employeeIssue.decision_received_date &&
-          new Intl.DateTimeFormat('en-US', {
+            }).format(new Date(employeeIssue.incident_received_date));
+          employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
+          employeeIssue['investigatedDate'] = employeeIssue.investigate
+            ? Intl.DateTimeFormat('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric',
+              }).format(new Date(employeeIssue.investigate.date_of_investigation))
+            : '';
+          employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
+          employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
+          employeeIssue['decisionReceivedDate'] =
+            employeeIssue.decision_received_date &&
+            new Intl.DateTimeFormat('en-US', {
+              month: '2-digit',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(employeeIssue.decision_received_date));
+          employeeIssue['investigateForm'] = employeeIssue.investigate || {
+            date: '',
+            witness: '',
+            presider: '',
+            isAttendHearing: '',
+            decision: '',
+            attachments: '',
+          };
+          employeeIssue['issueNTEForm'] = {
+            template: 'Test',
+            to: '',
+            message: '',
+          };
+          employeeIssue['sendDecisionForm'] = {
+            template: 'Test',
+            to: '',
+            message: '',
+          };
+          return employeeIssue;
+        });
+        totalPages = dataEmployeeIssues.total_pages || 1;
+        totalRecords = dataEmployeeIssues.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataEmployeeIssues)) {
+        items = dataEmployeeIssues.map((employeeIssue: any) => {
+          // Same transformation as above
+          employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
             month: '2-digit',
             day: '2-digit',
             year: 'numeric',
-          }).format(new Date(employeeIssue.decision_received_date));
-        employeeIssue['investigateForm'] = employeeIssue.investigate || {
-          date: '',
-          witness: '',
-          presider: '',
-          isAttendHearing: '',
-          decision: '',
-          attachments: '',
-        };
-        employeeIssue['issueNTEForm'] = {
-          template: 'Test',
-          to: '',
-          message: '',
-        };
-        employeeIssue['sendDecisionForm'] = {
-          template: 'Test',
-          to: '',
-          message: '',
-        };
-        return employeeIssue;
+          }).format(new Date(employeeIssue.incident_date));
+          employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
+          employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
+          employeeIssue['incidentReceivedDate'] =
+            employeeIssue.incident_received_date &&
+            new Intl.DateTimeFormat('en-US', {
+              month: '2-digit',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(employeeIssue.incident_received_date));
+          employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
+          employeeIssue['investigatedDate'] = employeeIssue.investigate
+            ? Intl.DateTimeFormat('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric',
+              }).format(new Date(employeeIssue.investigate.date_of_investigation))
+            : '';
+          employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
+          employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
+          employeeIssue['decisionReceivedDate'] =
+            employeeIssue.decision_received_date &&
+            new Intl.DateTimeFormat('en-US', {
+              month: '2-digit',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(employeeIssue.decision_received_date));
+          employeeIssue['investigateForm'] = employeeIssue.investigate || {
+            date: '',
+            witness: '',
+            presider: '',
+            isAttendHearing: '',
+            decision: '',
+            attachments: '',
+          };
+          employeeIssue['issueNTEForm'] = {
+            template: 'Test',
+            to: '',
+            message: '',
+          };
+          employeeIssue['sendDecisionForm'] = {
+            template: 'Test',
+            to: '',
+            message: '',
+          };
+          return employeeIssue;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setEmployeeIssueItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setEmployeeIssueItems(dataEmployeeIssues);
     }
   }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition]);
 
-  const checkIfDateIsValid = () => {
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
+  const handleSearch = () => {
+    // Check date validity first
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -197,7 +301,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         duration: 5000,
       });
     }
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       return toast.custom(
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
         {
@@ -205,7 +309,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    refetch();
+    
+    // Update itemsFilter with the current searchText
+    setItemsFilter((prev: {from: string; to: string; search: string}) => ({
+      ...prev,
+      search: searchText
+    }));
+    
+    // Reset to first page when searching
+    setCurrentPage(1);
+    
+    // Explicitly call refetch to trigger the search with all filters
+    setTimeout(() => {
+      refetch();
+    }, 0);
   };
 
   const renderRows = () => {
@@ -358,14 +475,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
               </div>
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -406,7 +528,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {employeeIssueItems.length}</p>
+                <Pagination
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={pageSizeChange}
+                  onPageChange={paginationChange}
+                />
               </div>
             </div>
           </div>

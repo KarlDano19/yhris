@@ -13,10 +13,14 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
+
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import { T_SendNTEModal } from '@/types/globals';
@@ -45,7 +49,7 @@ export default function SendNTEModal({
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
-  const [isCCOpen, setIsCCOPen] = useState(false);
+  const [isCCOpen, setIsCCOpen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
@@ -61,17 +65,41 @@ export default function SendNTEModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
+  // Fetch employee issue details to get attachment
+  const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
+  // Reset all form data when modal opens or closes
   useEffect(() => {
-    if (isOpen && isOpen.id) {
+    // Reset all tags and inputs first
+    setTagsTo([]);
+    setTagsCc([]);
+    setTagsBcc([]);
+    setInputTo('');
+    setInputCc('');
+    setInputBcc('');
+    setIsCCOpen(false);
+    setIsBCCOpen(false);
+    setApplicantEmail(null);
+    reset();
+
+    // Only set email data if modal is opening with an ID AND we have valid data
+    if (isOpen?.id && employeeIssueItems?.length > 0) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
-      if (employeeIssueItemsCopy[itemIndex]) {
-        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+      // Don't auto-populate the To field
+      if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
+        setApplicantEmail(employeeIssueItems[itemIndex].email);
+        // Removed setTagsTo here to prevent auto-population
       }
     }
-  }, [isOpen]);
+  }, [isOpen?.id, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
+
+  // Get attachment from the server if available
+  useEffect(() => {
+    if (employeeIssueDetails?.nte_attachment) {
+      setPdfAttachment(employeeIssueDetails.nte_attachment);
+    }
+  }, [employeeIssueDetails]);
 
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
@@ -90,11 +118,17 @@ export default function SendNTEModal({
         employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
       }
       employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
+      // Include PDF attachment if available
+      if (pdfAttachment) {
+        employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;
+        employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment = pdfAttachment;
+      }
       employeeIssueItemsCopy[itemIndex].isNTESent = true;
       const callbackReq = {
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
           setIsOpen(null);
+          setPdfAttachment(null); // Clear attachment state
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           reset();
         },
@@ -109,6 +143,13 @@ export default function SendNTEModal({
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
   });
+
+  // Get filename from attachment URL
+  const getFilenameFromUrl = (url: string) => {
+    if (!url) return '';
+    const urlParts = url.split('/');
+    return urlParts[urlParts.length - 1];
+  };
 
   return (
     <>
@@ -142,6 +183,7 @@ export default function SendNTEModal({
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Send NTE</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                   </div>
+                  
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
@@ -158,17 +200,15 @@ export default function SendNTEModal({
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
-                                if (applicantEmail) {
-                                  setTagsTo([applicantEmail, ...template.to]);
-                                } else {
-                                  setTagsTo(template.to);
-                                }
+                                // Just set the template's to addresses directly
+                                setTagsTo(template.to || []);
+                                
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);
                                 }
                                 if (template.cc) {
-                                  setIsCCOPen(true);
+                                  setIsCCOpen(true);
                                   setTagsCc(template.cc);
                                 }
                                 setValue('message', template.body);
@@ -232,7 +272,7 @@ export default function SendNTEModal({
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
                               isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
-                            onClick={() => setIsCCOPen(!isCCOpen)}
+                            onClick={() => setIsCCOpen(!isCCOpen)}
                           >
                             CC
                           </button>
@@ -331,7 +371,7 @@ export default function SendNTEModal({
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
-                        <div className='mt-2 h-72 mb-12'>
+                        <div className='mt-2 h-72'>
                           <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
                           <ReactQuill
                             onChange={(value) => setValue('message', value)}
@@ -342,6 +382,33 @@ export default function SendNTEModal({
                           />
                         </div>
                       </div>
+                      
+                      {/* Attachment section with ClipIcon - moved outside the quill container */}
+                      <div className="mt-10 border-t pt-4">
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachment
+                        </label>
+                        <div className="mt-2 flex items-center">
+                          <div className="flex items-center gap-2 pl-2 cursor-pointer">
+                            <ClipIcon hasFile={!!pdfAttachment} />
+                            {pdfAttachment && (
+                              <>
+                                <span className="text-sm text-gray-600">
+                                  {getFilenameFromUrl(pdfAttachment)}
+                                </span>
+                                <ArrowTopRightOnSquareIcon 
+                                  className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
+                                  onClick={() => window.open(pdfAttachment, '_blank')}
+                                />
+                              </>
+                            )}
+                            {!pdfAttachment && (
+                              <span className="text-sm text-gray-400">No attachment</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
                     </div>
                     <hr />
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
@@ -391,7 +458,7 @@ export default function SendNTEModal({
                             <span className='sr-only'>Loading...</span>
                           </div>
                         )}
-                        {!isLoading && 'Send'}
+                        {!isLoading && 'Send & Mark as Sent'}
                       </button>
                       <button
                         type='button'

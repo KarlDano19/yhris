@@ -9,7 +9,7 @@ import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHead
 
 function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
   const pathname = usePathname();
-  const listPathname = pathname.split('/');
+  const listPathname = pathname?.split('/') || [];
   const slicePaths = listPathname.slice(1);
   const firstRoute = slicePaths[0];
   const lastRoute = slicePaths[slicePaths.length - 1];
