@@ -347,7 +347,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       </div>
 
       {/* Decorative line */}
-      <div className="w-full border-b-1 mb-2 sm:mb-4 md:mb-6 certificate-border" style={{ borderColor }}></div>
+      <div className="w-full border-b mb-2 sm:mb-4 md:mb-6 certificate-border" style={{ borderColor }}></div>
       
       <div className="grid grid-cols-2 gap-2">
         <div className="text-black text-xs">
@@ -414,7 +414,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       </div>
 
       {/* Decorative line */}
-      <div className="w-full border-b-1 mb-2 sm:mb-4 md:mb-6 certificate-border" style={{ borderColor }}></div>
+      <div className="w-full border-b mb-2 sm:mb-4 md:mb-6 certificate-border" style={{ borderColor }}></div>
     </>
   );
 
