@@ -12,9 +12,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import Form from "./Form";
 import CustomToast from "@/components/CustomToast";
-import EmployeeCertificatePreview from "./components/previews/EmployeeCertificatePreview";
-import EmploymentAgreementPreview from "./components/previews/EmploymentAgreementPreview";
-import NoticeToExplainPreview from "./components/previews/NoticeToExplainPreview";
+import EmployeeCertificatePreview from "./previews/EmployeeCertificatePreview";
+import EmploymentAgreementPreview from "./previews/EmploymentAgreementPreview";
+import NoticeToExplainPreview from "./previews/NoticeToExplainPreview";
 import usePatchEmployeeIssueItems from '../address-employee-issue/hooks/usePatchEmployeeIssueItems';
 import useGetEmployeeIssueItems from '../address-employee-issue/hooks/useGetEmployeeIssueItems';
 import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
@@ -26,8 +26,8 @@ import { EmployeeCertificateFormData } from "@/types/document-generator/document
 import { EmploymentAgreementFormData } from "@/types/document-generator/documents";
 import { NoticeToExplainFormData } from "@/types/document-generator/documents";
 import { DocumentType } from "@/types/document-generator/form";
-import { print } from './utils/print/index';
-import { generateNoticeToExplainHTML } from './utils/print/NoticeToExplain';
+import { print } from './print/index';
+import { generateNoticeToExplainHTML } from './print/documents/NoticeToExplain';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';

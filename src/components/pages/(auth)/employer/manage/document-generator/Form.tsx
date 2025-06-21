@@ -19,13 +19,13 @@ import {
   SignatoryPositionField,
   SignatureField,
   ActionButtons
-} from './components/form-fields/Common';
+} from './form-fields/Common';
 
 // Import document-specific fields
 import {
   EndDateField,
   PurposeField
-} from './components/form-fields/EmployeeCertificate';
+} from './form-fields/EmployeeCertificate';
 
 // Import employment-agreement-specific fields
 import {
@@ -33,7 +33,7 @@ import {
   ProbationPeriodField,
   WorkingHoursField,
   DailySalaryField
-} from './components/form-fields/EmploymentAgreement';
+} from './form-fields/EmploymentAgreement';
 
 // Import notice-to-explain-specific fields
 import {
@@ -45,7 +45,7 @@ import {
   BriefBackgroundField,
   PreparedByField,
   ReviewedByField
-} from './components/form-fields/NoticeToExplain';
+} from './form-fields/NoticeToExplain';
 
 // Import DatePicker styles
 import 'react-datepicker/dist/react-datepicker.css';

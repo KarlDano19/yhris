@@ -1,17 +1,12 @@
-import { printEmployeeCertificate } from './EmployeeCertificate';
-import { printEmploymentAgreement } from './EmploymentAgreement';
-import { printNoticeToExplain } from './NoticeToExplain';
+import { printEmployeeCertificate } from './documents/EmployeeCertificate';
+import { printEmploymentAgreement } from './documents/EmploymentAgreement';
+import { printNoticeToExplain } from './documents/NoticeToExplain';
 
+import { PrintOptions } from '@/types/document-generator/documents';
 import { DocumentType } from '@/types/document-generator/form';
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-
-interface PrintOptions {
-  elementId: string;
-  title: string;
-  fileName?: string;
-}
 
 /**
  * Main print function that routes to the appropriate print function based on document type
@@ -42,6 +37,3 @@ export const print = (
       return Promise.resolve(null);
   }
 };
-
-// Export individual print functions for direct use if needed
-export { printEmployeeCertificate, printEmploymentAgreement, printNoticeToExplain }; 

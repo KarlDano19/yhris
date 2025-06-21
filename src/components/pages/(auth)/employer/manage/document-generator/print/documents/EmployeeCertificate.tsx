@@ -2,7 +2,7 @@ import { toast } from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 
-import { validateRequiredFields, prepareDocumentFrame } from '../../helper/documents';
+import { validateRequiredFields, prepareDocumentFrame } from '../helper/documents';
 
 import { EmployeeCertificateFormData, PrintOptions } from '@/types/document-generator/documents';
 
