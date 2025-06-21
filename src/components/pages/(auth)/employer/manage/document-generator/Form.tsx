@@ -548,12 +548,14 @@ export default function Form({
                 formData={formData}
                 handleInputChange={handleInputChange}
                 disabled={isFormDisabled}
+                isSubmitted={isSubmitted}
               />
               
               <SignatoryPositionField 
                 formData={formData}
                 handleInputChange={handleInputChange}
                 disabled={isFormDisabled}
+                isSubmitted={isSubmitted}
               />
             </>
           )}

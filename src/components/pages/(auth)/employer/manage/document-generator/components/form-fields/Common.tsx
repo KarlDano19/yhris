@@ -186,12 +186,15 @@ export function CommonFields({
   // Add local state for validation
   const [showEmployeeNameValidation, setShowEmployeeNameValidation] = useState(false);
   const [showPositionValidation, setShowPositionValidation] = useState(false);
+  const [showCompanyNameValidation, setShowCompanyNameValidation] = useState(false);
   
   // Update validation state when isSubmitted or field values change
   useEffect(() => {
     setShowEmployeeNameValidation(isSubmitted === true && !employeeName);
     setShowPositionValidation(isSubmitted === true && !position);
-  }, [isSubmitted, employeeName, position]);
+    setShowCompanyNameValidation(isSubmitted === true && !companyName && 
+      (documentType === 'employee-certificate' || documentType === 'employment-agreement'));
+  }, [isSubmitted, employeeName, position, companyName, documentType]);
 
   return (
     <>
@@ -231,7 +234,11 @@ export function CommonFields({
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border rounded-md ${
               disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            } ${
+              showCompanyNameValidation
+                ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+            }`}
             placeholder="Enter company name"
             required
             disabled={disabled}
@@ -310,41 +317,69 @@ export const PlaceIssuanceField = ({ formData, handleInputChange, disabled }: Fi
   </div>
 );
 
-export const SignatoryNameField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div>
-    <label className="block mb-2 text-black">
-      Signatory Name <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="text"
-      name="signatoryName"
-      value={formData.signatoryName}
-      onChange={handleInputChange}
-      placeholder="Enter name of signatory"
-      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-      required
-      disabled={disabled}
-    />
-  </div>
-);
+export const SignatoryNameField = ({ formData, handleInputChange, disabled, isSubmitted = false }: FieldProps) => {
+  // Use local state to track validation
+  const [showValidation, setShowValidation] = useState(false);
+  
+  // Update validation state when isSubmitted or field value changes
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && (!formData.signatoryName || !formData.signatoryName.trim()));
+  }, [isSubmitted, formData.signatoryName]);
 
-export const SignatoryPositionField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div>
-    <label className="block mb-2 text-black">
-      Signatory Position <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="text"
-      name="signatoryPosition"
-      value={formData.signatoryPosition}
-      onChange={handleInputChange}
-      placeholder="Enter position of signatory"
-      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-      required
-      disabled={disabled}
-    />
-  </div>
-);
+  return (
+    <div>
+      <label className="block mb-2 text-black">
+        Signatory Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        name="signatoryName"
+        value={formData.signatoryName}
+        onChange={handleInputChange}
+        placeholder="Enter name of signatory"
+        className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${
+          showValidation
+            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+            : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+        }`}
+        required
+        disabled={disabled}
+      />
+    </div>
+  );
+};
+
+export const SignatoryPositionField = ({ formData, handleInputChange, disabled, isSubmitted = false }: FieldProps) => {
+  // Use local state to track validation
+  const [showValidation, setShowValidation] = useState(false);
+  
+  // Update validation state when isSubmitted or field value changes
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && (!formData.signatoryPosition || !formData.signatoryPosition.trim()));
+  }, [isSubmitted, formData.signatoryPosition]);
+
+  return (
+    <div>
+      <label className="block mb-2 text-black">
+        Signatory Position <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        name="signatoryPosition"
+        value={formData.signatoryPosition}
+        onChange={handleInputChange}
+        placeholder="Enter position of signatory"
+        className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${
+          showValidation
+            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+            : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+        }`}
+        required
+        disabled={disabled}
+      />
+    </div>
+  );
+};
 
 interface SignatureFieldProps extends FieldProps {
   onOpenSignatureModal: () => void;
