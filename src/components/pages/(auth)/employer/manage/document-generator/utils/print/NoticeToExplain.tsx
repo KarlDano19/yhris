@@ -6,13 +6,7 @@ import CustomToast from '@/components/CustomToast';
 
 import { formatDate } from '@/helpers/date';
 
-import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-
-interface PrintOptions {
-  elementId: string;
-  title: string;
-  fileName?: string;
-}
+import { NoticeToExplainFormData, PrintOptions } from '@/types/document-generator/documents';
 
 // Characters per page (approximate) - Match the same constants as in preview
 const CHARS_PER_PAGE = 1500;

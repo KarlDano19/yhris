@@ -4,13 +4,7 @@ import CustomToast from '@/components/CustomToast';
 
 import { validateRequiredFields } from '../../helper/documents';
 
-import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
-
-interface PrintOptions {
-  elementId: string;
-  title: string
-  fileName?: string;
-}
+import { EmploymentAgreementFormData, PrintOptions } from '@/types/document-generator/documents';
 
 /**
  * Prints an employment agreement with all 5 pages

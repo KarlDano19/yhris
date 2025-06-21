@@ -55,3 +55,9 @@ export interface NoticeToExplainFormData {
     signature: File | string | null;
     borderColor: string;
     } 
+
+export interface PrintOptions {
+    elementId: string;
+    title: string;
+    fileName?: string;
+  }

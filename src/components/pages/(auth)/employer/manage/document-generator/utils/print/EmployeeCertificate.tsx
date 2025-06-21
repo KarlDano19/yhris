@@ -4,13 +4,7 @@ import CustomToast from '@/components/CustomToast';
 
 import { validateRequiredFields, prepareDocumentFrame } from '../../helper/documents';
 
-import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
-
-interface PrintOptions {
-  elementId: string;
-  title: string;
-  fileName?: string;
-}
+import { EmployeeCertificateFormData, PrintOptions } from '@/types/document-generator/documents';
 
 /**
  * Prints an employee certificate using a hidden iframe approach
