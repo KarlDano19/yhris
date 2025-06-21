@@ -424,43 +424,86 @@ interface ActionButtonsProps {
   onProceed?: () => void;
 }
 
-export const ActionButtons = ({ handleReset, onPrint, onProceed }: ActionButtonsProps) => (
-  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 justify-between mt-6 sm:mt-8">
-    <button
-      onClick={handleReset}
-      className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 border border-blue-500 text-blue-500 bg-white rounded-full hover:bg-blue-50 w-full sm:w-auto"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
-        <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/>
-      </svg>
-      Reset Form
-    </button>
+export const ActionButtons = ({ handleReset, onPrint, onProceed }: ActionButtonsProps) => {
+  const [printLoading, setPrintLoading] = useState(false);
+  const [proceedLoading, setProceedLoading] = useState(false);
+
+  const handlePrintClick = () => {
+    setPrintLoading(true);
     
-    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+    // Set a timeout to turn off loading after 3 seconds
+    setTimeout(() => {
+      setPrintLoading(false);
+      onPrint();
+    }, 3000);
+  };
+
+  const handleProceedClick = () => {
+    if (!onProceed) return;
+    
+    setProceedLoading(true);
+    
+    // Set a timeout to turn off loading after 3 seconds
+    setTimeout(() => {
+      setProceedLoading(false);
+      onProceed();
+    }, 3000);
+  };
+
+  return (
+    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 justify-between mt-6 sm:mt-8">
       <button
-        onClick={onPrint}
-        className="flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 w-full sm:w-auto mt-3 sm:mt-0"
+        onClick={handleReset}
+        className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 border border-blue-500 text-blue-500 bg-white rounded-full hover:bg-blue-50 w-full sm:w-auto transition-colors duration-300"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
-          <path d="M6 9V2h12v7"/>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-          <path d="M6 14h12v8H6z"/>
+          <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/>
         </svg>
-        Print
+        Reset Form
       </button>
       
-      {onProceed && (
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
         <button
-          onClick={onProceed}
-          className="flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-green-500 text-white rounded-full hover:bg-green-600 w-full sm:w-auto mt-3 sm:mt-0"
+          onClick={handlePrintClick}
+          disabled={printLoading}
+          className={`flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 ${printLoading ? 'bg-blue-400' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-full w-full sm:w-auto mt-3 sm:mt-0 transition-colors duration-300`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
-            <path d="M5 12h14"/>
-            <path d="m12 5 7 7-7 7"/>
-          </svg>
-          Proceed
+          {printLoading ? (
+            <svg className="animate-spin sm:w-5 sm:h-5 w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
+              <path d="M6 9V2h12v7"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <path d="M6 14h12v8H6z"/>
+            </svg>
+          )}
+          {printLoading ? 'Printing...' : 'Print'}
         </button>
-      )}
+        
+        {onProceed && (
+          <button
+            onClick={handleProceedClick}
+            disabled={proceedLoading}
+            className={`flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 ${proceedLoading ? 'bg-green-400' : 'bg-green-500 hover:bg-green-600'} text-white rounded-full w-full sm:w-auto mt-3 sm:mt-0 transition-colors duration-300`}
+          >
+            {proceedLoading ? (
+              <svg className="animate-spin sm:w-5 sm:h-5 w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            )}
+            {proceedLoading ? 'Processing...' : 'Proceed'}
+          </button>
+        )}
+      </div>
     </div>
-  </div>
-); 
+  );
+}; 
