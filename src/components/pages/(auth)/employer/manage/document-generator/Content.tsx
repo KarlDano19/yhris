@@ -122,67 +122,84 @@ export default function Content() {
     initColorPolyfill();
   }, []);
   
-  // Reset form data when component unmounts
+  // Reset form data when component unmounts - NOT when printing or proceeding
+  // This was causing the form to reset after printing
   useEffect(() => {
+    // Store a flag to track if this is a real unmount vs a re-render
+    let isUnmounting = false;
+    
+    // Use beforeunload to detect actual page navigation away
+    const handleBeforeUnload = () => {
+      isUnmounting = true;
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
     return () => {
-      // Reset all form data to initial state when component unmounts
-      setEmployeeCertificateData({
-        employeeName: '',
-        companyName: '',
-        position: '',
-        startDate: '',
-        endDate: '',
-        purpose: '',
-        dateOfIssuance: '',
-        placeOfIssuance: '',
-        signatoryName: '',
-        signatoryPosition: '',
-        letterheadImage: null,
-        sampleLetterheadPath: '',
-        signature: null,
-        documentTitle: 'Certificate of Employment',
-        borderColor: '#FFC107'
-      });
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       
-      setEmploymentAgreementData({
-        employeeName: '',
-        companyName: '',
-        position: '',
-        startDate: '',
-        probationPeriod: '6',
-        workingHours: '8',
-        dailySalary: '1',
-        dateOfIssuance: '',
-        placeOfIssuance: '',
-        signatoryName: '',
-        signatoryPosition: '',
-        companyAddress: '',
-        signature: null,
-      });
-      
-      setNoticeToExplainData({
-        employeeName: '',
-        position: '',
-        date: '',
-        place: '',
-        dateOfIssuance: '',
-        placeOfIssuance: '',
-        signatoryName: '',
-        signatoryPosition: '',
-        incidentDate: '',
-        incidentPlace: '',
-        briefBackground: '',
-        preparedBy: '',
-        reviewedBy: '',
-        receivedBy: '',
-        employeeExplanation: '',
-        hearingNotes: '',
-        managementDecision: '',
-        logoImage: null,
-        sampleLogoPath: '',
-        signature: null,
-        borderColor: '#FFC107'
-      });
+      // Only reset if this is a true unmount (navigating away from the page)
+      // not just a re-render caused by printing
+      if (isUnmounting) {
+        // Reset all form data to initial state when component unmounts
+        setEmployeeCertificateData({
+          employeeName: '',
+          companyName: '',
+          position: '',
+          startDate: '',
+          endDate: '',
+          purpose: '',
+          dateOfIssuance: '',
+          placeOfIssuance: '',
+          signatoryName: '',
+          signatoryPosition: '',
+          letterheadImage: null,
+          sampleLetterheadPath: '',
+          signature: null,
+          documentTitle: 'Certificate of Employment',
+          borderColor: '#FFC107'
+        });
+        
+        setEmploymentAgreementData({
+          employeeName: '',
+          companyName: '',
+          position: '',
+          startDate: '',
+          probationPeriod: '6',
+          workingHours: '8',
+          dailySalary: '1',
+          dateOfIssuance: '',
+          placeOfIssuance: '',
+          signatoryName: '',
+          signatoryPosition: '',
+          companyAddress: '',
+          signature: null,
+        });
+        
+        setNoticeToExplainData({
+          employeeName: '',
+          position: '',
+          date: '',
+          place: '',
+          dateOfIssuance: '',
+          placeOfIssuance: '',
+          signatoryName: '',
+          signatoryPosition: '',
+          incidentDate: '',
+          incidentPlace: '',
+          briefBackground: '',
+          preparedBy: '',
+          reviewedBy: '',
+          receivedBy: '',
+          employeeExplanation: '',
+          hearingNotes: '',
+          managementDecision: '',
+          logoImage: null,
+          sampleLogoPath: '',
+          signature: null,
+          borderColor: '#FFC107'
+        });
+      }
     };
   }, []);
   
