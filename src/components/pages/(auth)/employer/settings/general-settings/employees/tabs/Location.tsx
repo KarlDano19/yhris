@@ -78,7 +78,7 @@ const Content = () => {
 
   useEffect(() => {
     locationListRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, locationListRefetch]);
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
