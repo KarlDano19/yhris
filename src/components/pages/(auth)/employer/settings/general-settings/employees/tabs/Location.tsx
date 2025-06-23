@@ -53,11 +53,16 @@ const Content = () => {
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const {
     data: locationListData,
     isLoading: isLocationListLoading,
     refetch: locationListRefetch,
-  } = useGetLocationItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetLocationItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   const cachedData: any = cachedProfile?.state?.data;
 
@@ -75,29 +80,25 @@ const Content = () => {
     locationListRefetch();
   }, [currentPage, pageSize]);
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
     if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
     }
     if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
     }
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       return toast.custom(
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
+        { duration: 5000 }
       );
     }
-    locationListRefetch();
+    setAppliedFilter({ ...itemsFilter });
+    setCurrentPage(1);
+    // No need to call refetch; useGetLocationItems will refetch on appliedFilter change
   };
 
   const paginationChange = (event: any) => {
@@ -225,13 +226,18 @@ const Content = () => {
                     id='search'
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                     onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch();
+                      }
+                    }}
                     placeholder='Search ...'
                   />
                 </div>
               </div>
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
+                onClick={handleSearch}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
