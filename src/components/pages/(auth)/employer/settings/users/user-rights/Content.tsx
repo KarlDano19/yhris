@@ -83,7 +83,7 @@ const Content = () => {
 
   useEffect(() => {
     userRightsListRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, userRightsListRefetch]);
 
   const handleSearch = () => {
     setAppliedFilter({ ...itemsFilter });
