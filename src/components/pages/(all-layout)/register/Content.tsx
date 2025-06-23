@@ -71,7 +71,7 @@ const Content = () => {
         if (agree) {
           mutate(data, callBackReq);
         } else {
-          toast.custom(() => <CustomToast message={'Please agree to user agreement policy'} type='error' />, {
+          toast.custom(() => <CustomToast message={'Please agree to the Terms of Service and Privacy Policy to proceed.'} type='error' />, {
             duration: 4000,
           });
         }
