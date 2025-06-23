@@ -40,7 +40,12 @@ const Content = () => {
     totalPages: 1,
     totalRecords: 0,
   });
-  const [itemsFilter, setItemsFilter] = useState<any>({
+  const [pendingFilter, setPendingFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -51,7 +56,7 @@ const Content = () => {
     data: personelMovementListData,
     isLoading: isLoadingPersonelMovementList,
     refetch: personelMovementListRefetch,
-  } = useGetPersonelMovementList({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetPersonelMovementList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   useEffect(() => {
     if (personelMovementListData) {
@@ -79,6 +84,22 @@ const Content = () => {
   const pageSizeChange = (value: number) => {
     setCurrentPage(1);
     setPageSize(value);
+  };
+
+  const handleSearch = () => {
+    const dateFrom = Date.parse(pendingFilter.from);
+    const dateTo = Date.parse(pendingFilter.to);
+    if (dateFrom && !dateTo) {
+      return alert('Invalid date to.');
+    }
+    if (!dateFrom && dateTo) {
+      return alert('Invalid date from.');
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return alert('You have entered an invalid date range. Please select again.');
+    }
+    setCurrentPage(1);
+    setAppliedFilter({ ...pendingFilter });
   };
 
   const renderRows = () => {
@@ -192,15 +213,12 @@ const Content = () => {
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.from}
+                  selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                    setPendingFilter({ ...pendingFilter, from: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, from: value });
                   }}
                 />
               </div>
@@ -212,18 +230,14 @@ const Content = () => {
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.to}
+                  selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
+                    setPendingFilter({ ...pendingFilter, to: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, to: value });
                   }}
-                  minDate={itemsFilter.from}
+                  minDate={pendingFilter.from}
                 />
               </div>
             </div>
@@ -232,19 +246,26 @@ const Content = () => {
                 <div className='relative flex items-center'>
                   <input
                     type='text'
-                  name='search'
-                  id='search'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  value={itemsFilter.search}
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                  placeholder='Search ...'
-                />
+                    name='search'
+                    id='search'
+                    className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                    value={pendingFilter.search}
+                    onChange={(e) => {
+                      setPendingFilter({ ...pendingFilter, search: e.target.value });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch();
+                      }
+                    }}
+                    placeholder='Search ...'
+                  />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={() => {}}
-            >
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
