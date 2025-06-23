@@ -32,18 +32,18 @@ const getPasswordRequirements = (pass: string) => ({
 
 const Content = () => {
   const router = useRouter();
-  const accountType = [
-    {
-      value: 'employer',
-      label: 'Employer',
-    },
-  ];
+  // const accountType = [
+  //   {
+  //     value: 'employer',
+  //     label: 'Employer',
+  //   },
+  // ];
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<T_Register>();
+  const { register, handleSubmit, reset, watch, formState: { errors }, clearErrors } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
@@ -67,11 +67,8 @@ const Content = () => {
               setBackendPasswordError(err);
               setBackendEmailError('');
             } else if (typeof err === 'string' && err.toLowerCase().includes('already in use')) {
-              setBackendEmailError('This email address is already in use.');
+              setBackendEmailError(err);
               setBackendPasswordError('');
-              toast.custom(() => <CustomToast message={err} type='error' />, {
-                duration: 4000,
-              });
             } else {
               setBackendPasswordError('');
               setBackendEmailError('');
@@ -119,7 +116,7 @@ const Content = () => {
                   <h1 className='text-2xl font-bold leading-none tracking-tight text-indigo-dye lg:text-3xl'>
                     Create Account
                   </h1>
-                  <form onSubmit={handleSubmit(onSubmit)}>
+                  <form onSubmit={handleSubmit(onSubmit)} suppressHydrationWarning>
                     <div className='relative mb-2'>
                       <label htmlFor='role' className='text-sm leading-6 text-gray-900'>
                         Register As
@@ -158,6 +155,9 @@ const Content = () => {
                         tabIndex={2}
                         onChange={(e) => {
                           setBackendEmailError('');
+                          if (e.currentTarget.value) {
+                            clearErrors('email');
+                          }
                         }}
                       />
                       {errors.email && (
@@ -241,13 +241,16 @@ const Content = () => {
                         <input
                           type={showPassword ? 'text' : 'password'}
                           id='password'
-                          {...register('password', { required: true })}
+                          {...register('password', { required: "Password is required" })}
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
                           onChange={(e) => {
                             setPassword(e.currentTarget.value);
                             setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
                             setBackendPasswordError('');
+                            if (e.currentTarget.value) {
+                              clearErrors('password');
+                            }
                           }}
                         />
                         <button
@@ -264,6 +267,9 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                      {errors.password && (
+                        <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>
+                      )}
                       {backendPasswordError && (
                         <p className="text-red-600 text-xs mt-1">{backendPasswordError}</p>
                       )}
@@ -303,8 +309,13 @@ const Content = () => {
                           id='confirm-password'
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
-                          {...register('confirmPassword', { required: true })}
-                          onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                          {...register('confirmPassword', { required: "Please confirm your password" })}
+                          onChange={(e) => {
+                            setConfirmPassword(e.currentTarget.value);
+                            if (e.currentTarget.value) {
+                              clearErrors('confirmPassword');
+                            }
+                          }}
                         />
                         <button
                           type='button'
@@ -320,6 +331,9 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                      {errors.confirmPassword && (
+                        <p className="text-red-600 text-xs mt-1">{errors.confirmPassword.message}</p>
+                      )}
                     </div>
                     <div className='relative flex items-start'>
                       <div className='flex h-6 items-center'>
