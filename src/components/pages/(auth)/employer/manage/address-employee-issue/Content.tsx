@@ -1,8 +1,9 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
+
 import toast from 'react-hot-toast';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -92,7 +93,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataPosition } = useGetPositionItems();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-  const searchParams = useSearchParams();
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -131,14 +131,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
     mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
   };
-
-  useEffect(() => {
-    refetch();
-  }, []);
-
-  useEffect(() => {
-    refetch();
-  }, [currentPage, pageSize]);
 
   useEffect(() => {
     if (dataDepartment) {
@@ -279,7 +271,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         totalRecords
       });
     }
-  }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition]);
+  }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition, pageSize]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;

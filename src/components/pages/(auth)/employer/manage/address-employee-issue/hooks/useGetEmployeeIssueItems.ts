@@ -42,7 +42,7 @@ function useGetEmployeeIssueItems(filters: any) {
     ['employeeIssueItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
     () => getEmployeeIssueItems(filters),
     {
-      enabled: false,
+      // enabled: false,
       keepPreviousData: true,
     }
   );
