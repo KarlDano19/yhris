@@ -63,6 +63,10 @@ const Content = () => {
           onError: (err: any) => {
             if (typeof err === 'string' && err.toLowerCase().includes('password')) {
               setBackendPasswordError(err);
+            } else if (typeof err === 'string' && err.toLowerCase().includes('already in use')) {
+              toast.custom(() => <CustomToast message={err} type='error' />, {
+                duration: 4000,
+              });
             } else {
               setBackendPasswordError('');
             }
@@ -267,7 +271,7 @@ const Content = () => {
                               <li>• At least 1 number (0-9)</li>
                             )}
                             {!passwordRequirements.special && (
-                              <li>• At least 1 special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                              <li>• At least 1 special character (!@#$%^&*(),.?&quot;:{}|&lt;&gt;)</li>
                             )}
                             {!passwordRequirements.noSpaces && (
                               <li>• Spaces are not allowed</li>
