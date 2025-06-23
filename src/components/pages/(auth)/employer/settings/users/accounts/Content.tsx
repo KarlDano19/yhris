@@ -154,25 +154,21 @@ const Content = () => {
           <h2 className='text-xl font-bold text-indigo-dye'>Accounts</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
-                    type='text'
-                    name='search'
-                    id='search'
-                    className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                    onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSearch();
-                      }
-                    }}
-                    placeholder='Search ...'
-                  />
-                </div>
-              </div>
+              <input
+                type='text'
+                name='search'
+                id='search'
+                className='flex-1 rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+                placeholder='Search ...'
+              />
               <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                className='flex-none bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
                 onClick={handleSearch}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
