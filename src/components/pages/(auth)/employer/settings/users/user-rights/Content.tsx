@@ -6,11 +6,8 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 
 import Pagination from '@/components/Pagination';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import CustomToast from '@/components/CustomToast';
 import useGetUserRightsList from './hooks/useGetUserRightsList';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -63,15 +60,16 @@ const Content = () => {
     totalRecords: 0,
   });
   const [itemsFilter, setItemsFilter] = useState<any>({
-    from: '',
-    to: '',
+    search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
     search: '',
   });
   const {
     data: userRightsListData,
     isLoading: isUserRightsListLoading,
     refetch: userRightsListRefetch,
-  } = useGetUserRightsList({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetUserRightsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   useEffect(() => {
     if (userRightsListData) {
@@ -87,29 +85,10 @@ const Content = () => {
     userRightsListRefetch();
   }, [currentPage, pageSize]);
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    userRightsListRefetch();
+  const handleSearch = () => {
+    setAppliedFilter({ ...itemsFilter });
+    setCurrentPage(1);
+    // No need to call refetch; useGetUserRightsList will refetch on appliedFilter change
   };
 
   const paginationChange = (event: any) => {
@@ -220,49 +199,6 @@ const Content = () => {
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Accounts</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
-              <div className='relative'>
-                <CustomDatePicker
-                  id='from-datepicker'
-                  placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
-                  selected={itemsFilter.from}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value,
-                    });
-                  }}
-                />
-              </div>
-              <p>to</p>
-              <div className='relative'>
-                <CustomDatePicker
-                  id='to-datepicker'
-                  placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
-                  selected={itemsFilter.to}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value,
-                    });
-                  }}
-                  minDate={itemsFilter.from}
-                />
-              </div>
-            </div>
             <div className='flex-none lg:w-1/3'>
               <div className='relative flex items-center'>
                 <input
@@ -271,13 +207,18 @@ const Content = () => {
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
               </div>
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
