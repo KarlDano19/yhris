@@ -93,6 +93,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataPosition } = useGetPositionItems();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [isSearching, setIsSearching] = useState(false);
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -306,17 +307,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    // Update appliedFilter with the current itemsFilter and searchText
+    setIsSearching(true);
     setAppliedFilter({
       ...itemsFilter,
       search: searchText
     });
-    setCurrentPage(1);
-    // No need to call refetch here; useGetEmployeeIssueItems will refetch on appliedFilter change
   };
 
+  useEffect(() => {
+    if (!isGetEmployeeIssuesLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetEmployeeIssuesLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetEmployeeIssuesLoading) {
+    if (isSearching || isGetEmployeeIssuesLoading) {
       return (
         <tr>
           <td colSpan={100}>

@@ -45,6 +45,7 @@ const Department = () => {
   const [isDepartmentDeleteModalOpen, setIsDepartmentDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -81,6 +82,12 @@ const Department = () => {
     departmentListRefetch();
   }, [currentPage, pageSize, departmentListRefetch]);
 
+  useEffect(() => {
+    if (!isDepartmentListLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isDepartmentListLoading, isSearching]);
+
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
@@ -97,8 +104,8 @@ const Department = () => {
         { duration: 5000 }
       );
     }
+    setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
-    setCurrentPage(1);
     // No need to call refetch; useGetDepartmentItems will refetch on appliedFilter change
   };
 
@@ -113,7 +120,7 @@ const Department = () => {
   };
 
   const renderRows = () => {
-    if (isDepartmentListLoading) {
+    if (isSearching || isDepartmentListLoading) {
       return (
         <tr>
           <td colSpan={100}>

@@ -86,6 +86,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       disabled: !cachedRigths?.state?.data?.generate_dole_wair,
     },
   ];
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (workAccidentIlnessReportsData) {
@@ -174,9 +175,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />, { duration: 5000 }
       );
     }
+    setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
     setCurrentPage(1);
   };
+
+  useEffect(() => {
+    if (!isWorkAccidentIlnessReportsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isWorkAccidentIlnessReportsLoading, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -189,7 +197,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isWorkAccidentIlnessReportsLoading) {
+    if (isSearching || isWorkAccidentIlnessReportsLoading) {
       return (
         <tr>
           <td colSpan={100}>

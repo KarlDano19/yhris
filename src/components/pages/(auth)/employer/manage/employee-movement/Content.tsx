@@ -16,6 +16,8 @@ import PrintModal from './modals/PrintModal';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import PrintIcon from '@/svg/PrintIcon';
 import EditIcon from '@/svg/EditIcon';
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 type PaginationProps = {
   totalRecords: number;
@@ -50,6 +52,7 @@ const Content = () => {
     to: '',
     search: '',
   });
+  const [isSearching, setIsSearching] = useState(false);
 
   const cachedData: any = cachedProfile?.state?.data;
   const {
@@ -74,7 +77,13 @@ const Content = () => {
 
   useEffect(() => {
     personelMovementListRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, personelMovementListRefetch]);
+
+  useEffect(() => {
+    if (!isLoadingPersonelMovementList && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLoadingPersonelMovementList, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -90,20 +99,23 @@ const Content = () => {
     const dateFrom = Date.parse(pendingFilter.from);
     const dateTo = Date.parse(pendingFilter.to);
     if (dateFrom && !dateTo) {
-      return alert('Invalid date to.');
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
     }
     if (!dateFrom && dateTo) {
-      return alert('Invalid date from.');
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
     }
     if (dateFrom && dateTo && dateFrom > dateTo) {
-      return alert('You have entered an invalid date range. Please select again.');
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
     }
-    setCurrentPage(1);
+    setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
   };
 
   const renderRows = () => {
-    if (isLoadingPersonelMovementList) {
+    if (isSearching || isLoadingPersonelMovementList) {
       return (
         <tr>
           <td colSpan={100}>

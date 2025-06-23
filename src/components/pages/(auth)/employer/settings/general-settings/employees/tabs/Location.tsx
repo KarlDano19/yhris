@@ -44,6 +44,7 @@ const Content = () => {
   const [isLocationDeleteModalOpen, setIsLocationDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -80,6 +81,12 @@ const Content = () => {
     locationListRefetch();
   }, [currentPage, pageSize, locationListRefetch]);
 
+  useEffect(() => {
+    if (!isLocationListLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLocationListLoading, isSearching]);
+
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
@@ -96,8 +103,8 @@ const Content = () => {
         { duration: 5000 }
       );
     }
+    setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
-    setCurrentPage(1);
     // No need to call refetch; useGetLocationItems will refetch on appliedFilter change
   };
 
@@ -112,7 +119,7 @@ const Content = () => {
   };
 
   const renderRows = () => {
-    if (isLocationListLoading) {
+    if (isSearching || isLocationListLoading) {
       return (
         <tr>
           <td colSpan={100}>

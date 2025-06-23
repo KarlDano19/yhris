@@ -55,6 +55,7 @@ const Content = () => {
   const [benefitsRightsModal, setBenefitsRightsModal] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -85,9 +86,15 @@ const Content = () => {
     userRightsListRefetch();
   }, [currentPage, pageSize, userRightsListRefetch]);
 
+  useEffect(() => {
+    if (!isUserRightsListLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isUserRightsListLoading, isSearching]);
+
   const handleSearch = () => {
+    setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
-    setCurrentPage(1);
     // No need to call refetch; useGetUserRightsList will refetch on appliedFilter change
   };
 
@@ -102,7 +109,7 @@ const Content = () => {
   };
 
   const renderRows = () => {
-    if (isUserRightsListLoading) {
+    if (isSearching || isUserRightsListLoading) {
       return (
         <tr>
           <td colSpan={100}>

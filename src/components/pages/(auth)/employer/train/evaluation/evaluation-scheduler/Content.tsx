@@ -44,6 +44,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: refetchEvaluationScheduler,
   } = useGetEvaluationSchedulerItems(itemsFilter);
 
+  const [isSearching, setIsSearching] = useState(false);
+
   useEffect(() => {
     refetchEvaluationScheduler();
   }, []);
@@ -118,8 +120,33 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     );
   };
 
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    refetchEvaluationScheduler();
+  };
+
+  useEffect(() => {
+    if (!isGetEvaluationSchedulerLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetEvaluationSchedulerLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetEvaluationSchedulerLoading) {
+    if (isSearching || isGetEvaluationSchedulerLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -203,31 +230,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetchEvaluationScheduler();
-  };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -298,7 +300,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>

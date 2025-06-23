@@ -61,6 +61,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [isSearching, setIsSearching] = useState(false);
   const {
     data: employeeCompensationLogbookData,
     isLoading: isEmployeeCompensationLogbookListLoading,
@@ -107,7 +108,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     employeeCompensationLogbookListRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, employeeCompensationLogbookListRefetch]);
 
   const handlePrint = (items: any) => {
     // Create a new div element
@@ -166,9 +167,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />, { duration: 5000 }
       );
     }
+    setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
     setCurrentPage(1);
   };
+
+  useEffect(() => {
+    if (!isEmployeeCompensationLogbookListLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isEmployeeCompensationLogbookListLoading, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -181,7 +189,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isEmployeeCompensationLogbookListLoading) {
+    if (isSearching || isEmployeeCompensationLogbookListLoading) {
       return (
         <tr>
           <td colSpan={100}>

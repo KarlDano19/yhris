@@ -50,6 +50,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
+  const [isSearching, setIsSearching] = useState(false);
   
   const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems({
     ...itemsFilter,
@@ -156,8 +157,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    setItemsFilter({ ...itemsFilter }); // This line is just to keep the pattern, but you may want to trigger a refetch or set a filter state
+    refetch();
+  };
+
+  useEffect(() => {
+    if (!isGetDirectivesLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetDirectivesLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetDirectivesLoading) {
+    if (isSearching || isGetDirectivesLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -236,33 +263,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    // Reset to first page when searching
-    setCurrentPage(1);
-    refetch();
-  };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -329,12 +329,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>

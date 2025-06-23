@@ -81,6 +81,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const hasAgreed = cachedData?.is_export_agreed;
 
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (!hasAgreed) {
@@ -136,7 +137,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     employeeListRefetch();
-  }, [appliedFilter, pageSize, currentPage]);
+  }, [appliedFilter, pageSize, currentPage, employeeListRefetch]);
 
   const handleSearch = () => {
     const dateFrom = Date.parse(pendingFilter.from);
@@ -153,9 +154,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         { duration: 5000 }
       );
     }
-    setCurrentPage(1);
+    setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
   };
+
+  useEffect(() => {
+    if (!isEmployeeListLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isEmployeeListLoading, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -168,7 +175,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isEmployeeListLoading) {
+    if (isSearching || isEmployeeListLoading) {
       return (
         <tr>
           <td colSpan={100}>

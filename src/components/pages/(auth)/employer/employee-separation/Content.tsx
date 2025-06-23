@@ -50,6 +50,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems(itemsFilter);
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [isSearching, setIsSearching] = useState(false);
 
   const setReceived = (id: string, emailType: string) => {
     const itemIndex = separationItems.findIndex((item: any) => item.id === id);
@@ -84,6 +85,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
     mutate(separationItemsCopy[itemIndex], callbackReq);
   };
+
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    refetch();
+  };
+
+  useEffect(() => {
+    if (!isGetSeparationLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetSeparationLoading, isSearching]);
 
   useEffect(() => {
     refetch();
@@ -143,7 +169,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [dataSeparation]);
 
   const renderRows = () => {
-    if (isGetSeparationLoading) {
+    if (isSearching || isGetSeparationLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -247,31 +273,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetch();
-  };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -338,12 +339,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>

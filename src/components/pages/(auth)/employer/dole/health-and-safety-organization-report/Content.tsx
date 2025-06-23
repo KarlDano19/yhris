@@ -48,6 +48,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -109,7 +110,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     healthAndSafetyReportItemsRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, healthAndSafetyReportItemsRefetch]);
+
+  useEffect(() => {
+    if (!isHealthAndSafetyReportItemsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isHealthAndSafetyReportItemsLoading, isSearching]);
 
   const handlePrintWithBranch = () => {
     if (selectedBranch) {
@@ -153,7 +160,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -175,6 +182,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setIsSearching(true);
     healthAndSafetyReportItemsRefetch();
   };
 
@@ -189,7 +197,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isHealthAndSafetyReportItemsLoading) {
+    if (isSearching || isHealthAndSafetyReportItemsLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -345,7 +353,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>

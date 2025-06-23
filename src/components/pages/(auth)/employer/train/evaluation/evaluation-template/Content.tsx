@@ -34,6 +34,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isGetEvaluationLoading,
     refetch: refetchEvaluation,
   } = useGetEvaluationTemplateItems(itemsFilter);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     refetchEvaluation();
@@ -77,8 +78,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    refetchEvaluation();
+  };
+
+  useEffect(() => {
+    if (!isGetEvaluationLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetEvaluationLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetEvaluationLoading) {
+    if (isSearching || isGetEvaluationLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -138,31 +164,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </>
       );
     }
-  };
-
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetchEvaluation();
   };
 
   return (
@@ -231,12 +232,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>

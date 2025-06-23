@@ -93,6 +93,7 @@ const Content = () => {
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
@@ -284,8 +285,33 @@ const Content = () => {
     window.open(LinkedInSharer);
   };
 
+  const handleSearch = () => {
+    const dateFrom = Date.parse(pendingFilter.from);
+    const dateTo = Date.parse(pendingFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    setAppliedFilter({ ...pendingFilter });
+  };
+
+  useEffect(() => {
+    if (!isGetJobPostLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetJobPostLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetJobPostLoading) {
+    if (isSearching || isGetJobPostLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -453,25 +479,6 @@ const Content = () => {
         </tr>
       );
     }
-  };
-
-  const handleSearch = () => {
-    const dateFrom = Date.parse(pendingFilter.from);
-    const dateTo = Date.parse(pendingFilter.to);
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
-    }
-    if (dateFrom && dateTo && dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        { duration: 5000 }
-      );
-    }
-    setCurrentPage(1);
-    setAppliedFilter({ ...pendingFilter });
   };
 
   return (

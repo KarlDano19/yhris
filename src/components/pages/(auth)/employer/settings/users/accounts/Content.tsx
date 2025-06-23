@@ -38,6 +38,7 @@ const Content = () => {
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -68,9 +69,15 @@ const Content = () => {
     accountsListRefetch();
   }, [currentPage, pageSize, accountsListRefetch]);
 
+  useEffect(() => {
+    if (!isAccountsListLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isAccountsListLoading, isSearching]);
+
   const handleSearch = () => {
+    setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
-    setCurrentPage(1);
     // No need to call refetch; useGetAccountsList will refetch on appliedFilter change
   };
 
@@ -85,7 +92,7 @@ const Content = () => {
   };
 
   const renderRows = () => {
-    if (isAccountsListLoading) {
+    if (isSearching || isAccountsListLoading) {
       return (
         <tr>
           <td colSpan={100}>

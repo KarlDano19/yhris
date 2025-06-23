@@ -49,6 +49,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
@@ -108,7 +109,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     workEnvironmentRequestItemsRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, workEnvironmentRequestItemsRefetch]);
+
+  useEffect(() => {
+    if (!isWorkEnvironmentRequestItemsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isWorkEnvironmentRequestItemsLoading, isSearching]);
 
   const handlePrint = () => {
     // Create a new div element
@@ -145,7 +152,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -167,6 +174,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setIsSearching(true);
     workEnvironmentRequestItemsRefetch();
   };
 
@@ -181,7 +189,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isWorkEnvironmentRequestItemsLoading) {
+    if (isSearching || isWorkEnvironmentRequestItemsLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -354,7 +362,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>

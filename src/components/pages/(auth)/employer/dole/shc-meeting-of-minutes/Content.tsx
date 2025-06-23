@@ -47,6 +47,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isCreateShcMeetingMinutesModalOpen, setIsCreateShcMeetingMinutesModalOpen] = useState<boolean>(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [pageSize, setPageSize] = useState(5);
@@ -97,7 +98,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     shcMinutesMeetingRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, shcMinutesMeetingRefetch]);
+
+  useEffect(() => {
+    if (!isShcMinutesMeetingLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isShcMinutesMeetingLoading, isSearching]);
 
   const handlePrint = () => {
     // Create a new div element
@@ -134,7 +141,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -156,6 +163,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setIsSearching(true);
     shcMinutesMeetingRefetch();
   };
 
@@ -170,7 +178,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isShcMinutesMeetingLoading) {
+    if (isSearching || isShcMinutesMeetingLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -325,7 +333,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
