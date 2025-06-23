@@ -40,7 +40,7 @@ const CustomDatePicker = ({
     const [inputValue, setInputValue] = useState(value);
 
     useEffect(() => {
-      setInputValue(value);
+      setInputValue(value ?? '');
     }, [value]);
     
     return (
@@ -52,7 +52,10 @@ const CustomDatePicker = ({
           onChange={(e) => {
             const typedValue = e.target.value;
             setInputValue(typedValue);
-            if (isGoodDate(typedValue)) {
+            if (typedValue === '') {
+              onChange({ target: { value: '' } }); // propagate clear to DatePicker
+              if (pickerOnChange) pickerOnChange(null); // clear the selected date in parent
+            } else if (isGoodDate(typedValue)) {
               onChange(e); // This will sync with DatePicker
             }
           }}

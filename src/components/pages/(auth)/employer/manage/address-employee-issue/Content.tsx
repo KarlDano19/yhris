@@ -49,6 +49,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const [searchText, setSearchText] = useState('');
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,7 +83,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isGetEmployeeIssuesLoading,
     refetch,
   } = useGetEmployeeIssueItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -309,20 +314,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    
-    // Update itemsFilter with the current searchText
-    setItemsFilter((prev: {from: string; to: string; search: string}) => ({
-      ...prev,
+    // Update appliedFilter with the current itemsFilter and searchText
+    setAppliedFilter({
+      ...itemsFilter,
       search: searchText
-    }));
-    
-    // Reset to first page when searching
+    });
     setCurrentPage(1);
-    
-    // Explicitly call refetch to trigger the search with all filters
-    setTimeout(() => {
-      refetch();
-    }, 0);
+    // No need to call refetch here; useGetEmployeeIssueItems will refetch on appliedFilter change
   };
 
   const renderRows = () => {
@@ -439,7 +437,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      from: value,
+                      from: value?.target?.value === '' ? null : value,
                     });
                   }}
                 />
@@ -460,7 +458,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      to: value,
+                      to: value?.target?.value === '' ? null : value,
                     });
                   }}
                   minDate={itemsFilter.from}
