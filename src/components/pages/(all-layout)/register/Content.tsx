@@ -47,6 +47,7 @@ const Content = () => {
   const { mutate, isLoading } = useRegisterAccount();
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
+  const [backendEmailError, setBackendEmailError] = useState('');
 
   const onSubmit = (data: T_Register) => {
     if (password !== '' || conformPassword !== '') {
@@ -54,6 +55,7 @@ const Content = () => {
         const callBackReq = {
           onSuccess: (data: any) => {
             setBackendPasswordError('');
+            setBackendEmailError('');
             reset();
             toast.custom(() => <CustomToast message={data.message} type='success' />, {
               duration: 7000,
@@ -63,12 +65,16 @@ const Content = () => {
           onError: (err: any) => {
             if (typeof err === 'string' && err.toLowerCase().includes('password')) {
               setBackendPasswordError(err);
+              setBackendEmailError('');
             } else if (typeof err === 'string' && err.toLowerCase().includes('already in use')) {
+              setBackendEmailError('This email address is already in use.');
+              setBackendPasswordError('');
               toast.custom(() => <CustomToast message={err} type='error' />, {
                 duration: 4000,
               });
             } else {
               setBackendPasswordError('');
+              setBackendEmailError('');
             }
           },
         };
@@ -150,9 +156,15 @@ const Content = () => {
                         {...register('email', { required: "Please enter an email address" })}
                         className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                         tabIndex={2}
+                        onChange={(e) => {
+                          setBackendEmailError('');
+                        }}
                       />
                       {errors.email && (
                         <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>
+                      )}
+                      {backendEmailError && (
+                        <p className="text-red-600 text-xs mt-1">{backendEmailError}</p>
                       )}
                     </div>
                     {watch('accountType') === 'Applicant' ? (
