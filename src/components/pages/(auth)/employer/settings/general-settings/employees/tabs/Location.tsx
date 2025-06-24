@@ -4,6 +4,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import useGetLocationItems from '../hooks/useGetLocationItems';
 import CreateModal from '../modals/CreateModal';
@@ -231,6 +232,9 @@ const Content = () => {
                     type='text'
                     name='search'
                     id='search'
+                    data-tooltip-id='search-tooltip'
+                    data-tooltip-content='Search for: Name'
+                    data-tooltip-place='bottom'
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                     onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                     onKeyDown={(e) => {
@@ -313,6 +317,8 @@ const Content = () => {
           setIsOpen={setIsLocationDeleteModalOpen}
         />
       )}
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };
