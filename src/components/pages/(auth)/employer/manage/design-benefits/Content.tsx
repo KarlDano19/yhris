@@ -1,13 +1,20 @@
 'use client';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 import React, { useEffect, useState, useRef } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
-import DesignBenefitsModal from './modals/DesignBenefitsModal';
+
 import Link from 'next/link';
-import useGetBenefitItems from './hooks/useGetBenefitItems';
+
+import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { Tooltip } from 'react-tooltip';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomToast from '@/components/CustomToast';
+import useGetBenefitItems from './hooks/useGetBenefitItems';
+import DesignBenefitsModal from './modals/DesignBenefitsModal';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
@@ -172,9 +179,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
-                    type='text'
+                  type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Title/Purpose/Eligibility'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
@@ -232,6 +242,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsDesignBenefitsModalOpen}
         refetch={refetch}
       />
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };
