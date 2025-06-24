@@ -12,17 +12,37 @@ async function updateHealthAndSafetyReport(data: any, health_and_safety_report_i
       }
     }
 
-    if (data.signature && data.signature.length) {
-      const signatureBlob = await fetch(`${data.signature}`).then((res) =>
-        res.blob()
-      );
+    // Check if any file fields are present
+    const hasFiles = data.policy_and_program_file || data.technical_information_file || data.signature;
+    
+    if (hasFiles) {
       const formData = new FormData();
-      formData.append("signature", signatureBlob, "signature.jpg");
+      
+      // Handle policy_and_program_file
+      if (data.policy_and_program_file && data.policy_and_program_file.length > 0) {
+        formData.append("policy_and_program_file", data.policy_and_program_file[0]);
+      }
+      
+      // Handle technical_information_file
+      if (data.technical_information_file && data.technical_information_file.length > 0) {
+        formData.append("technical_information_file", data.technical_information_file[0]);
+      }
+      
+      // Handle signature (existing logic)
+      if (data.signature && data.signature.length) {
+        const signatureBlob = await fetch(`${data.signature}`).then((res) =>
+          res.blob()
+        );
+        formData.append("signature", signatureBlob, "signature.jpg");
+      }
+      
+      // Add all other fields
       for (const key in data) {
-        if (key !== "signature") {
+        if (key !== "policy_and_program_file" && key !== "technical_information_file" && key !== "signature") {
           formData.append(key, data[key]);
         }
       }
+      
       data = formData;
     }
 
@@ -30,6 +50,8 @@ async function updateHealthAndSafetyReport(data: any, health_and_safety_report_i
       method: "POST",
       headers: {
         Authorization: `Token ${token}`,
+        // Don't set content-type for FormData, let the browser set it with boundary
+        ...(data instanceof FormData ? {} : { "content-type": "application/json" }),
       },
       body: data instanceof FormData ? data : JSON.stringify(data),
     };

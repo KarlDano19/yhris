@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -33,7 +33,7 @@ function EditHealthAndSafetyReportModal({
     refetch: refetchHealthAndSafetyReport,
     remove: removeHealthAndSafetyReport,
   } = useGetHealthAndSafetyReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, getValues, watch } = useForm();
   const {
     mutate: updateHealthAndSafetyReport,
     isLoading: isLoadingUpdateHealthAndSafetyReport,
@@ -61,11 +61,30 @@ function EditHealthAndSafetyReportModal({
         setValue("submitted_by", healthAndSafetyReportData.submitted_by);
         setValue("type_of_industry", healthAndSafetyReportData.type_of_industry);
         setValue("number_of_workers_male", healthAndSafetyReportData.number_of_workers_male);
-        setValue("number_of_workers_female", healthAndSafetyReportData.number_of_workers_female);
+        setValue("number_of_workers_male", healthAndSafetyReportData.total_employees_male);
+        setValue("number_of_workers_female", healthAndSafetyReportData.total_employees_female);
         setValue("number_of_workers_total", healthAndSafetyReportData.number_of_workers_total);
+        setValue("position", healthAndSafetyReportData.position);
         setValue("risk_classification", healthAndSafetyReportData.risk_classification);
+
+        // Add these for Tab 2
+        setValue("chairman_name", healthAndSafetyReportData.chairman_name);
+        setValue("chairman_position", healthAndSafetyReportData.chairman_position);
+        setValue("secretary_name", healthAndSafetyReportData.secretary_name);
+        setValue("secretary_position", healthAndSafetyReportData.secretary_position);
+        setValue("member_name_1", healthAndSafetyReportData.member_name_1);
+        setValue("member_position_1", healthAndSafetyReportData.member_position_1);
+        setValue("member_name_2", healthAndSafetyReportData.member_name_2);
+        setValue("member_position_2", healthAndSafetyReportData.member_position_2);
+        setValue("member_name_3", healthAndSafetyReportData.member_name_3);
+        setValue("member_position_3", healthAndSafetyReportData.member_position_3);
+
+        // Set file field values (these will be URLs from the backend)
+        setValue("policy_and_program_file", healthAndSafetyReportData.policy_and_program_file);
+        setValue("technical_information_file", healthAndSafetyReportData.technical_information_file);
+        setValue("signature", healthAndSafetyReportData.signature);
     }
-  })
+  }, [healthAndSafetyReportData, setValue]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -89,7 +108,12 @@ function EditHealthAndSafetyReportModal({
         );
       },
     };
-    updateHealthAndSafetyReport(data, callbackReq);
+    
+    // Pass the correct data structure expected by the update hook
+    updateHealthAndSafetyReport({
+      data: data,
+      health_and_safety_report_id: isOpen.id
+    }, callbackReq);
   });
 
   return (
@@ -140,6 +164,7 @@ function EditHealthAndSafetyReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -149,6 +174,7 @@ function EditHealthAndSafetyReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -158,6 +184,7 @@ function EditHealthAndSafetyReportModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>

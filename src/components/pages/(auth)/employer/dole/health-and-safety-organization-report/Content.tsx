@@ -3,7 +3,6 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
@@ -26,6 +25,7 @@ import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportMo
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import { useQueryClient } from '@tanstack/react-query';
+import ExportProgressModal from './modals/ExportProgressModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -465,27 +465,34 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isCreateHealthAndSafetyReportModalOpen && (
         <CreateHealthAndSafetyReportModal
-          refetch={null}
+          refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isCreateHealthAndSafetyReportModalOpen}
           setIsOpen={setIsCreateHealthAndSafetyReportModalOpen}
         />
       )}
       {isDeleteHealthAndSafetyReportModalOpen && (
         <DeleteHealthAndSafetyReportModal
-          refetch={null}
+          refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isDeleteHealthAndSafetyReportModalOpen}
           setIsOpen={setIsDeleteHealthAndSafetyReportModalOpen}
         />
       )}
       {isEditHealthAndSafetyReportModalOpen && (
         <EditHealthAndSafetyReportModal
-          refetch={null}
+          refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isEditHealthAndSafetyReportModalOpen}
           setIsOpen={setIsEditHealthAndSafetyReportModalOpen}
         />
       )}
       {isSendEmailModalOpen && (
-        <SendEmailModal refetch={null} isOpen={isSendEmailModalOpen} setIsOpen={setIsSendEmailModalOpen} />
+        <SendEmailModal refetch={healthAndSafetyReportItemsRefetch} isOpen={isSendEmailModalOpen} setIsOpen={setIsSendEmailModalOpen} />
+      )}
+      {isExportProgressModalOpen && (
+        <ExportProgressModal
+          isOpen={isExportProgressModalOpen}
+          setIsOpen={setIsExportProgressModalOpen}
+          itemsFilter={itemsFilter}
+        />
       )}
       {/* Print Section */}
       {/* <div className="container mx-auto p-4 hidden">
