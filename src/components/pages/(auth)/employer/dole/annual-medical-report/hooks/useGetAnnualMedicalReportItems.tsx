@@ -17,6 +17,8 @@ async function getAnnualMedicalReportItems(filters: any) {
     if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString("en-CA");
     if (filters.to) newFilters.to = filters.to.toLocaleDateString("en-CA");
+    if (!newFilters.from) delete newFilters.from;
+    if (!newFilters.to) delete newFilters.to;
     const searchParams = new URLSearchParams(
       Object.entries(newFilters).map(([key, value]) => [key, String(value)])
     );
