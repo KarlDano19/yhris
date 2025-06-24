@@ -28,6 +28,11 @@ function CreateHealthAndSafetyReportModal({
     } = useAddHealthAndSafetyReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
+  const handleClose = () => {
+    setIsOpen(false);
+    reset();
+  };
+
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -37,8 +42,7 @@ function CreateHealthAndSafetyReportModal({
             duration: 5000,
           }
         );
-        setIsOpen(false);
-        reset();
+        handleClose();
         if (typeof refetch === 'function') {
           refetch();
         }
@@ -97,7 +101,7 @@ function CreateHealthAndSafetyReportModal({
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleClose}
                   />
                 </div>
                 {selectedTab === 1 && (
