@@ -5,10 +5,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import toast from 'react-hot-toast';
-
-import CustomDatePicker from '@/components/CustomDatePicker';
-import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
 import DeleteEvaluationSchedulerModal from './modals/DeleteEvaluationSchedulerModal';
@@ -34,8 +30,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   const [itemsFilter, setItemsFilter] = useState<any>({
-    from: '',
-    to: '',
     search: '',
   });
   const {
@@ -121,20 +115,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleSearch = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
-    }
-    if (dateFrom && dateTo && dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        { duration: 5000 }
-      );
-    }
     setIsSearching(true);
     refetchEvaluationScheduler();
   };
@@ -242,49 +222,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Scheduler</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
-              <div className='relative'>
-                <CustomDatePicker
-                  id='from-datepicker'
-                  placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
-                  selected={itemsFilter.from}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value,
-                    });
-                  }}
-                />
-              </div>
-              <p>to</p>
-              <div className='relative'>
-                <CustomDatePicker
-                  id='to-datepicker'
-                  placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
-                  selected={itemsFilter.to}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value,
-                    });
-                  }}
-                  minDate={itemsFilter.from}
-                />
-              </div>
-            </div>
             <div className='flex gap-2 lg:w-1/3'>
               <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
