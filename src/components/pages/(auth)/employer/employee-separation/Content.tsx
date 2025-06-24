@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -332,7 +333,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
-                    type='text'
+                  type='text'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Employee Name / Reason of Leaving'
+                  data-tooltip-place='bottom'
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
@@ -432,6 +436,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteSepartionModalOpen}
         />
       )}
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };

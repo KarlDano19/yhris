@@ -3,11 +3,11 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -15,7 +15,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 import CreateShcMettingMinutesModal from './modals/CreateShcMettingMinutesModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, EnvelopeIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import useGetShcMinutesMeetingItems from './hooks/useGetShcMinutesMettingItems';
@@ -322,9 +322,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className='flex-none w-full lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
-                    type='text'
+                  type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Venue'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
@@ -467,6 +470,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsSendEmailModalOpen}
         />
       )}
+
+      <Tooltip id='search-tooltip' />
     </>
   );
 }
