@@ -60,13 +60,25 @@ function PolicyAndComittee({
 
   return (
     <form onSubmit={handleSubmit((data: any) => {
-      const fileField = data.policy_and_program_file;
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'policy_and_program_file') {
+          // Only append if it's a File (not a string/URL)
+          if (value instanceof File) {
+            formData.append(key, value);
+          }
+          // If it's a string (URL), skip appending
+        } else {
+          formData.append(key, value as string);
+        }
+      });
+      const hasExistingFile = !!(existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http'));
       const isFileMissing =
-        (!fileField ||
-          (typeof fileField === 'object' && fileField instanceof FileList && fileField.length === 0) ||
-          (typeof fileField === 'object' && fileField instanceof File && !fileField.name) ||
-          (typeof fileField === 'string' && fileField.trim() === '')) &&
-        !(existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http'));
+        !hasExistingFile &&
+        (!data.policy_and_program_file ||
+          (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof FileList && data.policy_and_program_file.length === 0) ||
+          (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof File && !data.policy_and_program_file.name) ||
+          (typeof data.policy_and_program_file === 'string' && data.policy_and_program_file.trim() === ''));
       if (isFileMissing) {
         toast.custom(() => <CustomToast message="Policy and Program file is required." type="error" />, { duration: 5000 });
         return;
@@ -113,6 +125,7 @@ function PolicyAndComittee({
                   e.target.value ? setAttachmentExist(true) : null;
                 }}
                 type="file"
+                disabled={!!(existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http'))}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               {attachmentExist ? (

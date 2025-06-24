@@ -47,7 +47,7 @@ async function updateHealthAndSafetyReport(data: any, health_and_safety_report_i
     }
 
     const config = {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: `Token ${token}`,
         // Don't set content-type for FormData, let the browser set it with boundary

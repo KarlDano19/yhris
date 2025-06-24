@@ -87,6 +87,24 @@ function EditHealthAndSafetyReportModal({
   }, [healthAndSafetyReportData, setValue]);
 
   const onSubmit = handleSubmit((data) => {
+    const formData = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      // For file fields, only append if it's a File (not a string/URL)
+      if (
+        key === 'policy_and_program_file' ||
+        key === 'technical_information_file' ||
+        key === 'signature'
+      ) {
+        if (value instanceof File) {
+          formData.append(key, value);
+        }
+        // If it's a string (URL), do not append (let backend keep the old file)
+      } else {
+        formData.append(key, value as string);
+      }
+    });
+
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -109,11 +127,13 @@ function EditHealthAndSafetyReportModal({
       },
     };
     
-    // Pass the correct data structure expected by the update hook
-    updateHealthAndSafetyReport({
-      data: data,
-      health_and_safety_report_id: isOpen.id
-    }, callbackReq);
+    updateHealthAndSafetyReport(
+      {
+        data: formData,
+        health_and_safety_report_id: isOpen.id,
+      },
+      callbackReq
+    );
   });
 
   return (
