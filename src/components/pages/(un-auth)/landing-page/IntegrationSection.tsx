@@ -1,18 +1,22 @@
 "use client"
-import { ArrowPathIcon, CheckCircleIcon, ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+
 import Link from "next/link";
 import Image from "next/image";
+
+import { ArrowPathIcon, CheckCircleIcon, ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+
 import MainLogo from "@/svg/MainLogo";
+
 import ypoLogo from "@/assets/landing-page-images/ypo-logo.png";
 
 const IntegrationSection = () => {
   const integrationFeatures = [
     "Real-time employee data synchronization",
-    "Automatic payroll processing triggers",
+    "Distribute memos and policies directly",
     "Unified employee records management",
-    "Seamless data flow between HR and Payroll",
-    "Single source of truth for employee information",
-    "Reduced manual data entry and errors"
+    "Document distribution via email",
+    "Reduced manual data entry and errors",
+    "Seamless workflow integration"
   ];
 
   return (
@@ -32,8 +36,8 @@ const IntegrationSection = () => {
             <span className="text-[#FFC107]">YAHSHUA HRIS</span> + <span className="text-blue-700">YAHSHUA Payroll</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-            Experience the power of unified HR and Payroll management. Our deep integration with YAHSHUA Payroll 
-            creates a seamless workflow that eliminates duplicate data entry and ensures consistency across your organization.
+            Sync employee data with YAHSHUA Payroll and send Personnel Movement Forms, memos, policies, and other documents 
+            directly to employees. Streamlined document distribution and data management in one unified system.
           </p>
           
           {/* Logo Integration Visual */}
@@ -89,8 +93,8 @@ const IntegrationSection = () => {
               </div>
               
               <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                From the moment an employee is hired in YAHSHUA HRIS to their first payroll run, 
-                everything flows seamlessly. No more switching between systems or manual data transfers.
+                Sync employee data with YAHSHUA Payroll and distribute important documents like Personnel Movement Forms, 
+                memos, and policies directly to employees via email.
               </p>
 
               <div className="space-y-4">
@@ -148,10 +152,10 @@ const IntegrationSection = () => {
         <div className="mt-16 text-center">
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-4xl mx-auto">
             <h3 className="text-2xl font-bold text-indigo-dye mb-4">
-              Ready to Experience Unified HR & Payroll?
+              Ready to Streamline Your HR Operations?
             </h3>
             <p className="text-gray-600 mb-6 text-lg">
-              Join hundreds of companies already using YAHSHUA HRIS with Payroll integration
+              Join companies using YAHSHUA HRIS for employee data sync and document distribution
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 

@@ -1,6 +1,8 @@
-import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/solid";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+
+import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/solid";
+
 import FacebookIcon from "@/svg/FacebookIcon";
 import InstagramIcon from "@/svg/InstagramIcons";
 import LinkedInIcon from "@/svg/LinkedInIcon";
@@ -55,17 +57,17 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                  <Link href="https://showcase.yahshuapayroll.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-savoy-blue transition-colors">
                     YAHSHUA Payroll Online
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                  <Link href="https://yahshuabooksonline.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-savoy-blue transition-colors">
                     YAHSHUA Books Online
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                  <Link href="https://yahshuataxonline.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-savoy-blue transition-colors">
                     YAHSHUA Tax Online
                   </Link>
                 </li>
@@ -124,17 +126,14 @@ const Footer = () => {
           <div className="border-t border-gray-200 mt-8 pt-8">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
               <div className="text-gray-500 text-sm text-center md:text-left">
-                &copy; 2024 The ABBA Initiative, OPC. All rights reserved.
+                &copy; {new Date().getFullYear()} The ABBA Initiative, OPC. All rights reserved.
               </div>
               <div className="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0 text-center md:text-left">
-                <Link href="#" className="text-gray-500 hover:text-[#FFC107] text-sm transition-colors">
-                  Terms and Conditions
+                <Link href="/terms-of-service" className="text-gray-500 hover:text-[#FFC107] text-sm transition-colors">
+                  Terms of Service
                 </Link>
-                <Link href="#" className="text-gray-500 hover:text-[#FFC107] text-sm transition-colors">
+                <Link href="/privacy-policy" className="text-gray-500 hover:text-[#FFC107] text-sm transition-colors">
                   Privacy Policy
-                </Link>
-                <Link href="#" className="text-gray-500 hover:text-[#FFC107] text-sm transition-colors">
-                  Cookie Policy
                 </Link>
               </div>
             </div>

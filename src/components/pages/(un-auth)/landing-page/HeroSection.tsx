@@ -1,6 +1,8 @@
 "use client"
-import { ArrowRightIcon, BoltIcon, GlobeAltIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+
 import Link from "next/link";
+
+import { ArrowRightIcon, BoltIcon, GlobeAltIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 
 const HeroSection = () => {
   return (
@@ -42,7 +44,7 @@ const HeroSection = () => {
                 <BoltIcon className="w-6 h-6 text-[#FFC107]" />
               </div>
               <h3 className="text-lg font-semibold text-indigo-dye mb-2">Lightning Fast</h3>
-              <p className="text-gray-600">Post jobs to 50+ platforms in seconds, not hours</p>
+              <p className="text-gray-600">Post jobs to multiple platforms in seconds, not hours</p>
             </div>
             
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">

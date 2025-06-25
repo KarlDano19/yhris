@@ -1,4 +1,5 @@
 "use client"
+
 import { 
   BriefcaseIcon, 
   UserPlusIcon, 
@@ -8,64 +9,88 @@ import {
   ChartBarIcon,
   CogIcon,
   ShieldCheckIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  KeyIcon,
+  ClockIcon,
+  FolderIcon,
+  UserIcon,
+  AcademicCapIcon,
+  DocumentDuplicateIcon
 } from "@heroicons/react/24/outline";
 
 const FeaturesSection = () => {
   const features = [
     {
+      icon: KeyIcon,
+      title: "Secure Sign In",
+      description: "Secure login using existing Google, Facebook, or YAHSHUA accounts for quick and easy access.",
+      highlights: ["Google sign-in", "Facebook sign-in", "YAHSHUA account integration"]
+    },
+    {
       icon: BriefcaseIcon,
-      title: "Job Posting & Recruitment",
-      description: "Create once, post everywhere. Distribute job postings across 50+ platforms with one click. Advanced applicant tracking and screening tools.",
-      highlights: ["Multi-platform posting", "ATS integration", "Candidate screening"]
+      title: "Job Posting & Management",
+      description: "Create job postings and launch across LinkedIn, Facebook, and YAHSHUA Jobs Portal. View and manage job posting history with status tracking.",
+      highlights: ["Multi-platform posting", "Job posting history", "Status tracking"]
     },
     {
       icon: UserPlusIcon,
-      title: "Employee Onboarding & Offboarding",
-      description: "Streamlined processes for welcoming new hires and managing departures. Automated workflows ensure nothing falls through the cracks.",
-      highlights: ["Digital onboarding", "Exit interviews", "Document automation"]
-    },
-    {
-      icon: DocumentTextIcon,
-      title: "Memos & Policy Creation",
-      description: "Generate professional memos and company policies with our intuitive builder. Ensure consistent communication across your organization.",
-      highlights: ["Template library", "Digital signatures", "Version control"]
-    },
-    {
-      icon: ExclamationTriangleIcon,
-      title: "Employee Issue Management",
-      description: "Handle employee concerns, grievances, and disciplinary actions with proper documentation and workflow management.",
-      highlights: ["Case tracking", "Escalation workflows", "Compliance reporting"]
+      title: "Applicant Screening & Onboarding",
+      description: "Filter and assess applicants efficiently. Document onboarding process with contract sending, team introductions, and system enrollment via email.",
+      highlights: ["Requirements setup", "Interview scheduling", "Digital onboarding"]
     },
     {
       icon: GiftIcon,
       title: "Benefits Design & Management",
-      description: "Create, manage, and track employee benefits packages. From health insurance to retirement plans, keep everything organized.",
-      highlights: ["Benefits calculator", "Enrollment management", "Cost analysis"]
+      description: "Design your company's benefits and send them to employees via email. Streamline employee perks with structured templates.",
+      highlights: ["Custom benefits design", "Email distribution", "Benefits templates (coming soon)"]
+    },
+    {
+      icon: UserIcon,
+      title: "Employee Management",
+      description: "Securely store all employee information from hire date. Automatic syncing capability for existing YAHSHUA Payroll users.",
+      highlights: ["Secure data storage", "YAHSHUA Payroll sync", "Employee profiles"]
     },
     {
       icon: ChartBarIcon,
       title: "Performance Evaluations",
-      description: "Comprehensive performance management system with customizable evaluation forms, 360-degree feedback, and goal tracking.",
-      highlights: ["Custom evaluations", "360 feedback", "Goal setting"]
+      description: "Keep history of performance evaluations with scores and review details. Create custom evaluation templates tailored to your business needs.",
+      highlights: ["Evaluation history", "Custom templates", "Performance tracking (coming soon)"]
+    },
+    {
+      icon: ClockIcon,
+      title: "Evaluation Scheduling",
+      description: "Ensure reviews happen on time. Assign evaluations, set deadlines, and track completion—all in one place.",
+      highlights: ["Digital scheduling", "Deadline tracking", "Completion monitoring"]
+    },
+    {
+      icon: FolderIcon,
+      title: "Personnel Movement",
+      description: "Document employee movements including early regularization, probationary status changes, and appointments with approver notes and signatures.",
+      highlights: ["Movement tracking", "Approver signatures", "Digital records"]
+    },
+    {
+      icon: DocumentDuplicateIcon,
+      title: "Employee Separation",
+      description: "Process and document offboarding procedures from clearance forms to quitclaims with comprehensive workflow management.",
+      highlights: ["Centralized request for clearance", "Quitclaim processing", "Offboarding workflow"]
     },
     {
       icon: ShieldCheckIcon,
-      title: "DOLE Compliance",
-      description: "Stay compliant with Philippine labor laws. Automated reporting and documentation aligned with Department of Labor regulations.",
-      highlights: ["Automated reporting", "Legal compliance", "Audit trails"]
+      title: "DOLE Compliance Suite",
+      description: "Complete DOLE compliance including compensation logbooks, establishment registration, work accident reports, safety policies, and annual reporting.",
+      highlights: ["Access to Rule 1020", "Accident/illness reporting", "Health and Safety documentation"]
     },
     {
-      icon: CogIcon,
-      title: "Standardized Processes",
-      description: "Implement consistent HR processes across your organization with customizable workflows and approval systems.",
-      highlights: ["Workflow automation", "Approval chains", "Process templates"]
+      icon: AcademicCapIcon,
+      title: "Training & Development (Coming Soon!)",
+      description: "Comprehensive training management with evaluation templates, scheduling, and progress tracking for employee development.",
+      highlights: ["Training programs", "Progress tracking", "Custom curricula"]
     },
     {
       icon: ArrowPathIcon,
       title: "YAHSHUA Payroll Integration",
-      description: "Seamlessly sync with YAHSHUA Payroll for unified HR and payroll management. Single source of truth for employee data.",
-      highlights: ["Real-time sync", "Data consistency", "Unified reporting"]
+      description: "Seamlessly sync employee data with YAHSHUA Payroll. Send memos, NTEs, policies, Personnel Movement Form and other documents directly to employees.",
+      highlights: ["Employee data sync", "Document distribution"]
     }
   ];
 
@@ -152,18 +177,22 @@ const FeaturesSection = () => {
             <h3 className="text-2xl font-bold text-indigo-dye mb-4">
               Why Choose YAHSHUA HRIS?
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-[#FFC107] mb-2">50+</div>
-                <div className="text-gray-600">Job Board Integrations</div>
+                <div className="text-xl font-bold text-[#FFC107] mb-2">Facebook, LinkedIn, and YAHSHUA Jobs</div>
+                <div className="text-gray-600">Job posting automation</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-[#FFC107] mb-2">100%</div>
-                <div className="text-gray-600">DOLE Compliant</div>
+                <div className="text-xl font-bold text-[#FFC107] mb-2">Be 100% DOLE Compliant</div>
+                <div className="text-gray-600">With Confidence</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-[#FFC107] mb-2">24/7</div>
-                <div className="text-gray-600">Support Available</div>
+                <div className="text-xl font-bold text-[#FFC107] mb-2">Complete 100% DOLE Reports</div>
+                <div className="text-gray-600">Ready to Submit</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#FFC107] mb-2">Excellent</div>
+                <div className="text-gray-600">Support Response</div>
               </div>
             </div>
           </div>
