@@ -34,6 +34,9 @@ function CreateHealthAndSafetyReportModal({
   };
 
   const onSubmit = handleSubmit((data) => {
+    if (data.employees) {
+      data.shift_employees = JSON.stringify(data.employees);
+    }
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(

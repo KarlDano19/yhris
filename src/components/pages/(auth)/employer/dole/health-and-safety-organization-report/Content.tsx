@@ -229,7 +229,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return healthAndSafetyReportItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_report}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.person_employed}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {Number(item.total_employees_male || 0) + Number(item.total_employees_female || 0)}
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.comittee_type}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.chairman_name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>

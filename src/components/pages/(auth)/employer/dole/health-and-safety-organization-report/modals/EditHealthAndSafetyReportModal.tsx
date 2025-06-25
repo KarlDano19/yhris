@@ -83,11 +83,19 @@ function EditHealthAndSafetyReportModal({
         setValue("policy_and_program_file", healthAndSafetyReportData.policy_and_program_file);
         setValue("technical_information_file", healthAndSafetyReportData.technical_information_file);
         setValue("signature", healthAndSafetyReportData.signature);
+
+        // Set employees from shift_employees for editing shifts
+        setValue("employees", healthAndSafetyReportData.shift_employees || []);
     }
   }, [healthAndSafetyReportData, setValue]);
 
   const onSubmit = handleSubmit((data) => {
     const formData = new FormData();
+
+    // Add shift_employees to the payload from employees field
+    if (data.employees) {
+      formData.append('shift_employees', JSON.stringify(data.employees));
+    }
 
     Object.entries(data).forEach(([key, value]) => {
       // For file fields, only append if it's a File (not a string/URL)
@@ -100,7 +108,7 @@ function EditHealthAndSafetyReportModal({
           formData.append(key, value);
         }
         // If it's a string (URL), do not append (let backend keep the old file)
-      } else {
+      } else if (key !== 'employees') { // Don't append employees directly
         formData.append(key, value as string);
       }
     });

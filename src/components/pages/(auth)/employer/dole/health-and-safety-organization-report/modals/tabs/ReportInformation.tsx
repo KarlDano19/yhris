@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect } from "react";
@@ -7,7 +6,6 @@ import { Controller, useFieldArray } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import {
   PlusIcon,
@@ -38,11 +36,16 @@ function ReportInformation({
 }) {
   const queryClient = useQueryClient();
 
-  const onSubmit = handleSubmit(() => {
+  const onSubmit = handleSubmit((data: any) => {
+    // Calculate number_of_employees as the sum of total_employees_male and total_employees_female
+    const totalMale = Number(data.total_employees_male) || 0;
+    const totalFemale = Number(data.total_employees_female) || 0;
+    setValue('number_of_employees', totalMale + totalFemale);
+    // Also update the data object for immediate submit
+    data.number_of_employees = totalMale + totalFemale;
     setSelectedTab(2);
   });
 
-  const { data: employeeData } = useGetEmployeeItems();
   const cachedProfile = queryClient
     .getQueryCache()
     .find(["employerProfileCache"]) as {
@@ -57,10 +60,6 @@ function ReportInformation({
   const watchedEmployees = watch("employees") || [];
 
   useEffect(() => {
-    if (employeeData) {
-      setValue("number_of_employees", employeeData.length);
-    }
-
     if (cachedProfile?.state?.data) {
       setValue("company_name", cachedProfile.state.data.name || "");
       setValue(
@@ -69,7 +68,7 @@ function ReportInformation({
       );
       setValue("address", cachedProfile.state.data.city || "");
     }
-  }, [employeeData, cachedProfile, setValue]);
+  }, [cachedProfile, setValue]);
 
   // Calculate total employees from watched values
   const calculateTotalEmployees = () => {
