@@ -469,21 +469,21 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
       {isCreateAnnualMedicalReportModalOpen && (
         <CreateAnnualMedicalReportModal
-          refetch={null}
+          refetch={annualMedicalReportRefetch}
           isOpen={isCreateAnnualMedicalReportModalOpen}
           setIsOpen={setIsCreateAnnualMedicalReportModalOpen}
         />
       )}
       {isEditAnnualMedicalReportModalOpen && (
         <EditAnnualMedicalReportModal
-          refetch={null}
+          refetch={annualMedicalReportRefetch}
           isOpen={isEditAnnualMedicalReportModalOpen}
           setIsOpen={setIsEditAnnualMedicalReportModalOpen}
         />
       )}
       {isDeleteAnnualMedicalReportModalOpen && (
         <DeleteAnnualMedicalReportModal
-          refetch={null}
+          refetch={annualMedicalReportRefetch}
           isOpen={isDeleteAnnualMedicalReportModalOpen}
           setIsOpen={setIsDeleteAnnualMedicalReportModalOpen}
         />
