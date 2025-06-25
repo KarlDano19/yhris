@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 
 import toast from "react-hot-toast";
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from "@/components/CustomToast";
+import InfoIcon from '@/svg/InfoIcon';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
@@ -115,6 +117,18 @@ function PolicyAndComittee({
             >
              Policy and Program on Safety and Health
               <span className="text-red-600">*</span>
+              <div
+                className='inline-block ml-1 cursor-pointer'
+                data-tooltip-id='file-upload-tooltip'
+                data-tooltip-place='right'
+              >
+                <InfoIcon />
+              </div>
+              <Tooltip id='file-upload-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+                <div>
+                  <h2 className='text-[12px] font-medium'>Note: File uploads may disappear if the screen loses focus. Please re-upload if needed.</h2>
+                </div>
+              </Tooltip>
             </label>
             <div className="relative mt-2">
               <input

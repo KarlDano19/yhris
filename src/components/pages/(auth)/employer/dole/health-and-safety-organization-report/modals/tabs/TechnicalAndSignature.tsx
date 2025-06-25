@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 
 import Image from "next/image";
+import { Tooltip } from 'react-tooltip';
 
 import DrawSignatureModal from "../DrawSignatureModals";
+import InfoIcon from '@/svg/InfoIcon';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -156,6 +158,18 @@ function TechnicalAndSignature({
             >
               Technical Information File
               <span className="text-red-600">*</span>
+              <div
+                className='inline-block ml-1 cursor-pointer'
+                data-tooltip-id='tech-file-upload-tooltip'
+                data-tooltip-place='right'
+              >
+                <InfoIcon />
+              </div>
+              <Tooltip id='tech-file-upload-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+                <div>
+                  <h2 className='text-[12px] font-medium'>Note: File uploads may disappear if the screen loses focus. Please re-upload if needed.</h2>
+                </div>
+              </Tooltip>
             </label>
             <div className="relative mt-2">
               <input
@@ -274,6 +288,18 @@ function TechnicalAndSignature({
             >
               Upload Signature
               <span className="text-red-600">*</span>
+              <div
+                className='inline-block ml-1 cursor-pointer'
+                data-tooltip-id='signature-upload-tooltip'
+                data-tooltip-place='right'
+              >
+                <InfoIcon />
+              </div>
+              <Tooltip id='signature-upload-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+                <div>
+                  <h2 className='text-[12px] font-medium'>Note: File uploads may disappear if the screen loses focus. Please re-upload if needed.</h2>
+                </div>
+              </Tooltip>
             </label>
             <div className="relative mt-2">
               <input
