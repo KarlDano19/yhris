@@ -8,7 +8,10 @@ async function addHealthAndSafetyReport(data: any) {
     if (data.date_of_report) {
       const dateOfReport = new Date(data.date_of_report);
       if (!isNaN(dateOfReport.getTime())) {
-        data.date_of_report = dateOfReport.toISOString().split("T")[0];
+        // Adjust for timezone offset to preserve local date
+        const offset = dateOfReport.getTimezoneOffset();
+        const adjustedDate = new Date(dateOfReport.getTime() - offset * 60000);
+        data.date_of_report = adjustedDate.toISOString().split("T")[0];
       }
     }
 
