@@ -122,3 +122,18 @@ div.remove-height {
 .nested-decimal > li:before {
   content: counters(section, ".") ". ";
 }
+
+/* Safari-specific navigation styles */
+@supports (-webkit-appearance: none) {
+  .safari-nav-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: baseline !important;
+    overflow: visible !important;
+  }
+  
+  .safari-nav-container > * {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+}
