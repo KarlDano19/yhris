@@ -10,14 +10,19 @@ import MainLogo from "@/svg/MainLogo";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isUseCasesOpen, setIsUseCasesOpen] = useState(false);
+  const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const getStartedDropdownRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsUseCasesOpen(false);
+        setIsFeaturesOpen(false);
+      }
+      if (getStartedDropdownRef.current && !getStartedDropdownRef.current.contains(event.target as Node)) {
+        setIsGetStartedOpen(false);
       }
     };
 
@@ -35,10 +40,31 @@ const Navigation = () => {
     return `/landing-page#${section}`;
   };
 
-  const useCases = [
+  // Desktop features (tablet and up) - excludes integration and Sprout comparison
+  const desktopFeatureItems = [
+    { href: getNavLink("features"), label: "All Features" },
     { href: "/use-cases/employee-onboarding", label: "Employee Onboarding" },
     { href: "/use-cases/performance-management", label: "Performance Management" },
     { href: "/use-cases/employee-documentation", label: "Employee Documentation" }
+  ];
+
+  // Tablet features - includes Sprout comparison
+  const tabletFeatureItems = [
+    { href: getNavLink("features"), label: "All Features" },
+    { href: getNavLink("integration"), label: "Integrations" },
+    { href: "/vs-sprout", label: "How We Compare to Sprout" },
+    { href: "/use-cases/employee-onboarding", label: "Employee Onboarding" },
+    { href: "/use-cases/performance-management", label: "Performance Management" },
+    { href: "/use-cases/employee-documentation", label: "Employee Documentation" }
+  ];
+
+  const mobileFeatureItems = [
+    { href: getNavLink("features"), label: "All Features" },
+    { href: "/use-cases/employee-onboarding", label: "Employee Onboarding" },
+    { href: "/use-cases/performance-management", label: "Performance Management" },
+    { href: "/use-cases/employee-documentation", label: "Employee Documentation" },
+    { href: getNavLink("integration"), label: "Integrations" },
+    { href: "/vs-sprout", label: "How We Compare to Sprout" }
   ];
 
   return (
@@ -55,61 +81,94 @@ const Navigation = () => {
           
           <div className="hidden md:block">
             <div className="ml-8 lg:ml-10 flex items-baseline space-x-5 lg:space-x-7 safari-nav-container">
-              <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                Features
-              </Link>
-              <Link href={getNavLink("integration")} className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                Integration
-              </Link>
-              <Link href="/vs-sprout" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                How We Compare to Sprout
-              </Link>
               <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={() => setIsUseCasesOpen(!isUseCasesOpen)}
+                  onClick={() => setIsFeaturesOpen(!isFeaturesOpen)}
                   className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors flex items-center whitespace-nowrap"
                 >
-                  Use Cases
-                  <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isUseCasesOpen ? 'rotate-180' : ''}`} />
+                  Features
+                  <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isFeaturesOpen ? 'rotate-180' : ''}`} />
                 </button>
-                {isUseCasesOpen && (
+                {isFeaturesOpen && (
                   <div className="absolute top-full left-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
-                    <Link href="/use-cases" className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors">
-                      All Use Cases
-                    </Link>
-                    <div className="border-t border-gray-200/50 my-1"></div>
-                    {useCases.map((useCase) => (
-                      <Link
-                        key={useCase.href}
-                        href={useCase.href}
-                        className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
-                        onClick={() => setIsUseCasesOpen(false)}
-                      >
-                        {useCase.label}
-                      </Link>
-                    ))}
+                    {/* Use tablet features on md, desktop features on lg+ */}
+                    <div className="lg:hidden">
+                      {tabletFeatureItems.map((item, index) => (
+                        <div key={item.href}>
+                          <Link
+                            href={item.href}
+                            className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                            onClick={() => setIsFeaturesOpen(false)}
+                          >
+                            {item.label}
+                          </Link>
+                          {(index === 0 || index === 1 || index === 2) && <div className="border-t border-gray-200/50 my-1"></div>}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="hidden lg:block">
+                      {desktopFeatureItems.map((item, index) => (
+                        <div key={item.href}>
+                          <Link
+                            href={item.href}
+                            className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                            onClick={() => setIsFeaturesOpen(false)}
+                          >
+                            {item.label}
+                          </Link>
+                          {index === 0 && <div className="border-t border-gray-200/50 my-1"></div>}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
-              <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                Find Jobs
+              <Link href={getNavLink("integration")} className="hidden lg:block text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+                Integrations
+              </Link>
+              <Link href="/vs-sprout" className="hidden lg:block text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+                How We Compare to Sprout
+              </Link>
+              <Link href="/landing-page/pricing" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+                Pricing
               </Link>
             </div>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
             <Link 
-              href="/login" 
-              className="text-indigo-dye hover:text-[#FFC107] px-4 py-2 text-sm font-medium transition-colors"
+              href="/jobs" 
+              className="text-indigo-dye hover:text-[#FFC107] px-4 py-2 text-sm font-medium transition-colors border border-indigo-dye hover:border-[#FFC107] rounded-full"
             >
-              Sign In
+              Find Jobs
             </Link>
-            <Link 
-              href="/register" 
-              className="bg-[#FFC107] hover:bg-amber-600 text-black px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-lg"
-            >
-              Get Started
-            </Link>
+            <div className="relative" ref={getStartedDropdownRef}>
+              <button
+                onClick={() => setIsGetStartedOpen(!isGetStartedOpen)}
+                className="bg-[#FFC107] hover:bg-amber-600 text-black px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-lg flex items-center"
+              >
+                Get Started
+                <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isGetStartedOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isGetStartedOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
+                  <Link
+                    href="/register"
+                    className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                    onClick={() => setIsGetStartedOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                    onClick={() => setIsGetStartedOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="md:hidden">
@@ -132,27 +191,27 @@ const Navigation = () => {
         <div className="md:hidden mt-2">
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 max-w-7xl mx-auto">
             <div className="px-4 py-4 space-y-1">
-              <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Features
-              </Link>
-              <Link href={getNavLink("integration")} className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Integration
-              </Link>
-              <Link href="/vs-sprout" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                How We Compare to Sprout
-              </Link>
-              <Link href="/use-cases" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Use Cases
-              </Link>
-              <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Find Jobs
+              {mobileFeatureItems.map((item, index) => (
+                <Link 
+                  key={item.href}
+                  href={item.href} 
+                  className={`text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors ${index > 0 ? 'ml-4' : ''}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <Link href="/landing-page/pricing" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
+                Pricing
               </Link>
               <div className="pt-3 mt-3 border-t border-gray-200/50 space-y-1">
-                <Link href="/login" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                  Sign In
+                <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors border border-indigo-dye hover:border-[#FFC107] rounded-lg">
+                  Find Jobs
                 </Link>
                 <Link href="/register" className="bg-[#FFC107] hover:bg-amber-600 text-black block px-4 py-2 rounded-lg text-base font-medium transition-colors">
-                  Get Started
+                  Sign Up
+                </Link>
+                <Link href="/login" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
+                  Sign In
                 </Link>
               </div>
             </div>
