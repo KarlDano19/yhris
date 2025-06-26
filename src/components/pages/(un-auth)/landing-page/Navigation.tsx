@@ -44,7 +44,7 @@ const Navigation = () => {
   return (
     <nav className="fixed top-4 left-4 right-4 z-[9999] mb-8">
       <div className="bg-white/70 backdrop-blur-xl rounded-full shadow-lg shadow-black/5 border border-white/30 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center h-16 px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 px-4 lg:px-6">
           <div className="flex-shrink-0">
             <Link href="/landing-page" className="flex items-center space-x-2">
               <div className="h-6 w-auto">
@@ -54,20 +54,20 @@ const Navigation = () => {
           </div>
           
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] px-3 py-2 text-sm font-medium transition-colors">
+            <div className="ml-8 lg:ml-10 flex items-baseline space-x-5 lg:space-x-7 safari-nav-container">
+              <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Features
               </Link>
-              <Link href={getNavLink("integration")} className="text-indigo-dye hover:text-[#FFC107] px-3 py-2 text-sm font-medium transition-colors">
+              <Link href={getNavLink("integration")} className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Integration
               </Link>
-              <Link href="/vs-sprout" className="text-indigo-dye hover:text-[#FFC107] px-3 py-2 text-sm font-medium transition-colors">
+              <Link href="/vs-sprout" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 How We Compare to Sprout
               </Link>
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsUseCasesOpen(!isUseCasesOpen)}
-                  className="text-indigo-dye hover:text-[#FFC107] px-3 py-2 text-sm font-medium transition-colors flex items-center"
+                  className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors flex items-center whitespace-nowrap"
                 >
                   Use Cases
                   <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isUseCasesOpen ? 'rotate-180' : ''}`} />
@@ -91,7 +91,7 @@ const Navigation = () => {
                   </div>
                 )}
               </div>
-              <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] px-3 py-2 text-sm font-medium transition-colors">
+              <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Find Jobs
               </Link>
             </div>
