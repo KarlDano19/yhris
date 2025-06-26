@@ -75,9 +75,11 @@ function UpdateShcMinutesMeetingModal({
         setValue("date_of_meeting", minutesMeetingData.date_of_meeting);
         setValue("time_of_meeting", minutesMeetingData.time_of_meeting);
         setValue("venue", minutesMeetingData.venue);
-        setValue("submitted_by", minutesMeetingData.submitted_by);
+        setValue("attendees", minutesMeetingData.attendees);
+        setValue("absentees", minutesMeetingData.absentees);
+        setValue("details_of_meeting", minutesMeetingData.details_of_meeting);
+        setValue("prepared_by", minutesMeetingData.prepared_by);
         setValue("position", minutesMeetingData.position);
-
     }
   })
 
@@ -121,7 +123,7 @@ function UpdateShcMinutesMeetingModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Create Work Accident/Illness Report
+                    Edit Work Accident/Illness Report
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
