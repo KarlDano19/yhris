@@ -8,42 +8,11 @@ import { formatDate } from '@/helpers/date';
 
 import { NoticeToExplainFormData, PrintOptions } from '@/types/document-generator/documents';
 
-// Characters per page (approximate) - Match the same constants as in preview
-const CHARS_PER_PAGE = 1500;
-const HEADER_CHARS = 800;
-const EXPLANATION_CHARS = 150;
-const HEARING_CHARS = 150;
-const DECISION_CHARS = 150;
-const SIGNATURES_CHARS = 150;
-
-// Define content types
-type ContentType = 'header' | 'headerContinued' | 'explanation' | 'hearing' | 'decision' | 'signatures';
-
-// Define content for each page
-interface PageContent {
-  type: ContentType;
-  content: string;
-  title?: string;
-  isPartial?: boolean;
-  partIndex?: number;
-}
-
-// Define a page structure
-interface Page {
-  contents: PageContent[];
-}
-
 /**
  * Print the Notice to Explain document
  */
 export const printNoticeToExplain = (data: NoticeToExplainFormData, options: PrintOptions, saveOnly: boolean = false): Promise<Blob | null> => {
   const { title, fileName = 'notice-to-explain' } = options;
-  
-  // Check required fields
-  if (!data.employeeName || !data.date) {
-    toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
-    return Promise.resolve(null);
-  }
   
   const printToastId = toast.custom(() => <CustomToast message="Preparing notice to explain..." type="info" />);
   
@@ -180,56 +149,9 @@ export const printNoticeToExplain = (data: NoticeToExplainFormData, options: Pri
   });
 };
 
-// Split text into chunks that fit on a page
-const splitTextIntoChunks = (text: string, maxCharsPerChunk: number): string[] => {
-  if (!text) return [''];
-  
-  const chunks: string[] = [];
-  let remainingText = text;
-  
-  while (remainingText.length > 0) {
-    if (remainingText.length <= maxCharsPerChunk) {
-      chunks.push(remainingText);
-      break;
-    }
-    
-    // Find a good breaking point (preferably at a paragraph or sentence)
-    let breakPoint = maxCharsPerChunk;
-    
-    // Try to find paragraph break
-    const paragraphBreak = remainingText.lastIndexOf('\n\n', maxCharsPerChunk);
-    if (paragraphBreak > maxCharsPerChunk / 2) {
-      breakPoint = paragraphBreak + 2;
-    } else {
-      // Try to find sentence break
-      const sentenceBreak = remainingText.lastIndexOf('. ', maxCharsPerChunk);
-      if (sentenceBreak > maxCharsPerChunk / 2) {
-        breakPoint = sentenceBreak + 2;
-      } else {
-        // Try to find line break
-        const lineBreak = remainingText.lastIndexOf('\n', maxCharsPerChunk);
-        if (lineBreak > maxCharsPerChunk / 2) {
-          breakPoint = lineBreak + 1;
-        } else {
-          // Fall back to word break
-          const wordBreak = remainingText.lastIndexOf(' ', maxCharsPerChunk);
-          if (wordBreak > maxCharsPerChunk / 2) {
-            breakPoint = wordBreak + 1;
-          }
-        }
-      }
-    }
-    
-    chunks.push(remainingText.substring(0, breakPoint));
-    remainingText = remainingText.substring(breakPoint);
-  }
-  
-  return chunks;
-};
-
 export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): string => {
   // Format dates
-  const formattedDate = formatDate(data.date);
+  const formattedDate = formatDate(data.dateIssued);
   const formattedIncidentDate = formatDate(data.incidentDate);
   
   // Get logo image
@@ -251,239 +173,166 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
   // Border color with fallback to default amber
   const borderColor = data.borderColor || '#FFC107';
 
-  // Organize content into pages exactly like the preview component
-  const pages: Page[] = [];
-  
-  // Split brief background text into chunks
-  const backgroundText = data.briefBackground || '';
-  let backgroundChunks: string[] = [];
-  
-  // Check if we need to split background text or if it's short enough to fit on the first page
-  const totalSectionChars = EXPLANATION_CHARS + HEARING_CHARS + DECISION_CHARS + SIGNATURES_CHARS;
-  const availableCharsForBackground = CHARS_PER_PAGE - HEADER_CHARS - totalSectionChars;
-  
-  if (backgroundText.length <= availableCharsForBackground) {
-    // Background is short enough to fit with all sections on the first page
-    backgroundChunks = [backgroundText];
-    
-    // Create the single page with all content
-    const page: Page = {
-      contents: [
-        { type: 'header', content: backgroundChunks[0] || '' },
-        { type: 'explanation', content: data.employeeExplanation || '' },
-        { type: 'hearing', content: data.hearingNotes || '' },
-        { type: 'decision', content: data.managementDecision || '' },
-        { type: 'signatures', content: '' }
-      ]
-    };
-    
-    pages.push(page);
-  } else {
-    // Background is too long, need to distribute content across pages
-    backgroundChunks = splitTextIntoChunks(backgroundText, CHARS_PER_PAGE);
-    
-    // First page has header with first part of background
-    let currentPage: Page = {
-      contents: [
-        { type: 'header', content: backgroundChunks[0] || '', isPartial: backgroundChunks.length > 1 }
-      ]
-    };
-    
-    // Calculate remaining space on first page
-    let remainingChars = CHARS_PER_PAGE - HEADER_CHARS - backgroundChunks[0].length;
-    
-    // Try to fit explanation box
-    if (remainingChars >= EXPLANATION_CHARS) {
-      currentPage.contents.push({ type: 'explanation', content: data.employeeExplanation || '' });
-      remainingChars -= EXPLANATION_CHARS;
-      
-      // Try to fit hearing box
-      if (remainingChars >= HEARING_CHARS) {
-        currentPage.contents.push({ type: 'hearing', content: data.hearingNotes || '' });
-        remainingChars -= HEARING_CHARS;
+  // Generate HTML for the document - no longer using character-based chunking
+  const documentHTML = `
+    <div class="document-container">
+      <!-- Header Section -->
+      <div class="section avoid-break">
+        <div class="logo-container">
+          ${logoSrc ? `
+            <img src="${logoSrc}" alt="Company Logo">
+          ` : `<div class="space"></div>`}
+        </div>
         
-        // Try to fit decision box
-        if (remainingChars >= DECISION_CHARS) {
-          currentPage.contents.push({ type: 'decision', content: data.managementDecision || '' });
-          remainingChars -= DECISION_CHARS;
-          
-          // Try to fit signatures
-          if (remainingChars >= SIGNATURES_CHARS) {
-            currentPage.contents.push({ type: 'signatures', content: '' });
-          }
-        }
-      }
-    }
-    
-    // Add first page
-    pages.push(currentPage);
-    
-    // Process remaining background chunks if any
-    for (let i = 1; i < backgroundChunks.length; i++) {
-      currentPage = {
-        contents: [
-          { 
-            type: 'headerContinued', 
-            content: backgroundChunks[i], 
-            title: 'Brief background (Continued)',
-            isPartial: i < backgroundChunks.length - 1
-          }
-        ]
-      };
-      
-      // Calculate remaining space on this continuation page
-      remainingChars = CHARS_PER_PAGE - 200 - backgroundChunks[i].length; // 200 for continued header
-      
-      // If this is the last background chunk, try to fit remaining sections
-      if (i === backgroundChunks.length - 1) {
-        const remainingSections: PageContent[] = [];
+        <div class="document-title">NOTICE TO EXPLAIN</div>
+        <div class="document-subtitle">${data.incidentPlace || '[Place of Incident]'}</div>
         
-        // Check which sections haven't been added yet
-        const hasExplanation = pages.some(page => 
-          page.contents.some(content => content.type === 'explanation'));
-        const hasHearing = pages.some(page => 
-          page.contents.some(content => content.type === 'hearing'));
-        const hasDecision = pages.some(page => 
-          page.contents.some(content => content.type === 'decision'));
-        const hasSignatures = pages.some(page => 
-          page.contents.some(content => content.type === 'signatures'));
+        <div class="decorative-line" style="border-color: ${borderColor}"></div>
         
-        // Add missing sections in order if they fit
-        if (!hasExplanation && remainingChars >= EXPLANATION_CHARS) {
-          currentPage.contents.push({ type: 'explanation', content: data.employeeExplanation || '' });
-          remainingChars -= EXPLANATION_CHARS;
-        } else if (!hasExplanation) {
-          remainingSections.push({ type: 'explanation', content: data.employeeExplanation || '' });
-        }
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000; margin-bottom: 10px;">
+          <tr>
+            <td style="width: 50%; padding: 0;">
+              <span class="detail-label">Name of Employee :</span> ${data.employeeName || '[Employee Name]'}
+            </td>
+            <td style="width: 50%; padding: 0;">
+              <span class="detail-label">Date Issued:</span> ${formattedDate || '[Date Issued]'}
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 50%; padding: 0;">
+              <span class="detail-label">Position :</span> ${data.position || '[Position]'}
+            </td>
+            <td style="width: 50%; padding: 0;">
+              <span class="detail-label">Company Name:</span> ${data.companyName || '[Company Name]'}
+            </td>
+          </tr>
+        </table>
         
-        if (!hasHearing && remainingChars >= HEARING_CHARS) {
-          currentPage.contents.push({ type: 'hearing', content: data.hearingNotes || '' });
-          remainingChars -= HEARING_CHARS;
-        } else if (!hasHearing) {
-          remainingSections.push({ type: 'hearing', content: data.hearingNotes || '' });
-        }
+        <div class="main-text">
+          You are instructed to explain in writing within 5 days upon receipt of this memo why no disciplinary action
+          should be taken against you for allegedly violating the company rule(s) described below:
+        </div>
         
-        if (!hasDecision && remainingChars >= DECISION_CHARS) {
-          currentPage.contents.push({ type: 'decision', content: data.managementDecision || '' });
-          remainingChars -= DECISION_CHARS;
-        } else if (!hasDecision) {
-          remainingSections.push({ type: 'decision', content: data.managementDecision || '' });
-        }
+        <div class="tagalog-translation">
+          (Gitahasan ka nga magsulat sa imong eksplenasyon sulod sa 5 ka adlaw pagkadawat nimo niini nga memo
+          kung ngano nga dili ka angay nga patawan ug disciplinary action alang sa imong kuno nga paglapas sa
+          mga lagda sa kompanya nga gipahayag sa ubos:)
+        </div>
         
-        if (!hasSignatures && remainingChars >= SIGNATURES_CHARS) {
-          currentPage.contents.push({ type: 'signatures', content: '' });
-        } else if (!hasSignatures) {
-          remainingSections.push({ type: 'signatures', content: '' });
-        }
-        
-        // Add this page
-        pages.push(currentPage);
-        
-        // Create additional pages for remaining sections
-        if (remainingSections.length > 0) {
-          let sectionsPage: Page = { contents: [] };
-          let spaceLeft = CHARS_PER_PAGE - 200; // Space for continued header
-          
-          for (const section of remainingSections) {
-            const sectionSize = 
-              section.type === 'explanation' ? EXPLANATION_CHARS :
-              section.type === 'hearing' ? HEARING_CHARS :
-              section.type === 'decision' ? DECISION_CHARS :
-              SIGNATURES_CHARS;
-            
-            if (sectionsPage.contents.length === 0 || spaceLeft >= sectionSize) {
-              // First section on page or section fits
-              if (sectionsPage.contents.length === 0) {
-                // Add continued header for the first section
-                sectionsPage = { contents: [section] };
-              } else {
-                sectionsPage.contents.push(section);
-              }
-              spaceLeft -= sectionSize;
-            } else {
-              // Section doesn't fit, create a new page
-              pages.push(sectionsPage);
-              sectionsPage = { contents: [section] };
-              spaceLeft = CHARS_PER_PAGE - 200 - sectionSize;
-            }
-          }
-          
-          // Add the last sections page if it has content
-          if (sectionsPage.contents.length > 0) {
-            pages.push(sectionsPage);
-          }
-        }
-      } else {
-        // Not the last chunk, just add the page
-        pages.push(currentPage);
-      }
-    }
-    
-    // Check if we need to add any missing sections
-    const hasExplanation = pages.some(page => 
-      page.contents.some(content => content.type === 'explanation'));
-    const hasHearing = pages.some(page => 
-      page.contents.some(content => content.type === 'hearing'));
-    const hasDecision = pages.some(page => 
-      page.contents.some(content => content.type === 'decision'));
-    const hasSignatures = pages.some(page => 
-      page.contents.some(content => content.type === 'signatures'));
-    
-    // Create a new page with any missing sections
-    const missingSections: PageContent[] = [];
-    if (!hasExplanation) missingSections.push({ type: 'explanation', content: data.employeeExplanation || '' });
-    if (!hasHearing) missingSections.push({ type: 'hearing', content: data.hearingNotes || '' });
-    if (!hasDecision) missingSections.push({ type: 'decision', content: data.managementDecision || '' });
-    if (!hasSignatures) missingSections.push({ type: 'signatures', content: '' });
-    
-    if (missingSections.length > 0) {
-      currentPage = { contents: missingSections };
-      pages.push(currentPage);
-    }
-  }
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000; margin-bottom: 10px;">
+          <tr>
+            <td style="padding: 0;">
+              <span class="detail-label">Date of Incident :</span> ${formattedIncidentDate || '[Date of Incident]'}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0;">
+              <span class="detail-label">Place of Incident :</span> ${data.incidentPlace || '[Place of Incident]'}
+            </td>
+          </tr>
+        </table>
+      </div>
 
-  // Generate HTML for all pages
-  const pagesHTML = pages
-    .filter(page => page.contents.length > 0) // Filter out empty pages
-    .map((page, index) => {
-      let pageContent = '';
-      
-      // Render contents for this page
-      page.contents.forEach((content, contentIndex) => {
-        // Add continued header at the top of pages after the first one
-        const needsContinuedHeader = index > 0 && contentIndex === 0 && 
-          content.type !== 'headerContinued'; // headerContinued already includes the continued header
+      <!-- Brief Background Section -->
+      <div class="section avoid-break">
+        <div class="background-section">
+          <div class="detail-label">Brief background :</div>
+          <div style="white-space: normal; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>
+        </div>
         
-        if (needsContinuedHeader) {
-          pageContent += renderContinuedHeader(data, logoSrc, borderColor);
-        }
+        <div class="signatures-grid">
+          <div class="signature-block">
+            <div class="detail-label">Prepared by:</div>
+            <div>${data.preparedBy || '\u00A0'}</div>
+            <div class="signature-line"></div>
+            <div style="font-weight: bold;">HR Representative</div>
+          </div>
+          
+          <div class="signature-block">
+            <div class="detail-label">Reviewed by:</div>
+            <div>${data.reviewedBy || '\u00A0'}</div>
+            <div class="signature-line"></div>
+            <div style="font-weight: bold;">Immediate Supervisor/Manager</div>
+          </div>
+          
+          <div class="signature-block">
+            <div class="detail-label">Received by:</div>
+            <div>${data.receivedBy || data.employeeName || '[Name]'}</div>
+            <div class="signature-line"></div>
+            <div style="font-weight: bold;">Employee Name</div>
+          </div>
+        </div>
         
-        if (content.type === 'header') {
-          pageContent += renderHeaderWithContent(data, formattedDate, formattedIncidentDate, logoSrc, borderColor, content.content);
-        } else if (content.type === 'headerContinued') {
-          pageContent += renderContinuedHeader(data, logoSrc, borderColor);
-        } else if (content.type === 'explanation') {
-          pageContent += renderExplanation(content.content);
-        } else if (content.type === 'hearing') {
-          pageContent += renderHearing(content.content);
-        } else if (content.type === 'decision') {
-          pageContent += renderDecision(content.content);
-        } else if (content.type === 'signatures') {
-          pageContent += renderSignatures(data, signatureSrc);
-        }
-      });
-      
-      // Only create page if it has content
-      if (pageContent.trim() === '') {
-        return '';
-      }
-      
-      return `
-        <div class="page" id="page-${index + 1}">
-          ${pageContent}
+        <div class="decorative-line" style="border-color: ${borderColor}; margin-top: 16px;"></div>
+      </div>
+
+      <!-- Employee Explanation Section -->
+      <div class="section avoid-break">
+        <div style="margin-top: 25px; margin-bottom: 15px;">
+          <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">I. Employee Explanation</div>
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+            ${data.employeeExplanation || ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Hearing Section -->
+      <div class="section avoid-break">
+        <div style="margin-top: 15px; margin-bottom: 15px;">
+          <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">II. Hearing</div>
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+            ${data.hearingNotes || ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Management Decision Section -->
+      <div class="section avoid-break">
+        <div style="margin-top: 15px;">
+          <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">III. Management Decision</div>
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; margin-bottom: 30px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+            ${data.managementDecision || ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Signatures Section -->
+      <div class="section avoid-break page-break-before">
+
+        <!-- Continued Header -->
+        <div class="logo-container">
+          ${logoSrc ? `
+            <img src="${logoSrc}" alt="Company Logo">
+          ` : `<div style="height: 100%;"></div>`}
+        </div>
+        
+        <div class="document-title">NOTICE TO EXPLAIN</div>
+        <div class="document-subtitle">${data.incidentPlace || '[Place of Incident]'}</div>
+        
+        <table class="signature-table">
+          <tr>
+            <td class="signature-cell signature-cell-left">
+              ${signatureSrc ? `
+                <div class="signature-image-container-table">
+                  <img src="${signatureSrc}" class="signature-image-table" alt="Signature">
+                </div>
+              ` : '<div class="signature-image-container-table"></div>'}
+              <div class="signature-name">${data.reviewedBy || '\u00A0'}</div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Immediate Supervisor/Manager Signature</div>
+            </td>
+            
+            <td class="signature-cell signature-cell-right">
+              <div class="signature-image-container-table"></div>
+              <div class="signature-name">${data.employeeName || '[Employee Name]'}</div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Employee Signature</div>
+            </td>
+          </tr>
+        </table>
+      </div>
         </div>
       `;
-    }).filter(html => html !== '').join('');
 
   return `
     <!DOCTYPE html>
@@ -494,6 +343,8 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       <title>Notice to Explain</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        
+        /* CSS to fix pagination */
         
         body {
           font-family: 'Roboto', Arial, sans-serif;
@@ -506,38 +357,42 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         
         @page {
           size: A4;
-          margin: 1cm;
+          margin: 0.1cm 1cm 1cm 1cm; /* top right bottom left */
         }
         
-        .page {
+        .document-container {
           box-sizing: border-box;
           width: 100%;
           padding: 0;
           position: relative;
-          page-break-after: always;
         }
         
-        .page:last-child {
-          page-break-after: avoid;
+        .section {
+          margin-bottom: 1rem;
         }
         
         .logo-container {
-          text-align: center;
-          margin-bottom: 1rem;
-          min-height: 4rem;
+          position: relative;
+          width: 100%;
+          height: 6rem; /* Approx xl:h-32 */
+          margin-bottom: 0.5rem;
         }
         
         .logo-container img {
-          max-width: 150px;
-          max-height: 4rem;
+          width: 100%;
+          height: 100%;
           object-fit: contain;
+        }
+
+        .space {
+          height: 100%;
         }
         
         .document-title {
           text-align: center;
           font-size: 16px;
           font-weight: bold;
-          margin: 4px 0 2px;
+          margin: 0 0 2px;
           text-transform: uppercase;
           color: #000;
         }
@@ -545,7 +400,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         .document-subtitle {
           text-align: center;
           font-size: 12px;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           color: #666;
         }
         
@@ -725,21 +580,31 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           margin-top: 5px;
         }
         
+        /* Page break control */
+        .avoid-break {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+
+        .page-break-before {
+          page-break-before: always;
+        }
+        
         @media print {
           body {
             padding: 0;
             margin: 0;
           }
           
-          .page {
-            margin: 0;
-            border: none;
+          .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
         }
       </style>
     </head>
     <body>
-      ${pagesHTML}
+      ${documentHTML}
       <script>
         // Force print after content is fully loaded
         window.onload = function() {
@@ -784,173 +649,5 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </script>
     </body>
     </html>
-  `;
-};
-
-// Helper functions to render different sections
-const renderHeaderWithContent = (
-  data: NoticeToExplainFormData, 
-  formattedDate: string, 
-  formattedIncidentDate: string,
-  logoSrc: string,
-  borderColor: string,
-  content: string
-) => {
-  return `
-    <div class="logo-container">
-      ${logoSrc ? `
-        <img src="${logoSrc}" alt="Company Logo">
-      ` : `<div style="height: 4rem;"></div>`}
-    </div>
-    
-    <div class="document-title">NOTICE TO EXPLAIN</div>
-    <div class="document-subtitle">${data.place || '[Place]'}</div>
-    
-    <div class="decorative-line" style="border-color: ${borderColor}"></div>
-    
-    <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000; margin-bottom: 10px;">
-      <tr>
-        <td style="width: 50%; padding: 0;">
-          <span class="detail-label">Name of Employee :</span> ${data.employeeName || '[Employee Name]'}
-        </td>
-        <td style="width: 50%; padding: 0;">
-          <span class="detail-label">Date:</span> ${formattedDate || '[Date]'}
-        </td>
-      </tr>
-      <tr>
-        <td style="width: 50%; padding: 0;">
-          <span class="detail-label">Position :</span> ${data.position || '[Position]'}
-        </td>
-        <td style="width: 50%; padding: 0;">
-          <span class="detail-label">Place:</span> ${data.place || '[Place]'}
-        </td>
-      </tr>
-    </table>
-    
-    <div class="main-text">
-      You are instructed to explain in writing within 5 days upon receipt of this memo why no disciplinary action
-      should be taken against you for allegedly violating the company rule(s) described below:
-    </div>
-    
-    <div class="tagalog-translation">
-      (Gitahasan ka nga magsulat sa imong eksplenasyon sulod sa 5 ka adlaw pagkadawat nimo niini nga memo
-      kung ngano nga dili ka angay nga patawan ug disciplinary action alang sa imong kuno nga paglapas sa
-      mga lagda sa kompanya nga gipahayag sa ubos:)
-    </div>
-    
-    <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #000; margin-bottom: 10px;">
-      <tr>
-        <td style="padding: 0;">
-          <span class="detail-label">Date of Incident :</span> ${formattedIncidentDate || '[Date of Incident]'}
-        </td>
-      </tr>
-      <tr>
-        <td style="padding: 0;">
-          <span class="detail-label">Place of Incident :</span> ${data.incidentPlace || '[Place of Incident]'}
-        </td>
-      </tr>
-    </table>
-    
-    <div class="background-section">
-      <div class="detail-label">Brief background :</div>
-      <div>${content || '[Brief description of the incident...]'}</div>
-    </div>
-    
-    <div class="signatures-grid">
-      <div class="signature-block">
-        <div class="detail-label">Prepared by:</div>
-        <div>${data.preparedBy || '[Name]'}</div>
-        <div class="signature-line"></div>
-        <div style="font-weight: bold;">HR Representative</div>
-      </div>
-      
-      <div class="signature-block">
-        <div class="detail-label">Reviewed by:</div>
-        <div>${data.reviewedBy || '[Name]'}</div>
-        <div class="signature-line"></div>
-        <div style="font-weight: bold;">Immediate Supervisor/Manager</div>
-      </div>
-      
-      <div class="signature-block">
-        <div class="detail-label">Received by:</div>
-        <div>${data.receivedBy || data.employeeName || '[Name]'}</div>
-        <div class="signature-line"></div>
-        <div style="font-weight: bold;">Employee Name</div>
-      </div>
-    </div>
-    
-    <div class="decorative-line" style="border-color: ${borderColor}; margin-top: 16px;"></div>
-  `;
-};
-
-const renderContinuedHeader = (data: NoticeToExplainFormData, logoSrc: string, borderColor: string) => {
-  return `
-    <div class="logo-container">
-      ${logoSrc ? `
-        <img src="${logoSrc}" alt="Company Logo">
-      ` : `<div style="height: 4rem;"></div>`}
-    </div>
-    
-    <div class="document-title">NOTICE TO EXPLAIN</div>
-    <div class="document-subtitle">${data.place || '[Place]'}</div>
-  `;
-};
-
-const renderExplanation = (content: string) => {
-  return `
-    <div style="margin-top: 25px; margin-bottom: 15px;">
-      <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">I. Employee Explanation</div>
-      <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
-        ${content}
-      </div>
-    </div>
-  `;
-};
-
-const renderHearing = (content: string) => {
-  return `
-    <div style="margin-top: 15px; margin-bottom: 15px;">
-      <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">II. Hearing</div>
-      <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
-        ${content}
-      </div>
-    </div>
-  `;
-};
-
-const renderDecision = (content: string) => {
-  return `
-    <div style="margin-top: 15px;">
-      <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">III. Management Decision</div>
-      <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; margin-bottom: 30px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
-        ${content}
-      </div>
-    </div>
-  `;
-};
-
-const renderSignatures = (data: NoticeToExplainFormData, signatureSrc: string) => {
-  return `
-    <table class="signature-table">
-      <tr>
-        <td class="signature-cell signature-cell-left">
-          ${signatureSrc ? `
-            <div class="signature-image-container-table">
-              <img src="${signatureSrc}" class="signature-image-table" alt="Signature">
-            </div>
-          ` : '<div class="signature-image-container-table"></div>'}
-          <div class="signature-name">${data.reviewedBy || '[Name]'}</div>
-          <div class="signature-line"></div>
-          <div class="signature-title">Immediate Supervisor/Manager Signature</div>
-        </td>
-        
-        <td class="signature-cell signature-cell-right">
-          <div class="signature-image-container-table"></div>
-          <div class="signature-name">${data.employeeName || '[Employee Name]'}</div>
-          <div class="signature-line"></div>
-          <div class="signature-title">Employee Signature</div>
-        </td>
-      </tr>
-    </table>
   `;
 }; 

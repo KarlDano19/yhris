@@ -77,48 +77,16 @@ export const LogoField = ({ formData, logoDisplayName, onOpenLogoModal, handleIn
 
 export const DateField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => (
   <DatePickerField 
-    id="date"
-    label="Date"
-    name="date"
-    value={formData.date}
+    id="dateIssued"
+    label="Date Issued"
+    name="dateIssued"
+    value={formData.dateIssued}
     handleInputChange={handleInputChange as any}
     required={true}
     disabled={disabled}
     isSubmitted={isSubmitted}
   />
 );
-
-export const PlaceField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
-  const [showValidation, setShowValidation] = useState(false);
-  
-  useEffect(() => {
-    setShowValidation(isSubmitted === true && !formData.place);
-  }, [isSubmitted, formData.place]);
-  
-  return (
-    <div className="mb-4">
-      <label htmlFor="place" className="block text-sm font-medium text-gray-700 mb-1">
-        Place <span className="text-red-500">*</span>
-      </label>
-      <input
-        type="text"
-        id="place"
-        name="place"
-        placeholder="Enter place"
-        value={formData.place}
-        onChange={handleInputChange}
-        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
-          disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-        } ${
-          showValidation
-            ? 'border-red-500 focus:border-red-500'
-            : 'border-gray-300 focus:border-blue-500'
-        }`}
-        disabled={disabled}
-      />
-    </div>
-  );
-};
 
 export const IncidentDateField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => (
   <DatePickerField 
@@ -237,59 +205,35 @@ export const ReviewedByField = ({ formData, handleInputChange, disabled }: Field
   </div>
 );
 
-export const EmployeeExplanationField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div className="sm:col-span-2">
-    <label htmlFor="employeeExplanation" className="block mb-2 text-black">
-      Employee Explanation
-    </label>
-    <textarea
-      id="employeeExplanation"
-      name="employeeExplanation"
-      value={formData.employeeExplanation || ''}
-      onChange={handleInputChange}
-      rows={4}
-      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-      placeholder="Employee's explanation will be written here"
-      style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
-      disabled={disabled}
-    />
-  </div>
-);
-
-export const HearingNotesField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div className="sm:col-span-2">
-    <label htmlFor="hearingNotes" className="block mb-2 text-black">
-      Hearing Notes
-    </label>
-    <textarea
-      id="hearingNotes"
-      name="hearingNotes"
-      value={formData.hearingNotes || ''}
-      onChange={handleInputChange}
-      rows={4}
-      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-      placeholder="Notes from the hearing"
-      style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
-      disabled={disabled}
-    />
-  </div>
-);
-
-export const ManagementDecisionField = ({ formData, handleInputChange, disabled }: FieldProps) => (
-  <div className="sm:col-span-2">
-    <label htmlFor="managementDecision" className="block mb-2 text-black">
-      Management Decision
-    </label>
-    <textarea
-      id="managementDecision"
-      name="managementDecision"
-      value={formData.managementDecision || ''}
-      onChange={handleInputChange}
-      rows={4}
-      className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-      placeholder="Management's decision will be written here"
-      style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
-      disabled={disabled}
-    />
-  </div>
-); 
+export const CompanyNameField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
+  const [showValidation, setShowValidation] = useState(false);
+  
+  useEffect(() => {
+    setShowValidation(isSubmitted === true && !formData.companyName);
+  }, [isSubmitted, formData.companyName]);
+  
+  return (
+    <div className="mb-4">
+      <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
+        Company Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        id="companyName"
+        name="companyName"
+        placeholder="Enter company name"
+        value={formData.companyName}
+        onChange={handleInputChange}
+        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
+          disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
+        } ${
+          showValidation
+            ? 'border-red-500 focus:border-red-500'
+            : 'border-gray-300 focus:border-blue-500'
+        }`}
+        required
+        disabled={disabled}
+      />
+    </div>
+  );
+}; 

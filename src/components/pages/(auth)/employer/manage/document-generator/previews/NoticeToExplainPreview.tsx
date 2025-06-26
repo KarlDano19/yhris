@@ -45,7 +45,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
 
   // Format dates
-  const formattedDate = formatDate(data.date);
+  const formattedDate = formatDate(data.dateIssued);
   const formattedIncidentDate = formatDate(data.incidentDate);
 
   // Get logo image
@@ -327,23 +327,21 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
   const renderHeaderWithContent = (content: string) => (
     <>
       {/* Logo at the top */}
-      <div className="flex justify-center mb-4">
-        {logoSrc ? (
-          <Image 
-            src={logoSrc} 
-            alt="Company Logo" 
-            className="h-16 object-contain"
-            width={150}
-            height={64}
+      <div className="relative w-full h-16 md:h-24">
+        {logoSrc && (
+          <Image
+            src={logoSrc}
+            alt="Company Logo"
+            fill
+            className="object-contain"
+            priority
           />
-        ) : (
-          <div className="h-16"></div>
         )}
       </div>
       
       <div className="text-center mb-4">
         <h1 className="text-base font-bold uppercase text-black">NOTICE TO EXPLAIN</h1>
-        <p className="text-xs text-gray-600">{data.place || '[Place]'}</p>
+        <p className="text-xs text-gray-600">{data.incidentPlace || '[Place of Incident]'}</p>
       </div>
 
       {/* Decorative line */}
@@ -354,7 +352,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
           <span className="font-bold">Name of Employee :</span> {data.employeeName || '[Employee Name]'}
         </div>
         <div className="text-black text-xs" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
-          <span className="font-bold">Date:</span> {formattedDate || '[Date]'}
+          <span className="font-bold">Date Issued:</span> {formattedDate || '[Date Issued]'}
         </div>
       </div>
       
@@ -363,7 +361,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
           <span className="font-bold">Position :</span> {data.position || '[Position]'}
         </div>
         <div className="text-black text-xs" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
-          <span className="font-bold">Place:</span> {data.place || '[Place]'}
+          <span className="font-bold">Company Name:</span> {data.companyName || '[Company Name]'}
         </div>
       </div>
       
@@ -396,13 +394,17 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       <div className="grid grid-cols-3 gap-3 mb-6 text-black text-xs">
         <div className="text-center">
           <div className="font-bold mb-1">Prepared by:</div>
-          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.preparedBy || '[Name]'}</div>
+          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+            {data.preparedBy || '\u00A0'}
+          </div>
           <div className="border-t font-bold border-black pt-1">HR Representative</div>
         </div>
         
         <div className="text-center">
           <div className="font-bold mb-1">Reviewed by:</div>
-          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.reviewedBy || '[Name]'} </div>
+          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+            {data.reviewedBy || '\u00A0'}
+          </div>
           <div className="border-t font-bold border-black pt-1">Immediate Supervisor/Manager</div>
         </div>
         
@@ -459,7 +461,9 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
             />
           )}
         </div>
-        <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.reviewedBy || '[Name]'}</div>
+        <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+          {data.reviewedBy || '\u00A0'}
+        </div>
         <div className="border-t border-black pt-1 mb-1"></div>
         <div className="text-center text-xs font-bold">Immediate Supervisor/Manager Signature</div>
       </div>
@@ -476,23 +480,21 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
   const renderContinuedHeader = () => (
     <>
       {/* Logo at the top */}
-      <div className="flex justify-center mb-4">
-        {logoSrc ? (
-          <Image 
-            src={logoSrc} 
-            alt="Company Logo" 
-            className="h-16 object-contain"
-            width={150}
-            height={64}
+      <div className="relative w-full h-16 md:h-20">
+        {logoSrc && (
+          <Image
+            src={logoSrc}
+            alt="Company Logo"
+            fill
+            className="object-contain"
+            priority
           />
-        ) : (
-          <div className="h-16"></div>
         )}
       </div>
       
       <div className="text-center mb-6">
         <h1 className="text-base font-bold uppercase text-black">NOTICE TO EXPLAIN</h1>
-        <p className="text-xs text-gray-600" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.place || '[Place]'}</p>
+        <p className="text-xs text-gray-600" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{data.incidentPlace || '[Place of Incident]'}</p>
       </div>
     </>
   );
@@ -512,17 +514,11 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
           // Add continued header at the top of pages after the first one
           const needsContinuedHeader = currentPage > 1 && index === 0 && 
             content.type !== 'headerContinued'; // headerContinued already includes the continued header
-          
           return (
             <div key={`content-${content.type}-${index}`}>
               {needsContinuedHeader && renderContinuedHeader()}
-              
               {content.type === 'header' && renderHeaderWithContent(content.content)}
-              {content.type === 'headerContinued' && (
-                <>
-                  {renderContinuedHeader()}
-                </>
-              )}
+              {content.type === 'headerContinued' && renderContinuedHeader()}
               {content.type === 'explanation' && renderExplanation()}
               {content.type === 'hearing' && renderHearing()}
               {content.type === 'decision' && renderDecision()}
@@ -548,7 +544,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
           <div className="absolute inset-0 -m-2 rounded-3xl opacity-30 blur-md print-hide" style={{ backgroundColor: borderColor }}></div>
           
           {/* Content with inner glow */}
-          <div className="bg-white p-8 rounded-2xl shadow-md max-w-3xl mx-auto relative transition-all duration-300 hover:shadow-xl hover:transform hover:scale-[1.01]">
+          <div className="bg-white pt-0 pb-8 px-8 rounded-2xl shadow-md max-w-3xl mx-auto relative transition-all duration-300 hover:shadow-xl hover:transform hover:scale-[1.01]">
             {/* Inner light effect - hidden when printing */}
             <div className="absolute inset-0 rounded-lg from-white to-amber-50 agreement-glow print-hide"></div>
             

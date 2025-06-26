@@ -91,8 +91,8 @@ export default function Content() {
   const [noticeToExplainData, setNoticeToExplainData] = useState<NoticeToExplainFormData>({
     employeeName: '',
     position: '',
-    date: '',
-    place: '',
+    dateIssued: '',
+    companyName: '',
     dateOfIssuance: '',
     placeOfIssuance: '',
     signatoryName: '',
@@ -179,8 +179,8 @@ export default function Content() {
         setNoticeToExplainData({
           employeeName: '',
           position: '',
-          date: '',
-          place: '',
+          dateIssued: '',
+          companyName: '',
           dateOfIssuance: '',
           placeOfIssuance: '',
           signatoryName: '',
@@ -309,11 +309,11 @@ export default function Content() {
         setNoticeToExplainData(prev => ({
           ...prev,
           // Only update fields that should remain editable
+          dateIssued: noticeData.dateIssued,
+          companyName: noticeData.companyName,
           briefBackground: noticeData.briefBackground,
           preparedBy: noticeData.preparedBy,
           reviewedBy: noticeData.reviewedBy,
-          date: noticeData.date,
-          place: noticeData.place,
           signature: noticeData.signature,
           borderColor: noticeData.borderColor,
           logoImage: noticeData.logoImage,
@@ -324,9 +324,6 @@ export default function Content() {
       }
     }
   };
-  
-  // For handling employee issue update
-  const { mutate: updateEmployeeIssue, isLoading: isUpdatingIssue } = usePatchEmployeeIssueItems();
   
   // Handle proceeding (marking as sent and returning to employee issues)
   const handleProceed = () => {
@@ -358,7 +355,7 @@ export default function Content() {
             
             @page {
               size: A4;
-              margin: 1cm;
+              margin: 0.1cm 1cm 1cm 1cm;
             }
 
             .document-subtitle {
@@ -368,7 +365,11 @@ export default function Content() {
             /* Fix for blank pages by resizing content to fit better */
             html, body {
               height: auto !important;
-              overflow: visible !important;
+              overflow: hidden !important;
+            }
+
+            .space {
+              height: 100% !important;
             }
             
             /* Enhance signature spacing */
@@ -460,9 +461,28 @@ export default function Content() {
           // Get the body element from the iframe
           const content = iframeDoc.body;
           
-          // Wait longer for all resources and styles to load completely
-          setTimeout(() => {
-            // Use html2canvas to capture the content with improved settings
+                      // Wait longer for all resources and styles to load completely
+            setTimeout(() => {
+              // Add logo image style to ensure proper aspect ratio without breaking layout
+              const style = document.createElement('style');
+              style.textContent = `
+                .logo-container {
+                  height: 8rem !important;
+                  display: flex !important;
+                  align-items: center !important;
+                  justify-content: center !important;
+                }
+                .logo-container img {
+                  max-height: 8rem !important;
+                  width: auto !important;
+                  height: auto !important;
+                  object-fit: contain !important;
+                  max-width: 100% !important;
+                }
+              `;
+              iframeDoc.head.appendChild(style);
+              
+              // Use html2canvas to capture the content with improved settings
             html2canvas(content, {
               scale: 2.5, // Higher scale for better quality (increased from 2)
               useCORS: true,
@@ -478,13 +498,16 @@ export default function Content() {
               logging: false
             }).then((canvas) => {
               try {
-                // Create a new PDF document with 1cm margins
+                // Create a new PDF document
                 const pdf = new jsPDF({
                   orientation: 'portrait',
                   unit: 'mm',
                   format: 'a4',
                   compress: true
                 });
+                
+                // Set zero top margin for the document
+                pdf.setDrawColor(255, 255, 255, 0);
                 
                 // Get the image data
                 const imgData = canvas.toDataURL('image/png');
@@ -494,22 +517,83 @@ export default function Content() {
                 const pageHeight = 297 - 20; // A4 height minus 2cm margins
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
                 
-                // Add the image to the PDF with margins
-                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                                // Rather than trying to split the canvas image automatically,
+                // we'll take a different approach: separate the continued header section
                 
-                // Handle multi-page content, but only if it's significantly larger than one page
-                // This prevents blank pages
-                let heightLeft = imgHeight - pageHeight;
+                // First, check if there's a 'page-break-before' element in the document
+                const headerBreakPoint = iframeDoc.querySelector('.page-break-before');
+                let useSinglePageApproach = true;
                 
-                // Only add additional pages if there's substantial content overflow (more than 5mm)
-                if (heightLeft > 5) {
-                  let position = -(pageHeight - 10); // Start position for next pages
+                if (headerBreakPoint) {
+                  useSinglePageApproach = false;
                   
-                  while (heightLeft > 0) {
+                  // First page - everything up to the signature section
+                  const firstPageCanvas = document.createElement('canvas');
+                  const firstPageCtx = firstPageCanvas.getContext('2d');
+                  const headerPosition = headerBreakPoint.getBoundingClientRect();
+                  
+                  if (firstPageCtx) {
+                    // Create first page canvas
+                    firstPageCanvas.width = canvas.width;
+                    firstPageCanvas.height = headerPosition.top * 2.5; // Adjust for scale
+                    
+                    // Draw the first part of the canvas to this new canvas
+                    firstPageCtx.drawImage(
+                      canvas, 
+                      0, 0, canvas.width, firstPageCanvas.height,
+                      0, 0, firstPageCanvas.width, firstPageCanvas.height
+                    );
+                    
+                    // Add first page to PDF
+                    const firstPageImgData = firstPageCanvas.toDataURL('image/png');
+                    pdf.addImage(firstPageImgData, 'PNG', 10, 0, imgWidth, (firstPageCanvas.height * imgWidth) / firstPageCanvas.width);
+                    
+                    // Add new page for signature section
                     pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                    position -= pageHeight;
+                    
+                    // Second page - just the signature section
+                    const secondPageCanvas = document.createElement('canvas');
+                    const secondPageCtx = secondPageCanvas.getContext('2d');
+                    
+                    if (secondPageCtx) {
+                      // Create second page canvas
+                      secondPageCanvas.width = canvas.width;
+                      secondPageCanvas.height = canvas.height - firstPageCanvas.height;
+                      
+                      // Draw the rest of the canvas to the second canvas
+                      secondPageCtx.drawImage(
+                        canvas,
+                        0, firstPageCanvas.height, canvas.width, secondPageCanvas.height,
+                        0, 0, secondPageCanvas.width, secondPageCanvas.height
+                      );
+                      
+                      // Add second page to PDF (with a slight offset to center content)
+                      const secondPageImgData = secondPageCanvas.toDataURL('image/png');
+                      pdf.addImage(secondPageImgData, 'PNG', 10, 0, imgWidth, (secondPageCanvas.height * imgWidth) / secondPageCanvas.width);
+                    }
+                  }
+                }
+                
+                // Fall back to the original approach if we couldn't find page breaks
+                if (useSinglePageApproach) {
+                  console.log('Falling back to single page approach');
+                  // Add the image to the PDF with no top margin
+                  pdf.addImage(imgData, 'PNG', 10, 0, imgWidth, imgHeight);
+                  
+                  // Handle multi-page content, but only if it's significantly larger than one page
+                  // This prevents blank pages
+                  let heightLeft = imgHeight - pageHeight;
+                  
+                  // Only add additional pages if there's substantial content overflow (more than 5mm)
+                  if (heightLeft > 5) {
+                    let position = -(pageHeight); // Start position for next pages (no top margin)
+                    
+                    while (heightLeft > 0) {
+                      pdf.addPage();
+                      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                      heightLeft -= pageHeight;
+                      position -= pageHeight;
+                    }
                   }
                 }
                 
