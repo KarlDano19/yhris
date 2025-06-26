@@ -80,19 +80,19 @@ const VsSproutContent = () => {
         {
           feature: "Multi-platform job posting",
           yahshua: true,
-          sprout: false,
+          competitors: false,
           yahshuaDetail: "LinkedIn, Facebook, YAHSHUA Jobs in 1-3 steps"
         },
         {
           feature: "Centralized application management",
           yahshua: true,
-          sprout: false,
+          competitors: false,
           yahshuaDetail: "No platform switching required"
         },
         {
           feature: "Ready talent pool access",
           yahshua: true,
-          sprout: false,
+          competitors: false,
           yahshuaDetail: "One-click access to pre-screened candidates"
         }
       ]
@@ -103,19 +103,19 @@ const VsSproutContent = () => {
         {
           feature: "DOLE compliance automation",
           yahshua: true,
-          sprout: false,
+          competitors: false,
           yahshuaDetail: "Guided tours and automatic report generation"
         },
         {
           feature: "Philippine labor law compliance",
           yahshua: true,
-          sprout: true,
+          competitors: true,
           yahshuaDetail: "Built-in DOLE module with guided compliance"
         },
         {
           feature: "Secure document management",
           yahshua: true,
-          sprout: true,
+          competitors: true,
           yahshuaDetail: "Data Privacy Act compliant storage"
         }
       ]
@@ -126,19 +126,19 @@ const VsSproutContent = () => {
         {
           feature: "Complete hiring-to-offboarding automation",
           yahshua: true,
-          sprout: false,
+          competitors: false,
           yahshuaDetail: "Screen, Orient, Manage, Train, Evaluate, Separate"
         },
         {
           feature: "Custom performance evaluation forms",
           yahshua: true,
-          sprout: true,
+          competitors: true,
           yahshuaDetail: "Tailored to specific employees, positions, departments"
         },
         {
           feature: "Employee self-service portal",
           yahshua: true,
-          sprout: true,
+          competitors: true,
           yahshuaDetail: "Comprehensive self-service capabilities"
         }
       ]
@@ -149,19 +149,19 @@ const VsSproutContent = () => {
         {
           feature: "Professional image enhancement",
           yahshua: true,
-          sprout: false,
+          competitors: false,
           yahshuaDetail: "Elevates business perception in industry"
         },
         {
           feature: "Industry-specific solutions",
           yahshua: true,
-          sprout: false,
+          competitors: false,
           yahshuaDetail: "Tailored for Philippine business requirements"
         },
         {
           feature: "SME-focused design",
           yahshua: true,
-          sprout: true,
+          competitors: true,
           yahshuaDetail: "Built specifically for small-medium enterprises"
         }
       ]
@@ -173,7 +173,7 @@ const VsSproutContent = () => {
       {/* Header Section */}
       <div className="text-center mb-20">
         <h1 className="text-4xl md:text-6xl font-bold text-indigo-dye mb-6">
-          YAHSHUA HRIS vs Sprout HR
+          YAHSHUA HRIS vs Competitors
         </h1>
         <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
           Discover why YAHSHUA HRIS is the superior choice for Philippine businesses. 
@@ -248,7 +248,7 @@ const VsSproutContent = () => {
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Feature</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-gray-900">YAHSHUA HRIS</th>
-                      <th className="px-6 py-4 text-center text-sm font-medium text-gray-900">Sprout HR</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-gray-900">Competitors</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">YAHSHUA Advantage</th>
                     </tr>
                   </thead>
@@ -266,7 +266,7 @@ const VsSproutContent = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          {item.sprout ? (
+                          {item.competitors ? (
                             <CheckCircleIcon className="h-6 w-6 text-green-500 mx-auto" />
                           ) : (
                             <XMarkIcon className="h-6 w-6 text-red-500 mx-auto" />
