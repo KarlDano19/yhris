@@ -58,12 +58,18 @@ const PerformanceManagementContent = () => {
     }
   ];
 
-  const metrics = [
-    { label: "Employee Engagement Increase", value: "35%" },
-    { label: "Goal Achievement Rate", value: "78%" },
-    { label: "Time Saved on Reviews", value: "60%" },
-    { label: "Retention Improvement", value: "25%" }
-  ];
+  const businessStory = {
+    title: "Transforming Performance Reviews from Burden to Breakthrough",
+    subtitle: "How Cebu Marketing Group Revolutionized Employee Development",
+    challenge: "Cebu Marketing Group's annual performance reviews were dreaded by everyone. Managers postponed evaluations, employees felt disconnected from their goals, and HR struggled to track completion across 150+ employees.",
+    solution: "YAHSHUA HRIS transformed their approach with continuous feedback tools, automated scheduling, and customizable evaluation templates that align with company values.",
+    results: [
+      "Managers now conduct meaningful quarterly check-ins",
+      "Employees actively track and achieve their goals",
+      "HR has real-time visibility into all evaluations",
+      "Performance conversations became development opportunities"
+    ]
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -83,14 +89,41 @@ const PerformanceManagementContent = () => {
         </p>
       </div>
 
-      {/* Metrics Section */}
-      <div className="grid md:grid-cols-4 gap-6 mb-20">
-        {metrics.map((metric, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-savoy-blue mb-2">{metric.value}</div>
-            <div className="text-sm text-gray-600">{metric.label}</div>
+      {/* Business Story Section */}
+      <div className="bg-gradient-to-br from-savoy-blue/5 to-indigo-50 rounded-2xl p-8 md:p-12 mb-20">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-indigo-dye mb-4">
+            {businessStory.title}
+          </h2>
+          <p className="text-lg text-savoy-blue font-medium mb-2">
+            {businessStory.subtitle}
+          </p>
+          <p className="text-xs text-gray-500 italic">
+            *This is a fictional story for illustration purposes. Any resemblance to actual companies or persons is purely coincidental.
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-indigo-dye mb-3">The Challenge</h3>
+            <p className="text-gray-600 mb-6">{businessStory.challenge}</p>
+            
+            <h3 className="text-lg font-semibold text-indigo-dye mb-3">The Solution</h3>
+            <p className="text-gray-600">{businessStory.solution}</p>
           </div>
-        ))}
+          
+          <div className="bg-white rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-indigo-dye mb-4">The Results</h3>
+            <ul className="space-y-3">
+              {businessStory.results.map((result, index) => (
+                <li key={index} className="flex items-start">
+                  <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-600">{result}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Features Section */}
@@ -179,21 +212,21 @@ const PerformanceManagementContent = () => {
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Top Performers</span>
+                <span className="text-gray-600">Performance Reviews</span>
                 <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  15% of team
+                  Completed
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Goals on Track</span>
+                <span className="text-gray-600">Employee Goals</span>
                 <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                  78% completion
+                  On Track
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Development Plans</span>
                 <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                  92% active
+                  Active
                 </div>
               </div>
             </div>

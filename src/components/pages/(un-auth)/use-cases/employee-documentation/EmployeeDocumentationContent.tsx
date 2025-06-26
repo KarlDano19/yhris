@@ -20,13 +20,13 @@ const EmployeeDocumentationContent = () => {
     },
     {
       icon: FolderIcon,
-      title: "Automated Organization",
-      description: "Intelligent categorization and filing system that automatically organizes documents by employee, department, and type."
+      title: "Organized Document Management",
+      description: "Structured categorization and filing system that helps organize documents by employee, department, and type."
     },
     {
       icon: MagnifyingGlassIcon,
-      title: "Advanced Search & Retrieval",
-      description: "Powerful search functionality to quickly find any document using keywords, employee names, or document types."
+      title: "Document Organization & Access",
+      description: "Organized filing system to easily locate and access documents by employee, department, or document category."
     },
     {
       icon: ShieldCheckIcon,
@@ -77,12 +77,12 @@ const EmployeeDocumentationContent = () => {
   const workflowSteps = [
     {
       step: "Upload",
-      description: "Drag and drop or batch upload documents with automatic categorization.",
+      description: "Drag and drop or batch upload documents with easy categorization.",
       icon: CloudArrowUpIcon
     },
     {
       step: "Organize",
-      description: "AI-powered filing system automatically sorts and tags documents.",
+      description: "Structured filing system helps sort and tag documents efficiently.",
       icon: FolderIcon
     },
     {
@@ -92,17 +92,23 @@ const EmployeeDocumentationContent = () => {
     },
     {
       step: "Retrieve",
-      description: "Quick search and download with full audit trail tracking.",
+      description: "Easy document access and download with full audit trail tracking.",
       icon: DocumentArrowDownIcon
     }
   ];
 
-  const metrics = [
-    { label: "Document Retrieval Time", value: "90% Faster" },
-    { label: "Storage Cost Reduction", value: "60%" },
-    { label: "Compliance Rate", value: "100%" },
-    { label: "User Satisfaction", value: "95%" }
-  ];
+  const businessStory = {
+    title: "From Filing Cabinets to Digital Excellence",
+    subtitle: "How Davao Construction Corp Modernized Document Management",
+    challenge: "Davao Construction Corp had rooms full of filing cabinets, lost employee records, and compliance nightmares. Finding a single document took hours, and audits were stressful ordeals with missing paperwork.",
+    solution: "YAHSHUA HRIS digitized their entire document system with secure cloud storage, organized filing structure, and systematic management that keeps everything compliant and accessible.",
+    results: [
+      "Eliminated physical filing rooms and storage costs",
+      "Locate documents easily with organized filing system",
+      "Stay compliant with organized deadline tracking",
+      "Remote access allows work from anywhere securely"
+    ]
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -122,14 +128,41 @@ const EmployeeDocumentationContent = () => {
         </p>
       </div>
 
-      {/* Metrics Section */}
-      <div className="grid md:grid-cols-4 gap-6 mb-20">
-        {metrics.map((metric, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-savoy-blue mb-2">{metric.value}</div>
-            <div className="text-sm text-gray-600">{metric.label}</div>
+      {/* Business Story Section */}
+      <div className="bg-gradient-to-br from-savoy-blue/5 to-indigo-50 rounded-2xl p-8 md:p-12 mb-20">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-indigo-dye mb-4">
+            {businessStory.title}
+          </h2>
+          <p className="text-lg text-savoy-blue font-medium mb-2">
+            {businessStory.subtitle}
+          </p>
+          <p className="text-xs text-gray-500 italic">
+            *This is a fictional story for illustration purposes. Any resemblance to actual companies or persons is purely coincidental.
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-indigo-dye mb-3">The Challenge</h3>
+            <p className="text-gray-600 mb-6">{businessStory.challenge}</p>
+            
+            <h3 className="text-lg font-semibold text-indigo-dye mb-3">The Solution</h3>
+            <p className="text-gray-600">{businessStory.solution}</p>
           </div>
-        ))}
+          
+          <div className="bg-white rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-indigo-dye mb-4">The Results</h3>
+            <ul className="space-y-3">
+              {businessStory.results.map((result, index) => (
+                <li key={index} className="flex items-start">
+                  <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-600">{result}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Features Section */}
@@ -237,7 +270,7 @@ const EmployeeDocumentationContent = () => {
             </div>
             <div className="flex items-start">
               <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-600">Automated retention policy management</span>
+              <span className="text-gray-600">Structured retention policy management</span>
             </div>
           </div>
         </div>
@@ -248,24 +281,24 @@ const EmployeeDocumentationContent = () => {
           </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Active Users</span>
+              <span className="text-gray-600">Document Storage</span>
               <div className="text-right">
-                <div className="text-lg font-semibold text-indigo-dye">247</div>
-                <div className="text-sm text-green-600">↑ 12% this month</div>
+                <div className="text-lg font-semibold text-indigo-dye">Secure</div>
+                <div className="text-sm text-green-600">Cloud-based</div>
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Documents Uploaded</span>
+              <span className="text-gray-600">Document Access</span>
               <div className="text-right">
-                <div className="text-lg font-semibold text-indigo-dye">1,543</div>
-                <div className="text-sm text-blue-600">This month</div>
+                <div className="text-lg font-semibold text-indigo-dye">Organized</div>
+                <div className="text-sm text-blue-600">Structured</div>
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Search Queries</span>
+              <span className="text-gray-600">Access Control</span>
               <div className="text-right">
-                <div className="text-lg font-semibold text-indigo-dye">892</div>
-                <div className="text-sm text-purple-600">Daily average</div>
+                <div className="text-lg font-semibold text-indigo-dye">Protected</div>
+                <div className="text-sm text-purple-600">Role-based</div>
               </div>
             </div>
           </div>
