@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-
-import useGetWorkAccidentIlnessReportsItems from "../../hooks/useGetWorkAccidentIlnessReportsItems";
+import Image from "next/image";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
+import useGetDisablingInjuryData from "../../hooks/useGetDisablingInjuryData";
 
 interface CachedProfileData {
   name: string;
@@ -23,6 +23,9 @@ function InjurySummary({
   setSelectedTab,
   setValue,
   isLoading,
+  watch,
+  initialEmployeeHours = 0,
+  initialDaysLost = 0,
 }: {
   control: any;
   register: any;
@@ -30,6 +33,9 @@ function InjurySummary({
   setSelectedTab: any;
   setValue: any;
   isLoading: boolean;
+  watch: any;
+  initialEmployeeHours?: number;
+  initialDaysLost?: number;
 }) {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient
@@ -44,7 +50,11 @@ function InjurySummary({
     useState<number>(0);
   const [employeeHours, setEmployeeHours] = useState<number>(0);
   const [daysLost, setDaysLost] = useState<number>(0);
-  const { data: reportsData, refetch: refetchReportsData } = useGetWorkAccidentIlnessReportsItems();
+
+  // Watch for existing signature URL from form
+  const existingSignatureUrl = watch("signature");
+
+  const { data: reportsData, refetch: refetchReportsData } = useGetDisablingInjuryData();
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -53,13 +63,16 @@ function InjurySummary({
   useEffect(() => {
     if (signatureUrl) {
       setValue("signature", signatureUrl);
-    } else {
-      setSignatureUrl("");
     }
-    if (!drawSignatureModal && signatureUrl) {
-      setSignatureUrl("");
+  }, [signatureUrl, setValue]);
+
+  // Check if there are existing signature URLs (for edit mode)
+  useEffect(() => {
+    if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
+      setAttachmentExist(true);
+      setSignatureUrl(existingSignatureUrl);
     }
-  }, [signatureUrl, setValue, drawSignatureModal]);
+  }, [existingSignatureUrl]);
 
   useEffect(() => {
     if (employeeHours > 0) {
@@ -86,12 +99,20 @@ function InjurySummary({
 
   useEffect(() => {
     if (reportsData && reportsData.records) {
-      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
-      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
-      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
+      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury === true).length;
+      const totalNonDisabling = reportsData.records.filter((report: any) => report.disabling_injury === false).length;
+      setValue("total_disabling_injuries", totalDisabling);
       setValue("total_non_disabling_injuries", totalNonDisabling);
+    } else {
+      setValue("total_disabling_injuries", 0);
+      setValue("total_non_disabling_injuries", 0);
     }
   }, [reportsData, setValue]);
+
+  useEffect(() => {
+    setEmployeeHours(initialEmployeeHours);
+    setDaysLost(initialDaysLost);
+  }, [initialEmployeeHours, initialDaysLost]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -114,19 +135,18 @@ function InjurySummary({
         <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
           <div>
             <label
-              htmlFor="total_all_disabling_injuries_illnesses"
+              htmlFor="total_disabling_injuries"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Total-All Disabling Injuries/ Illnesses
-              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("total_all_disabling_injuries_illnesses")}
+                {...register("total_disabling_injuries")}
                 disabled
-                id="total_all_disabling_injuries_illnesses"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                id="total_disabling_injuries"
+                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -136,7 +156,6 @@ function InjurySummary({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Total-Non-Disabling Injuries
-              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
@@ -144,7 +163,7 @@ function InjurySummary({
                 {...register("total_non_disabling_injuries")}
                 disabled
                 id="total_non_disabling_injuries"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -161,8 +180,8 @@ function InjurySummary({
                 type="text"
                 {...register("frequency_rate", { required: true })}
                 id="frequency_rate"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                // disabled
+                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                disabled
               />
             </div>
           </div>
@@ -179,8 +198,8 @@ function InjurySummary({
                 type="text"
                 {...register("severity_rate", { required: true })}
                 id="severity_rate"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                // disabled
+                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                disabled
               />
             </div>
           </div>
@@ -237,28 +256,68 @@ function InjurySummary({
                 id="signature"
                 {...register("signature")}
                 onChange={(e) => {
-                  e.target.value ? setSignatureUrl("") : null;
-                  e.target.value ? setAttachmentExist(true) : null;
+                  const file = e.target.files && e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setSignatureUrl(reader.result as string);
+                      setAttachmentExist(true);
+                    };
+                    reader.readAsDataURL(file);
+                  } else {
+                    setSignatureUrl("");
+                    setAttachmentExist(false);
+                  }
                 }}
                 type="file"
+                disabled={!!(existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http'))}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               {attachmentExist ? (
-                <button
-                  type="button"
-                  className="underline text-savoy-blue text-sm"
-                  onClick={() => {
-                    setValue("signature", "");
-                    setAttachmentExist(false);
-                  }}
-                >
-                  Remove Attachment
-                </button>
+                <div className="mt-2">
+                  {existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http') ? (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        className="underline text-red-600 text-sm"
+                        onClick={() => {
+                          setValue("signature", "");
+                          setAttachmentExist(false);
+                          setSignatureUrl("");
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="underline text-savoy-blue text-sm"
+                      onClick={() => {
+                        setValue("signature", "");
+                        setAttachmentExist(false);
+                      }}
+                    >
+                      Remove Attachment
+                    </button>
+                  )}
+                </div>
               ) : null}
             </div>
           </div>
         </div>
       </div>
+      {signatureUrl !== "" && (
+        <div className="mt-4">
+          <Image
+            className="border-0 ring-1 ring-inset ring-gray-300 m-auto"
+            src={signatureUrl}
+            width={500}
+            height={200}
+            alt="signatureImage"
+          />
+        </div>
+      )}
       {drawSignatureModal && (
         <DrawSignatureModal
           isOpen={drawSignatureModal}

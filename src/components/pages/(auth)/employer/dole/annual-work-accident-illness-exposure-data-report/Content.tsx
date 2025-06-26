@@ -9,7 +9,6 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 
-import UpdateReportModal from './modals/UpdateReportModal';
 import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
@@ -19,6 +18,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
 import CreateReportModal from './modals/CreateReportModal';
+import EditReportModal from './modals/EditReportModal';
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -43,7 +43,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [annualAccidentIllnessReportItems, setAnnualAccidentIllnessReportItems] = useState<any>([]);
   const [isDeleteAnnualAccidentIllnessReportModalOpen, setIsDeleteAnnualAccidentIllnessReportModalOpen] =
     useState<T_ModalData | null>(null);
-  const [isUpdateAnnualAccidentIllnessReportModalOpen, setIsUpdateAnnualAccidentIllnessReportModalOpen] =
+  const [isEditAnnualAccidentIllnessReportModalOpen, setIsEditAnnualAccidentIllnessReportModalOpen] =
     useState<T_ModalData | null>(null);
   const [isCreateAnnualAccidentIllnessReportModalOpen, setIsCreateAnnualAccidentIllnessReportModalOpen] =
     useState<boolean>(false);
@@ -241,7 +241,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex space-x-2'>
               <button
                 onClick={() =>
-                  setIsUpdateAnnualAccidentIllnessReportModalOpen({
+                  setIsEditAnnualAccidentIllnessReportModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -262,71 +262,73 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <div className='flex-1 flex justify-end'>
-                <Menu as='div' className='relative'>
-                  <Menu.Button className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                    <span className='sr-only'>Open options</span>
-                    <div className='flex gap-4'>
-                      <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
-                    </div>
-                  </Menu.Button>
-                  <Transition
-                    as={Fragment}
-                    enter='transition ease-out duration-100'
-                    enterFrom='transform opacity-0 scale-95'
-                    enterTo='transform opacity-100 scale-100'
-                    leave='transition ease-in duration-75'
-                    leaveFrom='transform opacity-100 scale-100'
-                    leaveTo='transform opacity-0 scale-95'
-                  >
-                    <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                      <div className='py-1'>
-                        {[
-                          {
-                            name: 'Download',
-                            action: () => {
-                              setIsExportProgressModalOpen(true);
-                            },
-                          },
-                          {
-                            name: 'Print',
-                            action: () => {
-                              handlePrint();
-                            },
-                          },
-                          {
-                            name: 'Edit',
-                            action: () => {
-                              setIsExportProgressModalOpen(true);
-                            },
-                          },
-                          {
-                            name: 'Delete',
-                            action: () => {
-                              setIsDeleteAnnualAccidentIllnessReportModalOpen({
-                                id: item.id,
-                                open: true,
-                              });
-                            },
-                          },
-                        ].map((menuItem) => (
-                          <Menu.Item key={menuItem.name}>
-                            {({ active }) => (
-                              <span
-                                className={classNames(
-                                  'block px-4 py-2 text-sm cursor-pointer text-center',
-                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                                )}
-                                onClick={menuItem.action}
-                              >
-                                {menuItem.name}
-                              </span>
-                            )}
-                          </Menu.Item>
-                        ))}
+                <div style={{ position: 'relative', overflow: 'visible' }}>
+                  <Menu as='div' className='relative'>
+                    <Menu.Button className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                      <span className='sr-only'>Open options</span>
+                      <div className='flex gap-4'>
+                        <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
                       </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
+                    </Menu.Button>
+                    <Transition
+                      as={Fragment}
+                      enter='transition ease-out duration-100'
+                      enterFrom='transform opacity-0 scale-95'
+                      enterTo='transform opacity-100 scale-100'
+                      leave='transition ease-in duration-75'
+                      leaveFrom='transform opacity-100 scale-100'
+                      leaveTo='transform opacity-0 scale-95'
+                    >
+                      <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                        <div className='py-1'>
+                          {[
+                            {
+                              name: 'Download',
+                              action: () => {
+                                setIsExportProgressModalOpen(true);
+                              },
+                            },
+                            // {
+                            //   name: 'Print',
+                            //   action: () => {
+                            //     handlePrint();
+                            //   },
+                            // },
+                            // {
+                            //   name: 'Edit',
+                            //   action: () => {
+                            //     setIsExportProgressModalOpen(true);
+                            //   },
+                            // },
+                            {
+                              name: 'Delete',
+                              action: () => {
+                                setIsDeleteAnnualAccidentIllnessReportModalOpen({
+                                  id: item.id,
+                                  open: true,
+                                });
+                              },
+                            },
+                          ].map((menuItem) => (
+                            <Menu.Item key={menuItem.name}>
+                              {({ active }) => (
+                                <span
+                                  className={classNames(
+                                    'block px-4 py-2 text-sm cursor-pointer text-center',
+                                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                  )}
+                                  onClick={menuItem.action}
+                                >
+                                  {menuItem.name}
+                                </span>
+                              )}
+                            </Menu.Item>
+                          ))}
+                        </div>
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
+                </div>
               </div>
             </div>
           </td>
@@ -461,7 +463,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8' style={{ overflow: 'visible' }}>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
@@ -531,11 +533,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteAnnualAccidentIllnessReportModalOpen}
         />
       )}
-      {isUpdateAnnualAccidentIllnessReportModalOpen && (
-        <UpdateReportModal
+      {isEditAnnualAccidentIllnessReportModalOpen && (
+        <EditReportModal
           refetch={annualAccidentIllnessReportRefetch}
-          isOpen={isUpdateAnnualAccidentIllnessReportModalOpen}
-          setIsOpen={setIsUpdateAnnualAccidentIllnessReportModalOpen}
+          isOpen={isEditAnnualAccidentIllnessReportModalOpen}
+          setIsOpen={setIsEditAnnualAccidentIllnessReportModalOpen}
         />
       )}
       {isExportProgressModalOpen && (

@@ -327,14 +327,6 @@ function TechnicalAndSignature({
                 <div className="mt-2">
                   {existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http') ? (
                     <div className="flex items-center space-x-2">
-                      <a 
-                        href={existingSignatureUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-savoy-blue text-sm underline"
-                      >
-                        View Existing File
-                      </a>
                       <button
                         type="button"
                         className="underline text-red-600 text-sm"

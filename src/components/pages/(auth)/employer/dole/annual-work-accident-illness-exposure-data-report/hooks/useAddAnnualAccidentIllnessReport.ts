@@ -6,9 +6,12 @@ async function addAnnualAccidentIllnessReport(data: any) {
     const token = getCookie("token");
 
     if (data.date_of_report) {
-      const reportDate = new Date(data.date_of_report);
-      if (!isNaN(reportDate.getTime())) {
-        data.date_of_report = reportDate.toISOString().split("T")[0];
+      const dateOfReport = new Date(data.date_of_report);
+      if (!isNaN(dateOfReport.getTime())) {
+        // Adjust for timezone offset to preserve local date
+        const offset = dateOfReport.getTimezoneOffset();
+        const adjustedDate = new Date(dateOfReport.getTime() - offset * 60000);
+        data.date_of_report = adjustedDate.toISOString().split("T")[0];
       }
     }
 

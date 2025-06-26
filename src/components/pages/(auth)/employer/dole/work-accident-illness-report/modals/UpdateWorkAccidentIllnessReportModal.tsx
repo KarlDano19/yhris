@@ -83,6 +83,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
       setValue('days_of_absence_illness', workAccidentIllnessReportData.days_of_absence_illness);
       setValue('days_chargeable_illness', workAccidentIllnessReportData.days_chargeable_illness);
       setValue('date_returned_to_work_illness', workAccidentIllnessReportData.date_returned_to_work_illness);
+      setValue('disabling_injury', workAccidentIllnessReportData.disabling_injury ? 'yes' : 'no');
     }
   }, [workAccidentIllnessReportData]);
 
@@ -93,6 +94,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
   }
 
   const onSubmit = handleSubmit((data: any) => {
+    data.disabling_injury = data.disabling_injury === 'yes';
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -144,7 +146,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Create Work Accident/Illness Report
+                    Edit Work Accident/Illness Report
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
