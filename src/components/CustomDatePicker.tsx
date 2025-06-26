@@ -83,6 +83,7 @@ const CustomDatePicker = ({
   });
 
   return (
+    // @ts-ignore
     <DatePicker
       wrapperClassName='w-full'
       popperClassName='!z-20'
