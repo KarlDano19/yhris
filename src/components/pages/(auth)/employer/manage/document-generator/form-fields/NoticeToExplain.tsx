@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { DatePickerField } from './DatePickerField';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
+import { toast } from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 interface FieldProps {
   formData: NoticeToExplainFormData;
@@ -135,11 +137,20 @@ export const IncidentPlaceField = ({ formData, handleInputChange, disabled, isSu
 
 export const BriefBackgroundField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
   const [showValidation, setShowValidation] = useState(false);
-  
+  const maxLength = 430;
+
   useEffect(() => {
     setShowValidation(isSubmitted === true && !formData.briefBackground);
   }, [isSubmitted, formData.briefBackground]);
-  
+
+  const handleBriefBackgroundChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    if (e.target.value.length > maxLength) {
+      toast.custom(() => <CustomToast message={`Brief Background cannot exceed ${maxLength} characters.`} type="error" />);
+      return;
+    }
+    handleInputChange(e);
+  };
+
   return (
     <div className="mb-4">
       <label htmlFor="briefBackground" className="block text-sm font-medium text-gray-700 mb-1">
@@ -150,8 +161,9 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         name="briefBackground"
         placeholder="Enter brief background"
         value={formData.briefBackground}
-        onChange={handleInputChange}
+        onChange={handleBriefBackgroundChange}
         rows={4}
+        maxLength={maxLength + 1}
         className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
         } ${
@@ -161,6 +173,9 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         }`}
         disabled={disabled}
       />
+      <div className="text-xs text-gray-500 text-right mt-1">
+        {formData.briefBackground.length}/{maxLength} characters
+      </div>
     </div>
   );
 };

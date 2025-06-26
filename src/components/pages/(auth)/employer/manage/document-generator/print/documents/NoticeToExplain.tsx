@@ -173,15 +173,22 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
   // Border color with fallback to default amber
   const borderColor = data.borderColor || '#FFC107';
 
+  // Estimate content length for conditional page break
+  const contentLength =
+    (data.briefBackground?.length || 0) +
+    (data.employeeExplanation?.length || 0) +
+    (data.hearingNotes?.length || 0) +
+    (data.managementDecision?.length || 0);
+  // You can adjust this threshold as needed (e.g., 1200)
+  const needsPageBreak = contentLength > 1200;
+
   // Generate HTML for the document - no longer using character-based chunking
   const documentHTML = `
     <div class="document-container">
       <!-- Header Section -->
       <div class="section avoid-break">
         <div class="logo-container">
-          ${logoSrc ? `
-            <img src="${logoSrc}" alt="Company Logo">
-          ` : `<div class="space"></div>`}
+          ${logoSrc ? `<img src="${logoSrc}" alt="Company Logo">` : `<div class="space"></div>`}
         </div>
         
         <div class="document-title">NOTICE TO EXPLAIN</div>
@@ -297,18 +304,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Signatures Section -->
-      <div class="section avoid-break page-break-before">
-
-        <!-- Continued Header -->
-        <div class="logo-container">
-          ${logoSrc ? `
-            <img src="${logoSrc}" alt="Company Logo">
-          ` : `<div style="height: 100%;"></div>`}
-        </div>
-        
-        <div class="document-title">NOTICE TO EXPLAIN</div>
-        <div class="document-subtitle">${data.incidentPlace || '[Place of Incident]'}</div>
-        
+      <div class="section avoid-break">
         <table class="signature-table">
           <tr>
             <td class="signature-cell signature-cell-left">
@@ -317,22 +313,22 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
                   <img src="${signatureSrc}" class="signature-image-table" alt="Signature">
                 </div>
               ` : '<div class="signature-image-container-table"></div>'}
-              <div class="signature-name">${data.reviewedBy || '\u00A0'}</div>
+              <div>${data.reviewedBy || '\u00A0'}</div>
               <div class="signature-line"></div>
               <div class="signature-title">Immediate Supervisor/Manager Signature</div>
             </td>
             
             <td class="signature-cell signature-cell-right">
               <div class="signature-image-container-table"></div>
-              <div class="signature-name">${data.employeeName || '[Employee Name]'}</div>
+              <div>${data.employeeName || '[Employee Name]'}</div>
               <div class="signature-line"></div>
               <div class="signature-title">Employee Signature</div>
             </td>
           </tr>
         </table>
       </div>
-        </div>
-      `;
+    </div>
+  `;
 
   return `
     <!DOCTYPE html>
@@ -357,7 +353,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         
         @page {
           size: A4;
-          margin: 0.1cm 1cm 1cm 1cm; /* top right bottom left */
+          margin: 0.3cm 1cm 0cm 1cm; /* top right bottom left */
         }
         
         .document-container {
@@ -537,7 +533,6 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           border-collapse: collapse;
           font-size: 12px;
           color: #000;
-          margin-bottom: 10px;
         }
         
         .signature-cell {
@@ -568,10 +563,6 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         .signature-cell-right {
           padding-left: 12px;
           padding-right: 0;
-        }
-        
-        .signature-name {
-          margin-top: 5px;
         }
         
         .signature-title {

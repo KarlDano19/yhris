@@ -189,7 +189,7 @@ export default function Form({
     setIsSubmitted(true);
     
     // Common validation for all document types
-    if (!formData.employeeName || !formData.position || !formData.signature) {
+    if (!formData.employeeName || !formData.position) {
       toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
       return false;
     }
@@ -226,8 +226,8 @@ export default function Form({
       const noticeData = formData as NoticeToExplainFormData;
       
       // Check required fields for Notice to Explain
-      if (!noticeData.employeeName || !noticeData.companyName || !noticeData.position || !noticeData.dateIssued || !noticeData.incidentDate || !noticeData.incidentPlace || !noticeData.briefBackground || !noticeData.signature) {
-        toast.custom(() => <CustomToast message="Please fill in all required fields: Employee Name, Company Name, Position/Title, Date Issued, Date of Incident, Place of Incident, Brief Background, and Signature" type="error" />);
+      if (!noticeData.employeeName || !noticeData.companyName || !noticeData.position || !noticeData.dateIssued || !noticeData.incidentDate || !noticeData.incidentPlace || !noticeData.briefBackground) {
+        toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
         return false;
       }
     }

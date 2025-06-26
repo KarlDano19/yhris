@@ -31,7 +31,7 @@ interface Page {
 }
 
 // Characters per page (approximate)
-const CHARS_PER_PAGE = 1500;
+const CHARS_PER_PAGE = 1900;
 const HEADER_CHARS = 800;
 const EXPLANATION_CHARS = 150;
 const HEARING_CHARS = 150;
