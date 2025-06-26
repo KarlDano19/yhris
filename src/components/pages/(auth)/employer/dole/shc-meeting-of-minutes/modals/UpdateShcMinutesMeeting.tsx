@@ -80,6 +80,7 @@ function UpdateShcMinutesMeetingModal({
         setValue("details_of_meeting", minutesMeetingData.details_of_meeting);
         setValue("prepared_by", minutesMeetingData.prepared_by);
         setValue("position", minutesMeetingData.position);
+        setValue("signature", minutesMeetingData.signature);
     }
   })
 

@@ -5,6 +5,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
@@ -34,6 +35,8 @@ function TechnicalAndSignature({
   const [attachmentPolicyExist, setAttachmentPolicyExist] = useState(false);
   const [attachmentExist, setAttachmentExist] = useState(false);
 
+  const existingSignatureUrl = control?._formValues?.signature;
+
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
   };
@@ -41,13 +44,8 @@ function TechnicalAndSignature({
   useEffect(() => {
     if (signatureUrl) {
       setValue("signature", signatureUrl);
-    } else {
-      setSignatureUrl("");
     }
-    if (!drawSignatureModal && signatureUrl) {
-      setSignatureUrl("");
-    }
-  }, [signatureUrl, setValue, drawSignatureModal]);
+  }, [signatureUrl, setValue]);
 
   useEffect(() => {
     if (fileUrl) {
@@ -56,6 +54,13 @@ function TechnicalAndSignature({
       setFileUrl("");
     }
   }, [fileUrl, setValue]);
+
+  useEffect(() => {
+    if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
+      setAttachmentExist(true);
+      setSignatureUrl(existingSignatureUrl);
+    }
+  }, [existingSignatureUrl]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -146,28 +151,69 @@ function TechnicalAndSignature({
                 id="signature"
                 {...register("signature")}
                 onChange={(e) => {
-                  e.target.value ? setSignatureUrl("") : null;
-                  e.target.value ? setAttachmentExist(true) : null;
+                  const file = e.target.files && e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setSignatureUrl(reader.result as string);
+                      setAttachmentExist(true);
+                    };
+                    reader.readAsDataURL(file);
+                  } else {
+                    setSignatureUrl("");
+                    setAttachmentExist(false);
+                  }
                 }}
                 type="file"
+                disabled={!!(existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http'))}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               {attachmentExist ? (
-                <button
-                  type="button"
-                  className="underline text-savoy-blue text-sm"
-                  onClick={() => {
-                    setValue("signature", "");
-                    setAttachmentExist(false);
-                  }}
-                >
-                  Remove Attachment
-                </button>
+                <div className="mt-2">
+                  {existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http') ? (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        className="underline text-red-600 text-sm"
+                        onClick={() => {
+                          setValue("signature", "");
+                          setAttachmentExist(false);
+                          setSignatureUrl("");
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="underline text-savoy-blue text-sm"
+                      onClick={() => {
+                        setValue("signature", "");
+                        setAttachmentExist(false);
+                        setSignatureUrl("");
+                      }}
+                    >
+                      Remove Attachment
+                    </button>
+                  )}
+                </div>
               ) : null}
             </div>
           </div>
         </div>
       </div>
+      {signatureUrl !== "" && (
+        <div className="mt-4">
+          <Image
+            className="border-0 ring-1 ring-inset ring-gray-300 m-auto"
+            src={signatureUrl}
+            width={500}
+            height={200}
+            alt="signatureImage"
+          />
+        </div>
+      )}
       {drawSignatureModal && (
         <DrawSignatureModal
           isOpen={drawSignatureModal}

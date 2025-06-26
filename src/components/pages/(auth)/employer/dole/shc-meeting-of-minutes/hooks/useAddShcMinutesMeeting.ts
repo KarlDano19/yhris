@@ -1,6 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
+// Utility to convert dataURL to File
+function dataURLtoFile(dataurl: string, filename: string) {
+  const arr = dataurl.split(',');
+  const mimeMatch = arr[0].match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : '';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
 async function addShcMinutesMeeting(data: any) {
   try {
     const token = getCookie("token");
@@ -26,6 +40,19 @@ async function addShcMinutesMeeting(data: any) {
     formData.append("details_of_meeting", data.details_of_meeting);
     formData.append("prepared_by", data.prepared_by);
     formData.append("position", data.position);
+
+    // Handle signature
+    if (data.signature) {
+      if (typeof data.signature === "string" && data.signature.startsWith("data:")) {
+        // Drawn signature (data URL)
+        const file = dataURLtoFile(data.signature, "signature.png");
+        formData.append("signature", file);
+      } else if (data.signature instanceof File) {
+        // Uploaded file
+        formData.append("signature", data.signature);
+      }
+    }
+
     const config = {
       method: "POST",
       headers: {

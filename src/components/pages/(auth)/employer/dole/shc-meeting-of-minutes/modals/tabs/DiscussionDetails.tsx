@@ -92,7 +92,14 @@ export default function DiscussionDetails({
         </div>
       </div>
       <hr />
-      <div className="py-4 px-4 text-right">
+      <div className="flex justify-between py-4 px-4">
+        <button
+          type="button"
+          className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          onClick={() => setSelectedTab(1)}
+        >
+          Back
+        </button>
         <button
           type="submit"
           className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
