@@ -1,8 +1,11 @@
 import { Dispatch, Fragment } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
+
+import useGetLocationItems from '@/components/hooks/useGetLocationItems';
+
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
-import useGetLocationItems from '@/components/hooks/useGetLocationItems';
 
 type SelectBranchModalProps = {
   isOpen: boolean;

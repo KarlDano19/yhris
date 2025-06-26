@@ -3,11 +3,11 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -17,7 +17,6 @@ import classNames from '@/helpers/classNames';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import useGetWorkAccidentIlnessReportsItems from '../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems';
 import CreateWemRequestModal from './modals/CreateWemRequestModal';
 import ExportProgressModal from '../employee-compensation-logbook/modals/ExportProgressModal';
 import useGetWorkEnvironmentRequestItems from './hooks/useGetWorkEnvironmentRequestItems';
@@ -49,6 +48,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
@@ -108,7 +108,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     workEnvironmentRequestItemsRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, workEnvironmentRequestItemsRefetch]);
+
+  useEffect(() => {
+    if (!isWorkEnvironmentRequestItemsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isWorkEnvironmentRequestItemsLoading, isSearching]);
 
   const handlePrint = () => {
     // Create a new div element
@@ -145,7 +151,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -167,6 +173,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setIsSearching(true);
     workEnvironmentRequestItemsRefetch();
   };
 
@@ -181,7 +188,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isWorkEnvironmentRequestItemsLoading) {
+    if (isSearching || isWorkEnvironmentRequestItemsLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -343,9 +350,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
-                    type='text'
+                  type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Risk Classification, Conducted By'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
@@ -354,7 +364,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -657,6 +667,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <p className='mt-4 text-xl text-center'>-- Nothing follows --</p>
         </div>
       </div>
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 }

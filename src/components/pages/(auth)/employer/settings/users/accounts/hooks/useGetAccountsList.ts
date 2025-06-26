@@ -3,8 +3,6 @@ import { getCookie } from 'cookies-next';
 
 interface newFiltersProps {
   search?: string;
-  from?: string;
-  to?: string;
   current_page?: number;
   page_size?: number;
 }

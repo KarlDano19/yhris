@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef, use } from 'react';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
@@ -26,6 +27,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [isSearching, setIsSearching] = useState(false);
 
   const {
     data: dataEvaluationHistoryItems,
@@ -46,33 +48,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetchEvaluationHistoryItems();
   }, []);
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
-
     if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
     }
     if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
     }
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       return toast.custom(
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
+        { duration: 5000 }
       );
     }
+    setIsSearching(true);
     refetchEvaluationHistoryItems();
   };
 
+  useEffect(() => {
+    if (!isLoadingEvaluationHistoryItems && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLoadingEvaluationHistoryItems, isSearching]);
+
   const renderRows = () => {
-    if (isLoadingEvaluationHistoryItems) {
+    if (isSearching || isLoadingEvaluationHistoryItems) {
       return (
         <tr>
           <td colSpan={100}>
@@ -202,21 +204,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
-                    type='text'
+                  type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for Employee Name'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
-              <MagnifyingGlassIcon className='h-5 w-5' />
-            </button>
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
+                <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
             </div>
           </div>
           <div className='mt-8 flow-root'>
@@ -265,6 +270,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsEvaluationDetailsModalOpen}
         />
       )}
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };

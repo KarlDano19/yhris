@@ -3,11 +3,11 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -25,6 +25,7 @@ import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportMo
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import { useQueryClient } from '@tanstack/react-query';
+import ExportProgressModal from './modals/ExportProgressModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -48,6 +49,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -109,7 +111,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     healthAndSafetyReportItemsRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, healthAndSafetyReportItemsRefetch]);
+
+  useEffect(() => {
+    if (!isHealthAndSafetyReportItemsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isHealthAndSafetyReportItemsLoading, isSearching]);
 
   const handlePrintWithBranch = () => {
     if (selectedBranch) {
@@ -153,7 +161,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -175,6 +183,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setIsSearching(true);
     healthAndSafetyReportItemsRefetch();
   };
 
@@ -189,7 +198,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isHealthAndSafetyReportItemsLoading) {
+    if (isSearching || isHealthAndSafetyReportItemsLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -220,7 +229,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return healthAndSafetyReportItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_report}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.person_employed}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {Number(item.total_employees_male || 0) + Number(item.total_employees_female || 0)}
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.comittee_type}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.chairman_name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
@@ -337,6 +348,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Safety Committee Type, Chairman/ Officer in Charge'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
@@ -345,7 +359,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -453,27 +467,34 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isCreateHealthAndSafetyReportModalOpen && (
         <CreateHealthAndSafetyReportModal
-          refetch={null}
+          refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isCreateHealthAndSafetyReportModalOpen}
           setIsOpen={setIsCreateHealthAndSafetyReportModalOpen}
         />
       )}
       {isDeleteHealthAndSafetyReportModalOpen && (
         <DeleteHealthAndSafetyReportModal
-          refetch={null}
+          refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isDeleteHealthAndSafetyReportModalOpen}
           setIsOpen={setIsDeleteHealthAndSafetyReportModalOpen}
         />
       )}
       {isEditHealthAndSafetyReportModalOpen && (
         <EditHealthAndSafetyReportModal
-          refetch={null}
+          refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isEditHealthAndSafetyReportModalOpen}
           setIsOpen={setIsEditHealthAndSafetyReportModalOpen}
         />
       )}
       {isSendEmailModalOpen && (
-        <SendEmailModal refetch={null} isOpen={isSendEmailModalOpen} setIsOpen={setIsSendEmailModalOpen} />
+        <SendEmailModal refetch={healthAndSafetyReportItemsRefetch} isOpen={isSendEmailModalOpen} setIsOpen={setIsSendEmailModalOpen} />
+      )}
+      {isExportProgressModalOpen && (
+        <ExportProgressModal
+          isOpen={isExportProgressModalOpen}
+          setIsOpen={setIsExportProgressModalOpen}
+          itemsFilter={itemsFilter}
+        />
       )}
       {/* Print Section */}
       {/* <div className="container mx-auto p-4 hidden">
@@ -643,6 +664,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
         </div>
       </div> */}
+      <Tooltip id='search-tooltip' /> 
     </>
   );
 }

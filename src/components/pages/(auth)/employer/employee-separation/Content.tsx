@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -50,6 +51,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems(itemsFilter);
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [isSearching, setIsSearching] = useState(false);
 
   const setReceived = (id: string, emailType: string) => {
     const itemIndex = separationItems.findIndex((item: any) => item.id === id);
@@ -84,6 +86,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
     mutate(separationItemsCopy[itemIndex], callbackReq);
   };
+
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    refetch();
+  };
+
+  useEffect(() => {
+    if (!isGetSeparationLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetSeparationLoading, isSearching]);
 
   useEffect(() => {
     refetch();
@@ -143,7 +170,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [dataSeparation]);
 
   const renderRows = () => {
-    if (isGetSeparationLoading) {
+    if (isSearching || isGetSeparationLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -247,31 +274,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetch();
-  };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -331,19 +333,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
-                    type='text'
+                  type='text'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Employee Name / Reason of Leaving'
+                  data-tooltip-place='bottom'
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
@@ -431,6 +436,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteSepartionModalOpen}
         />
       )}
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };

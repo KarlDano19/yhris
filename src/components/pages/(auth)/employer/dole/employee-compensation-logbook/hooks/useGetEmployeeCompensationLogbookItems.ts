@@ -16,6 +16,8 @@ async function getEmployeeCompensationLogbookItems(filters: any) {
     if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    if (!newFilters.from) delete newFilters.from;
+    if (!newFilters.to) delete newFilters.to;
     const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie('token');
     const config = {
@@ -47,10 +49,16 @@ async function getEmployeeCompensationLogbookItems(filters: any) {
 
 function useGetEmployeeCompensationLogbookItems(filters: any) {
   const query = useQuery(
-    ['employeeCompensationLogbookItemsCache'],
+    [
+      'employeeCompensationLogbookItemsCache',
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to
+    ],
     () => getEmployeeCompensationLogbookItems(filters),
     {
-      enabled: false,
       keepPreviousData: true,
     }
   );

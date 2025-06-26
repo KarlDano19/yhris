@@ -15,12 +15,11 @@ async function getWorkAccidentIlnessReportsItems(filters: any) {
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
     if (filters.search) newFilters.search = filters.search;
-    if (filters.from)
-      newFilters.from = filters.from.toLocaleDateString("en-CA");
-    if (filters.to) newFilters.to = filters.to.toLocaleDateString("en-CA");
-    const searchParams = new URLSearchParams(
-      Object.entries(newFilters).map(([key, value]) => [key, String(value)])
-    );
+    if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
+    if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    if (!newFilters.from) delete newFilters.from;
+    if (!newFilters.to) delete newFilters.to;
+    const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie("token");
     const config = {
       method: "GET",
@@ -51,10 +50,16 @@ async function getWorkAccidentIlnessReportsItems(filters: any) {
 
 function useGetWorkAccidentIlnessReportsItems(filters: any) {
   const query = useQuery(
-    ["workAccidentIlnessReportsItemsCache"],
+    [
+      'workAccidentIlnessReportsItemsCache',
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to
+    ],
     () => getWorkAccidentIlnessReportsItems(filters),
     {
-      enabled: false,
       keepPreviousData: true,
     }
   );

@@ -5,10 +5,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
-import CustomDatePicker from '@/components/CustomDatePicker';
-import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
 import DeleteEvaluationSchedulerModal from './modals/DeleteEvaluationSchedulerModal';
@@ -34,8 +32,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   const [itemsFilter, setItemsFilter] = useState<any>({
-    from: '',
-    to: '',
     search: '',
   });
   const {
@@ -43,6 +39,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isGetEvaluationSchedulerLoading,
     refetch: refetchEvaluationScheduler,
   } = useGetEvaluationSchedulerItems(itemsFilter);
+
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     refetchEvaluationScheduler();
@@ -118,8 +116,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     );
   };
 
+  const handleSearch = () => {
+    setIsSearching(true);
+    refetchEvaluationScheduler();
+  };
+
+  useEffect(() => {
+    if (!isGetEvaluationSchedulerLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetEvaluationSchedulerLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetEvaluationSchedulerLoading) {
+    if (isSearching || isGetEvaluationSchedulerLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -203,31 +212,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetchEvaluationScheduler();
-  };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -240,68 +224,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Scheduler</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
-              <div className='relative'>
-                <CustomDatePicker
-                  id='from-datepicker'
-                  placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
-                  selected={itemsFilter.from}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value,
-                    });
-                  }}
-                />
-              </div>
-              <p>to</p>
-              <div className='relative'>
-                <CustomDatePicker
-                  id='to-datepicker'
-                  placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
-                  selected={itemsFilter.to}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value,
-                    });
-                  }}
-                  minDate={itemsFilter.from}
-                />
-              </div>
-            </div>
             <div className='flex gap-2 lg:w-1/3'>
               <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
-                    type='text'
+                  type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for Schedule: Name / Evaluation Template'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
-                <div className='absolute inset-y-0 right-0 flex py-2 pr-2'>
-                  <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-                </div>
               </div>
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -385,6 +326,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvaluationSchedulerId={selectedEvaluationSchedulerId}
         />
       )}
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 }

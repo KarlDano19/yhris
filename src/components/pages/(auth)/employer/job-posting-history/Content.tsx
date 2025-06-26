@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
@@ -61,7 +62,12 @@ const Content = () => {
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
-  const [itemsFilter, setItemsFilter] = useState<any>({
+  const [pendingFilter, setPendingFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -79,7 +85,7 @@ const Content = () => {
     isLoading: isGetJobPostLoading,
     refetch,
   } = useGetJobPostItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -88,6 +94,7 @@ const Content = () => {
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
@@ -279,8 +286,33 @@ const Content = () => {
     window.open(LinkedInSharer);
   };
 
+  const handleSearch = () => {
+    const dateFrom = Date.parse(pendingFilter.from);
+    const dateTo = Date.parse(pendingFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    setAppliedFilter({ ...pendingFilter });
+  };
+
+  useEffect(() => {
+    if (!isGetJobPostLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetJobPostLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetJobPostLoading) {
+    if (isSearching || isGetJobPostLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -450,31 +482,6 @@ const Content = () => {
     }
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
-    }
-    if (dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
-      );
-    }
-    refetch();
-  };
-
   return (
     <div>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -495,15 +502,12 @@ const Content = () => {
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.from}
+                  selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                    setPendingFilter({ ...pendingFilter, from: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, from: value });
                   }}
                 />
               </div>
@@ -515,18 +519,14 @@ const Content = () => {
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.to}
+                  selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
+                    setPendingFilter({ ...pendingFilter, to: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, to: value });
                   }}
-                  minDate={itemsFilter.from}
+                  minDate={pendingFilter.from}
                 />
               </div>
             </div>
@@ -537,15 +537,26 @@ const Content = () => {
                     type='text'
                     name='search'
                     id='search'
+                    data-tooltip-id='search-tooltip'
+                    data-tooltip-content='Search for Job: Title, Type, Schedule'
+                    data-tooltip-place='bottom'
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                    onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                    value={pendingFilter.search}
+                    onChange={(e) => {
+                      setPendingFilter({ ...pendingFilter, search: e.target.value });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch();
+                      }
+                    }}
                     placeholder='Search ...'
                   />
                 </div>
               </div>
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
+                onClick={handleSearch}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -621,6 +632,7 @@ const Content = () => {
       {isDeleteModalOpen?.open && (
         <DeleteJobModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
       )}
+      <Tooltip id='search-tooltip' />
     </div>
   );
 };

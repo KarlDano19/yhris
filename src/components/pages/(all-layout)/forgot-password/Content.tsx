@@ -16,13 +16,14 @@ import CustomToast from "@/components/CustomToast";
 
 const Content = () => {
   const [showInstructionModal, setInstructionModal] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const { register, handleSubmit, reset } = useForm<any>();
-  const [email, setEmail] = useState('');
-  const { mutate, isLoading } = useSendLink();
+  const { mutate } = useSendLink();
 
   const onSubmit = (data: any) => {
     const callBackReq = {
       onSuccess: () => {
+        setSubmittedEmail(data.email);
         setInstructionModal(true);
         reset();
       },
@@ -66,8 +67,8 @@ const Content = () => {
                     Forgot your Password?
                   </h1>
                   <p className='text-center text-[#6F829B]'>
-                    Enter your email below and we’ll send you a link to reset
-                    your password.
+                    Enter your email below and we&apos;ll send you a link to
+                    reset your password.
                   </p>
                 </div>
                 <form className='' onSubmit={handleSubmit(onSubmit)}>
@@ -82,7 +83,6 @@ const Content = () => {
                       type='email'
                       id='email'
                       {...register('email', { required: true })}
-                      onChange={(e) => setEmail(e.currentTarget.value)}
                       className='bg-gray-50 border border-gray-300 text-gray-900 pl-11 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                       placeholder='Email'
                       tabIndex={1}
@@ -109,7 +109,7 @@ const Content = () => {
             <InstructionModal
               open={showInstructionModal}
               onClose={() => setInstructionModal(false)}
-              name={email}
+              name={submittedEmail}
             />
           </div>
         </>

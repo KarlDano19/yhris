@@ -6,6 +6,8 @@ async function getBenefitItems(filters: any) {
     let newFilters = {...filters};
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    if (!newFilters.from) delete newFilters.from;
+    if (!newFilters.to) delete newFilters.to;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {

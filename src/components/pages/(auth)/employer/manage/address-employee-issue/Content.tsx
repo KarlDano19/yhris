@@ -1,9 +1,11 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
+
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -49,6 +51,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const [searchText, setSearchText] = useState('');
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,7 +85,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isGetEmployeeIssuesLoading,
     refetch,
   } = useGetEmployeeIssueItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -87,7 +94,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: dataPosition } = useGetPositionItems();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-  const searchParams = useSearchParams();
+  const [isSearching, setIsSearching] = useState(false);
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -126,14 +133,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
     mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
   };
-
-  useEffect(() => {
-    refetch();
-  }, []);
-
-  useEffect(() => {
-    refetch();
-  }, [currentPage, pageSize]);
 
   useEffect(() => {
     if (dataDepartment) {
@@ -274,7 +273,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         totalRecords
       });
     }
-  }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition]);
+  }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition, pageSize]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -309,24 +308,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    
-    // Update itemsFilter with the current searchText
-    setItemsFilter((prev: {from: string; to: string; search: string}) => ({
-      ...prev,
+    setIsSearching(true);
+    setAppliedFilter({
+      ...itemsFilter,
       search: searchText
-    }));
-    
-    // Reset to first page when searching
-    setCurrentPage(1);
-    
-    // Explicitly call refetch to trigger the search with all filters
-    setTimeout(() => {
-      refetch();
-    }, 0);
+    });
   };
 
+  useEffect(() => {
+    if (!isGetEmployeeIssuesLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetEmployeeIssuesLoading, isSearching]);
+
   const renderRows = () => {
-    if (isGetEmployeeIssuesLoading) {
+    if (isSearching || isGetEmployeeIssuesLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -439,7 +435,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      from: value,
+                      from: value?.target?.value === '' ? null : value,
                     });
                   }}
                 />
@@ -460,7 +456,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      to: value,
+                      to: value?.target?.value === '' ? null : value,
                     });
                   }}
                   minDate={itemsFilter.from}
@@ -474,6 +470,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for Employee Name'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setSearchText(e.target.value)}
                   onKeyDown={(e) => {
@@ -595,6 +594,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDecisionAttachmentViewModalOpen}
         />
       )}
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };
