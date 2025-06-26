@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Dispatch, Fragment, useRef, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
@@ -22,15 +22,21 @@ function CreateHealthAndSafetyReportModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { register, handleSubmit, reset, control, setValue, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
   const {
     mutate: addWorkEnvironmentRequest,
-    isLoading: isLoadingAddWorkEnvironmentRequest,
     } = useAddHealthAndSafetyReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
+  const handleClose = () => {
+    setIsOpen(false);
+    reset();
+  };
+
   const onSubmit = handleSubmit((data) => {
+    if (data.employees) {
+      data.shift_employees = JSON.stringify(data.employees);
+    }
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -39,12 +45,16 @@ function CreateHealthAndSafetyReportModal({
             duration: 5000,
           }
         );
-        setIsOpen(false);
-        reset();
-        refetch();
+        handleClose();
+        if (typeof refetch === 'function') {
+          refetch();
+        }
       },
       onError: (err: any) => {
-        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
+        let errorMessage = err.message || "An unexpected error occurred.";
+        if (err.description && typeof err.description === 'string' && err.description.toLowerCase().includes('chairman')) {
+          errorMessage = err.description;
+        }
         toast.custom(
           () => <CustomToast message={errorMessage} type="error" />,
           {
@@ -94,7 +104,7 @@ function CreateHealthAndSafetyReportModal({
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleClose}
                   />
                 </div>
                 {selectedTab === 1 && (
@@ -104,6 +114,7 @@ function CreateHealthAndSafetyReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -113,6 +124,7 @@ function CreateHealthAndSafetyReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -122,6 +134,7 @@ function CreateHealthAndSafetyReportModal({
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>

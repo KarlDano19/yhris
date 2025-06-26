@@ -1,4 +1,5 @@
 import { Golos_Text } from 'next/font/google';
+import 'react-quill/dist/quill.snow.css';
 
 import { Toaster } from 'react-hot-toast';
 

@@ -1,4 +1,6 @@
 "use client";
+
+import { useEffect } from "react";
 import { useFieldArray } from "react-hook-form";
 
 import { MinusIcon, XCircleIcon } from "@heroicons/react/24/solid";
@@ -6,19 +8,38 @@ import { MinusIcon, XCircleIcon } from "@heroicons/react/24/solid";
 export default function RiskManagement({
   control,
   register,
+  validationMessage,
 }: {
   control: any;
   register: any;
+  validationMessage?: string;
 }) {
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: "emergency_and_disaster_preparedness",
   });
 
+  // Initialize with an empty row if there are no fields
+  useEffect(() => {
+    if (fields.length === 0) {
+      handleAddNewLine();
+    }
+  }, []);
+
+  const handleAddNewLine = () => {
+    append({
+      task: "",
+      hazard_identified: "",
+      risk_description: "",
+      priority: "",
+      control_measures: ""
+    });
+  };
+
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
+        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon
@@ -28,7 +49,7 @@ export default function RiskManagement({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
+                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
               </h3>
             </div>
           </div>
@@ -69,8 +90,7 @@ export default function RiskManagement({
                 >
                   Priority
                   <h1 className="text-sm text-gray-500 mt-2">
-                    likelihood of   injury and illness to occur (low, medium,
-                    high)
+                    likelihood of injury and illness to occur (low, medium, high)
                   </h1>
                 </th>
                 <th
@@ -95,9 +115,9 @@ export default function RiskManagement({
                     <input
                       type="text"
                       {...register(
-                        `emergency_and_disaster_preparedness.${index}.task`
+                        `emergency_and_disaster_preparedness.${index}.task`,
+                        { required: true }
                       )}
-                      id={`emergency_and_disaster_preparedness.${index}.task`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                     />
                   </td>
@@ -105,9 +125,9 @@ export default function RiskManagement({
                     <input
                       type="text"
                       {...register(
-                        `emergency_and_disaster_preparedness.${index}.hazard_identified`
+                        `emergency_and_disaster_preparedness.${index}.hazard_identified`,
+                        { required: true }
                       )}
-                      id={`emergency_and_disaster_preparedness.${index}.hazard_identified`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                     />
                   </td>
@@ -115,9 +135,9 @@ export default function RiskManagement({
                     <input
                       type="text"
                       {...register(
-                        `emergency_and_disaster_preparedness.${index}.risk_description`
+                        `emergency_and_disaster_preparedness.${index}.risk_description`,
+                        { required: true }
                       )}
-                      id={`emergency_and_disaster_preparedness.${index}.risk_description`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                     />
                   </td>
@@ -125,9 +145,9 @@ export default function RiskManagement({
                     <input
                       type="text"
                       {...register(
-                        `emergency_and_disaster_preparedness.${index}.priority`
+                        `emergency_and_disaster_preparedness.${index}.priority`,
+                        { required: true }
                       )}
-                      id={`emergency_and_disaster_preparedness.${index}.priority`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                     />
                   </td>
@@ -135,9 +155,9 @@ export default function RiskManagement({
                     <input
                       type="text"
                       {...register(
-                        `emergency_and_disaster_preparedness.${index}.control_measures`
+                        `emergency_and_disaster_preparedness.${index}.control_measures`,
+                        { required: true }
                       )}
-                      id={`emergency_and_disaster_preparedness.${index}.control_measures`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                     />
                   </td>
@@ -160,7 +180,7 @@ export default function RiskManagement({
         <div className="flex justify-start mt-4">
           <button
             type="button"
-            onClick={() => append({ id: Date.now() })}
+            onClick={handleAddNewLine}
             className="bg-savoy-blue text-white px-4 py-2 rounded-md"
           >
             Add new line

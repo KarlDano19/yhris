@@ -21,7 +21,7 @@ import ExportProgressModal from '../work-accident-illness-report/modals/ExportPr
 import CreateReportModal from './modals/CreateReportModal';
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
 
@@ -180,6 +180,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setCurrentPage(1);
     setPageSize(value);
   };
+
+  // Menu options for Export and Generate Report
+  const menuOptions = [
+    // {
+    //   name: 'Export',
+    //   action: () => {
+    //     setIsExportProgressModalOpen(true);
+    //   },
+    //   disabled: !cachedRigths?.state?.data?.export_dole_awair,
+    // },
+    {
+      name: 'Generate Report',
+      action: () => {
+        setIsSelectBranchModalOpen(true);
+      },
+      disabled: !cachedRigths?.state?.data?.generate_dole_awair,
+    },
+  ];
 
   const renderRows = () => {
     if (isAnnualAccidentIllnessReportLoading) {
@@ -382,18 +400,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-full lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
-                    type='text'
-                    name='search'
-                    id='search'
-                    className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                    onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                    placeholder='Search ...'
-                  />
-                </div>
-              </div>
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
                 onClick={checkIfDateIsValid}
@@ -403,12 +409,54 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
-                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsSelectBranchModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.generate_dole_wair}
+                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                onClick={() => setIsCreateAnnualAccidentIllnessReportModalOpen(true)}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_awair}
               >
-                Generate Report
+                CREATE
               </button>
+              <Menu as='div' className='relative'>
+                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                  <span className='sr-only'>Open options</span>
+                  <div className='flex gap-4'>
+                    <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
+                  </div>
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter='transition ease-out duration-100'
+                  enterFrom='transform opacity-0 scale-95'
+                  enterTo='transform opacity-100 scale-100'
+                  leave='transition ease-in duration-75'
+                  leaveFrom='transform opacity-100 scale-100'
+                  leaveTo='transform opacity-0 scale-95'
+                >
+                  <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                    <div className='py-1'>
+                      {menuOptions.map((item) => (
+                        <Menu.Item key={item.name}>
+                          {({ active }) => (
+                            <span
+                              className={classNames(
+                                'block px-4 py-2 text-sm cursor-pointer text-center',
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
+                              )}
+                              onClick={() => {
+                                if (!item.disabled) {
+                                  item.action();
+                                }
+                              }}
+                            >
+                              {item.name}
+                            </span>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
             </div>
           </div>
 

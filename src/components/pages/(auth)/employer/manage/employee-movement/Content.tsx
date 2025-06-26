@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -13,9 +14,11 @@ import CreatePersonelMovementModal from './modals/CreatePersonelMovementModal';
 import EditPersonelMovementModal from './modals/EditPersonelMovementModal';
 import PrintModal from './modals/PrintModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import PrintIcon from '@/svg/PrintIcon';
 import EditIcon from '@/svg/EditIcon';
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 type PaginationProps = {
   totalRecords: number;
@@ -40,18 +43,24 @@ const Content = () => {
     totalPages: 1,
     totalRecords: 0,
   });
-  const [itemsFilter, setItemsFilter] = useState<any>({
+  const [pendingFilter, setPendingFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [isSearching, setIsSearching] = useState(false);
 
   const cachedData: any = cachedProfile?.state?.data;
   const {
     data: personelMovementListData,
     isLoading: isLoadingPersonelMovementList,
     refetch: personelMovementListRefetch,
-  } = useGetPersonelMovementList({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetPersonelMovementList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   useEffect(() => {
     if (personelMovementListData) {
@@ -69,7 +78,13 @@ const Content = () => {
 
   useEffect(() => {
     personelMovementListRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, personelMovementListRefetch]);
+
+  useEffect(() => {
+    if (!isLoadingPersonelMovementList && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLoadingPersonelMovementList, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -81,8 +96,27 @@ const Content = () => {
     setPageSize(value);
   };
 
+  const handleSearch = () => {
+    const dateFrom = Date.parse(pendingFilter.from);
+    const dateTo = Date.parse(pendingFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    setAppliedFilter({ ...pendingFilter });
+  };
+
   const renderRows = () => {
-    if (isLoadingPersonelMovementList) {
+    if (isSearching || isLoadingPersonelMovementList) {
       return (
         <tr>
           <td colSpan={100}>
@@ -192,15 +226,12 @@ const Content = () => {
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.from}
+                  selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                    setPendingFilter({ ...pendingFilter, from: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, from: value });
                   }}
                 />
               </div>
@@ -212,18 +243,14 @@ const Content = () => {
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.to}
+                  selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
+                    setPendingFilter({ ...pendingFilter, to: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, to: value });
                   }}
-                  minDate={itemsFilter.from}
+                  minDate={pendingFilter.from}
                 />
               </div>
             </div>
@@ -232,19 +259,29 @@ const Content = () => {
                 <div className='relative flex items-center'>
                   <input
                     type='text'
-                  name='search'
-                  id='search'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  value={itemsFilter.search}
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                  placeholder='Search ...'
-                />
+                    name='search'
+                    id='search'
+                    data-tooltip-id='search-tooltip'
+                    data-tooltip-content='Search for: Employee Name / Position'
+                    data-tooltip-place='bottom'
+                    className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                    value={pendingFilter.search}
+                    onChange={(e) => {
+                      setPendingFilter({ ...pendingFilter, search: e.target.value });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch();
+                      }
+                    }}
+                    placeholder='Search ...'
+                  />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={() => {}}
-            >
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
@@ -321,6 +358,8 @@ const Content = () => {
           )}
         </div>
       </div>
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };

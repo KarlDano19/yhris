@@ -6,16 +6,15 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import CustomToast from '@/components/CustomToast';
-import DragDrop from '@/components/DragDrop';
 import useTagTo from '@/components/hooks/useTagTo';
-import SignatureModal from './SignatureModal';
+import CustomToast from '@/components/CustomToast';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
+import SignatureModal from './SignatureModal';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-import { T_Directive } from '@/types/globals';
+import { DirectiveData } from '@/types/directives';
 
 export default function CreateMemoModal({
   isOpen,
@@ -34,10 +33,27 @@ export default function CreateMemoModal({
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [inputTo, setInputTo] = useState('');
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, trigger } = useForm<T_Directive>();
+  const { register, handleSubmit, setValue, reset, trigger } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
 
   const onSubmit = handleSubmit((data) => {
+    // Check if To field has any entries with valid email format
+    if (tagsTo.length === 0) {
+      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, {
+        duration: 5000,
+      });
+      return; // Prevent form submission
+    }
+    
+    // Validate that all email addresses in tagsTo are valid
+    const invalidEmails = tagsTo.filter(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'));
+    if (invalidEmails.length > 0) {
+      toast.custom(() => <CustomToast message={'Only valid email addresses with format example@domain.com are allowed'} type='error' />, {
+        duration: 5000,
+      });
+      return; // Prevent form submission
+    }
+
     const callbackReq = {
       onSuccess: () => {
         toast.custom(
@@ -55,8 +71,8 @@ export default function CreateMemoModal({
         });
       },
     };
-    data['email'] = tagsTo;
-    data['type'] = 'memo';
+    data['to'] = tagsTo;
+    data.directive_type = 'memo';
     mutate({ ...toSaveData, ...data }, callbackReq);
   });
 
@@ -64,8 +80,24 @@ export default function CreateMemoModal({
     const file = target.files[0];
     if (!file) return;
     if (file.size <= 5000000) {
-      setToSaveData({ ...toSaveData, qrCode: file });
+      setToSaveData({ ...toSaveData, qr_code: file });
       setQrCodeExist(true);
+    } else {
+      toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+        duration: 5000,
+      });
+    }
+  };
+
+  // Handle file attachment upload
+  const handleAttachmentUpload = ({ target }: { target: any }) => {
+    const file = target.files[0];
+    if (!file) return;
+    
+    if (file.size <= 5000000) {
+      // Set the file in the form
+      setValue('attachments', file);
+      setAttachmentExist(true);
     } else {
       toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
         duration: 5000,
@@ -75,14 +107,19 @@ export default function CreateMemoModal({
 
   useEffect(() => {
     if (signatureUrl) {
-      setValue('signature', signatureUrl);
+      setValue('signature', signatureUrl as never);
     } else {
       setSignatureUrl('');
     }
     if (!isOpen && signatureUrl) {
       setSignatureUrl('');
     }
-  }, [signatureUrl, setValue]);
+    
+    // Reset form when modal closes
+    if (!isOpen) {
+      setAttachmentExist(false);
+    }
+  }, [signatureUrl, setValue, isOpen]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -144,17 +181,6 @@ export default function CreateMemoModal({
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                         />
                       </div>
-                    </div>
-                    <div className='sm:col-span-4 flex ml-4 mt-4'>
-                      <input
-                        id='withResponse'
-                        type='checkbox'
-                        {...register('withResponse')}
-                        className='form-checkbox h-5 w-5 border border-gray-300 rounded-md text-indigo-600 bg-white'
-                      />
-                      <label htmlFor='withResponse' className='block text-sm font-medium leading-6 text-gray-900 ml-2'>
-                        With Response
-                      </label>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
                       <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -260,7 +286,7 @@ export default function CreateMemoModal({
                             type='button'
                             className='underline text-savoy-blue text-sm'
                             onClick={() => {
-                              setValue('signature', '');
+                              setValue('signature', '' as never);
                               setAttachmentExist(false);
                             }}
                           >
@@ -281,12 +307,12 @@ export default function CreateMemoModal({
                       </div>
                     )}
                     <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='qrCode' className='block text-sm font-medium leading-6 text-gray-900'>
+                      <label htmlFor='qr_code' className='block text-sm font-medium leading-6 text-gray-900'>
                         QR Code
                       </label>
                       <div className='mt-2'>
                         <input
-                          id='qrCode'
+                          id='qr_code'
                           type='file'
                           onChange={uploadOnChange}
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
@@ -296,7 +322,7 @@ export default function CreateMemoModal({
                             type='button'
                             className='underline text-savoy-blue text-sm mt-1'
                             onClick={() => {
-                              delete toSaveData.qrCode;
+                              delete toSaveData.qr_code;
                               setToSaveData({ ...toSaveData });
                               setQrCodeExist(false);
                             }}
@@ -307,33 +333,55 @@ export default function CreateMemoModal({
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='file' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
-                        Upload File (Optional)
+                      <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
+                        Attachment
                       </label>
-                      <DragDrop setValue={(value: any) => setValue('file', value)} />
+                      <div className='mt-2'>
+                        <input
+                          id='attachments'
+                          type='file'
+                          onChange={handleAttachmentUpload}
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                        />
+                        {attachmentExist ? (
+                          <button
+                            type='button'
+                            className='underline text-savoy-blue text-sm mt-1'
+                            onClick={() => {
+                              setValue('attachments', undefined as any);
+                              setAttachmentExist(false);
+                            }}
+                          >
+                            Remove Attachment
+                          </button>
+                        ) : null}
+                      </div>
                       <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                     </div>
                   </div>
                   <hr />
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                     <button
-                      onClick={async () => {
+                      onClick={async (e) => {
                         const title = await trigger('title');
-                        const email = await trigger('email');
-                        const results = [title, email];
+                        // Check if tagsTo array exists and validate all emails
+                        const toFieldValid = tagsTo.length > 0 && tagsTo.every(email => email.includes('@') && email.toLowerCase().endsWith('.com'));
+                        const results = [title, toFieldValid];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
-                          toast.custom(
-                            () => (
-                              <CustomToast
-                                message={'You cannot proceed due to incomplete fields. Please review.'}
-                                type='error'
-                              />
-                            ),
-                            {
-                              duration: 5000,
-                            }
-                          );
+                          e.preventDefault(); // Prevent form submission
+                          let message = '';
+                          if (tagsTo.length === 0) {
+                            message = 'Email address is required';
+                          } else if (tagsTo.some(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'))) {
+                            message = 'Only valid email addresses with format example@domain.com are allowed';
+                          } else {
+                            message = 'You cannot proceed due to incomplete fields. Please review.';
+                          }
+                          toast.custom(() => <CustomToast message={message} type='error' />, {
+                            duration: 5000,
+                          });
+                          return false;
                         }
                       }}
                       type='submit'

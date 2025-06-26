@@ -3,10 +3,7 @@ import { getCookie } from 'cookies-next';
 
 async function getEvaluationSchedulerItems(filters: any) {
   try {
-    let newFilters = { ...filters };
-    if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
-    if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
-    const searchParams = new URLSearchParams(newFilters);
+    const searchParams = new URLSearchParams(filters);
     const token = getCookie('token');
     const config = {
       method: 'GET',

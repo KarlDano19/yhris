@@ -32,21 +32,22 @@ const getPasswordRequirements = (pass: string) => ({
 
 const Content = () => {
   const router = useRouter();
-  const accountType = [
-    {
-      value: 'employer',
-      label: 'Employer',
-    },
-  ];
+  // const accountType = [
+  //   {
+  //     value: 'employer',
+  //     label: 'Employer',
+  //   },
+  // ];
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<T_Register>();
+  const { register, handleSubmit, reset, watch, formState: { errors }, clearErrors } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
+  const [backendEmailError, setBackendEmailError] = useState('');
 
   const onSubmit = (data: T_Register) => {
     if (password !== '' || conformPassword !== '') {
@@ -54,6 +55,7 @@ const Content = () => {
         const callBackReq = {
           onSuccess: (data: any) => {
             setBackendPasswordError('');
+            setBackendEmailError('');
             reset();
             toast.custom(() => <CustomToast message={data.message} type='success' />, {
               duration: 7000,
@@ -63,15 +65,20 @@ const Content = () => {
           onError: (err: any) => {
             if (typeof err === 'string' && err.toLowerCase().includes('password')) {
               setBackendPasswordError(err);
+              setBackendEmailError('');
+            } else if (typeof err === 'string' && err.toLowerCase().includes('already in use')) {
+              setBackendEmailError(err);
+              setBackendPasswordError('');
             } else {
               setBackendPasswordError('');
+              setBackendEmailError('');
             }
           },
         };
         if (agree) {
           mutate(data, callBackReq);
         } else {
-          toast.custom(() => <CustomToast message={'Please agree to user agreement policy'} type='error' />, {
+          toast.custom(() => <CustomToast message={'Please agree to the Terms of Service and Privacy Policy to proceed.'} type='error' />, {
             duration: 4000,
           });
         }
@@ -109,7 +116,7 @@ const Content = () => {
                   <h1 className='text-2xl font-bold leading-none tracking-tight text-indigo-dye lg:text-3xl'>
                     Create Account
                   </h1>
-                  <form onSubmit={handleSubmit(onSubmit)}>
+                  <form onSubmit={handleSubmit(onSubmit)} suppressHydrationWarning>
                     <div className='relative mb-2'>
                       <label htmlFor='role' className='text-sm leading-6 text-gray-900'>
                         Register As
@@ -146,9 +153,18 @@ const Content = () => {
                         {...register('email', { required: "Please enter an email address" })}
                         className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                         tabIndex={2}
+                        onChange={(e) => {
+                          setBackendEmailError('');
+                          if (e.currentTarget.value) {
+                            clearErrors('email');
+                          }
+                        }}
                       />
                       {errors.email && (
                         <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>
+                      )}
+                      {backendEmailError && (
+                        <p className="text-red-600 text-xs mt-1">{backendEmailError}</p>
                       )}
                     </div>
                     {watch('accountType') === 'Applicant' ? (
@@ -225,13 +241,16 @@ const Content = () => {
                         <input
                           type={showPassword ? 'text' : 'password'}
                           id='password'
-                          {...register('password', { required: true })}
+                          {...register('password', { required: "Please enter a password" })}
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
                           onChange={(e) => {
                             setPassword(e.currentTarget.value);
                             setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
                             setBackendPasswordError('');
+                            if (e.currentTarget.value) {
+                              clearErrors('password');
+                            }
                           }}
                         />
                         <button
@@ -248,6 +267,9 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                      {errors.password && (
+                        <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>
+                      )}
                       {backendPasswordError && (
                         <p className="text-red-600 text-xs mt-1">{backendPasswordError}</p>
                       )}
@@ -267,7 +289,7 @@ const Content = () => {
                               <li>• At least 1 number (0-9)</li>
                             )}
                             {!passwordRequirements.special && (
-                              <li>• At least 1 special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                              <li>• At least 1 special character (!@#$%^&*(),.?&quot;:{}|&lt;&gt;)</li>
                             )}
                             {!passwordRequirements.noSpaces && (
                               <li>• Spaces are not allowed</li>
@@ -287,8 +309,13 @@ const Content = () => {
                           id='confirm-password'
                           className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
                           tabIndex={2}
-                          {...register('confirmPassword', { required: true })}
-                          onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                          {...register('confirmPassword', { required: "Please confirm your password" })}
+                          onChange={(e) => {
+                            setConfirmPassword(e.currentTarget.value);
+                            if (e.currentTarget.value) {
+                              clearErrors('confirmPassword');
+                            }
+                          }}
                         />
                         <button
                           type='button'
@@ -304,6 +331,9 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                      {errors.confirmPassword && (
+                        <p className="text-red-600 text-xs mt-1">{errors.confirmPassword.message}</p>
+                      )}
                     </div>
                     <div className='relative flex items-start'>
                       <div className='flex h-6 items-center'>

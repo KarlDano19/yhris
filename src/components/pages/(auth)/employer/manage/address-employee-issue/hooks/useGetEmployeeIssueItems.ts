@@ -6,6 +6,8 @@ async function getEmployeeIssueItems(filters: any) {
     let newFilters = {...filters};
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    if (!newFilters.from) delete newFilters.from;
+    if (!newFilters.to) delete newFilters.to;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -37,10 +39,10 @@ async function getEmployeeIssueItems(filters: any) {
 
 function useGetEmployeeIssueItems(filters: any) {
   const query = useQuery(
-    ['employeeIssueItemCache'],
+    ['employeeIssueItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
     () => getEmployeeIssueItems(filters),
     {
-      enabled: false,
+      // enabled: false,
       keepPreviousData: true,
     }
   );

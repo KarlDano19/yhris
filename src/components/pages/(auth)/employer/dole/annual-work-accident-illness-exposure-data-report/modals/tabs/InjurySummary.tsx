@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 
-import useGetWorkAccidentIlnessReportsItems from "../../../work-accident-illness-report/hooks/useGetWorkAccidentIlnessReportsItems";
+import useGetWorkAccidentIlnessReportsItems from "../../hooks/useGetWorkAccidentIlnessReportsItems";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
@@ -44,6 +44,7 @@ function InjurySummary({
     useState<number>(0);
   const [employeeHours, setEmployeeHours] = useState<number>(0);
   const [daysLost, setDaysLost] = useState<number>(0);
+  const { data: reportsData, refetch: refetchReportsData } = useGetWorkAccidentIlnessReportsItems();
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -78,6 +79,19 @@ function InjurySummary({
       setValue("severity_rate", 0);
     }
   }, [daysLost, employeeHours, setValue]);
+
+  useEffect(() => {
+    refetchReportsData();
+  }, [refetchReportsData]);
+
+  useEffect(() => {
+    if (reportsData && reportsData.records) {
+      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
+      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
+      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
+      setValue("total_non_disabling_injuries", totalNonDisabling);
+    }
+  }, [reportsData, setValue]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -148,7 +162,7 @@ function InjurySummary({
                 {...register("frequency_rate", { required: true })}
                 id="frequency_rate"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                disabled
+                // disabled
               />
             </div>
           </div>
@@ -166,7 +180,7 @@ function InjurySummary({
                 {...register("severity_rate", { required: true })}
                 id="severity_rate"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                disabled
+                // disabled
               />
             </div>
           </div>

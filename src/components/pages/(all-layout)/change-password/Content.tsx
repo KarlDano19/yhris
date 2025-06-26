@@ -46,7 +46,7 @@ const Content = () => {
     useVerifyToken(urlToken);
 
   const onSubmit = (data: T_UserPassword) => {
-    data.code = urlToken;
+    data.code = urlToken || '';
     if (data.password !== '' || data.confirmPassword !== '') {
       // Check if password meets all requirements
       const requirements = getPasswordRequirements(data.password);
