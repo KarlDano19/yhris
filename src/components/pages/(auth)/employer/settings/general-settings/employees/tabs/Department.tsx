@@ -37,7 +37,7 @@ const formatDate = (dateString: string) => {
   return `${month}/${day}/${year}`;
 };
 
-const Department = () => {
+const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [departmentItems, setDepartmentItems] = useState<any>([]);
@@ -262,6 +262,7 @@ const Department = () => {
               <button
                 onClick={() => setIsAddDepartmentModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>
