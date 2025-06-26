@@ -14,60 +14,60 @@ import {
 const PerformanceManagementContent = () => {
   const features = [
     {
+      icon: CalendarDaysIcon,
+      title: "Scheduled Check-Ins",
+      description: "Empower managers to set and track regular performance conversations ahead of time—ensuring consistency and meaningful engagement."
+    },
+    {
       icon: UserGroupIcon,
-      title: "360-Degree Feedback",
-      description: "Collect comprehensive feedback from peers, supervisors, and direct reports for holistic performance evaluation."
+      title: "Employee Self-Evaluations",
+      description: "Give employees a space to reflect on their own progress, encouraging ownership and alignment with team goals."
     },
     {
       icon: ClipboardDocumentCheckIcon,
-      title: "Goal Setting & Tracking",
-      description: "Set SMART goals, track progress in real-time, and align individual objectives with company goals."
-    },
-    {
-      icon: CalendarDaysIcon,
-      title: "Continuous Performance Reviews",
-      description: "Move beyond annual reviews with ongoing check-ins, feedback sessions, and performance conversations."
+      title: "Centralized Evaluation Records",
+      description: "Keep all evaluations organized and accessible in one place—eliminating the risks of paper trails and scattered files."
     },
     {
       icon: AcademicCapIcon,
-      title: "Development Planning",
-      description: "Create personalized development plans with skill assessments, training recommendations, and career pathing."
+      title: "Development-Focused Reviews",
+      description: "Turn performance reviews into opportunities for growth by focusing on clear feedback and future-focused conversations."
     }
   ];
 
   const reviewCycle = [
     {
-      phase: "Goal Setting",
-      description: "Establish clear, measurable objectives aligned with organizational priorities.",
-      duration: "Quarterly"
+      phase: "Setup Evaluation Template",
+      description: "Customize evaluation forms to align with your company's roles, values, and performance criteria.",
+      duration: "Initial Setup"
     },
     {
-      phase: "Continuous Feedback",
-      description: "Regular check-ins, peer feedback, and real-time performance tracking.",
+      phase: "Schedule Evaluations",
+      description: "Automate evaluation schedules to ensure consistent and timely performance reviews.",
+      duration: "Recurring"
+    },
+    {
+      phase: "Conduct Evaluations",
+      description: "Easily complete employee evaluations with structured forms and built-in rating systems.",
+      duration: "As Scheduled"
+    },
+    {
+      phase: "View Evaluation History",
+      description: "Track employee performance trends through a centralized evaluation record system.",
       duration: "Ongoing"
-    },
-    {
-      phase: "Formal Review",
-      description: "Comprehensive evaluation with 360-degree feedback and performance ratings.",
-      duration: "Semi-Annual"
-    },
-    {
-      phase: "Development Planning",
-      description: "Create growth plans, identify training needs, and set career goals.",
-      duration: "Annual"
     }
   ];
 
   const businessStory = {
     title: "Transforming Performance Reviews from Burden to Breakthrough",
-    subtitle: "How Cebu Marketing Group Revolutionized Employee Development",
-    challenge: "Cebu Marketing Group's annual performance reviews were dreaded by everyone. Managers postponed evaluations, employees felt disconnected from their goals, and HR struggled to track completion across 150+ employees.",
-    solution: "YAHSHUA HRIS transformed their approach with continuous feedback tools, automated scheduling, and customizable evaluation templates that align with company values.",
+    subtitle: "How Companies Transform Employee Development",
+    challenge: "Companies relying on paper evaluations face outdated, hard-to-manage processes—often leading to delays, lost records, and low engagement. With limited budgets, they're stuck using inefficient methods or skipping performance reviews altogether.",
+    solution: "YAHSHUA HRIS simplifies everything: a single intuitive platform to create, customize, manage, and store evaluations—no paperwork, no hassle.",
     results: [
-      "Managers now conduct meaningful quarterly check-ins",
-      "Employees actively track and achieve their goals",
-      "HR has real-time visibility into all evaluations",
-      "Performance conversations became development opportunities"
+      "Managers now hold timely, meaningful check‑ins scheduled in advance",
+      "Employees actively self-evaluate and stay engaged",
+      "HR gains full visibility over current and past evaluations",
+      "Performance discussions shift from chores to growth opportunities"
     ]
   };
 
@@ -180,59 +180,6 @@ const PerformanceManagementContent = () => {
         </div>
       </div>
 
-      {/* Performance Analytics Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-12 mb-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl font-bold text-indigo-dye mb-6">
-              Data-Driven Insights
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <TrophyIcon className="h-6 w-6 text-[#FFC107] mr-3" />
-                <span className="text-gray-600">Performance analytics dashboard</span>
-              </div>
-              <div className="flex items-center">
-                <StarIcon className="h-6 w-6 text-[#FFC107] mr-3" />
-                <span className="text-gray-600">Employee recognition system</span>
-              </div>
-              <div className="flex items-center">
-                <ChartBarIcon className="h-6 w-6 text-[#FFC107] mr-3" />
-                <span className="text-gray-600">Competency mapping and tracking</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircleIcon className="h-6 w-6 text-[#FFC107] mr-3" />
-                <span className="text-gray-600">Automated performance reporting</span>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-savoy-blue/10 to-indigo-100 rounded-xl p-8">
-            <h3 className="text-xl font-semibold text-indigo-dye mb-4">
-              Performance Insights at a Glance
-            </h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Performance Reviews</span>
-                <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Completed
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Employee Goals</span>
-                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                  On Track
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Development Plans</span>
-                <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                  Active
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* CTA Section */}
       <div className="bg-gradient-to-r from-savoy-blue to-indigo-600 rounded-2xl p-12 text-white">
@@ -248,7 +195,7 @@ const PerformanceManagementContent = () => {
               href="/register"
               className="bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-3 rounded-lg font-medium transition-colors"
             >
-              Start Free Trial
+              Start 30 Day Free Trial
             </Link>
             <Link
               href="/use-cases"

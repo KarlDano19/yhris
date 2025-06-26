@@ -48,7 +48,7 @@ const Footer = () => {
 
             <div id="products">
               <h5 className="text-indigo-dye text-lg font-semibold mb-4">
-                ABBA Initiative Products
+                The ABBA Initiative Products
               </h5>
               <ul className="space-y-3">
                 <li>

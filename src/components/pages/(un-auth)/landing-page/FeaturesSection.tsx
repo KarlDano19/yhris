@@ -41,8 +41,8 @@ const FeaturesSection = () => {
     {
       icon: UserIcon,
       title: "Employee Management",
-      description: "Securely store all employee information from hire date. Automatic syncing capability for existing YAHSHUA Payroll users.",
-      highlights: ["Secure data storage", "YAHSHUA Payroll sync", "Employee profiles"]
+      description: "Securely store all employee information from hire date. Automatic syncing capability for existing YAHSHUA Payroll users (Coming Soon).",
+      highlights: ["Secure data storage", "YAHSHUA Payroll sync (Coming Soon)", "Employee profiles"]
     },
     {
       icon: ChartBarIcon,
@@ -82,7 +82,7 @@ const FeaturesSection = () => {
     },
     {
       icon: ArrowPathIcon,
-      title: "YAHSHUA Payroll Integration",
+      title: "YAHSHUA Payroll Integration (Coming Soon)",
       description: "Seamlessly sync employee data with YAHSHUA Payroll. Send memos, NTEs, policies, Personnel Movement Form and other documents directly to employees.",
       highlights: ["Employee data sync", "Document distribution"]
     }
@@ -155,7 +155,7 @@ const FeaturesSection = () => {
                     href="/yahshua-payroll" 
                     className="inline-flex items-center px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
                   >
-                    Learn More About YAHSHUA Payroll
+                    Learn More About YAHSHUA Payroll (Coming Soon)
                     <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>

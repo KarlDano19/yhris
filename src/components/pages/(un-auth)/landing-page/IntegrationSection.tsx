@@ -30,6 +30,9 @@ const IntegrationSection = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
+          <div className="inline-block bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-2xl text-xl font-bold mb-6 shadow-lg animate-pulse">
+            🚀 COMING SOON
+          </div>
           <h2 className="text-3xl md:text-5xl font-bold text-indigo-dye mb-6">
             Seamless Integration
             <br />
@@ -162,7 +165,7 @@ const IntegrationSection = () => {
                 href="/register" 
                 className="bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
               >
-                Start Free Trial
+                Start 30 Day Free Trial
               </Link>
               <Link 
                 href="#contact" 
