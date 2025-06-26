@@ -21,12 +21,12 @@ const EmployeeDocumentationContent = () => {
     {
       icon: FolderIcon,
       title: "Organized Document Management",
-      description: "Structured categorization and filing system that helps organize documents by employee, department, and type."
+      description: "Structured categorization and filing system based on the employee's journey that helps organize documents systematically."
     },
     {
       icon: MagnifyingGlassIcon,
       title: "Document Organization & Access",
-      description: "Organized filing system to easily locate and access documents by employee, department, or document category."
+      description: "Organized filing system based on the employee's journey to easily locate and access documents."
     },
     {
       icon: ShieldCheckIcon,
@@ -105,7 +105,6 @@ const EmployeeDocumentationContent = () => {
     results: [
       "Eliminated physical filing rooms and storage costs",
       "Locate documents easily with organized filing system",
-      "Stay compliant with organized deadline tracking",
       "Remote access allows work from anywhere securely"
     ]
   };

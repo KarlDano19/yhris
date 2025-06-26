@@ -24,7 +24,7 @@ const EmployeeOnboardingContent = () => {
     {
       icon: CheckCircleIcon,
       title: "Compliance Tracking",
-      description: "Ensure all regulatory requirements are met with built-in compliance checklists and audit trails."
+      description: "Ensure all regulatory requirements are met with built-in compliance template and audit trails."
     },
     {
       icon: ChartBarIcon,
@@ -64,7 +64,7 @@ const EmployeeOnboardingContent = () => {
     results: [
       "New hires now complete paperwork before their first day",
       "HR team focuses on relationship building instead of paperwork",
-      "Zero compliance issues with automated checklists",
+      "Zero compliance issues with automated template",
       "New employees feel welcomed and prepared from day one"
     ]
   };
@@ -211,14 +211,14 @@ const EmployeeOnboardingContent = () => {
           <div className="bg-white/10 rounded-xl p-8 backdrop-blur-sm">
             <h3 className="text-xl font-semibold mb-4">Ready to Get Started?</h3>
             <p className="mb-6 opacity-90">
-              Join thousands of companies that have transformed their onboarding process.
+              Transform your onboarding process with our comprehensive solution.
             </p>
             <div className="space-y-3">
               <Link
                 href="/register"
                 className="block w-full bg-[#FFC107] hover:bg-amber-600 text-black px-6 py-3 rounded-lg text-center font-medium transition-colors"
               >
-                Start Free Trial
+                Start 30 Day Free Trial
               </Link>
               <Link
                 href="/use-cases"
