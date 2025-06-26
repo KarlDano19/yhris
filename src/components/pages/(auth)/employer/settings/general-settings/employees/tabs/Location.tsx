@@ -36,7 +36,7 @@ const formatDate = (dateString: string) => {
   return `${month}/${day}/${year}`;
 };
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [locationItems, setLocationItems] = useState<any>([]);
@@ -257,6 +257,7 @@ const Content = () => {
               <button
                 onClick={() => setIsAddLocationModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>

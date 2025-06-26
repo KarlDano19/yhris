@@ -47,6 +47,7 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
 
   return (
     <>
+      {type === 'employer' && employerRoutes.includes(firstRoute) && firstRoute !== 'manage-subscriptions' && <SubscriptionHeader />}
       {!noHeaderRoutes.includes(lastRoute) && (
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
@@ -55,7 +56,6 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
           {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader hasProfile={hasProfile} />}
         </>
       )}
-      {type === 'employer' && employerRoutes.includes(firstRoute) && <SubscriptionHeader />}
     </>
   );
 }
