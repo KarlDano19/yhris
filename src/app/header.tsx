@@ -7,7 +7,6 @@ import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
 import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
 import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader';
 import Navigation from '@/components/pages/(un-auth)/landing-page/Navigation';
-import SubscriptionHeader from '@/components/pages/(auth)/employer/SubscriptionHeader';
 
 function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
   const pathname = usePathname();
@@ -55,7 +54,6 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
           {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader hasProfile={hasProfile} />}
         </>
       )}
-      {type === 'employer' && employerRoutes.includes(firstRoute) && <SubscriptionHeader />}
     </>
   );
 }
