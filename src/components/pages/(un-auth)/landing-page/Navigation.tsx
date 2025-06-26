@@ -52,7 +52,7 @@ const Navigation = () => {
   const tabletFeatureItems = [
     { href: getNavLink("features"), label: "All Features" },
     { href: getNavLink("integration"), label: "Integrations" },
-    { href: "/vs-sprout", label: "How We Compare to Sprout" },
+    { href: "/vs-sprout", label: "How We Compare to Others" },
     { href: "/use-cases/employee-onboarding", label: "Employee Onboarding" },
     { href: "/use-cases/performance-management", label: "Performance Management" },
     { href: "/use-cases/employee-documentation", label: "Employee Documentation" }
@@ -64,7 +64,7 @@ const Navigation = () => {
     { href: "/use-cases/performance-management", label: "Performance Management" },
     { href: "/use-cases/employee-documentation", label: "Employee Documentation" },
     { href: getNavLink("integration"), label: "Integrations" },
-    { href: "/vs-sprout", label: "How We Compare to Sprout" }
+    { href: "/vs-sprout", label: "How We Compare to Others" }
   ];
 
   return (
@@ -127,7 +127,7 @@ const Navigation = () => {
                 Integrations
               </Link>
               <Link href="/vs-sprout" className="hidden lg:block text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                How We Compare to Sprout
+                How We Compare to Others
               </Link>
               <Link href="/landing-page/pricing" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Pricing
