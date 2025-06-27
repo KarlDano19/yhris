@@ -336,9 +336,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_stool_exam_pre_placement`
+                    `total_workers_examination_stool_exam_pre_placement`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_stool_exam_pre_placement`}
+                  id={`total_workers_examination_stool_exam_pre_placement`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -348,9 +348,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_blood_test_pre_placement`
+                    `total_workers_examination_blood_test_pre_placement`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_blood_test_pre_placement`}
+                  id={`total_workers_examination_blood_test_pre_placement`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -360,9 +360,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_ecg_pre_placement`
+                    `total_workers_examination_ecg_pre_placement`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_ecg_pre_placement`}
+                  id={`total_workers_examination_ecg_pre_placement`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -372,9 +372,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_others_pre_placement`
+                    `total_workers_examination_others_pre_placement`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_others_pre_placement`}
+                  id={`total_workers_examination_others_pre_placement`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -393,9 +393,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_stool_exam_periodic`
+                    `total_workers_examination_stool_exam_periodic`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_stool_exam_periodic`}
+                  id={`total_workers_examination_stool_exam_periodic`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -405,9 +405,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_blood_test_periodic`
+                    `total_workers_examination_blood_test_periodic`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_blood_test_periodic`}
+                  id={`total_workers_examination_blood_test_periodic`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -417,9 +417,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_ecg_periodic`
+                    `total_workers_examination_ecg_periodic`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_ecg_periodic`}
+                  id={`total_workers_examination_ecg_periodic`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -429,9 +429,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_others_periodic`
+                    `total_workers_examination_others_periodic`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_others_periodic`}
+                  id={`total_workers_examination_others_periodic`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -450,9 +450,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_stool_exam_return_to_work`
+                    `total_workers_examination_stool_exam_return_to_work`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_stool_exam_return_to_work`}
+                  id={`total_workers_examination_stool_exam_return_to_work`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -462,9 +462,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_blood_test_return_to_work`
+                    `total_workers_examination_blood_test_return_to_work`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_blood_test_return_to_work`}
+                  id={`total_workers_examination_blood_test_return_to_work`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -474,9 +474,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_ecg_return_to_work`
+                    `total_workers_examination_ecg_return_to_work`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_ecg_return_to_work`}
+                  id={`total_workers_examination_ecg_return_to_work`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -486,9 +486,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_others_return_to_work`
+                    `total_workers_examination_others_return_to_work`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_others_return_to_work`}
+                  id={`total_workers_examination_others_return_to_work`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -507,9 +507,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_stool_exam_transfer`
+                    `total_workers_examination_stool_exam_transfer`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_stool_exam_transfer`}
+                  id={`total_workers_examination_stool_exam_transfer`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -519,9 +519,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_blood_test_transfer`
+                    `total_workers_examination_blood_test_transfer`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_blood_test_transfer`}
+                  id={`total_workers_examination_blood_test_transfer`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -531,9 +531,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_ecg_transfer`
+                    `total_workers_examination_ecg_transfer`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_ecg_transfer`}
+                  id={`total_workers_examination_ecg_transfer`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -543,9 +543,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_others_transfer`
+                    `total_workers_examination_others_transfer`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_others_transfer`}
+                  id={`total_workers_examination_others_transfer`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -564,9 +564,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_stool_exam_special`
+                    `total_workers_examination_stool_exam_special`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_stool_exam_special`}
+                  id={`total_workers_examination_stool_exam_special`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -576,9 +576,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_blood_test_special`
+                    `total_workers_examination_blood_test_special`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_blood_test_special`}
+                  id={`total_workers_examination_blood_test_special`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -588,9 +588,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_ecg_special`
+                    `total_workers_examination_ecg_special`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_ecg_special`}
+                  id={`total_workers_examination_ecg_special`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -600,9 +600,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_others_special`
+                    `total_workers_examination_others_special`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_others_special`}
+                  id={`total_workers_examination_others_special`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -621,9 +621,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_stool_exam_separation`
+                    `total_workers_examination_stool_exam_separation`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_stool_exam_separation`}
+                  id={`total_workers_examination_stool_exam_separation`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -633,9 +633,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_blood_test_separation`
+                    `total_workers_examination_blood_test_separation`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_blood_test_separation`}
+                  id={`total_workers_examination_blood_test_separation`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -645,9 +645,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_ecg_separation`
+                    `total_workers_examination_ecg_separation`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_ecg_separation`}
+                  id={`total_workers_examination_ecg_separation`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
@@ -657,9 +657,9 @@ function OccupationalHealthService({
                 <input
                   type="number"
                   {...register(
-                    `number_of_workers_who_underwent_medical_examination_others_separation`
+                    `total_workers_examination_others_separation`
                   )}
-                  id={`number_of_workers_who_underwent_medical_examination_others_separation`}
+                  id={`total_workers_examination_others_separation`}
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>

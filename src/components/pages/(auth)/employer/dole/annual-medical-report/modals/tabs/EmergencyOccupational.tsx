@@ -122,7 +122,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2 flex flex-row items-center">
                 <input
-                  type="text"
+                  type="number"
                   {...register(`occupational_health_physician_hours_per_day`)}
                   id={`occupational_health_physician_hours_per_day`}
                   className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -133,7 +133,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2">
                 <input
-                  type="text"
+                  type="number"
                   {...register(`occupational_health_physician_shift`)}
                   id={`occupational_health_physician_shift`}
                   className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -152,7 +152,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2 flex flex-row items-center">
                 <input
-                  type="text"
+                  type="number"
                   {...register(`occupational_health_dentist_hours_per_day`)}
                   id={`occupational_health_dentist_hours_per_day`}
                   className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -163,7 +163,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2">
                 <input
-                  type="text"
+                  type="number"
                   {...register(`occupational_health_dentist_shift`)}
                   id={`occupational_health_dentist_shift`}
                   className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -182,7 +182,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2 flex flex-row items-center">
                 <input
-                  type="text"
+                  type="number"
                   {...register(
                     `occupational_health_practitioner_hours_per_day`
                   )}
@@ -195,7 +195,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2">
                 <input
-                  type="text"
+                  type="number"
                   {...register(`occupational_health_practitioner_shift`)}
                   id={`occupational_health_practitioner_shift`}
                   className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -214,7 +214,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2 flex flex-row items-center">
                 <input
-                  type="text"
+                  type="number"
                   {...register(`occupational_health_nurse_hours_per_day`)}
                   id={`occupational_health_nurse_hours_per_day`}
                   className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -225,7 +225,7 @@ function EmergencyOccupational({
             <div className="grid-item">
               <div className="mt-2">
                 <input
-                  type="text"
+                  type="number"
                   {...register(`occupational_health_nurse_shift`)}
                   id={`occupational_health_nurse_shift`}
                   className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"

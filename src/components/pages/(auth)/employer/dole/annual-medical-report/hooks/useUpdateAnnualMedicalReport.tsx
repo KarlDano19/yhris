@@ -30,7 +30,7 @@ async function updateAnnualMedicalReport(data: any, annual_medical_report_id: nu
     }
 
     const config = {
-        method: "POST",
+        method: "PATCH",
         headers: {
             Authorization: `Token ${token}`,
         },

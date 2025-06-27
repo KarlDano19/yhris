@@ -360,8 +360,8 @@ function WorkplaceWelfare({
               <h1 className="text-sm font-medium pl-14">
                 <input
                   type="checkbox"
-                  {...register("others")}
-                  id="others"
+                  {...register("sports_activities")}
+                  id="sports_activities"
                   value="no"
                 />
                 <label htmlFor="others" className="ml-1">
@@ -373,8 +373,8 @@ function WorkplaceWelfare({
               <h1 className="text-sm font-medium pl-14">
                 <input
                   type="checkbox"
-                  {...register("others")}
-                  id="others"
+                  {...register("sports_activities")}
+                  id="sports_activities"
                   value="yes"
                 />
                 <label htmlFor="others" className="ml-1">

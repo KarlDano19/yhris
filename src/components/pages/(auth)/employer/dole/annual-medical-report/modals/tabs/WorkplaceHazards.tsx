@@ -139,7 +139,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`dust_workers_exposed`)}
                       id={`dust_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -168,7 +168,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`liquids_workers_exposed`)}
                       id={`liquids_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -197,7 +197,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`mist_fumes_vapors_workers_exposed`)}
                       id={`mist_fumes_vapors_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -226,7 +226,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`gas_workers_exposed`)}
                       id={`gas_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -272,7 +272,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`noise_workers_exposed`)}
                       id={`noise_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -301,7 +301,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`temperature_humidity_workers_exposed`)}
                       id={`temperature_humidity_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -330,7 +330,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`pressure_workers_exposed`)}
                       id={`pressure_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -359,7 +359,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`illumination_workers_exposed`)}
                       id={`illumination_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -388,7 +388,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`radiation_ultraviolet_microwave_workers_exposed`)}
                       id={`radiation_ultraviolet_microwave_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -417,7 +417,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`vibration_workers_exposed`)}
                       id={`vibration_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -446,7 +446,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`others_workers_exposed`)}
                       id={`others_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -492,7 +492,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`exhausting_physical_work_workers_exposed`)}
                       id={`exhausting_physical_work_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -521,7 +521,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`prolonged_standing_workers_exposed`)}
                       id={`prolonged_standing_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -550,7 +550,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`excessive_mental_effort_workers_exposed`)}
                       id={`excessive_mental_effort_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -579,7 +579,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`unfavorable_work_posture_workers_exposed`)}
                       id={`unfavorable_work_posture_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -608,7 +608,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`static_monotonous_work_workers_exposed`)}
                       id={`static_monotonous_work_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -637,7 +637,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`others_workers_exposed`)}
                       id={`others_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -683,7 +683,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`viral_workers_exposed`)}
                       id={`viral_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -712,7 +712,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`bacterial_workers_exposed`)}
                       id={`bacterial_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -741,7 +741,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`fungal_workers_exposed`)}
                       id={`fungal_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -770,7 +770,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`parasitic_workers_exposed`)}
                       id={`parasitic_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -799,7 +799,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`others_workers_exposed`)}
                       id={`others_workers_exposed`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
