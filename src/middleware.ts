@@ -15,6 +15,7 @@ export async function middleware(request: NextRequest) {
   const accountType = session.accountType;
   const hasProfile = session.hasProfile;
   const hasPendingTransaction = session.hasPendingTransaction;
+  const hasActiveSubscription = session.hasActiveSubscription;
 
   const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
@@ -82,7 +83,7 @@ export async function middleware(request: NextRequest) {
             if (firstRoute === 'setup-employer-profile') {
               return NextResponse.redirect(new URL('/dashboard', request.url));
             }
-            if (firstRoute === 'checkout' && hasPendingTransaction) {
+            if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
               return NextResponse.redirect(new URL('/manage-subscriptions', request.url));
             }
           }

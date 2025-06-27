@@ -14,10 +14,11 @@ async function Auth({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   const type = session.accountType;
   const hasProfile = session.hasProfile;
+  const hasActiveSubscription = session.hasActiveSubscription;
 
   return (
     <>
-      <Header type={type} hasProfile={hasProfile} />
+      <Header type={type} hasProfile={hasProfile} hasActiveSubscription={hasActiveSubscription} />
       {children}
     </>
   );

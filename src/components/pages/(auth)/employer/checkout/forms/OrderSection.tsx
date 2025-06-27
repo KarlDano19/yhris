@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'next/navigation';
 
@@ -7,11 +7,18 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import formatPrice from '@/helpers/currencyFormat';
 
-const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, added_employee_slot, duration }: any) => {
+const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, added_employee_slot, duration, isAllowTrial }: any) => {
   const [inputtedCode, setInputtedCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const { slug } = useParams();
   const { mutate, isLoading } = useDiscount();
+
+  useEffect(() => {
+    if (isAllowTrial) {
+      setInputtedCode('FREE100');
+      setDiscount(100);
+    }
+  }, [isAllowTrial]);
 
   const periodicityPrice = () => {
     if (!price) {
@@ -29,7 +36,7 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
   };
 
   const getDiscountPrice = () => {
-    return (getAddedPrice() / (1 + 12 / 100)) * (discount / 100);
+    return (getAddedPrice()) * (discount / 100);
   };
 
   const getNetOfDiscount = () => {
@@ -107,10 +114,11 @@ const OrderedSection = ({ title, price, setVoucherCode, plan_employee_slot, adde
               }
             }
           }}
+          disabled={isAllowTrial}
         />
         <button
           className='w-1/4 h-12 rounded-md bg-[#2757ed] text-lg leading-6 tracking-wider text-white enabled:hover:bg-[#4f80ff] disabled:opacity-50'
-          disabled={!inputtedCode}
+          disabled={!inputtedCode || isAllowTrial}
           onClick={() => availDiscount()}
         >
           Apply

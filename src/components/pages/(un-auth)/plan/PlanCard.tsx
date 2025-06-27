@@ -100,6 +100,7 @@ const PlanCard = ({
   isShowMore,
   showMore,
   isLoggedIn,
+  isAllowTrial,
 }: {
   id: any;
   slug: any;
@@ -113,6 +114,7 @@ const PlanCard = ({
   isShowMore: any;
   showMore: any;
   isLoggedIn: any;
+  isAllowTrial: any;
 }) => {
   const router = useRouter();
   const [addedSlots, setAddedSlots] = useState(0);
@@ -237,22 +239,26 @@ const PlanCard = ({
                 let searchParams = new URLSearchParams(params);
                 router.push(`/checkout/${slug}/?${searchParams}`);
               } else {
-                let params: any = {
-                  additional_employee_slot: addedSlots,
-                };
-                if (periodicity === 'yearly') {
-                  params.duration = periodicityDuration;
+                if (isAllowTrial) {
+                  router.push('/register');
+                } else {
+                  let params: any = {
+                    additional_employee_slot: addedSlots,
+                  };
+                  if (periodicity === 'yearly') {
+                    params.duration = periodicityDuration;
+                  }
+                  let searchParams = new URLSearchParams(params);
+                  let redirectParams: any = {
+                    redirect: `/checkout/${slug}/?${searchParams}`.toString(),
+                  };
+                  let redirectSearchParams = new URLSearchParams(redirectParams);
+                  router.push(`/login?${redirectSearchParams}`);
                 }
-                let searchParams = new URLSearchParams(params);
-                let redirectParams: any = {
-                  redirect: `/checkout/${slug}/?${searchParams}`.toString(),
-                };
-                let redirectSearchParams = new URLSearchParams(redirectParams);
-                router.push(`/login?${redirectSearchParams}`);
               }
             }}
           >
-            SUBSCRIBE
+            {isAllowTrial ? 'Start Free Trial' : 'SUBSCRIBE'}
           </SubscribeBtn>
         </ParentCardDiv>
       </GradientBorderDiv>
