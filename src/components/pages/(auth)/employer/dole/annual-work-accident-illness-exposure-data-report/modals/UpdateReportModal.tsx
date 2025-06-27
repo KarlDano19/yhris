@@ -37,7 +37,7 @@ export default function UpdateReportModal({
         refetch: refetchWorkAccidentIllnessReport,
         remove: removeWorkAccidentIllnessReport,
   } = useGetAnnualAccidentIllnessReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
   const { mutate, isLoading: isLoadingUpdateAnnualAccidentIllnessReport } = useUpdateAnnualAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
@@ -154,6 +154,7 @@ export default function UpdateReportModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingUpdateAnnualAccidentIllnessReport}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}  
               </Dialog.Panel>
