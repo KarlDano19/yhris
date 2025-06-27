@@ -105,6 +105,7 @@ const PricingContent = ({ isLoggedIn }: { isLoggedIn: any }) => {
                       }}
                       className="w-full px-4 py-3 text-lg font-semibold text-indigo-dye bg-white border-2 border-gray-200 rounded-lg focus:border-[#FFC107] focus:ring-2 focus:ring-[#FFC107]/20 focus:outline-none transition-all duration-300 text-center animate-pulse hover:animate-none focus:animate-none shadow-lg hover:shadow-xl focus:shadow-xl"
                       placeholder="Enter number of employees"
+                      disabled
                     />
                     {/* Animated Border Glow */}
                     <div className="absolute inset-0 rounded-lg border-2 border-[#FFC107] opacity-30 animate-ping pointer-events-none"></div>
