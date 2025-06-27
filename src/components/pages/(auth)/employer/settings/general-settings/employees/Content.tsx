@@ -10,7 +10,7 @@ import Position from './tabs/Position';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState('location');
 
   return (
@@ -22,23 +22,41 @@ const Content = () => {
             <h4>General Settings</h4>
           </Link>
         </div>
-        {/* Tab Navigation */}
-        <div className='flex pl-10 mb-5'>
-          <div onClick={() => setActiveTab('location')} className={`cursor-pointer ${activeTab === 'location' ? ' bg-sky-600 text-white px-2 py-1 rounded-md' : 'bg-gray-100 px-2 py-1 rounded-md'}`}>
+        <div className='flex pl-10 mb-5 gap-2'>
+          <div
+            onClick={() => setActiveTab('location')}
+            className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+              activeTab === 'location'
+                ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+            }`}
+          >
             Location
           </div>
-          <div onClick={() => setActiveTab('department')} className={`cursor-pointer ${activeTab === 'department' ? ' bg-sky-600 text-white px-2 py-1 rounded-md' : 'bg-gray-100 px-2 py-1 rounded-md'}`}>
+          <div
+            onClick={() => setActiveTab('department')}
+            className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+              activeTab === 'department'
+                ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+            }`}
+          >
             Department
           </div>
-          <div onClick={() => setActiveTab('position')} className={`cursor-pointer ${activeTab === 'position' ? ' bg-sky-600 text-white px-2 py-1 rounded-md' : 'bg-gray-100 px-2 py-1 rounded-md'}`}>
+          <div
+            onClick={() => setActiveTab('position')}
+            className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+              activeTab === 'position'
+                ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+            }`}
+          >
             Position
           </div>
         </div>
-        {/* Tab Content */}
-        {activeTab === 'location' && <Location />}
-        {/* Add components for Department and Position here */}
-        {activeTab === 'department' && <Department />}
-        {activeTab === 'position' && <Position />}
+        {activeTab === 'location' && <Location hasActiveSubscription={hasActiveSubscription} />}
+        {activeTab === 'department' && <Department hasActiveSubscription={hasActiveSubscription} />}
+        {activeTab === 'position' && <Position hasActiveSubscription={hasActiveSubscription} />}
       </div>
     </>
   );

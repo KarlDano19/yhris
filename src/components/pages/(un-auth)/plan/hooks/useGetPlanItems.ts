@@ -3,12 +3,16 @@ import { getCookie } from 'cookies-next';
 
 async function getPlanItems() {
   try {
-    const config = {
+    const token = getCookie('token');
+    const config: any = {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
       },
     };
+    if (token) {
+      config.headers['Authorization'] = `Token ${token}`;
+    }
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/plans/`, config);
     if (!res.ok) {
       throw res.json();

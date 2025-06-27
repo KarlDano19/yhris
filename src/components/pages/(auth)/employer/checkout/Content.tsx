@@ -17,6 +17,7 @@ import OrderedSection from './forms/OrderSection';
 import useGetPlan from './hooks/useGetPlan';
 import useGetPayments from './hooks/useGetPayments';
 import useCreatePayment from './hooks/useCreatePayment';
+import useAvailTrialPeriod from './hooks/useAvailTrialPeriod';
 
 const Content = () => {
   const params = useParams();
@@ -35,6 +36,7 @@ const Content = () => {
   const { data: dataPlan, isLoading: isPlanLoading } = useGetPlan(params.slug);
   const { data: dataPayment, isLoading: isPaymentLoading } = useGetPayments();
   const { mutate, isLoading } = useCreatePayment();
+  const { mutate: mutateAvailTrialPeriod, isLoading: isAvailTrialPeriodLoading } = useAvailTrialPeriod();
 
   useEffect(() => {
     if (dataPlan && Object.keys(dataPlan).length !== 0 && !isPlanLoading) {
@@ -53,43 +55,59 @@ const Content = () => {
   const duration = Math.abs(parseInt(searchParams.get('duration') || '0'));
 
   const onSubmit = handleSubmit((data) => {
-    const paymentType = data.payment;
-    const payloads: any = {
-      info: data,
-      path: window.location.pathname,
-      url: window.location.origin,
-      additional_employees: additionalEmployeeSlot,
-      plan_id: plan.id,
-      periodicity: duration ? 'yearly' : 'monthly',
-      periodicity_duration: duration,
-      voucher_code: voucherCode,
-    };
-    if (paymentType === 'maya') {
-      payloads['payment_id'] = getPaymentId('maya');
-    }
-    if (paymentType === 'dragonpay') {
-      payloads['payment_id'] = getPaymentId('dragonpay');
-    }
-    if (paymentType === 'paymongo') {
-      payloads['payment_id'] = getPaymentId('paymongo');
-    }
-    const callbackReq = {
-      onSuccess: async (data: any) => {
-        await updateSession({ hasPendingTransaction: true });
-        setTimeout(() => {
-          window.open(data.checkout_url, 'popupWindow', 'width=720,height=720');
+    if (plan.is_allow_trial) {
+      const callbackReq = {
+        onSuccess: (data: any) => {
           setTimeout(() => {
-            window.location.replace(data.callback_url);
+            window.location.replace('/manage-subscriptions#active-plans');
           }, 250);
-        }, 500);
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 4000,
-        });
-      },
-    };
-    mutate(payloads, callbackReq);
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 4000,
+          });
+        },
+      };
+      mutateAvailTrialPeriod(plan.id, callbackReq);
+    } else {
+      const paymentType = data.payment;
+      const payloads: any = {
+        info: data,
+        path: window.location.pathname,
+        url: window.location.origin,
+        additional_employees: additionalEmployeeSlot,
+        plan_id: plan.id,
+        periodicity: duration ? 'yearly' : 'monthly',
+        periodicity_duration: duration,
+        voucher_code: voucherCode,
+      };
+      if (paymentType === 'maya') {
+        payloads['payment_id'] = getPaymentId('maya');
+      }
+      if (paymentType === 'dragonpay') {
+        payloads['payment_id'] = getPaymentId('dragonpay');
+      }
+      if (paymentType === 'paymongo') {
+        payloads['payment_id'] = getPaymentId('paymongo');
+      }
+      const callbackReq = {
+        onSuccess: async (data: any) => {
+          await updateSession({ hasPendingTransaction: true });
+          setTimeout(() => {
+            window.open(data.checkout_url, 'popupWindow', 'width=720,height=720');
+            setTimeout(() => {
+              window.location.replace(data.callback_url);
+            }, 250);
+          }, 500);
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 4000,
+          });
+        },
+      };
+      mutate(payloads, callbackReq);
+    }
   });
 
   const getPaymentId = (type: any) => {
@@ -134,6 +152,7 @@ const Content = () => {
         )} */}
         {checkoutProgress == 1 && (
           <PaymentOption
+            plan={plan}
             payments={payments}
             errors={errors}
             setError={setError}
@@ -157,10 +176,11 @@ const Content = () => {
       <OrderedSection
         title={plan.name}
         price={plan.price}
-        plan_employee_slot={plan.max_employees}
+        plan_employee_slot={plan.min_employees}
         added_employee_slot={additionalEmployeeSlot}
         setVoucherCode={setVoucherCode}
         duration={duration}
+        isAllowTrial={plan.is_allow_trial}
       />
     </div>
   );
