@@ -174,7 +174,7 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         disabled={disabled}
       />
       <div className="text-xs text-gray-500 text-right mt-1">
-        {formData.briefBackground.length}/{maxLength} characters
+        {(formData.briefBackground || '').length}/{maxLength} characters
       </div>
     </div>
   );
