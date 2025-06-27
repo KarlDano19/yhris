@@ -27,7 +27,7 @@ const HeroSection = () => {
               href="/register" 
               className="group bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
             >
-              Start Your Free Trial
+              Start Your 30 Day Free Trial
               <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
