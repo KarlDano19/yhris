@@ -231,11 +231,10 @@ const DocsPage = () => {
                     If you're already using YAHSHUA Payroll, you can integrate with YAHSHUA HRIS using your Owner account:
                   </p>
                   <ol className="list-decimal list-inside space-y-2 text-gray-600 mb-6">
-                    <li>Use the same email address from your YAHSHUA Payroll <strong>Owner account</strong></li>
-                    <li>During registration, select "I have a YAHSHUA Payroll account"</li>
-                    <li>Enter your YAHSHUA Payroll Owner credentials for verification</li>
-                    <li>Your employee data will be automatically synchronized</li>
-                    <li>Configure additional HRIS-specific settings</li>
+                    <li>Click "YAHSHUA Payroll" in the log in options</li>
+                    <li>Click Authorize and wait for 1 second to be redirected to your account in YAHSHUA HRIS</li>
+                    <li>Enjoy the 30 day free trial as your first time experience with YAHSHUA HRIS</li>
+                    <li>To sync your employee records, tap on the sync icon in the dashboard</li>
                   </ol>
 
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">Account Access Requirements</h3>
@@ -390,7 +389,7 @@ const DocsPage = () => {
                         </p>
                         <ul className="list-disc list-inside space-y-1 text-yellow-700 text-sm">
                           <li>Sending Notice to Explain (NTE) to employee kiosk</li>
-                          <li>Receiving employee responses via kiosk</li>
+                          <li>Receiving and responding to notices, memos & policies via YAHSHUA Employee Kiosk</li>
                           <li>Employee evaluation submissions through kiosk</li>
                         </ul>
                       </div>
@@ -402,7 +401,7 @@ const DocsPage = () => {
                       <div className="bg-green-50 p-4 rounded-lg mb-4">
                         <h4 className="font-semibold text-green-800 mb-2">✅ Currently Available</h4>
                         <p className="text-green-700 text-sm">
-                          Direct evaluation system where managers can evaluate employees directly.
+                        Direct evaluation system where managers can evaluate employees directly or direct employee self evaluation from the template created.
                         </p>
                       </div>
                       <div className="bg-yellow-50 p-4 rounded-lg">
@@ -493,21 +492,15 @@ const DocsPage = () => {
                   <div className="bg-green-50 p-4 rounded-lg mb-6">
                     <h4 className="font-semibold text-green-800 mb-2">✅ Currently Synced</h4>
                     <ul className="list-disc list-inside space-y-1 text-green-700 text-sm">
-                      <li>Employee personal information (name, contact details, etc.)</li>
-                      <li>Job titles and department assignments</li>
-                      <li>Employment start dates</li>
-                      <li>Basic compensation information</li>
-                      <li>Employment status (active, inactive)</li>
+                      <li>Employee's personal basic information (name, ID, Address, email, etc.)</li>
+                      <li>Hired dates and contact details</li>
                     </ul>
                   </div>
 
                   <div className="bg-blue-50 p-4 rounded-lg mb-6">
                     <h4 className="font-semibold text-blue-800 mb-2">🔄 Coming Soon</h4>
                     <ul className="list-disc list-inside space-y-1 text-blue-700 text-sm">
-                      <li>Detailed payroll history and earnings statements</li>
-                      <li>Time and attendance data</li>
-                      <li>Tax information and deductions</li>
-                      <li>Benefits enrollment and eligibility</li>
+                      <li>Full compensation details</li>
                       <li>Performance review scores and ratings</li>
                     </ul>
                   </div>
@@ -517,10 +510,8 @@ const DocsPage = () => {
                     Data synchronization occurs:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-gray-600 mb-6">
-                    <li>Automatically every 24 hours for basic employee information</li>
                     <li>Real-time for new employee additions</li>
                     <li>On-demand when you manually trigger a sync</li>
-                    <li>During payroll processing cycles</li>
                   </ul>
 
                   <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
