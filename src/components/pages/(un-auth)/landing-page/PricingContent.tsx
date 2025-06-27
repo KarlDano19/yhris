@@ -508,7 +508,7 @@ const PricingContent = ({ isLoggedIn }: { isLoggedIn: any }) => {
           </div>
 
           {/* FAQ Section */}
-          <div className="max-w-4xl mx-auto mt-16">
+          {/* <div className="max-w-4xl mx-auto mt-16">
             <h3 className="text-3xl font-bold text-indigo-dye mb-8 text-center">Frequently Asked Questions</h3>
             <div className="space-y-6">
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-white/20">
@@ -531,7 +531,7 @@ const PricingContent = ({ isLoggedIn }: { isLoggedIn: any }) => {
                 <p className="text-gray-600">Yes, we offer custom pricing and features for large enterprises. Contact our sales team to discuss your specific needs.</p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </main>
       <Footer />

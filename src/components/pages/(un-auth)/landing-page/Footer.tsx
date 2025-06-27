@@ -31,16 +31,13 @@ const Footer = () => {
                 Complete HR solution for modern businesses. Streamline your HR processes with our comprehensive platform.
               </p>
               <div className="flex space-x-4">
-                <Link href="#" className="text-gray-400 hover:text-[#FFC107] transition-colors">
+                <Link href="https://www.facebook.com/people/Yahshua-HRIS/61561504064973/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FFC107] transition-colors">
                   <FacebookIcon className="w-6 h-6" />
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-[#FFC107] transition-colors">
-                  <InstagramIcon className="w-6 h-6" />
-                </Link>
-                <Link href="#" className="text-gray-400 hover:text-[#FFC107] transition-colors">
+                <Link href="https://www.linkedin.com/company/yahshua-hris/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FFC107] transition-colors">
                   <LinkedInIcon className="w-6 h-6" />
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-[#FFC107] transition-colors">
+                <Link href="https://www.youtube.com/@YAHSHUAHRIS" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FFC107] transition-colors">
                   <YoutubeIcon className="w-6 h-6" />
                 </Link>
               </div>
