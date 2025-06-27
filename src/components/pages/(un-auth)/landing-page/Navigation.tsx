@@ -11,15 +11,20 @@ import MainLogo from "@/svg/MainLogo";
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUseCasesOpen, setIsUseCasesOpen] = useState(false);
+  const [isDocsOpen, setIsDocsOpen] = useState(false);
   const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
   const pathname = usePathname();
   const useCasesDropdownRef = useRef<HTMLDivElement>(null);
+  const docsDropdownRef = useRef<HTMLDivElement>(null);
   const getStartedDropdownRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (useCasesDropdownRef.current && !useCasesDropdownRef.current.contains(event.target as Node)) {
         setIsUseCasesOpen(false);
+      }
+      if (docsDropdownRef.current && !docsDropdownRef.current.contains(event.target as Node)) {
+        setIsDocsOpen(false);
       }
       if (getStartedDropdownRef.current && !getStartedDropdownRef.current.contains(event.target as Node)) {
         setIsGetStartedOpen(false);
@@ -87,6 +92,26 @@ const Navigation = () => {
                       onClick={() => setIsUseCasesOpen(false)}
                     >
                       Performance Management
+                    </Link>
+                  </div>
+                )}
+              </div>
+              <div className="relative" ref={docsDropdownRef}>
+                <button
+                  onClick={() => setIsDocsOpen(!isDocsOpen)}
+                  className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap flex items-center"
+                >
+                  Docs
+                  <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isDocsOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isDocsOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
+                    <Link
+                      href="/docs"
+                      className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                      onClick={() => setIsDocsOpen(false)}
+                    >
+                      Get Setup in YAHSHUA HRIS
                     </Link>
                   </div>
                 )}
@@ -166,6 +191,12 @@ const Navigation = () => {
                 </Link>
                 <Link href="/use-cases/performance-management" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
                   Performance Management
+                </Link>
+              </div>
+              <div className="space-y-1">
+                <div className="text-indigo-dye px-4 py-2 text-base font-medium">Docs</div>
+                <Link href="/docs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
+                  Get Setup in YAHSHUA HRIS
                 </Link>
               </div>
               <Link href="/how-we-compare" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
