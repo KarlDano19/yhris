@@ -178,7 +178,6 @@ const DocsPage = () => {
                   <ul className="list-disc list-inside space-y-2 text-gray-600 mb-6">
                     <li>Complete your company profile information</li>
                     <li>Set up your HR preferences and settings</li>
-                    <li>Configure your employee data structure</li>
                     <li>Import existing employee data (optional)</li>
                   </ul>
                 </section>
@@ -193,10 +192,10 @@ const DocsPage = () => {
                   </p>
                   <ol className="list-decimal list-inside space-y-2 text-gray-600 mb-6">
                     <li>Visit our <Link href="/register" className="text-indigo-600 hover:underline">registration page</Link></li>
-                    <li>Fill in your business information</li>
+                    <li>Verify your account</li>
+                    <li>Complete your company profile</li>
+                    <li>Experience 30 day free trial</li>
                     <li>Choose your subscription plan</li>
-                    <li>Verify your email address</li>
-                    <li>Complete your profile setup</li>
                   </ol>
 
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">Account Types</h3>
@@ -204,7 +203,7 @@ const DocsPage = () => {
                     <h4 className="font-semibold text-indigo-800 mb-2">Employer Account</h4>
                     <p className="text-gray-600 text-sm">
                       Full access to all HR management features including employee management, 
-                      payroll integration, compliance reporting, and administrative tools.
+                      YAHSHUA Payroll integration, compliance reporting, and administrative tools.
                     </p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg mb-6">
