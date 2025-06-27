@@ -66,7 +66,7 @@ export default function UpdateReportModal({
       setValue('total_hours_worked', workAccidentIllnessReportData.total_hours_worked);
       setValue('total_non_disabling_injuries', workAccidentIllnessReportData.total_non_disabling_injuries);
       setValue('type_of_industry', workAccidentIllnessReportData.type_of_industry);
-      setValue('name_signature', workAccidentIllnessReportData.name_signature);
+      setValue('signature', workAccidentIllnessReportData.signature);
       setValue('year', workAccidentIllnessReportData.year);
       setValue('date_of_report', workAccidentIllnessReportData.date_of_report);
     }
