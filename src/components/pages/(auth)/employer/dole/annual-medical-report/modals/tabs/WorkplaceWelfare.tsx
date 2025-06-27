@@ -355,35 +355,19 @@ function WorkplaceWelfare({
             <div>{""}</div>
           </div>
           <div className="grid grid-cols-4 gap-2 mt-4">
-            <div>Others (Please specify):</div>
-            <div className="relative mt-2 flex items-center gap-1">
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("sports_activities")}
-                  id="sports_activities"
-                  value="no"
-                />
-                <label htmlFor="others" className="ml-1">
-                  No
-                </label>
-              </h1>
+            <div className="col-span-1 flex items-center">
+              <label htmlFor="physical_fitness_program_others" className="text-sm font-medium">Others (Please specify):</label>
             </div>
-            <div className="relative mt-2 flex items-center gap-1">
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("sports_activities")}
-                  id="sports_activities"
-                  value="yes"
-                />
-                <label htmlFor="others" className="ml-1">
-                  Yes
-                </label>
-              </h1>
+            <div className="col-span-3">
+              <input
+                type="text"
+                {...register("physical_fitness_program_others")}
+                id="physical_fitness_program_others"
+                maxLength={100}
+                className="rounded-md max-w-xs border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                placeholder="Specify sport here"
+              />
             </div>
-            <div>{""}</div>
-            <div>{""}</div>
           </div>
         </div>
       </div>

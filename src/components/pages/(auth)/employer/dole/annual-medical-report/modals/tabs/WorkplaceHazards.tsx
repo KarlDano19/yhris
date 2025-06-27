@@ -7,6 +7,7 @@ import { Controller } from "react-hook-form";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../DrawSignatureModal";
 import DrawNotedBySignatureModal from "../DrawNotedBySignature";
+import Image from "next/image";
 
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
@@ -49,6 +50,10 @@ function WorkplaceSafetyCompliance({
   const [notedAttachmentExist, setNotedAttachmentExist] = useState(false);
   const [attachmentExist, setAttachmentExist] = useState(false);
 
+  // Watch for existing file URLs from form (if using react-hook-form's watch)
+  const existingSignatureUrl = control?._formValues?.signature || "";
+  const existingNotedSignatureUrl = control?._formValues?.noted_signature || "";
+
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
   };
@@ -86,6 +91,29 @@ function WorkplaceSafetyCompliance({
       setFileUrl("");
     }
   }, [fileUrl, setValue]);
+
+  // Show existing signature if present (edit mode)
+  useEffect(() => {
+    if (
+      existingSignatureUrl &&
+      typeof existingSignatureUrl === "string" &&
+      (existingSignatureUrl.startsWith("http") || existingSignatureUrl.startsWith("data:image/"))
+    ) {
+      setAttachmentExist(true);
+      setSignatureUrl(existingSignatureUrl);
+    }
+  }, [existingSignatureUrl]);
+
+  useEffect(() => {
+    if (
+      existingNotedSignatureUrl &&
+      typeof existingNotedSignatureUrl === "string" &&
+      (existingNotedSignatureUrl.startsWith("http") || existingNotedSignatureUrl.startsWith("data:image/"))
+    ) {
+      setNotedAttachmentExist(true);
+      setNotedSignatureUrl(existingNotedSignatureUrl);
+    }
+  }, [existingNotedSignatureUrl]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -858,27 +886,48 @@ function WorkplaceSafetyCompliance({
                   id="signature"
                   {...register("signature")}
                   onChange={(e) => {
-                    e.target.value ? setSignatureUrl("") : null;
-                    e.target.value ? setAttachmentExist(true) : null;
+                    const file = e.target.files && e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setSignatureUrl(reader.result as string);
+                        setAttachmentExist(true);
+                      };
+                      reader.readAsDataURL(file);
+                    } else {
+                      setSignatureUrl("");
+                      setAttachmentExist(false);
+                    }
                   }}
                   type="file"
+                  disabled={!!(existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http'))}
                   className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                 />
-                {attachmentExist ? (
-                  <button
-                    type="button"
-                    className="underline text-savoy-blue text-sm"
-                    onClick={() => {
-                      setValue("signature", "");
-                      setAttachmentExist(false);
-                    }}
-                  >
-                    Remove Attachment
-                  </button>
-                ) : null}
               </div>
             </div>
           </div>
+          {((signatureUrl && signatureUrl !== "") || (existingSignatureUrl && existingSignatureUrl !== "")) && (
+            <div className="col-span-3 flex flex-col items-center mt-2 mb-2">
+              <Image
+                className="border-0 ring-1 ring-inset ring-gray-300"
+                src={signatureUrl || existingSignatureUrl}
+                width={500}
+                height={200}
+                alt="signatureImage"
+              />
+              <button
+                type="button"
+                className="mt-2 underline text-red-600 text-sm"
+                onClick={() => {
+                  setValue("signature", "");
+                  setSignatureUrl("");
+                  setAttachmentExist(false);
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-6 mt-4 pl-6 pr-6 mb-4">
             <div>
               <label
@@ -928,27 +977,48 @@ function WorkplaceSafetyCompliance({
                   id="noted_signature"
                   {...register("noted_signature")}
                   onChange={(e) => {
-                    e.target.value ? setNotedSignatureUrl("") : null;
-                    e.target.value ? setNotedAttachmentExist(true) : null;
+                    const file = e.target.files && e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setNotedSignatureUrl(reader.result as string);
+                        setNotedAttachmentExist(true);
+                      };
+                      reader.readAsDataURL(file);
+                    } else {
+                      setNotedSignatureUrl("");
+                      setNotedAttachmentExist(false);
+                    }
                   }}
                   type="file"
+                  disabled={!!(existingNotedSignatureUrl && typeof existingNotedSignatureUrl === 'string' && existingNotedSignatureUrl.startsWith('http'))}
                   className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                 />
-                {notedAttachmentExist ? (
-                  <button
-                    type="button"
-                    className="underline text-savoy-blue text-sm"
-                    onClick={() => {
-                      setValue("noted_signature", "");
-                      setNotedAttachmentExist(false);
-                    }}
-                  >
-                    Remove Attachment
-                  </button>
-                ) : null}
               </div>
             </div>
           </div>
+          {((notedSignatureUrl && notedSignatureUrl !== "") || (existingNotedSignatureUrl && existingNotedSignatureUrl !== "")) && (
+            <div className="col-span-3 flex flex-col items-center mt-2 mb-2">
+              <Image
+                className="border-0 ring-1 ring-inset ring-gray-300"
+                src={notedSignatureUrl || existingNotedSignatureUrl}
+                width={500}
+                height={200}
+                alt="notedSignatureImage"
+              />
+              <button
+                type="button"
+                className="mt-2 underline text-red-600 text-sm"
+                onClick={() => {
+                  setValue("noted_signature", "");
+                  setNotedSignatureUrl("");
+                  setNotedAttachmentExist(false);
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6 mb-4">
               <div>
                 <label

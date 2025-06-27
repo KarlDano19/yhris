@@ -502,6 +502,7 @@ function EditAnnualMedicalReportModal({
       setValue("mental_health_program", annualMedicalReportData.mental_health_program);
       setValue("personal_health_maintenance", annualMedicalReportData.personal_health_maintenance);
       setValue("sports_activities", annualMedicalReportData.sports_activities);
+      setValue("physical_fitness_program_others", annualMedicalReportData.physical_fitness_program_others);
 
       // Workplace Hazards
       setValue("dust_sources", annualMedicalReportData.dust_sources);
