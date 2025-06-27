@@ -113,6 +113,7 @@ export default function Content() {
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isLetterheadModalOpen, setIsLetterheadModalOpen] = useState(false);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{message: string, type: 'success' | 'error' | 'warning' | 'info'} | null>(null);
   
   // Initialize color input polyfill for Safari
   useEffect(() => {
@@ -398,6 +399,17 @@ export default function Content() {
     setIsSignatureModalOpen(false);
   };
   
+  const handleTransparencyCheck = (result: {hasTransparency: boolean, message: string, type: 'success' | 'warning' | 'error'}) => {
+    // Display the toast message
+    toast.custom(() => (
+      <CustomToast 
+        message={result.message} 
+        type={result.type} 
+        onClose={() => setToastMessage(null)} 
+      />
+    ));
+  };
+  
   // Handle letterhead modal
   const handleOpenLetterheadModal = () => {
     setIsLetterheadModalOpen(true);
@@ -477,6 +489,15 @@ export default function Content() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {toastMessage && (
+          <div className="fixed top-4 right-4 z-50">
+            <CustomToast 
+              message={toastMessage.message} 
+              type={toastMessage.type} 
+              onClose={() => setToastMessage(null)} 
+            />
+          </div>
+        )}
         <div className="flex p-4">
           <Link 
             href={employeeId ? "/manage/address-employee-issue" : "/manage"} 
@@ -527,6 +548,7 @@ export default function Content() {
         isOpen={isSignatureModalOpen}
         onClose={() => setIsSignatureModalOpen(false)}
         onSave={handleSignatureSave}
+        onTransparencyCheck={handleTransparencyCheck}
       />
       
       <LetterheadModal 

@@ -250,7 +250,14 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         <div class="signatures-grid">
           <div class="signature-block">
             <div class="detail-label">Prepared by:</div>
-            <div>${data.preparedBy || '\u00A0'}</div>
+            <div class="signature-container">
+              ${signatureSrc ? `
+                <div class="signature-image-container">
+                  <img src="${signatureSrc}" class="signature-image" alt="Signature">
+                </div>
+              ` : ''}
+              <div>${data.preparedBy || '\u00A0'}</div>
+            </div>
             <div class="signature-line"></div>
             <div style="font-weight: bold;">HR Representative</div>
           </div>
@@ -303,26 +310,20 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         </div>
       </div>
 
-      <!-- Signatures Section -->
+      <!-- Footer Section -->
       <div class="section avoid-break">
-        <table class="signature-table">
+        <table class="footer-table">
           <tr>
-            <td class="signature-cell signature-cell-left">
-              ${signatureSrc ? `
-                <div class="signature-image-container-table">
-                  <img src="${signatureSrc}" class="signature-image-table" alt="Signature">
-                </div>
-              ` : '<div class="signature-image-container-table"></div>'}
+            <td class="footer-cell footer-cell-left">
               <div>${data.reviewedBy || '\u00A0'}</div>
-              <div class="signature-line"></div>
-              <div class="signature-title">Immediate Supervisor/Manager Signature</div>
+              <div class="footer-line"></div>
+              <div class="footer-title">Immediate Supervisor/Manager Signature</div>
             </td>
             
-            <td class="signature-cell signature-cell-right">
-              <div class="signature-image-container-table"></div>
+            <td class="footer-cell footer-cell-right">
               <div>${data.employeeName || '[Employee Name]'}</div>
-              <div class="signature-line"></div>
-              <div class="signature-title">Employee Signature</div>
+              <div class="footer-line"></div>
+              <div class="footer-title">Employee Signature</div>
             </td>
           </tr>
         </table>
@@ -478,25 +479,6 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           color: #000;
         }
         
-        .signature-line {
-          border-top: 1px solid #000;
-          margin-bottom: 5px;
-        }
-        
-        .signature-image-container {
-          height: 50px;
-          display: flex;
-          align-items: flex-end;
-          justify-content: center;
-          margin-bottom: 10px;
-        }
-        
-        .signature-image {
-          max-width: 150px;
-          max-height: 48px;
-          object-fit: contain;
-        }
-        
         .section-title {
           font-weight: bold;
           margin-top: 15px;
@@ -526,46 +508,61 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         .text-center {
           text-align: center;
         }
+
+
+        /* Signature line styles */
+        .signature-line {
+          border-top: 1px solid #000;
+          margin-bottom: 5px;
+        }
+
+        .signature-image-container {
+          position: absolute;
+          width: 100%;
+          right: 3px;
+          top: -25px;
+          z-index: 10;
+          text-align: center;
+        }
+
+        .signature-image {
+          max-width: 150px;
+          height: 48px;
+          object-fit: contain;
+          margin: 0 auto;
+        }
+
         
-        /* Signature table styles */
-        .signature-table {
+        /* Footer table styles */
+        .footer-table {
           width: 100%;
           border-collapse: collapse;
           font-size: 12px;
           color: #000;
         }
         
-        .signature-cell {
+        .footer-cell {
           width: 50%;
           padding: 0 12px;
           text-align: center;
           vertical-align: bottom;
         }
         
-        .signature-cell-left {
+        .footer-cell-left {
           padding-right: 12px;
           padding-left: 0;
         }
 
-        .signature-image-container-table {
-          height: 30px;
-          display: flex;
-          align-items: flex-end;
-          justify-content: center;
+        .footer-line {
+          border-bottom: 1px solid #000;
         }
 
-        .signature-image-table {
-          max-width: 150px;
-          max-height: 50px;
-          object-fit: contain;
-        }
-        
-        .signature-cell-right {
+        .footer-cell-right {
           padding-left: 12px;
           padding-right: 0;
         }
         
-        .signature-title {
+        .footer-title {
           font-weight: bold;
           text-align: center;
           margin-top: 5px;
@@ -591,6 +588,11 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
             page-break-inside: avoid;
             break-inside: avoid;
           }
+        }
+
+        .signature-container {
+          position: relative;
+          min-height: 20px;
         }
       </style>
     </head>

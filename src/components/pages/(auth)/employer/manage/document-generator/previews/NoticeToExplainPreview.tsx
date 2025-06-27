@@ -392,10 +392,24 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       </div>
       
       <div className="grid grid-cols-3 gap-3 mb-6 text-black text-xs">
-        <div className="text-center">
+        <div className="text-center relative">
           <div className="font-bold mb-1">Prepared by:</div>
-          <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
-            {data.preparedBy || '\u00A0'}
+          <div className="mb-1 relative">
+            <div className="absolute w-full right-3 -top-7 z-10">
+              {signatureUrl && (
+                <Image
+                  src={signatureUrl}
+                  alt="Signature"
+                  width={150}
+                  height={48}
+                  className="object-contain mx-auto"
+                  style={{ pointerEvents: 'none' }}
+                />
+              )}
+            </div>
+            <div className="relative z-0" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+              {data.preparedBy || '\u00A0'}
+            </div>
           </div>
           <div className="border-t font-bold border-black pt-1">HR Representative</div>
         </div>
@@ -450,17 +464,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
   const renderSignatures = () => (
     <div className="grid grid-cols-2 gap-6 mt-2 text-black text-xs">
       <div className="text-center">
-        <div style={{ height: '30px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          {signatureUrl && (
-            <Image 
-              src={signatureUrl} 
-              alt="Signature" 
-              className="h-12 object-contain" 
-              width={150}
-              height={48}
-            />
-          )}
-        </div>
+        <div style={{ height: '30px' }}></div>
         <div className="mb-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
           {data.reviewedBy || '\u00A0'}
         </div>

@@ -83,7 +83,7 @@ export function handleProceedUtil({
             margin-bottom: 5px !important;
           }
           
-          .signature-table {
+          .footer-table {
             width: 100% !important;
             border-collapse: collapse !important;
             font-size: 12px !important;
@@ -92,41 +92,57 @@ export function handleProceedUtil({
             margin-bottom: 20px !important;
           }
           
-          .signature-cell {
+          .footer-cell {
             width: 50% !important;
             padding: 0 12px !important;
             text-align: center !important;
             vertical-align: bottom !important;
           }
           
-          .signature-cell-left {
+          .footer-cell-left {
             padding-right: 12px !important;
             padding-left: 0 !important;
           }
+
+          .footer-line {
+            border-bottom: 1px solid #000 !important;
+            margin-top: 10px !important;
+          }
           
-          .signature-cell-right {
+          .footer-cell-right {
             padding-left: 12px !important;
             padding-right: 0 !important;
           }
           
-          .signature-image-container-table {
-            height: 30px !important;
-            display: flex !important;
-            align-items: flex-end !important;
-            justify-content: center !important;
-          }
-          
-          .signature-image-table {
-            max-width: 150px !important;
-            max-height: 50px !important;
-            object-fit: contain !important;
-          }
-          
-          .signature-title {
+          .footer-title {
             font-weight: bold !important;
             text-align: center !important;
             margin-bottom: 10px !important;
           }
+
+          /* Signature container styles for the HR Representative section */
+          .signature-container {
+            position: relative !important;
+            min-height: 20px !important;
+          }
+
+          .signature-image-container {
+            position: absolute !important;
+            width: 100% !important;
+            right: 3px !important;
+            top: -25px !important;
+            z-index: 10 !important;
+            text-align: center !important;
+          }
+
+          .signature-image {
+            max-width: 150px !important;
+            height: 48px !important;
+            object-fit: contain !important;
+            margin: 0 auto !important;
+          }
+
+
         `
       );
 
