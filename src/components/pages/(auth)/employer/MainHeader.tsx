@@ -21,12 +21,13 @@ import MainLogo from '@/svg/MainLogo';
 import useGetRights from '@/components/hooks/useGetRights';
 import useGetUsers from '@/components/hooks/useGetUsers';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
+import SubscriptionHeader from '@/components/pages/(auth)/employer/SubscriptionHeader';
 
 interface ErrorDetail {
   detail: string;
 }
 
-const MainHeader = () => {
+const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute }: { hasProfile: boolean; hasActiveSubscription: boolean; firstRoute: string }) => {
   const [profile, setProfile] = useState<any>({});
   const [userRights, setUserRights] = useState<any>({});
   const [userDetails, setUserDetails] = useState<any>({});
@@ -64,8 +65,8 @@ const MainHeader = () => {
   };
 
   const userNavigation = [
-    { name: 'My Profile', href: '/employer-profile', onClick: void 0, isDisabled: false },
-    { name: 'Subscriptions', href: '/manage-subscriptions#active-plans', onClick: void 0, isDisabled: true },
+    { name: 'My Profile', href: '/employer-profile', onClick: void 0, isDisabled: !hasProfile },
+    { name: 'Subscriptions', href: '/manage-subscriptions#active-plans', onClick: void 0, isDisabled: !hasProfile },
     {
       name: 'Sign out',
       href: '',
@@ -270,6 +271,7 @@ const MainHeader = () => {
         )}
       </Popover>
       <FloatingHelpButton companyName={profile.name} />
+      {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute) && <SubscriptionHeader />}
     </>
   );
 };

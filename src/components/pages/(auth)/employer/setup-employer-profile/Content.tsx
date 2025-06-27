@@ -22,7 +22,7 @@ const Content = () => {
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: async (data: any) => {
-        await updateSession({ hasProfile: true });
+        await updateSession({ hasProfile: true, hasActiveSubscription: true });
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         location.href = '/dashboard';
       },
