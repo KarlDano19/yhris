@@ -19,7 +19,7 @@ const PurchaseStatusCard = ({ refetch, plan }: any) => {
         plan.is_ended ? (
           <>
             <h4 className='text-[15px] font-medium tracking-[0.02em]'>Your subscription has ended.</h4>
-            <button className='bg-[#FFC107] text-black rounded-md font-semibold px-4 py-2 mt-4' onClick={() => router.push('/pricing')}>
+            <button className='bg-[#FFC107] text-black rounded-md font-semibold px-4 py-2 mt-4' onClick={() => router.push('/landing-page/pricing')}>
               Renew Subscription
             </button>
           </>

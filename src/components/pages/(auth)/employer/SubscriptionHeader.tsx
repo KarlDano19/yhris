@@ -12,7 +12,7 @@ const SubscriptionHeader = () => {
           <button
             className='bg-white text-blue-500 px-4 py-2 rounded-full text-sm font-semibold border border-[#A8B5C7]'
             onClick={() => {
-              router.push('/pricing');
+              router.push('/landing-page/pricing');
             }}
           >
             Subscribe Now!

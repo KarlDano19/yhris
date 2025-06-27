@@ -1,12 +1,20 @@
 "use client"
-
-import Link from "next/link";
-import { CheckIcon, PhoneIcon, EnvelopeIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import Navigation from "./Navigation";
-import Footer from "./Footer";
 import { useState } from "react";
 
-const PricingContent = () => {
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+import Navigation from "./Navigation";
+import Footer from "./Footer";
+
+import { CheckIcon, PhoneIcon, EnvelopeIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+
+const PricingContent = ({ isLoggedIn }: { isLoggedIn: any }) => {
+  const router = useRouter();
+  const [addedSlots, setAddedSlots] = useState(0);
+  const [periodicity, setPeriodicity] = useState('monthly');
+  const [periodicityDuration, setPeriodicityDuration] = useState(1);
+  const [slug, setSlug] = useState('basic-plan');
   const [employeeCount, setEmployeeCount] = useState(100);
 
   const calculatePrice = (employees: number) => {
@@ -98,14 +106,11 @@ const PricingContent = () => {
                       className="w-full px-4 py-3 text-lg font-semibold text-indigo-dye bg-white border-2 border-gray-200 rounded-lg focus:border-[#FFC107] focus:ring-2 focus:ring-[#FFC107]/20 focus:outline-none transition-all duration-300 text-center animate-pulse hover:animate-none focus:animate-none shadow-lg hover:shadow-xl focus:shadow-xl"
                       placeholder="Enter number of employees"
                     />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400 text-sm animate-bounce">employees</span>
-                    </div>
                     {/* Animated Border Glow */}
                     <div className="absolute inset-0 rounded-lg border-2 border-[#FFC107] opacity-30 animate-ping pointer-events-none"></div>
                   </div>
                   <div className="text-center text-xs text-gray-500 mt-2">
-                    <span>Minimum: 1 employee</span>
+                    <span>Minimum: 100 employee</span>
                   </div>
                 </div>
 
@@ -188,12 +193,36 @@ const PricingContent = () => {
                     <span className="text-sm">Document Management</span>
                   </li>
                 </ul>
-                <Link 
-                  href="/register" 
+                <button 
                   className="block w-full text-center px-6 py-3 border-2 border-[#FFC107] text-[#FFC107] hover:bg-[#FFC107] hover:text-black rounded-lg font-medium transition-colors"
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      let params: any = {
+                        additional_employee_slot: employeeCount - 100,
+                      };
+                      if (periodicity === 'yearly') {
+                        params.duration = periodicityDuration;
+                      }
+                      let searchParams = new URLSearchParams(params);
+                      router.push(`/checkout/${slug}/?${searchParams}`);
+                    } else {
+                      let params: any = {
+                        additional_employee_slot: employeeCount - 100,
+                      };
+                      if (periodicity === 'yearly') {
+                        params.duration = periodicityDuration;
+                      }
+                      let searchParams = new URLSearchParams(params);
+                      let redirectParams: any = {
+                        redirect: `/checkout/${slug}/?${searchParams}`.toString(),
+                      };
+                      let redirectSearchParams = new URLSearchParams(redirectParams);
+                      router.push(`/login?${redirectSearchParams}`);
+                    }
+                  }}
                 >
                   Start 30 Day Free Trial
-                </Link>
+                </button>
               </div>
             </div>
 

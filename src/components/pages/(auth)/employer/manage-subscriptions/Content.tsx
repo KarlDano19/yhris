@@ -315,7 +315,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <div className='w-full flex justify-center'>
                   <div className='w-1/4 border-2 border-dashed rounded-[2rem] mt-8 px-8 py-12 text-center'>
                     <p className='mb-4 font-semibold'>You’re not subscribed to any plans yet.</p>
-                    <Link href={`/pricing`} className='bg-[#FFC107] text-black rounded-md font-semibold px-4 py-2 mt-4'>
+                    <Link href={`/landing-page/pricing`} className='bg-[#FFC107] text-black rounded-md font-semibold px-4 py-2 mt-4'>
                       Subscribe Now
                     </Link>
                   </div>
