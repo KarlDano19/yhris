@@ -52,6 +52,7 @@ function UpdateShcMinutesMeetingModal({
         );
         setIsOpen({ id: 0, open: false });
         reset();
+        setSelectedTab(1);
         refetch();
       },
       onError: (err: any) => {
@@ -61,7 +62,7 @@ function UpdateShcMinutesMeetingModal({
         });
       },
     };
-    updateShcMinutesMeeting(data, callbackReq);
+    updateShcMinutesMeeting({ data, shc_meeting_minutes_id: isOpen.id }, callbackReq);
   });
 
   useEffect(() => {
@@ -82,11 +83,12 @@ function UpdateShcMinutesMeetingModal({
         setValue("position", minutesMeetingData.position);
         setValue("signature", minutesMeetingData.signature);
     }
-  })
+  }, [minutesMeetingData, setValue]);
 
   const customCloseModal = () => {
     reset();
     removeMinutesMeeting();
+    setSelectedTab(1);
     setIsOpen(null);
   };
 
