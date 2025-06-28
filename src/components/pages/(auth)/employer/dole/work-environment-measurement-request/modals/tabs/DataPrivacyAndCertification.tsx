@@ -142,7 +142,7 @@ function DataPrivacyAndCertification({
     // Use react-hook-form's watched value for signature
     const signatureValue = watch("signature");
     if (!signatureValue || signatureValue === "") {
-      toast.custom(() => <CustomToast message="Please Draw or Upload a signature." type="error" />);
+      toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />);
       return;
     }
 

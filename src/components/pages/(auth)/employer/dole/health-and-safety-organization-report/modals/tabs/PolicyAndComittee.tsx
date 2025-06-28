@@ -117,9 +117,13 @@ function PolicyAndComittee({
         return;
       } else if (!data.chairman_name || data.chairman_name.trim() === "") {
         toast.custom(() => <CustomToast message="Chairman name is required." type="error" />, { duration: 5000 });
+        const el = document.getElementById("chairman_name");
+        if (el) el.focus();
         return;
       } else if (!data.chairman_position || data.chairman_position.trim() === "") {
         toast.custom(() => <CustomToast message="Chairman position is required." type="error" />, { duration: 5000 });
+        const el = document.getElementById("chairman_position");
+        if (el) el.focus();
         return;
       }
       setSelectedTab(3);

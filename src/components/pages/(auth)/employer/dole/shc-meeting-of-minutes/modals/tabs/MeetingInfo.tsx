@@ -1,9 +1,8 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import Select from 'react-select';
 
@@ -25,10 +24,6 @@ export default function MeetingInfo({
   handleSubmit: any;
   setSelectedTab: any;
 }) {
-  const onSubmit = handleSubmit(() => {
-    setSelectedTab(2);
-  });
-
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
 
@@ -41,6 +36,34 @@ export default function MeetingInfo({
       setEmployeeItems(formattedEmployees);
     }
   }, [employeeData]);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const timeOfMeeting = control._formValues?.time_of_meeting;
+    const venue = control._formValues?.venue;
+    const attendees = control._formValues?.attendees;
+    const absentees = control._formValues?.absentees;
+
+    if (!timeOfMeeting) {
+      const el = document.getElementById("time_of_meeting");
+      if (el) el.focus();
+      return;
+    }
+    if (!venue) {
+      const el = document.getElementById("venue");
+      if (el) el.focus();
+      return;
+    }
+    if (!attendees || !Array.isArray(attendees) || attendees.length === 0) {
+      toast.custom(() => <CustomToast message="Please select at least one Attendee." type="error" />);
+      return;
+    }
+    if (!absentees || !Array.isArray(absentees) || absentees.length === 0) {
+      toast.custom(() => <CustomToast message="Please select at least one Absentee." type="error" />);
+      return;
+    }
+    setSelectedTab(2);
+  };
 
   return (
     <form onSubmit={onSubmit}>
@@ -112,11 +135,12 @@ export default function MeetingInfo({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Venue
+              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("venue")}
+                {...register("venue", { required: true })}
                 id="venue"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />

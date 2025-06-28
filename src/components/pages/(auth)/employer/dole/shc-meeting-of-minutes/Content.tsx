@@ -86,6 +86,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         const incidentDate = new Date(item.date_of_meeting);
         item.date_of_meeting = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
 
+        // Format time_of_meeting to 12-hour format
+        if (item.time_of_meeting) {
+          const [hours, minutes, seconds] = item.time_of_meeting.split(":");
+          const date = new Date();
+          date.setHours(Number(hours), Number(minutes), Number(seconds || 0));
+          item.time_of_meeting = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+
         return item;
       });
       setShcMinutesMeetingItems(shcMinutesMeetingData.records);

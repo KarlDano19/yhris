@@ -213,6 +213,8 @@ function TechnicalAndSignature({
             toast.custom(() => <CustomToast message="Submitted By is required." type="error" />, { duration: 5000 });
           });
         });
+        const el = document.getElementById("submitted_by");
+        if (el) el.focus();
         return;
       }
       if (!positionValue) {
@@ -221,6 +223,8 @@ function TechnicalAndSignature({
             toast.custom(() => <CustomToast message="Position is required." type="error" />, { duration: 5000 });
           });
         });
+        const el = document.getElementById("position");
+        if (el) el.focus();
         return;
       }
       if (!signatureValue) {

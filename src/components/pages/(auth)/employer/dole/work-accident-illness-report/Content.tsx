@@ -93,9 +93,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (workAccidentIlnessReportsData) {
       workAccidentIlnessReportsData.records.map((item: any) => {
         const incidentDate = new Date(item.date_of_incident);
-        item.date_of_incident = `${
-          incidentDate.getMonth() + 1
-        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+        item.date_of_incident = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+
+        // Format time_of_incident to 12-hour format
+        if (item.time_of_incident) {
+          const [hours, minutes, seconds] = item.time_of_incident.split(":");
+          const date = new Date();
+          date.setHours(Number(hours), Number(minutes), Number(seconds || 0));
+          item.time_of_incident = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
 
         const returnDate = new Date(item.date_returned_to_work);
         item.date_returned_to_work = `${returnDate.getMonth() + 1}/${returnDate.getDate()}/${returnDate.getFullYear()}`;
@@ -645,6 +651,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tr key={rowIndex}>
                     <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
                       {item.employee}
+                    </td>
+                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
+                      {item.time_of_incident}
                     </td>
                     <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
                       {item.age}
