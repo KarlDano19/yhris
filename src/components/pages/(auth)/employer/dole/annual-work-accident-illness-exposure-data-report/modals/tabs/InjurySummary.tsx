@@ -2,22 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 
-import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
 import useGetDisablingInjuryData from "../../hooks/useGetDisablingInjuryData";
 
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function InjurySummary({
-  control,
   register,
   onSubmit,
   setSelectedTab,
@@ -37,52 +29,111 @@ function InjurySummary({
   initialEmployeeHours?: number;
   initialDaysLost?: number;
 }) {
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient
-    .getQueryCache()
-    .find(["employerProfileCache"]) as {
-    state: { data: CachedProfileData } | undefined;
-  };
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
-  const [attachmentExist, setAttachmentExist] = useState(false);
-  const [totalDisablingInjuries, setTotalDisablingInjuries] =
-    useState<number>(0);
+  const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
   const [employeeHours, setEmployeeHours] = useState<number>(0);
   const [daysLost, setDaysLost] = useState<number>(0);
+  const [signatureSource, setSignatureSource] = useState<string>("");
 
   // Watch for existing signature URL from form
   const existingSignatureUrl = watch("signature");
 
   const { data: reportsData, refetch: refetchReportsData } = useGetDisablingInjuryData();
 
+  // Track current signature source and file
+  useEffect(() => {
+    const currentSignature = watch("signature");
+    const currentSource = watch("signature_source");
+    
+    if (currentSignature && typeof currentSignature === "string") {
+      setPreviousSignatureFile(currentSignature);
+      return;
+    }
+
+    // Only show previews for unsaved signatures
+    if (currentSource === "draw") {
+    } else if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("signature", file);
+      setValue("previous_signature", previousSignatureFile);
+      setValue("signature_source", "upload");
+      setSignatureSource("upload");
+      setSignatureUrl(URL.createObjectURL(file));
+    }
+  };
+
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
+    if (!drawSignatureModal) {
+    }
+  };
+
+  // Handle drawn signature from modal
+  const handleDrawnSignature = (drawnSignatureDataUrl: string) => {
+    // Convert data URL to Blob
+    fetch(drawnSignatureDataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        // Create a File object from the Blob
+        const file = new File([blob], "signature.png", { type: "image/png" });
+        
+        // Update form state with the File object
+        setValue("signature", file);
+        setValue("signature_source", "draw");
+        setSignatureSource("draw");
+        setSignatureUrl(drawnSignatureDataUrl);
+      });
   };
 
   useEffect(() => {
     if (signatureUrl) {
-      setValue("signature", signatureUrl);
+      // If signatureUrl is a data URL from drawing
+      if (signatureUrl.startsWith('data:')) {
+        fetch(signatureUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], "signature.png", { type: "image/png" });
+            setValue("signature", file);
+            setValue("signature_source", "draw");
+            setSignatureSource("draw");
+          })
+          .catch(err => {
+            console.error("Error converting signature data URL to file:", err);
+          });
+      } else if (signatureUrl.startsWith('blob:')) {
+        // Uploaded file preview
+        setSignatureSource("upload");
+      } else {
+        setValue("signature", signatureUrl);
+        setValue("previous_signature", signatureUrl);
+        setValue("signature_source", "draw");
+        setSignatureSource("");
+      }
     }
   }, [signatureUrl, setValue]);
 
   // Check if there are existing signature URLs (for edit mode)
   useEffect(() => {
     if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
-      setAttachmentExist(true);
       setSignatureUrl(existingSignatureUrl);
+      setSignatureSource("");
     }
   }, [existingSignatureUrl]);
 
   useEffect(() => {
     if (employeeHours > 0) {
-      const calculatedFrequencyRate =
-        (totalDisablingInjuries * 1000000) / employeeHours;
+      const calculatedFrequencyRate = 0;
       setValue("frequency_rate", calculatedFrequencyRate);
     } else {
       setValue("frequency_rate", 0);
     }
-  }, [totalDisablingInjuries, employeeHours, setValue]);
+  }, [employeeHours, setValue]);
 
   useEffect(() => {
     if (employeeHours > 0) {
@@ -222,7 +273,7 @@ function InjurySummary({
                 {...register("name_signature", {
                   required: true,
                 })}
-                id="naname_signatureme"
+                id="name_signature"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -254,63 +305,30 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 id="signature"
-                {...register("signature")}
-                onChange={(e) => {
-                  const file = e.target.files && e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setSignatureUrl(reader.result as string);
-                      setAttachmentExist(true);
-                    };
-                    reader.readAsDataURL(file);
-                  } else {
-                    setSignatureUrl("");
-                    setAttachmentExist(false);
-                  }
-                }}
                 type="file"
-                disabled={!!(existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http'))}
-                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
-              {attachmentExist ? (
-                <div className="mt-2">
-                  {existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http') ? (
-                    <div className="flex items-center space-x-2">
-                      <button
-                        type="button"
-                        className="underline text-red-600 text-sm"
-                        onClick={() => {
-                          setValue("signature", "");
-                          setAttachmentExist(false);
-                          setSignatureUrl("");
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="underline text-savoy-blue text-sm"
-                      onClick={() => {
-                        setValue("signature", "");
-                        setAttachmentExist(false);
-                      }}
-                    >
-                      Remove Attachment
-                    </button>
-                  )}
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
       </div>
-      {signatureUrl !== "" && (
+      
+      {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) and no previews */}
+      {signatureUrl && (
         <div className="mt-4">
+          <div
+            className={`text-center font-semibold mb-2 ${
+              signatureSource === "draw" || signatureSource === "upload"
+                ? "text-red-600"
+                : "text-green-600"
+            }`}
+          >
+            {signatureSource === "draw" || signatureSource === "upload" ? "Preview" : "Existing Signature"}
+          </div>
           <Image
-            className="border-0 ring-1 ring-inset ring-gray-300 m-auto"
+            className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6"
             src={signatureUrl}
             width={500}
             height={200}
@@ -318,13 +336,18 @@ function InjurySummary({
           />
         </div>
       )}
+      
       {drawSignatureModal && (
         <DrawSignatureModal
           isOpen={drawSignatureModal}
           setIsOpen={setDrawSignatureModal}
-          setSignatureUrl={setSignatureUrl}
+          setSignatureUrl={(url: any) => {
+            setSignatureUrl(url);
+            handleDrawnSignature(url);
+          }}
         />
       )}
+      
       <hr />
       <div className="flex justify-between py-4 px-4">
         <button

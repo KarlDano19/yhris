@@ -27,25 +27,27 @@ async function updateAnnualAccidentIllnessReport(
       }
     }
 
-    if (data.signature && data.signature.length) {
-      const signatureBlob = await fetch(`${data.signature}`).then((res) => res.blob());
-      const formData = new FormData();
-      formData.append('signature', signatureBlob, 'signature.jpg');
+    let formData;
+    if (data.signature && typeof data.signature !== 'string') {
+      formData = new FormData();
+      formData.append('signature', data.signature);
+      
       for (const key in data) {
         if (key !== 'signature') {
           formData.append(key, data[key]);
         }
       }
-      data = formData;
+    } else {
+      formData = data;
     }
 
     const config = {
       method: "PATCH",
       headers: {
         Authorization: `Token ${token}`,
-        ...(data instanceof FormData ? {} : { "content-type": "application/json" }),
+        ...(formData instanceof FormData ? {} : { "content-type": "application/json" }),
       },
-      body: data instanceof FormData ? data : JSON.stringify(data),
+      body: formData instanceof FormData ? formData : JSON.stringify(formData),
     };
 
     const res = await fetch(

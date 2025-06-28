@@ -85,6 +85,7 @@ import {
                           height: 200,
                           className: "",
                         }}
+                        backgroundColor="rgba(0,0,0,0)"
                       />
                     </div>
                   </div>
