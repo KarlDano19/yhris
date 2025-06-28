@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
-
 function WorkplaceSafetyCompliance({
   register,
   handleSubmit,
@@ -36,14 +34,12 @@ function WorkplaceSafetyCompliance({
           >
             <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
               a. Report of Occupational Accidents/Injuries:
-              <span
-                className={`ml-2 ${
-                  isOccupationalAccidentOpen ? "rotate-180" : ""
-                }`}
-              >
-                {/* Chevron icon */}
-                <ChevronDownIcon className="h-5 w-5" />
-              </span>
+                <span className="ml-2 cursor-pointer">
+                  {isOccupationalAccidentOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
+                </span>
             </h1>
           </div>
           {isOccupationalAccidentOpen && (
@@ -499,11 +495,12 @@ function WorkplaceSafetyCompliance({
           >
             <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
               b. Immunization Program (Indicate number immunized)
-              <span
-                className={`ml-2 ${isImmunizationOpen ? "rotate-180" : ""}`}
-              >
-                <ChevronDownIcon className="h-5 w-5" />
-              </span>
+                <span className="ml-2 cursor-pointer">
+                  {isImmunizationOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
+                </span>
             </h1>
           </div>
           {isImmunizationOpen && (

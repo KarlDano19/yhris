@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import { Controller, useWatch } from "react-hook-form";
+import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../DrawSignatureModal";
 import DrawNotedBySignatureModal from "../DrawNotedBySignature";
 import Image from "next/image";
-
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 function WorkplaceSafetyCompliance({
   control,
@@ -250,14 +248,12 @@ function WorkplaceSafetyCompliance({
           >
             <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
               a. Chemical Hazards:
-              <span
-                className={`ml-2 ${
-                  isChemicalHazardsOpen ? "rotate-180" : ""
-                }`}
-              >
-                {/* Chevron icon */}
-                <ChevronDownIcon className="h-5 w-5" />
-              </span>
+                <span className="ml-2 cursor-pointer">
+                  {isChemicalHazardsOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
+                </span>
             </h1>
           </div>
           {isChemicalHazardsOpen && (
@@ -386,11 +382,12 @@ function WorkplaceSafetyCompliance({
           >
             <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
               b. Physical Hazards:
-              <span
-                className={`ml-2 ${isPhysicalHazardsOpen ? "rotate-180" : ""}`}
-              >
-                <ChevronDownIcon className="h-5 w-5" />
-              </span>
+                <span className="ml-2 cursor-pointer">
+                  {isPhysicalHazardsOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
+                </span>
             </h1>
           </div>
           {isPhysicalHazardsOpen && (
@@ -606,11 +603,12 @@ function WorkplaceSafetyCompliance({
           >
             <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
               b. Ergonomic Stress:
-              <span
-                className={`ml-2 ${isErgonomicHazardsOpen ? "rotate-180" : ""}`}
-              >
-                <ChevronDownIcon className="h-5 w-5" />
-              </span>
+                <span className="ml-2 cursor-pointer">
+                  {isErgonomicHazardsOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
+                </span>
             </h1>
           </div>
           {isErgonomicHazardsOpen && (
@@ -797,11 +795,12 @@ function WorkplaceSafetyCompliance({
           >
             <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
               b. Biological Hazards:
-              <span
-                className={`ml-2 ${isBiologicalHazardsOpen ? "rotate-180" : ""}`}
-              >
-                <ChevronDownIcon className="h-5 w-5" />
-              </span>
+                <span className="ml-2 cursor-pointer">
+                  {isBiologicalHazardsOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
+                </span>
             </h1>
           </div>
           {isBiologicalHazardsOpen && (

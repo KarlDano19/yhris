@@ -4,8 +4,6 @@ import { useState } from "react";
 
 import classNames from "@/helpers/classNames";
 
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
-
 function ReportOfDisease({
   register,
   handleSubmit,
@@ -116,9 +114,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 flex flex-row items-center">
                 Skin
-                <span className={`ml-2 ${isSkinOpen ? "rotate-180" : ""}`}>
-                  {/* Chevron icon */}
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isSkinOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -308,8 +308,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Head
-                <span className={`ml-2 ${isHeadOpen ? "rotate-180" : ""}`}>
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isHeadOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -415,8 +418,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Eyes
-                <span className={`ml-2 ${isEyesOpen ? "rotate-180" : ""}`}>
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isEyesOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -600,8 +606,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Mount & ENT
-                <span className={`ml-2 ${isMountENTOpen ? "rotate-180" : ""}`}>
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isMountENTOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -1058,10 +1067,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Respiratory
-                <span
-                  className={`ml-2 ${isRespiratoryOpen ? "rotate-180" : ""}`}
-                >
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isRespiratoryOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -1323,8 +1333,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Heart and Blood Vessel
-                <span className={`ml-2 ${isHeartOpen ? "rotate-180" : ""}`}>
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isHeartOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -1586,12 +1599,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Gastrointestinal
-                <span
-                  className={`ml-2 ${
-                    isGastrointestinalOpen ? "rotate-180" : ""
-                  }`}
-                >
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isGastrointestinalOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -2009,10 +2021,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Genito Urinary
-                <span
-                  className={`ml-2 ${isGenitourinaryOpen ? "rotate-180" : ""}`}
-                >
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isGenitourinaryOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -2196,10 +2209,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Reproductive
-                <span
-                  className={`ml-2 ${isReproductiveOpen ? "rotate-180" : ""}`}
-                >
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isReproductiveOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -2617,10 +2631,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Neuromuscular/ Skeletal/ Joints
-                <span
-                  className={`ml-2 ${isNeurologicalOpen ? "rotate-180" : ""}`}
-                >
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isNeurologicalOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -2804,8 +2819,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Lymphatic and Immune System
-                <span className={`ml-2 ${isLymphaticOpen ? "rotate-180" : ""}`}>
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isLymphaticOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -3028,8 +3046,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 Infectious Diseases
-                <span className={`ml-2 ${isInfectionOpen ? "rotate-180" : ""}`}>
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isInfectionOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -3531,13 +3552,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 a. Diseases due to Noise and vibration
-                <span
-                  className={`ml-2 ${
-                    isDiseaseDueToVibrationOpen ? "rotate-180" : ""
-                  }`}
-                >
-                  {/* Chevron icon */}
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isDiseaseDueToVibrationOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -3721,12 +3740,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 b. Diseases due to Temperature And Humidity abnormalities:
-                <span
-                  className={`ml-2 ${
-                    isDiseaseDueToTemperatureOpen ? "rotate-180" : ""
-                  }`}
-                >
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isDiseaseDueToTemperatureOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
@@ -4186,12 +4204,11 @@ function ReportOfDisease({
             >
               <h1 className="text-sm font-bold pl-10 pt-4 flex flex-row items-center">
                 c. Diseases due to radiation:
-                <span
-                  className={`ml-2 ${
-                    isDiseaseDueToRadiationOpen ? "rotate-180" : ""
-                  }`}
-                >
-                  <ChevronDownIcon className="h-5 w-5" />
+                <span className="ml-2 cursor-pointer">
+                  {isDiseaseDueToRadiationOpen ? 
+                    <span className="text-red-600 font-medium">hide</span> : 
+                    <span className="text-green-600 font-medium">show</span>
+                  }
                 </span>
               </h1>
             </div>
