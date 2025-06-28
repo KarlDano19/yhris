@@ -34,7 +34,7 @@ export default function EditWemRequestModal({
     refetch: refetchWorkEnvironmentRequest,
     remove: removeWorkEnvironmentRequest,
   } = useGetWorkEnvironmentRequestDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
   const { mutate, isLoading: isLoadingUpdateWorkEnvironmentRequest } =
     useUpdateWorkEnvironmentRequest();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -47,72 +47,35 @@ export default function EditWemRequestModal({
 
   useEffect(() => {
     if (workEnvironmentRequestData) {
-      setValue(
-        "date_of_application",
-        workEnvironmentRequestData.date_of_application
-      );
+      setValue("date_of_application",workEnvironmentRequestData.date_of_application);
       setValue("company_name", workEnvironmentRequestData.company_name);
       setValue("type_of_industry", workEnvironmentRequestData.type_of_industry);
-      setValue(
-        "number_of_workers_male",
-        workEnvironmentRequestData.number_of_workers_male
-      );
-      setValue(
-        "number_of_workers_female",
-        workEnvironmentRequestData.number_of_workers_female
-      );
-      setValue(
-        "number_of_workers_total",
-        workEnvironmentRequestData.number_of_workers_total
-      );
-      setValue(
-        "risk_classification",
-        workEnvironmentRequestData.risk_classification
-      );
-      setValue(
-        "name_of_safety_officer",
-        workEnvironmentRequestData.name_of_safety_officer
-      );
-      setValue(
-        "safety_officer_levels",
-        workEnvironmentRequestData.safety_officer_levels
-      );
-      setValue(
-        "purpose_of_wem_request",
-        workEnvironmentRequestData.purpose_of_wem_request
-      );
+      setValue("number_of_workers_male",workEnvironmentRequestData.number_of_workers_male);
+      setValue("number_of_workers_female",workEnvironmentRequestData.number_of_workers_female);
+      setValue("number_of_workers_total",workEnvironmentRequestData.number_of_workers_total);
+      setValue("risk_classification",workEnvironmentRequestData.risk_classification);
+      setValue("name_of_safety_officer",workEnvironmentRequestData.name_of_safety_officer);
+      let levels = workEnvironmentRequestData.safety_officer_levels;
+      if (Array.isArray(levels) && levels.length === 1 && typeof levels[0] === "string" && levels[0].includes(",")) {
+        levels = levels[0].split(",").map((s: string) => s.trim());
+      }
+      if (typeof levels === "string") {
+        levels = levels.split(",").map((s: string) => s.trim());
+      }
+      setValue("safety_officer_levels", levels);
+      setValue("purpose_of_wem_request",workEnvironmentRequestData.purpose_of_wem_request);
       setValue("wem_conducted_by", workEnvironmentRequestData.wem_conducted_by);
       setValue("last_wem_date", workEnvironmentRequestData.last_wem_date);
-      setValue(
-        "wem_internal_monitoring_capability",
-        workEnvironmentRequestData.wem_internal_monitoring_capability
-      );
-      setValue(
-        "wem_equipment_owned_by_company",
-        workEnvironmentRequestData.wem_equipment_owned_by_company
-      );
-      setValue(
-        "conducting_internal_wem",
-        workEnvironmentRequestData.conducting_internal_wem ? "yes" : "no"
-      );
-      setValue(
-        "date_of_internal_monitoring",
-        workEnvironmentRequestData.date_of_internal_monitoring
-      );
-      setValue(
-        "hazards_purpose_of_wem_request",
-        workEnvironmentRequestData.hazards_purpose_of_wem_request
-      );
+      setValue("wem_internal_monitoring_capability",workEnvironmentRequestData.wem_internal_monitoring_capability);
+      setValue("wem_equipment_owned_by_company",workEnvironmentRequestData.wem_equipment_owned_by_company);
+      setValue("conducting_internal_wem",workEnvironmentRequestData.conducting_internal_wem ? "yes" : "no");
+      setValue("date_of_internal_monitoring",workEnvironmentRequestData.date_of_internal_monitoring);      
+      setValue("hazards_purpose_of_wem_request",workEnvironmentRequestData.hazards_purpose_of_wem_request);
       setValue("chemical_hazards", workEnvironmentRequestData.chemical_hazards);
       setValue("ventilation", workEnvironmentRequestData.ventilation);
-      setValue(
-        "requesting_personnel_name",
-        workEnvironmentRequestData.requesting_personnel_name
-      );
-      setValue(
-        "requesting_personnel_position",
-        workEnvironmentRequestData.requesting_personnel_position
-      );
+      setValue("requesting_personnel_name",workEnvironmentRequestData.requesting_personnel_name);
+      setValue("requesting_personnel_position",workEnvironmentRequestData.requesting_personnel_position);
+      setValue("signature", workEnvironmentRequestData.signature);
     }
   }, [workEnvironmentRequestData]);
 
@@ -219,6 +182,7 @@ export default function EditWemRequestModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>

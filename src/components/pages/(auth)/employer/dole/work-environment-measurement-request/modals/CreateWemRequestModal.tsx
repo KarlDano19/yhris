@@ -25,7 +25,7 @@ function CreateWemRequestModal({
 }) {
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { register, handleSubmit, reset, control, setValue, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, getValues, watch } = useForm();
   const {
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddWorkEnvironmentRequest,
@@ -131,6 +131,7 @@ function CreateWemRequestModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>
