@@ -39,7 +39,7 @@ function EditAnnualMedicalReportModal({
     refetch: refetchAnnualMedicalReport,
     remove: removeAnnualMedicalReport,
   } = useGetAnnualMedicalReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, getValues, watch } = useForm();
   const {
     mutate: updateAnnualMedicalReport,
     isLoading: isLoadingUpdateAnnualMedicalReport,
@@ -715,6 +715,7 @@ function EditAnnualMedicalReportModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingUpdateAnnualMedicalReport}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../DrawSignatureModal";
@@ -18,6 +18,7 @@ function WorkplaceSafetyCompliance({
   setSelectedTab,
   setValue,
   isLoading,
+  watch,
 }: {
   control: any;
   register: any;
@@ -25,13 +26,13 @@ function WorkplaceSafetyCompliance({
   setSelectedTab: any;
   setValue: any;
   isLoading: boolean;
+  watch: any;
 }) {
 
   const [isChemicalHazardsOpen, setIsChemicalHazardsOpen] = useState(false);
   const [isPhysicalHazardsOpen, setIsPhysicalHazardsOpen] = useState(false);
   const [isErgonomicHazardsOpen, setIsErgonomicHazardsOpen] = useState(false);
   const [isBiologicalHazardsOpen, setIsBiologicalHazardsOpen] = useState(false);
-    useState(false);
 
   const toggleChemicalHazardsOpen = () =>
     setIsChemicalHazardsOpen(!isChemicalHazardsOpen);
@@ -46,13 +47,14 @@ function WorkplaceSafetyCompliance({
   const [drawNotedBySignatureModal, setDrawNotedBySignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [notedSignatureUrl, setNotedSignatureUrl] = useState<string>("");
-  const [fileUrl, setFileUrl] = useState<string>("");
-  const [notedAttachmentExist, setNotedAttachmentExist] = useState(false);
-  const [attachmentExist, setAttachmentExist] = useState(false);
+  const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
+  const [previousNotedSignatureFile, setPreviousNotedSignatureFile] = useState<string>("");
+  const [signatureSource, setSignatureSource] = useState<string>("");
+  const [notedSignatureSource, setNotedSignatureSource] = useState<string>("");
 
-  // Watch for existing file URLs from form (if using react-hook-form's watch)
-  const existingSignatureUrl = control?._formValues?.signature || "";
-  const existingNotedSignatureUrl = control?._formValues?.noted_signature || "";
+  // Watch for existing signature URLs from form
+  const existingSignatureUrl = watch("signature");
+  const existingNotedSignatureUrl = watch("noted_signature");
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
@@ -62,58 +64,172 @@ function WorkplaceSafetyCompliance({
     setDrawNotedBySignatureModal(!drawNotedBySignatureModal);
   };
 
+  // Track current signature source and file
   useEffect(() => {
-    if (notedSignatureUrl) {
-      setValue("noted_signature", notedSignatureUrl);
-    } else {
-      setNotedSignatureUrl("");
+    const currentSignature = watch("signature");
+    const currentSource = watch("signature_source");
+    
+    if (currentSignature && typeof currentSignature === "string") {
+      setPreviousSignatureFile(currentSignature);
+      return;
     }
-    if (!drawNotedBySignatureModal && notedSignatureUrl) {
-      setNotedSignatureUrl("");
+
+    // Only show previews for unsaved signatures
+    if (currentSource === "draw") {
+    } else if (currentSource === "upload") {
     }
-  }, [notedSignatureUrl, setValue, drawNotedBySignatureModal]);
+  }, [watch]);
+
+  // Track current noted signature source and file
+  useEffect(() => {
+    const currentNotedSignature = watch("noted_signature");
+    const currentSource = watch("noted_signature_source");
+    
+    if (currentNotedSignature && typeof currentNotedSignature === "string") {
+      setPreviousNotedSignatureFile(currentNotedSignature);
+      return;
+    }
+
+    // Only show previews for unsaved signatures
+    if (currentSource === "draw") {
+    } else if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  const handleSignatureFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("signature", file);
+      setValue("previous_signature", previousSignatureFile);
+      setValue("signature_source", "upload");
+      setSignatureSource("upload");
+      setSignatureUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleNotedSignatureFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("noted_signature", file);
+      setValue("previous_noted_signature", previousNotedSignatureFile);
+      setValue("noted_signature_source", "upload");
+      setNotedSignatureSource("upload");
+      setNotedSignatureUrl(URL.createObjectURL(file));
+    }
+  };
+
+  // Handle drawn signature from modal
+  const handleDrawnSignature = (drawnSignatureDataUrl: string) => {
+    // Convert data URL to Blob
+    fetch(drawnSignatureDataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        // Create a File object from the Blob
+        const file = new File([blob], "signature.png", { type: "image/png" });
+        
+        // Update form state with the File object
+        setValue("signature", file);
+        setValue("previous_signature", previousSignatureFile);
+        setValue("signature_source", "draw");
+        setSignatureSource("draw");
+        setSignatureUrl(drawnSignatureDataUrl);
+      });
+  };
+
+  // Handle drawn noted signature from modal
+  const handleDrawnNotedSignature = (drawnSignatureDataUrl: string) => {
+    // Convert data URL to Blob
+    fetch(drawnSignatureDataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        // Create a File object from the Blob
+        const file = new File([blob], "noted_signature.png", { type: "image/png" });
+        
+        // Update form state with the File object
+        setValue("noted_signature", file);
+        setValue("previous_noted_signature", previousNotedSignatureFile);
+        setValue("noted_signature_source", "draw");
+        setNotedSignatureSource("draw");
+        setNotedSignatureUrl(drawnSignatureDataUrl);
+      });
+  };
 
   useEffect(() => {
     if (signatureUrl) {
-      setValue("signature", signatureUrl);
-    } else {
-      setSignatureUrl("");
+      // If signatureUrl is a data URL from drawing
+      if (signatureUrl.startsWith('data:')) {
+        fetch(signatureUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], "signature.png", { type: "image/png" });
+            setValue("signature", file);
+            setValue("previous_signature", previousSignatureFile);
+            setValue("signature_source", "draw");
+            setSignatureSource("draw");
+          })
+          .catch(err => {
+            console.error("Error converting signature data URL to file:", err);
+          });
+      } else if (signatureUrl.startsWith('blob:')) {
+        // Uploaded file preview
+        setSignatureSource("upload");
+      } else {
+        setValue("signature", signatureUrl);
+        setValue("previous_signature", signatureUrl);
+        setValue("signature_source", "");
+        setSignatureSource("");
+      }
     }
-    if (!drawSignatureModal && signatureUrl) {
-      setSignatureUrl("");
-    }
-  }, [signatureUrl, setValue, drawSignatureModal,]);
+  }, [signatureUrl, setValue, previousSignatureFile]);
 
   useEffect(() => {
-    if (fileUrl) {
-      setValue("policy_and_program_on_safety_and_health", fileUrl);
-    } else {
-      setFileUrl("");
+    if (notedSignatureUrl) {
+      // If notedSignatureUrl is a data URL from drawing
+      if (notedSignatureUrl.startsWith('data:')) {
+        fetch(notedSignatureUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], "noted_signature.png", { type: "image/png" });
+            setValue("noted_signature", file);
+            setValue("previous_noted_signature", previousNotedSignatureFile);
+            setValue("noted_signature_source", "draw");
+            setNotedSignatureSource("draw");
+          })
+          .catch(err => {
+            console.error("Error converting noted signature data URL to file:", err);
+          });
+      } else if (notedSignatureUrl.startsWith('blob:')) {
+        // Uploaded file preview
+        setNotedSignatureSource("upload");
+      } else {
+        setValue("noted_signature", notedSignatureUrl);
+        setValue("previous_noted_signature", notedSignatureUrl);
+        setValue("noted_signature_source", "");
+        setNotedSignatureSource("");
+      }
     }
-  }, [fileUrl, setValue]);
+  }, [notedSignatureUrl, setValue, previousNotedSignatureFile]);
 
-  // Show existing signature if present (edit mode)
+  // Check if there are existing signature URLs (for edit mode)
   useEffect(() => {
-    if (
-      existingSignatureUrl &&
-      typeof existingSignatureUrl === "string" &&
-      (existingSignatureUrl.startsWith("http") || existingSignatureUrl.startsWith("data:image/"))
-    ) {
-      setAttachmentExist(true);
+    if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
       setSignatureUrl(existingSignatureUrl);
+      setSignatureSource("");
+      // Ensure the existing signature is properly set in form state
+      setValue("signature", existingSignatureUrl);
+      setValue("previous_signature", existingSignatureUrl);
     }
-  }, [existingSignatureUrl]);
+  }, [existingSignatureUrl, setValue]);
 
   useEffect(() => {
-    if (
-      existingNotedSignatureUrl &&
-      typeof existingNotedSignatureUrl === "string" &&
-      (existingNotedSignatureUrl.startsWith("http") || existingNotedSignatureUrl.startsWith("data:image/"))
-    ) {
-      setNotedAttachmentExist(true);
+    if (existingNotedSignatureUrl && typeof existingNotedSignatureUrl === 'string' && existingNotedSignatureUrl.startsWith('http')) {
       setNotedSignatureUrl(existingNotedSignatureUrl);
+      setNotedSignatureSource("");
+      // Ensure the existing signature is properly set in form state
+      setValue("noted_signature", existingNotedSignatureUrl);
+      setValue("previous_noted_signature", existingNotedSignatureUrl);
     }
-  }, [existingNotedSignatureUrl]);
+  }, [existingNotedSignatureUrl, setValue]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -861,7 +977,7 @@ function WorkplaceSafetyCompliance({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Draw Signature
-                <span className="text-red-600">*</span>
+                {!existingSignatureUrl && <span className="text-red-600">*</span>}
               </label>
               <div className="relative mt-2">
                 <button
@@ -879,55 +995,42 @@ function WorkplaceSafetyCompliance({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Upload Signature
-                <span className="text-red-600">*</span>
+                {!existingSignatureUrl && <span className="text-red-600">*</span>}
               </label>
               <div className="relative mt-2">
                 <input
                   id="signature"
-                  {...register("signature")}
-                  onChange={(e) => {
-                    const file = e.target.files && e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setSignatureUrl(reader.result as string);
-                        setAttachmentExist(true);
-                      };
-                      reader.readAsDataURL(file);
-                    } else {
-                      setSignatureUrl("");
-                      setAttachmentExist(false);
-                    }
-                  }}
                   type="file"
-                  disabled={!!(existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http'))}
-                  className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                  accept="image/*"
+                  onChange={handleSignatureFileUpload}
+                  className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                 />
               </div>
             </div>
           </div>
-          {((signatureUrl && signatureUrl !== "") || (existingSignatureUrl && existingSignatureUrl !== "")) && (
-            <div className="col-span-3 flex flex-col items-center mt-2 mb-2">
+          
+          {/* Signature Preview */}
+          {signatureUrl && (
+            <div className="mt-4">
+              <div
+                className={`text-center font-semibold mb-2 ${
+                  signatureSource === "draw" || signatureSource === "upload"
+                    ? "text-red-600"
+                    : "text-green-600"
+                }`}
+              >
+                {signatureSource === "draw" || signatureSource === "upload" ? "Preview" : "Existing Signature"}
+              </div>
               <Image
-                className="border-0 ring-1 ring-inset ring-gray-300"
-                src={signatureUrl || existingSignatureUrl}
+                className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6"
+                src={signatureUrl}
                 width={500}
                 height={200}
                 alt="signatureImage"
               />
-              <button
-                type="button"
-                className="mt-2 underline text-red-600 text-sm"
-                onClick={() => {
-                  setValue("signature", "");
-                  setSignatureUrl("");
-                  setAttachmentExist(false);
-                }}
-              >
-                Remove
-              </button>
             </div>
           )}
+          
           <div className="grid grid-cols-3 gap-6 mt-4 pl-6 pr-6 mb-4">
             <div>
               <label
@@ -948,11 +1051,11 @@ function WorkplaceSafetyCompliance({
             </div>
             <div>
               <label
-                htmlFor="draw_signature"
+                htmlFor="draw_noted_signature"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Draw Signature
-                <span className="text-red-600">*</span>
+                {!existingNotedSignatureUrl && <span className="text-red-600">*</span>}
               </label>
               <div className="relative mt-2">
                 <button
@@ -966,57 +1069,43 @@ function WorkplaceSafetyCompliance({
             </div>
             <div className="flex-1">
               <label
-                htmlFor="signature"
+                htmlFor="noted_signature"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Upload Signature
-                <span className="text-red-600">*</span>
+                {!existingNotedSignatureUrl && <span className="text-red-600">*</span>}
               </label>
               <div className="relative mt-2">
                 <input
                   id="noted_signature"
-                  {...register("noted_signature")}
-                  onChange={(e) => {
-                    const file = e.target.files && e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setNotedSignatureUrl(reader.result as string);
-                        setNotedAttachmentExist(true);
-                      };
-                      reader.readAsDataURL(file);
-                    } else {
-                      setNotedSignatureUrl("");
-                      setNotedAttachmentExist(false);
-                    }
-                  }}
                   type="file"
-                  disabled={!!(existingNotedSignatureUrl && typeof existingNotedSignatureUrl === 'string' && existingNotedSignatureUrl.startsWith('http'))}
-                  className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                  accept="image/*"
+                  onChange={handleNotedSignatureFileUpload}
+                  className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                 />
               </div>
             </div>
           </div>
-          {((notedSignatureUrl && notedSignatureUrl !== "") || (existingNotedSignatureUrl && existingNotedSignatureUrl !== "")) && (
-            <div className="col-span-3 flex flex-col items-center mt-2 mb-2">
+          
+          {/* Noted Signature Preview */}
+          {notedSignatureUrl && (
+            <div className="mt-4">
+              <div
+                className={`text-center font-semibold mb-2 ${
+                  notedSignatureSource === "draw" || notedSignatureSource === "upload"
+                    ? "text-red-600"
+                    : "text-green-600"
+                }`}
+              >
+                {notedSignatureSource === "draw" || notedSignatureSource === "upload" ? "Preview" : "Existing Signature"}
+              </div>
               <Image
-                className="border-0 ring-1 ring-inset ring-gray-300"
-                src={notedSignatureUrl || existingNotedSignatureUrl}
+                className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6"
+                src={notedSignatureUrl}
                 width={500}
                 height={200}
                 alt="notedSignatureImage"
               />
-              <button
-                type="button"
-                className="mt-2 underline text-red-600 text-sm"
-                onClick={() => {
-                  setValue("noted_signature", "");
-                  setNotedSignatureUrl("");
-                  setNotedAttachmentExist(false);
-                }}
-              >
-                Remove
-              </button>
             </div>
           )}
           <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6 mb-4">
@@ -1055,14 +1144,20 @@ function WorkplaceSafetyCompliance({
         <DrawSignatureModal
           isOpen={drawSignatureModal}
           setIsOpen={setDrawSignatureModal}
-          setSignatureUrl={setSignatureUrl}
+          setSignatureUrl={(url: any) => {
+            setSignatureUrl(url);
+            handleDrawnSignature(url);
+          }}
         />
       )}
       {drawNotedBySignatureModal && (
         <DrawNotedBySignatureModal
           isOpen={drawNotedBySignatureModal}
           setIsOpen={setDrawNotedBySignatureModal}
-          setNotedSignatureUrl={setNotedSignatureUrl}
+          setNotedSignatureUrl={(url: any) => {
+            setNotedSignatureUrl(url);
+            handleDrawnNotedSignature(url);
+          }}
         />
       )}
       <hr />

@@ -28,7 +28,7 @@ function CreateAnnualMedicalReportModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
   const {
     mutate: addAnnualMedicalReport,
     isLoading: isLoadingAddAnnualMedicalReport,
@@ -198,6 +198,7 @@ function CreateAnnualMedicalReportModal({
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
                     isLoading={isLoadingAddAnnualMedicalReport}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>

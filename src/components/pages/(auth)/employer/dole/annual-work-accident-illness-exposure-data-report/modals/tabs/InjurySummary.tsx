@@ -284,7 +284,6 @@ function InjurySummary({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Draw Signature
-              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <button
@@ -302,7 +301,6 @@ function InjurySummary({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Upload Signature
-              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
