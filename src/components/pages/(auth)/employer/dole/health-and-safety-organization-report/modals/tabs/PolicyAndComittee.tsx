@@ -28,15 +28,45 @@ function PolicyAndComittee({
   const [fileUrl, setFileUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [committeeType, setCommitteeType] = useState<string>("a");
+  const [fileSource, setFileSource] = useState<string>("");
   
   // Watch for existing file URL from form
   const existingFileUrl = watch("policy_and_program_file");
 
+  // Track current file source and file
+  useEffect(() => {
+    const currentFile = watch("policy_and_program_file");
+    const currentSource = watch("file_source");
+    
+    if (currentFile && typeof currentFile === "string") {
+      return;
+    }
+
+    // Only show previews for unsaved files
+    if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("policy_and_program_file", file);
+      setValue("file_source", "upload");
+      setFileSource("upload");
+      setFileUrl(URL.createObjectURL(file));
+      setAttachmentExist(true);
+    }
+  };
+
   useEffect(() => {
     if (fileUrl) {
-      setValue("policy_and_program_file", fileUrl);
-    } else {
-      setFileUrl("");
+      // If fileUrl is a blob URL from upload
+      if (fileUrl.startsWith('blob:')) {
+        setFileSource("upload");
+      } else {
+        setValue("policy_and_program_file", fileUrl);
+        setFileSource("");
+      }
     }
   }, [fileUrl, setValue]);
 
@@ -44,6 +74,7 @@ function PolicyAndComittee({
   useEffect(() => {
     if (existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http')) {
       setAttachmentExist(true);
+      setFileSource("");
     }
   }, [existingFileUrl]);
 
@@ -133,13 +164,9 @@ function PolicyAndComittee({
             <div className="relative mt-2">
               <input
                 id="policy_and_program_file"
-                {...register("policy_and_program_file")}
-                onChange={(e) => {
-                  e.target.value ? setFileUrl("") : null;
-                  e.target.value ? setAttachmentExist(true) : null;
-                }}
                 type="file"
-                disabled={!!(existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http'))}
+                accept="*/*"
+                onChange={handleFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               {attachmentExist ? (
@@ -154,29 +181,8 @@ function PolicyAndComittee({
                       >
                         View Existing File
                       </a>
-                      <button
-                        type="button"
-                        className="underline text-red-600 text-sm"
-                        onClick={() => {
-                          setValue("policy_and_program_file", "");
-                          setAttachmentExist(false);
-                        }}
-                      >
-                        Remove
-                      </button>
                     </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="underline text-savoy-blue text-sm"
-                      onClick={() => {
-                        setValue("policy_and_program_file", "");
-                        setAttachmentExist(false);
-                      }}
-                    >
-                      Remove Attachment
-                    </button>
-                  )}
+                  ) : null}
                 </div>
               ) : null}
             </div>
