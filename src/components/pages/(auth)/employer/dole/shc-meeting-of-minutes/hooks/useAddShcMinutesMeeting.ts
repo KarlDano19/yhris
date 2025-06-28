@@ -18,38 +18,48 @@ function dataURLtoFile(dataurl: string, filename: string) {
 async function addShcMinutesMeeting(data: any) {
   try {
     const token = getCookie("token");
-    const formData = new FormData();
-    formData.append("time_of_meeting", data.time_of_meeting);
-    formData.append("venue", data.venue);
-    
-    // Validate date_of_meeting format
-    const dateOfMeeting = new Date(data.date_of_meeting);
-    if (isNaN(dateOfMeeting.getTime())) {
-      throw new Error("Invalid date format. Use YYYY-MM-DD.");
+
+    if (data.date_of_meeting) {
+      const dateOfMeeting = new Date(data.date_of_meeting);
+      if (!isNaN(dateOfMeeting.getTime())) {
+        // Adjust for timezone offset to preserve local date
+        const offset = dateOfMeeting.getTimezoneOffset();
+        const adjustedDate = new Date(dateOfMeeting.getTime() - offset * 60000);
+        data.date_of_meeting = adjustedDate.toISOString().split("T")[0];
+      }
     }
-    formData.append("date_of_meeting", dateOfMeeting.toISOString().split('T')[0]); // Format to YYYY-MM-DD
 
-    // Append attendees and absentees as arrays of integers
-    data.attendees.forEach((attendee: number) => {
-      formData.append("attendees", attendee.toString());
-    });
-    data.absentees.forEach((absentee: number) => {
-      formData.append("absentees", absentee.toString());
-    });
-
-    formData.append("details_of_meeting", data.details_of_meeting);
-    formData.append("prepared_by", data.prepared_by);
-    formData.append("position", data.position);
-
-    // Handle signature
+    // Always use FormData for consistency
+    const formData = new FormData();
+    
+    // Handle signature if present
     if (data.signature) {
-      if (typeof data.signature === "string" && data.signature.startsWith("data:")) {
-        // Drawn signature (data URL)
-        const file = dataURLtoFile(data.signature, "signature.png");
-        formData.append("signature", file);
-      } else if (data.signature instanceof File) {
-        // Uploaded file
-        formData.append("signature", data.signature);
+      if (data.signature instanceof File) {
+        // If it's already a File object, use it directly
+        formData.append('signature', data.signature);
+      } else if (typeof data.signature === 'string' && data.signature.startsWith('data:')) {
+        // If it's a data URL (from drawing)
+        const signatureBlob = await fetch(data.signature).then((res) => res.blob());
+        formData.append('signature', signatureBlob, 'signature.png');
+      }
+    }
+    
+    // Add all other form fields
+    for (const key in data) {
+      if (key !== 'signature') {
+        if (key === 'attendees' && Array.isArray(data[key])) {
+          // Append attendees as array of integers
+          data[key].forEach((attendee: number) => {
+            formData.append("attendees", attendee.toString());
+          });
+        } else if (key === 'absentees' && Array.isArray(data[key])) {
+          // Append absentees as array of integers
+          data[key].forEach((absentee: number) => {
+            formData.append("absentees", absentee.toString());
+          });
+        } else {
+          formData.append(key, data[key]);
+        }
       }
     }
 
@@ -60,6 +70,7 @@ async function addShcMinutesMeeting(data: any) {
       },
       body: formData,
     };
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/shc-meeting-minutes/`,
       config

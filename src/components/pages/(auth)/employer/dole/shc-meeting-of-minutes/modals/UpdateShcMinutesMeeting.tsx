@@ -158,6 +158,7 @@ function UpdateShcMinutesMeetingModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>
