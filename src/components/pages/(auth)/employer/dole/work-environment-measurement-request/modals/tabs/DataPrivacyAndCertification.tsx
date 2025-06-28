@@ -1,18 +1,13 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
 import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import DrawSignatureModal from "../DrawSignatureModal";
 
 function DataPrivacyAndCertification({
@@ -127,8 +122,36 @@ function DataPrivacyAndCertification({
     }
   }, [existingSignatureUrl, setValue]);
 
+  // Handle form submission with validation
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData);
+
+    // Validate required fields
+    if (!data.requesting_personnel_name || data.requesting_personnel_name === "") {
+      const el = document.getElementById("requesting_personnel_name");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.requesting_personnel_position || data.requesting_personnel_position === "") {
+      const el = document.getElementById("requesting_personnel_position");
+      if (el) el.focus();
+      return;
+    }
+    // Use react-hook-form's watched value for signature
+    const signatureValue = watch("signature");
+    if (!signatureValue || signatureValue === "") {
+      toast.custom(() => <CustomToast message="Please Draw or Upload a signature." type="error" />);
+      return;
+    }
+
+    // If validation passes, call the original onSubmit
+    onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleSubmit}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">

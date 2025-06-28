@@ -34,7 +34,7 @@ export default function EditWemRequestModal({
     refetch: refetchWorkEnvironmentRequest,
     remove: removeWorkEnvironmentRequest,
   } = useGetWorkEnvironmentRequestDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues } = useForm();
   const { mutate, isLoading: isLoadingUpdateWorkEnvironmentRequest } =
     useUpdateWorkEnvironmentRequest();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -140,7 +140,7 @@ export default function EditWemRequestModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Update Work Environment Measurement (WEM) Request
+                    Edit Work Environment Measurement (WEM) Request
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
@@ -157,6 +157,8 @@ export default function EditWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -165,6 +167,8 @@ export default function EditWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -173,6 +177,8 @@ export default function EditWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 4 && (

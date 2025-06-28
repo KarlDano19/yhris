@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -12,7 +12,6 @@ import MonitoringAndHazardInfo from "./tabs/MonitoringAndHazardInfo";
 import DataPrivacyAndCertification from "./tabs/DataPrivacyAndCertification";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function CreateWemRequestModal({
   refetch,
@@ -24,8 +23,7 @@ function CreateWemRequestModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { register, handleSubmit, reset, control, setValue, getValues, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues } = useForm();
   const {
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddWorkEnvironmentRequest,
@@ -106,6 +104,8 @@ function CreateWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -114,6 +114,8 @@ function CreateWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -122,6 +124,8 @@ function CreateWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 4 && (

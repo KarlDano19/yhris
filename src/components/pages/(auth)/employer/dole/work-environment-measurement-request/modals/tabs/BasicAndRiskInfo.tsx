@@ -1,19 +1,17 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
-
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 import { useQueryClient } from '@tanstack/react-query';
 import toast from "react-hot-toast";
+import { Tooltip } from 'react-tooltip';
 
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import useTagOfficer from "../../hooks/useTagOfficer";
+import CustomToast from "@/components/CustomToast";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 interface CachedProfileData {
   name: string;
@@ -27,6 +25,8 @@ function BasicAndRiskInfo({
   handleSubmit,
   setSelectedTab,
   setValue,
+  getValues,
+  watch,
 }: {
   name_of_safety_officer?: string[];
   control: any;
@@ -34,6 +34,8 @@ function BasicAndRiskInfo({
   handleSubmit: any;
   setSelectedTab: any;
   setValue: any;
+  getValues: any;
+  watch: any;
 }) {
   const queryClient = useQueryClient();
   const [inputOfficer, setInputOfficer] = useState("");
@@ -43,14 +45,49 @@ function BasicAndRiskInfo({
     handleKeyDownOfficer,
     handleRemoveTagOfficer,
   } = useTagOfficer(inputOfficer, setInputOfficer);
-  const onSubmit = handleSubmit(() => {
+
+  // Always sync tagsOfficer with the form value using watch
+  const watchedNames = watch ? watch("name_of_safety_officer") : name_of_safety_officer;
+  useEffect(() => {
+    setTagsOfficer(watchedNames || []);
+  }, [watchedNames]);
+
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = getValues();
+    // Validate number fields
+    if (!data.number_of_workers_male || data.number_of_workers_male === "") {
+      const el = document.getElementById("number_of_workers_male");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.number_of_workers_female || data.number_of_workers_female === "") {
+      const el = document.getElementById("number_of_workers_female");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.number_of_workers_total || data.number_of_workers_total === "") {
+      const el = document.getElementById("number_of_workers_total");
+      if (el) el.focus();
+      return;
+    }
+    // Validate radio and checkbox groups
+    if (!data.risk_classification) {
+      toast.custom(() => <CustomToast message="Please select a Risk Classification." type="error" />);
+      return;
+    }
+    // Validate safety officer names using tagsOfficer
+    if (!tagsOfficer || tagsOfficer.length === 0) {
+      toast.custom(() => <CustomToast message="Please enter at least one Name of Safety Officer." type="error" />);
+      return;
+    }
+    if (!data.safety_officer_levels || (Array.isArray(data.safety_officer_levels) && data.safety_officer_levels.length === 0)) {
+      toast.custom(() => <CustomToast message="Please select at least one Safety Officer Level." type="error" />);
+      return;
+    }
     setValue("name_of_safety_officer", tagsOfficer);
     setSelectedTab(2);
-  });
-
-  useEffect(() => {
-    setTagsOfficer(name_of_safety_officer || []);
-  }, [name_of_safety_officer])
+  };
 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
@@ -68,7 +105,7 @@ function BasicAndRiskInfo({
   }, [employeeData, cachedProfile, setValue]);
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleNext}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -96,13 +133,14 @@ function BasicAndRiskInfo({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Date of Application
+                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <Controller
                   control={control}
                   name="date_of_application"
                   render={({ field }) => (
-                    <CustomDatePicker
+                    <CustomDatePicker 
                       id="date_of_application"
                       placeholder={"mm/dd/yyyy"}
                       className={
@@ -123,14 +161,14 @@ function BasicAndRiskInfo({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Company Name
-                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <input
                   type="text"
+                  disabled
                   {...register("company_name", { required: true })}
                   id="company_name"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -140,14 +178,14 @@ function BasicAndRiskInfo({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Type of Industry
-                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <input
                   type="text"
+                  disabled
                   {...register("type_of_industry", { required: true })}
                   id="type_of_industry"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -275,9 +313,13 @@ function BasicAndRiskInfo({
                     type='text'
                     value={inputOfficer}
                     onKeyDown={handleKeyDownOfficer}
-                    onChange={(e) => setInputOfficer(e.target.value)} // Add this line to update input state
+                    onChange={(e) => setInputOfficer(e.target.value)}
                     className='focus:none outline-none px-2 py-1 grow'
+                    data-tooltip-id='officer-tooltip'
+                    data-tooltip-content='Press enter key or tab to add names'
+                    data-tooltip-place='bottom'
                   />
+                  <Tooltip id='officer-tooltip' opacity={1} style={{ fontSize: '10px' }} />
                 </div>
               </div>
             </div>

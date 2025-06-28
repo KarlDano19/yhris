@@ -1,35 +1,55 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
-
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function WEMDetailsRequest({
   control,
   register,
   handleSubmit,
   setSelectedTab,
+  getValues,
+  watch,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  getValues: any;
+  watch: any;
 }) {
-  const onSubmit = handleSubmit(() => {
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = getValues();
+    // Validate required fields
+    if (!data.purpose_of_wem_request || (Array.isArray(data.purpose_of_wem_request) && data.purpose_of_wem_request.length === 0)) {
+      toast.custom(() => <CustomToast message="Please select at least one Purpose of WEM Request." type="error" />);
+      const el = document.getElementById("purpose_of_wem_request");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.wem_conducted_by || (Array.isArray(data.wem_conducted_by) && data.wem_conducted_by.length === 0)) {
+      toast.custom(() => <CustomToast message="Please select at least one WEM Conducted By option." type="error" />);
+      const el = document.getElementById("wem_conducted_by");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.last_wem_date || data.last_wem_date === "") {
+      toast.custom(() => <CustomToast message="Please select the Last WEM Date." type="error" />);
+      const el = document.getElementById("last_wem_date");
+      if (el) el.focus();
+      return;
+    }
     setSelectedTab(3);
-  });
+  };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleNext}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">

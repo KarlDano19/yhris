@@ -18,15 +18,56 @@ function MonitoringAndHazardInfo({
   register,
   handleSubmit,
   setSelectedTab,
+  getValues,
+  watch,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  getValues: any;
+  watch: any;
 }) {
-  const onSubmit = handleSubmit(() => {
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = getValues();
+    // Validate required fields
+    if (!data.wem_internal_monitoring_capability || data.wem_internal_monitoring_capability === "") {
+      const el = document.getElementById("wem_internal_monitoring_capability");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.wem_equipment_owned_by_company || data.wem_equipment_owned_by_company === "") {
+      const el = document.getElementById("wem_equipment_owned_by_company");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.conducting_internal_wem) {
+      toast.custom(() => <CustomToast message="Please select Conducting Internal WEM." type="error" />);
+      const el = document.getElementById("conducting_internal_wem_yes");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.hazards_purpose_of_wem_request || (Array.isArray(data.hazards_purpose_of_wem_request) && data.hazards_purpose_of_wem_request.length === 0)) {
+      toast.custom(() => <CustomToast message="Please select at least one Purpose of WEM Request (Hazards)." type="error" />);
+      const el = document.getElementById("hazards_purpose_of_wem_request");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.chemical_hazards || (Array.isArray(data.chemical_hazards) && data.chemical_hazards.length === 0)) {
+      toast.custom(() => <CustomToast message="Please select at least one Chemical Hazard." type="error" />);
+      const el = document.getElementById("dust");
+      if (el) el.focus();
+      return;
+    }
+    if (!data.ventilation) {
+      toast.custom(() => <CustomToast message="Please select at least one Ventilation." type="error" />);
+      const el = document.getElementById("ventilation");
+      if (el) el.focus();
+      return;
+    }
     setSelectedTab(4);
-  });
+  };
 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
@@ -38,7 +79,7 @@ function MonitoringAndHazardInfo({
   }, [employeeData]);
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleNext}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
