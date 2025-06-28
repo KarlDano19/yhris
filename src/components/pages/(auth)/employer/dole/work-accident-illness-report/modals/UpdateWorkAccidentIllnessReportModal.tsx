@@ -9,7 +9,7 @@ import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentI
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import PersonalInformation from './tabs/PersonalInformation';
-import EmployementDetails from './tabs/EmployementDetails';
+import EmploymentDetails from './tabs/EmploymentDetails';
 import InjuryDetails from './tabs/InjuryDetails';
 import IllnessDetails from './tabs/IllnessDetails';
 
@@ -162,7 +162,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
                   />
                 )}
                 {selectedTab === 2 && (
-                  <EmployementDetails
+                  <EmploymentDetails
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}

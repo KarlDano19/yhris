@@ -12,7 +12,7 @@ import useAddWorkAccidentIllnessReport from "../hooks/useAddWorkAccidentIllnessR
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import PersonalInformation from "./tabs/PersonalInformation";
-import EmployementDetails from "./tabs/EmployementDetails";
+import EmploymentDetails from "./tabs/EmploymentDetails";
 import IllnessDetails from "./tabs/IllnessDetails";
 import InjuryDetails from "./tabs/InjuryDetails";
 
@@ -114,7 +114,7 @@ function CreateWorkAccidentIllnessReportModal({
                   />
                 )}
                 {selectedTab === 2 && (
-                  <EmployementDetails
+                  <EmploymentDetails
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}

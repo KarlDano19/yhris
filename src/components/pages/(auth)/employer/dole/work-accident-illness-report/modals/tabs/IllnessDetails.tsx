@@ -114,6 +114,7 @@ function IllnessDetails({
                     selected={field.value ? new Date(field.value) : null}
                     pickerOnChange={(date: any) => field.onChange(date)}
                     inputOnChange={(value: any) => field.onChange(value)}
+                    required={true}
                   />
                 )}
               />

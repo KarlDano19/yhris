@@ -13,7 +13,7 @@ import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
-function EmployementDetails({
+function EmploymentDetails({
   register,
   handleSubmit,
   setSelectedTab,
@@ -54,7 +54,7 @@ function EmployementDetails({
           </div>
         </div>
         <div className="mt-4">
-          <h1 className="text-lg font-semibold">Employement Details</h1>
+          <h1 className="text-lg font-semibold">Employment Details</h1>
         </div>
         <div className="grid grid-cols-3 gap-6 mt-4">
           <div>
@@ -195,4 +195,4 @@ function EmployementDetails({
   );
 }
 
-export default EmployementDetails;
+export default EmploymentDetails;
