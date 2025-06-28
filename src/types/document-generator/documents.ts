@@ -35,8 +35,8 @@ export interface EmploymentAgreementFormData {
 export interface NoticeToExplainFormData {
     employeeName: string;
     position: string;
-    date: string;
-    place: string;
+    dateIssued: string;
+    companyName: string;
     dateOfIssuance: string;
     placeOfIssuance: string;
     signatoryName: string;

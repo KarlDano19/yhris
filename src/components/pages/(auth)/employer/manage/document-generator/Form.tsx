@@ -39,12 +39,12 @@ import {
 import {
   LogoField,
   DateField,
-  PlaceField,
+  CompanyNameField,
   IncidentDateField,
   IncidentPlaceField,
   BriefBackgroundField,
   PreparedByField,
-  ReviewedByField
+  ReviewedByField,
 } from './form-fields/NoticeToExplain';
 
 // Import DatePicker styles
@@ -189,7 +189,7 @@ export default function Form({
     setIsSubmitted(true);
     
     // Common validation for all document types
-    if (!formData.employeeName || !formData.position || !formData.signature) {
+    if (!formData.employeeName || !formData.position) {
       toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
       return false;
     }
@@ -225,8 +225,8 @@ export default function Form({
     } else if (documentType === 'notice-to-explain') {
       const noticeData = formData as NoticeToExplainFormData;
       
-      // Check required fields
-      if (!noticeData.incidentDate || !noticeData.incidentPlace || !noticeData.briefBackground) {
+      // Check required fields for Notice to Explain
+      if (!noticeData.employeeName || !noticeData.companyName || !noticeData.position || !noticeData.dateIssued || !noticeData.incidentDate || !noticeData.incidentPlace || !noticeData.briefBackground) {
         toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
         return false;
       }
@@ -301,8 +301,8 @@ export default function Form({
       const resetData: NoticeToExplainFormData = {
         employeeName: '',
         position: '',
-        date: '',
-        place: '',
+        dateIssued: '',
+        companyName: '',
         dateOfIssuance: '',
         placeOfIssuance: '',
         signatoryName: '',
@@ -468,31 +468,27 @@ export default function Form({
               <DateField 
                 formData={formData as NoticeToExplainFormData}
                 handleInputChange={handleInputChange}
-                disabled={isFormDisabled}
+                disabled={false}
                 isSubmitted={isSubmitted}
               />
-              
-              <PlaceField 
+              <CompanyNameField 
                 formData={formData as NoticeToExplainFormData}
                 handleInputChange={handleInputChange}
-                disabled={isFormDisabled}
+                disabled={false}
                 isSubmitted={isSubmitted}
               />
-              
               <IncidentDateField 
                 formData={formData as NoticeToExplainFormData}
                 handleInputChange={handleInputChange}
                 disabled={isFieldDisabled ? isFieldDisabled('incidentDate') : isFormDisabled}
                 isSubmitted={isSubmitted}
               />
-              
               <IncidentPlaceField 
                 formData={formData as NoticeToExplainFormData}
                 handleInputChange={handleInputChange}
                 disabled={isFieldDisabled ? isFieldDisabled('incidentPlace') : isFormDisabled}
                 isSubmitted={isSubmitted}
               />
-              
               {/* Make Brief Background take full width */}
               <div className="sm:col-span-2">
                 <BriefBackgroundField 
@@ -503,14 +499,12 @@ export default function Form({
                   isSubmitted={isSubmitted}
                 />
               </div>
-              
               {/* Place Prepared By and Reviewed By side by side */}
               <PreparedByField 
                 formData={formData as NoticeToExplainFormData}
                 handleInputChange={handleInputChange}
                 disabled={false}
               />
-              
               <ReviewedByField 
                 formData={formData as NoticeToExplainFormData}
                 handleInputChange={handleInputChange}
