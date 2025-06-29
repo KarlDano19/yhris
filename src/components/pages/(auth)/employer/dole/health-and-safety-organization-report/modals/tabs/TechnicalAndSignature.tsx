@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import { Tooltip } from 'react-tooltip';
+import toast from "react-hot-toast";
 
+import CustomToast from "@/components/CustomToast";
 import DrawSignatureModal from "../DrawSignatureModals";
 import InfoIcon from '@/svg/InfoIcon';
 
@@ -200,39 +202,23 @@ function TechnicalAndSignature({
 
       // Show toast for each missing required field
       if (isTechFileMissing) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Technical Information file is required." type="error" />, { duration: 5000 });
-          });
-        });
+        toast.dismiss();
+        toast.custom(() => <CustomToast message="Technical Information file is required." type="error" />);
         return;
       }
       if (!submittedByValue) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Submitted By is required." type="error" />, { duration: 5000 });
-          });
-        });
         const el = document.getElementById("submitted_by");
         if (el) el.focus();
         return;
       }
       if (!positionValue) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Position is required." type="error" />, { duration: 5000 });
-          });
-        });
         const el = document.getElementById("position");
         if (el) el.focus();
         return;
       }
       if (!signatureValue) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />, { duration: 5000 });
-          });
-        });
+        toast.dismiss();
+        toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />);
         return;
       }
       // Call the original onSubmit

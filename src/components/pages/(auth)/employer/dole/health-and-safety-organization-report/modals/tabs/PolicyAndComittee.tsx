@@ -113,15 +113,14 @@ function PolicyAndComittee({
           (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof File && !data.policy_and_program_file.name) ||
           (typeof data.policy_and_program_file === 'string' && data.policy_and_program_file.trim() === ''));
       if (isFileMissing) {
-        toast.custom(() => <CustomToast message="Policy and Program file is required." type="error" />, { duration: 5000 });
+        toast.dismiss();
+        toast.custom(() => <CustomToast message="Policy and Program file is required." type="error" />);
         return;
       } else if (!data.chairman_name || data.chairman_name.trim() === "") {
-        toast.custom(() => <CustomToast message="Chairman name is required." type="error" />, { duration: 5000 });
         const el = document.getElementById("chairman_name");
         if (el) el.focus();
         return;
       } else if (!data.chairman_position || data.chairman_position.trim() === "") {
-        toast.custom(() => <CustomToast message="Chairman position is required." type="error" />, { duration: 5000 });
         const el = document.getElementById("chairman_position");
         if (el) el.focus();
         return;
