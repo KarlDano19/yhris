@@ -70,7 +70,7 @@ function CreateWorkAccidentIllnessReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}

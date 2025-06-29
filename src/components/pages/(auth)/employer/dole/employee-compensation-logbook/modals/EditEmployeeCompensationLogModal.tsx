@@ -89,7 +89,7 @@ export default function EditEmployeeCompensationLogModal({
 
   return (
     <Transition.Root show={isOpen.open} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {}}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'

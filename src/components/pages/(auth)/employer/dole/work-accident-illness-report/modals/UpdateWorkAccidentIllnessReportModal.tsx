@@ -118,7 +118,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => customCloseModal()}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}

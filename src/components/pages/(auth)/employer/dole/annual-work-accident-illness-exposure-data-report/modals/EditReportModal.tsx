@@ -114,7 +114,7 @@ export default function EditReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => customCloseModal()}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}
