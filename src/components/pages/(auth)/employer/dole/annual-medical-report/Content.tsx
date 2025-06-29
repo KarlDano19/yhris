@@ -97,15 +97,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (annualMedicalReportData) {
-      annualMedicalReportData.records?.map((item: any) => {
-        const incidentDate = new Date(item.date_of_report);
-        item.date_of_incident = `${
-          incidentDate.getMonth() + 1
-        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
-
-        return item;
-      });
-      setAnnualMedicalReportItems(annualMedicalReportData.records);
+      const sortedRecords = [...annualMedicalReportData.records]
+        .map((item: any) => {
+          const incidentDate = new Date(item.date_of_report);
+          item.date_of_incident = `${
+            incidentDate.getMonth() + 1
+          }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+          return item;
+        })
+        .sort((a, b) => b.id - a.id);
+      setAnnualMedicalReportItems(sortedRecords);
       setPagination({
         totalPages: annualMedicalReportData.total_pages,
         totalRecords: annualMedicalReportData.total_records,

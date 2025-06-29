@@ -176,6 +176,7 @@ function CreateAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -183,6 +184,7 @@ function CreateAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 4 && (
@@ -190,6 +192,7 @@ function CreateAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 5 && (
@@ -211,6 +214,7 @@ function CreateAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 8 && (

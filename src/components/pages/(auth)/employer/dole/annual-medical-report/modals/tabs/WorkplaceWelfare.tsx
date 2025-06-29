@@ -1,15 +1,39 @@
 "use client";
 
+import toast from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
+
 function WorkplaceWelfare({
   register,
   handleSubmit,
   setSelectedTab,
+  watch,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  watch: any;
 }) {
   const onSubmit = handleSubmit(() => {
+    // Section a
+    const a = watch("keeping_of_medical_records_of_workers");
+    const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
+    if (!isChecked(a)) {
+      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
+      return;
+    }
+    // Section b
+    const b = watch("health_education_and_counselling_by_health_and_safety_personnel");
+    if (!isChecked(b)) {
+      toast.custom(() => <CustomToast message="Section (b) is required." type="error" />);
+      return;
+    }
+    // Physical Fitness Program
+    const sports = watch("sports_activities");
+    if (!isChecked(sports)) {
+      toast.custom(() => <CustomToast message="Physical Fitness Program is required." type="error" />);
+      return;
+    }
     setSelectedTab(8);
   });
 

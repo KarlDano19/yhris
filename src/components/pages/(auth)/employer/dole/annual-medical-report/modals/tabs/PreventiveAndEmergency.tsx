@@ -1,20 +1,63 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
 
 function PreventiveAndEmergency({
   register,
   handleSubmit,
   setSelectedTab,
+  watch,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  watch: any;
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
 
   const onSubmit = handleSubmit(() => {
+    // Use watch to get current values
+    const a = watch("occupational_health_services_by");
+    const aOther = watch("occupational_health_services_by_other_specification");
+    const b = watch("occupational_health_services_as_a_service");
+    const c = watch("employer_engages_the_services_of");
+    const d = watch("conduct_inspection_of_workplace");
+    const dOther = watch("conduct_inspection_of_workplace_other_specification");
+
+    // Helper to check if a checkbox group is filled
+    const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
+
+    // a. validation
+    if (!isChecked(a)) {
+      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
+      return;
+    }
+    if (Array.isArray(a) && a.includes("Other") && !aOther) {
+      toast.custom(() => <CustomToast message="Section (a): Please specify 'Other'." type="error" />);
+      return;
+    }
+    // b. validation
+    if (!isChecked(b)) {
+      toast.custom(() => <CustomToast message="Section (b) is required." type="error" />);
+      return;
+    }
+    // c. validation
+    if (!isChecked(c)) {
+      toast.custom(() => <CustomToast message="Section (c) is required." type="error" />);
+      return;
+    }
+    // d. validation
+    if (!isChecked(d)) {
+      toast.custom(() => <CustomToast message="Section (d) is required." type="error" />);
+      return;
+    }
+    if (Array.isArray(d) && d.includes("Other") && !dOther) {
+      toast.custom(() => <CustomToast message="Section (d): Please specify 'Other'." type="error" />);
+      return;
+    }
     setSelectedTab(3);
   });
   return (

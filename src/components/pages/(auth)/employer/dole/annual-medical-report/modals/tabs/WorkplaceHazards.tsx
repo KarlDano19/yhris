@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 
+import Image from "next/image";
+
 import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../DrawSignatureModal";
 import DrawNotedBySignatureModal from "../DrawNotedBySignature";
-import Image from "next/image";
+import toast from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
 
 function WorkplaceSafetyCompliance({
   control,
@@ -229,8 +232,32 @@ function WorkplaceSafetyCompliance({
     }
   }, [existingNotedSignatureUrl, setValue]);
 
+  const onSubmitHandler = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Signature validation (drawn, uploaded, or existing)
+    const signatureValue = watch("signature");
+    const hasSignature =
+      (signatureValue && typeof signatureValue === "string" && (signatureValue.startsWith("data:image/") || signatureValue.startsWith("http"))) ||
+      (signatureValue && typeof signatureValue === "object" && signatureValue instanceof File);
+    if (!hasSignature) {
+      toast.custom(() => <CustomToast message="Submitted by signature is required (draw or upload)." type="error" />);
+      return;
+    }
+    // Noted signature validation (drawn, uploaded, or existing)
+    const notedSignatureValue = watch("noted_signature");
+    const hasNotedSignature =
+      (notedSignatureValue && typeof notedSignatureValue === "string" && (notedSignatureValue.startsWith("data:image/") || notedSignatureValue.startsWith("http"))) ||
+      (notedSignatureValue && typeof notedSignatureValue === "object" && notedSignatureValue instanceof File);
+    if (!hasNotedSignature) {
+      toast.custom(() => <CustomToast message="Noted signature is required (draw or upload)." type="error" />);
+      return;
+    }
+    // ...rest of your submit logic (e.g., setSelectedTab or actual submit)
+    if (typeof onSubmit === 'function') onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmitHandler}>
       <>
         <div className="pr-8">
           <div className="grid grid-cols-3 gap-4 pt-10">
@@ -976,7 +1003,7 @@ function WorkplaceSafetyCompliance({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Draw Signature
-                {!existingSignatureUrl && <span className="text-red-600">*</span>}
+                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <button
@@ -994,7 +1021,7 @@ function WorkplaceSafetyCompliance({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Upload Signature
-                {!existingSignatureUrl && <span className="text-red-600">*</span>}
+                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <input
@@ -1054,7 +1081,7 @@ function WorkplaceSafetyCompliance({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Draw Signature
-                {!existingNotedSignatureUrl && <span className="text-red-600">*</span>}
+                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <button
@@ -1072,7 +1099,7 @@ function WorkplaceSafetyCompliance({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Upload Signature
-                {!existingNotedSignatureUrl && <span className="text-red-600">*</span>}
+                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <input

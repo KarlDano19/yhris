@@ -1,15 +1,28 @@
 "use client";
 
+import { toast } from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
+
 function OccupationalHealthService({
   register,
   handleSubmit,
   setSelectedTab,
+  watch,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  watch: any;
 }) {
   const onSubmit = handleSubmit(() => {
+    const sanitation = watch("sanitation_system_appraisal");
+    const isChecked = Array.isArray(sanitation)
+      ? sanitation.length > 0
+      : !!sanitation;
+    if (!isChecked) {
+      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
+      return;
+    }
     setSelectedTab(5);
   });
 
@@ -29,7 +42,7 @@ function OccupationalHealthService({
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
-                {...register("sanitation_system_appraisal", { required: true })}
+                {...register("sanitation_system_appraisal")}
                 id="sanitation_system_appraisal"
                 value="yes"
               />
@@ -40,7 +53,7 @@ function OccupationalHealthService({
             <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
-                {...register("sanitation_system_appraisal", { required: true })}
+                {...register("sanitation_system_appraisal")}
                 id="sanitation_system_appraisal"
                 value="no"
               />

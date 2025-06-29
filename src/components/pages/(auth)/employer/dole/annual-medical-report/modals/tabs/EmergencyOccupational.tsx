@@ -1,20 +1,76 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
+import CustomToast from "@/components/CustomToast";
 
 function EmergencyOccupational({
   register,
   handleSubmit,
   setSelectedTab,
+  watch,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  watch: any;
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
 
   const onSubmit = handleSubmit(() => {
+    const a = watch("provided_treatment_room_medical_clinic");
+    const aOther = watch("provided_treatment_room_medical_clinic_other_specification");
+    const bPhysicianHours = watch("occupational_health_physician_hours_per_day");
+    const bPhysicianShift = watch("occupational_health_physician_shift");
+    const bDentistHours = watch("occupational_health_dentist_hours_per_day");
+    const bDentistShift = watch("occupational_health_dentist_shift");
+    const bPractitionerHours = watch("occupational_health_practitioner_hours_per_day");
+    const bPractitionerShift = watch("occupational_health_practitioner_shift");
+    const bNurseHours = watch("occupational_health_nurse_hours_per_day");
+    const bNurseShift = watch("occupational_health_nurse_shift");
+    const c = watch("schedule_of_attendance_of_full_time_first_aider");
+    const d = watch("occupational_health_personnel_training");
+    const dOther = watch("occupational_health_personnel_training_other_specification");
+
+    const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
+
+    if (!isChecked(a)) {
+      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
+      return;
+    }
+    if (Array.isArray(a) && a.includes("Other") && !aOther) {
+      toast.custom(() => <CustomToast message="Section (a): Please specify 'Other'." type="error" />);
+      return;
+    }
+    
+    const hoursFields = [bPhysicianHours, bDentistHours, bPractitionerHours, bNurseHours];
+    const shiftFields = [bPhysicianShift, bDentistShift, bPractitionerShift, bNurseShift];
+
+    const hasHours = hoursFields.some(val => val !== undefined && val !== null && val !== "");
+    const hasShift = shiftFields.some(val => val !== undefined && val !== null && val !== "");
+
+    if (!hasHours) {
+      toast.custom(() => <CustomToast message="Section (b): input at least one 'hours per day' value." type="error" />);
+      return;
+    }
+    if (!hasShift) {
+      toast.custom(() => <CustomToast message="Section (b): input at least one 'shift' value." type="error" />);
+      return;
+    }
+
+    if (!isChecked(c)) {
+      toast.custom(() => <CustomToast message="Section (c) is required." type="error" />);
+      return;
+    }
+    if (!isChecked(d)) {
+      toast.custom(() => <CustomToast message="Section (d) is required." type="error" />);
+      return;
+    }
+    if (Array.isArray(d) && d.includes("Other") && !dOther) {
+      toast.custom(() => <CustomToast message="Section (d): Please specify 'Other'." type="error" />);
+      return;
+    }
     setSelectedTab(4);
   });
 
@@ -306,9 +362,7 @@ function EmergencyOccupational({
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
-                {...register("occupational_health_personnel_training", {
-                  required: true,
-                })}
+                {...register("occupational_health_personnel_training")}
                 id="occupational_health_personnel_training"
                 value="occupational health physician"
               />
@@ -322,9 +376,7 @@ function EmergencyOccupational({
             <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
-                {...register("occupational_health_personnel_training", {
-                  required: true,
-                })}
+                {...register("occupational_health_personnel_training")}
                 id="occupational_health_personnel_training"
                 value="occupational health dentist"
               />
@@ -339,9 +391,7 @@ function EmergencyOccupational({
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
-                {...register("occupational_health_personnel_training", {
-                  required: true,
-                })}
+                {...register("occupational_health_personnel_training")}
                 id="occupational_health_personnel_training"
                 value="occupational health nurse"
               />
@@ -355,9 +405,7 @@ function EmergencyOccupational({
             <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
-                {...register("occupational_health_personnel_training", {
-                  required: true,
-                })}
+                {...register("occupational_health_personnel_training")}
                 id="occupational_health_personnel_training"
                 value="first aider"
               />
@@ -372,9 +420,7 @@ function EmergencyOccupational({
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
-                {...register("occupational_health_personnel_training", {
-                  required: true,
-                })}
+                {...register("occupational_health_personnel_training")}
                 id="occupational_health_personnel_training"
                 value="Other"
                 onChange={(e) => setIsOtherCheckedD(e.target.checked)}

@@ -693,6 +693,7 @@ function EditAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -700,6 +701,7 @@ function EditAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 4 && (
@@ -707,6 +709,7 @@ function EditAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 5 && (
@@ -728,6 +731,7 @@ function EditAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 8 && (
