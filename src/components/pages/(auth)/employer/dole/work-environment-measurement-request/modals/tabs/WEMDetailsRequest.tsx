@@ -31,17 +31,21 @@ function WEMDetailsRequest({
   clearErrors: any;
 }) {
   // Clear errors when user makes a valid selection
+  const purposeOfWemRequest = watch("purpose_of_wem_request");
+  const wemConductedBy = watch("wem_conducted_by");
+  const lastWemDate = watch("last_wem_date");
+
   useEffect(() => {
-    if (watch("purpose_of_wem_request") && watch("purpose_of_wem_request").length > 0) {
+    if (purposeOfWemRequest && purposeOfWemRequest.length > 0) {
       clearErrors("purpose_of_wem_request");
     }
-    if (watch("wem_conducted_by") && watch("wem_conducted_by").length > 0) {
+    if (wemConductedBy && wemConductedBy.length > 0) {
       clearErrors("wem_conducted_by");
     }
-    if (watch("last_wem_date")) {
+    if (lastWemDate) {
       clearErrors("last_wem_date");
     }
-  }, [watch("purpose_of_wem_request"), watch("wem_conducted_by"), watch("last_wem_date"), clearErrors]);
+  }, [purposeOfWemRequest, wemConductedBy, lastWemDate, clearErrors]);
 
   const onValid = (data: any) => {
     if (!data.purpose_of_wem_request || (Array.isArray(data.purpose_of_wem_request) && data.purpose_of_wem_request.length === 0)) {

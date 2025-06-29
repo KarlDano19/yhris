@@ -125,12 +125,15 @@ function DataPrivacyAndCertification({
     }
   }, [existingSignatureUrl, setValue]);
 
+
+  // Clear errors when signature is changed
+  const signatureValue = watch("signature");
+
   useEffect(() => {
-    const signatureValue = watch("signature");
     if (signatureValue && signatureValue !== "") {
       clearErrors("signature");
     }
-  }, [watch("signature"), clearErrors]);
+  }, [signatureValue, clearErrors]);
 
   // Handle form submission with validation (name, position, then signature)
   const onValid = (data: any) => {
