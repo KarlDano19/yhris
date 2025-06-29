@@ -387,14 +387,6 @@ interface SignatureFieldProps extends FieldProps {
 }
 
 export const SignatureField = ({ formData, onOpenSignatureModal, disabled, isSubmitted = false }: SignatureFieldProps) => {
-  // Use local state to track validation
-  const [showValidation, setShowValidation] = useState(false);
-  
-  // Update validation state when isSubmitted or signature changes
-  useEffect(() => {
-    setShowValidation(isSubmitted === true && !formData.signature);
-  }, [isSubmitted, formData.signature]);
-
   const handleSignatureClick = () => {
     onOpenSignatureModal();
   };
@@ -402,12 +394,10 @@ export const SignatureField = ({ formData, onOpenSignatureModal, disabled, isSub
   return (
     <div className="mt-4 sm:mt-6">
       <label className="block mb-2 text-black">
-        Signature <span className="text-red-500">*</span>
+        Signature
       </label>
       <div className={`border-2 border-dashed rounded-md p-3 sm:p-6 flex flex-col items-center justify-center ${
-        disabled ? 'bg-gray-100 cursor-not-allowed' : ''
-      } ${
-        showValidation ? 'border-red-500' : 'border-gray-300'
+        disabled ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'
       }`}>
         {formData.signature ? (
           <div className="flex flex-col items-center w-full">
@@ -438,12 +428,12 @@ export const SignatureField = ({ formData, onOpenSignatureModal, disabled, isSub
             data-signature-button
             disabled={disabled}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`sm:w-12 sm:h-12 ${showValidation ? 'text-red-400' : 'text-gray-400'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-12 sm:h-12 text-gray-400">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
               <polyline points="10 17 15 12 10 7"></polyline>
               <line x1="15" y1="12" x2="3" y2="12"></line>
             </svg>
-            <span className={`hover:underline focus:outline-none text-sm sm:text-base text-center ${showValidation ? 'text-red-500' : 'text-blue-500'}`}>
+            <span className="hover:underline focus:outline-none text-sm sm:text-base text-center text-blue-500">
               Click to add signature
             </span>
           </button>

@@ -13,7 +13,7 @@ import {
   TrophyIcon
 } from "@heroicons/react/24/outline";
 
-const VsSproutContent = () => {
+const CompetitorsContent = () => {
   const valuePropositions = [
     {
       title: "Multi-Channel Job Posting",
@@ -362,10 +362,12 @@ const VsSproutContent = () => {
             href="/register"
             className="bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-3 rounded-lg font-medium transition-colors"
           >
-            Start Free Trial
+            Start 30 Day Free Trial
           </Link>
           <Link
-            href="/landing-page#contact"
+            href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH"
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-lg font-medium transition-colors border border-white/30"
           >
             Schedule Demo
@@ -382,4 +384,4 @@ const VsSproutContent = () => {
   );
 };
 
-export default VsSproutContent;
+export default CompetitorsContent;

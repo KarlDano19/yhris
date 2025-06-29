@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 // Sample logo images
 const SAMPLE_LOGOS = [
   { path: '/assets/images/logo/yahshua.png' },
+  { path: '/assets/images/banner/Shell_banner.png' },
 ];
 
 interface LogoModalProps {

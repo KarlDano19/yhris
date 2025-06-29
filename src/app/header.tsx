@@ -8,7 +8,7 @@ import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader'
 import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader';
 import Navigation from '@/components/pages/(un-auth)/landing-page/Navigation';
 
-function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
+function Header({ type, hasProfile, hasActiveSubscription }: { type: string; hasProfile: boolean; hasActiveSubscription: boolean }) {
   const pathname = usePathname();
   const listPathname = pathname?.split('/') || [];
   const slicePaths = listPathname.slice(1);
@@ -50,7 +50,7 @@ function Header({ type, hasProfile }: { type: string; hasProfile: boolean }) {
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
           {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
-          {type === 'employer' && employerRoutes.includes(firstRoute) && <MainHeader />}
+          {type === 'employer' && employerRoutes.includes(firstRoute) && <MainHeader hasProfile={hasProfile} hasActiveSubscription={hasActiveSubscription} firstRoute={firstRoute} />}
           {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader hasProfile={hasProfile} />}
         </>
       )}

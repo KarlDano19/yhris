@@ -30,7 +30,7 @@ type T_ModalData = {
   open: boolean;
 };
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [isOpenCreatePersonelMovementModal, setIsOpenCreatePersonelMovementModal] = useState(false);

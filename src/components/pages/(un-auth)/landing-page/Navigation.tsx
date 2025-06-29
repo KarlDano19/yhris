@@ -11,13 +11,23 @@ import MainLogo from "@/svg/MainLogo";
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUseCasesOpen, setIsUseCasesOpen] = useState(false);
+  const [isDocsOpen, setIsDocsOpen] = useState(false);
+  const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
   const pathname = usePathname();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const useCasesDropdownRef = useRef<HTMLDivElement>(null);
+  const docsDropdownRef = useRef<HTMLDivElement>(null);
+  const getStartedDropdownRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (useCasesDropdownRef.current && !useCasesDropdownRef.current.contains(event.target as Node)) {
         setIsUseCasesOpen(false);
+      }
+      if (docsDropdownRef.current && !docsDropdownRef.current.contains(event.target as Node)) {
+        setIsDocsOpen(false);
+      }
+      if (getStartedDropdownRef.current && !getStartedDropdownRef.current.contains(event.target as Node)) {
+        setIsGetStartedOpen(false);
       }
     };
 
@@ -35,7 +45,8 @@ const Navigation = () => {
     return `/landing-page#${section}`;
   };
 
-  const useCases = [
+  // Use cases items
+  const useCaseItems = [
     { href: "/use-cases/employee-onboarding", label: "Employee Onboarding" },
     { href: "/use-cases/performance-management", label: "Performance Management" },
     { href: "/use-cases/employee-documentation", label: "Employee Documentation" }
@@ -58,58 +69,96 @@ const Navigation = () => {
               <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Features
               </Link>
-              <Link href={getNavLink("integration")} className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                Integration
-              </Link>
-              <Link href="/vs-sprout" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                How We Compare to Sprout
-              </Link>
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative" ref={useCasesDropdownRef}>
                 <button
                   onClick={() => setIsUseCasesOpen(!isUseCasesOpen)}
-                  className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors flex items-center whitespace-nowrap"
+                  className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap flex items-center"
                 >
                   Use Cases
                   <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isUseCasesOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isUseCasesOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
-                    <Link href="/use-cases" className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors">
-                      All Use Cases
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
+                    <Link
+                      href="/use-cases/employee-onboarding"
+                      className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                      onClick={() => setIsUseCasesOpen(false)}
+                    >
+                      Employee Onboarding
                     </Link>
-                    <div className="border-t border-gray-200/50 my-1"></div>
-                    {useCases.map((useCase) => (
-                      <Link
-                        key={useCase.href}
-                        href={useCase.href}
-                        className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
-                        onClick={() => setIsUseCasesOpen(false)}
-                      >
-                        {useCase.label}
-                      </Link>
-                    ))}
+                    <Link
+                      href="/use-cases/performance-management"
+                      className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                      onClick={() => setIsUseCasesOpen(false)}
+                    >
+                      Performance Management
+                    </Link>
                   </div>
                 )}
               </div>
-              <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                Find Jobs
+              <div className="relative" ref={docsDropdownRef}>
+                <button
+                  onClick={() => setIsDocsOpen(!isDocsOpen)}
+                  className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap flex items-center"
+                >
+                  Docs
+                  <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isDocsOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isDocsOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
+                    <Link
+                      href="/docs"
+                      className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                      onClick={() => setIsDocsOpen(false)}
+                    >
+                      Get Setup in YAHSHUA HRIS
+                    </Link>
+                  </div>
+                )}
+              </div>
+              <Link href="/how-we-compare" className="hidden lg:block text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+                How We Compare to Others
+              </Link>
+              <Link href="/landing-page/pricing" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+                Pricing
               </Link>
             </div>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
             <Link 
-              href="/login" 
-              className="text-indigo-dye hover:text-[#FFC107] px-4 py-2 text-sm font-medium transition-colors"
+              href="/jobs" 
+              className="text-indigo-dye hover:text-[#FFC107] px-4 py-2 text-sm font-medium transition-colors border border-indigo-dye hover:border-[#FFC107] rounded-full"
             >
-              Sign In
+              Find Jobs
             </Link>
-            <Link 
-              href="/register" 
-              className="bg-[#FFC107] hover:bg-amber-600 text-black px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-lg"
-            >
-              Get Started
-            </Link>
+            <div className="relative" ref={getStartedDropdownRef}>
+              <button
+                onClick={() => setIsGetStartedOpen(!isGetStartedOpen)}
+                className="bg-[#FFC107] hover:bg-amber-600 text-black px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-lg flex items-center"
+              >
+                Get Started
+                <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isGetStartedOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isGetStartedOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
+                  <Link
+                    href="/register"
+                    className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                    onClick={() => setIsGetStartedOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
+                    onClick={() => setIsGetStartedOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="md:hidden">
@@ -135,24 +184,36 @@ const Navigation = () => {
               <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
                 Features
               </Link>
-              <Link href={getNavLink("integration")} className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Integration
+              <div className="space-y-1">
+                <div className="text-indigo-dye px-4 py-2 text-base font-medium">Use Cases</div>
+                <Link href="/use-cases/employee-onboarding" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
+                  Employee Onboarding
+                </Link>
+                <Link href="/use-cases/performance-management" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
+                  Performance Management
+                </Link>
+              </div>
+              <div className="space-y-1">
+                <div className="text-indigo-dye px-4 py-2 text-base font-medium">Docs</div>
+                <Link href="/docs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
+                  Get Setup in YAHSHUA HRIS
+                </Link>
+              </div>
+              <Link href="/how-we-compare" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
+                How We Compare to Others
               </Link>
-              <Link href="/vs-sprout" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                How We Compare to Sprout
-              </Link>
-              <Link href="/use-cases" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Use Cases
-              </Link>
-              <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Find Jobs
+              <Link href="/landing-page/pricing" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
+                Pricing
               </Link>
               <div className="pt-3 mt-3 border-t border-gray-200/50 space-y-1">
-                <Link href="/login" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                  Sign In
+                <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors border border-indigo-dye hover:border-[#FFC107] rounded-lg">
+                  Find Jobs
                 </Link>
                 <Link href="/register" className="bg-[#FFC107] hover:bg-amber-600 text-black block px-4 py-2 rounded-lg text-base font-medium transition-colors">
-                  Get Started
+                  Sign Up
+                </Link>
+                <Link href="/login" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
+                  Sign In
                 </Link>
               </div>
             </div>

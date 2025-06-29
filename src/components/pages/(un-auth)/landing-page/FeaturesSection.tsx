@@ -21,12 +21,6 @@ import {
 const FeaturesSection = () => {
   const features = [
     {
-      icon: KeyIcon,
-      title: "Secure Sign In",
-      description: "Secure login using existing Google, Facebook, or YAHSHUA accounts for quick and easy access.",
-      highlights: ["Google sign-in", "Facebook sign-in", "YAHSHUA account integration"]
-    },
-    {
       icon: BriefcaseIcon,
       title: "Job Posting & Management",
       description: "Create job postings and launch across LinkedIn, Facebook, and YAHSHUA Jobs Portal. View and manage job posting history with status tracking.",
@@ -47,25 +41,25 @@ const FeaturesSection = () => {
     {
       icon: UserIcon,
       title: "Employee Management",
-      description: "Securely store all employee information from hire date. Automatic syncing capability for existing YAHSHUA Payroll users.",
-      highlights: ["Secure data storage", "YAHSHUA Payroll sync", "Employee profiles"]
+      description: "Securely store all employee information from hire date. Automatic syncing capability for existing YAHSHUA Payroll users (Coming Soon).",
+      highlights: ["Secure data storage", "YAHSHUA Payroll sync (Coming Soon)", "Employee profiles"]
     },
     {
       icon: ChartBarIcon,
       title: "Performance Evaluations",
       description: "Keep history of performance evaluations with scores and review details. Create custom evaluation templates tailored to your business needs.",
-      highlights: ["Evaluation history", "Custom templates", "Performance tracking (coming soon)"]
+      highlights: ["Evaluation history", "Customize templates", "Performance tracking (coming soon)"]
     },
     {
       icon: ClockIcon,
       title: "Evaluation Scheduling",
       description: "Ensure reviews happen on time. Assign evaluations, set deadlines, and track completion—all in one place.",
-      highlights: ["Digital scheduling", "Deadline tracking", "Completion monitoring"]
+      highlights: ["Digital scheduling", "Deadline tracking", "Completion monitoring (coming soon)"]
     },
     {
       icon: FolderIcon,
       title: "Personnel Movement",
-      description: "Document employee movements including early regularization, probationary status changes, and appointments with approver notes and signatures.",
+      description: "Document employee movements like regularization or job appointments with approval notes and signatures.",
       highlights: ["Movement tracking", "Approver signatures", "Digital records"]
     },
     {
@@ -88,7 +82,7 @@ const FeaturesSection = () => {
     },
     {
       icon: ArrowPathIcon,
-      title: "YAHSHUA Payroll Integration",
+      title: "YAHSHUA Payroll Integration (Coming Soon)",
       description: "Seamlessly sync employee data with YAHSHUA Payroll. Send memos, NTEs, policies, Personnel Movement Form and other documents directly to employees.",
       highlights: ["Employee data sync", "Document distribution"]
     }
@@ -161,7 +155,7 @@ const FeaturesSection = () => {
                     href="/yahshua-payroll" 
                     className="inline-flex items-center px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
                   >
-                    Learn More About YAHSHUA Payroll
+                    Learn More About YAHSHUA Payroll (Coming Soon)
                     <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>

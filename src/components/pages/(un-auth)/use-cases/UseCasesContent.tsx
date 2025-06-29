@@ -10,10 +10,12 @@ const useCases = [
     description: "Streamline your new hire process with automated workflows and digital documentation",
     icon: UserPlusIcon,
     benefits: [
-      "Reduce onboarding time by 50%",
-      "Automated document collection",
-      "Digital signature integration",
-      "Compliance tracking"
+      "Faster applicant filtering and assessment",
+      "Streamlined interview scheduling",
+      "Centralized requirements setup",
+      "Digital contract sending and signing",
+      "Team introductions via email",
+      "System enrollment with onboarding email"
     ],
     href: "/use-cases/employee-onboarding"
   },
@@ -23,25 +25,14 @@ const useCases = [
     description: "Enhance employee performance with comprehensive evaluation and feedback systems",
     icon: ChartBarIcon,
     benefits: [
-      "360-degree feedback system",
-      "Goal setting and tracking",
-      "Performance analytics",
-      "Career development planning"
+      "Customizable evaluation templates",
+      "Centralized performance history",
+      "Scheduled reviews with deadline tracking",
+      "Evaluation assignment and monitoring",
+      "Performance tracking (coming soon)",
+      "Completion monitoring (coming soon)"
     ],
     href: "/use-cases/performance-management"
-  },
-  {
-    id: "employee-documentation",
-    title: "Employee Documentation",
-    description: "Secure digital document management with intelligent organization and instant access",
-    icon: DocumentTextIcon,
-    benefits: [
-      "Digital document storage",
-      "Automated organization",
-      "Advanced search capabilities",
-      "Compliance & security"
-    ],
-    href: "/use-cases/employee-documentation"
   }
 ];
 
@@ -97,7 +88,7 @@ const UseCasesContent = () => {
       </div>
 
       {/* Use Cases Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         {useCases.map((useCase) => {
           const IconComponent = useCase.icon;
           return (
@@ -154,10 +145,12 @@ const UseCasesContent = () => {
             href="/register"
             className="bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-3 rounded-lg font-medium transition-colors"
           >
-            Get Started Free
+            Start 30 Day Free Trial
           </Link>
           <Link
-            href="/landing-page#contact"
+            href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH"
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-lg font-medium transition-colors border border-white/30"
           >
             Contact Sales

@@ -10,9 +10,10 @@ interface SignatureModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (signatureData: string | File) => void;
+  onTransparencyCheck?: (result: {hasTransparency: boolean, message: string, type: 'success' | 'warning' | 'error'}) => void;
 }
 
-export default function SignatureModal({ isOpen, onClose, onSave }: SignatureModalProps) {
+export default function SignatureModal({ isOpen, onClose, onSave, onTransparencyCheck }: SignatureModalProps) {
   const [signatureMode, setSignatureMode] = useState<'draw' | 'upload'>('draw');
   const [uploadedSignature, setUploadedSignature] = useState<File | null>(null);
   const signatureRef = useRef<SignatureCanvas | null>(null);
@@ -57,11 +58,71 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
     }
   };
 
+  // Check if image has transparency
+  const checkImageTransparency = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        if (!event.target?.result) {
+          resolve(false);
+          return;
+        }
+        
+        const img = new Image();
+        img.onload = () => {
+          // Create canvas to analyze image
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            resolve(false);
+            return;
+          }
+          
+          canvas.width = img.width;
+          canvas.height = img.height;
+          
+          // Draw image to canvas
+          ctx.drawImage(img, 0, 0);
+          
+          // Check pixels for transparency
+          try {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            
+            // Check if any pixel has alpha < 255 (transparent)
+            for (let i = 3; i < imageData.length; i += 4) {
+              if (imageData[i] < 255) {
+                resolve(true);
+                return;
+              }
+            }
+            
+            resolve(false);
+          } catch (error) {
+            console.error('Error analyzing image:', error);
+            resolve(false);
+          }
+        };
+        
+        img.src = event.target.result as string;
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleSaveSignature = () => {
     try {
       if (signatureMode === 'draw') {
         if (!signatureRef.current || signatureRef.current.isEmpty()) {
-          alert('Please draw your signature before saving.');
+          if (onTransparencyCheck) {
+            onTransparencyCheck({
+              hasTransparency: false,
+              message: 'Please draw your signature before saving.',
+              type: 'error'
+            });
+          }
           return;
         }
         
@@ -86,16 +147,34 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
           return;
         }
         
-        alert('Could not capture signature. Please try again or use the upload option.');
+        if (onTransparencyCheck) {
+          onTransparencyCheck({
+            hasTransparency: false,
+            message: 'Could not capture signature. Please try again or use the upload option.',
+            type: 'error'
+          });
+        }
       } else if (signatureMode === 'upload' && uploadedSignature) {
         onSave(uploadedSignature);
         onClose();
       } else {
-        alert('Please upload a signature file before saving.');
+        if (onTransparencyCheck) {
+          onTransparencyCheck({
+            hasTransparency: false,
+            message: 'Please upload a signature file before saving.',
+            type: 'error'
+          });
+        }
       }
     } catch (error) {
       console.error('Error saving signature:', error);
-      alert('There was an error saving your signature. Please try again.');
+      if (onTransparencyCheck) {
+        onTransparencyCheck({
+          hasTransparency: false,
+          message: 'There was an error saving your signature. Please try again.',
+          type: 'error'
+        });
+      }
     }
   };
   
@@ -107,13 +186,38 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
     }
   };
   
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.size <= 2 * 1024 * 1024) { // Max 2MB
+        // Check if the image has transparency
+        const hasTransparency = await checkImageTransparency(file);
+        
+        if (onTransparencyCheck) {
+          if (!hasTransparency) {
+            onTransparencyCheck({
+              hasTransparency,
+              message: 'Warning: Image does not have transparency. For best results, use a PNG with transparent background.',
+              type: 'warning'
+            });
+          } else {
+            onTransparencyCheck({
+              hasTransparency,
+              message: 'Image with transparency detected. Good choice!',
+              type: 'success'
+            });
+          }
+        }
+        
         setUploadedSignature(file);
       } else {
-        alert('File size exceeds 2MB limit.');
+        if (onTransparencyCheck) {
+          onTransparencyCheck({
+            hasTransparency: false,
+            message: 'File size exceeds 2MB limit.',
+            type: 'error'
+          });
+        }
       }
     }
   };
@@ -204,7 +308,7 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
                           height: 200,
                           className: "w-full h-full"
                         }}
-                        backgroundColor="white"
+                        backgroundColor="rgba(0,0,0,0)"
                       />
                     </div>
                   ) : (
@@ -216,6 +320,7 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
                               src={URL.createObjectURL(uploadedSignature)} 
                               alt="Signature Preview" 
                               className="max-h-32 object-contain mb-4"
+                              style={{ background: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC42/Ixj3wAAAC5JREFUOVFj+M/A8J+BArDBwMDAyIAi+XcANRhk+KjBA6fBoC8IA20wKMyJBQDoJTChCgkjAAAAAABJRU5ErkJggg==") repeat' }}
                             />
                             <div className="flex gap-3 mb-2">
                               <p className="text-sm text-green-600">
@@ -254,6 +359,7 @@ export default function SignatureModal({ isOpen, onClose, onSave }: SignatureMod
                               />
                             </label>
                             <p className="text-sm text-gray-500 mt-1">PNG, JPG, GIF up to 2MB</p>
+                            <p className="text-xs text-gray-500 mt-1">For best results, use PNG with transparent background</p>
                           </div>
                         )}
                       </div>
