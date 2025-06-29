@@ -1,16 +1,10 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
-
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { ChevronDownIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function InjuryDetails({
