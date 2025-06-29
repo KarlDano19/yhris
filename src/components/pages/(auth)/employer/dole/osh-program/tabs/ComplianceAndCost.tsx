@@ -65,8 +65,7 @@ export default function ComplianceAndCost({
             Cost of implementing company OSH program
           </label>
         </div>
-        <div className="grid grid-cols-4 gap-6 mt-2">
-
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-2">
             <div>
                 <label
                 htmlFor="cost_osh_program"
@@ -96,7 +95,7 @@ export default function ComplianceAndCost({
               machine guards,) etc.
             </h1>
       </div>
-      <div className="mt-4 w-1/2">
+      <div className="mt-4 w-full overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-300 text-center">
           <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
             <tr>
@@ -263,12 +262,12 @@ export default function ComplianceAndCost({
           />
         </div>
       </div>
-      <div className=" gap-6 mt-4">
+      <div className=" gap-6 mt-24 md:mt-4">
             <h1 className="text-sm text-gray-500 mt-2">
-            This policy is formulated for everybody's information. The company is committed to ensuring workers' health and providing a healthy and safe workplace
+            This policy is formulated for everybody&apos;s information. The company is committed to ensuring workers&apos; health and providing a healthy and safe workplace
             </h1>
       </div>
-      <div className="grid grid-cols-3 gap-6 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
           <div>
             <label
               htmlFor="company_name"
@@ -291,7 +290,7 @@ export default function ComplianceAndCost({
               htmlFor="type_of_industry"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-             Employees' Representative
+             Employees&apos; Representative
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">

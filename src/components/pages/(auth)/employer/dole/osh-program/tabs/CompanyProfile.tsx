@@ -198,7 +198,7 @@ export default function CompanyProfile({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="company_name"
@@ -304,7 +304,7 @@ export default function CompanyProfile({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="fax_number"
@@ -355,7 +355,7 @@ export default function CompanyProfile({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="number_of_male_employees"
@@ -411,8 +411,8 @@ export default function CompanyProfile({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Business Description</h1>
         </div>
-        <div className="grid grid-cols-2 gap-10 mt-4">
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-10 mt-4">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -430,10 +430,10 @@ export default function CompanyProfile({
               type="text"
               {...register("manufacturing_description")}
               id="manufacturing_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -454,10 +454,10 @@ export default function CompanyProfile({
               type="text"
               {...register("bank_and_financial_institution_description")}
               id="bank_and_financial_institution_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset  ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset  ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -475,10 +475,10 @@ export default function CompanyProfile({
               type="text"
               {...register("service_description")}
               id="service_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-ins ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-ins ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -496,10 +496,10 @@ export default function CompanyProfile({
               type="text"
               {...register("security_agency_description")}
               id="security_agency_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -517,10 +517,10 @@ export default function CompanyProfile({
               type="text"
               {...register("agri_fishing_description")}
               id="agri_fishing_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -538,10 +538,10 @@ export default function CompanyProfile({
               type="text"
               {...register("maintenance_description")}
               id="maintenance_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset $ ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset $ ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -559,10 +559,10 @@ export default function CompanyProfile({
               type="text"
               {...register("wholesale_retail_description")}
               id="wholesale_retail_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -580,10 +580,10 @@ export default function CompanyProfile({
               type="text"
               {...register("construction_description")}
               id="construction_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -601,10 +601,10 @@ export default function CompanyProfile({
               type="text"
               {...register("utilities_description")}
               id="utilities_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
-          <div className="relative mt-2 pl-4 flex gap-2 justify-between">
+          <div className="relative mt-2 pl-4 flex flex-col sm:flex-row gap-2 sm:justify-between">
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -622,11 +622,11 @@ export default function CompanyProfile({
               type="text"
               {...register("others_description")}
               id="others_description"
-              className={`rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-in ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+              className={`rounded-md w-full sm:w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-in ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-10">
           <div>
             <label
               htmlFor="product_description"
