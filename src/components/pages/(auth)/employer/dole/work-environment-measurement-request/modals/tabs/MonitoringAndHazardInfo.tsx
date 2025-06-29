@@ -4,9 +4,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
@@ -20,6 +18,9 @@ function MonitoringAndHazardInfo({
   setSelectedTab,
   getValues,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
@@ -27,43 +28,37 @@ function MonitoringAndHazardInfo({
   setSelectedTab: any;
   getValues: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = getValues();
-    // Validate required fields
-    if (!data.wem_internal_monitoring_capability || data.wem_internal_monitoring_capability === "") {
-      const el = document.getElementById("wem_internal_monitoring_capability");
-      if (el) el.focus();
-      return;
-    }
-    if (!data.wem_equipment_owned_by_company || data.wem_equipment_owned_by_company === "") {
-      const el = document.getElementById("wem_equipment_owned_by_company");
-      if (el) el.focus();
-      return;
-    }
+  const onValid = (data: any) => {
     if (!data.conducting_internal_wem) {
-      toast.custom(() => <CustomToast message="Please select Conducting Internal WEM." type="error" />);
-      const el = document.getElementById("conducting_internal_wem_yes");
-      if (el) el.focus();
+      setError("conducting_internal_wem", {
+        type: "manual",
+        message: "Please select Conducting Internal WEM."
+      });
       return;
     }
     if (!data.hazards_purpose_of_wem_request || (Array.isArray(data.hazards_purpose_of_wem_request) && data.hazards_purpose_of_wem_request.length === 0)) {
-      toast.custom(() => <CustomToast message="Please select at least one Purpose of WEM Request (Hazards)." type="error" />);
-      const el = document.getElementById("hazards_purpose_of_wem_request");
-      if (el) el.focus();
+      setError("hazards_purpose_of_wem_request", {
+        type: "manual",
+        message: "Please select at least one Purpose of WEM Request (Hazards)."
+      });
       return;
     }
     if (!data.chemical_hazards || (Array.isArray(data.chemical_hazards) && data.chemical_hazards.length === 0)) {
-      toast.custom(() => <CustomToast message="Please select at least one Chemical Hazard." type="error" />);
-      const el = document.getElementById("dust");
-      if (el) el.focus();
+      setError("chemical_hazards", {
+        type: "manual",
+        message: "Please select at least one Chemical Hazard."
+      });
       return;
     }
     if (!data.ventilation) {
-      toast.custom(() => <CustomToast message="Please select at least one Ventilation." type="error" />);
-      const el = document.getElementById("ventilation");
-      if (el) el.focus();
+      setError("ventilation", {
+        type: "manual",
+        message: "Please select at least one Ventilation."
+      });
       return;
     }
     setSelectedTab(4);
@@ -79,7 +74,7 @@ function MonitoringAndHazardInfo({
   }, [employeeData]);
 
   return (
-    <form onSubmit={handleNext}>
+    <form onSubmit={handleSubmit(onValid)}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -143,6 +138,11 @@ function MonitoringAndHazardInfo({
                 Conducting Internal WEM
                 <span className="text-red-600">*</span>
               </label>
+              {errors.conducting_internal_wem && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.conducting_internal_wem.message || "Please select Conducting Internal WEM."}
+                </p>
+              )}
               <div className="relative mt-2">
                 <div className="space-y-2">
                   <div>
@@ -212,6 +212,11 @@ function MonitoringAndHazardInfo({
                     Purpose of WEM Request
                     <span className="text-red-600">*</span>
                   </label>
+                  {errors.hazards_purpose_of_wem_request && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.hazards_purpose_of_wem_request.message || "Please select at least one Purpose of WEM Request (Hazards)."}
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <div className="relative mt-2 flex gap-2">
                       <input
@@ -267,6 +272,11 @@ function MonitoringAndHazardInfo({
                     Chemical Hazards
                     <span className="text-red-600">*</span>
                   </label>
+                  {errors.chemical_hazards && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.chemical_hazards.message || "Please select at least one Chemical Hazard."}
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <div className="relative mt-2 flex gap-2">
                       <input
@@ -346,6 +356,11 @@ function MonitoringAndHazardInfo({
                 Ventilation
                 <span className="text-red-600">*</span>
               </label>
+              {errors.ventilation && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.ventilation.message || "Please select at least one Ventilation."}
+                </p>
+              )}
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"

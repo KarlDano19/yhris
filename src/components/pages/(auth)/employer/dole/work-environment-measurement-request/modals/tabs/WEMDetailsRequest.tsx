@@ -1,6 +1,7 @@
 "use client";
 
 import { Controller } from "react-hook-form";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -15,6 +16,9 @@ function WEMDetailsRequest({
   setSelectedTab,
   getValues,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
@@ -22,34 +26,50 @@ function WEMDetailsRequest({
   setSelectedTab: any;
   getValues: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = getValues();
-    // Validate required fields
+  // Clear errors when user makes a valid selection
+  useEffect(() => {
+    if (watch("purpose_of_wem_request") && watch("purpose_of_wem_request").length > 0) {
+      clearErrors("purpose_of_wem_request");
+    }
+    if (watch("wem_conducted_by") && watch("wem_conducted_by").length > 0) {
+      clearErrors("wem_conducted_by");
+    }
+    if (watch("last_wem_date")) {
+      clearErrors("last_wem_date");
+    }
+  }, [watch("purpose_of_wem_request"), watch("wem_conducted_by"), watch("last_wem_date"), clearErrors]);
+
+  const onValid = (data: any) => {
     if (!data.purpose_of_wem_request || (Array.isArray(data.purpose_of_wem_request) && data.purpose_of_wem_request.length === 0)) {
-      toast.custom(() => <CustomToast message="Please select at least one Purpose of WEM Request." type="error" />);
-      const el = document.getElementById("purpose_of_wem_request");
-      if (el) el.focus();
+      setError("purpose_of_wem_request", {
+        type: "manual",
+        message: "Please select at least one Purpose of WEM Request."
+      });
       return;
     }
     if (!data.wem_conducted_by || (Array.isArray(data.wem_conducted_by) && data.wem_conducted_by.length === 0)) {
-      toast.custom(() => <CustomToast message="Please select at least one WEM Conducted By option." type="error" />);
-      const el = document.getElementById("wem_conducted_by");
-      if (el) el.focus();
+      setError("wem_conducted_by", {
+        type: "manual",
+        message: "Please select at least one WEM Conducted By option."
+      });
       return;
     }
     if (!data.last_wem_date || data.last_wem_date === "") {
-      toast.custom(() => <CustomToast message="Please select the Last WEM Date." type="error" />);
-      const el = document.getElementById("last_wem_date");
-      if (el) el.focus();
+      setError("last_wem_date", {
+        type: "manual",
+        message: "Please select the Last WEM Date."
+      });
       return;
     }
     setSelectedTab(3);
   };
 
   return (
-    <form onSubmit={handleNext}>
+    <form onSubmit={handleSubmit(onValid)}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -78,6 +98,11 @@ function WEMDetailsRequest({
               Purpose of WEM Request
               <span className="text-red-600">*</span>
             </label>
+            {errors.purpose_of_wem_request && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.purpose_of_wem_request.message || "Please select at least one Purpose of WEM Request."}
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
@@ -160,6 +185,11 @@ function WEMDetailsRequest({
               WEM Conducted By
               <span className="text-red-600">*</span>
             </label>
+            {errors.wem_conducted_by && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.wem_conducted_by.message || "Please select at least one WEM Conducted By option."}
+              </p>
+            )}
             <div className="grid grid-cols-3 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
@@ -206,6 +236,11 @@ function WEMDetailsRequest({
               Last WEM Date
               <span className="text-red-600">*</span>
             </label>
+            {errors.last_wem_date && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.last_wem_date.message || "Please select the Last WEM Date."}
+              </p>
+            )}
             <div className="relative mt-2">
               <Controller
                 control={control}

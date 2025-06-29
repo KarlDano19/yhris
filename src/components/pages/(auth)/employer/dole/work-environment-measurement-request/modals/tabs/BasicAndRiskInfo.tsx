@@ -27,6 +27,9 @@ function BasicAndRiskInfo({
   setValue,
   getValues,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   name_of_safety_officer?: string[];
   control: any;
@@ -36,6 +39,9 @@ function BasicAndRiskInfo({
   setValue: any;
   getValues: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
   const queryClient = useQueryClient();
   const [inputOfficer, setInputOfficer] = useState("");
@@ -52,41 +58,33 @@ function BasicAndRiskInfo({
     setTagsOfficer(watchedNames || []);
   }, [watchedNames]);
 
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = getValues();
-    // Validate number fields
-    if (!data.number_of_workers_male || data.number_of_workers_male === "") {
-      const el = document.getElementById("number_of_workers_male");
-      if (el) el.focus();
-      return;
+  // Clear error when tagsOfficer is non-empty
+  useEffect(() => {
+    if (tagsOfficer && tagsOfficer.length > 0) {
+      clearErrors("name_of_safety_officer");
     }
-    if (!data.number_of_workers_female || data.number_of_workers_female === "") {
-      const el = document.getElementById("number_of_workers_female");
-      if (el) el.focus();
-      return;
-    }
-    if (!data.number_of_workers_total || data.number_of_workers_total === "") {
-      const el = document.getElementById("number_of_workers_total");
-      if (el) el.focus();
-      return;
-    }
-    // Validate radio and checkbox groups
-    if (!data.risk_classification) {
-      toast.custom(() => <CustomToast message="Please select a Risk Classification." type="error" />);
-      return;
-    }
-    // Validate safety officer names using tagsOfficer
+  }, [tagsOfficer, clearErrors]);
+
+  // Submission handler using react-hook-form validation
+  const onValid = (data: any) => {
     if (!tagsOfficer || tagsOfficer.length === 0) {
-      toast.custom(() => <CustomToast message="Please enter at least one Name of Safety Officer." type="error" />);
-      return;
-    }
-    if (!data.safety_officer_levels || (Array.isArray(data.safety_officer_levels) && data.safety_officer_levels.length === 0)) {
-      toast.custom(() => <CustomToast message="Please select at least one Safety Officer Level." type="error" />);
+      setError("name_of_safety_officer", {
+        type: "manual",
+        message: "Please enter at least one Name of Safety Officer."
+      });
       return;
     }
     setValue("name_of_safety_officer", tagsOfficer);
     setSelectedTab(2);
+  };
+
+  // Optionally scroll to first error field
+  const onInvalid = (errors: any) => {
+    const firstErrorField = Object.keys(errors)[0];
+    if (firstErrorField) {
+      const el = document.getElementById(firstErrorField);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   };
 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -105,7 +103,7 @@ function BasicAndRiskInfo({
   }, [employeeData, cachedProfile, setValue]);
 
   return (
-    <form onSubmit={handleNext}>
+    <form onSubmit={handleSubmit(onValid, onInvalid)}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -253,12 +251,17 @@ function BasicAndRiskInfo({
                 Risk Classification
                 <span className="text-red-600">*</span>
               </label>
+              {errors.risk_classification && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.risk_classification.message || "Please select a Risk Classification."}
+                </p>
+              )}
               <div className="relative mt-2">
                 <div className="space-y-2">
                   <div>
                     <input
                       type="radio"
-                      {...register("risk_classification", { required: true })}
+                      {...register("risk_classification", { required: "Please select a Risk Classification." })}
                       id="risk_low"
                       value="Low"
                     />
@@ -269,7 +272,7 @@ function BasicAndRiskInfo({
                   <div>
                     <input
                       type="radio"
-                      {...register("risk_classification", { required: true })}
+                      {...register("risk_classification", { required: "Please select a Risk Classification." })}
                       id="risk_medium"
                       value="Medium"
                     />
@@ -280,7 +283,7 @@ function BasicAndRiskInfo({
                   <div>
                     <input
                       type="radio"
-                      {...register("risk_classification", { required: true })}
+                      {...register("risk_classification", { required: "Please select a Risk Classification." })}
                       id="risk_high"
                       value="High"
                     />
@@ -295,6 +298,11 @@ function BasicAndRiskInfo({
             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
               Name of Safety Officer(s)<span className='text-red-600'>*</span>
             </label>
+            {errors.name_of_safety_officer && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.name_of_safety_officer.message}
+              </p>
+            )}
             <div className='mt-2 flex rounded-md shadow-sm'>
               <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                 <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
@@ -332,10 +340,15 @@ function BasicAndRiskInfo({
                 Safety Officer Levels
                 <span className="text-red-600">*</span>
               </label>
+              {errors.safety_officer_levels && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.safety_officer_levels.message || "Please select at least one Safety Officer Level."}
+                </p>
+              )}
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels", { required: true })}
+                  {...register("safety_officer_levels", { required: "Please select at least one Safety Officer Level." })}
                   id="safety_officer_level_1"
                   value="Safety Officer Level 1"
                 />
@@ -346,7 +359,7 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels", { required: true })}
+                  {...register("safety_officer_levels", { required: "Please select at least one Safety Officer Level." })}
                   id="safety_officer_level_2"
                   value="Safety Officer Level 2"
                 />
@@ -357,7 +370,7 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels", { required: true })}
+                  {...register("safety_officer_levels", { required: "Please select at least one Safety Officer Level." })}
                   id="safety_officer_level_3"
                   value="Safety Officer Level 3"
                 />
@@ -368,7 +381,7 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels", { required: true })}
+                  {...register("safety_officer_levels", { required: "Please select at least one Safety Officer Level." })}
                   id="safety_officer_level_4"
                   value="Safety Officer Level 4"
                 />
@@ -379,7 +392,7 @@ function BasicAndRiskInfo({
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
-                  {...register("safety_officer_levels", { required: true })}
+                  {...register("safety_officer_levels", { required: "Please select at least one Safety Officer Level." })}
                   id="safety_officer_level_5"
                   value="Safety Officer Level 5"
                 />

@@ -34,7 +34,7 @@ export default function EditWemRequestModal({
     refetch: refetchWorkEnvironmentRequest,
     remove: removeWorkEnvironmentRequest,
   } = useGetWorkEnvironmentRequestDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, watch, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = useForm();
   const { mutate, isLoading: isLoadingUpdateWorkEnvironmentRequest } =
     useUpdateWorkEnvironmentRequest();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -159,6 +159,9 @@ export default function EditWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     getValues={getValues}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -169,6 +172,9 @@ export default function EditWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     getValues={getValues}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -179,6 +185,9 @@ export default function EditWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     getValues={getValues}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 4 && (
@@ -189,6 +198,9 @@ export default function EditWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

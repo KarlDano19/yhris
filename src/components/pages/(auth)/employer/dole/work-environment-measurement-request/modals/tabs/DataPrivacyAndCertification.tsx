@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import toast from "react-hot-toast";
 import Image from "next/image";
-
-import CustomToast from "@/components/CustomToast";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
@@ -17,6 +14,9 @@ function DataPrivacyAndCertification({
   setSelectedTab,
   setValue,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
@@ -24,6 +24,9 @@ function DataPrivacyAndCertification({
   setSelectedTab: any;
   setValue: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
 
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
@@ -122,36 +125,41 @@ function DataPrivacyAndCertification({
     }
   }, [existingSignatureUrl, setValue]);
 
-  // Handle form submission with validation
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const data = Object.fromEntries(formData);
+  useEffect(() => {
+    const signatureValue = watch("signature");
+    if (signatureValue && signatureValue !== "") {
+      clearErrors("signature");
+    }
+  }, [watch("signature"), clearErrors]);
 
-    // Validate required fields
-    if (!data.requesting_personnel_name || data.requesting_personnel_name === "") {
+  // Handle form submission with validation (name, position, then signature)
+  const onValid = (data: any) => {
+    const nameValue = watch("requesting_personnel_name");
+    const positionValue = watch("requesting_personnel_position");
+    const signatureValue = watch("signature");
+
+    if (!nameValue || nameValue === "") {
       const el = document.getElementById("requesting_personnel_name");
       if (el) el.focus();
       return;
     }
-    if (!data.requesting_personnel_position || data.requesting_personnel_position === "") {
+    if (!positionValue || positionValue === "") {
       const el = document.getElementById("requesting_personnel_position");
       if (el) el.focus();
       return;
     }
-    // Use react-hook-form's watched value for signature
-    const signatureValue = watch("signature");
     if (!signatureValue || signatureValue === "") {
-      toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />);
+      setError("signature", {
+        type: "manual",
+        message: "Signature is required (draw or upload)."
+      });
       return;
     }
-
-    // If validation passes, call the original onSubmit
-    onSubmit(e);
+    onSubmit();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={e => { e.preventDefault(); onValid({}); }}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -236,6 +244,11 @@ function DataPrivacyAndCertification({
               Draw Signature
               {!existingSignatureUrl && <span className="text-red-600">*</span>}
             </label>
+            {errors.signature && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.signature.message || "Signature is required (draw or upload)."}
+              </p>
+            )}
             <div className="relative mt-2">
               <button
                 type="button"
@@ -254,6 +267,11 @@ function DataPrivacyAndCertification({
               Upload Signature
               {!existingSignatureUrl && <span className="text-red-600">*</span>}
             </label>
+            {errors.signature && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.signature.message || "Signature is required (draw or upload)."}
+              </p>
+            )}
             <div className="relative mt-2">
               <input
                 id="signature"

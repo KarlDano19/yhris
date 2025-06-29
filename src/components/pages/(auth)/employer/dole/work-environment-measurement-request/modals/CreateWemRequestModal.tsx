@@ -23,7 +23,7 @@ function CreateWemRequestModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = useForm();
   const {
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddWorkEnvironmentRequest,
@@ -106,6 +106,9 @@ function CreateWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     getValues={getValues}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -116,6 +119,9 @@ function CreateWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     getValues={getValues}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -126,6 +132,9 @@ function CreateWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     getValues={getValues}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 4 && (
@@ -136,6 +145,9 @@ function CreateWemRequestModal({
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>
