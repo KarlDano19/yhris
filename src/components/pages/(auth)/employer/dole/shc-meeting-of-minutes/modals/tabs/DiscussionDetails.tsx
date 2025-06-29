@@ -1,27 +1,20 @@
 "use client";
 
 import {
-  Dispatch,
-  Fragment,
-  useRef,
   useEffect,
   useState,
   useMemo,
 } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
+import dynamic from "next/dynamic";
 
-import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
+import "react-quill/dist/quill.snow.css";
+
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
-import "react-quill/dist/quill.snow.css";
-import dynamic from "next/dynamic";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function DiscussionDetails({
   control,
