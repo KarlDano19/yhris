@@ -39,7 +39,7 @@ function EditAnnualMedicalReportModal({
     refetch: refetchAnnualMedicalReport,
     remove: removeAnnualMedicalReport,
   } = useGetAnnualMedicalReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, getValues, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors }, setError, clearErrors } = useForm();
   const {
     mutate: updateAnnualMedicalReport,
     isLoading: isLoadingUpdateAnnualMedicalReport,
@@ -694,6 +694,9 @@ function EditAnnualMedicalReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -702,6 +705,9 @@ function EditAnnualMedicalReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 4 && (
@@ -710,6 +716,9 @@ function EditAnnualMedicalReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 5 && (
@@ -732,6 +741,9 @@ function EditAnnualMedicalReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 8 && (

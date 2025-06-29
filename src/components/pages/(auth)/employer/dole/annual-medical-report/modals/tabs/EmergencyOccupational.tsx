@@ -1,24 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import toast from "react-hot-toast";
-import CustomToast from "@/components/CustomToast";
+import { useState, useEffect } from "react";
 
 function EmergencyOccupational({
   register,
   handleSubmit,
   setSelectedTab,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
 
-  const onSubmit = handleSubmit(() => {
+  // Helper to check if a checkbox group is filled
+  const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     const a = watch("provided_treatment_room_medical_clinic");
     const aOther = watch("provided_treatment_room_medical_clinic_other_specification");
     const bPhysicianHours = watch("occupational_health_physician_hours_per_day");
@@ -33,46 +41,120 @@ function EmergencyOccupational({
     const d = watch("occupational_health_personnel_training");
     const dOther = watch("occupational_health_personnel_training_other_specification");
 
-    const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
-
-    if (!isChecked(a)) {
-      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
-      return;
-    }
-    if (Array.isArray(a) && a.includes("Other") && !aOther) {
-      toast.custom(() => <CustomToast message="Section (a): Please specify 'Other'." type="error" />);
-      return;
-    }
+    let hasError = false;
     
+    // Clear all errors first
+    clearErrors();
+    
+    // a. validation
+    if (!isChecked(a)) {
+      setError("provided_treatment_room_medical_clinic", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
+    } else if (Array.isArray(a) && a.includes("Other") && !aOther) {
+      setError("provided_treatment_room_medical_clinic_other_specification", {
+        type: "manual",
+        message: "Please specify 'Other'."
+      });
+      hasError = true;
+    }
+
     const hoursFields = [bPhysicianHours, bDentistHours, bPractitionerHours, bNurseHours];
     const shiftFields = [bPhysicianShift, bDentistShift, bPractitionerShift, bNurseShift];
 
     const hasHours = hoursFields.some(val => val !== undefined && val !== null && val !== "");
     const hasShift = shiftFields.some(val => val !== undefined && val !== null && val !== "");
 
-    if (!hasHours) {
-      toast.custom(() => <CustomToast message="Section (b): input at least one 'hours per day' value." type="error" />);
-      return;
-    }
-    if (!hasShift) {
-      toast.custom(() => <CustomToast message="Section (b): input at least one 'shift' value." type="error" />);
-      return;
+    if (!hasHours || !hasShift) {
+      setError("occupational_health_services_group", {
+        type: "manual",
+        message: "Input at least one 'hours per day' value and one 'shift' value."
+      });
+      hasError = true;
     }
 
+    // c. validation
     if (!isChecked(c)) {
-      toast.custom(() => <CustomToast message="Section (c) is required." type="error" />);
-      return;
+      setError("schedule_of_attendance_of_full_time_first_aider", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
     }
+    
+    // d. validation
     if (!isChecked(d)) {
-      toast.custom(() => <CustomToast message="Section (d) is required." type="error" />);
-      return;
+      setError("occupational_health_personnel_training", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
+    } else if (Array.isArray(d) && d.includes("Other") && !dOther) {
+      setError("occupational_health_personnel_training_other_specification", {
+        type: "manual",
+        message: "Please specify 'Other'."
+      });
+      hasError = true;
     }
-    if (Array.isArray(d) && d.includes("Other") && !dOther) {
-      toast.custom(() => <CustomToast message="Section (d): Please specify 'Other'." type="error" />);
-      return;
-    }
+    
+    if (hasError) return;
     setSelectedTab(4);
-  });
+  };
+
+  // Clear errors on change
+  const providedTreatmentRoom = watch("provided_treatment_room_medical_clinic");
+  const providedTreatmentRoomOther = watch("provided_treatment_room_medical_clinic_other_specification");
+  const physicianHours = watch("occupational_health_physician_hours_per_day");
+  const dentistHours = watch("occupational_health_dentist_hours_per_day");
+  const practitionerHours = watch("occupational_health_practitioner_hours_per_day");
+  const nurseHours = watch("occupational_health_nurse_hours_per_day");
+  const physicianShift = watch("occupational_health_physician_shift");
+  const dentistShift = watch("occupational_health_dentist_shift");
+  const practitionerShift = watch("occupational_health_practitioner_shift");
+  const nurseShift = watch("occupational_health_nurse_shift");
+  const scheduleAttendance = watch("schedule_of_attendance_of_full_time_first_aider");
+  const personnelTraining = watch("occupational_health_personnel_training");
+  const personnelTrainingOther = watch("occupational_health_personnel_training_other_specification");
+
+  useEffect(() => {
+    if (isChecked(providedTreatmentRoom)) {
+      clearErrors("provided_treatment_room_medical_clinic");
+    }
+  }, [providedTreatmentRoom, clearErrors]);
+  useEffect(() => {
+    if (providedTreatmentRoomOther) {
+      clearErrors("provided_treatment_room_medical_clinic_other_specification");
+    }
+  }, [providedTreatmentRoomOther, clearErrors]);
+  useEffect(() => {
+    const hoursFields = [physicianHours, dentistHours, practitionerHours, nurseHours];
+    if (hoursFields.some(val => val !== undefined && val !== null && val !== "")) {
+      clearErrors("occupational_health_services_group");
+    }
+  }, [physicianHours, dentistHours, practitionerHours, nurseHours, clearErrors]);
+  useEffect(() => {
+    const shiftFields = [physicianShift, dentistShift, practitionerShift, nurseShift];
+    if (shiftFields.some(val => val !== undefined && val !== null && val !== "")) {
+      clearErrors("occupational_health_services_group");
+    }
+  }, [physicianShift, dentistShift, practitionerShift, nurseShift, clearErrors]);
+  useEffect(() => {
+    if (isChecked(scheduleAttendance)) {
+      clearErrors("schedule_of_attendance_of_full_time_first_aider");
+    }
+  }, [scheduleAttendance, clearErrors]);
+  useEffect(() => {
+    if (isChecked(personnelTraining)) {
+      clearErrors("occupational_health_personnel_training");
+    }
+  }, [personnelTraining, clearErrors]);
+  useEffect(() => {
+    if (personnelTrainingOther) {
+      clearErrors("occupational_health_personnel_training_other_specification");
+    }
+  }, [personnelTrainingOther, clearErrors]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -86,6 +168,11 @@ function EmergencyOccupational({
             workplace with medicines and facilities:
             <span className="text-red-600">*</span>
           </label>
+          {errors.provided_treatment_room_medical_clinic && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.provided_treatment_room_medical_clinic.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="grid grid-cols-3 gap-2 pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -145,6 +232,11 @@ function EmergencyOccupational({
                   placeholder="Please specify"
                   className="border-b p-2 border-gray-300"
                 />
+                {errors.provided_treatment_room_medical_clinic_other_specification && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.provided_treatment_room_medical_clinic_other_specification.message || "Please specify 'Other'."}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -160,6 +252,11 @@ function EmergencyOccupational({
             organized/provided as a Service:
             <span className="text-red-600">*</span>
           </label>
+          {errors.occupational_health_services_group && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.occupational_health_services_group.message || "Input at least one 'hours per day' value and one 'shift' value."}
+            </p>
+          )}
           <div className="grid grid-cols-3 gap-4">
             <div>{""}</div>
             <div>{""}</div>
@@ -300,6 +397,11 @@ function EmergencyOccupational({
             c. Schedule of attendance of full time first aider:
             <span className="text-red-600">*</span>
           </label>
+          {errors.schedule_of_attendance_of_full_time_first_aider && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.schedule_of_attendance_of_full_time_first_aider.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="grid grid-cols-3 gap-2 pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -358,6 +460,11 @@ function EmergencyOccupational({
             have undergone training in occupational health and safety/first aid:
             <span className="text-red-600">*</span>
           </label>
+          {errors.occupational_health_personnel_training && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.occupational_health_personnel_training.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="grid grid-cols-3 gap-2 pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -433,23 +540,26 @@ function EmergencyOccupational({
                 <span className="text-gray-500"></span>
               </label>
             </div>
-            <div className="relative mt-2 flex items-center gap-1">
-              {isOtherCheckedD && (
-                <div className="relative mt-2 flex items-center gap-2 col-span-3">
-                  <input
-                    type="text"
-                    {...register(
-                      "occupational_health_personnel_training_other_specification",
-                      {
-                        required: isOtherCheckedD,
-                      }
-                    )}
-                    placeholder="Please specify"
-                    className="border-b p-2 border-gray-300"
-                  />
-                </div>
-              )}
-            </div>
+            {isOtherCheckedD && (
+              <div className="relative mt-2 flex items-center gap-2 col-span-3">
+                <input
+                  type="text"
+                  {...register(
+                    "occupational_health_personnel_training_other_specification",
+                    {
+                      required: isOtherCheckedD,
+                    }
+                  )}
+                  placeholder="Please specify"
+                  className="border-b p-2 border-gray-300"
+                />
+                {errors.occupational_health_personnel_training_other_specification && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.occupational_health_personnel_training_other_specification.message || "Please specify 'Other'."}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

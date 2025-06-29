@@ -1,30 +1,52 @@
 "use client";
 
-import { toast } from "react-hot-toast";
-import CustomToast from "@/components/CustomToast";
+import { useState, useEffect, useMemo } from "react";
 
 function OccupationalHealthService({
   register,
   handleSubmit,
   setSelectedTab,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
-  const onSubmit = handleSubmit(() => {
-    const sanitation = watch("sanitation_system_appraisal");
-    const isChecked = Array.isArray(sanitation)
-      ? sanitation.length > 0
-      : !!sanitation;
-    if (!isChecked) {
-      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
+
+  // Helper to check if a checkbox group is filled
+  const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Clear all errors first
+    clearErrors();
+    
+    if (!isChecked(watch("sanitation_system_appraisal"))) {
+      setError("sanitation_system_appraisal", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
       return;
     }
     setSelectedTab(5);
-  });
+  };
+
+  // Clear errors on change
+  const sanitationSystemAppraisal = watch("sanitation_system_appraisal");
+  
+  useEffect(() => {
+    if (isChecked(sanitationSystemAppraisal)) {
+      clearErrors("sanitation_system_appraisal");
+    }
+  }, [sanitationSystemAppraisal, clearErrors]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -38,6 +60,11 @@ function OccupationalHealthService({
             regular appraisal of the sanitation system in the workplace:
             <span className="text-red-600">*</span>
           </label>
+          {errors.sanitation_system_appraisal && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.sanitation_system_appraisal.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="grid grid-cols-3 gap-2 pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input

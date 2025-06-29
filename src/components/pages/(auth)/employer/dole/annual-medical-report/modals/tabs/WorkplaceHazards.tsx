@@ -234,12 +234,28 @@ function WorkplaceSafetyCompliance({
 
   const onSubmitHandler = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const preparedByValue = watch("prepared_by");
+    if (!preparedByValue || preparedByValue === "") {
+      const el = document.getElementById("prepared_by");
+      if (el) el.focus();
+      return;
+    }
+
+    const notedByValue = watch("noted_by");
+    if (!notedByValue || notedByValue === "") {
+      const el = document.getElementById("noted_by");
+      if (el) el.focus();
+      return;
+    }
+
     // Signature validation (drawn, uploaded, or existing)
     const signatureValue = watch("signature");
     const hasSignature =
       (signatureValue && typeof signatureValue === "string" && (signatureValue.startsWith("data:image/") || signatureValue.startsWith("http"))) ||
       (signatureValue && typeof signatureValue === "object" && signatureValue instanceof File);
     if (!hasSignature) {
+      toast.dismiss();
       toast.custom(() => <CustomToast message="Submitted by signature is required (draw or upload)." type="error" />);
       return;
     }
@@ -249,6 +265,7 @@ function WorkplaceSafetyCompliance({
       (notedSignatureValue && typeof notedSignatureValue === "string" && (notedSignatureValue.startsWith("data:image/") || notedSignatureValue.startsWith("http"))) ||
       (notedSignatureValue && typeof notedSignatureValue === "object" && notedSignatureValue instanceof File);
     if (!hasNotedSignature) {
+      toast.dismiss();
       toast.custom(() => <CustomToast message="Noted signature is required (draw or upload)." type="error" />);
       return;
     }

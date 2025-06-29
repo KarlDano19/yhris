@@ -1,41 +1,93 @@
 "use client";
 
-import toast from "react-hot-toast";
-import CustomToast from "@/components/CustomToast";
+import { useState, useEffect, useMemo } from "react";
 
 function WorkplaceWelfare({
   register,
   handleSubmit,
   setSelectedTab,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
-  const onSubmit = handleSubmit(() => {
+  
+  // Extract watched values with useMemo
+  const keepingMedicalRecords = useMemo(() => watch("keeping_of_medical_records_of_workers"), [watch]);
+  const healthEducation = useMemo(() => watch("health_education_and_counselling_by_health_and_safety_personnel"), [watch]);
+  const sportsActivities = useMemo(() => watch("sports_activities"), [watch]);
+
+  // Helper to check if a checkbox group is filled
+  const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Clear all errors first
+    clearErrors();
+    
+    let hasError = false;
+    
     // Section a
     const a = watch("keeping_of_medical_records_of_workers");
-    const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
     if (!isChecked(a)) {
-      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
-      return;
+      setError("keeping_of_medical_records_of_workers", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
     }
+    
     // Section b
     const b = watch("health_education_and_counselling_by_health_and_safety_personnel");
     if (!isChecked(b)) {
-      toast.custom(() => <CustomToast message="Section (b) is required." type="error" />);
-      return;
+      setError("health_education_and_counselling_by_health_and_safety_personnel", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
     }
+    
     // Physical Fitness Program
     const sports = watch("sports_activities");
     if (!isChecked(sports)) {
-      toast.custom(() => <CustomToast message="Physical Fitness Program is required." type="error" />);
-      return;
+      setError("sports_activities", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
     }
+    
+    if (hasError) return;
     setSelectedTab(8);
-  });
+  };
+
+  // Clear errors on change
+  useEffect(() => {
+    if (isChecked(keepingMedicalRecords)) {
+      clearErrors("keeping_of_medical_records_of_workers");
+    }
+  }, [keepingMedicalRecords, clearErrors]);
+  
+  useEffect(() => {
+    if (isChecked(healthEducation)) {
+      clearErrors("health_education_and_counselling_by_health_and_safety_personnel");
+    }
+  }, [healthEducation, clearErrors]);
+  
+  useEffect(() => {
+    if (isChecked(sportsActivities)) {
+      clearErrors("sports_activities");
+    }
+  }, [sportsActivities, clearErrors]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -48,6 +100,11 @@ function WorkplaceWelfare({
             a. Keeping of Medical Records of Workers:
             <span className="text-red-600">*</span>
           </label>
+          {errors.keeping_of_medical_records_of_workers && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.keeping_of_medical_records_of_workers.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="grid grid-cols-4 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -93,6 +150,11 @@ function WorkplaceWelfare({
             (You may check one or more)
             <span className="text-red-600">*</span>
           </label>
+          {errors.health_education_and_counselling_by_health_and_safety_personnel && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.health_education_and_counselling_by_health_and_safety_personnel.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -347,6 +409,11 @@ function WorkplaceWelfare({
             Physical Fitness Program
             <span className="text-red-600">*</span>
           </label>
+          {errors.sports_activities && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.sports_activities.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="grid grid-cols-4 gap-2 mt-4">
             <div>Sports Activities</div>
             <div className="relative mt-2 flex items-center gap-1">

@@ -1,25 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import toast from "react-hot-toast";
-import CustomToast from "@/components/CustomToast";
+import { useState, useEffect } from "react";
+// eslint-disable-next-line react-hooks/exhaustive-deps
 
 function PreventiveAndEmergency({
   register,
   handleSubmit,
   setSelectedTab,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
 
-  const onSubmit = handleSubmit(() => {
-    // Use watch to get current values
+  // Helper to check if a checkbox group is filled
+  const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     const a = watch("occupational_health_services_by");
     const aOther = watch("occupational_health_services_by_other_specification");
     const b = watch("occupational_health_services_as_a_service");
@@ -27,39 +35,94 @@ function PreventiveAndEmergency({
     const d = watch("conduct_inspection_of_workplace");
     const dOther = watch("conduct_inspection_of_workplace_other_specification");
 
-    // Helper to check if a checkbox group is filled
-    const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
-
+    let hasError = false;
     // a. validation
     if (!isChecked(a)) {
-      toast.custom(() => <CustomToast message="Section (a) is required." type="error" />);
-      return;
-    }
-    if (Array.isArray(a) && a.includes("Other") && !aOther) {
-      toast.custom(() => <CustomToast message="Section (a): Please specify 'Other'." type="error" />);
-      return;
+      setError("occupational_health_services_by", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
+    } else if (Array.isArray(a) && a.includes("Other") && !aOther) {
+      setError("occupational_health_services_by_other_specification", {
+        type: "manual",
+        message: "Please specify 'Other'."
+      });
+      hasError = true;
     }
     // b. validation
     if (!isChecked(b)) {
-      toast.custom(() => <CustomToast message="Section (b) is required." type="error" />);
-      return;
+      setError("occupational_health_services_as_a_service", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
     }
     // c. validation
     if (!isChecked(c)) {
-      toast.custom(() => <CustomToast message="Section (c) is required." type="error" />);
-      return;
+      setError("employer_engages_the_services_of", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
     }
     // d. validation
     if (!isChecked(d)) {
-      toast.custom(() => <CustomToast message="Section (d) is required." type="error" />);
-      return;
+      setError("conduct_inspection_of_workplace", {
+        type: "manual",
+        message: "Please select at least one option."
+      });
+      hasError = true;
+    } else if (Array.isArray(d) && d.includes("Other") && !dOther) {
+      setError("conduct_inspection_of_workplace_other_specification", {
+        type: "manual",
+        message: "Section (d): Please specify 'Other'."
+      });
+      hasError = true;
     }
-    if (Array.isArray(d) && d.includes("Other") && !dOther) {
-      toast.custom(() => <CustomToast message="Section (d): Please specify 'Other'." type="error" />);
-      return;
-    }
+    if (hasError) return;
     setSelectedTab(3);
-  });
+  };
+
+  // Clear errors on change
+  const occupationalHealthServicesBy = watch("occupational_health_services_by");
+  const occupationalHealthServicesByOther = watch("occupational_health_services_by_other_specification");
+  const occupationalHealthServicesAsService = watch("occupational_health_services_as_a_service");
+  const employerEngagesServices = watch("employer_engages_the_services_of");
+  const conductInspection = watch("conduct_inspection_of_workplace");
+  const conductInspectionOther = watch("conduct_inspection_of_workplace_other_specification");
+
+  useEffect(() => {
+    if (isChecked(occupationalHealthServicesBy)) {
+      clearErrors("occupational_health_services_by");
+    }
+  }, [occupationalHealthServicesBy, clearErrors]);
+  useEffect(() => {
+    if (occupationalHealthServicesByOther) {
+      clearErrors("occupational_health_services_by_other_specification");
+    }
+  }, [occupationalHealthServicesByOther, clearErrors]);
+  useEffect(() => {
+    if (isChecked(occupationalHealthServicesAsService)) {
+      clearErrors("occupational_health_services_as_a_service");
+    }
+  }, [occupationalHealthServicesAsService, clearErrors]);
+  useEffect(() => {
+    if (isChecked(employerEngagesServices)) {
+      clearErrors("employer_engages_the_services_of");
+    }
+  }, [employerEngagesServices, clearErrors]);
+  useEffect(() => {
+    if (isChecked(conductInspection)) {
+      clearErrors("conduct_inspection_of_workplace");
+    }
+  }, [conductInspection, clearErrors]);
+  useEffect(() => {
+    if (conductInspectionOther) {
+      clearErrors("conduct_inspection_of_workplace_other_specification");
+    }
+  }, [conductInspectionOther, clearErrors]);
+
   return (
     <form onSubmit={onSubmit}>
       <div className="gap-6 mt-4 pl-6 mb-6">
@@ -71,6 +134,11 @@ function PreventiveAndEmergency({
             a. Occupational health services is organized/provided by:
             <span className="text-red-600">*</span>
           </label>
+          {errors.occupational_health_services_by && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.occupational_health_services_by.message || "Section (a) is required."}
+            </p>
+          )}
           <div className="grid grid-cols-3 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -121,6 +189,11 @@ function PreventiveAndEmergency({
                   placeholder="Please specify"
                   className="border-b p-2 border-gray-300"
                 />
+                {errors.occupational_health_services_by_other_specification && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.occupational_health_services_by_other_specification.message || "Section (a): Please specify 'Other'."}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -136,6 +209,11 @@ function PreventiveAndEmergency({
             organized/provided as a Service:
             <span className="text-red-600">*</span>
           </label>
+          {errors.occupational_health_services_as_a_service && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.occupational_health_services_as_a_service.message || "Section (b) is required."}
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -178,6 +256,11 @@ function PreventiveAndEmergency({
             c. The employer engages the services of:
             <span className="text-red-600">*</span>
           </label>
+          {errors.employer_engages_the_services_of && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.employer_engages_the_services_of.message || "Section (c) is required."}
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -251,6 +334,11 @@ function PreventiveAndEmergency({
             conducts an inspection of the workplace:
             <span className="text-red-600">*</span>
           </label>
+          {errors.conduct_inspection_of_workplace && (
+            <p className="text-xs text-red-600 mt-1">
+              {errors.conduct_inspection_of_workplace.message || "Section (d) is required."}
+            </p>
+          )}
           <div className="grid grid-cols-3 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
@@ -323,6 +411,11 @@ function PreventiveAndEmergency({
                     placeholder="Please specify"
                     className="border-b p-2 border-gray-300"
                   />
+                  {errors.conduct_inspection_of_workplace_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.conduct_inspection_of_workplace_other_specification.message || "Section (d): Please specify 'Other'."}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
