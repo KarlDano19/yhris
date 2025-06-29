@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { Controller } from "react-hook-form";
-import toast from "react-hot-toast";
 import Select from 'react-select';
 
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
@@ -18,11 +16,17 @@ export default function MeetingInfo({
   register,
   handleSubmit,
   setSelectedTab,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
@@ -36,6 +40,18 @@ export default function MeetingInfo({
       setEmployeeItems(formattedEmployees);
     }
   }, [employeeData]);
+
+  useEffect(() => {
+    if (control._formValues?.attendees && Array.isArray(control._formValues.attendees) && control._formValues.attendees.length > 0) {
+      clearErrors("attendees");
+    }
+  }, [control._formValues?.attendees, clearErrors]);
+
+  useEffect(() => {
+    if (control._formValues?.absentees && Array.isArray(control._formValues.absentees) && control._formValues.absentees.length > 0) {
+      clearErrors("absentees");
+    }
+  }, [control._formValues?.absentees, clearErrors]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,14 +70,24 @@ export default function MeetingInfo({
       if (el) el.focus();
       return;
     }
+
+    let hasError = false;
     if (!attendees || !Array.isArray(attendees) || attendees.length === 0) {
-      toast.custom(() => <CustomToast message="Please select at least one Attendee." type="error" />);
-      return;
+      setError("attendees", {
+        type: "manual",
+        message: "Please select at least one Attendee."
+      });
+      hasError = true;
     }
     if (!absentees || !Array.isArray(absentees) || absentees.length === 0) {
-      toast.custom(() => <CustomToast message="Please select at least one Absentee." type="error" />);
-      return;
+      setError("absentees", {
+        type: "manual",
+        message: "Please select at least one Absentee."
+      });
+      hasError = true;
     }
+    if (hasError) return;
+
     setSelectedTab(2);
   };
 
@@ -158,31 +184,36 @@ export default function MeetingInfo({
             >
               Attendees<span className="text-red-600">*</span>
             </label>
+            {errors.attendees && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.attendees.message || "Please select at least one Attendee."}
+              </p>
+            )}
             <Controller
               name="attendees"
               control={control}
               rules={{ required: true }}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <>
-                  <Select
-                    className="basic-multi-select"
-                    classNamePrefix="select"
-                    options={employeeItems}
-                    value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                    onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
-                    components={{
-                      DropdownIndicator: () => (
-                        <div className="pointer-events-none px-2">
-                          <SelectChevronDown />
-                        </div>
-                      ),
-                      IndicatorSeparator: () => null,
-                    }}
-                    isClearable={false}
-                    isMulti
-                  />
-                  {error && <p className="text-red-500 text-sm mt-1 ml-1">{error.message}</p>}
-                </>
+                <Select
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  options={employeeItems}
+                  value={employeeItems.filter((item: any) => value?.includes(item.value))}
+                  onChange={(val) => {
+                    clearErrors("attendees");
+                    onChange(val ? val.map((item: any) => item.value) : []);
+                  }}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className="pointer-events-none px-2">
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable={false}
+                  isMulti
+                />
               )}
             />
           </div>
@@ -193,31 +224,36 @@ export default function MeetingInfo({
             >
               Absentees<span className="text-red-600">*</span>
             </label>
+            {errors.absentees && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.absentees.message || "Please select at least one Absentee."}
+              </p>
+            )}
             <Controller
               name="absentees"
               control={control}
               rules={{ required: true }}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <>
-                  <Select
-                    className="basic-multi-select"
-                    classNamePrefix="select"
-                    options={employeeItems}
-                    value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                    onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
-                    components={{
-                      DropdownIndicator: () => (
-                        <div className="pointer-events-none px-2">
-                          <SelectChevronDown />
-                        </div>
-                      ),
-                      IndicatorSeparator: () => null,
-                    }}
-                    isClearable={false}
-                    isMulti
-                  />
-                  {error && <p className="text-red-500 text-sm mt-1 ml-1">{error.message}</p>}
-                </>
+                <Select
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  options={employeeItems}
+                  value={employeeItems.filter((item: any) => value?.includes(item.value))}
+                  onChange={(val) => {
+                    clearErrors("absentees");
+                    onChange(val ? val.map((item: any) => item.value) : []);
+                  }}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className="pointer-events-none px-2">
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable={false}
+                  isMulti
+                />
               )}
             />
           </div>

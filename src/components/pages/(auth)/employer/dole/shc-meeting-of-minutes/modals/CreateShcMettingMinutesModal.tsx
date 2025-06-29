@@ -27,7 +27,7 @@ function CreateShcMettingMinutesModal({
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = useForm();
   const {
     mutate: addShcMeetingMinutes,
     isLoading: isLoadingAddShcMeetingMinutes,
@@ -110,6 +110,9 @@ function CreateShcMettingMinutesModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -130,6 +133,9 @@ function CreateShcMettingMinutesModal({
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

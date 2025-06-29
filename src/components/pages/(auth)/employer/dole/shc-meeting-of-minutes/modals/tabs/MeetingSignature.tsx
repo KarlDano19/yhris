@@ -4,10 +4,8 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
 import Image from "next/image";
 
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
@@ -22,6 +20,9 @@ function TechnicalAndSignature({
   setSelectedTab,
   setValue,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
@@ -29,6 +30,9 @@ function TechnicalAndSignature({
   setSelectedTab: any;
   setValue: any;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
 
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
@@ -127,8 +131,41 @@ function TechnicalAndSignature({
     }
   }, [existingSignatureUrl, setValue]);
 
+  useEffect(() => {
+    const signatureValue = watch("signature");
+    if (signatureValue && signatureValue !== "") {
+      clearErrors("signature");
+    }
+  }, [watch("signature"), clearErrors]);
+
+  // Handle form submission with validation (prepared_by, position, then signature)
+  const onValid = (data: any) => {
+    const preparedByValue = watch("prepared_by");
+    const positionValue = watch("position");
+    const signatureValue = watch("signature");
+
+    if (!preparedByValue || preparedByValue === "") {
+      const el = document.getElementById("prepared_by");
+      if (el) el.focus();
+      return;
+    }
+    if (!positionValue || positionValue === "") {
+      const el = document.getElementById("position");
+      if (el) el.focus();
+      return;
+    }
+    if (!signatureValue || signatureValue === "") {
+      setError("signature", {
+        type: "manual",
+        message: "Signature is required (draw or upload)."
+      });
+      return;
+    }
+    onSubmit();
+  };
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={e => { e.preventDefault(); onValid({}); }}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -183,6 +220,11 @@ function TechnicalAndSignature({
         </div>
         <div className="mt-4 pl-6 pr-6">
           <h1 className="text-sm font-medium">Signature</h1>
+          {errors.signature && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.signature.message || "Signature is required (draw or upload)."}
+              </p>
+            )}
         </div>
         <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
           <div>
