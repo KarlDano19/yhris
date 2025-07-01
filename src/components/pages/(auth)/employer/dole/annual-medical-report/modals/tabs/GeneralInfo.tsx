@@ -380,6 +380,7 @@ function GeneralInfo({
                 {...register(`total_office_workers`)}
                 id={`total_office_workers`}
                 readOnly
+                value={watch('total_office_workers') || 0}
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -392,6 +393,7 @@ function GeneralInfo({
                 {...register(`total_shop_workers_shift_1`)}
                 id={`total_shop_workers_shift_1`}
                 readOnly
+                value={watch('total_shop_workers_shift_1') || 0}
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -404,6 +406,7 @@ function GeneralInfo({
                 {...register(`total_shop_workers_shift_2`)}
                 id={`total_shop_workers_shift_2`}
                 readOnly
+                value={watch('total_shop_workers_shift_2') || 0}
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -416,6 +419,7 @@ function GeneralInfo({
                 {...register(`total_shop_workers_shift_3`)}
                 id={`total_shop_workers_shift_3`}
                 readOnly
+                value={watch('total_shop_workers_shift_3') || 0}
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>

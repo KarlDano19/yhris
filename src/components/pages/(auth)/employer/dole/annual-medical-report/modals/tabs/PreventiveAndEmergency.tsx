@@ -368,29 +368,6 @@ function PreventiveAndEmergency({
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
                 id="conduct_inspection_of_workplace"
-                value="the establishment/undertaking"
-              />
-              <label htmlFor="conduct_inspection_of_workplace" className="ml-1">
-                the establishment/undertaking
-              </label>
-            </div>
-            <div className="relative mt-2 flex items-center gap-2">
-              <input
-                type="checkbox"
-                {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_of_workplace"
-                value="government authority/institution"
-              />
-              <label htmlFor="conduct_inspection_of_workplace" className="ml-2">
-                government authority/institution
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            <div className="relative mt-2 flex items-center gap-1">
-              <input
-                type="checkbox"
-                {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_of_workplace"
                 value="Other"
                 onChange={(e) => setIsOtherCheckedD(e.target.checked)}
               />

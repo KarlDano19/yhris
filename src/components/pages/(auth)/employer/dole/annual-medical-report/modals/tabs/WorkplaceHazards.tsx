@@ -1151,35 +1151,36 @@ function WorkplaceSafetyCompliance({
               />
             </div>
           )}
-          <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6 mb-4">
-              <div>
-                <label
-                  htmlFor="date_of_report"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Date of Report
-                </label>
-                <div className="relative mt-2">
-                  <Controller
-                    control={control}
-                    name="date_of_report"
-                    render={({ field }) => (
-                      <CustomDatePicker
-                        id="date_of_report"
-                        placeholder={"mm/dd/yyyy"}
-                        className={
-                          "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                        }
-                        selected={field.value ? new Date(field.value) : null}
-                        pickerOnChange={(date: any) => field.onChange(date)}
-                        inputOnChange={(value: any) => field.onChange(value)}
-                        required={true}
-                      />
-                    )}
-                  />
-                </div>
+          <div className="grid grid-cols-3 gap-6 mt-4 pl-6 pr-6 mb-4">
+            <div>
+              <label
+                htmlFor="date_of_report"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Date of Report
+              </label>
+              <div className="relative mt-2">
+                <Controller
+                  control={control}
+                  name="date_of_report"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      id="date_of_report"
+                      placeholder={"mm/dd/yyyy"}
+                      className={
+                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                      }
+                      selected={field.value ? new Date(field.value) : null}
+                      pickerOnChange={(date: any) => field.onChange(date)}
+                      inputOnChange={(value: any) => field.onChange(value)}
+                      required={true}
+                    />
+                  )}
+                />
               </div>
-
+            </div>
+            <div></div>
+            <div></div>
           </div>
         </div>
       </>

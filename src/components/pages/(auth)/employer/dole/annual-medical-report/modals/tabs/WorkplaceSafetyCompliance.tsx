@@ -29,7 +29,6 @@ function WorkplaceSafetyCompliance({
   });
 
   // Auto-calculate totals
-
   // Watch all fields
   const watchedValues = watch();
   
@@ -54,7 +53,7 @@ function WorkplaceSafetyCompliance({
       'cranial_injury',
       'sprain',
       'dislocation_fracture',
-      'burns',
+      'burns_injury',
 
       // Immunization Program (Indicate number immunized)
       'tetanus_toxoid_injection',
