@@ -102,11 +102,14 @@ function BasicAndRiskInfo({
   }, [employeeData, cachedProfile, setValue]);
 
   // Auto-calculate total workers
+  const number_of_workers_male = watch('number_of_workers_male');
+  const number_of_workers_female = watch('number_of_workers_female');
+
   useEffect(() => {
-    const male = Number(watch('number_of_workers_male')) || 0;
-    const female = Number(watch('number_of_workers_female')) || 0;
+    const male = Number(number_of_workers_male) || 0;
+    const female = Number(number_of_workers_female) || 0;
     setValue('number_of_workers_total', male + female);
-  }, [watch('number_of_workers_male'), watch('number_of_workers_female'), setValue, watch]);
+  }, [number_of_workers_female, number_of_workers_male, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onValid, onInvalid)}>

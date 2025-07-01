@@ -169,6 +169,7 @@ function CreateAnnualMedicalReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -209,6 +210,8 @@ function CreateAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    setValue={setValue}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 6 && (

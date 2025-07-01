@@ -20,12 +20,14 @@ function GeneralInfo({
   handleSubmit,
   setSelectedTab,
   setValue,
+  watch,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
   setValue: any;
+  watch: any;
 }) {
   const queryClient = useQueryClient();
 
@@ -53,6 +55,43 @@ function GeneralInfo({
       setValue("address", cachedProfile.state.data.city || "");
     }
   }, [employeeData, cachedProfile, setValue]);
+
+  // Auto-calculate totals
+  const male_office_workers = watch('male_office_workers');
+  const female_office_workers = watch('female_office_workers');
+  const male_shop_workers_shift_1 = watch('male_shop_workers_shift_1');
+  const female_shop_workers_shift_1 = watch('female_shop_workers_shift_1');
+  const male_shop_workers_shift_2 = watch('male_shop_workers_shift_2');
+  const female_shop_workers_shift_2 = watch('female_shop_workers_shift_2');
+  const male_shop_workers_shift_3 = watch('male_shop_workers_shift_3');
+  const female_shop_workers_shift_3 = watch('female_shop_workers_shift_3');
+
+  useEffect(() => {
+    const male = Number(male_office_workers) || 0;
+    const female = Number(female_office_workers) || 0;
+    setValue('total_office_workers', male + female);
+
+    const maleShift1 = Number(male_shop_workers_shift_1) || 0;
+    const femaleShift1 = Number(female_shop_workers_shift_1) || 0;
+    setValue('total_shop_workers_shift_1', maleShift1 + femaleShift1);
+
+    const maleShift2 = Number(male_shop_workers_shift_2) || 0;
+    const femaleShift2 = Number(female_shop_workers_shift_2) || 0;
+    setValue('total_shop_workers_shift_2', maleShift2 + femaleShift2);
+
+    const maleShift3 = Number(male_shop_workers_shift_3) || 0;
+    const femaleShift3 = Number(female_shop_workers_shift_3) || 0;
+    setValue('total_shop_workers_shift_3', maleShift3 + femaleShift3);
+
+  }, [male_office_workers,
+      female_office_workers,
+      male_shop_workers_shift_1,
+      female_shop_workers_shift_1,
+      male_shop_workers_shift_2,
+      female_shop_workers_shift_2,
+      male_shop_workers_shift_3,
+      female_shop_workers_shift_3,
+      setValue]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -84,10 +123,10 @@ function GeneralInfo({
             <div className="relative mt-2">
               <input
                 type="text"
-                disabled
+                readOnly
                 {...register("company_name", { required: true })}
                 id="company_name"
-                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -119,10 +158,10 @@ function GeneralInfo({
             <div className="relative mt-2">
               <input
                 type="text"
-                disabled
+                readOnly
                 {...register("address", { required: true })}
                 id="address"
-                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -137,10 +176,10 @@ function GeneralInfo({
             <div className="relative mt-2">
               <input
                 type="text"
-                disabled
+                readOnly
                 {...register("type_of_industry", { required: true })}
                 id="type_of_industry"
-                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -155,10 +194,10 @@ function GeneralInfo({
             <div className="relative mt-2">
               <input
                 type="number"
-                disabled
+                readOnly
                 {...register("total_number_of_employees", { required: true })}
                 id="total_number_of_employees"
-                className="cursor-not-allowed opacity-50  rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -173,6 +212,7 @@ function GeneralInfo({
             <div className="relative mt-2">
               <input
                 type="number"
+                min={0}
                 {...register("number_of_shifts", { required: true })}
                 id="number_of_shifts"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -230,6 +270,7 @@ function GeneralInfo({
             <div className="mt-2 flex flex-row items-center">
               <input
                 type="number"
+                min={0}
                 {...register(`male_office_workers`)}
                 id={`male_office_workers`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -240,6 +281,7 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
+                min={0}
                 {...register(`male_shop_workers_shift_1`)}
                 id={`number_of_workers_who_underwent_medical_examination_x_rays_pre_placement`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -250,6 +292,7 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
+                min={0}
                 {...register(`male_shop_workers_shift_2`)}
                 id={`male_shop_workers_shift_2`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -260,6 +303,7 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
+                min={0}
                 {...register(`male_shop_workers_shift_3`)}
                 id={`male_shop_workers_shift_3`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -279,6 +323,7 @@ function GeneralInfo({
             <div className="mt-2 flex flex-row items-center">
               <input
                 type="number"
+                min={0}
                 {...register(`female_office_workers`)}
                 id={`female_office_workers`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -289,6 +334,7 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
+                min={0}
                 {...register(`female_shop_workers_shift_1`)}
                 id={`female_shop_workers_shift_1`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -299,6 +345,7 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
+                min={0}
                 {...register(`female_shop_workers_shift_2`)}
                 id={`female_shop_workers_shift_2`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -309,6 +356,7 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
+                min={0}
                 {...register(`female_shop_workers_shift_3`)}
                 id={`female_shop_workers_shift_3`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -328,9 +376,11 @@ function GeneralInfo({
             <div className="mt-2 flex flex-row items-center">
               <input
                 type="number"
-                {...register(`total_office_male_workers`)}
-                id={`total_office_male_workers`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                min={0}
+                {...register(`total_office_workers`)}
+                id={`total_office_workers`}
+                readOnly
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -338,9 +388,11 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
-                {...register(`total_shop_male_workers_shift_1`)}
-                id={`total_shop_male_workers_shift_1`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                min={0}
+                {...register(`total_shop_workers_shift_1`)}
+                id={`total_shop_workers_shift_1`}
+                readOnly
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -348,9 +400,11 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
-                {...register(`total_shop_male_workers_shift_2`)}
-                id={`total_shop_male_workers_shift_2`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                min={0}
+                {...register(`total_shop_workers_shift_2`)}
+                id={`total_shop_workers_shift_2`}
+                readOnly
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -358,9 +412,11 @@ function GeneralInfo({
             <div className="mt-2">
               <input
                 type="number"
-                {...register(`total_shop_male_workers_shift_3`)}
-                id={`total_shop_male_workers_shift_3`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                min={0}
+                {...register(`total_shop_workers_shift_3`)}
+                id={`total_shop_workers_shift_3`}
+                readOnly
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
