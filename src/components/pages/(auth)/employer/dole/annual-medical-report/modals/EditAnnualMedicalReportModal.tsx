@@ -60,6 +60,14 @@ function EditAnnualMedicalReportModal({
 
   useEffect(() => {
     if (annualMedicalReportData) {
+      // Helper to always return an array of strings
+      const parseArrayField = (field: any) => {
+        if (Array.isArray(field) && field.length === 1 && typeof field[0] === "string" && field[0].includes(",")) {
+          return field[0].split(",").map((s: string) => s.trim());
+        }
+        return field;
+      };
+
       // General Information
       setValue("address", annualMedicalReportData.address);
       setValue("type_of_industry", annualMedicalReportData.type_of_industry);
@@ -80,15 +88,15 @@ function EditAnnualMedicalReportModal({
       setValue("total_shop_male_workers_shift_3", annualMedicalReportData.total_shop_male_workers_shift_3);
 
       // Preventive and Emergency
-      setValue("occupational_health_services_by", annualMedicalReportData.occupational_health_services_by);
+      setValue("occupational_health_services_by", parseArrayField(annualMedicalReportData.occupational_health_services_by));
       setValue("occupational_health_services_by_other_specification", annualMedicalReportData.occupational_health_services_by_other_specification);
-      setValue("occupational_health_services_as_a_service", annualMedicalReportData.occupational_health_services_as_a_service);
-      setValue("employer_engages_the_services_of", annualMedicalReportData.employer_engages_the_services_of);
-      setValue("conduct_inspection_of_workplace", annualMedicalReportData.conduct_inspection_of_workplace);
+      setValue("occupational_health_services_as_a_service", parseArrayField(annualMedicalReportData.occupational_health_services_as_a_service));
+      setValue("employer_engages_the_services_of", parseArrayField(annualMedicalReportData.employer_engages_the_services_of));
+      setValue("conduct_inspection_of_workplace", parseArrayField(annualMedicalReportData.conduct_inspection_of_workplace));
       setValue("conduct_inspection_of_workplace_other_specification", annualMedicalReportData.conduct_inspection_of_workplace_other_specification);
 
       // Emergency Occupational
-      setValue("provided_treatment_room_medical_clinic", annualMedicalReportData.provided_treatment_room_medical_clinic);
+      setValue("provided_treatment_room_medical_clinic", parseArrayField(annualMedicalReportData.provided_treatment_room_medical_clinic));
       setValue("provided_treatment_room_medical_clinic_other_specification", annualMedicalReportData.provided_treatment_room_medical_clinic_other_specification);
       setValue("occupational_health_physician_hours_per_day", annualMedicalReportData.occupational_health_physician_hours_per_day);
       setValue("occupational_health_physician_shift", annualMedicalReportData.occupational_health_physician_shift);
@@ -98,12 +106,12 @@ function EditAnnualMedicalReportModal({
       setValue("occupational_health_practitioner_shift", annualMedicalReportData.occupational_health_practitioner_shift);
       setValue("occupational_health_nurse_hours_per_day", annualMedicalReportData.occupational_health_nurse_hours_per_day);
       setValue("occupational_health_nurse_shift", annualMedicalReportData.occupational_health_nurse_shift);
-      setValue("schedule_of_attendance_of_full_time_first_aider", annualMedicalReportData.schedule_of_attendance_of_full_time_first_aider);
-      setValue("occupational_health_personnel_training", annualMedicalReportData.occupational_health_personnel_training);
+      setValue("schedule_of_attendance_of_full_time_first_aider", parseArrayField(annualMedicalReportData.schedule_of_attendance_of_full_time_first_aider));
+      setValue("occupational_health_personnel_training", parseArrayField(annualMedicalReportData.occupational_health_personnel_training));
       setValue("occupational_health_personnel_training_other_specification", annualMedicalReportData.occupational_health_personnel_training_other_specification);
 
       // Occupational Health Services
-      setValue("sanitation_system_appraisal", annualMedicalReportData.sanitation_system_appraisal);
+      setValue("sanitation_system_appraisal", parseArrayField(annualMedicalReportData.sanitation_system_appraisal));
       setValue("workers_pre_placement_physical_exam", annualMedicalReportData.workers_pre_placement_physical_exam);
       setValue("workers_pre_placement_x_rays", annualMedicalReportData.workers_pre_placement_x_rays);
       setValue("workers_pre_placement_urinalysis", annualMedicalReportData.workers_pre_placement_urinalysis);
@@ -494,14 +502,14 @@ function EditAnnualMedicalReportModal({
       setValue("others_immunization_total", annualMedicalReportData.others_immunization_total);
 
       // Workplace Welfare
-      setValue("keeping_of_medical_records_of_workers", annualMedicalReportData.keeping_of_medical_records_of_workers);
-      setValue("health_education_and_counselling_by_health_and_safety_personnel", annualMedicalReportData.health_education_and_counselling_by_health_and_safety_personnel);
-      setValue("nutrition_program", annualMedicalReportData.nutrition_program);
-      setValue("maternal_and_child_care_program", annualMedicalReportData.maternal_and_child_care_program);
-      setValue("family_planning_program", annualMedicalReportData.family_planning_program);
-      setValue("mental_health_program", annualMedicalReportData.mental_health_program);
-      setValue("personal_health_maintenance", annualMedicalReportData.personal_health_maintenance);
-      setValue("sports_activities", annualMedicalReportData.sports_activities);
+      setValue("keeping_of_medical_records_of_workers", parseArrayField(annualMedicalReportData.keeping_of_medical_records_of_workers));
+      setValue("health_education_and_counselling_by_health_and_safety_personnel", parseArrayField(annualMedicalReportData.health_education_and_counselling_by_health_and_safety_personnel));
+      setValue("nutrition_program", parseArrayField(annualMedicalReportData.nutrition_program));
+      setValue("maternal_and_child_care_program", parseArrayField(annualMedicalReportData.maternal_and_child_care_program));
+      setValue("family_planning_program", parseArrayField(annualMedicalReportData.family_planning_program));
+      setValue("mental_health_program", parseArrayField(annualMedicalReportData.mental_health_program));
+      setValue("personal_health_maintenance", parseArrayField(annualMedicalReportData.personal_health_maintenance));
+      setValue("sports_activities", parseArrayField(annualMedicalReportData.sports_activities));
       setValue("physical_fitness_program_others", annualMedicalReportData.physical_fitness_program_others);
 
       // Workplace Hazards
