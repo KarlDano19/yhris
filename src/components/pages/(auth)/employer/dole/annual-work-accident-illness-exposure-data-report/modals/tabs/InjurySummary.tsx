@@ -189,15 +189,15 @@ function InjurySummary({
               htmlFor="total_disabling_injuries"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Total-All Disabling Injuries/ Illnesses
+              Total: All Disabling Injuries/ Illnesses
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
                 {...register("total_disabling_injuries")}
-                disabled
+                readOnly
                 id="total_disabling_injuries"
-                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -206,15 +206,15 @@ function InjurySummary({
               htmlFor="total_non_disabling_injuries"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Total-Non-Disabling Injuries
+              Total: Non-Disabling Injuries
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
                 {...register("total_non_disabling_injuries")}
-                disabled
+                readOnly
                 id="total_non_disabling_injuries"
-                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -231,8 +231,8 @@ function InjurySummary({
                 type="text"
                 {...register("frequency_rate", { required: true })}
                 id="frequency_rate"
-                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                disabled
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                readOnly
               />
             </div>
           </div>
@@ -249,8 +249,8 @@ function InjurySummary({
                 type="text"
                 {...register("severity_rate", { required: true })}
                 id="severity_rate"
-                className="cursor-not-allowed opacity-50 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                disabled
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                readOnly
               />
             </div>
           </div>
