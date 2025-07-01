@@ -245,7 +245,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             {item.number_of_shifts}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
-            <div className="flex space-x-2">
+            <div className="flex items-center justify-center space-x-2">
               <button
                 onClick={() =>
                   setIsEditAnnualMedicalReportModalOpen({
@@ -441,7 +441,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Total Hours Worked
+                        Number of Shifts
                       </th>
                       <th
                         scope="col"

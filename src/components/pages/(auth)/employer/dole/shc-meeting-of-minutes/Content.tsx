@@ -222,7 +222,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.attendees.length}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.absentees.length}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-            <div className='flex space-x-2'>
+            <div className='flex items-center justify-center space-x-2'>
               <button
                 onClick={() =>
                   setIsUpdateShcMinutesMeetingModalOpen({
@@ -423,7 +423,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Absentees
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
                         Actions
                       </th>
                     </tr>
