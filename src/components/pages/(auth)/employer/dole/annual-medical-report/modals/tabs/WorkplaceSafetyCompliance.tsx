@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function WorkplaceSafetyCompliance({
   register,
   handleSubmit,
   setSelectedTab,
+  setValue,
+  watch,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  setValue: any;
+  watch: any;
 }) {
   const [isImmunizationOpen, setIsImmunizationOpen] = useState(false);
   const [isOccupationalAccidentOpen, setIsOccupationalAccidentOpen] =
@@ -23,6 +27,48 @@ function WorkplaceSafetyCompliance({
   const onSubmit = handleSubmit(() => {
     setSelectedTab(7);
   });
+
+  // Auto-calculate totals
+
+  // Watch all fields
+  const watchedValues = watch();
+  
+  useEffect(() => {
+    // Helper function to calculate totals
+    const calculateTotal = (baseFieldName: string) => {
+      const maleValue = Number(watchedValues[`${baseFieldName}_male`]) || 0;
+      const femaleValue = Number(watchedValues[`${baseFieldName}_female`]) || 0;
+      setValue(`${baseFieldName}_total`, maleValue + femaleValue);
+    };
+
+    // List of all base field names
+    const fieldNames = [
+      // Report of Occupational Accidents/Injuries
+      'contusion_bruises_hematoma',
+      'abrasions',
+      'cuts_lacerations_punctures',
+      'avulsion',
+      'amputation_loss_body_part',
+      'crushing_injury',
+      'spinal_injury',
+      'cranial_injury',
+      'sprain',
+      'dislocation_fracture',
+      'burns',
+
+      // Immunization Program (Indicate number immunized)
+      'tetanus_toxoid_injection',
+      'tetanus_antitoxin_injection',
+      'tetanus_globulin_injection',
+      'hepatitis_b_vaccination',
+      'rabies_vaccination',
+      'others_immunization',
+    ];
+
+    // Calculate totals for all fields
+    fieldNames.forEach(calculateTotal);
+    
+  }, [watch, setValue, watchedValues]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -69,7 +115,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`contusion_bruises_hematoma_male`)}
                       id={`contusion_bruises_hematoma_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -79,7 +125,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`contusion_bruises_hematoma_female`)}
                       id={`contusion_bruises_hematoma_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -89,10 +135,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`contusion_bruises_hematoma_total`)}
                       id={`contusion_bruises_hematoma_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -108,7 +155,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`abrasions_male`)}
                       id={`abrasions_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -118,7 +165,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`abrasions_female`)}
                       id={`abrasions_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -128,10 +175,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`abrasions_total`)}
                       id={`abrasions_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -147,7 +195,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`cuts_lacerations_punctures_male`)}
                       id={`cuts_lacerations_punctures_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -157,7 +205,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`cuts_lacerations_punctures_female`)}
                       id={`cuts_lacerations_punctures_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -167,10 +215,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`cuts_lacerations_punctures_total`)}
                       id={`cuts_lacerations_punctures_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -186,7 +235,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`avulsion_male`)}
                       id={`avulsion_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -196,7 +245,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`avulsion_female`)}
                       id={`avulsion_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -206,10 +255,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`avulsion_total`)}
                       id={`avulsion_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -225,7 +275,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`amputation_loss_body_part_male`)}
                       id={`amputation_loss_body_part_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -235,7 +285,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`amputation_loss_body_part_female`)}
                       id={`amputation_loss_body_part_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -245,10 +295,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`amputation_loss_body_part_total`)}
                       id={`amputation_loss_body_part_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -264,7 +315,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`crushing_injury_male`)}
                       id={`crushing_injury_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -274,7 +325,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`crushing_injury_female`)}
                       id={`crushing_injury_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -284,10 +335,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`crushing_injury_total`)}
                       id={`crushing_injury_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -303,7 +355,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`spinal_injury_male`)}
                       id={`spinal_injury_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -313,7 +365,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`spinal_injury_female`)}
                       id={`spinal_injury_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -323,10 +375,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`spinal_injury_total`)}
                       id={`spinal_injury_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -342,7 +395,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`cranial_injury_male`)}
                       id={`cranial_injury_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -352,7 +405,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`cranial_injury_female`)}
                       id={`cranial_injury_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -362,10 +415,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`cranial_injury_total`)}
                       id={`cranial_injury_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -381,7 +435,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`sprain_male`)}
                       id={`sprain_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -391,7 +445,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`sprain_female`)}
                       id={`sprain_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -401,10 +455,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`sprain_total`)}
                       id={`sprain_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -420,7 +475,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`dislocation_fracture_male`)}
                       id={`dislocation_fracture_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -430,7 +485,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`dislocation_fracture_female`)}
                       id={`dislocation_fracture_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -440,10 +495,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`dislocation_fracture_total`)}
                       id={`dislocation_fracture_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -459,7 +515,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`burns_injury_male`)}
                       id={`burns_injury_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -469,7 +525,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`burns_injury_female`)}
                       id={`burns_injury_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -479,10 +535,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`burns_injury_total`)}
                       id={`burns_injury_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -530,7 +587,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_toxoid_injection_male`)}
                       id={`tetanus_toxoid_injection_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -540,7 +597,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_toxoid_injection_female`)}
                       id={`tetanus_toxoid_injection_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -550,10 +607,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_toxoid_injection_total`)}
                       id={`tetanus_toxoid_injection_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -569,7 +627,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_antitoxin_injection_male`)}
                       id={`tetanus_antitoxin_injection_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -579,7 +637,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_antitoxin_injection_female`)}
                       id={`tetanus_antitoxin_injection_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -589,10 +647,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_antitoxin_injection_total`)}
                       id={`tetanus_antitoxin_injection_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -608,7 +667,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_globulin_injection_male`)}
                       id={`tetanus_globulin_injection_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -618,7 +677,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_globulin_injection_female`)}
                       id={`tetanus_globulin_injection_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -628,10 +687,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`tetanus_globulin_injection_total`)}
                       id={`tetanus_globulin_injection_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -647,7 +707,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`hepatitis_b_vaccination_male`)}
                       id={`hepatitis_b_vaccination_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -657,7 +717,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`hepatitis_b_vaccination_female`)}
                       id={`hepatitis_b_vaccination_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -667,10 +727,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`hepatitis_b_vaccination_total`)}
                       id={`hepatitis_b_vaccination_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -686,7 +747,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`rabies_vaccination_male`)}
                       id={`rabies_vaccination_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -696,7 +757,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`rabies_vaccination_female`)}
                       id={`rabies_vaccination_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -706,10 +767,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`rabies_vaccination_total`)}
                       id={`rabies_vaccination_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
@@ -725,7 +787,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2 flex flex-row items-center">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`others_immunization_male`)}
                       id={`others_immunization_male`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -735,7 +797,7 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`others_immunization_female`)}
                       id={`others_immunization_female`}
                       className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -745,10 +807,11 @@ function WorkplaceSafetyCompliance({
                 <div className="grid-item">
                   <div className="mt-2">
                     <input
-                      type="text"
+                      type="number"
                       {...register(`others_immunization_total`)}
                       id={`others_immunization_total`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>

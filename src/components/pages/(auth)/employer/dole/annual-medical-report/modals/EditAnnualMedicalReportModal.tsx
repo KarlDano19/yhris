@@ -478,57 +478,60 @@ function EditAnnualMedicalReportModal({
         setValue("radiation_related_cancers_total", annualMedicalReportData.radiation_related_cancers_total);
 
       // Workplace Safety Compliance
-      setValue("contusion_bruises_hematoma_male", annualMedicalReportData.contusion_bruises_hematoma_male);
-      setValue("contusion_bruises_hematoma_female", annualMedicalReportData.contusion_bruises_hematoma_female);
-      setValue("contusion_bruises_hematoma_total", annualMedicalReportData.contusion_bruises_hematoma_total);
-      setValue("abrasions_male", annualMedicalReportData.abrasions_male);
-      setValue("abrasions_female", annualMedicalReportData.abrasions_female);
-      setValue("abrasions_total", annualMedicalReportData.abrasions_total);
-      setValue("cuts_lacerations_punctures_male", annualMedicalReportData.cuts_lacerations_punctures_male);
-      setValue("cuts_lacerations_punctures_female", annualMedicalReportData.cuts_lacerations_punctures_female);
-      setValue("cuts_lacerations_punctures_total", annualMedicalReportData.cuts_lacerations_punctures_total);
-      setValue("avulsion_male", annualMedicalReportData.avulsion_male);
-      setValue("avulsion_female", annualMedicalReportData.avulsion_female);
-      setValue("avulsion_total", annualMedicalReportData.avulsion_total);
-      setValue("amputation_loss_body_part_male", annualMedicalReportData.amputation_loss_body_part_male);
-      setValue("amputation_loss_body_part_female", annualMedicalReportData.amputation_loss_body_part_female);
-      setValue("amputation_loss_body_part_total", annualMedicalReportData.amputation_loss_body_part_total);
-      setValue("crushing_injury_male", annualMedicalReportData.crushing_injury_male);
-      setValue("crushing_injury_female", annualMedicalReportData.crushing_injury_female);
-      setValue("crushing_injury_total", annualMedicalReportData.crushing_injury_total);
-      setValue("spinal_injury_male", annualMedicalReportData.spinal_injury_male);
-      setValue("spinal_injury_female", annualMedicalReportData.spinal_injury_female);
-      setValue("spinal_injury_total", annualMedicalReportData.spinal_injury_total);
-      setValue("cranial_injury_male", annualMedicalReportData.cranial_injury_male);
-      setValue("cranial_injury_female", annualMedicalReportData.cranial_injury_female);
-      setValue("cranial_injury_total", annualMedicalReportData.cranial_injury_total);
-      setValue("sprain_male", annualMedicalReportData.sprain_male);
-      setValue("sprain_female", annualMedicalReportData.sprain_female);
-      setValue("sprain_total", annualMedicalReportData.sprain_total);
-      setValue("dislocation_fracture_male", annualMedicalReportData.dislocation_fracture_male);
-      setValue("dislocation_fracture_female", annualMedicalReportData.dislocation_fracture_female);
-      setValue("dislocation_fracture_total", annualMedicalReportData.dislocation_fracture_total);
-      setValue("burns_injury_male", annualMedicalReportData.burns_injury_male);
-      setValue("burns_injury_female", annualMedicalReportData.burns_injury_female);
-      setValue("burns_injury_total", annualMedicalReportData.burns_injury_total);
-      setValue("tetanus_toxoid_injection_male", annualMedicalReportData.tetanus_toxoid_injection_male);
-      setValue("tetanus_toxoid_injection_female", annualMedicalReportData.tetanus_toxoid_injection_female);
-      setValue("tetanus_toxoid_injection_total", annualMedicalReportData.tetanus_toxoid_injection_total);
-      setValue("tetanus_antitoxin_injection_male", annualMedicalReportData.tetanus_antitoxin_injection_male);
-      setValue("tetanus_antitoxin_injection_female", annualMedicalReportData.tetanus_antitoxin_injection_female);
-      setValue("tetanus_antitoxin_injection_total", annualMedicalReportData.tetanus_antitoxin_injection_total);
-      setValue("tetanus_globulin_injection_male", annualMedicalReportData.tetanus_globulin_injection_male);
-      setValue("tetanus_globulin_injection_female", annualMedicalReportData.tetanus_globulin_injection_female);
-      setValue("tetanus_globulin_injection_total", annualMedicalReportData.tetanus_globulin_injection_total);
-      setValue("hepatitis_b_vaccination_male", annualMedicalReportData.hepatitis_b_vaccination_male);
-      setValue("hepatitis_b_vaccination_female", annualMedicalReportData.hepatitis_b_vaccination_female);
-      setValue("hepatitis_b_vaccination_total", annualMedicalReportData.hepatitis_b_vaccination_total);
-      setValue("rabies_vaccination_male", annualMedicalReportData.rabies_vaccination_male);
-      setValue("rabies_vaccination_female", annualMedicalReportData.rabies_vaccination_female);
-      setValue("rabies_vaccination_total", annualMedicalReportData.rabies_vaccination_total);
-      setValue("others_immunization_male", annualMedicalReportData.others_immunization_male);
-      setValue("others_immunization_female", annualMedicalReportData.others_immunization_female);
-      setValue("others_immunization_total", annualMedicalReportData.others_immunization_total);
+        // Report of Occupational Accidents/Injuries
+        setValue("contusion_bruises_hematoma_male", annualMedicalReportData.contusion_bruises_hematoma_male);
+        setValue("contusion_bruises_hematoma_female", annualMedicalReportData.contusion_bruises_hematoma_female);
+        setValue("contusion_bruises_hematoma_total", annualMedicalReportData.contusion_bruises_hematoma_total);
+        setValue("abrasions_male", annualMedicalReportData.abrasions_male);
+        setValue("abrasions_female", annualMedicalReportData.abrasions_female);
+        setValue("abrasions_total", annualMedicalReportData.abrasions_total);
+        setValue("cuts_lacerations_punctures_male", annualMedicalReportData.cuts_lacerations_punctures_male);
+        setValue("cuts_lacerations_punctures_female", annualMedicalReportData.cuts_lacerations_punctures_female);
+        setValue("cuts_lacerations_punctures_total", annualMedicalReportData.cuts_lacerations_punctures_total);
+        setValue("avulsion_male", annualMedicalReportData.avulsion_male);
+        setValue("avulsion_female", annualMedicalReportData.avulsion_female);
+        setValue("avulsion_total", annualMedicalReportData.avulsion_total);
+        setValue("amputation_loss_body_part_male", annualMedicalReportData.amputation_loss_body_part_male);
+        setValue("amputation_loss_body_part_female", annualMedicalReportData.amputation_loss_body_part_female);
+        setValue("amputation_loss_body_part_total", annualMedicalReportData.amputation_loss_body_part_total);
+        setValue("crushing_injury_male", annualMedicalReportData.crushing_injury_male);
+        setValue("crushing_injury_female", annualMedicalReportData.crushing_injury_female);
+        setValue("crushing_injury_total", annualMedicalReportData.crushing_injury_total);
+        setValue("spinal_injury_male", annualMedicalReportData.spinal_injury_male);
+        setValue("spinal_injury_female", annualMedicalReportData.spinal_injury_female);
+        setValue("spinal_injury_total", annualMedicalReportData.spinal_injury_total);
+        setValue("cranial_injury_male", annualMedicalReportData.cranial_injury_male);
+        setValue("cranial_injury_female", annualMedicalReportData.cranial_injury_female);
+        setValue("cranial_injury_total", annualMedicalReportData.cranial_injury_total);
+        setValue("sprain_male", annualMedicalReportData.sprain_male);
+        setValue("sprain_female", annualMedicalReportData.sprain_female);
+        setValue("sprain_total", annualMedicalReportData.sprain_total);
+        setValue("dislocation_fracture_male", annualMedicalReportData.dislocation_fracture_male);
+        setValue("dislocation_fracture_female", annualMedicalReportData.dislocation_fracture_female);
+        setValue("dislocation_fracture_total", annualMedicalReportData.dislocation_fracture_total);
+        setValue("burns_injury_male", annualMedicalReportData.burns_injury_male);
+        setValue("burns_injury_female", annualMedicalReportData.burns_injury_female);
+        setValue("burns_injury_total", annualMedicalReportData.burns_injury_total);
+
+        // Immunization Program (Indicate number immunized)
+        setValue("tetanus_toxoid_injection_male", annualMedicalReportData.tetanus_toxoid_injection_male);
+        setValue("tetanus_toxoid_injection_female", annualMedicalReportData.tetanus_toxoid_injection_female);
+        setValue("tetanus_toxoid_injection_total", annualMedicalReportData.tetanus_toxoid_injection_total);
+        setValue("tetanus_antitoxin_injection_male", annualMedicalReportData.tetanus_antitoxin_injection_male);
+        setValue("tetanus_antitoxin_injection_female", annualMedicalReportData.tetanus_antitoxin_injection_female);
+        setValue("tetanus_antitoxin_injection_total", annualMedicalReportData.tetanus_antitoxin_injection_total);
+        setValue("tetanus_globulin_injection_male", annualMedicalReportData.tetanus_globulin_injection_male);
+        setValue("tetanus_globulin_injection_female", annualMedicalReportData.tetanus_globulin_injection_female);
+        setValue("tetanus_globulin_injection_total", annualMedicalReportData.tetanus_globulin_injection_total);
+        setValue("hepatitis_b_vaccination_male", annualMedicalReportData.hepatitis_b_vaccination_male);
+        setValue("hepatitis_b_vaccination_female", annualMedicalReportData.hepatitis_b_vaccination_female);
+        setValue("hepatitis_b_vaccination_total", annualMedicalReportData.hepatitis_b_vaccination_total);
+        setValue("rabies_vaccination_male", annualMedicalReportData.rabies_vaccination_male);
+        setValue("rabies_vaccination_female", annualMedicalReportData.rabies_vaccination_female);
+        setValue("rabies_vaccination_total", annualMedicalReportData.rabies_vaccination_total);
+        setValue("others_immunization_male", annualMedicalReportData.others_immunization_male);
+        setValue("others_immunization_female", annualMedicalReportData.others_immunization_female);
+        setValue("others_immunization_total", annualMedicalReportData.others_immunization_total);
 
       // Workplace Welfare
       setValue("keeping_of_medical_records_of_workers", parseArrayField(annualMedicalReportData.keeping_of_medical_records_of_workers));
@@ -773,6 +776,8 @@ function EditAnnualMedicalReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    setValue={setValue}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 7 && (
