@@ -324,7 +324,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`allergy_total`)}
                         id={`allergy_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -363,7 +364,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`dermatoses_total`)}
                         id={`dermatoses_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -408,7 +410,8 @@ function ReportOfDisease({
                           `infection_as_folliculitis_abscess_paronychia_total`
                         )}
                         id={`infection_as_folliculitis_abscess_paronychia_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -447,7 +450,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_skin_total`)}
                         id={`others_skin_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -518,7 +522,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`tension_headache_total`)}
                         id={`tension_headache_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -557,7 +562,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_head_total`)}
                         id={`others_head_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -628,7 +634,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`cataract_total`)}
                         id={`cataract_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -667,7 +674,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`error_of_refraction_total`)}
                         id={`error_of_refraction_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -706,7 +714,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`bacterial_viral_conjunctivities_total`)}
                         id={`bacterial_viral_conjunctivities_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -745,7 +754,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_eyes_total`)}
                         id={`others_eyes_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -816,7 +826,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`gingivitis_total`)}
                         id={`gingivitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -855,7 +866,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`herpes_labiales_nasalis_total`)}
                         id={`herpes_labiales_nasalis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -894,7 +906,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`otitis_media_externa_total`)}
                         id={`otitis_media_externa_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -933,7 +946,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`deafness_total`)}
                         id={`deafness_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -972,7 +986,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`meniere_s_syndrome_vertigo_total`)}
                         id={`meniere_s_syndrome_vertigo_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1011,7 +1026,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`rhinitis_colds_total`)}
                         id={`rhinitis_colds_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1050,7 +1066,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`nasal_polyps_total`)}
                         id={`nasal_polyps_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1089,7 +1106,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`sinusitis_total`)}
                         id={`sinusitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1128,7 +1146,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`tonsillapharyngitis_total`)}
                         id={`tonsillapharyngitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1167,7 +1186,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`laryngitis_total`)}
                         id={`laryngitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1206,7 +1226,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_ent_total`)}
                         id={`others_ent_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1277,7 +1298,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`bronchitis_total`)}
                         id={`bronchitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1316,7 +1338,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`bronchial_asthma_total`)}
                         id={`bronchial_asthma_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1355,7 +1378,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`pneumonia_total`)}
                         id={`pneumonia_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1394,7 +1418,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`tuberculosis_total`)}
                         id={`tuberculosis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1433,7 +1458,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`pneumoconiosis_total`)}
                         id={`pneumoconiosis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1472,7 +1498,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_respiratory_total`)}
                         id={`others_respiratory_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1543,7 +1570,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`hypertension_total`)}
                         id={`hypertension_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1582,7 +1610,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`hypotension_total`)}
                         id={`hypotension_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1621,7 +1650,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`angina_pectoria_total`)}
                         id={`angina_pectoria_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1660,7 +1690,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`myocardial_infarction_total`)}
                         id={`myocardial_infarction_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1699,7 +1730,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`vascular_disturbance_total`)}
                         id={`vascular_disturbance_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1738,7 +1770,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_heart_total`)}
                         id={`others_heart_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1809,7 +1842,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`gastroenteritis_diarhea_total`)}
                         id={`gastroenteritis_diarhea_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1848,7 +1882,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`amoebiasis_total`)}
                         id={`amoebiasis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1887,7 +1922,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`gastritis_hyperacidity_total`)}
                         id={`gastritis_hyperacidity_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1926,7 +1962,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`appendicitis_total`)}
                         id={`appendicitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -1965,7 +2002,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`infectious_hepatitis_total`)}
                         id={`infectious_hepatitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2004,7 +2042,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`liver_cirrhosis_total`)}
                         id={`liver_cirrhosis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2043,7 +2082,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`hepatic_abscess_total`)}
                         id={`hepatic_abscess_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2082,7 +2122,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`cancer_hepatic_gastric_total`)}
                         id={`cancer_hepatic_gastric_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2121,7 +2162,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`ulcer_total`)}
                         id={`ulcer_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2160,7 +2202,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_gastrointestinal_total`)}
                         id={`others_gastrointestinal_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2231,7 +2274,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`urinary_tract_infection_total`)}
                         id={`urinary_tract_infection_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2270,7 +2314,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`stones_total`)}
                         id={`stones_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2309,7 +2354,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`cancer_total`)}
                         id={`cancer_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2348,7 +2394,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_genitourinary_total`)}
                         id={`others_genitourinary_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2419,7 +2466,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`dysmenorrhea_total`)}
                         id={`dysmenorrhea_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2458,7 +2506,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`infection_cervicitis_vaginitis_total`)}
                         id={`infection_cervicitis_vaginitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2497,7 +2546,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`abortion_spontaneous_threatened_total`)}
                         id={`abortion_spontaneous_threatened_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2536,7 +2586,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`hyperemesis_gravidarum_total`)}
                         id={`hyperemesis_gravidarum_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2575,7 +2626,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`uterine_tumors_total`)}
                         id={`uterine_tumors_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2614,7 +2666,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`cervical_polyp_cancer_total`)}
                         id={`cervical_polyp_cancer_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2653,7 +2706,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`ovarian_cyst_tumors_total`)}
                         id={`ovarian_cyst_tumors_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2692,7 +2746,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`sexually_transmitted_diseases_total`)}
                         id={`sexually_transmitted_diseases_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2731,7 +2786,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`hermia_inguinal_femoral_total`)}
                         id={`hermia_inguinal_femoral_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2770,7 +2826,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_reproductive_total`)}
                         id={`others_reproductive_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2841,7 +2898,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`peripheral_neuritis_total`)}
                         id={`peripheral_neuritis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2880,7 +2938,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`torticollis_total`)}
                         id={`torticollis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2919,7 +2978,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`arthritis_total`)}
                         id={`arthritis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -2958,7 +3018,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_skeletal_total`)}
                         id={`others_skeletal_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3029,7 +3090,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`anemia_total`)}
                         id={`anemia_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3068,7 +3130,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`leukemia_total`)}
                         id={`leukemia_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3107,7 +3170,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`cerebrovascular_accident_total`)}
                         id={`cerebrovascular_accident_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3146,7 +3210,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`lymphadenitis_total`)}
                         id={`lymphadenitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3185,7 +3250,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`lymphoma_total`)}
                         id={`lymphoma_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3256,7 +3322,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`influenza_total`)}
                         id={`influenza_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3295,7 +3362,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`typhoid_fever_total`)}
                         id={`typhoid_fever_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3334,7 +3402,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`cholera_total`)}
                         id={`cholera_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3373,7 +3442,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`measles_total`)}
                         id={`measles_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3412,7 +3482,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`tetanus_total`)}
                         id={`tetanus_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3451,7 +3522,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`malaria_total`)}
                         id={`malaria_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3490,7 +3562,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`schistosomiasis_total`)}
                         id={`schistosomiasis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3529,7 +3602,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`herpes_zoster_total`)}
                         id={`herpes_zoster_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3568,7 +3642,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`chicken_pox_total`)}
                         id={`chicken_pox_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3607,7 +3682,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`german_measles_total`)}
                         id={`german_measles_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3646,7 +3722,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`rabies_total`)}
                         id={`rabies_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3685,7 +3762,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_infectious_total`)}
                         id={`others_infectious_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3762,7 +3840,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`deafness_noise_induced_total`)}
                         id={`deafness_noise_induced_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3801,7 +3880,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`white_fingers_disease_total`)}
                         id={`white_fingers_disease_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3840,7 +3920,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`musculo_skeletal_disturbances_total`)}
                         id={`musculo_skeletal_disturbances_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3879,7 +3960,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`fatigue_total`)}
                         id={`fatigue_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3950,7 +4032,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`heat_stroke_total`)}
                         id={`heat_stroke_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -3989,7 +4072,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`heat_cramps_total`)}
                         id={`heat_cramps_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4028,7 +4112,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`dehydration_total`)}
                         id={`dehydration_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4067,7 +4152,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`heat_exhaustion_total`)}
                         id={`heat_exhaustion_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4106,7 +4192,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`others_heat_total`)}
                         id={`others_heat_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4148,7 +4235,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`decompression_sickness_total`)}
                         id={`decompression_sickness_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4187,7 +4275,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`air_embolism_total`)}
                         id={`air_embolism_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4226,7 +4315,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`bends_disease_total`)}
                         id={`bends_disease_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4265,7 +4355,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`barotrauma_total`)}
                         id={`barotrauma_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4304,7 +4395,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`hypoxia_total`)}
                         id={`hypoxia_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4343,7 +4435,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`altitude_sickness_total`)}
                         id={`altitude_sickness_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4414,7 +4507,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`cataract_radiation_total`)}
                         id={`cataract_radiation_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4453,7 +4547,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`keratitis_total`)}
                         id={`keratitis_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4492,7 +4587,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`burns_total`)}
                         id={`burns_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -4531,7 +4627,8 @@ function ReportOfDisease({
                         type="number"
                         {...register(`radiation_related_cancers_total`)}
                         id={`radiation_related_cancers_total`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
