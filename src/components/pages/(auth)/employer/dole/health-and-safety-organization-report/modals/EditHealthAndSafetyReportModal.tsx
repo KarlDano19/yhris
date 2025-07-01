@@ -90,6 +90,14 @@ function EditHealthAndSafetyReportModal({
   }, [healthAndSafetyReportData, setValue]);
 
   const onSubmit = handleSubmit((data) => {
+    // Convert date_of_report to YYYY-MM-DD before appending to FormData
+    if (data.date_of_report) {
+      const dateObj = new Date(data.date_of_report);
+      if (!isNaN(dateObj.getTime())) {
+        data.date_of_report = dateObj.toLocaleDateString('en-CA');
+      }
+    }
+
     const formData = new FormData();
 
     // Add shift_employees to the payload from employees field
