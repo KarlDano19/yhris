@@ -25,7 +25,7 @@ function WEMDetailsRequest({
   handleSubmit: any;
   setSelectedTab: any;
   getValues: any;
-  watch: any;
+  watch: any;sig
   errors: any;
   setError: any;
   clearErrors: any;

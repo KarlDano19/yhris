@@ -237,6 +237,11 @@ function DataPrivacyAndCertification({
         </div>
         <div className="mt-4 pl-6 pr-6">
           <h1 className="text-sm font-medium">Signature</h1>
+          {errors.signature && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.signature.message || "Signature is required (draw or upload)."}
+              </p>
+            )}
         </div>
         <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
           <div>
@@ -247,11 +252,6 @@ function DataPrivacyAndCertification({
               Draw Signature
               {!existingSignatureUrl && <span className="text-red-600">*</span>}
             </label>
-            {errors.signature && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.signature.message || "Signature is required (draw or upload)."}
-              </p>
-            )}
             <div className="relative mt-2">
               <button
                 type="button"
@@ -270,11 +270,6 @@ function DataPrivacyAndCertification({
               Upload Signature
               {!existingSignatureUrl && <span className="text-red-600">*</span>}
             </label>
-            {errors.signature && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.signature.message || "Signature is required (draw or upload)."}
-              </p>
-            )}
             <div className="relative mt-2">
               <input
                 id="signature"
