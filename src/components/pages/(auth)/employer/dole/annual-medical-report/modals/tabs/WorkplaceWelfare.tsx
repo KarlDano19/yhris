@@ -91,12 +91,9 @@ function WorkplaceWelfare({
 
   return (
     <form onSubmit={onSubmit}>
-      <div className="gap-6 mt-4 pl-6 mb-6">
+      <div className="gap-4 md:gap-6 mt-4 px-4 md:pl-6 mb-6">
         <div>
-          <label
-            htmlFor="purpose_of_wem_request"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
+          <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
             a. Keeping of Medical Records of Workers:
             <span className="text-red-600">*</span>
           </label>
@@ -105,18 +102,15 @@ function WorkplaceWelfare({
               {errors.keeping_of_medical_records_of_workers.message || "Please select at least one option."}
             </p>
           )}
-          <div className="grid grid-cols-4 gap-2">
-            <div className="relative mt-2 flex items-center gap-1">
+          <div className="flex flex-col md:grid md:grid-cols-4 md:gap-2">
+            <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
                 {...register("keeping_of_medical_records_of_workers")}
                 id="keeping_of_medical_records_of_workers"
                 value="done"
               />
-              <label
-                htmlFor="keeping_of_medical_records_of_workers"
-                className="ml-1"
-              >
+              <label htmlFor="keeping_of_medical_records_of_workers" className="ml-1 text-sm">
                 Done
               </label>
             </div>
@@ -127,285 +121,211 @@ function WorkplaceWelfare({
                 id="keeping_of_medical_records_of_workers"
                 value="not_done"
               />
-              <label
-                htmlFor="keeping_of_medical_records_of_workers"
-                className="ml-2"
-              >
+              <label htmlFor="keeping_of_medical_records_of_workers" className="ml-2 text-sm">
                 Not Done
-                <span className="text-gray-500"></span>
               </label>
             </div>
-            <div>{""}</div>
-            <div>{""}</div>
+            <div className="hidden md:block">{""}</div>
+            <div className="hidden md:block">{""}</div>
           </div>
         </div>
       </div>
-      <div className="gap-6 mt-4 pl-6 mb-6">
+      <div className="gap-4 md:gap-6 mt-4 px-4 md:pl-6 mb-6">
         <div>
-          <label
-            htmlFor="purpose_of_wem_request"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
+          <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
             b. Health Education and Counselling by Health and Safety Personnel:
-            (You may check one or more)
             <span className="text-red-600">*</span>
+            <span className="block text-xs text-gray-500">(You may check one or more)</span>
           </label>
           {errors.health_education_and_counselling_by_health_and_safety_personnel && (
             <p className="text-xs text-red-600 mt-1">
               {errors.health_education_and_counselling_by_health_and_safety_personnel.message || "Please select at least one option."}
             </p>
           )}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="relative mt-2 flex items-center gap-1">
+          <div className="flex flex-col md:grid md:grid-cols-2 md:gap-2">
+            <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
-                {...register(
-                  "health_education_and_counselling_by_health_and_safety_personnel"
-                )}
-                id="health_education_and_counselling_by_health_and_safety_personnel"
+                {...register("health_education_and_counselling_by_health_and_safety_personnel")}
+                id="health_education_and_counselling_by_health_and_safety_personnel_1"
                 value="done_individually"
               />
-              <label
-                htmlFor="health_education_and_counselling_by_health_and_safety_personnel"
-                className="ml-1"
-              >
-                done individually as each worker comes to the clinic for
-                consultation.
+              <label htmlFor="health_education_and_counselling_by_health_and_safety_personnel_1" className="ml-1 text-sm">
+                done individually as each worker comes to the clinic for consultation.
               </label>
             </div>
             <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
-                {...register(
-                  "health_education_and_counselling_by_health_and_safety_personnel"
-                )}
-                id="health_education_and_counselling_by_health_and_safety_personnel"
+                {...register("health_education_and_counselling_by_health_and_safety_personnel")}
+                id="health_education_and_counselling_by_health_and_safety_personnel_2"
                 value="done "
               />
-              <label
-                htmlFor="health_education_and_counselling_by_health_and_safety_personnel"
-                className="ml-2"
-              >
+              <label htmlFor="health_education_and_counselling_by_health_and_safety_personnel_2" className="ml-2 text-sm">
                 done in organized group discussions/seminars.
-                <span className="text-gray-500"></span>
               </label>
             </div>
-            <div className="relative mt-2 flex items-center gap-1">
+            <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
-                {...register(
-                  "health_education_and_counselling_by_health_and_safety_personnel"
-                )}
-                id="health_education_and_counselling_by_health_and_safety_personnel"
+                {...register("health_education_and_counselling_by_health_and_safety_personnel")}
+                id="health_education_and_counselling_by_health_and_safety_personnel_3"
                 value="done_visual_displays"
               />
-              <label
-                htmlFor="health_education_and_counselling_by_health_and_safety_personnel"
-                className="ml-1"
-              >
-                done with the use of visual displays and/or promotional
-                materials, leaflets, etc.
+              <label htmlFor="health_education_and_counselling_by_health_and_safety_personnel_3" className="ml-1 text-sm">
+                done with the use of visual displays and/or promotional materials, leaflets, etc.
               </label>
             </div>
           </div>
         </div>
       </div>
-      <div className="gap-6 mt-4 pl-6 mb-6">
+      <div className="gap-4 md:gap-6 mt-4 px-4 md:pl-6 mb-6">
         <div>
-          <label
-            htmlFor="purpose_of_wem_request"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
+          <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
             c. Other Health Programs:
             <span className="text-red-600">*</span>
           </label>
-          <div className="grid grid-cols-4 gap-2 pt-2">
+          <div className="hidden md:grid md:grid-cols-4 md:gap-2">
             <div>Kind of Program</div>
             <div>
               <h1 className="text-sm font-medium pl-14">Seminars</h1>
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                Use of Visual Aid/ Materials
-              </h1>
+              <h1 className="text-sm font-medium pl-14">Use of Visual Aid/ Materials</h1>
             </div>
             <div>
               <h1 className="text-sm font-medium pl-14">Counseling</h1>
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
+          <div className="flex flex-col gap-4 md:hidden mt-2">
+            <div>
+              <div className="font-medium text-xs mb-1">Nutrition Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("nutrition_program")} value="seminars" /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("nutrition_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("nutrition_program")} value="counseling" /> Counseling
+                </label>
+              </div>
+            </div>
+            <div>
+              <div className="font-medium text-xs mb-1">Maternal and Child Care Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("maternal_and_child_care_program")} value="seminars" /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("maternal_and_child_care_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("maternal_and_child_care_program")} value="counseling" /> Counseling
+                </label>
+              </div>
+            </div>
+            <div>
+              <div className="font-medium text-xs mb-1">Family Planning Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("family_planning_program")} value="seminars" /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("family_planning_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("family_planning_program")} value="counseling" /> Counseling
+                </label>
+              </div>
+            </div>
+            <div>
+              <div className="font-medium text-xs mb-1">Mental Health Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("mental_health_program")} value="seminars" /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("mental_health_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("mental_health_program")} value="counseling" /> Counseling
+                </label>
+              </div>
+            </div>
+            <div>
+              <div className="font-medium text-xs mb-1">Personal Health Maintenance</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("personal_health_maintenance")} value="seminars" /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("personal_health_maintenance")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" {...register("personal_health_maintenance")} value="counseling" /> Counseling
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="hidden md:grid md:grid-cols-4 md:gap-2 mt-4">
             <div>Nutrition Program</div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("nutrition_program")}
-                  id="nutrition_program"
-                  value="seminars"
-                />
-              </h1>
+              <input type="checkbox" {...register("nutrition_program")} value="seminars" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("nutrition_program")}
-                  id="nutrition_program"
-                  value="use_of_visual_aid_materials"
-                />
-              </h1>
+              <input type="checkbox" {...register("nutrition_program")} value="use_of_visual_aid_materials" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("nutrition_program")}
-                  id="nutrition_program"
-                  value="counseling"
-                />
-              </h1>
+              <input type="checkbox" {...register("nutrition_program")} value="counseling" />
             </div>
-          </div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
             <div>Maternal and Child Care Program</div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("maternal_and_child_care_program")}
-                  id="maternal_and_child_care_program"
-                  value="seminars"
-                />
-              </h1>
+              <input type="checkbox" {...register("maternal_and_child_care_program")} value="seminars" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("maternal_and_child_care_program")}
-                  id="maternal_and_child_care_program"
-                  value="use_of_visual_aid_materials"
-                />
-              </h1>
+              <input type="checkbox" {...register("maternal_and_child_care_program")} value="use_of_visual_aid_materials" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("maternal_and_child_care_program")}
-                  id="maternal_and_child_care_program"
-                  value="counseling"
-                />
-              </h1>
+              <input type="checkbox" {...register("maternal_and_child_care_program")} value="counseling" />
             </div>
-          </div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
             <div>Family Planning Program</div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("family_planning_program")}
-                  id="family_planning_program"
-                  value="seminars"
-                />
-              </h1>
+              <input type="checkbox" {...register("family_planning_program")} value="seminars" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("family_planning_program")}
-                  id="family_planning_program"
-                  value="use_of_visual_aid_materials"
-                />
-              </h1>
+              <input type="checkbox" {...register("family_planning_program")} value="use_of_visual_aid_materials" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("family_planning_program")}
-                  id="family_planning_program"
-                  value="counseling"
-                />
-              </h1>
+              <input type="checkbox" {...register("family_planning_program")} value="counseling" />
             </div>
-          </div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
             <div>Mental Health Program</div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("mental_health_program")}
-                  id="mental_health_program"
-                  value="seminars"
-                />
-              </h1>
+              <input type="checkbox" {...register("mental_health_program")} value="seminars" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("mental_health_program")}
-                  id="mental_health_program"
-                  value="use_of_visual_aid_materials"
-                />
-              </h1>
+              <input type="checkbox" {...register("mental_health_program")} value="use_of_visual_aid_materials" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("mental_health_program")}
-                  id="mental_health_program"
-                  value="counseling"
-                />
-              </h1>
+              <input type="checkbox" {...register("mental_health_program")} value="counseling" />
             </div>
-          </div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
             <div>Personal Health Maintenance</div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("personal_health_maintenance")}
-                  id="personal_health_maintenance"
-                  value="seminars"
-                />
-              </h1>
+              <input type="checkbox" {...register("personal_health_maintenance")} value="seminars" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("personal_health_maintenance")}
-                  id="personal_health_maintenance"
-                  value="use_of_visual_aid_materials"
-                />
-              </h1>
+              <input type="checkbox" {...register("personal_health_maintenance")} value="use_of_visual_aid_materials" />
             </div>
             <div>
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("personal_health_maintenance")}
-                  id="personal_health_maintenance"
-                  value="counseling"
-                />
-              </h1>
+              <input type="checkbox" {...register("personal_health_maintenance")} value="counseling" />
             </div>
           </div>
         </div>
       </div>
-      <div className="gap-6 mt-4 pl-6 mb-6">
+      <div className="gap-4 md:gap-6 mt-4 px-4 md:pl-6 mb-6">
         <div>
-          <label
-            htmlFor="purpose_of_wem_request"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
+          <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
             Physical Fitness Program
             <span className="text-red-600">*</span>
           </label>
@@ -414,39 +334,35 @@ function WorkplaceWelfare({
               {errors.sports_activities.message || "Please select at least one option."}
             </p>
           )}
-          <div className="grid grid-cols-4 gap-2 mt-4">
-            <div>Sports Activities</div>
-            <div className="relative mt-2 flex items-center gap-1">
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("sports_activities")}
-                  id="sports_activities"
-                  value="no"
-                />
-                <label htmlFor="sports_activities" className="ml-1">
-                  No
-                </label>
-              </h1>
+          <div className="flex flex-col md:grid md:grid-cols-4 md:gap-2 mt-2">
+            <div className="mb-2 md:mb-0">Sports Activities</div>
+            <div className="relative flex items-center gap-2">
+              <input
+                type="checkbox"
+                {...register("sports_activities")}
+                id="sports_activities_no"
+                value="no"
+              />
+              <label htmlFor="sports_activities_no" className="ml-1 text-sm">
+                No
+              </label>
             </div>
-            <div className="relative mt-2 flex items-center gap-1">
-              <h1 className="text-sm font-medium pl-14">
-                <input
-                  type="checkbox"
-                  {...register("sports_activities")}
-                  id="sports_activities"
-                  value="yes"
-                />
-                <label htmlFor="sports_activities" className="ml-1">
-                  Yes
-                </label>
-              </h1>
+            <div className="relative flex items-center gap-2">
+              <input
+                type="checkbox"
+                {...register("sports_activities")}
+                id="sports_activities_yes"
+                value="yes"
+              />
+              <label htmlFor="sports_activities_yes" className="ml-1 text-sm">
+                Yes
+              </label>
             </div>
-            <div>{""}</div>
-            <div>{""}</div>
+            <div className="hidden md:block">{""}</div>
+            <div className="hidden md:block">{""}</div>
           </div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
-            <div className="col-span-1 flex items-center">
+          <div className="flex flex-col md:grid md:grid-cols-4 md:gap-2 mt-2">
+            <div className="col-span-1 flex items-center mb-2 md:mb-0">
               <label htmlFor="physical_fitness_program_others" className="text-sm font-medium">Others (Please specify):</label>
             </div>
             <div className="col-span-3">
@@ -455,7 +371,7 @@ function WorkplaceWelfare({
                 {...register("physical_fitness_program_others")}
                 id="physical_fitness_program_others"
                 maxLength={100}
-                className="rounded-md max-w-xs border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="rounded-md w-full max-w-xs border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 placeholder="Specify sport here"
               />
             </div>
