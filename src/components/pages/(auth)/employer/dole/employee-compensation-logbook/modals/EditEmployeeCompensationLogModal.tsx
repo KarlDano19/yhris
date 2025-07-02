@@ -102,24 +102,24 @@ export default function EditEmployeeCompensationLogModal({
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
         </Transition.Child>
 
-        <div className='fixed inset-0 z-10 overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-2 text-center md:p-0">
             <Transition.Child
               as={Fragment}
               enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
+              enterFrom='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
+              enterTo='opacity-100 translate-y-0 md:scale-100'
               leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              leaveFrom='opacity-100 translate-y-0 md:scale-100'
+              leaveTo='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Employee Compensation Log</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 <form onSubmit={onSubmit}>
-                  <div className='px-4 pt-4 pb-6'>
+                  <div className='px-2 pt-4 pb-6 md:px-8'>
                     <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
                       <div className='flex'>
                         <div className='flex-shrink-0'>
@@ -132,7 +132,7 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           Date of Entry
@@ -184,7 +184,7 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
                           Employee Name<span className='text-red-600'>*</span>
@@ -233,7 +233,7 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           Place of Contingency
@@ -263,10 +263,10 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          No. of Days of Employee’s Absence
+                          No. of Days of Employee&apos;s Absence
                           <span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
@@ -279,7 +279,7 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='sm:col-span-4 mt-4'>
+                    <div className='mt-4'>
                       <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                         Remarks<span className='text-red-600'>*</span>
                       </label>
