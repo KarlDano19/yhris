@@ -20,7 +20,7 @@ function WorkplaceSafetyCompliance({
   setValue: any;
   watch: any;
 }) {
-  const [isOccupationalAccidentOpen, setIsOccupationalAccidentOpen] =useState(true);
+  const [isOccupationalAccidentOpen, setIsOccupationalAccidentOpen] =useState(false);
   const [isImmunizationOpen, setIsImmunizationOpen] = useState(false);
 
   const toggleImmunizationOpen = () =>

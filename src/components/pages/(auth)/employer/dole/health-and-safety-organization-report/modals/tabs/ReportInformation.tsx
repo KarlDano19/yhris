@@ -281,8 +281,8 @@ function ReportInformation({
                   type="text"
                   value={totals.male}
                   {...register("total_employees_male", { required: true })}
-                  disabled
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                  readOnly
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -292,8 +292,8 @@ function ReportInformation({
                   type="text"
                   value={totals.female}
                   {...register("total_employees_female", { required: true })}
-                  disabled
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                  readOnly
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
