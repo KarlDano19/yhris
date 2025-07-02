@@ -143,7 +143,7 @@ function PolicyAndComittee({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div className="flex-1">
             <label
               htmlFor="policy_and_program_file"
@@ -218,10 +218,10 @@ function PolicyAndComittee({
           </div>
         </div>
         <hr className="my-4" />
-        <div className="mt-4 pl-6 pr-6">
+        <div className="mt-4 px-2 md:px-6">
           <h1 className="text-sm font-medium">Central Safety Committee</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4 pb-6">
           <div className="flex justify-center items-center">
             <div className="grid-item">
               <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
@@ -252,10 +252,10 @@ function PolicyAndComittee({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4 pb-6">
           {/* Render member inputs based on committee type */}
           {Array.from({ length: committeeMembersCount[committeeType as keyof typeof committeeMembersCount] }).map((_, index) => (
-            <div key={index} className="grid-item grid grid-cols-3 gap-4 col-span-4"> {/* Ensure it spans the full width */}
+            <div key={index} className="grid-item grid grid-cols-1 md:grid-cols-3 gap-4 col-span-4"> {/* Ensure it spans the full width */}
               <div className="mt-2">
               <div className="grid-item">
               <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
@@ -284,7 +284,7 @@ function PolicyAndComittee({
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4 pb-6">
           <div className="flex justify-center items-center">
             <div className="grid-item">
               <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">

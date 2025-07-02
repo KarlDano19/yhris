@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import React from "react";
 
 import { Controller, useFieldArray } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
@@ -90,10 +91,21 @@ function ReportInformation({
     setValue("total_employees_female", totals.female);
   }, [totals, setValue]);
 
+  // For mobile inputs, use watch and setValue for each shift
+  const getMobileShiftValues = (index: number) => {
+    const male = watch ? watch(`employees.${index}.male`) : '';
+    const female = watch ? watch(`employees.${index}.female`) : '';
+    return { male, female };
+  };
+
+  const totalMale = watch ? watch('total_employees_male') : '';
+  const totalFemale = watch ? watch('total_employees_female') : '';
+
   const renderEmployeeInputs = () => {
-    return fields.map((item, index) => {
-      return (
-        <div key={index} className="grid grid-cols-4 gap-6 mt-4 pb-6">
+    return fields.map((item, index) => (
+      <React.Fragment key={index}>
+        {/* Desktop grid row */}
+        <div className="hidden md:grid md:grid-cols-4 gap-4 md:gap-6 mt-4 pb-6">
           <div className="flex justify-center items-center mt-6">
             <div className="grid-item">
               <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
@@ -131,8 +143,41 @@ function ReportInformation({
             </button>
           </div>
         </div>
-      );
-    });
+        {/* Mobile stacked layout */}
+        <div className="block md:hidden mb-6">
+          <h2 className="font-medium mb-2 text-sm">Shift {index + 1}</h2>
+          <div className="grid grid-cols-1 gap-3">
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Male</label>
+              <input
+                type="number"
+                value={getMobileShiftValues(index).male || ''}
+                onChange={e => setValue && setValue(`employees.${index}.male`, e.target.value)}
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Female</label>
+              <input
+                type="number"
+                value={getMobileShiftValues(index).female || ''}
+                onChange={e => setValue && setValue(`employees.${index}.female`, e.target.value)}
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div className="flex justify-center items-center mt-2">
+              <button
+                type="button"
+                className="flex justify-center items-center rounded-md bg-red-600 p-2 text-white"
+                onClick={() => remove(index)}
+              >
+                <MinusIcon className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </React.Fragment>
+    ));
   };
 
   return (
@@ -153,7 +198,7 @@ function ReportInformation({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
               htmlFor="date_of_report"
@@ -237,7 +282,7 @@ function ReportInformation({
           </div>
         </div>
         <hr />
-        <div className="grid grid-cols-2 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
           <div className="mt-4">
             <h1 className="text-lg font-semibold">Persons Employed</h1>
           </div>
@@ -253,51 +298,83 @@ function ReportInformation({
           </button>
         </div>
         {fields.length > 0 && (
-          <div className="grid grid-cols-4 gap-6 mt-4">
-            <label className="text-sm font-medium leading-6 text-gray-900">
-              {""}
-            </label>
-            <label className="text-sm font-medium leading-6 text-gray-900">
-              Male
-            </label>
-            <label className="text-sm font-medium leading-6 text-gray-900">
-              Female
-            </label>
-          </div>
+          <>
+            {/* Desktop header */}
+            <div className="hidden md:grid md:grid-cols-4 gap-4 md:gap-6 mt-4">
+              <label className="text-sm font-medium leading-6 text-gray-900">
+                {""}
+              </label>
+              <label className="text-sm font-medium leading-6 text-gray-900">
+                Male
+              </label>
+              <label className="text-sm font-medium leading-6 text-gray-900">
+                Female
+              </label>
+            </div>
+          </>
         )}
         <div>{renderEmployeeInputs()}</div>
         {fields.length > 0 && (
-          <div className="grid grid-cols-4 gap-6 mt-4 pb-6">
-            <div className="flex justify-center items-center mt-6">
+          <>
+            {/* Desktop total row */}
+            <div className="hidden md:grid md:grid-cols-4 gap-4 md:gap-6 mt-4 pb-6">
+              <div className="flex justify-center items-center mt-6">
+                <div className="grid-item">
+                  <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
+                    Total Employees
+                  </h1>
+                </div>
+              </div>
               <div className="grid-item">
-                <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
-                  Total Employees
-                </h1>
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    value={totals.male}
+                    {...register("total_employees_male", { required: true })}
+                    readOnly
+                    className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    value={totals.female}
+                    {...register("total_employees_female", { required: true })}
+                    readOnly
+                    className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                  />
+                </div>
               </div>
             </div>
-            <div className="grid-item">
-              <div className="mt-2">
-                <input
-                  type="text"
-                  value={totals.male}
-                  {...register("total_employees_male", { required: true })}
-                  readOnly
-                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                />
+            {/* Mobile total row */}
+            <div className="block md:hidden mb-6">
+              <h2 className="font-medium mb-2 text-sm">Total Employees</h2>
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                  <input
+                    type="text"
+                    value={totalMale || ''}
+                    onChange={e => setValue && setValue('total_employees_male', e.target.value)}
+                    readOnly
+                    className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                  <input
+                    type="text"
+                    value={totalFemale || ''}
+                    onChange={e => setValue && setValue('total_employees_female', e.target.value)}
+                    readOnly
+                    className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                  />
+                </div>
               </div>
             </div>
-            <div className="grid-item">
-              <div className="mt-2">
-                <input
-                  type="text"
-                  value={totals.female}
-                  {...register("total_employees_female", { required: true })}
-                  readOnly
-                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-          </div>
+          </>
         )}
       </div>
       <hr />
