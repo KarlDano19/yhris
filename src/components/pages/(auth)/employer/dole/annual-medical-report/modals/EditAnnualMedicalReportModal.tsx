@@ -657,58 +657,58 @@ function EditAnnualMedicalReportModal({
                   />
                 </div>
                 <div>
-                  <div className="pt-4 pb-2 pl-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                  <div className="pt-4 pb-2 pl-4 pr-4 flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide">
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(1)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 1 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>1</h1>
                       <h1 className={classNames('self-center text-sm md:text-base font-semibold', selectedTab === 1 ? 'text-savoy-blue' : 'hidden')}>General Information</h1>
                     </div>
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(2)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 2 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>2</h1>
                       <h1 className={classNames('self-center text-sm md:text-base font-semibold', selectedTab === 2 ? 'text-savoy-blue' : 'hidden')}>Preventive and Emergency Health Services</h1>
                     </div>
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(3)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 3 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>3</h1>
                       <h1 className={classNames('self-center text-sm md:text-base font-semibold', selectedTab === 3 ? 'text-savoy-blue' : 'hidden')}>Emergency Occupational Health Services</h1>
                     </div>
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(4)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 4 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>4</h1>
                       <h1 className={classNames('self-center text-sm md:text-base font-semibold', selectedTab === 4 ? 'text-savoy-blue' : 'hidden')}>Occupational Health Services</h1>
                     </div>
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(5)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 5 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>5</h1>
                       <h1 className={classNames('self-center text-sm md:text-base font-semibold', selectedTab === 5 ? 'text-savoy-blue' : 'hidden')}>Report of Disease</h1>
                     </div>
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(6)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 6 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>6</h1>
                       <h1 className={classNames('self-center text-sm md:text-base font-semibold', selectedTab === 6 ? 'text-savoy-blue' : 'hidden')}>Workplace Safety Compliance</h1>
                     </div>
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(7)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 7 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>7</h1>
                       <h1 className={classNames('self-center text-sm md:text-base font-semibold', selectedTab === 7 ? 'text-savoy-blue' : 'hidden')}>Workplace Welfare</h1>
                     </div>
                     <div 
-                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex space-x-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       onClick={() => setSelectedTab(8)}
                     >
                       <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', selectedTab === 8 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>8</h1>

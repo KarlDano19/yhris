@@ -100,7 +100,7 @@ function CreateAnnualMedicalReportModal({
                   />
                 </div>
                 <div>
-                  <div className="pt-4 pb-2 pl-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                  <div className="pt-4 pb-2 pl-4 pr-4 flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide">
                     <div 
                       className="flex space-x-2 transition-opacity"
                     >
