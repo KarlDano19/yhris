@@ -93,7 +93,7 @@ const FeaturesSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-indigo-dye mb-6">
-            Complete HRIS Solution
+            YAHSHUA HRIS: Employee Data & Job Posting Management
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Everything you need to manage your human resources from recruitment to retirement. 
