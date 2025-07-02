@@ -10,6 +10,7 @@ function WorkplaceWelfare({
   errors,
   setError,
   clearErrors,
+  setValue,
 }: {
   register: any;
   handleSubmit: any;
@@ -18,6 +19,7 @@ function WorkplaceWelfare({
   errors: any;
   setError: any;
   clearErrors: any;
+  setValue: any;
 }) {
   
   // Extract watched values with useMemo
@@ -185,6 +187,7 @@ function WorkplaceWelfare({
             c. Other Health Programs:
             <span className="text-red-600">*</span>
           </label>
+          {/* Desktop layout start */}
           <div className="hidden md:grid md:grid-cols-4 md:gap-2">
             <div>Kind of Program</div>
             <div>
@@ -197,78 +200,9 @@ function WorkplaceWelfare({
               <h1 className="text-sm font-medium pl-14">Counseling</h1>
             </div>
           </div>
-          <div className="flex flex-col gap-4 md:hidden mt-2">
-            <div>
-              <div className="font-medium text-xs mb-1">Nutrition Program</div>
-              <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("nutrition_program")} value="seminars" /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("nutrition_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("nutrition_program")} value="counseling" /> Counseling
-                </label>
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-xs mb-1">Maternal and Child Care Program</div>
-              <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("maternal_and_child_care_program")} value="seminars" /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("maternal_and_child_care_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("maternal_and_child_care_program")} value="counseling" /> Counseling
-                </label>
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-xs mb-1">Family Planning Program</div>
-              <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("family_planning_program")} value="seminars" /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("family_planning_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("family_planning_program")} value="counseling" /> Counseling
-                </label>
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-xs mb-1">Mental Health Program</div>
-              <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("mental_health_program")} value="seminars" /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("mental_health_program")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("mental_health_program")} value="counseling" /> Counseling
-                </label>
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-xs mb-1">Personal Health Maintenance</div>
-              <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("personal_health_maintenance")} value="seminars" /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("personal_health_maintenance")} value="use_of_visual_aid_materials" /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" {...register("personal_health_maintenance")} value="counseling" /> Counseling
-                </label>
-              </div>
-            </div>
-          </div>
+          {/* Desktop layout end */}
+
+          {/* Desktop layout start */}
           <div className="hidden md:grid md:grid-cols-4 md:gap-2 mt-4">
             <div>Nutrition Program</div>
             <div>
@@ -321,6 +255,252 @@ function WorkplaceWelfare({
               <input type="checkbox" {...register("personal_health_maintenance")} value="counseling" />
             </div>
           </div>
+          {/* Desktop layout end */}
+
+          {/* Mobile layout start */}
+          <div className="flex flex-col gap-4 md:hidden mt-2">
+            {/* Nutrition Program */}
+            <div>
+              <div className="font-medium text-xs mb-1">Nutrition Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("nutrition_program")?.includes("seminars") || false}
+                    onChange={e => {
+                      const prev = watch("nutrition_program") || [];
+                      if (e.target.checked) {
+                        setValue("nutrition_program", [...prev, "seminars"]);
+                      } else {
+                        setValue("nutrition_program", prev.filter((v: string) => v !== "seminars"));
+                      }
+                    }}
+                  /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("nutrition_program")?.includes("use_of_visual_aid_materials") || false}
+                    onChange={e => {
+                      const prev = watch("nutrition_program") || [];
+                      if (e.target.checked) {
+                        setValue("nutrition_program", [...prev, "use_of_visual_aid_materials"]);
+                      } else {
+                        setValue("nutrition_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                      }
+                    }}
+                  /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("nutrition_program")?.includes("counseling") || false}
+                    onChange={e => {
+                      const prev = watch("nutrition_program") || [];
+                      if (e.target.checked) {
+                        setValue("nutrition_program", [...prev, "counseling"]);
+                      } else {
+                        setValue("nutrition_program", prev.filter((v: string) => v !== "counseling"));
+                      }
+                    }}
+                  /> Counseling
+                </label>
+              </div>
+            </div>
+            {/* Maternal and Child Care Program */}
+            <div>
+              <div className="font-medium text-xs mb-1">Maternal and Child Care Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("maternal_and_child_care_program")?.includes("seminars") || false}
+                    onChange={e => {
+                      const prev = watch("maternal_and_child_care_program") || [];
+                      if (e.target.checked) {
+                        setValue("maternal_and_child_care_program", [...prev, "seminars"]);
+                      } else {
+                        setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "seminars"));
+                      }
+                    }}
+                  /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("maternal_and_child_care_program")?.includes("use_of_visual_aid_materials") || false}
+                    onChange={e => {
+                      const prev = watch("maternal_and_child_care_program") || [];
+                      if (e.target.checked) {
+                        setValue("maternal_and_child_care_program", [...prev, "use_of_visual_aid_materials"]);
+                      } else {
+                        setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                      }
+                    }}
+                  /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("maternal_and_child_care_program")?.includes("counseling") || false}
+                    onChange={e => {
+                      const prev = watch("maternal_and_child_care_program") || [];
+                      if (e.target.checked) {
+                        setValue("maternal_and_child_care_program", [...prev, "counseling"]);
+                      } else {
+                        setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "counseling"));
+                      }
+                    }}
+                  /> Counseling
+                </label>
+              </div>
+            </div>
+            {/* Family Planning Program */}
+            <div>
+              <div className="font-medium text-xs mb-1">Family Planning Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("family_planning_program")?.includes("seminars") || false}
+                    onChange={e => {
+                      const prev = watch("family_planning_program") || [];
+                      if (e.target.checked) {
+                        setValue("family_planning_program", [...prev, "seminars"]);
+                      } else {
+                        setValue("family_planning_program", prev.filter((v: string) => v !== "seminars"));
+                      }
+                    }}
+                  /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("family_planning_program")?.includes("use_of_visual_aid_materials") || false}
+                    onChange={e => {
+                      const prev = watch("family_planning_program") || [];
+                      if (e.target.checked) {
+                        setValue("family_planning_program", [...prev, "use_of_visual_aid_materials"]);
+                      } else {
+                        setValue("family_planning_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                      }
+                    }}
+                  /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("family_planning_program")?.includes("counseling") || false}
+                    onChange={e => {
+                      const prev = watch("family_planning_program") || [];
+                      if (e.target.checked) {
+                        setValue("family_planning_program", [...prev, "counseling"]);
+                      } else {
+                        setValue("family_planning_program", prev.filter((v: string) => v !== "counseling"));
+                      }
+                    }}
+                  /> Counseling
+                </label>
+              </div>
+            </div>
+            {/* Mental Health Program */}
+            <div>
+              <div className="font-medium text-xs mb-1">Mental Health Program</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("mental_health_program")?.includes("seminars") || false}
+                    onChange={e => {
+                      const prev = watch("mental_health_program") || [];
+                      if (e.target.checked) {
+                        setValue("mental_health_program", [...prev, "seminars"]);
+                      } else {
+                        setValue("mental_health_program", prev.filter((v: string) => v !== "seminars"));
+                      }
+                    }}
+                  /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("mental_health_program")?.includes("use_of_visual_aid_materials") || false}
+                    onChange={e => {
+                      const prev = watch("mental_health_program") || [];
+                      if (e.target.checked) {
+                        setValue("mental_health_program", [...prev, "use_of_visual_aid_materials"]);
+                      } else {
+                        setValue("mental_health_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                      }
+                    }}
+                  /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("mental_health_program")?.includes("counseling") || false}
+                    onChange={e => {
+                      const prev = watch("mental_health_program") || [];
+                      if (e.target.checked) {
+                        setValue("mental_health_program", [...prev, "counseling"]);
+                      } else {
+                        setValue("mental_health_program", prev.filter((v: string) => v !== "counseling"));
+                      }
+                    }}
+                  /> Counseling
+                </label>
+              </div>
+            </div>
+            {/* Personal Health Maintenance */}
+            <div>
+              <div className="font-medium text-xs mb-1">Personal Health Maintenance</div>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("personal_health_maintenance")?.includes("seminars") || false}
+                    onChange={e => {
+                      const prev = watch("personal_health_maintenance") || [];
+                      if (e.target.checked) {
+                        setValue("personal_health_maintenance", [...prev, "seminars"]);
+                      } else {
+                        setValue("personal_health_maintenance", prev.filter((v: string) => v !== "seminars"));
+                      }
+                    }}
+                  /> Seminars
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("personal_health_maintenance")?.includes("use_of_visual_aid_materials") || false}
+                    onChange={e => {
+                      const prev = watch("personal_health_maintenance") || [];
+                      if (e.target.checked) {
+                        setValue("personal_health_maintenance", [...prev, "use_of_visual_aid_materials"]);
+                      } else {
+                        setValue("personal_health_maintenance", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                      }
+                    }}
+                  /> Visual Aid/Materials
+                </label>
+                <label className="flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={watch("personal_health_maintenance")?.includes("counseling") || false}
+                    onChange={e => {
+                      const prev = watch("personal_health_maintenance") || [];
+                      if (e.target.checked) {
+                        setValue("personal_health_maintenance", [...prev, "counseling"]);
+                      } else {
+                        setValue("personal_health_maintenance", prev.filter((v: string) => v !== "counseling"));
+                      }
+                    }}
+                  /> Counseling
+                </label>
+              </div>
+            </div>
+          </div>
+          {/* Mobile layout end */}
         </div>
       </div>
       <div className="gap-4 md:gap-6 mt-4 px-4 md:pl-6 mb-6">

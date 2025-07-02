@@ -198,7 +198,7 @@ const Skin: React.FC<SkinProps> = ({ register, setValue, watch }) => {
       <div className="hidden md:grid md:grid-cols-4 gap-6 pb-6">
         <div className="flex justify-start items-center pl-6">
           <div className="grid-item">
-            <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+            <h1 className="block text-sm font-medium items-start leading-6 text-gray-900">
               infection as folliculitis abscess/paro nychia
             </h1>
           </div>

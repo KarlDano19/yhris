@@ -138,7 +138,7 @@ import {
                         <SignatureCanvas
                           ref={signatureCanvasRef}
                           canvasProps={{
-                            width: typeof window !== 'undefined' && window.innerWidth < 640 ? 320 : 900,
+                            width: 900,
                             height: 200,
                             className: "mx-auto block rounded bg-white border",
                             style: { width: '100%', maxWidth: 900, height: 200 }

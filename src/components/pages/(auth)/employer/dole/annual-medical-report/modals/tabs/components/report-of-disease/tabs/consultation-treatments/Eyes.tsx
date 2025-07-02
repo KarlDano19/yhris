@@ -85,7 +85,7 @@ const Eyes: React.FC<EyesProps> = ({ register, setValue, watch }) => {
         </div>
         
         {/* Mobile layout - hidden on desktop */}
-        <div className="block md:hidden mb-6">
+        <div className="pl-7 block md:hidden mb-6">
             <h2 className="font-medium mb-2 text-sm">Cataract</h2>
             <div className="grid grid-cols-1 gap-3">
                 <div>
@@ -161,7 +161,7 @@ const Eyes: React.FC<EyesProps> = ({ register, setValue, watch }) => {
         </div>
         
         {/* Mobile layout - hidden on desktop */}
-        <div className="block md:hidden mb-6">
+        <div className="pl-7 block md:hidden mb-6">
             <h2 className="font-medium mb-2 text-sm">Error of refraction</h2>
             <div className="grid grid-cols-1 gap-3">
                 <div>
@@ -237,7 +237,7 @@ const Eyes: React.FC<EyesProps> = ({ register, setValue, watch }) => {
         </div>
         
         {/* Mobile layout - hidden on desktop */}
-        <div className="block md:hidden mb-6">
+        <div className="pl-7 block md:hidden mb-6">
             <h2 className="font-medium mb-2 text-sm">Bacterial/viral conjunctivities</h2>
             <div className="grid grid-cols-1 gap-3">
                 <div>
@@ -313,7 +313,7 @@ const Eyes: React.FC<EyesProps> = ({ register, setValue, watch }) => {
         </div>
         
         {/* Mobile layout - hidden on desktop */}
-        <div className="block md:hidden mb-6">
+        <div className="pl-7 block md:hidden mb-6">
             <h2 className="font-medium mb-2 text-sm">Others</h2>
             <div className="grid grid-cols-1 gap-3">
                 <div>
