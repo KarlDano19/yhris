@@ -162,10 +162,6 @@ function OccupationalHealthService({
               </div>
             </div>
             
-            {/* Mobile header */}
-            <div className="block md:hidden mb-4">
-              <h1 className="text-base font-medium">Medical Examinations</h1>
-            </div>
             {/* Desktop layout - hidden on mobile */}
             <div className="hidden md:grid md:grid-cols-5 gap-6 pb-6">
               <div className="flex justify-start items-center pl-6">
@@ -465,7 +461,8 @@ function OccupationalHealthService({
                 </div>
               </div>
             </div>
-                      {/* Desktop layout - hidden on mobile */}
+            
+            {/* Desktop layout - hidden on mobile */}
             <div className="hidden md:grid md:grid-cols-5 gap-6 pb-6">
               <div className="flex justify-start items-center pl-6">
                 <div className="grid-item">
@@ -630,11 +627,6 @@ function OccupationalHealthService({
               <div>
                 <h1 className="text-sm font-medium pl-10">Others</h1>
               </div>
-            </div>
-            
-            {/* Mobile header */}
-            <div className="block md:hidden mb-4 mt-8">
-              <h1 className="text-base font-medium">Additional Medical Examinations</h1>
             </div>
             
             {/* Desktop layout - hidden on mobile */}

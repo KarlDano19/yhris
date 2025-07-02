@@ -2,12 +2,35 @@ import React from "react";
 
 interface RespiratoryProps {
   register: any;
+  setValue?: any;
+  watch?: any;
 }
 
-const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
+const Respiratory: React.FC<RespiratoryProps> = ({ register, setValue, watch }) => {
+  // Get values for mobile inputs
+  const bronchitis_male = watch ? watch("bronchitis_male") : "";
+  const bronchitis_female = watch ? watch("bronchitis_female") : "";
+  const bronchitis_total = watch ? watch("bronchitis_total") : "";
+  const bronchial_asthma_male = watch ? watch("bronchial_asthma_male") : "";
+  const bronchial_asthma_female = watch ? watch("bronchial_asthma_female") : "";
+  const bronchial_asthma_total = watch ? watch("bronchial_asthma_total") : "";
+  const pneumonia_male = watch ? watch("pneumonia_male") : "";
+  const pneumonia_female = watch ? watch("pneumonia_female") : "";
+  const pneumonia_total = watch ? watch("pneumonia_total") : "";
+  const tuberculosis_male = watch ? watch("tuberculosis_male") : "";
+  const tuberculosis_female = watch ? watch("tuberculosis_female") : "";
+  const tuberculosis_total = watch ? watch("tuberculosis_total") : "";
+  const pneumoconiosis_male = watch ? watch("pneumoconiosis_male") : "";
+  const pneumoconiosis_female = watch ? watch("pneumoconiosis_female") : "";
+  const pneumoconiosis_total = watch ? watch("pneumoconiosis_total") : "";
+  const others_respiratory_male = watch ? watch("others_respiratory_male") : "";
+  const others_respiratory_female = watch ? watch("others_respiratory_female") : "";
+  const others_respiratory_total = watch ? watch("others_respiratory_total") : "";
+
   return (
     <>
-        <div className="grid grid-cols-4 gap-4">
+        {/* Desktop header - hidden on mobile */}
+        <div className="hidden md:grid md:grid-cols-4 gap-4">
         <div>{""}</div>
         <div>
             <h1 className="text-sm font-medium text-center">Male</h1>
@@ -21,7 +44,8 @@ const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
             </h1>
         </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 pb-6">
+        {/* Desktop layout - hidden on mobile */}
+        <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
         <div className="flex justify-start items-center pl-6">
             <div className="grid-item">
             <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
@@ -61,7 +85,41 @@ const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
             </div>
         </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 pb-6">
+        {/* Mobile layout - hidden on desktop */}
+        <div className="pl-7 block md:hidden mb-6">
+            <h2 className="font-medium mb-2 text-sm">Bronchitis</h2>
+            <div className="grid grid-cols-1 gap-3">
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                    <input
+                        type="number"
+                        value={bronchitis_male || ""}
+                        onChange={(e) => setValue && setValue("bronchitis_male", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                    <input
+                        type="number"
+                        value={bronchitis_female || ""}
+                        onChange={(e) => setValue && setValue("bronchitis_female", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+                    <input
+                        type="number"
+                        value={bronchitis_total || ""}
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                    />
+                </div>
+            </div>
+        </div>
+        {/* Desktop layout - hidden on mobile */}
+        <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
         <div className="flex justify-start items-center pl-6">
             <div className="grid-item">
             <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
@@ -101,7 +159,41 @@ const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
             </div>
         </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 pb-6">
+        {/* Mobile layout - hidden on desktop */}
+        <div className="pl-7 block md:hidden mb-6">
+            <h2 className="font-medium mb-2 text-sm">Bronchial Asthma</h2>
+            <div className="grid grid-cols-1 gap-3">
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                    <input
+                        type="number"
+                        value={bronchial_asthma_male || ""}
+                        onChange={(e) => setValue && setValue("bronchial_asthma_male", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                    <input
+                        type="number"
+                        value={bronchial_asthma_female || ""}
+                        onChange={(e) => setValue && setValue("bronchial_asthma_female", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+                    <input
+                        type="number"
+                        value={bronchial_asthma_total || ""}
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                    />
+                </div>
+            </div>
+        </div>
+        {/* Desktop layout - hidden on mobile */}
+        <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
         <div className="flex justify-start items-center pl-6">
             <div className="grid-item">
             <h1 className="block text-sm font-medium items-start leading-6 text-gray-900">
@@ -141,7 +233,41 @@ const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
             </div>
         </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 pb-6">
+        {/* Mobile layout - hidden on desktop */}
+        <div className="pl-7 block md:hidden mb-6">
+            <h2 className="font-medium mb-2 text-sm">Pneumonia</h2>
+            <div className="grid grid-cols-1 gap-3">
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                    <input
+                        type="number"
+                        value={pneumonia_male || ""}
+                        onChange={(e) => setValue && setValue("pneumonia_male", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                    <input
+                        type="number"
+                        value={pneumonia_female || ""}
+                        onChange={(e) => setValue && setValue("pneumonia_female", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+                    <input
+                        type="number"
+                        value={pneumonia_total || ""}
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                    />
+                </div>
+            </div>
+        </div>
+        {/* Desktop layout - hidden on mobile */}
+        <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
         <div className="flex justify-start items-center pl-6">
             <div className="grid-item">
             <h1 className="block text-sm font-medium items-start leading-6 text-gray-900">
@@ -181,7 +307,41 @@ const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
             </div>
         </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 pb-6">
+        {/* Mobile layout - hidden on desktop */}
+        <div className="pl-7 block md:hidden mb-6">
+            <h2 className="font-medium mb-2 text-sm">Tuberculosis</h2>
+            <div className="grid grid-cols-1 gap-3">
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                    <input
+                        type="number"
+                        value={tuberculosis_male || ""}
+                        onChange={(e) => setValue && setValue("tuberculosis_male", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                    <input
+                        type="number"
+                        value={tuberculosis_female || ""}
+                        onChange={(e) => setValue && setValue("tuberculosis_female", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+                    <input
+                        type="number"
+                        value={tuberculosis_total || ""}
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                    />
+                </div>
+            </div>
+        </div>
+        {/* Desktop layout - hidden on mobile */}
+        <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
         <div className="flex justify-start items-center pl-6">
             <div className="grid-item">
             <h1 className="block text-sm font-medium items-start leading-6 text-gray-900">
@@ -221,7 +381,41 @@ const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
             </div>
         </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 pb-6">
+        {/* Mobile layout - hidden on desktop */}
+        <div className="pl-7 block md:hidden mb-6">
+            <h2 className="font-medium mb-2 text-sm">Pneumoconiosis</h2>
+            <div className="grid grid-cols-1 gap-3">
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                    <input
+                        type="number"
+                        value={pneumoconiosis_male || ""}
+                        onChange={(e) => setValue && setValue("pneumoconiosis_male", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                    <input
+                        type="number"
+                        value={pneumoconiosis_female || ""}
+                        onChange={(e) => setValue && setValue("pneumoconiosis_female", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+                    <input
+                        type="number"
+                        value={pneumoconiosis_total || ""}
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                    />
+                </div>
+            </div>
+        </div>
+        {/* Desktop layout - hidden on mobile */}
+        <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
         <div className="flex justify-start items-center pl-6">
             <div className="grid-item">
             <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
@@ -260,6 +454,39 @@ const Respiratory: React.FC<RespiratoryProps> = ({ register }) => {
             />
             </div>
         </div>
+        </div>
+        {/* Mobile layout - hidden on desktop */}
+        <div className="pl-7 block md:hidden mb-6">
+            <h2 className="font-medium mb-2 text-sm">Others</h2>
+            <div className="grid grid-cols-1 gap-3">
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                    <input
+                        type="number"
+                        value={others_respiratory_male || ""}
+                        onChange={(e) => setValue && setValue("others_respiratory_male", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                    <input
+                        type="number"
+                        value={others_respiratory_female || ""}
+                        onChange={(e) => setValue && setValue("others_respiratory_female", e.target.value)}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+                    <input
+                        type="number"
+                        value={others_respiratory_total || ""}
+                        readOnly
+                        className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+                    />
+                </div>
+            </div>
         </div>
     </>
   );

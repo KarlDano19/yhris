@@ -103,10 +103,10 @@ function ReportOfDisease({
       {/* Include the AutoCalculateTotals component */}
       <AutoCalculateTotals watch={watch} setValue={setValue} />
       
-      <div className="flex flex-row gap-4 pl-6 pt-4">
+      <div className="flex flex-row gap-2 md:gap-4 px-4 md:pl-6 pt-4">
         <div
           className={classNames(
-            "px-4 py-2 rounded-md",
+            "px-3 md:px-4 py-2 rounded-md text-sm",
             isDiseaseOpen
               ? "bg-savoy-blue text-white"
               : "bg-white text-gray-500"
@@ -117,7 +117,7 @@ function ReportOfDisease({
         </div>
         <div
           className={classNames(
-            "px-4 py-2 rounded-md",
+            "px-3 md:px-4 py-2 rounded-md text-sm",
             isPhysicalEnvironmentOpen
               ? "bg-savoy-blue text-white"
               : "bg-white text-gray-500"
@@ -127,9 +127,9 @@ function ReportOfDisease({
           Disease due to Physical Environment
         </div>
       </div>
-      <div className="gap-6 mt-4 pl-6 mb-6 flex flex-row">
+      <div className="gap-6 mt-4 px-4 md:pl-6 mb-6">
         {isDiseaseOpen && (
-          <div className="pr-8">
+          <div className="pr-0 md:pr-8">
             <label
               htmlFor="purpose_of_wem_request"
               className="block text-sm font-medium leading-6 text-gray-900"
@@ -144,7 +144,7 @@ function ReportOfDisease({
               isOpen={isSkinOpen} 
               onToggle={toggleSkinOpen}
             >
-              <Skin register={register} />
+              <Skin register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
             
             {/* Head */}
@@ -153,7 +153,7 @@ function ReportOfDisease({
               isOpen={isHeadOpen} 
               onToggle={toggleHeadOpen}
             >
-              <Head register={register} />
+              <Head register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
             
             {/* Eyes */}
@@ -162,7 +162,7 @@ function ReportOfDisease({
               isOpen={isEyesOpen} 
               onToggle={toggleEyesOpen}
             >
-              <Eyes register={register} />
+              <Eyes register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Mount & ENT */}
@@ -171,7 +171,7 @@ function ReportOfDisease({
               isOpen={isMountENTOpen} 
               onToggle={toggleMountENTOpen}
             >
-              <MountENT register={register} />
+              <MountENT register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
           
             {/* Respiratory */}
@@ -180,7 +180,7 @@ function ReportOfDisease({
               isOpen={isRespiratoryOpen} 
               onToggle={toggleRespiratoryOpen}
             >
-              <Respiratory register={register} />
+              <Respiratory register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Heart and Blood Vessel */}
@@ -189,7 +189,7 @@ function ReportOfDisease({
               isOpen={isHeartOpen} 
               onToggle={toggleHeartOpen}
             >
-              <Heart register={register} />
+              <Heart register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
               
             {/* Gastrointestinal */}
@@ -198,7 +198,7 @@ function ReportOfDisease({
               isOpen={isGastrointestinalOpen} 
               onToggle={toggleGastrointestinalOpen}
             >
-              <Gastrointestinal register={register} />
+              <Gastrointestinal register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Genito Urinary */}
@@ -207,7 +207,7 @@ function ReportOfDisease({
               isOpen={isGenitourinaryOpen} 
               onToggle={toggleGenitourinaryOpen}
             >
-              <Genitourinary register={register} />
+              <Genitourinary register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Reproductive */}
@@ -216,7 +216,7 @@ function ReportOfDisease({
               isOpen={isReproductiveOpen} 
               onToggle={toggleReproductiveOpen}
             >
-              <Reproductive register={register} />
+              <Reproductive register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Neuromuscular/ Skeletal/ Joints */}
@@ -225,7 +225,7 @@ function ReportOfDisease({
               isOpen={isNeurologicalOpen} 
               onToggle={toggleNeurologicalOpen}
             >
-              <Neurological register={register} />
+              <Neurological register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Lymphatic and Immune System */}
@@ -234,7 +234,7 @@ function ReportOfDisease({
               isOpen={isLymphaticOpen} 
               onToggle={toggleLymphaticOpen}
             >
-              <Lymphatic register={register} />
+              <Lymphatic register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Infectious Diseases */}
@@ -243,22 +243,21 @@ function ReportOfDisease({
               isOpen={isInfectionOpen} 
               onToggle={toggleInfectionOpen}
             >
-              <Infection register={register} />
+              <Infection register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
           </div>
         )}
-      </div>
-      {isPhysicalEnvironmentOpen && (
-        <>
-          <div className="pr-8">
+      
+        {isPhysicalEnvironmentOpen && (
+          <div className="pr-0 md:pr-8">
             {/* Diseases due to Noise and vibration */}
             <ToggleSection 
               title="a. Diseases due to Noise and vibration" 
               isOpen={isDiseaseDueToVibrationOpen} 
               onToggle={toggleDiseaseDueToVibrationOpen}
             >
-              <DiseaseDueToVibration register={register} />
+              <DiseaseDueToVibration register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Diseases due to Temperature And Humidity abnormalities */}
@@ -267,7 +266,7 @@ function ReportOfDisease({
               isOpen={isDiseaseDueToTemperatureOpen} 
               onToggle={toggleDiseaseDueToTemperatureOpen}
             >
-              <DiseaseDueToTemperature register={register} />
+              <DiseaseDueToTemperature register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
             {/* Diseases due to radiation */}
@@ -276,24 +275,23 @@ function ReportOfDisease({
               isOpen={isDiseaseDueToRadiationOpen} 
               onToggle={toggleDiseaseDueToRadiationOpen}
             >
-              <DiseaseDueToRadiation register={register} />
+              <DiseaseDueToRadiation register={register} setValue={setValue} watch={watch}/>
             </ToggleSection>
-
           </div>
-        </>
-      )}
+        )}
+      </div>
       <hr />
       <div className="py-4 px-4 flex justify-between">
         <button
           type="button"
-          className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="w-auto rounded-md bg-white border border-savoy-blue px-8 md:px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           onClick={() => setSelectedTab(4)}
         >
           Back
         </button>
         <button
           type="submit"
-          className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="w-auto rounded-md bg-savoy-blue px-8 md:px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Next
         </button>
