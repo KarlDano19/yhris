@@ -79,7 +79,7 @@ export default function DeleteEmployeeCompensationLogModal({
                     Are you sure you want to <span className='text-red-500'>delete</span> this entry?
                   </p>
                 </div>
-                <div className='flex flex-col md:flex-row justify-center w-full gap-3 md:gap-8 px-2 md:px-4 pt-8 md:pt-10 pb-5 md:pb-7'>
+                <div className='flex flex-row justify-center w-full gap-3 md:gap-8 px-4 pt-8 md:pt-10 pb-5 md:pb-7'>
                   <span className='flex w-full rounded-md shadow-sm md:w-auto'>
                     <button
                       type='button'
