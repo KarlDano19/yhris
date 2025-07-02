@@ -51,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
         
+        
         {/* Meta Pixel */}
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
@@ -62,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '1275455147702466');
+            fbq('init', '2144124972722813');
             fbq('track', 'PageView');
           `}
         </Script>
@@ -85,6 +86,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <noscript>
           <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MMRM9NHW"
           height="0" width="0" style={{display:'none',visibility:'hidden'}}></iframe>
+        </noscript>
+        
+        <noscript>
+          <img height="1" width="1" style={{display:'none'}} alt="" src="https://www.facebook.com/tr?id=2144124972722813&ev=PageView&noscript=1" />
         </noscript>
         
         <noscript>
