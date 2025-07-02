@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'YAHSHUA HRIS - Complete HRIS Management',
     description: 'Complete HRIS solution for employee data management, and job posting automation.',
+  },
+  alternates: {
+    canonical: 'https://yahshuahris.com/landing-page'
   }
 };
 

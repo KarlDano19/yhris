@@ -9,6 +9,9 @@ import { SessionData, sessionOptions } from '@/lib/session';
 export const metadata = {
   title: 'Pricing - Yahshua HRIS',
   description: 'HRIS',
+  alternates: {
+    canonical: 'https://yahshuahris.com/pricing'
+  }
 };
 
 async function getSession() {
