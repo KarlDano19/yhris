@@ -9,17 +9,17 @@ const HeroSection = () => {
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 pt-24">
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-5">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-indigo-dye mb-6 leading-tight">
-            Create Once,
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-indigo-dye mb-6 mt-8 leading-tight">
+            YAHSHUA HRIS: Complete 
             <br />
-            <span className="text-[#FFC107]">Post Everywhere</span>
+            <span className="text-[#FFC107]">Employee Data Management</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            The complete HRIS solution that transforms your job posting into a powerful recruitment engine. 
-            Post jobs across multiple platforms with one click and manage your entire HR workflow seamlessly.
+          <p className="text-lg md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Transform your business with YAHSHUA HRIS - the complete payroll and employee data management system. 
+            Seamlessly sync employee data, automate job posting across platforms, and discover powerful payroll features with YAHSHUA Payroll.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
