@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { AutoCalculateTotals } from "./components/report-of-disease/AutoCalculateTotals";
-import ToggleSection from "./components/report-of-disease/ToggleSection";
+import ToggleSection from "./components/ToggleSection";
 
 // Consultation/ Treatments
 import Skin from "./components/report-of-disease/tabs/consultation-treatments/Skin";

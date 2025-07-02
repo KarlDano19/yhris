@@ -883,8 +883,8 @@ const MountENT: React.FC<MountENTProps> = ({ register, setValue, watch }) => {
                         value={others_ent_total || ""}
                         readOnly
                         className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
-                    />
-                </div>
+                />
+            </div>
             </div>
         </div>
     </>
