@@ -177,7 +177,7 @@ function TechnicalAndSignature({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div>
             <label
               htmlFor="prepared_by"
@@ -213,7 +213,7 @@ function TechnicalAndSignature({
             </div>
           </div>
         </div>
-        <div className="mt-4 pl-6 pr-6">
+        <div className="mt-4 px-2 md:px-6">
           <h1 className="text-sm font-medium">Signature</h1>
           {errors.signature && (
               <p className="text-xs text-red-600 mt-1">
@@ -221,7 +221,7 @@ function TechnicalAndSignature({
               </p>
             )}
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div>
             <label
               htmlFor="draw_signature"
@@ -263,7 +263,7 @@ function TechnicalAndSignature({
       
       {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) and no previews */}
       {signatureUrl && (
-        <div className="mt-4">
+        <div className="mt-4 pl-4 pr-4 md:pl-0 md:pr-0">
           <div
             className={`text-center font-semibold mb-2 ${
               signatureSource === "draw" || signatureSource === "upload"

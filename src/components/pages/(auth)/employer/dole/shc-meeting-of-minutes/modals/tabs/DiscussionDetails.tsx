@@ -47,7 +47,7 @@ export default function DiscussionDetails({
 
   return (
     <form onSubmit={onSubmit}>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pt-4 pb-16 md:pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
