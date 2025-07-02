@@ -10,6 +10,7 @@ function EmergencyOccupational({
   errors,
   setError,
   clearErrors,
+  setValue,
 }: {
   register: any;
   handleSubmit: any;
@@ -18,6 +19,7 @@ function EmergencyOccupational({
   errors: any;
   setError: any;
   clearErrors: any;
+  setValue: any;
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
@@ -158,7 +160,7 @@ function EmergencyOccupational({
 
   return (
     <form onSubmit={onSubmit}>
-      <div className="gap-6 mt-4 pl-6 mb-6">
+      <div className="gap-6 mt-4 px-4 md:pl-6 mb-6">
         <div>
           <label
             htmlFor="provided_treatment_room_medical_clinic"
@@ -173,7 +175,7 @@ function EmergencyOccupational({
               {errors.provided_treatment_room_medical_clinic.message || "Please select at least one option."}
             </p>
           )}
-          <div className="grid grid-cols-3 gap-2 pl-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pl-0 md:pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
@@ -242,8 +244,8 @@ function EmergencyOccupational({
           </div>
         </div>
       </div>
-      <div className="gap-6 mt-4 pl-6 mb-6">
-        <div className="pr-8">
+      <div className="gap-6 mt-4 px-4 md:pl-6 mb-6">
+        <div className="pr-0 md:pr-8">
           <label
             htmlFor="organized_provided_as_a_service"
             className="block text-sm font-medium leading-6 text-gray-900"
@@ -257,138 +259,242 @@ function EmergencyOccupational({
               {errors.occupational_health_services_group.message || "Input at least one 'hours per day' value and one 'shift' value."}
             </p>
           )}
-          <div className="grid grid-cols-3 gap-4">
-            <div>{""}</div>
-            <div>{""}</div>
-            <div>
-              <h1 className="text-sm font-medium pl-14">Shift</h1>
+          
+          {/* Desktop layout - hidden on mobile */}
+          <div className="hidden md:block">
+            <div className="grid grid-cols-3 gap-4">
+              <div>{""}</div>
+              <div>{""}</div>
+              <div>
+                <h1 className="text-sm font-medium pl-14">Shift</h1>
+              </div>
+            </div>
+            {/* Keep existing grid layout for desktop */}
+            <div className="grid grid-cols-3 gap-6 pb-6">
+              <div className="flex justify-start items-center pl-6">
+                <div className="grid-item">
+                  <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                    Occupational health physician
+                  </h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2 flex flex-row items-center">
+                  <input
+                    type="number"
+                    {...register(`occupational_health_physician_hours_per_day`)}
+                    id={`occupational_health_physician_hours_per_day`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                  <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    {...register(`occupational_health_physician_shift`)}
+                    id={`occupational_health_physician_shift`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-6 pb-6">
+              <div className="flex justify-start items-center pl-6">
+                <div className="grid-item">
+                  <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                    Occupational health dentist
+                  </h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2 flex flex-row items-center">
+                  <input
+                    type="number"
+                    {...register(`occupational_health_dentist_hours_per_day`)}
+                    id={`occupational_health_dentist_hours_per_day`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                  <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    {...register(`occupational_health_dentist_shift`)}
+                    id={`occupational_health_dentist_shift`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-6 pb-6">
+              <div className="flex justify-start items-center pl-6">
+                <div className="grid-item">
+                  <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                    Occupational health practitioner
+                  </h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2 flex flex-row items-center">
+                  <input
+                    type="number"
+                    {...register(
+                      `occupational_health_practitioner_hours_per_day`
+                    )}
+                    id={`occupational_health_practitioner_hours_per_day`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                  <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    {...register(`occupational_health_practitioner_shift`)}
+                    id={`occupational_health_practitioner_shift`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-6 pb-6">
+              <div className="flex justify-start items-center pl-6">
+                <div className="grid-item">
+                  <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                    Occupational health nurse
+                  </h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2 flex flex-row items-center">
+                  <input
+                    type="number"
+                    {...register(`occupational_health_nurse_hours_per_day`)}
+                    id={`occupational_health_nurse_hours_per_day`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                  <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+                </div>
+              </div>
+              <div className="grid-item">
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    {...register(`occupational_health_nurse_shift`)}
+                    id={`occupational_health_nurse_shift`}
+                    className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-6 pb-6">
-            <div className="flex justify-start items-center pl-6">
-              <div className="grid-item">
-                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-                  Occupational health physician
-                </h1>
+          
+          {/* Mobile layout - hidden on desktop */}
+          <div className="md:hidden mt-4">
+            <div className="mb-6">
+              <h1 className="font-medium mb-2">Occupational health physician</h1>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Hours/day</label>
+                  <input
+                    type="number"
+                    value={physicianHours || ""}
+                    onChange={(e) => setValue("occupational_health_physician_hours_per_day", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Shift</label>
+                  <input
+                    type="number"
+                    value={physicianShift || ""}
+                    onChange={(e) => setValue("occupational_health_physician_shift", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
               </div>
             </div>
-            <div className="grid-item">
-              <div className="mt-2 flex flex-row items-center">
-                <input
-                  type="number"
-                  {...register(`occupational_health_physician_hours_per_day`)}
-                  id={`occupational_health_physician_hours_per_day`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
-                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
+            
+            <div className="mb-6">
+              <h1 className="font-medium mb-2">Occupational health dentist</h1>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Hours/day</label>
+                  <input
+                    type="number"
+                    value={dentistHours || ""}
+                    onChange={(e) => setValue("occupational_health_dentist_hours_per_day", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Shift</label>
+                  <input
+                    type="number"
+                    value={dentistShift || ""}
+                    onChange={(e) => setValue("occupational_health_dentist_shift", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
               </div>
             </div>
-            <div className="grid-item">
-              <div className="mt-2">
-                <input
-                  type="number"
-                  {...register(`occupational_health_physician_shift`)}
-                  id={`occupational_health_physician_shift`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
+            
+            <div className="mb-6">
+              <h1 className="font-medium mb-2">Occupational health practitioner</h1>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Hours/day</label>
+                  <input
+                    type="number"
+                    value={practitionerHours || ""}
+                    onChange={(e) => setValue("occupational_health_practitioner_hours_per_day", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Shift</label>
+                  <input
+                    type="number"
+                    value={practitionerShift || ""}
+                    onChange={(e) => setValue("occupational_health_practitioner_shift", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="grid grid-cols-3 gap-6 pb-6">
-            <div className="flex justify-start items-center pl-6">
-              <div className="grid-item">
-                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-                  Occupational health dentist
-                </h1>
-              </div>
-            </div>
-            <div className="grid-item">
-              <div className="mt-2 flex flex-row items-center">
-                <input
-                  type="number"
-                  {...register(`occupational_health_dentist_hours_per_day`)}
-                  id={`occupational_health_dentist_hours_per_day`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
-                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
-              </div>
-            </div>
-            <div className="grid-item">
-              <div className="mt-2">
-                <input
-                  type="number"
-                  {...register(`occupational_health_dentist_shift`)}
-                  id={`occupational_health_dentist_shift`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-6 pb-6">
-            <div className="flex justify-start items-center pl-6">
-              <div className="grid-item">
-                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-                  Occupational health practitioner
-                </h1>
-              </div>
-            </div>
-            <div className="grid-item">
-              <div className="mt-2 flex flex-row items-center">
-                <input
-                  type="number"
-                  {...register(
-                    `occupational_health_practitioner_hours_per_day`
-                  )}
-                  id={`occupational_health_practitioner_hours_per_day`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
-                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
-              </div>
-            </div>
-            <div className="grid-item">
-              <div className="mt-2">
-                <input
-                  type="number"
-                  {...register(`occupational_health_practitioner_shift`)}
-                  id={`occupational_health_practitioner_shift`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-6 pb-6">
-            <div className="flex justify-start items-center pl-6">
-              <div className="grid-item">
-                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-                  Occupational health nurse
-                </h1>
-              </div>
-            </div>
-            <div className="grid-item">
-              <div className="mt-2 flex flex-row items-center">
-                <input
-                  type="number"
-                  {...register(`occupational_health_nurse_hours_per_day`)}
-                  id={`occupational_health_nurse_hours_per_day`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
-                <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
-              </div>
-            </div>
-            <div className="grid-item">
-              <div className="mt-2">
-                <input
-                  type="number"
-                  {...register(`occupational_health_nurse_shift`)}
-                  id={`occupational_health_nurse_shift`}
-                  className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
+            
+            <div className="mb-6">
+              <h1 className="font-medium mb-2">Occupational health nurse</h1>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Hours/day</label>
+                  <input
+                    type="number"
+                    value={nurseHours || ""}
+                    onChange={(e) => setValue("occupational_health_nurse_hours_per_day", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Shift</label>
+                  <input
+                    type="number"
+                    value={nurseShift || ""}
+                    onChange={(e) => setValue("occupational_health_nurse_shift", e.target.value)}
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="gap-6 mt-4 pl-6 mb-6">
+      <div className="gap-6 mt-4 px-4 md:pl-6 mb-6">
         <div>
           <label
             htmlFor="schedule_of_attendance_of_full_time_first_aider"
@@ -402,7 +508,7 @@ function EmergencyOccupational({
               {errors.schedule_of_attendance_of_full_time_first_aider.message || "Please select at least one option."}
             </p>
           )}
-          <div className="grid grid-cols-3 gap-2 pl-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pl-0 md:pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
@@ -450,7 +556,7 @@ function EmergencyOccupational({
           </div>
         </div>
       </div>
-      <div className="gap-6 mt-4 pl-6 mb-6">
+      <div className="gap-6 mt-4 px-4 md:pl-6 mb-6">
         <div>
           <label
             htmlFor="occupational_health_personnel_training"
@@ -465,7 +571,7 @@ function EmergencyOccupational({
               {errors.occupational_health_personnel_training.message || "Please select at least one option."}
             </p>
           )}
-          <div className="grid grid-cols-3 gap-2 pl-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pl-0 md:pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"

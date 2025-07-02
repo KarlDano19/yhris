@@ -111,7 +111,7 @@ function GeneralInfo({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
               htmlFor="company_name"
@@ -222,205 +222,351 @@ function GeneralInfo({
         </div>
         <div className="gap-6 mt-4">
           <div className="mt-4">
-            <label className=" font-semibold">
+            <label className="font-semibold">
               Number Distribution of Employees as to nature/workplace, sex and
               workshift:
             </label>
           </div>
         </div>
-        <div className="grid grid-cols-5 gap-4 pt-6">
-          <div>{""}</div>
-          <div>
-            <h1 className="text-sm font-medium pl-14">Office</h1>
+
+        {/* Desktop layout - unchanged */}
+        <div className="hidden md:block">
+          <div className="grid grid-cols-5 gap-4 pt-6">
+            <div>{""}</div>
+            <div>
+              <h1 className="text-sm font-medium pl-14">Office</h1>
+            </div>
+            <div>
+              <h1 className="text-sm font-medium pl-14"> </h1>
+            </div>
+            <div>
+              <h1 className="text-sm font-medium pl-14">Production/ Shop</h1>
+            </div>
+            <div>
+              <h1 className="text-sm font-medium pl-14"> </h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-sm font-medium pl-14"> </h1>
+          <div className="grid grid-cols-5 gap-4 pt-6">
+            <div>{""}</div>
+            <div>
+              <h1 className="text-sm font-medium pl-14">{""}</h1>
+            </div>
+            <div>
+              <h1 className="text-sm font-medium pl-14">Shift 1</h1>
+            </div>
+            <div>
+              <h1 className="text-sm font-medium pl-14">Shift 2</h1>
+            </div>
+            <div>
+              <h1 className="text-sm font-medium pl-14">Shift 3</h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-sm font-medium pl-14">Production/ Shop</h1>
-          </div>
-          <div>
-            <h1 className="text-sm font-medium pl-14"> </h1>
-          </div>
-        </div>
-        <div className="grid grid-cols-5 gap-4 pt-6">
-          <div>{""}</div>
-          <div>
-            <h1 className="text-sm font-medium pl-14">{""}</h1>
-          </div>
-          <div>
-            <h1 className="text-sm font-medium pl-14">Shift 1</h1>
-          </div>
-          <div>
-            <h1 className="text-sm font-medium pl-14">Shift 2</h1>
-          </div>
-          <div>
-            <h1 className="text-sm font-medium pl-14">Shift 3</h1>
-          </div>
-        </div>
-        <div className="grid grid-cols-5 gap-6 pb-6">
-          <div className="flex justify-start items-center pl-6">
+          <div className="grid grid-cols-5 gap-6 pb-6">
+            <div className="flex justify-start items-center pl-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                  Male
+                </h1>
+              </div>
+            </div>
             <div className="grid-item">
-              <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-                Male
-              </h1>
+              <div className="mt-2 flex flex-row items-center">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`male_office_workers`)}
+                  id={`male_office_workers`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`male_shop_workers_shift_1`)}
+                  id={`number_of_workers_who_underwent_medical_examination_x_rays_pre_placement`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`male_shop_workers_shift_2`)}
+                  id={`male_shop_workers_shift_2`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`male_shop_workers_shift_3`)}
+                  id={`male_shop_workers_shift_3`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
             </div>
           </div>
-          <div className="grid-item">
-            <div className="mt-2 flex flex-row items-center">
-              <input
-                type="number"
-                min={0}
-                {...register(`male_office_workers`)}
-                id={`male_office_workers`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
+          <div className="grid grid-cols-5 gap-6 pb-6">
+            <div className="flex justify-start items-center pl-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                  Female
+                </h1>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2 flex flex-row items-center">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`female_office_workers`)}
+                  id={`female_office_workers`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`female_shop_workers_shift_1`)}
+                  id={`female_shop_workers_shift_1`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`female_shop_workers_shift_2`)}
+                  id={`female_shop_workers_shift_2`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`female_shop_workers_shift_3`)}
+                  id={`female_shop_workers_shift_3`}
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
             </div>
           </div>
-          <div className="grid-item">
-            <div className="mt-2">
-              <input
-                type="number"
-                min={0}
-                {...register(`male_shop_workers_shift_1`)}
-                id={`number_of_workers_who_underwent_medical_examination_x_rays_pre_placement`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
+          <div className="grid grid-cols-5 gap-6 pb-6">
+            <div className="flex justify-start items-center pl-6">
+              <div className="grid-item">
+                <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
+                  Total
+                </h1>
+              </div>
             </div>
-          </div>
-          <div className="grid-item">
-            <div className="mt-2">
-              <input
-                type="number"
-                min={0}
-                {...register(`male_shop_workers_shift_2`)}
-                id={`male_shop_workers_shift_2`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
+            <div className="grid-item">
+              <div className="mt-2 flex flex-row items-center">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`total_office_workers`)}
+                  id={`total_office_workers`}
+                  readOnly
+                  value={watch('total_office_workers') || 0}
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
             </div>
-          </div>
-          <div className="grid-item">
-            <div className="mt-2">
-              <input
-                type="number"
-                min={0}
-                {...register(`male_shop_workers_shift_3`)}
-                id={`male_shop_workers_shift_3`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`total_shop_workers_shift_1`)}
+                  id={`total_shop_workers_shift_1`}
+                  readOnly
+                  value={watch('total_shop_workers_shift_1') || 0}
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`total_shop_workers_shift_2`)}
+                  id={`total_shop_workers_shift_2`}
+                  readOnly
+                  value={watch('total_shop_workers_shift_2') || 0}
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min={0}
+                  {...register(`total_shop_workers_shift_3`)}
+                  id={`total_shop_workers_shift_3`}
+                  readOnly
+                  value={watch('total_shop_workers_shift_3') || 0}
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-5 gap-6 pb-6">
-          <div className="flex justify-start items-center pl-6">
-            <div className="grid-item">
-              <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-                Female
-              </h1>
-            </div>
+
+        {/* Mobile layout - completely different structure */}
+        <div className="md:hidden mt-6">
+          {/* Header row with Male, Female, Total */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            <div className="text-sm font-medium">Workplace</div>
+            <div className="text-sm font-medium text-center">Male</div>
+            <div className="text-sm font-medium text-center">Female</div>
+            <div className="text-sm font-medium text-center">Total</div>
           </div>
-          <div className="grid-item">
-            <div className="mt-2 flex flex-row items-center">
+
+          {/* Office row */}
+          <div className="grid grid-cols-4 gap-2 mb-4 items-center">
+            <div className="text-sm font-medium">Office</div>
+            <div>
               <input
                 type="number"
                 min={0}
-                {...register(`female_office_workers`)}
-                id={`female_office_workers`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                value={male_office_workers || ""}
+                onChange={(e) => setValue("male_office_workers", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
               />
             </div>
-          </div>
-          <div className="grid-item">
-            <div className="mt-2">
+            <div>
               <input
                 type="number"
                 min={0}
-                {...register(`female_shop_workers_shift_1`)}
-                id={`female_shop_workers_shift_1`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                value={female_office_workers || ""}
+                onChange={(e) => setValue("female_office_workers", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
               />
             </div>
-          </div>
-          <div className="grid-item">
-            <div className="mt-2">
+            <div>
               <input
                 type="number"
                 min={0}
-                {...register(`female_shop_workers_shift_2`)}
-                id={`female_shop_workers_shift_2`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
-          <div className="grid-item">
-            <div className="mt-2">
-              <input
-                type="number"
-                min={0}
-                {...register(`female_shop_workers_shift_3`)}
-                id={`female_shop_workers_shift_3`}
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-5 gap-6 pb-6">
-          <div className="flex justify-start items-center pl-6">
-            <div className="grid-item">
-              <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-                Total
-              </h1>
-            </div>
-          </div>
-          <div className="grid-item">
-            <div className="mt-2 flex flex-row items-center">
-              <input
-                type="number"
-                min={0}
-                {...register(`total_office_workers`)}
-                id={`total_office_workers`}
                 readOnly
                 value={watch('total_office_workers') || 0}
-                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
               />
             </div>
           </div>
-          <div className="grid-item">
-            <div className="mt-2">
+
+          {/* Production/Shop header */}
+          <div className="text-sm font-medium mb-2 mt-4">Production/Shop</div>
+
+          {/* Shift 1 row */}
+          <div className="grid grid-cols-4 gap-2 mb-4 items-center">
+            <div className="text-sm font-medium">Shift 1</div>
+            <div>
               <input
                 type="number"
                 min={0}
-                {...register(`total_shop_workers_shift_1`)}
-                id={`total_shop_workers_shift_1`}
+                value={male_shop_workers_shift_1 || ""}
+                onChange={(e) => setValue("male_shop_workers_shift_1", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                min={0}
+                value={female_shop_workers_shift_1 || ""}
+                onChange={(e) => setValue("female_shop_workers_shift_1", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                min={0}
                 readOnly
                 value={watch('total_shop_workers_shift_1') || 0}
-                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
               />
             </div>
           </div>
-          <div className="grid-item">
-            <div className="mt-2">
+
+          {/* Shift 2 row */}
+          <div className="grid grid-cols-4 gap-2 mb-4 items-center">
+            <div className="text-sm font-medium">Shift 2</div>
+            <div>
               <input
                 type="number"
                 min={0}
-                {...register(`total_shop_workers_shift_2`)}
-                id={`total_shop_workers_shift_2`}
+                value={male_shop_workers_shift_2 || ""}
+                onChange={(e) => setValue("male_shop_workers_shift_2", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                min={0}
+                value={female_shop_workers_shift_2 || ""}
+                onChange={(e) => setValue("female_shop_workers_shift_2", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                min={0}
                 readOnly
                 value={watch('total_shop_workers_shift_2') || 0}
-                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
               />
             </div>
           </div>
-          <div className="grid-item">
-            <div className="mt-2">
+
+          {/* Shift 3 row */}
+          <div className="grid grid-cols-4 gap-2 mb-4 items-center">
+            <div className="text-sm font-medium">Shift 3</div>
+            <div>
               <input
                 type="number"
                 min={0}
-                {...register(`total_shop_workers_shift_3`)}
-                id={`total_shop_workers_shift_3`}
+                value={male_shop_workers_shift_3 || ""}
+                onChange={(e) => setValue("male_shop_workers_shift_3", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                min={0}
+                value={female_shop_workers_shift_3 || ""}
+                onChange={(e) => setValue("female_shop_workers_shift_3", e.target.value)}
+                className="rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                min={0}
                 readOnly
                 value={watch('total_shop_workers_shift_3') || 0}
-                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
               />
             </div>
           </div>
