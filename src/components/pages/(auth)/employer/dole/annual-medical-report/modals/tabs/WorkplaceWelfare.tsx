@@ -263,240 +263,280 @@ function WorkplaceWelfare({
             <div>
               <div className="font-medium text-xs mb-1">Nutrition Program</div>
               <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("nutrition_program")?.includes("seminars") || false}
-                    onChange={e => {
-                      const prev = watch("nutrition_program") || [];
-                      if (e.target.checked) {
-                        setValue("nutrition_program", [...prev, "seminars"]);
-                      } else {
-                        setValue("nutrition_program", prev.filter((v: string) => v !== "seminars"));
-                      }
-                    }}
-                  /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("nutrition_program")?.includes("use_of_visual_aid_materials") || false}
-                    onChange={e => {
-                      const prev = watch("nutrition_program") || [];
-                      if (e.target.checked) {
-                        setValue("nutrition_program", [...prev, "use_of_visual_aid_materials"]);
-                      } else {
-                        setValue("nutrition_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
-                      }
-                    }}
-                  /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("nutrition_program")?.includes("counseling") || false}
-                    onChange={e => {
-                      const prev = watch("nutrition_program") || [];
-                      if (e.target.checked) {
-                        setValue("nutrition_program", [...prev, "counseling"]);
-                      } else {
-                        setValue("nutrition_program", prev.filter((v: string) => v !== "counseling"));
-                      }
-                    }}
-                  /> Counseling
-                </label>
+                {(() => {
+                  const nutrition = watch("nutrition_program");
+                  const arr = Array.isArray(nutrition) ? nutrition : [];
+                  return (
+                    <>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("seminars")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("nutrition_program", [...prev, "seminars"]);
+                            } else {
+                              setValue("nutrition_program", prev.filter((v: string) => v !== "seminars"));
+                            }
+                          }}
+                        /> Seminars
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("use_of_visual_aid_materials")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("nutrition_program", [...prev, "use_of_visual_aid_materials"]);
+                            } else {
+                              setValue("nutrition_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                            }
+                          }}
+                        /> Visual Aid/Materials
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("counseling")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("nutrition_program", [...prev, "counseling"]);
+                            } else {
+                              setValue("nutrition_program", prev.filter((v: string) => v !== "counseling"));
+                            }
+                          }}
+                        /> Counseling
+                      </label>
+                    </>
+                  );
+                })()}
               </div>
             </div>
             {/* Maternal and Child Care Program */}
             <div>
               <div className="font-medium text-xs mb-1">Maternal and Child Care Program</div>
               <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("maternal_and_child_care_program")?.includes("seminars") || false}
-                    onChange={e => {
-                      const prev = watch("maternal_and_child_care_program") || [];
-                      if (e.target.checked) {
-                        setValue("maternal_and_child_care_program", [...prev, "seminars"]);
-                      } else {
-                        setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "seminars"));
-                      }
-                    }}
-                  /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("maternal_and_child_care_program")?.includes("use_of_visual_aid_materials") || false}
-                    onChange={e => {
-                      const prev = watch("maternal_and_child_care_program") || [];
-                      if (e.target.checked) {
-                        setValue("maternal_and_child_care_program", [...prev, "use_of_visual_aid_materials"]);
-                      } else {
-                        setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
-                      }
-                    }}
-                  /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("maternal_and_child_care_program")?.includes("counseling") || false}
-                    onChange={e => {
-                      const prev = watch("maternal_and_child_care_program") || [];
-                      if (e.target.checked) {
-                        setValue("maternal_and_child_care_program", [...prev, "counseling"]);
-                      } else {
-                        setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "counseling"));
-                      }
-                    }}
-                  /> Counseling
-                </label>
+                {(() => {
+                  const maternal = watch("maternal_and_child_care_program");
+                  const arr = Array.isArray(maternal) ? maternal : [];
+                  return (
+                    <>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("seminars")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("maternal_and_child_care_program", [...prev, "seminars"]);
+                            } else {
+                              setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "seminars"));
+                            }
+                          }}
+                        /> Seminars
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("use_of_visual_aid_materials")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("maternal_and_child_care_program", [...prev, "use_of_visual_aid_materials"]);
+                            } else {
+                              setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                            }
+                          }}
+                        /> Visual Aid/Materials
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("counseling")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("maternal_and_child_care_program", [...prev, "counseling"]);
+                            } else {
+                              setValue("maternal_and_child_care_program", prev.filter((v: string) => v !== "counseling"));
+                            }
+                          }}
+                        /> Counseling
+                      </label>
+                    </>
+                  );
+                })()}
               </div>
             </div>
             {/* Family Planning Program */}
             <div>
               <div className="font-medium text-xs mb-1">Family Planning Program</div>
               <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("family_planning_program")?.includes("seminars") || false}
-                    onChange={e => {
-                      const prev = watch("family_planning_program") || [];
-                      if (e.target.checked) {
-                        setValue("family_planning_program", [...prev, "seminars"]);
-                      } else {
-                        setValue("family_planning_program", prev.filter((v: string) => v !== "seminars"));
-                      }
-                    }}
-                  /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("family_planning_program")?.includes("use_of_visual_aid_materials") || false}
-                    onChange={e => {
-                      const prev = watch("family_planning_program") || [];
-                      if (e.target.checked) {
-                        setValue("family_planning_program", [...prev, "use_of_visual_aid_materials"]);
-                      } else {
-                        setValue("family_planning_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
-                      }
-                    }}
-                  /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("family_planning_program")?.includes("counseling") || false}
-                    onChange={e => {
-                      const prev = watch("family_planning_program") || [];
-                      if (e.target.checked) {
-                        setValue("family_planning_program", [...prev, "counseling"]);
-                      } else {
-                        setValue("family_planning_program", prev.filter((v: string) => v !== "counseling"));
-                      }
-                    }}
-                  /> Counseling
-                </label>
+                {(() => {
+                  const family = watch("family_planning_program");
+                  const arr = Array.isArray(family) ? family : [];
+                  return (
+                    <>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("seminars")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("family_planning_program", [...prev, "seminars"]);
+                            } else {
+                              setValue("family_planning_program", prev.filter((v: string) => v !== "seminars"));
+                            }
+                          }}
+                        /> Seminars
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("use_of_visual_aid_materials")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("family_planning_program", [...prev, "use_of_visual_aid_materials"]);
+                            } else {
+                              setValue("family_planning_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                            }
+                          }}
+                        /> Visual Aid/Materials
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("counseling")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("family_planning_program", [...prev, "counseling"]);
+                            } else {
+                              setValue("family_planning_program", prev.filter((v: string) => v !== "counseling"));
+                            }
+                          }}
+                        /> Counseling
+                      </label>
+                    </>
+                  );
+                })()}
               </div>
             </div>
             {/* Mental Health Program */}
             <div>
               <div className="font-medium text-xs mb-1">Mental Health Program</div>
               <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("mental_health_program")?.includes("seminars") || false}
-                    onChange={e => {
-                      const prev = watch("mental_health_program") || [];
-                      if (e.target.checked) {
-                        setValue("mental_health_program", [...prev, "seminars"]);
-                      } else {
-                        setValue("mental_health_program", prev.filter((v: string) => v !== "seminars"));
-                      }
-                    }}
-                  /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("mental_health_program")?.includes("use_of_visual_aid_materials") || false}
-                    onChange={e => {
-                      const prev = watch("mental_health_program") || [];
-                      if (e.target.checked) {
-                        setValue("mental_health_program", [...prev, "use_of_visual_aid_materials"]);
-                      } else {
-                        setValue("mental_health_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
-                      }
-                    }}
-                  /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("mental_health_program")?.includes("counseling") || false}
-                    onChange={e => {
-                      const prev = watch("mental_health_program") || [];
-                      if (e.target.checked) {
-                        setValue("mental_health_program", [...prev, "counseling"]);
-                      } else {
-                        setValue("mental_health_program", prev.filter((v: string) => v !== "counseling"));
-                      }
-                    }}
-                  /> Counseling
-                </label>
+                {(() => {
+                  const mental = watch("mental_health_program");
+                  const arr = Array.isArray(mental) ? mental : [];
+                  return (
+                    <>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("seminars")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("mental_health_program", [...prev, "seminars"]);
+                            } else {
+                              setValue("mental_health_program", prev.filter((v: string) => v !== "seminars"));
+                            }
+                          }}
+                        /> Seminars
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("use_of_visual_aid_materials")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("mental_health_program", [...prev, "use_of_visual_aid_materials"]);
+                            } else {
+                              setValue("mental_health_program", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                            }
+                          }}
+                        /> Visual Aid/Materials
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("counseling")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("mental_health_program", [...prev, "counseling"]);
+                            } else {
+                              setValue("mental_health_program", prev.filter((v: string) => v !== "counseling"));
+                            }
+                          }}
+                        /> Counseling
+                      </label>
+                    </>
+                  );
+                })()}
               </div>
             </div>
             {/* Personal Health Maintenance */}
             <div>
               <div className="font-medium text-xs mb-1">Personal Health Maintenance</div>
               <div className="flex gap-3">
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("personal_health_maintenance")?.includes("seminars") || false}
-                    onChange={e => {
-                      const prev = watch("personal_health_maintenance") || [];
-                      if (e.target.checked) {
-                        setValue("personal_health_maintenance", [...prev, "seminars"]);
-                      } else {
-                        setValue("personal_health_maintenance", prev.filter((v: string) => v !== "seminars"));
-                      }
-                    }}
-                  /> Seminars
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("personal_health_maintenance")?.includes("use_of_visual_aid_materials") || false}
-                    onChange={e => {
-                      const prev = watch("personal_health_maintenance") || [];
-                      if (e.target.checked) {
-                        setValue("personal_health_maintenance", [...prev, "use_of_visual_aid_materials"]);
-                      } else {
-                        setValue("personal_health_maintenance", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
-                      }
-                    }}
-                  /> Visual Aid/Materials
-                </label>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={watch("personal_health_maintenance")?.includes("counseling") || false}
-                    onChange={e => {
-                      const prev = watch("personal_health_maintenance") || [];
-                      if (e.target.checked) {
-                        setValue("personal_health_maintenance", [...prev, "counseling"]);
-                      } else {
-                        setValue("personal_health_maintenance", prev.filter((v: string) => v !== "counseling"));
-                      }
-                    }}
-                  /> Counseling
-                </label>
+                {(() => {
+                  const personal = watch("personal_health_maintenance");
+                  const arr = Array.isArray(personal) ? personal : [];
+                  return (
+                    <>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("seminars")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("personal_health_maintenance", [...prev, "seminars"]);
+                            } else {
+                              setValue("personal_health_maintenance", prev.filter((v: string) => v !== "seminars"));
+                            }
+                          }}
+                        /> Seminars
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("use_of_visual_aid_materials")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("personal_health_maintenance", [...prev, "use_of_visual_aid_materials"]);
+                            } else {
+                              setValue("personal_health_maintenance", prev.filter((v: string) => v !== "use_of_visual_aid_materials"));
+                            }
+                          }}
+                        /> Visual Aid/Materials
+                      </label>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={arr.includes("counseling")}
+                          onChange={e => {
+                            const prev = arr;
+                            if (e.target.checked) {
+                              setValue("personal_health_maintenance", [...prev, "counseling"]);
+                            } else {
+                              setValue("personal_health_maintenance", prev.filter((v: string) => v !== "counseling"));
+                            }
+                          }}
+                        /> Counseling
+                      </label>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
