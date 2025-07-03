@@ -183,7 +183,7 @@ function InjurySummary({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
               htmlFor="total_disabling_injuries"
@@ -258,7 +258,7 @@ function InjurySummary({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Signature</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="name_signature"
@@ -317,7 +317,7 @@ function InjurySummary({
       
       {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) and no previews */}
       {signatureUrl && (
-        <div className="mt-4">
+        <div className="px-4 md:px-0 mt-4">
           <div
             className={`text-center font-semibold mb-2 ${
               signatureSource === "draw" || signatureSource === "upload"

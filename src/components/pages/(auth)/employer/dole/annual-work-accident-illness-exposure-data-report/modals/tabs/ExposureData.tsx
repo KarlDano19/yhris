@@ -79,7 +79,7 @@ function ExposureData({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
               htmlFor="date_of_report"
@@ -163,7 +163,7 @@ function ExposureData({
           </div>
         </div>
         <hr />
-        <div className="grid grid-cols-2 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
           <div className="mt-4">
             <h1 className="text-lg font-semibold">Personal Information</h1>
           </div>
@@ -185,7 +185,7 @@ function ExposureData({
           </div>
         </div>
         <hr className="border-b border-gray-200 mt-6 border-dashed" />
-        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
               htmlFor="number_of_employees"
