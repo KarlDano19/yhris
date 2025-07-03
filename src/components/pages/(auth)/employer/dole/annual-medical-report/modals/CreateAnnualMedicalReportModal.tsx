@@ -226,6 +226,7 @@ function CreateAnnualMedicalReportModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 8 && (
