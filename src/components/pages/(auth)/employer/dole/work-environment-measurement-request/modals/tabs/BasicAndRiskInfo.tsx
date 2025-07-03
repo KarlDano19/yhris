@@ -129,8 +129,8 @@ function BasicAndRiskInfo({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
-          <div className="border-r border-slate-300 pr-6 space-y-6 pl-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
+          <div className="border-r-0 md:border-r md:border-slate-300 pr-0 md:pr-6 space-y-6 pl-0 md:pl-6">
             <div className="mb-2">
               <h1 className="text-lg font-semibold">Basic Information</h1>
             </div>
@@ -201,40 +201,42 @@ function BasicAndRiskInfo({
                 Number of Workers
                 <span className="text-red-600">*</span>
               </h1>
-              <div className="relative mt-2 flex gap-6">
-                <label
-                  htmlFor="number_of_workers_male"
-                  className="block text-sm font-medium leading-6 text-gray-900 mr-4"
-                >
-                  Male
-                  <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="number"
-                  {...register("number_of_workers_male", { required: true })}
-                  id="number_of_workers_male"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
+              <div className="relative mt-2 flex flex-col sm:flex-row gap-4 sm:gap-6">
+                <div className="flex-1">
+                  <label
+                    htmlFor="number_of_workers_male"
+                    className="block text-sm font-medium leading-6 text-gray-900 mb-2"
+                  >
+                    Male
+                    <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    {...register("number_of_workers_male", { required: true })}
+                    id="number_of_workers_male"
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label
+                    htmlFor="number_of_workers_female"
+                    className="block text-sm font-medium leading-6 text-gray-900 mb-2"
+                  >
+                    Female
+                    <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    {...register("number_of_workers_female", { required: true })}
+                    id="number_of_workers_female"
+                    className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  />
+                </div>
               </div>
-              <div className="relative mt-2 flex gap-6">
-                <label
-                  htmlFor="number_of_workers"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Female
-                  <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="number"
-                  {...register("number_of_workers_female", { required: true })}
-                  id="number_of_workers_female"
-                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                />
-              </div>
-              <div className="relative mt-2 flex gap-6">
+              <div className="relative mt-2">
                 <label
                   htmlFor="number_of_workers_total"
-                  className="block text-sm font-medium leading-6 text-gray-900 mr-4"
+                  className="block text-sm font-medium leading-6 text-gray-900 mb-2"
                 >
                   Total
                   <span className="text-red-600">*</span>
@@ -249,7 +251,7 @@ function BasicAndRiskInfo({
               </div>
             </div>
           </div>
-          <div className="pr-6 space-y-6">
+          <div className="pr-0 md:pr-6 space-y-6">
             <div className="mb-2">
               <h1 className="text-lg font-semibold">Risk and Safety</h1>
             </div>

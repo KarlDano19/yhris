@@ -91,8 +91,8 @@ function MonitoringAndHazardInfo({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
-          <div className="border-r border-slate-300 pr-6 space-y-6 pl-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
+          <div className="border-r-0 md:border-r md:border-slate-300 pr-0 md:pr-6 space-y-6 pl-0 md:pl-6">
             <div className="mb-2">
               <h1 className="text-lg font-semibold">Monitoring Capability</h1>
             </div>
@@ -198,7 +198,7 @@ function MonitoringAndHazardInfo({
               </div>
             </div>
           </div>
-          <div className="pr-6 space-y-6">
+          <div className="pr-0 md:pr-6 space-y-6">
             <div className="mb-2">
               <h1 className="text-lg font-semibold">Hazards</h1>
             </div>
@@ -217,7 +217,7 @@ function MonitoringAndHazardInfo({
                       {errors.hazards_purpose_of_wem_request.message || "Please select at least one Purpose of WEM Request (Hazards)."}
                     </p>
                   )}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
@@ -277,7 +277,7 @@ function MonitoringAndHazardInfo({
                       {errors.chemical_hazards.message || "Please select at least one Chemical Hazard."}
                     </p>
                   )}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"

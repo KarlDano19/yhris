@@ -179,12 +179,12 @@ function DataPrivacyAndCertification({
             </div>
           </div>
         </div>
-        <div className="mt-4 pl-6 pr-6">
+        <div className="mt-4 pl-4 md:pl-6 pr-4 md:pr-6">
           <h1 className="text-lg font-semibold">
             Data Privacy and Certification
           </h1>
         </div>
-        <div className="gap-6 mt-4 space-y-4 pl-6 pr-6">
+        <div className="gap-6 mt-4 space-y-4 pl-4 md:pl-6 pr-4 md:pr-6">
           <p>
             This is to certify that the company agrees to pay all the expenses
             incurred during coordination and other pre-WEM activities such as
@@ -199,7 +199,7 @@ function DataPrivacyAndCertification({
             Privacy Act of 2012.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pl-4 md:pl-6 pr-4 md:pr-6">
           <div>
             <label
               htmlFor="requesting_personnel_name"
@@ -235,7 +235,7 @@ function DataPrivacyAndCertification({
             </div>
           </div>
         </div>
-        <div className="mt-4 pl-6 pr-6">
+        <div className="mt-4 pl-4 md:pl-6 pr-4 md:pr-6">
           <h1 className="text-sm font-medium">Signature</h1>
           {errors.signature && (
               <p className="text-xs text-red-600 mt-1">
@@ -243,7 +243,7 @@ function DataPrivacyAndCertification({
               </p>
             )}
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pl-4 md:pl-6 pr-4 md:pr-6">
           <div>
             <label
               htmlFor="draw_signature"
@@ -285,7 +285,7 @@ function DataPrivacyAndCertification({
       
       {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) and no previews */}
       {signatureUrl && (
-        <div className="mt-4">
+        <div className="px-4 md:px-0 mt-4">
           <div
             className={`text-center font-semibold mb-2 ${
               signatureSource === "draw" || signatureSource === "upload"

@@ -25,7 +25,7 @@ function WEMDetailsRequest({
   handleSubmit: any;
   setSelectedTab: any;
   getValues: any;
-  watch: any;sig
+  watch: any;
   errors: any;
   setError: any;
   clearErrors: any;
@@ -90,10 +90,10 @@ function WEMDetailsRequest({
             </div>
           </div>
         </div>
-        <div className="mt-4 pl-6">
+        <div className="mt-4 pl-4 md:pl-6">
           <h1 className="text-lg font-semibold">WEM Details Request</h1>
         </div>
-        <div className="gap-6 mt-4 pl-6">
+        <div className="gap-6 mt-4 pl-4 md:pl-6">
           <div>
             <label
               htmlFor="purpose_of_wem_request"
@@ -107,7 +107,7 @@ function WEMDetailsRequest({
                 {errors.purpose_of_wem_request.message || "Please select at least one Purpose of WEM Request."}
               </p>
             )}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
@@ -152,7 +152,7 @@ function WEMDetailsRequest({
                   ISO Compliance
                 </label>
               </div>
-              <div className="relative mt-2 flex items-center gap-2">
+              <div className="relative mt-2 flex items-center gap-2 md:col-span-2">
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
@@ -166,7 +166,7 @@ function WEMDetailsRequest({
                   </span>
                 </label>
               </div>
-              <div className="relative flex gap-2 mt-6">
+              <div className="relative flex gap-2 mt-6 md:col-span-2">
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
@@ -180,7 +180,7 @@ function WEMDetailsRequest({
             </div>
           </div>
         </div>
-        <div className="gap-6 mt-4 pl-6">
+        <div className="gap-6 mt-4 pl-4 md:pl-6">
           <div>
             <label
               htmlFor="wem_conducted_by"
@@ -194,7 +194,7 @@ function WEMDetailsRequest({
                 {errors.wem_conducted_by.message || "Please select at least one WEM Conducted By option."}
               </p>
             )}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
@@ -231,7 +231,7 @@ function WEMDetailsRequest({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4 pl-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 pl-4 md:pl-6">
           <div>
             <label
               htmlFor="last_wem_date"
