@@ -24,8 +24,6 @@ export function handleProceedUtil({
   html2canvas: any;
 }) {
   if (documentType === 'notice-to-explain' && employeeId) {
-    // Show loading toast
-    const loadingToast = toast.custom(() => CustomToast({ message: "Generating PDF document...", type: "info" }));
     try {
       // Create a hidden container to hold the iframe content
       const container = document.createElement('div');
@@ -254,24 +252,20 @@ export function handleProceedUtil({
                 }
               );
               document.body.removeChild(container);
-              toast.dismiss(loadingToast);
             } catch (pdfError) {
               console.error('PDF creation error:', pdfError);
               document.body.removeChild(container);
-              toast.dismiss(loadingToast);
               toast.custom(() => CustomToast({ message: "Error creating PDF. Please try again.", type: "error" }), { duration: 3000 });
             }
           }).catch((canvasError: any) => {
             console.error('Canvas capture error:', canvasError);
             document.body.removeChild(container);
-            toast.dismiss(loadingToast);
             toast.custom(() => CustomToast({ message: "Error capturing document. Please try again.", type: "error" }), { duration: 3000 });
           });
         }, 2500);
       };
     } catch (error) {
       console.error('Error setting up PDF generation:', error);
-      toast.dismiss(loadingToast);
       toast.custom(() => CustomToast({ message: "Error generating PDF. Please try again.", type: "error" }), { duration: 3000 });
     }
   }
