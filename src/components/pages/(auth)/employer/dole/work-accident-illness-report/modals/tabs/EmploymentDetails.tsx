@@ -49,7 +49,7 @@ function EmploymentDetails({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Employment Details</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="occupation"
@@ -99,7 +99,7 @@ function EmploymentDetails({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="length_of_service"
@@ -149,7 +149,7 @@ function EmploymentDetails({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="hours_worked_per_week"

@@ -95,13 +95,13 @@ function CreateWorkAccidentIllnessReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center">
-                  <h3 className="flex-1 text-white ml-2 font-semibold">
+                  <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
                     Create Work Accident/Illness Report
                   </h3>
                   <XCircleIcon
-                    className="w-8 h-8 text-white cursor-pointer"
+                    className="w-6 h-6 sm:w-8 sm:h-8 text-white cursor-pointer"
                     onClick={() => setIsOpen(false)}
                   />
                 </div>

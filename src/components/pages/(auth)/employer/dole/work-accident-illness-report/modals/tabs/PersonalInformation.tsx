@@ -52,7 +52,7 @@ function PersonalInformation({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="email"
@@ -102,7 +102,7 @@ function PersonalInformation({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Personal Information</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="employee"
@@ -175,7 +175,7 @@ function PersonalInformation({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="address"
