@@ -206,6 +206,8 @@ export type T_IncidentReportEmail = {
   issueNTEForm: any;
   sendDecisionForm: any;
   dateReceived: any;
+  decision_to: string;
+  decision_message: string;
 };
 
 export type T_Investigation = {

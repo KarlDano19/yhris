@@ -30,6 +30,8 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         data.cc = employeeIssue.sendDecisionForm.cc;
         data.bcc = employeeIssue.sendDecisionForm.bcc;
         data.context = employeeIssue.sendDecisionForm.message;
+        data.decision_to = employeeIssue.decision_to;
+        data.decision_message = employeeIssue.decision_message;
       }
     } else {
       data = {

@@ -18,7 +18,7 @@ import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
 import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
 import NTEAttachmentViewModal from './modals/NTEAttachmentViewModal';
 import UploadDecisionAttachmentModal from './modals/UploadDecisionAttachment';
-import DecisionAttachmentViewModal from './modals/DecisionAttachmentViewModal';
+import DecisionAttachmentViewModal from './modals/DecisionSummaryViewModal';
 import IncidentReportModal from './modals/IncidentReportModal';
 import InvestigationReportDetailsModal from './modals/InvestigationReportDetailsModal';
 import SendNTEModal from './modals/SendNTEModal';

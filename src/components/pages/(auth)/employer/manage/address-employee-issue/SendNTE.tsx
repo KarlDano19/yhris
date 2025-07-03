@@ -32,12 +32,12 @@ const SendNTE = ({
   const [checkingAttachment, setCheckingAttachment] = useState(false);
   const { data: employeeIssueDetails, isLoading: isLoadingDetails } = useGetEmployeeIssueDetails(id);
   
-  const customOnclick = () => {
-    setIsUploadEmployeeIssueAttachmentModalOpen({
-      isOpen: true,
-      id,
-    });
-  };
+  // const customOnclick = () => {
+  //   setIsUploadEmployeeIssueAttachmentModalOpen({
+  //     isOpen: true,
+  //     id,
+  //   });
+  // };
 
   const handleSendClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -87,9 +87,7 @@ const SendNTE = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isNTESent || isNTEReceived || isLoading}
-          onClick={() => {
-            customOnclick(), setReleased(id, 'nte');
-          }}
+          onClick={() => setReleased(id, 'nte')}
         >
           {isLoading && (
             <div role='status'>

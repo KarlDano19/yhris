@@ -68,7 +68,7 @@ export default function SendDecisionModal({
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       if (employeeIssueItemsCopy[itemIndex]) {
         setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+        setTagsTo([]);
       }
     }
   }, [isOpen]);
@@ -91,6 +91,8 @@ export default function SendDecisionModal({
       }
       employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = data.message;
       employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
+      employeeIssueItemsCopy[itemIndex].decision_to = JSON.stringify(tagsTo);
+      employeeIssueItemsCopy[itemIndex].decision_message = data.message;
       const callbackReq = {
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
@@ -158,11 +160,9 @@ export default function SendDecisionModal({
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
-                                if (applicantEmail) {
-                                  setTagsTo([applicantEmail, ...template.to]);
-                                } else {
-                                  setTagsTo(template.to);
-                                }
+                                // Just set the template's to addresses directly
+                                setTagsTo(template.to || []);
+                                
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);

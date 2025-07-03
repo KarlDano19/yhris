@@ -27,12 +27,12 @@ const SendDecision = ({
   setReleased: any;
   isLoading: boolean;
 }) => {
-  const customOnclick = () => {
-    setIsUploadDecisionAttachmentModalOpen({
-      isOpen: true,
-      id,
-    });
-  };
+  // const customOnclick = () => {
+  //   setIsUploadDecisionAttachmentModalOpen({
+  //     isOpen: true,
+  //     id,
+  //   });
+  // };
 
   return (
     <div className='flex flex-col gap-2'>
@@ -65,9 +65,7 @@ const SendDecision = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isDecisionSent || isDecisionReceived || isLoading}
-          onClick={() => {
-            customOnclick(), setReleased(id, 'decision');
-          }}
+          onClick={() => setReleased(id, 'decision')}
         >
           {isLoading && (
             <div role='status'>
