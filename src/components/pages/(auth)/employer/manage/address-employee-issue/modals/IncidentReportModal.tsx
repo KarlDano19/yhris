@@ -1,14 +1,19 @@
 import { Dispatch, Fragment, useRef } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
-import { T_IncidentReport } from '@/types/globals';
-import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useAddEmployeeIssueItems from '../hooks/useAddEmployeeIssueItems';
-import { useQueryClient } from '@tanstack/react-query';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import { T_IncidentReport } from '@/types/globals';
+
 
 export default function IncidentReportModal({
   employeeIssueItems,

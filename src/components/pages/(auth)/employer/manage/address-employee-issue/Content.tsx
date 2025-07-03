@@ -40,6 +40,7 @@ import {
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
@@ -95,6 +96,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const openNteModal = searchParams.get('openNteModal');
+    const employeeId = searchParams.get('employeeId');
+    if (openNteModal === 'true' && employeeId) {
+      setIsSendNTEModalOpen({
+        id: Number(employeeId),
+      });
+      // Remove the query params from the URL
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete('openNteModal');
+      newParams.delete('employeeId');
+      router.replace(`/manage/address-employee-issue${newParams.toString() ? '?' + newParams.toString() : ''}`);
+    }
+  }, [searchParams, router]);
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -201,6 +219,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             to: '',
             message: '',
           };
+          employeeIssue['is_responded'] = employeeIssue.is_responded;
           return employeeIssue;
         });
         totalPages = dataEmployeeIssues.total_pages || 1;
@@ -259,6 +278,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             to: '',
             message: '',
           };
+          employeeIssue['is_responded'] = employeeIssue.is_responded;
           return employeeIssue;
         });
         
@@ -272,6 +292,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         totalPages,
         totalRecords
       });
+
+
     }
   }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition, pageSize]);
 
@@ -350,53 +372,61 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     if (employeeIssueItems && employeeIssueItems.length > 0) {
-      return employeeIssueItems.map((item: any) => (
-        <tr
-          key={item.id}
-          // onClick={() => alert('Clicked Employee Issue Item')}
-          // className='hover:bg-gray-200/30 cursor-pointer'
-        >
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.incidentDate}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span>{item.name}</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <SendNTE
-              id={item.id}
-              isNTESent={item.isNTESent}
-              isNTEReceived={item.isNTEReceived}
-              incidentReceivedDate={item.incidentReceivedDate}
-              setIsSendNTEModalOpen={setIsSendNTEModalOpen}
-              setIsUploadEmployeeIssueAttachmentModalOpen={setIsUploadEmployeeIssueAttachmentModalOpen}
-              setNTEAttachmentViewModalOpen={setNTEAttachmentViewModalOpen}
-              setReleased={setReleased}
-              isLoading={isLoading}
-            />
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
-            <Investigation
-              id={item.id}
-              investigatedDate={item.investigatedDate}
-              isInvestigated={item.isInvestigated}
-              setIsInvestigateModalOpen={setIsInvestigateModalOpen}
-              setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
-            />
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
-            <SendDecision
-              id={item.id}
-              isDecisionSent={item.isDecisionSent}
-              isDecisionReceived={item.isDecisionReceived}
-              decisionReceivedDate={item.decisionReceivedDate}
-              setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
-              setIsUploadDecisionAttachmentModalOpen={setIsUploadDecisionAttachmentModalOpen}
-              setIsDecisionAttachmentViewModalOpen={setIsDecisionAttachmentViewModalOpen}
-              setReleased={setReleased}
-              isLoading={isLoading}
-            />
-          </td>
-        </tr>
-      ));
+      return employeeIssueItems.map((item: any) => {
+        // Get is_responded from the original data (it should be included in the list response)
+        const isResponded = item.is_responded;
+        const hasInvestigationReport = item.isInvestigated;
+        
+        return (
+          <tr
+            key={item.id}
+            // onClick={() => alert('Clicked Employee Issue Item')}
+            // className='hover:bg-gray-200/30 cursor-pointer'
+          >
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.incidentDate}</td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span>{item.name}</span>
+            </td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <SendNTE
+                id={item.id}
+                isNTESent={item.isNTESent}
+                isNTEReceived={item.isNTEReceived}
+                incidentReceivedDate={item.incidentReceivedDate}
+                setIsSendNTEModalOpen={setIsSendNTEModalOpen}
+                setIsUploadEmployeeIssueAttachmentModalOpen={setIsUploadEmployeeIssueAttachmentModalOpen}
+                setNTEAttachmentViewModalOpen={setNTEAttachmentViewModalOpen}
+                setReleased={setReleased}
+                isLoading={isLoading}
+              />
+            </td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
+              <Investigation
+                id={item.id}
+                investigatedDate={item.investigatedDate}
+                isInvestigated={item.isInvestigated}
+                setIsInvestigateModalOpen={setIsInvestigateModalOpen}
+                setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
+                isResponded={item.is_responded === true}
+              />
+            </td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
+              <SendDecision
+                id={item.id}
+                isDecisionSent={item.isDecisionSent}
+                isDecisionReceived={item.isDecisionReceived}
+                decisionReceivedDate={item.decisionReceivedDate}
+                setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
+                setIsUploadDecisionAttachmentModalOpen={setIsUploadDecisionAttachmentModalOpen}
+                setIsDecisionAttachmentViewModalOpen={setIsDecisionAttachmentViewModalOpen}
+                setReleased={setReleased}
+                isLoading={isLoading}
+                hasInvestigationReport={hasInvestigationReport}
+              />
+            </td>
+          </tr>
+        );
+      });
     } else {
       return (
         <tr>

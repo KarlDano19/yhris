@@ -15,7 +15,7 @@ import CustomToast from "@/components/CustomToast";
 import EmployeeCertificatePreview from "./previews/EmployeeCertificatePreview";
 import EmploymentAgreementPreview from "./previews/EmploymentAgreementPreview";
 import NoticeToExplainPreview from "./previews/NoticeToExplainPreview";
-import useGetEmployeeIssueItems from '../address-employee-issue/hooks/useGetEmployeeIssueItems';
+import useGetEmployeeIssueDetails from '../address-employee-issue/hooks/useGetEmployeeIssueDetails';
 import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
 import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
@@ -46,9 +46,8 @@ export default function Content() {
       : 'employee-certificate'
   );
 
-  // Fetch employee issue data if employeeId is provided
-  const { data: employeeIssueItems, refetch: refetchEmployeeIssues } = useGetEmployeeIssueItems({});
-  const [selectedEmployeeIssue, setSelectedEmployeeIssue] = useState<any>(null);
+  // Fetch employee issue details if employeeId is provided
+  const { data: selectedEmployeeIssue, refetch: refetchEmployeeIssue } = useGetEmployeeIssueDetails(employeeId ? Number(employeeId) : null);
   
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
@@ -201,28 +200,6 @@ export default function Content() {
     };
   }, []);
   
-  // Fetch employee issue data
-  useEffect(() => {
-    if (employeeId) {
-      refetchEmployeeIssues();
-    }
-  }, [employeeId, refetchEmployeeIssues]);
-  
-  // Set selected employee issue when data is loaded
-  useEffect(() => {
-    if (employeeId && employeeIssueItems) {
-      // Handle both paginated and non-paginated responses
-      const items = employeeIssueItems.records || employeeIssueItems;
-      
-      if (items && items.length > 0) {
-        const employeeIssue = items.find((item: any) => item.id.toString() === employeeId);
-        if (employeeIssue) {
-          setSelectedEmployeeIssue(employeeIssue);
-        }
-      }
-    }
-  }, [employeeId, employeeIssueItems]);
-  
   // Populate form with employee data if employeeId is provided
   useEffect(() => {
     if (documentType === 'notice-to-explain' && employeeId && selectedEmployeeIssue) {
@@ -230,13 +207,11 @@ export default function Content() {
       const incidentDate = selectedEmployeeIssue.incident_date 
         ? new Date(selectedEmployeeIssue.incident_date).toISOString().split('T')[0]
         : '';
-      
       // Find the employee info
       const employeeName = selectedEmployeeIssue.name || '';
       const position = selectedEmployeeIssue.position || '';
       const department = selectedEmployeeIssue.department || '';
       const incidentPlace = selectedEmployeeIssue.place_of_incident || '';
-      
       // Update form data
       setNoticeToExplainData(prev => ({
         ...prev,

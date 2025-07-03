@@ -125,7 +125,7 @@ const SendNTE = ({
                 })
               }
             >
-              <ClipIcon />
+              <ClipIcon hasFile={true} />
             </div>
             <p className='ml-2 text-xs'>{incidentReceivedDate}</p>
           </div>
