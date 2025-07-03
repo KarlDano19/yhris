@@ -81,7 +81,7 @@ const SendNTE = ({
           onClick={handleSendClick}
           title={employeeIssueDetails && employeeIssueDetails.nte_attachment
             ? (isNTESent ? 'Resend Notice to Explain' : 'Send Notice to Explain')
-            : 'Generate NTE'}
+            : 'Click to Generate NTE'}
         >
           {(checkingAttachment || isLoadingDetails || resettingNteSent)
             ? 'Checking...'
