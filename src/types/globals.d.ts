@@ -199,11 +199,19 @@ export type T_IncidentReport = {
   briefBackground: string;
 };
 
+export type T_NTEForm = {
+  template: string;
+  to: string | string[];
+  cc?: string | string[];
+  bcc?: string | string[];
+  message: string;
+};
+
 export type T_IncidentReportEmail = {
   id: string;
   actionType: string;
   emailType: string;
-  issueNTEForm: any;
+  issueNTEForm: T_NTEForm;
   sendDecisionForm: any;
   dateReceived: any;
   decision_to: string;

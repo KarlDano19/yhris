@@ -23,6 +23,10 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         data.cc = employeeIssue.issueNTEForm.cc;
         data.bcc = employeeIssue.issueNTEForm.bcc;
         data.context = employeeIssue.issueNTEForm.message;
+        data.nte_to = Array.isArray(employeeIssue.issueNTEForm.to) ? employeeIssue.issueNTEForm.to.join(',') : employeeIssue.issueNTEForm.to;
+        data.nte_cc = Array.isArray(employeeIssue.issueNTEForm.cc) ? employeeIssue.issueNTEForm.cc.join(',') : employeeIssue.issueNTEForm.cc;
+        data.nte_bcc = Array.isArray(employeeIssue.issueNTEForm.bcc) ? employeeIssue.issueNTEForm.bcc.join(',') : employeeIssue.issueNTEForm.bcc;
+        data.nte_message = employeeIssue.issueNTEForm.message;
       }
       if (employeeIssue.emailType === 'decision') {
         data.subject = `Decision | ${employeeIssue.sendDecisionForm.template}`;

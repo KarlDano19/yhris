@@ -4,6 +4,7 @@ import classNames from '@/helpers/classNames';
 
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
 import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
+import useResetNteSent from './hooks/useResetNteSent';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -30,7 +31,8 @@ const SendNTE = ({
 }) => {
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
-  const { data: employeeIssueDetails, isLoading: isLoadingDetails } = useGetEmployeeIssueDetails(id);
+  const { data: employeeIssueDetails, isLoading: isLoadingDetails, refetch } = useGetEmployeeIssueDetails(id);
+  const { resetNteSent, loading: resettingNteSent } = useResetNteSent();
   
   // const customOnclick = () => {
   //   setIsUploadEmployeeIssueAttachmentModalOpen({
@@ -41,24 +43,27 @@ const SendNTE = ({
 
   const handleSendClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isNTESent) {
-      setCheckingAttachment(true);
-      
-      try {
-        // Check if there's an attachment
-        if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
-          // If there's an attachment, open the modal with attachment data
-          setIsSendNTEModalOpen({
-            id,
-            attachment: employeeIssueDetails.nte_attachment
-          });
-        } else {
-          // If no attachment, redirect to document generator
-          router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
-        }
-      } finally {
-        setCheckingAttachment(false);
+    setCheckingAttachment(true);
+    try {
+      let details = employeeIssueDetails;
+      if (isNTESent) {
+        // If Resend, reset is_nte_sent to false first
+        await resetNteSent(id);
+        const refetchResult = await refetch();
+        details = refetchResult.data;
       }
+      // Check if there's an attachment
+      if (details && details.nte_attachment) {
+        setIsSendNTEModalOpen({
+          id,
+          attachment: details.nte_attachment
+        });
+      } else {
+        // If no attachment, redirect to document generator
+        router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
+      }
+    } finally {
+      setCheckingAttachment(false);
     }
   };
 
@@ -67,17 +72,20 @@ const SendNTE = ({
       <div>
         <button
           className={classNames(
-            isNTESent
+            employeeIssueDetails && employeeIssueDetails.nte_attachment
               ? 'bg-red-500 border-[1px] border-red-500 text-white'
-              : employeeIssueDetails?.nte_attachment
-                ? 'bg-red-500 border-[1px] border-red-500 text-white'
-                : 'border-[1px] border-red-500 text-red-500',
-            'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
+              : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
+            'items-center rounded-md px-2 py-1 focus:z-10 w-24'
           )}
-          disabled={isNTESent || checkingAttachment || isLoadingDetails}
+          disabled={checkingAttachment || isLoadingDetails || resettingNteSent}
           onClick={handleSendClick}
+          title={employeeIssueDetails && employeeIssueDetails.nte_attachment
+            ? (isNTESent ? 'Resend Notice to Explain' : 'Send Notice to Explain')
+            : 'Generate NTE'}
         >
-          {isNTESent ? 'Sent' : (checkingAttachment || isLoadingDetails ? 'Checking...' : 'Send')}
+          {(checkingAttachment || isLoadingDetails || resettingNteSent)
+            ? 'Checking...'
+            : (isNTESent ? 'Resend' : 'Send')}
         </button>
       </div>
       <div>

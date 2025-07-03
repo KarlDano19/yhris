@@ -69,36 +69,42 @@ export default function SendNTEModal({
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
   // Reset all form data when modal opens or closes
-  useEffect(() => {
-    // Reset all tags and inputs first
-    setTagsTo([]);
-    setTagsCc([]);
-    setTagsBcc([]);
-    setInputTo('');
-    setInputCc('');
-    setInputBcc('');
-    setIsCCOpen(false);
-    setIsBCCOpen(false);
-    setApplicantEmail(null);
-    reset();
+  // useEffect(() => {
+  //   // Only reset when modal is actually closed
+  //   if (!isOpen) {
+  //     setTagsTo([]);
+  //     setTagsCc([]);
+  //     setTagsBcc([]);
+  //     setInputTo('');
+  //     setInputCc('');
+  //     setInputBcc('');
+  //     setIsCCOpen(false);
+  //     setIsBCCOpen(false);
+  //     setApplicantEmail(null);
+  //     reset();
+  //   } else if (isOpen?.id && employeeIssueItems?.length > 0) {
+  //     // Only set email data if modal is opening with an ID AND we have valid data
+  //     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
+  //     // Don't auto-populate the To field
+  //     if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
+  //       setApplicantEmail(employeeIssueItems[itemIndex].email);
+  //       // Removed setTagsTo here to prevent auto-population
+  //     }
+  //   }
+  // }, [isOpen, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
 
-    // Only set email data if modal is opening with an ID AND we have valid data
-    if (isOpen?.id && employeeIssueItems?.length > 0) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      // Don't auto-populate the To field
-      if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
-        setApplicantEmail(employeeIssueItems[itemIndex].email);
-        // Removed setTagsTo here to prevent auto-population
+  // Prefill fields from backend when details are loaded
+  useEffect(() => {
+    if (employeeIssueDetails) {
+      setTagsTo(employeeIssueDetails.nte_to ? employeeIssueDetails.nte_to.split(',') : []);
+      setTagsCc(employeeIssueDetails.nte_cc ? employeeIssueDetails.nte_cc.split(',') : []);
+      setTagsBcc(employeeIssueDetails.nte_bcc ? employeeIssueDetails.nte_bcc.split(',') : []);
+      setValue('message', employeeIssueDetails.nte_message || '');
+      if (employeeIssueDetails.nte_attachment) {
+        setPdfAttachment(employeeIssueDetails.nte_attachment);
       }
     }
-  }, [isOpen?.id, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
-
-  // Get attachment from the server if available
-  useEffect(() => {
-    if (employeeIssueDetails?.nte_attachment) {
-      setPdfAttachment(employeeIssueDetails.nte_attachment);
-    }
-  }, [employeeIssueDetails]);
+  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
@@ -108,7 +114,7 @@ export default function SendNTEModal({
       employeeIssueItemsCopy[itemIndex].id = isOpen.id;
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'nte';
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template.subject;
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template ? template.subject : '';
       employeeIssueItemsCopy[itemIndex].issueNTEForm.to = tagsTo;
       if (tagsCc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = tagsCc;
@@ -187,12 +193,12 @@ export default function SendNTEModal({
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Email Template<span className='text-red-600'>*</span>
+                          Email Template
                         </label>
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(event) => {
                               const template = dataEmailTemplate.find(
