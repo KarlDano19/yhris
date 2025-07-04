@@ -18,6 +18,7 @@ const SendNTE = ({
   setNTEAttachmentViewModalOpen,
   setReleased,
   isLoading,
+  setIsRedirectingToDocumentGenerator,
 }: {
   id: number;
   isNTESent: boolean;
@@ -28,6 +29,7 @@ const SendNTE = ({
   setNTEAttachmentViewModalOpen: Dispatch<T_NTEAttachmentViewModal>;
   setReleased: any;
   isLoading: boolean;
+  setIsRedirectingToDocumentGenerator: Dispatch<boolean>;
 }) => {
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
@@ -60,6 +62,7 @@ const SendNTE = ({
         });
       } else {
         // If no attachment, redirect to document generator
+        setIsRedirectingToDocumentGenerator(true);
         router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
       }
     } finally {
