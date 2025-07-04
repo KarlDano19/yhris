@@ -70,6 +70,17 @@ const SendNTE = ({
     }
   };
 
+  // Format updated_at as MM/DD/YYYY
+  let formattedUpdatedAt = '';
+  if (employeeIssueDetails && employeeIssueDetails.updated_at) {
+    const date = new Date(employeeIssueDetails.updated_at);
+    formattedUpdatedAt = date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  }
+
   return (
     <div className='flex flex-col gap-2'>
       <div>
@@ -138,7 +149,7 @@ const SendNTE = ({
             >
               <ClipIcon hasFile={true} />
             </div>
-            <p className='ml-2 text-xs'>{incidentReceivedDate}</p>
+            <p className='ml-2 text-xs'>{formattedUpdatedAt}</p>
           </div>
         </div>
       ) : null}
