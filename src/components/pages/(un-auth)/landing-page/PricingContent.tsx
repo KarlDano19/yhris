@@ -1,16 +1,21 @@
 "use client"
 import { useState } from "react";
-
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { CheckIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 import Navigation from "./Navigation";
 import Footer from "./Footer";
-import { useState } from "react";
 import React from "react";
 
 const PricingContent: React.FC = () => {
   const [employeeCount, setEmployeeCount] = useState(1);
+  const router = useRouter();
+  
+  // Mock variables for the button functionality - these should be properly implemented
+  const isLoggedIn = false; // This should come from your auth context/state
+  const [periodicity] = useState<'monthly' | 'yearly'>('monthly'); // This should come from your pricing state
+  const periodicityDuration = 12; // This should come from your pricing state
+  const slug = 'hris'; // This should be the product slug
 
   const calculatePrice = (employees: number) => {
     const basePrice = 4000;
@@ -110,7 +115,7 @@ const PricingContent: React.FC = () => {
                     />
                   </div>
                   <div className="text-center text-xs text-gray-500 mt-2">
-                    <span>Minimum: 100 employee</span>
+                    <span>Minimum: 1 employee</span>
                   </div>
                 </div>
 
@@ -120,7 +125,7 @@ const PricingContent: React.FC = () => {
                     <span className="text-4xl font-bold text-indigo-dye">{formatPrice(calculatePrice(employeeCount))}</span>
                     <span className="text-lg text-gray-600 ml-2">/month</span>
                   </div>
-                  <p className="text-gray-600">{employeeCount.toLocaleString()} employees</p>
+                  <p className="text-gray-600">For 1 - 100 employees</p>
                   
                   {/* Pricing Breakdown */}
                   {employeeCount > 100 && (
