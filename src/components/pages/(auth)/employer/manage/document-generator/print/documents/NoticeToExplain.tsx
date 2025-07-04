@@ -41,7 +41,7 @@ export const printNoticeToExplain = (data: NoticeToExplainFormData, options: Pri
         return;
       }
       
-      // Generate HTML content with pagination that matches the preview
+      // Generate HTML content
       const htmlContent = generateNoticeToExplainHTML(data);
       
       // Write HTML content to the iframe
@@ -173,20 +173,11 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
   // Border color with fallback to default amber
   const borderColor = data.borderColor || '#FFC107';
 
-  // Estimate content length for conditional page break
-  const contentLength =
-    (data.briefBackground?.length || 0) +
-    (data.employeeExplanation?.length || 0) +
-    (data.hearingNotes?.length || 0) +
-    (data.managementDecision?.length || 0);
-  // You can adjust this threshold as needed (e.g., 1200)
-  const needsPageBreak = contentLength > 1200;
-
-  // Generate HTML for the document - no longer using character-based chunking
+  // Generate HTML for the document
   const documentHTML = `
     <div class="document-container">
       <!-- Header Section -->
-      <div class="section avoid-break">
+      <div class="section">
         <div class="logo-container">
           ${logoSrc ? `<img src="${logoSrc}" alt="Company Logo">` : `<div class="space"></div>`}
         </div>
@@ -241,7 +232,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Brief Background Section -->
-      <div class="section avoid-break">
+      <div class="section">
         <div class="background-section">
           <div class="detail-label">Brief background :</div>
           <div style="white-space: normal; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>
@@ -281,7 +272,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Employee Explanation Section -->
-      <div class="section avoid-break">
+      <div class="section">
         <div style="margin-top: 25px; margin-bottom: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">I. Employee Explanation</div>
           <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
@@ -291,7 +282,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Hearing Section -->
-      <div class="section avoid-break">
+      <div class="section">
         <div style="margin-top: 15px; margin-bottom: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">II. Hearing</div>
           <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
@@ -301,7 +292,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Management Decision Section -->
-      <div class="section avoid-break">
+      <div class="section">
         <div style="margin-top: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">III. Management Decision</div>
           <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; margin-bottom: 30px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
@@ -311,7 +302,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Footer Section -->
-      <div class="section avoid-break">
+      <div class="section">
         <table class="footer-table">
           <tr>
             <td class="footer-cell footer-cell-left">
@@ -340,8 +331,6 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       <title>Notice to Explain</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        
-        /* CSS to fix pagination */
         
         body {
           font-family: 'Roboto', Arial, sans-serif;
@@ -509,7 +498,6 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           text-align: center;
         }
 
-
         /* Signature line styles */
         .signature-line {
           border-top: 1px solid #000;
@@ -532,7 +520,6 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           margin: 0 auto;
         }
 
-        
         /* Footer table styles */
         .footer-table {
           width: 100%;
@@ -568,25 +555,10 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           margin-top: 5px;
         }
         
-        /* Page break control */
-        .avoid-break {
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-
-        .page-break-before {
-          page-break-before: always;
-        }
-        
         @media print {
           body {
             padding: 0;
             margin: 0;
-          }
-          
-          .avoid-break {
-            page-break-inside: avoid;
-            break-inside: avoid;
           }
         }
 
