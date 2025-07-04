@@ -51,7 +51,22 @@ export function handleProceedUtil({
           }
           
           .logo-container {
-            margin-top: 0.5rem !important;
+            width: 100% !important;
+            height: 7rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-bottom: 0.5rem !important;
+            overflow: hidden !important;
+          }
+            
+          .logo-container img {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain !important;
+            display: block !important;
           }
 
           .space {
