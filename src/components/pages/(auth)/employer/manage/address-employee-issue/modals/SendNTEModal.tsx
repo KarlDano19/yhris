@@ -102,9 +102,9 @@ export default function SendNTEModal({
   // Prefill fields from backend when details are loaded
   useEffect(() => {
     if (employeeIssueDetails) {
-      setTagsTo(employeeIssueDetails.nte_to ? employeeIssueDetails.nte_to.split(',') : []);
-      setTagsCc(employeeIssueDetails.nte_cc ? employeeIssueDetails.nte_cc.split(',') : []);
-      setTagsBcc(employeeIssueDetails.nte_bcc ? employeeIssueDetails.nte_bcc.split(',') : []);
+      setTagsTo(employeeIssueDetails.nte_to ? JSON.parse(employeeIssueDetails.nte_to) : []);
+      setTagsCc(employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : []);
+      setTagsBcc(employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []);
       setValue('message', employeeIssueDetails.nte_message || '');
       if (employeeIssueDetails.nte_attachment) {
         setPdfAttachment(employeeIssueDetails.nte_attachment);
