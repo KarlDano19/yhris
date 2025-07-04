@@ -38,6 +38,7 @@ export default function IncidentReportModal({
   const { mutate, isLoading } = useAddEmployeeIssueItems();
   const { register, handleSubmit, setValue, reset, control, trigger, watch } = useForm<T_IncidentReport>({
     defaultValues: {
+      name: '',
       incidentDate: new Date().toISOString(), 
     },
   });
@@ -53,7 +54,10 @@ export default function IncidentReportModal({
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={"Successfully created an incident report."} type='success' />, { duration: 5000 });
         setIsOpen(false);
-        reset();
+        reset({
+          name: '',
+          incidentDate: new Date().toISOString(),
+        });
         refetch();
       },
       onError: (err: any) => {
