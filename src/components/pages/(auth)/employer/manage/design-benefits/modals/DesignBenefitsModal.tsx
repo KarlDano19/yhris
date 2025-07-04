@@ -34,7 +34,7 @@ export default function DesignBenefitsModal({
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, reset, trigger, getValues, setValue } = useForm<T_Benefit>();
+  const { register, handleSubmit, reset, trigger, getValues, setValue, formState: { errors } } = useForm<T_Benefit>();
   const { mutate, isLoading } = useAddBenefitItems();
 
   const onSubmit = handleSubmit((data) => {
@@ -228,10 +228,19 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('purpose', { required: true })}
+                              {...register('purpose', { 
+                                required: true,
+                                maxLength: {
+                                  value: 100,
+                                  message: 'You have reached the 100 characters limit'
+                                }
+                              })}
                               id='purpose'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
+                            {errors.purpose && (
+                              <p className='mt-1 text-sm text-red-600'>{errors.purpose.message}</p>
+                            )}
                           </div>
                         </div>
                         <div className='sm:col-span-4 mt-4'>
@@ -241,10 +250,19 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('benefits', { required: true })}
+                              {...register('benefits', { 
+                                required: true,
+                                maxLength: {
+                                  value: 100,
+                                  message: 'You have reached the 100 characters limit'
+                                }
+                              })}
                               id='benefits'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
+                            {errors.benefits && (
+                              <p className='mt-1 text-sm text-red-600'>{errors.benefits.message}</p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -257,10 +275,19 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('coverage', { required: true })}
+                              {...register('coverage', { 
+                                required: true,
+                                maxLength: {
+                                  value: 100,
+                                  message: 'You have reached the 100 characters limit'
+                                }
+                              })}
                               id='coverage'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
+                            {errors.coverage && (
+                              <p className='mt-1 text-sm text-red-600'>{errors.coverage.message}</p>
+                            )}
                           </div>
                         </div>
                         <div className='sm:col-span-4 mt-4'>
@@ -270,10 +297,19 @@ export default function DesignBenefitsModal({
                           <div className='mt-2'>
                             <textarea
                               rows={4}
-                              {...register('eligibility', { required: true })}
+                              {...register('eligibility', { 
+                                required: true,
+                                maxLength: {
+                                  value: 100,
+                                  message: 'You have reached the 100 characters limit'
+                                }
+                              })}
                               id='eligibility'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
+                            {errors.eligibility && (
+                              <p className='mt-1 text-sm text-red-600'>{errors.eligibility.message}</p>
+                            )}
                           </div>
                         </div>
                       </div>
