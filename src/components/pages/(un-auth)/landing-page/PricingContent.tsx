@@ -115,7 +115,7 @@ const PricingContent: React.FC = () => {
                     />
                   </div>
                   <div className="text-center text-xs text-gray-500 mt-2">
-                    <span>Minimum: 100 employee</span>
+                    <span>Minimum: 1 employee</span>
                   </div>
                 </div>
 
