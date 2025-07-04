@@ -63,7 +63,7 @@ const PricingContent: React.FC = () => {
           {/* Header Section */}
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-indigo-dye mb-6">
-              <span className="text-[#FFC107]">Transparent</span> Pricing
+              Simple, <span className="text-[#FFC107]">Transparent</span> Pricing
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Choose the perfect plan for your business needs. Get the complete HRIS solution, add our powerful payroll system, or bundle both for maximum savings.
