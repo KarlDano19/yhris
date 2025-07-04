@@ -1,16 +1,21 @@
 "use client"
 import { useState } from "react";
-
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { CheckIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 import Navigation from "./Navigation";
 import Footer from "./Footer";
-import { useState } from "react";
 import React from "react";
 
 const PricingContent: React.FC = () => {
   const [employeeCount, setEmployeeCount] = useState(1);
+  const router = useRouter();
+  
+  // Mock variables for the button functionality - these should be properly implemented
+  const isLoggedIn = false; // This should come from your auth context/state
+  const [periodicity] = useState<'monthly' | 'yearly'>('monthly'); // This should come from your pricing state
+  const periodicityDuration = 12; // This should come from your pricing state
+  const slug = 'hris'; // This should be the product slug
 
   const calculatePrice = (employees: number) => {
     const basePrice = 4000;
