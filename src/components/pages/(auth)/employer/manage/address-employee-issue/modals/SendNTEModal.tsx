@@ -34,6 +34,12 @@ type FormValues = {
   bcc: string;
 };
 
+function stripHtml(html: string) {
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
 export default function SendNTEModal({
   employeeIssueItems,
   setEmployeeIssueItems,
@@ -122,7 +128,14 @@ export default function SendNTEModal({
       if (tagsBcc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
       }
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
+      // Store only plain text (strip HTML)
+      const plainMessage = stripHtml(data.message);
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = plainMessage;
+      // Save nte_to, nte_cc, nte_bcc as JSON stringified arrays
+      employeeIssueItemsCopy[itemIndex].nte_to = JSON.stringify(tagsTo);
+      employeeIssueItemsCopy[itemIndex].nte_cc = JSON.stringify(tagsCc);
+      employeeIssueItemsCopy[itemIndex].nte_bcc = JSON.stringify(tagsBcc);
+      employeeIssueItemsCopy[itemIndex].nte_message = plainMessage;
       // Include PDF attachment if available
       if (pdfAttachment) {
         employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;

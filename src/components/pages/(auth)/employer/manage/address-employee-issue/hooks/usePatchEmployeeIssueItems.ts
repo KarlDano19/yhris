@@ -23,10 +23,10 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         data.cc = employeeIssue.issueNTEForm.cc;
         data.bcc = employeeIssue.issueNTEForm.bcc;
         data.context = employeeIssue.issueNTEForm.message;
-        data.nte_to = Array.isArray(employeeIssue.issueNTEForm.to) ? employeeIssue.issueNTEForm.to.join(',') : employeeIssue.issueNTEForm.to;
-        data.nte_cc = Array.isArray(employeeIssue.issueNTEForm.cc) ? employeeIssue.issueNTEForm.cc.join(',') : employeeIssue.issueNTEForm.cc;
-        data.nte_bcc = Array.isArray(employeeIssue.issueNTEForm.bcc) ? employeeIssue.issueNTEForm.bcc.join(',') : employeeIssue.issueNTEForm.bcc;
-        data.nte_message = employeeIssue.issueNTEForm.message;
+        data.nte_to = employeeIssue.nte_to;
+        data.nte_cc = employeeIssue.nte_cc;
+        data.nte_bcc = employeeIssue.nte_bcc;
+        data.nte_message = employeeIssue.nte_message;
       }
       if (employeeIssue.emailType === 'decision') {
         data.subject = `Decision | ${employeeIssue.sendDecisionForm.template}`;
@@ -35,6 +35,8 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         data.bcc = employeeIssue.sendDecisionForm.bcc;
         data.context = employeeIssue.sendDecisionForm.message;
         data.decision_to = employeeIssue.decision_to;
+        data.decision_cc = employeeIssue.decision_cc;
+        data.decision_bcc = employeeIssue.decision_bcc;
         data.decision_message = employeeIssue.decision_message;
       }
     } else {

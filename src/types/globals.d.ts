@@ -214,7 +214,13 @@ export type T_IncidentReportEmail = {
   issueNTEForm: T_NTEForm;
   sendDecisionForm: any;
   dateReceived: any;
+  nte_to: string;
+  nte_cc: string;
+  nte_bcc: string;
+  nte_message: string;
   decision_to: string;
+  decision_cc: string;
+  decision_bcc: string;
   decision_message: string;
 };
 
