@@ -40,15 +40,15 @@ export function handleProceedUtil({
         '<style>',
         `<style>
           /* Override styles for PDF generation */
-          body {
-            margin: 0;
-            padding: 0;
-          }
+          // body {
+          //   margin: 0;
+          //   padding: 0;
+          // }
           
-          @page {
-            size: A4;
-            margin: 0.1cm 1cm 0cm 1cm;
-          }
+          // @page {
+          //   size: A4;
+          //   margin: 0.5cm 1cm 0cm 1cm;
+          // }
 
           .document-subtitle {
             margin-bottom: 20px !important;
@@ -164,75 +164,69 @@ export function handleProceedUtil({
       // Wait for iframe to load
       iframe.onload = () => {
         const content = iframeDoc.body;
+        
+        // Add style to body to match print layout more closely
+        const styleEl = iframeDoc.createElement('style');
+        styleEl.textContent = `
+          body {
+            width: 210mm !important;
+            box-sizing: border-box !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          .document-container {
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding: 0 5mm !important;
+            box-sizing: border-box !important;
+          }
+          /* Ensure footer is properly positioned */
+          .footer-table {
+            margin-bottom: 0 !important;
+          }
+        `;
+        iframeDoc.head.appendChild(styleEl);
+        
+        // Force layout recalculation
+        content.offsetHeight;
+        
         setTimeout(() => {
-          html2canvas(content, {
-            scale: 2.5,
+          // Get the main document container for more precise capture
+          const documentContainer = iframeDoc.querySelector('.document-container');
+          const targetElement = documentContainer || content;
+          
+          // Increased scale for better quality and to match print size
+          html2canvas(targetElement as HTMLElement, {
+            scale: 3, // Increased from 2.5 to 3
             useCORS: true,
             allowTaint: true,
             backgroundColor: '#ffffff',
-            width: content.scrollWidth,
-            height: content.scrollHeight,
+            width: targetElement.clientWidth,
+            height: targetElement.clientHeight,
             scrollX: 0,
             scrollY: 0,
-            logging: false
+            logging: false,
+            windowWidth: 210 * 3.78, // Approximate A4 width in pixels
+            windowHeight: 297 * 3.78 // Approximate A4 height in pixels
           }).then((canvas: any) => {
             try {
               const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
                 format: 'a4',
-                compress: true
+                compress: true,
+                hotfixes: ['px_scaling'] // Add hotfix for better pixel scaling
               });
-              pdf.setDrawColor(255, 255, 255, 0);
-              const imgData = canvas.toDataURL('image/png');
-              const imgWidth = 210 - 20;
-              const pageHeight = 297 - 20;
+              
+              const imgData = canvas.toDataURL('image/png', 1.0);
+              
+              // Use full page width with small margins
+              const imgWidth = 210 - 10; // 5mm margins on each side
               const imgHeight = (canvas.height * imgWidth) / canvas.width;
-              const headerBreakPoint = iframeDoc.querySelector('.page-break-before');
-              let useSinglePageApproach = true;
-              if (headerBreakPoint) {
-                useSinglePageApproach = false;
-                const firstPageCanvas = document.createElement('canvas');
-                const firstPageCtx = firstPageCanvas.getContext('2d');
-                const headerPosition = headerBreakPoint.getBoundingClientRect();
-                if (firstPageCtx) {
-                  firstPageCanvas.width = canvas.width;
-                  firstPageCanvas.height = headerPosition.top * 2.5;
-                  firstPageCtx.drawImage(
-                    canvas,
-                    0, 0, canvas.width, firstPageCanvas.height,
-                    0, 0, firstPageCanvas.width, firstPageCanvas.height
-                  );
-                  const firstPageImgData = firstPageCanvas.toDataURL('image/png');
-                  pdf.addImage(firstPageImgData, 'PNG', 10, 0, imgWidth, (firstPageCanvas.height * imgWidth) / firstPageCanvas.width);
-                  pdf.addPage();
-                  const secondPageCanvas = document.createElement('canvas');
-                  const secondPageCtx = secondPageCanvas.getContext('2d');
-                  if (secondPageCtx) {
-                    secondPageCanvas.width = canvas.width;
-                    secondPageCanvas.height = canvas.height - firstPageCanvas.height;
-                    secondPageCtx.drawImage(
-                      canvas,
-                      0, firstPageCanvas.height, canvas.width, secondPageCanvas.height,
-                      0, 0, secondPageCanvas.width, secondPageCanvas.height
-                    );
-                    const secondPageImgData = secondPageCanvas.toDataURL('image/png');
-                    pdf.addImage(secondPageImgData, 'PNG', 10, 0, imgWidth, (secondPageCanvas.height * imgWidth) / secondPageCanvas.width);
-                  }
-                }
-              }
-              if (useSinglePageApproach) {
-                pdf.addImage(imgData, 'PNG', 10, 0, imgWidth, imgHeight);
-                let heightLeft = imgHeight - pageHeight;
-                let position = -(pageHeight);
-                const minPageHeight = 20; // Only add a new page if more than 20mm left
-                while (heightLeft > minPageHeight) {
-                  pdf.addPage();
-                  pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                  heightLeft -= pageHeight;
-                  position -= pageHeight;
-                }
-              }
+              
+              // Center image on page with adjusted vertical position (moved up)
+              pdf.addImage(imgData, 'PNG', 5, 3, imgWidth, imgHeight);
+              
               const pdfBlob = pdf.output('blob');
               const pdfFile = new File([pdfBlob], `notice-to-explain-${employeeId}.pdf`, { type: 'application/pdf' });
               uploadAttachment(
