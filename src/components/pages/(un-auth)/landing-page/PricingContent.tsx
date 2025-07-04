@@ -5,9 +5,10 @@ import { CheckIcon, PhoneIcon, EnvelopeIcon, ArrowTopRightOnSquareIcon } from "@
 import Navigation from "./Navigation";
 import Footer from "./Footer";
 import { useState } from "react";
+import React from "react";
 
-const PricingContent = () => {
-  const [employeeCount, setEmployeeCount] = useState(100);
+const PricingContent: React.FC = () => {
+  const [employeeCount, setEmployeeCount] = useState(1);
 
   const calculatePrice = (employees: number) => {
     const basePrice = 4000;
@@ -88,21 +89,23 @@ const PricingContent = () => {
                     <input
                       type="number"
                       min="1"
+                      step="1"
                       value={employeeCount}
                       onChange={(e) => {
-                        const value = Number(e.target.value);
-                        if (value >= 1) {
-                          setEmployeeCount(value);
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setEmployeeCount(1);
+                        } else {
+                          const value = parseInt(inputValue, 10);
+                          if (!isNaN(value) && value >= 1) {
+                            setEmployeeCount(value);
+                          }
                         }
                       }}
-                      className="w-full px-4 py-3 text-lg font-semibold text-indigo-dye bg-white border-2 border-gray-200 rounded-lg focus:border-[#FFC107] focus:ring-2 focus:ring-[#FFC107]/20 focus:outline-none transition-all duration-300 text-center animate-pulse hover:animate-none focus:animate-none shadow-lg hover:shadow-xl focus:shadow-xl"
+                      className="w-full px-4 py-3 text-lg font-semibold text-indigo-dye bg-white border-2 border-gray-200 rounded-lg focus:border-[#FFC107] focus:ring-2 focus:ring-[#FFC107]/20 focus:outline-none transition-all duration-300 text-center shadow-lg hover:shadow-xl focus:shadow-xl"
                       placeholder="Enter number of employees"
+                      aria-label="Number of employees"
                     />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400 text-sm animate-bounce">employees</span>
-                    </div>
-                    {/* Animated Border Glow */}
-                    <div className="absolute inset-0 rounded-lg border-2 border-[#FFC107] opacity-30 animate-ping pointer-events-none"></div>
                   </div>
                   <div className="text-center text-xs text-gray-500 mt-2">
                     <span>Minimum: 1 employee</span>
