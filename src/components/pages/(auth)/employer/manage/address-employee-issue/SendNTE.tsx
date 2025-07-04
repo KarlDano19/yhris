@@ -97,7 +97,7 @@ const SendNTE = ({
             isNTEReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={!isNTESent || isNTEReceived || isLoading}
+          disabled={true}
           onClick={() => setReleased(id, 'nte')}
         >
           {isLoading && (
