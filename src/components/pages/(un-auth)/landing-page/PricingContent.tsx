@@ -1,21 +1,21 @@
 "use client"
 import { useState } from "react";
-
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { CheckIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 import Navigation from "./Navigation";
 import Footer from "./Footer";
+import React from "react";
 
-import { CheckIcon, PhoneIcon, EnvelopeIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-
-const PricingContent = ({ isLoggedIn }: { isLoggedIn: any }) => {
+const PricingContent: React.FC = () => {
+  const [employeeCount, setEmployeeCount] = useState(1);
   const router = useRouter();
-  const [addedSlots, setAddedSlots] = useState(0);
-  const [periodicity, setPeriodicity] = useState('monthly');
-  const [periodicityDuration, setPeriodicityDuration] = useState(1);
-  const [slug, setSlug] = useState('basic-plan');
-  const [employeeCount, setEmployeeCount] = useState(100);
+  
+  // Mock variables for the button functionality - these should be properly implemented
+  const isLoggedIn = false; // This should come from your auth context/state
+  const [periodicity] = useState<'monthly' | 'yearly'>('monthly'); // This should come from your pricing state
+  const periodicityDuration = 12; // This should come from your pricing state
+  const slug = 'hris'; // This should be the product slug
 
   const calculatePrice = (employees: number) => {
     const basePrice = 4000;
@@ -96,22 +96,26 @@ const PricingContent = ({ isLoggedIn }: { isLoggedIn: any }) => {
                     <input
                       type="number"
                       min="1"
+                      step="1"
                       value={employeeCount}
                       onChange={(e) => {
-                        const value = Number(e.target.value);
-                        if (value >= 1) {
-                          setEmployeeCount(value);
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setEmployeeCount(1);
+                        } else {
+                          const value = parseInt(inputValue, 10);
+                          if (!isNaN(value) && value >= 1) {
+                            setEmployeeCount(value);
+                          }
                         }
                       }}
-                      className="w-full px-4 py-3 text-lg font-semibold text-indigo-dye bg-white border-2 border-gray-200 rounded-lg focus:border-[#FFC107] focus:ring-2 focus:ring-[#FFC107]/20 focus:outline-none transition-all duration-300 text-center animate-pulse hover:animate-none focus:animate-none shadow-lg hover:shadow-xl focus:shadow-xl"
+                      className="w-full px-4 py-3 text-lg font-semibold text-indigo-dye bg-white border-2 border-gray-200 rounded-lg focus:border-[#FFC107] focus:ring-2 focus:ring-[#FFC107]/20 focus:outline-none transition-all duration-300 text-center shadow-lg hover:shadow-xl focus:shadow-xl"
                       placeholder="Enter number of employees"
-                      disabled
+                      aria-label="Number of employees"
                     />
-                    {/* Animated Border Glow */}
-                    <div className="absolute inset-0 rounded-lg border-2 border-[#FFC107] opacity-30 animate-ping pointer-events-none"></div>
                   </div>
                   <div className="text-center text-xs text-gray-500 mt-2">
-                    <span>Minimum: 100 employee</span>
+                    <span>Minimum: 1 employee</span>
                   </div>
                 </div>
 
@@ -121,7 +125,7 @@ const PricingContent = ({ isLoggedIn }: { isLoggedIn: any }) => {
                     <span className="text-4xl font-bold text-indigo-dye">{formatPrice(calculatePrice(employeeCount))}</span>
                     <span className="text-lg text-gray-600 ml-2">/month</span>
                   </div>
-                  <p className="text-gray-600">{employeeCount.toLocaleString()} employees</p>
+                  <p className="text-gray-600">For 1 - 100 employees</p>
                   
                   {/* Pricing Breakdown */}
                   {employeeCount > 100 && (

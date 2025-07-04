@@ -1,0 +1,33 @@
+User-agent: *
+Allow: /
+
+# Allow crawling of public pages
+Allow: /about
+Allow: /features
+Allow: /pricing
+Allow: /contact
+Allow: /blog
+Allow: /help
+Allow: /terms
+Allow: /privacy
+
+# Disallow sensitive/private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /manage/
+Disallow: /post-job/
+Disallow: /apply-for-a-job/
+Disallow: /application-tracker/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Allow static assets
+Allow: /assets/
+Allow: /_next/static/
+
+# Sitemap location (update when you create a sitemap)
+Sitemap: https://yahshuahris.com/sitemap.xml
