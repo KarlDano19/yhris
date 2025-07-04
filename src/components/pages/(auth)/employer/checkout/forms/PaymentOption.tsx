@@ -1,13 +1,17 @@
 import React from 'react';
+
 import { Tooltip } from 'react-tooltip';
 import styled from 'styled-components';
 import toast from "react-hot-toast";
+
+import CustomToast from '@/components/CustomToast';
 
 import MayaLogo from '@/svg/MayaLogo';
 import DragonpayLogo from '@/svg/DragonpayLogo';
 import PaymongoLogo from '@/svg/PaymongoLogo'
 
 const PaymentOption = ({
+  plan,
   payments,
   errors,
   setError,
@@ -18,7 +22,9 @@ const PaymentOption = ({
   const validation = (key: any, message: any) => (value: any) => {
     if (!value) {
       setError(key, { type: 'focus' }, { shouldFocus: true });
-      toast.error(message);
+      toast.custom(() => <CustomToast message={message} type='error' />, {
+        duration: 4000,
+      });
       return false;
     }
     return true;
@@ -79,15 +85,29 @@ const PaymentOption = ({
 
   return (
     <form className='mb-5 pt-4' onSubmit={onSubmit}>
-      <p className='mb-8 font-semibold text-[18px] leading-[20px] tracking-[0.02em] text-[#373530]'>Payment Method</p>
-      {renderPayments()}
-      <div className='block h-[100px]' />
+      {
+        !plan.is_allow_trial && (
+          <>
+            <p className='mb-8 font-semibold text-[18px] leading-[20px] tracking-[0.02em] text-[#373530]'>Payment Method</p>
+            {renderPayments()}
+            <div className='block h-[100px]' />
+          </>
+        )
+      }
+      {
+        plan.is_allow_trial && (
+          <>
+            <p className='mb-8 font-semibold text-[18px] leading-[20px] tracking-[0.02em] text-[#373530]'>Congratulations! Youre once step closer to your free trial.</p>
+            <div className='block h-[50px]' />
+          </>
+        )
+      }
       <button
         className='w-full h-[50px] rounded-lg bg-[#2757ed] text-white text-[18px] leading-[26px] tracking-[0.02em] hover:bg-[#4f80ff] focus:outline-none'
         type='submit'
         disabled={isLoading}
       >
-        {isLoading ? 'Processing...' : 'Next'}
+        {isLoading ? 'Processing...' : plan.is_allow_trial ? 'Click here to start free trial' : 'Next'}
       </button>
     </form>
   );

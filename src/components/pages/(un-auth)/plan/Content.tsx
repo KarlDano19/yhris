@@ -52,13 +52,14 @@ const Content = ({ isLoggedIn }: any) => {
             name={item.name}
             description={item.description}
             price={item.price}
-            employeeSlots={item.max_employees}
+            employeeSlots={item.min_employees}
             features={item.privilege_list}
             periodicity={periodicity}
             periodicityDuration={periodicityDuration}
             isShowMore={item.isShowMore}
             showMore={showMore}
             isLoggedIn={isLoggedIn}
+            isAllowTrial={item.is_allow_trial}
           />
         </main>
       );

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -34,6 +35,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [openModal, setOpenModal] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearching, setIsSearching] = useState(false);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -78,10 +80,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     auditLogsRefetch();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, auditLogsRefetch]);
 
+  useEffect(() => {
+    if (!isAuditLogsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isAuditLogsLoading, isSearching]);
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -103,6 +110,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setIsSearching(true);
     auditLogsRefetch();
   };
 
@@ -117,7 +125,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isAuditLogsLoading) {
+    if (isSearching || isAuditLogsLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -227,6 +235,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: User, Module'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
@@ -235,7 +246,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
+              onClick={handleSearch}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
@@ -334,6 +345,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={auditLogsRefetch}
         />
       )}
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };

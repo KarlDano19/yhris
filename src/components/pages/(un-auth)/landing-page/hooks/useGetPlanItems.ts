@@ -1,19 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getPlans(slug: any) {
+async function getPlanItems() {
   try {
-    const token = getCookie('token');
-    const config: any = {
+    const config = {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
       },
     };
-    if (token) {
-      config.headers['Authorization'] = `Token ${token}`;
-    }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/plans/${slug}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/plans/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -27,8 +23,8 @@ async function getPlans(slug: any) {
   }
 }
 
-function useGetPlans(slug: any) {
-  const query = useQuery(['planDetail', {}], () => getPlans(slug), {
+function useGetPlanItems() {
+  const query = useQuery(['planItemsPublicCache'], () => getPlanItems(), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
@@ -36,4 +32,4 @@ function useGetPlans(slug: any) {
   return query;
 }
 
-export default useGetPlans;
+export default useGetPlanItems;

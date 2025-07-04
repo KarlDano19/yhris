@@ -15,7 +15,6 @@ import CustomToast from "@/components/CustomToast";
 import EmployeeCertificatePreview from "./previews/EmployeeCertificatePreview";
 import EmploymentAgreementPreview from "./previews/EmploymentAgreementPreview";
 import NoticeToExplainPreview from "./previews/NoticeToExplainPreview";
-import usePatchEmployeeIssueItems from '../address-employee-issue/hooks/usePatchEmployeeIssueItems';
 import useGetEmployeeIssueItems from '../address-employee-issue/hooks/useGetEmployeeIssueItems';
 import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
 import SignatureModal from "./modals/SignatureModal";
@@ -29,6 +28,7 @@ import { DocumentType } from "@/types/document-generator/form";
 import { print } from './print/index';
 import { generateNoticeToExplainHTML } from './print/documents/NoticeToExplain';
 import initColorPolyfill from '@/helpers/colorPolyfill';
+import { handleProceedUtil } from './utils/handleProceed';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -49,9 +49,6 @@ export default function Content() {
   // Fetch employee issue data if employeeId is provided
   const { data: employeeIssueItems, refetch: refetchEmployeeIssues } = useGetEmployeeIssueItems({});
   const [selectedEmployeeIssue, setSelectedEmployeeIssue] = useState<any>(null);
-  
-  // No longer needed as we're using more granular field disabling
-  // const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false);
   
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
@@ -91,8 +88,8 @@ export default function Content() {
   const [noticeToExplainData, setNoticeToExplainData] = useState<NoticeToExplainFormData>({
     employeeName: '',
     position: '',
-    date: '',
-    place: '',
+    dateIssued: '',
+    companyName: '',
     dateOfIssuance: '',
     placeOfIssuance: '',
     signatoryName: '',
@@ -116,6 +113,7 @@ export default function Content() {
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isLetterheadModalOpen, setIsLetterheadModalOpen] = useState(false);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{message: string, type: 'success' | 'error' | 'warning' | 'info'} | null>(null);
   
   // Initialize color input polyfill for Safari
   useEffect(() => {
@@ -179,8 +177,8 @@ export default function Content() {
         setNoticeToExplainData({
           employeeName: '',
           position: '',
-          date: '',
-          place: '',
+          dateIssued: '',
+          companyName: '',
           dateOfIssuance: '',
           placeOfIssuance: '',
           signatoryName: '',
@@ -309,11 +307,11 @@ export default function Content() {
         setNoticeToExplainData(prev => ({
           ...prev,
           // Only update fields that should remain editable
+          dateIssued: noticeData.dateIssued,
+          companyName: noticeData.companyName,
           briefBackground: noticeData.briefBackground,
           preparedBy: noticeData.preparedBy,
           reviewedBy: noticeData.reviewedBy,
-          date: noticeData.date,
-          place: noticeData.place,
           signature: noticeData.signature,
           borderColor: noticeData.borderColor,
           logoImage: noticeData.logoImage,
@@ -325,246 +323,20 @@ export default function Content() {
     }
   };
   
-  // For handling employee issue update
-  const { mutate: updateEmployeeIssue, isLoading: isUpdatingIssue } = usePatchEmployeeIssueItems();
-  
   // Handle proceeding (marking as sent and returning to employee issues)
   const handleProceed = () => {
-    // Only for notice-to-explain with an employee ID
-    if (documentType === 'notice-to-explain' && employeeId) {
-      // Show loading toast
-      const loadingToast = toast.custom(() => <CustomToast message="Generating PDF document..." type="info" />);
-      
-      try {
-        // Create a hidden container to hold the iframe content
-        const container = document.createElement('div');
-        container.style.position = 'fixed';
-        container.style.left = '-9999px';
-        container.style.top = '-9999px';
-        document.body.appendChild(container);
-        
-        // Get the HTML content for the document - use the same function as the print feature
-        const htmlContent = generateNoticeToExplainHTML(currentData as NoticeToExplainFormData);
-        
-        // Add additional styles for better PDF rendering
-        const enhancedHtmlContent = htmlContent.replace(
-          '<style>',
-          `<style>
-            /* Override styles for PDF generation */
-            body {
-              margin: 0;
-              padding: 0;
-            }
-            
-            @page {
-              size: A4;
-              margin: 1cm;
-            }
-
-            .document-subtitle {
-              margin-bottom: 20px !important;
-            }
-            
-            /* Fix for blank pages by resizing content to fit better */
-            html, body {
-              height: auto !important;
-              overflow: visible !important;
-            }
-            
-            /* Enhance signature spacing */
-            .signatures-grid {
-              margin-top: 30px !important;
-              margin-bottom: 25px !important;
-            }
-            
-            .signature-block {
-              padding-bottom: 15px !important;
-            }
-            
-            .signature-line {
-              margin-top: 8px !important;
-              margin-bottom: 5px !important;
-            }
-            
-            /* Match signature styling from renderSignatures function */
-            .signature-table {
-              width: 100% !important;
-              border-collapse: collapse !important;
-              font-size: 12px !important;
-              color: #000 !important;
-              margin-top: 30px !important;
-              margin-bottom: 20px !important;
-            }
-            
-            .signature-cell {
-              width: 50% !important;
-              padding: 0 12px !important;
-              text-align: center !important;
-              vertical-align: bottom !important;
-            }
-            
-            .signature-cell-left {
-              padding-right: 12px !important;
-              padding-left: 0 !important;
-            }
-            
-            .signature-cell-right {
-              padding-left: 12px !important;
-              padding-right: 0 !important;
-            }
-            
-            .signature-image-container-table {
-              height: 30px !important;
-              display: flex !important;
-              align-items: flex-end !important;
-              justify-content: center !important;
-            }
-            
-            .signature-image-table {
-              max-width: 150px !important;
-              max-height: 50px !important;
-              object-fit: contain !important;
-            }
-            
-            .signature-name {
-              margin-top: 5px !important;
-            }
-            
-            .signature-title {
-              font-weight: bold !important;
-              text-align: center !important;
-              margin-bottom: 10px !important;
-            }
-          `
-        );
-        
-        // Create an iframe inside our container to render the HTML content
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '210mm';  // A4 width
-        iframe.style.height = '297mm'; // A4 height
-        iframe.style.border = '0';
-        container.appendChild(iframe);
-        
-        const iframeDoc = iframe.contentWindow?.document;
-        if (!iframeDoc) {
-          throw new Error('Could not access iframe document');
-        }
-        
-        // Write the HTML content to the iframe
-        iframeDoc.open();
-        iframeDoc.write(enhancedHtmlContent);
-        iframeDoc.close();
-        
-        // Wait for iframe to load
-        iframe.onload = () => {
-          // Get the body element from the iframe
-          const content = iframeDoc.body;
-          
-          // Wait longer for all resources and styles to load completely
-          setTimeout(() => {
-            // Use html2canvas to capture the content with improved settings
-            html2canvas(content, {
-              scale: 2.5, // Higher scale for better quality (increased from 2)
-              useCORS: true,
-              allowTaint: true,
-              backgroundColor: '#ffffff',
-              // Set dimensions to avoid cropping
-              width: content.scrollWidth,
-              height: content.scrollHeight,
-              // Disable scrolling capture to prevent blank pages
-              scrollX: 0,
-              scrollY: 0,
-              // Improve font rendering
-              logging: false
-            }).then((canvas) => {
-              try {
-                // Create a new PDF document with 1cm margins
-                const pdf = new jsPDF({
-                  orientation: 'portrait',
-                  unit: 'mm',
-                  format: 'a4',
-                  compress: true
-                });
-                
-                // Get the image data
-                const imgData = canvas.toDataURL('image/png');
-                
-                // Calculate dimensions, accounting for margins
-                const imgWidth = 210 - 20; // A4 width minus 2cm margins
-                const pageHeight = 297 - 20; // A4 height minus 2cm margins
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
-                // Add the image to the PDF with margins
-                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-                
-                // Handle multi-page content, but only if it's significantly larger than one page
-                // This prevents blank pages
-                let heightLeft = imgHeight - pageHeight;
-                
-                // Only add additional pages if there's substantial content overflow (more than 5mm)
-                if (heightLeft > 5) {
-                  let position = -(pageHeight - 10); // Start position for next pages
-                  
-                  while (heightLeft > 0) {
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                    position -= pageHeight;
-                  }
-                }
-                
-                // Convert the PDF to a blob
-                const pdfBlob = pdf.output('blob');
-                
-                // Convert blob to file
-                const pdfFile = new File([pdfBlob], `notice-to-explain-${employeeId}.pdf`, { type: 'application/pdf' });
-                
-                // Upload the attachment to the server
-                uploadAttachment(
-                  {
-                    employee_issue_id: parseInt(employeeId),
-                    nte_attachment: pdfFile
-                  },
-                  {
-                    onSuccess: () => {
-                      toast.custom(() => <CustomToast message="PDF document created and uploaded. Ready to send." type="success" />, { duration: 3000 });
-                      
-                      // Redirect to the address-employee-issue page with parameter to open the modal
-                      router.push(`/manage/address-employee-issue?openNteModal=true&employeeId=${employeeId}`);
-                      
-                      // After successful upload, the NTE attachment can be viewed directly from the server
-                      // using the API endpoint we created: /api/employee-issues/nte-attachment/{employee_issue_id}/
-                    },
-                    onError: (error) => {
-                      console.error('Upload error:', error);
-                      toast.custom(() => <CustomToast message="Error uploading document. Please try again." type="error" />, { duration: 3000 });
-                    }
-                  }
-                );
-                
-                // Clean up
-                document.body.removeChild(container);
-                toast.dismiss(loadingToast);
-              } catch (pdfError) {
-                console.error('PDF creation error:', pdfError);
-                document.body.removeChild(container);
-                toast.dismiss(loadingToast);
-                toast.custom(() => <CustomToast message="Error creating PDF. Please try again." type="error" />, { duration: 3000 });
-              }
-            }).catch(canvasError => {
-              console.error('Canvas capture error:', canvasError);
-              document.body.removeChild(container);
-              toast.dismiss(loadingToast);
-              toast.custom(() => <CustomToast message="Error capturing document. Please try again." type="error" />, { duration: 3000 });
-            });
-          }, 2500); // Increased wait time from 1500ms to 2500ms for fonts and styles to load completely
-        };
-      } catch (error) {
-        console.error('Error setting up PDF generation:', error);
-        toast.dismiss(loadingToast);
-        toast.custom(() => <CustomToast message="Error generating PDF. Please try again." type="error" />, { duration: 3000 });
-      }
-    }
+    handleProceedUtil({
+      documentType,
+      employeeId: employeeId || '',
+      currentData: currentData as NoticeToExplainFormData,
+      uploadAttachment,
+      router,
+      toast,
+      CustomToast,
+      generateNoticeToExplainHTML,
+      jsPDF,
+      html2canvas
+    });
   };
   
   // Handle print
@@ -625,6 +397,17 @@ export default function Content() {
     }
     
     setIsSignatureModalOpen(false);
+  };
+  
+  const handleTransparencyCheck = (result: {hasTransparency: boolean, message: string, type: 'success' | 'warning' | 'error'}) => {
+    // Display the toast message
+    toast.custom(() => (
+      <CustomToast 
+        message={result.message} 
+        type={result.type} 
+        onClose={() => setToastMessage(null)} 
+      />
+    ));
   };
   
   // Handle letterhead modal
@@ -706,6 +489,15 @@ export default function Content() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {toastMessage && (
+          <div className="fixed top-4 right-4 z-50">
+            <CustomToast 
+              message={toastMessage.message} 
+              type={toastMessage.type} 
+              onClose={() => setToastMessage(null)} 
+            />
+          </div>
+        )}
         <div className="flex p-4">
           <Link 
             href={employeeId ? "/manage/address-employee-issue" : "/manage"} 
@@ -756,6 +548,7 @@ export default function Content() {
         isOpen={isSignatureModalOpen}
         onClose={() => setIsSignatureModalOpen(false)}
         onSave={handleSignatureSave}
+        onTransparencyCheck={handleTransparencyCheck}
       />
       
       <LetterheadModal 

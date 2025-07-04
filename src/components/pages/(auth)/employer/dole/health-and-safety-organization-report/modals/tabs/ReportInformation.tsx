@@ -1,24 +1,17 @@
-// @ts-nocheck
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { useEffect } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { Controller, useFieldArray } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import {
   PlusIcon,
   XCircleIcon,
-  XMarkIcon,
   MinusIcon,
 } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 interface CachedProfileData {
   name: string;
@@ -32,20 +25,27 @@ function ReportInformation({
   handleSubmit,
   setSelectedTab,
   setValue,
+  watch,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
   setValue: any;
+  watch: any;
 }) {
   const queryClient = useQueryClient();
 
-  const onSubmit = handleSubmit(() => {
+  const onSubmit = handleSubmit((data: any) => {
+    // Calculate number_of_employees as the sum of total_employees_male and total_employees_female
+    const totalMale = Number(data.total_employees_male) || 0;
+    const totalFemale = Number(data.total_employees_female) || 0;
+    setValue('number_of_employees', totalMale + totalFemale);
+    // Also update the data object for immediate submit
+    data.number_of_employees = totalMale + totalFemale;
     setSelectedTab(2);
   });
 
-  const { data: employeeData } = useGetEmployeeItems();
   const cachedProfile = queryClient
     .getQueryCache()
     .find(["employerProfileCache"]) as {
@@ -56,11 +56,10 @@ function ReportInformation({
     name: "employees",
   });
 
-  useEffect(() => {
-    if (employeeData) {
-      setValue("number_of_employees", employeeData.length);
-    }
+  // Watch the employees array to make calculations reactive
+  const watchedEmployees = watch("employees") || [];
 
+  useEffect(() => {
     if (cachedProfile?.state?.data) {
       setValue("company_name", cachedProfile.state.data.name || "");
       setValue(
@@ -69,19 +68,27 @@ function ReportInformation({
       );
       setValue("address", cachedProfile.state.data.city || "");
     }
-  }, [employeeData, cachedProfile, setValue]);
+  }, [cachedProfile, setValue]);
 
-  // @ts-ignore
+  // Calculate total employees from watched values
   const calculateTotalEmployees = () => {
-    return fields.reduce(
-      (acc, item) => {
-        acc.male += Number(item.male) || 0; // Sum male employees
-        acc.female += Number(item.female) || 0; // Sum female employees
+    return watchedEmployees.reduce(
+      (acc: { male: number; female: number }, item: { male: number; female: number }) => {
+        acc.male += Number(item?.male) || 0;
+        acc.female += Number(item?.female) || 0;
         return acc;
       },
       { male: 0, female: 0 }
     );
   };
+
+  const totals = calculateTotalEmployees();
+
+  // Update form values when totals change
+  useEffect(() => {
+    setValue("total_employees_male", totals.male);
+    setValue("total_employees_female", totals.female);
+  }, [totals, setValue]);
 
   const renderEmployeeInputs = () => {
     return fields.map((item, index) => {
@@ -269,7 +276,7 @@ function ReportInformation({
               <div className="mt-2">
                 <input
                   type="text"
-                  value={calculateTotalEmployees().male}
+                  value={totals.male}
                   {...register("total_employees_male", { required: true })}
                   disabled
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
@@ -280,7 +287,7 @@ function ReportInformation({
               <div className="mt-2">
                 <input
                   type="text"
-                  value={calculateTotalEmployees().female}
+                  value={totals.female}
                   {...register("total_employees_female", { required: true })}
                   disabled
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"

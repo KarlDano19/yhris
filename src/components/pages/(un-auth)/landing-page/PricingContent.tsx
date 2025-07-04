@@ -1,7 +1,9 @@
 "use client"
+import { useState } from "react";
 
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckIcon, PhoneIcon, EnvelopeIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+
 import Navigation from "./Navigation";
 import Footer from "./Footer";
 import { useState } from "react";
@@ -108,7 +110,7 @@ const PricingContent: React.FC = () => {
                     />
                   </div>
                   <div className="text-center text-xs text-gray-500 mt-2">
-                    <span>Minimum: 1 employee</span>
+                    <span>Minimum: 100 employee</span>
                   </div>
                 </div>
 
@@ -191,12 +193,36 @@ const PricingContent: React.FC = () => {
                     <span className="text-sm">Document Management</span>
                   </li>
                 </ul>
-                <Link 
-                  href="/register" 
+                <button 
                   className="block w-full text-center px-6 py-3 border-2 border-[#FFC107] text-[#FFC107] hover:bg-[#FFC107] hover:text-black rounded-lg font-medium transition-colors"
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      let params: any = {
+                        additional_employee_slot: employeeCount - 100,
+                      };
+                      if (periodicity === 'yearly') {
+                        params.duration = periodicityDuration;
+                      }
+                      let searchParams = new URLSearchParams(params);
+                      router.push(`/checkout/${slug}/?${searchParams}`);
+                    } else {
+                      let params: any = {
+                        additional_employee_slot: employeeCount - 100,
+                      };
+                      if (periodicity === 'yearly') {
+                        params.duration = periodicityDuration;
+                      }
+                      let searchParams = new URLSearchParams(params);
+                      let redirectParams: any = {
+                        redirect: `/checkout/${slug}/?${searchParams}`.toString(),
+                      };
+                      let redirectSearchParams = new URLSearchParams(redirectParams);
+                      router.push(`/login?${redirectSearchParams}`);
+                    }
+                  }}
                 >
                   Start 30 Day Free Trial
-                </Link>
+                </button>
               </div>
             </div>
 

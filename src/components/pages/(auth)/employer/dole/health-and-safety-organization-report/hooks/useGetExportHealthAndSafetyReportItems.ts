@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getSeparationItems(filters: any) {
+async function getExportHealthAndSafetyReportItems(filters: any) {
   try {
     let newFilters = { ...filters };
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
-    if (!newFilters.from) delete newFilters.from;
-    if (!newFilters.to) delete newFilters.to;
+    newFilters.export = true;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -18,13 +17,16 @@ async function getSeparationItems(filters: any) {
       },
     };
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separations/?${searchParams}`, config);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/health-and-safety-organization-reports/?${searchParams}`,
+        config
+      );
       if (!res.ok) {
         throw res.json();
       }
       return res.json();
     }
-    return {};
+    return [];
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -34,13 +36,13 @@ async function getSeparationItems(filters: any) {
   }
 }
 
-function useGetSeparationItems(filters: any) {
-  const query = useQuery(['separationsItemsCache'], () => getSeparationItems(filters), {
-    refetchOnWindowFocus: false,
+function useGetExportHealthAndSafetyReportItems(filters: any) {
+  const query = useQuery([], () => getExportHealthAndSafetyReportItems(filters), {
+    enabled: false,
     keepPreviousData: true,
   });
 
   return query;
 }
 
-export default useGetSeparationItems;
+export default useGetExportHealthAndSafetyReportItems; 

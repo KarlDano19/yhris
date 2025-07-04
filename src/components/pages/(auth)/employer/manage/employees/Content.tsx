@@ -58,7 +58,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalRecords: 0,
   });
   const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
-  const [itemsFilter, setItemsFilter] = useState<any>({
+  const [pendingFilter, setPendingFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -67,13 +72,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     data: employeeListData,
     isLoading: isEmployeeListLoading,
     refetch: employeeListRefetch,
-  } = useGetEmployeeItemsList({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetEmployeeItemsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
   const { data: employeeItemsAll } = useGetEmployeeItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
 
   const cachedData: any = cachedProfile?.state?.data;
   const hasAgreed = cachedData?.is_export_agreed;
+
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (!hasAgreed) {
@@ -129,32 +137,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     employeeListRefetch();
-  }, [currentPage, pageSize]);
+  }, [appliedFilter, pageSize, currentPage, employeeListRefetch]);
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-
+  const handleSearch = () => {
+    const dateFrom = Date.parse(pendingFilter.from);
+    const dateTo = Date.parse(pendingFilter.to);
     if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
     }
     if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
     }
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       return toast.custom(
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
+        { duration: 5000 }
       );
     }
-    employeeListRefetch();
+    setIsSearching(true);
+    setAppliedFilter({ ...pendingFilter });
   };
+
+  useEffect(() => {
+    if (!isEmployeeListLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isEmployeeListLoading, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -167,7 +175,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isEmployeeListLoading) {
+    if (isSearching || isEmployeeListLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -260,15 +268,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.from}
+                  selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                    setPendingFilter({ ...pendingFilter, from: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, from: value });
                   }}
                 />
               </div>
@@ -280,18 +285,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.to}
+                  selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
+                    setPendingFilter({ ...pendingFilter, to: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value,
-                    });
+                    setPendingFilter({ ...pendingFilter, to: value });
                   }}
-                  minDate={itemsFilter.from}
+                  minDate={pendingFilter.from}
                 />
               </div>
             </div>
@@ -303,34 +304,41 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     name='search'
                     id='search'
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                    value={itemsFilter.search}
+                    value={pendingFilter.search}
                     onChange={(e) => {
-                      const value = e.target.value;
-                      setItemsFilter({ ...itemsFilter, search: value });
-                      const filteredItems = employeeItemsAll.filter(
-                        (item: any) =>
-                          item.firstname.toLowerCase().includes(value.toLowerCase()) ||
-                          item.lastname.toLowerCase().includes(value.toLowerCase())
-                      );
-                      setEmployeeItems(filteredItems);
+                      setPendingFilter({ ...pendingFilter, search: e.target.value });
+                      setShowAutocomplete(true);
+                    }}
+                    onFocus={() => {
+                      if (pendingFilter.search) setShowAutocomplete(true);
+                    }}
+                    onBlur={() => {
+                      setTimeout(() => setShowAutocomplete(false), 100);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch();
+                        setShowAutocomplete(false);
+                      }
                     }}
                     placeholder='Search ...'
                   />
-                  {itemsFilter.search && (
-                    <ul className='absolute mt-10 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'>
+                  {pendingFilter.search && showAutocomplete && (
+                    <ul className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'>
                       {employeeItemsAll
                         .filter(
                           (item: any) =>
-                            item.firstname.toLowerCase().includes(itemsFilter.search.toLowerCase()) ||
-                            item.lastname.toLowerCase().includes(itemsFilter.search.toLowerCase())
+                            item.firstname.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.lastname.toLowerCase().includes(pendingFilter.search.toLowerCase())
                         )
                         .map((item: any) => (
                           <li
                             key={item.id}
                             className='px-3 py-2 hover:bg-gray-200 cursor-pointer'
                             onClick={() => {
-                              setItemsFilter({ ...itemsFilter, search: `${item.firstname} ${item.lastname}` });
-                              setEmployeeItems([item]);
+                              setPendingFilter({ ...pendingFilter, search: item.firstname });
+                              setShowAutocomplete(false);
+                              document.getElementById('search')?.blur();
                             }}
                           >
                             {item.firstname} {item.lastname}
@@ -342,7 +350,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={checkIfDateIsValid}
+                onClick={handleSearch}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -473,7 +481,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <ExportProgressModal
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
-          itemsFilter={itemsFilter}
+          itemsFilter={appliedFilter}
         />
       )}
       {isImportModalOpen && (
@@ -483,7 +491,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <ExportTemplateModal
           isOpen={isExportTemplateModalOpen}
           setIsOpen={setIsExportTemplateModalOpen}
-          itemsFilter={itemsFilter}
+          itemsFilter={appliedFilter}
         />
       )}
       {isEmployeesDeleteModalOpen && (

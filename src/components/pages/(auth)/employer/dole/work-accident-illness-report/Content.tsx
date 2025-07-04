@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -55,7 +56,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
-  const [itemsFilter, setItemsFilter] = useState<any>({
+  const [pendingFilter, setPendingFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -64,11 +70,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     data: workAccidentIlnessReportsData,
     isLoading: isWorkAccidentIlnessReportsLoading,
     refetch: workAccidentIlnessReportsRefetch,
-  } = useGetWorkAccidentIlnessReportsItems({
-    ...itemsFilter,
-    pageSize: pageSize,
-    currentPage: currentPage,
-  });
+  } = useGetWorkAccidentIlnessReportsItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
   const menuOptions = [
     {
       name: 'Export',
@@ -85,6 +87,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       disabled: !cachedRigths?.state?.data?.generate_dole_wair,
     },
   ];
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (workAccidentIlnessReportsData) {
@@ -158,30 +161,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
-  const checkIfDateIsValid = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
+  const handleSearch = () => {
+    const dateFrom = Date.parse(pendingFilter.from);
+    const dateTo = Date.parse(pendingFilter.to);
 
     if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
     }
     if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
-        duration: 5000,
-      });
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
     }
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        {
-          duration: 5000,
-        }
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />, { duration: 5000 }
       );
     }
-    workAccidentIlnessReportsRefetch();
+    setIsSearching(true);
+    setAppliedFilter({ ...pendingFilter });
+    setCurrentPage(1);
   };
+
+  useEffect(() => {
+    if (!isWorkAccidentIlnessReportsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isWorkAccidentIlnessReportsLoading, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -194,7 +198,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isWorkAccidentIlnessReportsLoading) {
+    if (isSearching || isWorkAccidentIlnessReportsLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -315,13 +319,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.from}
+                  selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                    if (pendingFilter) setPendingFilter({ ...pendingFilter, from: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
+                    setPendingFilter({
+                      ...pendingFilter,
                       from: value,
                     });
                   }}
@@ -335,18 +339,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={itemsFilter.to}
+                  selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
+                    if (pendingFilter) setPendingFilter({ ...pendingFilter, to: date });
+                    if (!pendingFilter) setPendingFilter(date);
                   }}
                   inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
+                    setPendingFilter({
+                      ...pendingFilter,
                       to: value,
                     });
                   }}
-                  minDate={itemsFilter.from}
+                  minDate={pendingFilter.from}
                 />
               </div>
             </div>
@@ -355,18 +359,21 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <div className='relative flex items-center'>
                   <input
                     type='text'
-                  name='search'
-                  id='search'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
-                  placeholder='Search ...'
-                />
+                    name='search'
+                    id='search'
+                    data-tooltip-id='search-tooltip'
+                    data-tooltip-content='Search for Employee Name'
+                    data-tooltip-place='bottom'
+                    className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                    onChange={(e) => setPendingFilter({ ...pendingFilter, search: e.target.value })}
+                    placeholder='Search ...'
+                  />
+                </div>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
@@ -505,7 +512,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <ExportProgressModal
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
-          itemsFilter={itemsFilter}
+          itemsFilter={appliedFilter}
         />
       )}
       {/* Print Section */}
@@ -719,6 +726,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <p className='mt-4 text-xl text-center'>-- Nothing follows --</p>
         </div>
       </div>
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 }
