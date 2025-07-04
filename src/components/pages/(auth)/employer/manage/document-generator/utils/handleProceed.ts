@@ -40,15 +40,6 @@ export function handleProceedUtil({
         '<style>',
         `<style>
           /* Override styles for PDF generation */
-          // body {
-          //   margin: 0;
-          //   padding: 0;
-          // }
-          
-          // @page {
-          //   size: A4;
-          //   margin: 0.5cm 1cm 0cm 1cm;
-          // }
 
           .document-subtitle {
             margin-bottom: 20px !important;
@@ -127,19 +118,18 @@ export function handleProceedUtil({
           .signature-image-container {
             position: absolute !important;
             width: 100% !important;
-            right: 3px !important;
-            top: -25px !important;
+            right: 10px !important;
+            top: -33px !important;
             z-index: 10 !important;
             text-align: center !important;
           }
 
           .signature-image {
             max-width: 150px !important;
-            height: 48px !important;
+            height: 100px !important;
             object-fit: contain !important;
             margin: 0 auto !important;
           }
-
 
         `
       );

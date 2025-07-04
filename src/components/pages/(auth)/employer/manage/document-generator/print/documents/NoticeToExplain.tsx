@@ -507,15 +507,15 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
         .signature-image-container {
           position: absolute;
           width: 100%;
-          right: 3px;
-          top: -25px;
-          z-index: 10;
+          right: 10px;
+          top: -36px;
+          z-index: 100;
           text-align: center;
         }
 
         .signature-image {
           max-width: 150px;
-          height: 48px;
+          height: 100px;
           object-fit: contain;
           margin: 0 auto;
         }
