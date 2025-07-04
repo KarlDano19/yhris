@@ -125,7 +125,7 @@ const PricingContent: React.FC = () => {
                     <span className="text-4xl font-bold text-indigo-dye">{formatPrice(calculatePrice(employeeCount))}</span>
                     <span className="text-lg text-gray-600 ml-2">/month</span>
                   </div>
-                  <p className="text-gray-600">{employeeCount.toLocaleString()} employees</p>
+                  <p className="text-gray-600">For 1 - 100 employees</p>
                   
                   {/* Pricing Breakdown */}
                   {employeeCount > 100 && (
