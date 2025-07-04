@@ -1,10 +1,12 @@
-import React, { Dispatch, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import classNames from '@/helpers/classNames';
+import React, { Dispatch, useState } from 'react';
 
-import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
+import { useRouter } from 'next/navigation';
+
 import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 import useResetNteSent from './hooks/useResetNteSent';
+
+import classNames from '@/helpers/classNames';
+import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
 
 import ClipIcon from '@/svg/ClipIcon';
 

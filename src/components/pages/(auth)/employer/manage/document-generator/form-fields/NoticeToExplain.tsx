@@ -2,11 +2,12 @@ import { ChangeEvent, useEffect, useState } from 'react';
 
 import Image from 'next/image';
 
+import { toast } from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import { DatePickerField } from './DatePickerField';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-import { toast } from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 
 interface FieldProps {
   formData: NoticeToExplainFormData;
