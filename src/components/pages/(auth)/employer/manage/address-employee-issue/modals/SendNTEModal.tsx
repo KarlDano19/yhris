@@ -170,7 +170,14 @@ export default function SendNTEModal({
   // Get filename from attachment URL
   const getFilenameFromUrl = (url: string) => {
     if (!url) return '';
-    const urlParts = url.split('/');
+    
+    // Remove AWS credentials from the URL if present
+    let cleanUrl = url;
+    if (url.includes('?AWSAccessKeyId=')) {
+      cleanUrl = url.split('?AWSAccessKeyId=')[0];
+    }
+    
+    const urlParts = cleanUrl.split('/');
     return urlParts[urlParts.length - 1];
   };
 
