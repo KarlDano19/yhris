@@ -31,16 +31,24 @@ type FormValues = {
   bcc: string;
 };
 
+function stripHtml(html: string) {
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
 export default function SendDecisionModal({
   employeeIssueItems,
   setEmployeeIssueItems,
   isOpen,
   setIsOpen,
+  refetch,
 }: {
   employeeIssueItems: any;
   setEmployeeIssueItems: any;
   isOpen: T_SendDecisionModal | null;
   setIsOpen: Dispatch<T_SendDecisionModal | null>;
+  refetch?: () => void;
 }) {
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
@@ -68,7 +76,7 @@ export default function SendDecisionModal({
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       if (employeeIssueItemsCopy[itemIndex]) {
         setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+        setTagsTo([]);
       }
     }
   }, [isOpen]);
@@ -89,14 +97,23 @@ export default function SendDecisionModal({
       if (tagsBcc) {
         employeeIssueItemsCopy[itemIndex].sendDecisionForm.bcc = tagsBcc;
       }
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = data.message;
+      const plainMessage = stripHtml(data.message);
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = plainMessage;
       employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
+      // Save decision_to, decision_cc, decision_bcc as JSON stringified arrays
+      employeeIssueItemsCopy[itemIndex].decision_to = JSON.stringify(tagsTo);
+      employeeIssueItemsCopy[itemIndex].decision_cc = JSON.stringify(tagsCc);
+      employeeIssueItemsCopy[itemIndex].decision_bcc = JSON.stringify(tagsBcc);
+      employeeIssueItemsCopy[itemIndex].decision_message = plainMessage;
       const callbackReq = {
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
           setIsOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           reset();
+          if (refetch) {
+            refetch();
+          }
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -158,11 +175,9 @@ export default function SendDecisionModal({
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
-                                if (applicantEmail) {
-                                  setTagsTo([applicantEmail, ...template.to]);
-                                } else {
-                                  setTagsTo(template.to);
-                                }
+                                // Just set the template's to addresses directly
+                                setTagsTo(template.to || []);
+                                
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);

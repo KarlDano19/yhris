@@ -395,7 +395,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
         <div className="text-center relative">
           <div className="font-bold mb-1">Prepared by:</div>
           <div className="mb-1 relative">
-            <div className="absolute w-full right-3 -top-7 z-10">
+            <div className="absolute w-full right-3 -top-5 z-10">
               {signatureUrl && (
                 <Image
                   src={signatureUrl}

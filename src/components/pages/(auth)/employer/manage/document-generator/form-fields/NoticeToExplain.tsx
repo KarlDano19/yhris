@@ -2,11 +2,12 @@ import { ChangeEvent, useEffect, useState } from 'react';
 
 import Image from 'next/image';
 
+import { toast } from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import { DatePickerField } from './DatePickerField';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-import { toast } from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 
 interface FieldProps {
   formData: NoticeToExplainFormData;
@@ -138,17 +139,32 @@ export const IncidentPlaceField = ({ formData, handleInputChange, disabled, isSu
 export const BriefBackgroundField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
   const [showValidation, setShowValidation] = useState(false);
   const maxLength = 430;
+  const [hasShownToast, setHasShownToast] = useState(false);
 
   useEffect(() => {
     setShowValidation(isSubmitted === true && !formData.briefBackground);
   }, [isSubmitted, formData.briefBackground]);
 
   const handleBriefBackgroundChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    if (e.target.value.length > maxLength) {
+    const value = e.target.value;
+    
+    if (value.length <= maxLength) {
+      // Reset the toast flag when back under the limit
+      if (hasShownToast) setHasShownToast(false);
+      handleInputChange(e);
+    } else if (!hasShownToast) {
+      // Show toast only once per limit exceeding attempt
       toast.custom(() => <CustomToast message={`Brief Background cannot exceed ${maxLength} characters.`} type="error" />);
-      return;
+      setHasShownToast(true);
+      
+      // Prevent further input by truncating the text
+      const truncated = value.substring(0, maxLength);
+      e.target.value = truncated;
+      
+      // Create a new event to pass the truncated value
+      const newEvent = { ...e, target: { ...e.target, value: truncated, name: e.target.name } };
+      handleInputChange(newEvent as any);
     }
-    handleInputChange(e);
   };
 
   return (
