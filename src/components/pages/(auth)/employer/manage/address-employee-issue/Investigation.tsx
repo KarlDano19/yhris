@@ -12,13 +12,18 @@ const Investigation = ({
   investigatedDate,
   setIsInvestigateModalOpen,
   setInvestigationReportDetailsModalOpen,
+  isResponded,
 }: {
   id: number;
   isInvestigated: boolean;
   investigatedDate: string;
   setIsInvestigateModalOpen: Dispatch<T_InvestigationModal>;
   setInvestigationReportDetailsModalOpen: Dispatch<T_InvestigationReportDetailsModal>;
+  isResponded?: boolean;
 }) => {
+  // Disable investigate button if employee has not responded (is_responded: false)
+  const shouldDisableInvestigate = isResponded === false;
+  
   return (
     <div className='flex flex-col gap-2'>
       <div>
@@ -29,16 +34,17 @@ const Investigation = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 disabled:opacity-75'
           )}
-          disabled={isInvestigated}
+          disabled={isInvestigated || shouldDisableInvestigate}
           onClick={(e) => {
             e.stopPropagation();
-            if (!isInvestigated) {
+            if (!isInvestigated && !shouldDisableInvestigate) {
               setIsInvestigateModalOpen({
                 isOpen: true,
                 id,
               });
             }
           }}
+          title={shouldDisableInvestigate ? 'Employee has not responded yet' : ''}
         >
           {isInvestigated ? 'Investigated' : 'Investigate'}
         </button>
@@ -55,7 +61,7 @@ const Investigation = ({
                 })
               }
             >
-              <ClipIcon />
+              <ClipIcon hasFile={true} />
             </div>
             <p className='text-xs ml-1'>{investigatedDate}</p>
           </div>

@@ -16,6 +16,7 @@ const SendDecision = ({
   setIsDecisionAttachmentViewModalOpen,
   setReleased,
   isLoading,
+  hasInvestigationReport,
 }: {
   id: number;
   isDecisionSent: boolean;
@@ -26,14 +27,11 @@ const SendDecision = ({
   setIsDecisionAttachmentViewModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
   setReleased: any;
   isLoading: boolean;
+  hasInvestigationReport?: boolean;
 }) => {
-  const customOnclick = () => {
-    setIsUploadDecisionAttachmentModalOpen({
-      isOpen: true,
-      id,
-    });
-  };
-
+  // Disable send decision button if there is no investigation report
+  const shouldDisableSendDecision = hasInvestigationReport === false;
+  
   return (
     <div className='flex flex-col gap-2'>
       <div>
@@ -44,16 +42,17 @@ const SendDecision = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={isDecisionSent}
+          disabled={isDecisionSent || shouldDisableSendDecision}
           onClick={(e) => {
             e.stopPropagation();
-            if (!isDecisionSent) {
+            if (!isDecisionSent && !shouldDisableSendDecision) {
               setIsSendDecisionModalOpen({
                 isOpen: true,
                 id,
               });
             }
           }}
+          title={shouldDisableSendDecision ? 'Investigation report is required before sending decision' : ''}
         >
           {isDecisionSent ? 'Sent' : 'Send'}
         </button>
@@ -65,9 +64,7 @@ const SendDecision = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={!isDecisionSent || isDecisionReceived || isLoading}
-          onClick={() => {
-            customOnclick(), setReleased(id, 'decision');
-          }}
+          onClick={() => setReleased(id, 'decision')}
         >
           {isLoading && (
             <div role='status'>
@@ -105,7 +102,7 @@ const SendDecision = ({
                 })
               }
             >
-              <ClipIcon />
+              <ClipIcon hasFile={true} />
             </div>
             <p className='ml-2 text-xs'>{decisionReceivedDate}</p>
           </div>
