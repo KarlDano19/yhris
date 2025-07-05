@@ -1,7 +1,6 @@
 import React, { Dispatch } from 'react';
 
 import classNames from '@/helpers/classNames';
-
 import { T_SendDecisionModal, T_DecisionAttachmentViewModal } from '@/types/globals';
 
 import ClipIcon from '@/svg/ClipIcon';
@@ -11,6 +10,7 @@ const SendDecision = ({
   isDecisionSent,
   isDecisionReceived,
   decisionReceivedDate,
+  employeeIssueDetails,
   setIsSendDecisionModalOpen,
   setIsUploadDecisionAttachmentModalOpen,
   setIsDecisionAttachmentViewModalOpen,
@@ -22,6 +22,7 @@ const SendDecision = ({
   isDecisionSent: boolean;
   isDecisionReceived: boolean;
   decisionReceivedDate?: string;
+  employeeIssueDetails?: any;
   setIsSendDecisionModalOpen: Dispatch<T_SendDecisionModal>;
   setIsUploadDecisionAttachmentModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
   setIsDecisionAttachmentViewModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
@@ -31,6 +32,17 @@ const SendDecision = ({
 }) => {
   // Disable send decision button if there is no investigation report
   const shouldDisableSendDecision = hasInvestigationReport === false;
+  
+  // Format decision_received_date as MM/DD/YYYY
+  let formattedReceivedDate = '';
+  if (employeeIssueDetails && employeeIssueDetails.decision_received_date) {
+    const date = new Date(employeeIssueDetails.decision_received_date);
+    formattedReceivedDate = date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  }
   
   return (
     <div className='flex flex-col gap-2'>
@@ -63,7 +75,7 @@ const SendDecision = ({
             isDecisionReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={!isDecisionSent || isDecisionReceived || isLoading}
+          disabled={true}
           onClick={() => setReleased(id, 'decision')}
         >
           {isLoading && (
@@ -87,7 +99,7 @@ const SendDecision = ({
               <span className='sr-only'>Loading...</span>
             </div>
           )}
-          {!isLoading && 'Received'}
+          {!isLoading && (isDecisionReceived ? 'Received' : 'Receive')}
         </button>
       </div>
       {isDecisionReceived ? (
@@ -104,7 +116,7 @@ const SendDecision = ({
             >
               <ClipIcon hasFile={true} />
             </div>
-            <p className='ml-2 text-xs'>{decisionReceivedDate}</p>
+            <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
           </div>
         </div>
       ) : null}

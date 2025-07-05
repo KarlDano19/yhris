@@ -394,6 +394,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isNTESent={item.isNTESent}
                 isNTEReceived={item.isNTEReceived}
                 incidentReceivedDate={item.incidentReceivedDate}
+                employeeIssueDetails={item}
                 setIsSendNTEModalOpen={setIsSendNTEModalOpen}
                 setIsUploadEmployeeIssueAttachmentModalOpen={setIsUploadEmployeeIssueAttachmentModalOpen}
                 setNTEAttachmentViewModalOpen={setNTEAttachmentViewModalOpen}
@@ -418,6 +419,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isDecisionSent={item.isDecisionSent}
                 isDecisionReceived={item.isDecisionReceived}
                 decisionReceivedDate={item.decisionReceivedDate}
+                employeeIssueDetails={item}
                 setIsSendDecisionModalOpen={setIsSendDecisionModalOpen}
                 setIsUploadDecisionAttachmentModalOpen={setIsUploadDecisionAttachmentModalOpen}
                 setIsDecisionAttachmentViewModalOpen={setIsDecisionAttachmentViewModalOpen}
@@ -607,6 +609,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsSendNTEModalOpen}
         employeeIssueItems={employeeIssueItems}
         setEmployeeIssueItems={setEmployeeIssueItems}
+        refetch={refetch}
       />
       <InvestigationModal
         employeeIssueItems={employeeIssueItems}
@@ -619,6 +622,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsSendDecisionModalOpen}
         employeeIssueItems={employeeIssueItems}
         setEmployeeIssueItems={setEmployeeIssueItems}
+        refetch={refetch}
       />
       {isInvestigationReportDetailsModalOpen && (
         <InvestigationReportDetailsModal

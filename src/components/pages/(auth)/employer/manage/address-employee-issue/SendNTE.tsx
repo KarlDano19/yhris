@@ -2,7 +2,6 @@ import React, { Dispatch, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 import useResetNteSent from './hooks/useResetNteSent';
 
 import classNames from '@/helpers/classNames';
@@ -15,6 +14,7 @@ const SendNTE = ({
   isNTESent,
   isNTEReceived,
   incidentReceivedDate,
+  employeeIssueDetails,
   setIsSendNTEModalOpen,
   setIsUploadEmployeeIssueAttachmentModalOpen,
   setNTEAttachmentViewModalOpen,
@@ -26,6 +26,7 @@ const SendNTE = ({
   isNTESent: boolean;
   isNTEReceived: boolean;
   incidentReceivedDate?: string;
+  employeeIssueDetails?: any;
   setIsSendNTEModalOpen: Dispatch<T_SendNTEModal>;
   setIsUploadEmployeeIssueAttachmentModalOpen: Dispatch<T_UploadEmployeeIssueAttachmentModal>;
   setNTEAttachmentViewModalOpen: Dispatch<T_NTEAttachmentViewModal>;
@@ -35,7 +36,6 @@ const SendNTE = ({
 }) => {
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
-  const { data: employeeIssueDetails, isLoading: isLoadingDetails, refetch } = useGetEmployeeIssueDetails(id);
   const { resetNteSent, loading: resettingNteSent } = useResetNteSent();
   
   // const customOnclick = () => {
@@ -53,8 +53,9 @@ const SendNTE = ({
       if (isNTESent) {
         // If Resend, reset is_nte_sent to false first
         await resetNteSent(id);
-        const refetchResult = await refetch();
-        details = refetchResult.data;
+        // Note: We'll need to handle refetching in the parent component
+        // For now, we'll use the current details
+        details = employeeIssueDetails;
       }
       // Check if there's an attachment
       if (details && details.nte_attachment) {
@@ -72,11 +73,11 @@ const SendNTE = ({
     }
   };
 
-  // Format updated_at as MM/DD/YYYY
-  let formattedUpdatedAt = '';
-  if (employeeIssueDetails && employeeIssueDetails.updated_at) {
-    const date = new Date(employeeIssueDetails.updated_at);
-    formattedUpdatedAt = date.toLocaleDateString('en-US', {
+  // Format incident_received_date as MM/DD/YYYY
+  let formattedReceivedDate = '';
+  if (employeeIssueDetails && employeeIssueDetails.incident_received_date) {
+    const date = new Date(employeeIssueDetails.incident_received_date);
+    formattedReceivedDate = date.toLocaleDateString('en-US', {
       month: '2-digit',
       day: '2-digit',
       year: 'numeric',
@@ -93,13 +94,13 @@ const SendNTE = ({
               : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24'
           )}
-          disabled={checkingAttachment || isLoadingDetails || resettingNteSent}
+          disabled={checkingAttachment || resettingNteSent}
           onClick={handleSendClick}
           title={employeeIssueDetails && employeeIssueDetails.nte_attachment
             ? (isNTESent ? 'Resend Notice to Explain' : 'Send Notice to Explain')
             : 'Click to Generate NTE'}
         >
-          {(checkingAttachment || isLoadingDetails || resettingNteSent)
+          {(checkingAttachment || resettingNteSent)
             ? 'Checking...'
             : (isNTESent ? 'Resend' : 'Send')}
         </button>
@@ -151,7 +152,7 @@ const SendNTE = ({
             >
               <ClipIcon hasFile={true} />
             </div>
-            <p className='ml-2 text-xs'>{formattedUpdatedAt}</p>
+            <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
           </div>
         </div>
       ) : null}
