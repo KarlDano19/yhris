@@ -50,7 +50,11 @@ export default function InvestigationModal({
       employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other;
       employeeIssueItemsCopy[itemIndex].investigateForm.attachments = toSaveData.attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
-      employeeIssueItemsCopy[itemIndex].investigatedDate = Intl.DateTimeFormat('en-US').format(currentDate);
+      employeeIssueItemsCopy[itemIndex].investigatedDate = new Intl.DateTimeFormat('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+      }).format(currentDate);
       const copySaveData = employeeIssueItemsCopy[itemIndex].investigateForm;
       setToSaveData({ ...toSaveData, ...copySaveData });
       setToAddData([...employeeIssueItemsCopy]);

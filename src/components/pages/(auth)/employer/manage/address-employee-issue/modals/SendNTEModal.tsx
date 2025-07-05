@@ -45,11 +45,13 @@ export default function SendNTEModal({
   setEmployeeIssueItems,
   isOpen,
   setIsOpen,
+  refetch,
 }: {
   employeeIssueItems: any;
   setEmployeeIssueItems: any;
   isOpen: T_SendNTEModal | null;
   setIsOpen: Dispatch<T_SendNTEModal | null>;
+  refetch?: () => void;
 }) {
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
@@ -149,6 +151,9 @@ export default function SendNTEModal({
           setPdfAttachment(null); // Clear attachment state
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           reset();
+          if (refetch) {
+            refetch();
+          }
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
