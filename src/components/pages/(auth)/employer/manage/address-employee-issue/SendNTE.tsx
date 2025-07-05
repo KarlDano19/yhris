@@ -1,9 +1,12 @@
-import React, { Dispatch, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import classNames from '@/helpers/classNames';
+import React, { Dispatch, useState } from 'react';
 
-import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
+import { useRouter } from 'next/navigation';
+
 import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
+import useResetNteSent from './hooks/useResetNteSent';
+
+import classNames from '@/helpers/classNames';
+import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -17,6 +20,7 @@ const SendNTE = ({
   setNTEAttachmentViewModalOpen,
   setReleased,
   isLoading,
+  setIsRedirectingToDocumentGenerator,
 }: {
   id: number;
   isNTESent: boolean;
@@ -27,57 +31,77 @@ const SendNTE = ({
   setNTEAttachmentViewModalOpen: Dispatch<T_NTEAttachmentViewModal>;
   setReleased: any;
   isLoading: boolean;
+  setIsRedirectingToDocumentGenerator: Dispatch<boolean>;
 }) => {
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
-  const { data: employeeIssueDetails, isLoading: isLoadingDetails } = useGetEmployeeIssueDetails(id);
+  const { data: employeeIssueDetails, isLoading: isLoadingDetails, refetch } = useGetEmployeeIssueDetails(id);
+  const { resetNteSent, loading: resettingNteSent } = useResetNteSent();
   
-  const customOnclick = () => {
-    setIsUploadEmployeeIssueAttachmentModalOpen({
-      isOpen: true,
-      id,
-    });
-  };
+  // const customOnclick = () => {
+  //   setIsUploadEmployeeIssueAttachmentModalOpen({
+  //     isOpen: true,
+  //     id,
+  //   });
+  // };
 
   const handleSendClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isNTESent) {
-      setCheckingAttachment(true);
-      
-      try {
-        // Check if there's an attachment
-        if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
-          // If there's an attachment, open the modal with attachment data
-          setIsSendNTEModalOpen({
-            id,
-            attachment: employeeIssueDetails.nte_attachment
-          });
-        } else {
-          // If no attachment, redirect to document generator
-          router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
-        }
-      } finally {
-        setCheckingAttachment(false);
+    setCheckingAttachment(true);
+    try {
+      let details = employeeIssueDetails;
+      if (isNTESent) {
+        // If Resend, reset is_nte_sent to false first
+        await resetNteSent(id);
+        const refetchResult = await refetch();
+        details = refetchResult.data;
       }
+      // Check if there's an attachment
+      if (details && details.nte_attachment) {
+        setIsSendNTEModalOpen({
+          id,
+          attachment: details.nte_attachment
+        });
+      } else {
+        // If no attachment, redirect to document generator
+        setIsRedirectingToDocumentGenerator(true);
+        router.push('/manage/document-generator?type=notice-to-explain&employee=' + id);
+      }
+    } finally {
+      setCheckingAttachment(false);
     }
   };
+
+  // Format updated_at as MM/DD/YYYY
+  let formattedUpdatedAt = '';
+  if (employeeIssueDetails && employeeIssueDetails.updated_at) {
+    const date = new Date(employeeIssueDetails.updated_at);
+    formattedUpdatedAt = date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  }
 
   return (
     <div className='flex flex-col gap-2'>
       <div>
         <button
           className={classNames(
-            isNTESent
+            employeeIssueDetails && employeeIssueDetails.nte_attachment
               ? 'bg-red-500 border-[1px] border-red-500 text-white'
-              : employeeIssueDetails?.nte_attachment
-                ? 'bg-red-500 border-[1px] border-red-500 text-white'
-                : 'border-[1px] border-red-500 text-red-500',
-            'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
+              : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
+            'items-center rounded-md px-2 py-1 focus:z-10 w-24'
           )}
-          disabled={isNTESent || checkingAttachment || isLoadingDetails}
+          disabled={checkingAttachment || isLoadingDetails || resettingNteSent}
           onClick={handleSendClick}
+          title={employeeIssueDetails && employeeIssueDetails.nte_attachment
+            ? (isNTESent ? 'Resend Notice to Explain' : 'Send Notice to Explain')
+            : 'Click to Generate NTE'}
         >
-          {isNTESent ? 'Sent' : (checkingAttachment || isLoadingDetails ? 'Checking...' : 'Send')}
+          {(checkingAttachment || isLoadingDetails || resettingNteSent)
+            ? 'Checking...'
+            : (isNTESent ? 'Resend' : 'Send')}
         </button>
       </div>
       <div>
@@ -86,10 +110,8 @@ const SendNTE = ({
             isNTEReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={!isNTESent || isNTEReceived || isLoading}
-          onClick={() => {
-            customOnclick(), setReleased(id, 'nte');
-          }}
+          disabled={true}
+          onClick={() => setReleased(id, 'nte')}
         >
           {isLoading && (
             <div role='status'>
@@ -127,9 +149,9 @@ const SendNTE = ({
                 })
               }
             >
-              <ClipIcon />
+              <ClipIcon hasFile={true} />
             </div>
-            <p className='ml-2 text-xs'>{incidentReceivedDate}</p>
+            <p className='ml-2 text-xs'>{formattedUpdatedAt}</p>
           </div>
         </div>
       ) : null}
