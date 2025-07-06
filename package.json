@@ -34,6 +34,8 @@
     "next": "^14.1.1",
     "papaparse": "^5.4.1",
     "postcss": "8.4.22",
+    "posthog-js": "^1.256.1",
+    "posthog-node": "^5.1.1",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.7.4",

@@ -309,6 +309,8 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                           className: "w-full h-full"
                         }}
                         backgroundColor="rgba(0,0,0,0)"
+                        minWidth={1}
+                        maxWidth={2}
                       />
                     </div>
                   ) : (

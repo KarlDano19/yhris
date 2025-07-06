@@ -33,8 +33,20 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
     append({ title: '', max_score: 1, is_disable_comment: true });
   };
 
-  const copyCriteria = (criteria: any) => {
-    append(criteria);
+  const copyCriteria = (criteria: any, index: number) => {
+    // Get the current form values for this specific criteria index
+    const currentTitle = watch(`evaluation_criterion[${sectionIndex}].criterion[${index}].title`);
+    const currentMaxScore = watch(`evaluation_criterion[${sectionIndex}].criterion[${index}].max_score`);
+    const currentIsDisableComment = watch(`evaluation_criterion[${sectionIndex}].criterion[${index}].is_disable_comment`);
+    
+    // Create a new criteria object with the current values
+    const newCriteria = {
+      title: currentTitle || criteria.title,
+      max_score: currentMaxScore || criteria.max_score,
+      is_disable_comment: currentIsDisableComment !== undefined ? currentIsDisableComment : criteria.is_disable_comment,
+    };
+    
+    append(newCriteria);
   };
 
   const removeCriteria = (index: number) => {
@@ -168,7 +180,7 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
                                 data-tooltip-id='duplicate-criteria-tooltip'
                                 data-tooltip-content='Duplicate criteria'
                                 data-tooltip-place='top' 
-                                onClick={() => copyCriteria(item)}
+                                onClick={() => copyCriteria(item, index)}
                               >
                                 <DuplicateIcon />
                                 <Tooltip id='duplicate-criteria-tooltip' style={{ fontSize: '10px', }} />

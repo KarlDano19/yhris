@@ -15,7 +15,6 @@ import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItem
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
 import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
-
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -35,16 +34,24 @@ type FormValues = {
   bcc: string;
 };
 
+function stripHtml(html: string) {
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
 export default function SendNTEModal({
   employeeIssueItems,
   setEmployeeIssueItems,
   isOpen,
   setIsOpen,
+  refetch,
 }: {
   employeeIssueItems: any;
   setEmployeeIssueItems: any;
   isOpen: T_SendNTEModal | null;
   setIsOpen: Dispatch<T_SendNTEModal | null>;
+  refetch?: () => void;
 }) {
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
@@ -70,36 +77,42 @@ export default function SendNTEModal({
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
   // Reset all form data when modal opens or closes
-  useEffect(() => {
-    // Reset all tags and inputs first
-    setTagsTo([]);
-    setTagsCc([]);
-    setTagsBcc([]);
-    setInputTo('');
-    setInputCc('');
-    setInputBcc('');
-    setIsCCOpen(false);
-    setIsBCCOpen(false);
-    setApplicantEmail(null);
-    reset();
+  // useEffect(() => {
+  //   // Only reset when modal is actually closed
+  //   if (!isOpen) {
+  //     setTagsTo([]);
+  //     setTagsCc([]);
+  //     setTagsBcc([]);
+  //     setInputTo('');
+  //     setInputCc('');
+  //     setInputBcc('');
+  //     setIsCCOpen(false);
+  //     setIsBCCOpen(false);
+  //     setApplicantEmail(null);
+  //     reset();
+  //   } else if (isOpen?.id && employeeIssueItems?.length > 0) {
+  //     // Only set email data if modal is opening with an ID AND we have valid data
+  //     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
+  //     // Don't auto-populate the To field
+  //     if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
+  //       setApplicantEmail(employeeIssueItems[itemIndex].email);
+  //       // Removed setTagsTo here to prevent auto-population
+  //     }
+  //   }
+  // }, [isOpen, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
 
-    // Only set email data if modal is opening with an ID AND we have valid data
-    if (isOpen?.id && employeeIssueItems?.length > 0) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      // Don't auto-populate the To field
-      if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
-        setApplicantEmail(employeeIssueItems[itemIndex].email);
-        // Removed setTagsTo here to prevent auto-population
+  // Prefill fields from backend when details are loaded
+  useEffect(() => {
+    if (employeeIssueDetails) {
+      setTagsTo(employeeIssueDetails.nte_to ? JSON.parse(employeeIssueDetails.nte_to) : []);
+      setTagsCc(employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : []);
+      setTagsBcc(employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []);
+      setValue('message', employeeIssueDetails.nte_message || '');
+      if (employeeIssueDetails.nte_attachment) {
+        setPdfAttachment(employeeIssueDetails.nte_attachment);
       }
     }
-  }, [isOpen?.id, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
-
-  // Get attachment from the server if available
-  useEffect(() => {
-    if (employeeIssueDetails?.nte_attachment) {
-      setPdfAttachment(employeeIssueDetails.nte_attachment);
-    }
-  }, [employeeIssueDetails]);
+  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
@@ -109,7 +122,7 @@ export default function SendNTEModal({
       employeeIssueItemsCopy[itemIndex].id = isOpen.id;
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'nte';
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template.subject;
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template ? template.subject : '';
       employeeIssueItemsCopy[itemIndex].issueNTEForm.to = tagsTo;
       if (tagsCc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = tagsCc;
@@ -117,7 +130,14 @@ export default function SendNTEModal({
       if (tagsBcc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
       }
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
+      // Store only plain text (strip HTML)
+      const plainMessage = stripHtml(data.message);
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = plainMessage;
+      // Save nte_to, nte_cc, nte_bcc as JSON stringified arrays
+      employeeIssueItemsCopy[itemIndex].nte_to = JSON.stringify(tagsTo);
+      employeeIssueItemsCopy[itemIndex].nte_cc = JSON.stringify(tagsCc);
+      employeeIssueItemsCopy[itemIndex].nte_bcc = JSON.stringify(tagsBcc);
+      employeeIssueItemsCopy[itemIndex].nte_message = plainMessage;
       // Include PDF attachment if available
       if (pdfAttachment) {
         employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;
@@ -131,6 +151,9 @@ export default function SendNTEModal({
           setPdfAttachment(null); // Clear attachment state
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           reset();
+          if (refetch) {
+            refetch();
+          }
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -147,7 +170,14 @@ export default function SendNTEModal({
   // Get filename from attachment URL
   const getFilenameFromUrl = (url: string) => {
     if (!url) return '';
-    const urlParts = url.split('/');
+    
+    // Remove AWS credentials from the URL if present
+    let cleanUrl = url;
+    if (url.includes('?AWSAccessKeyId=')) {
+      cleanUrl = url.split('?AWSAccessKeyId=')[0];
+    }
+    
+    const urlParts = cleanUrl.split('/');
     return urlParts[urlParts.length - 1];
   };
 
@@ -188,12 +218,12 @@ export default function SendNTEModal({
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Email Template<span className='text-red-600'>*</span>
+                          Email Template
                         </label>
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(event) => {
                               const template = dataEmailTemplate.find(

@@ -1,14 +1,18 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
+
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { T_Investigation, T_InvestigationModal } from '@/types/globals';
-import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
 import useAddInvestigationReportItems from '../hooks/useAddInvestigationReportItems';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import { T_Investigation, T_InvestigationModal } from '@/types/globals';
 
 export default function InvestigationModal({
   employeeIssueItems,
@@ -46,7 +50,11 @@ export default function InvestigationModal({
       employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other;
       employeeIssueItemsCopy[itemIndex].investigateForm.attachments = toSaveData.attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
-      employeeIssueItemsCopy[itemIndex].investigatedDate = Intl.DateTimeFormat('en-US').format(currentDate);
+      employeeIssueItemsCopy[itemIndex].investigatedDate = new Intl.DateTimeFormat('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+      }).format(currentDate);
       const copySaveData = employeeIssueItemsCopy[itemIndex].investigateForm;
       setToSaveData({ ...toSaveData, ...copySaveData });
       setToAddData([...employeeIssueItemsCopy]);

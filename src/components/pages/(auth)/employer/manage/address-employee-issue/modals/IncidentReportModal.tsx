@@ -1,14 +1,19 @@
-import { Dispatch, Fragment, useRef } from 'react';
-import CustomDatePicker from '@/components/CustomDatePicker';
+import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
-import { T_IncidentReport } from '@/types/globals';
-import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useAddEmployeeIssueItems from '../hooks/useAddEmployeeIssueItems';
-import { useQueryClient } from '@tanstack/react-query';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
+import { T_IncidentReport } from '@/types/globals';
+
 
 export default function IncidentReportModal({
   employeeIssueItems,
@@ -31,19 +36,28 @@ export default function IncidentReportModal({
 }) {
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useAddEmployeeIssueItems();
-  const { register, handleSubmit, setValue, reset, control, trigger } = useForm<T_IncidentReport>({
+  const { register, handleSubmit, setValue, reset, control, trigger, watch } = useForm<T_IncidentReport>({
     defaultValues: {
+      name: '',
       incidentDate: new Date().toISOString(), 
     },
   });
   const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
+  
+  // Character limit state for brief background
+  const maxLength = 430;
+  const [hasShownToast, setHasShownToast] = useState(false);
+  const briefBackgroundValue = watch('briefBackground') || '';
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={"Successfully created an incident report."} type='success' />, { duration: 5000 });
         setIsOpen(false);
-        reset();
+        reset({
+          name: '',
+          incidentDate: new Date().toISOString(),
+        });
         refetch();
       },
       onError: (err: any) => {
@@ -54,6 +68,25 @@ export default function IncidentReportModal({
     };
     mutate(data, callbackReq);
   });
+
+  // Handle brief background input change with character limit
+  const handleBriefBackgroundChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    
+    if (value.length <= maxLength) {
+      // Reset the toast flag when back under the limit
+      if (hasShownToast) setHasShownToast(false);
+      setValue('briefBackground', value);
+    } else if (!hasShownToast) {
+      // Show toast only once per limit exceeding attempt
+      toast.custom(() => <CustomToast message={`Brief Background cannot exceed ${maxLength} characters.`} type="error" />);
+      setHasShownToast(true);
+      
+      // Prevent further input by truncating the text
+      const truncated = value.substring(0, maxLength);
+      setValue('briefBackground', truncated);
+    }
+  };
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -234,8 +267,14 @@ export default function IncidentReportModal({
                           rows={4}
                           {...register('briefBackground', { required: true })}
                           id='briefBackground'
+                          value={briefBackgroundValue}
+                          onChange={handleBriefBackgroundChange}
+                          maxLength={maxLength + 1}
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                         />
+                        <div className='text-xs text-gray-500 text-right mt-1'>
+                          {briefBackgroundValue.length}/{maxLength} characters
+                        </div>
                       </div>
                     </div>
                   </div>

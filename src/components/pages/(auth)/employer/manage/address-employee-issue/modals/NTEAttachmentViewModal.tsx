@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -9,10 +9,16 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 function NTEAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIsOpen: Dispatch<any> }) {
   const cancelButtonRef = useRef(null);
   const { data: employeeIssueData, remove: removeEmployeeIssue } = useGetEmployeeIssueDetails(isOpen.id);
+  const [isResponseView, setIsResponseView] = useState(false);
 
   const customCloseModal = () => {
     removeEmployeeIssue();
     setIsOpen(null);
+    setIsResponseView(false);
+  };
+
+  const toggleView = () => {
+    setIsResponseView(!isResponseView);
   };
 
   return (
@@ -47,12 +53,43 @@ function NTEAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIsOpen:
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
                   </div>
                   <div>
-                    <div className='flex flex-col gap-2'>
-                      <div className='flex flex-wrap gap-2 justify-center'>
-                        {employeeIssueData?.nte_attachment && (
-                          <>
-                            <object data={employeeIssueData.nte_attachment} width='100%' height='500px' />
-                          </>
+                    <div className='flex flex-col gap-2 p-4'>
+                      <div className='flex flex-wrap gap-2 justify-start'>
+                        <button 
+                          className={`px-4 py-2 rounded-md transition-colors ${
+                            isResponseView 
+                              ? 'bg-savoy-blue text-white hover:bg-blue-700' 
+                              : employeeIssueData?.is_responded 
+                                ? 'bg-savoy-blue text-white hover:bg-blue-700' 
+                                : 'bg-gray-400 text-white cursor-not-allowed'
+                          }`}
+                          onClick={toggleView}
+                          disabled={!isResponseView && !employeeIssueData?.is_responded}
+                        >
+                          {isResponseView ? 'Back' : (employeeIssueData?.is_responded ? 'View Response' : 'View Response')}
+                        </button>
+                      </div>
+                      
+                      <div className='mt-4'>
+                        {isResponseView ? (
+                          <div className='space-y-4'>
+                            <label htmlFor='response-message' className='block text-sm font-bold text-gray-700'>
+                              Response Message:
+                            </label>
+                            <textarea
+                              id='response-message'
+                              value={employeeIssueData?.response || ''}
+                              readOnly
+                              className='cursor-not-allowed w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:border-transparent resize-none'
+                              placeholder='No response yet'
+                            />
+                          </div>
+                        ) : (
+                          employeeIssueData?.nte_attachment && (
+                            <div className='mt-4'>
+                              <object data={employeeIssueData.nte_attachment} width='100%' height='500px' />
+                            </div>
+                          )
                         )}
                       </div>
                     </div>
