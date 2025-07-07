@@ -143,7 +143,7 @@ export default function IncidentReportModal({
                           {...register('name', { required: true })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
-                          <option value='' disabled>Select...</option>
+                          <option value=''>Select...</option>
                           {employeeItems.map((item: any) => {
                             return (
                               <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
