@@ -403,7 +403,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <AddSeparationModal isOpen={isAddSeparationModalOpen} setIsOpen={setIsAddSeparationModalOpen} refetch={refetch} />
+      <AddSeparationModal 
+        isOpen={isAddSeparationModalOpen} 
+        setIsOpen={setIsAddSeparationModalOpen} 
+        refetch={refetch} 
+      />
       <LetterModal
         separationItems={separationItems}
         refetch={refetch}
