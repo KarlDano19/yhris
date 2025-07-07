@@ -54,6 +54,13 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
     };
     
     append(newCriteria);
+    
+    setTimeout(() => {
+      const lastIndex = fields.length;
+      if (criteriaRefs.current[lastIndex]) {
+        criteriaRefs.current[lastIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const removeCriteria = (index: number) => {
