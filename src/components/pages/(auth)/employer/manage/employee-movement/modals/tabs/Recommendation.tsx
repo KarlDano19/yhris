@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import Image from "next/image";
 import DrawSignatureModal from "../DrawSignatureModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
-function Reccomendation({
+function Recommendation({
   register,
   onSubmit,
   setSelectedTab,
@@ -15,6 +15,10 @@ function Reccomendation({
   hasHrRecommendation = false,
   approvals = [],
   currentUserApproval = null,
+  watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   register: any;
   onSubmit: any;
@@ -24,45 +28,230 @@ function Reccomendation({
   hasHrRecommendation?: boolean;
   approvals?: any[];
   currentUserApproval?: any;
+  watch?: any;
+  errors?: any;
+  setError?: any;
+  clearErrors?: any;
 }) {
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
+  const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
+  const [signatureSource, setSignatureSource] = useState<string>("");
+
+  // Watch for existing signature if watch function is provided
+  const existingSignatureUrl = watch ? watch("signature") : null;
+  const recommendationValue = watch ? watch("recommendation") : null;
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
   };
 
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("signature", file);
+      setValue("previous_signature", previousSignatureFile);
+      setValue("signature_source", "upload");
+      setSignatureSource("upload");
+      setSignatureUrl(URL.createObjectURL(file));
+      setAttachmentExist(true);
+      
+      // Clear any signature errors when a file is uploaded
+      if (clearErrors) {
+        clearErrors("signature");
+      }
+    }
+  };
+
+  // Handle drawn signature from modal
+  const handleDrawnSignature = (drawnSignatureDataUrl: string) => {
+    try {
+      fetch(drawnSignatureDataUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], "signature.png", { type: "image/png" });
+          setValue("signature", file);
+          setValue("previous_signature", previousSignatureFile);
+          setValue("signature_source", "draw");
+          setSignatureSource("draw");
+          setSignatureUrl(drawnSignatureDataUrl);
+          
+          // Clear any signature errors when a signature is drawn
+          if (clearErrors) {
+            clearErrors("signature");
+          }
+        })
+        .catch(err => {
+          console.error("Error converting signature data URL to file:", err);
+          // Fallback to using the data URL directly
+          setValue("signature", drawnSignatureDataUrl);
+          setSignatureUrl(drawnSignatureDataUrl);
+          
+          // Clear any signature errors
+          if (clearErrors) {
+            clearErrors("signature");
+          }
+        });
+    } catch (error) {
+      console.error("Error in handleDrawnSignature:", error);
+      // Fallback to using the data URL directly
+      setValue("signature", drawnSignatureDataUrl);
+      setSignatureUrl(drawnSignatureDataUrl);
+      
+      // Clear any signature errors
+      if (clearErrors) {
+        clearErrors("signature");
+      }
+    }
+  };
+
   useEffect(() => {
     if (signatureUrl) {
-      setValue("signature", signatureUrl);
-    } else {
-      setSignatureUrl("");
+      try {
+        if (signatureUrl.startsWith('data:')) {
+          fetch(signatureUrl)
+            .then(res => res.blob())
+            .then(blob => {
+              const file = new File([blob], "signature.png", { type: "image/png" });
+              setValue("signature", file);
+              setValue("previous_signature", previousSignatureFile);
+              setValue("signature_source", "draw");
+              setSignatureSource("draw");
+              
+              // Clear any signature errors
+              if (clearErrors) {
+                clearErrors("signature");
+              }
+            })
+            .catch(err => {
+              console.error("Error converting signature data URL to file:", err);
+              // Fallback to using the URL directly
+              setValue("signature", signatureUrl);
+              
+              // Clear any signature errors
+              if (clearErrors) {
+                clearErrors("signature");
+              }
+            });
+        } else if (signatureUrl.startsWith('blob:')) {
+          setSignatureSource("upload");
+          
+          // Clear any signature errors
+          if (clearErrors) {
+            clearErrors("signature");
+          }
+        } else {
+          setValue("signature", signatureUrl);
+          setValue("previous_signature", signatureUrl);
+          setValue("signature_source", "");
+          setSignatureSource("");
+          
+          // Clear any signature errors
+          if (clearErrors) {
+            clearErrors("signature");
+          }
+        }
+      } catch (error) {
+        console.error("Error processing signature URL:", error);
+        // Fallback to using the URL directly
+        setValue("signature", signatureUrl);
+        
+        // Clear any signature errors
+        if (clearErrors) {
+          clearErrors("signature");
+        }
+      }
     }
-    if (!drawSignatureModal && signatureUrl) {
-      setSignatureUrl("");
+    
+    if (!drawSignatureModal && signatureUrl && signatureSource === "draw") {
+      // Don't clear signature URL when modal closes if we have a valid signature
     }
-  }, [signatureUrl, setValue, drawSignatureModal]);
+  }, [signatureUrl, setValue, drawSignatureModal, previousSignatureFile, signatureSource, clearErrors]);
+
+  // Check if there are existing signature URLs (for edit mode)
+  useEffect(() => {
+    if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
+      setSignatureUrl(existingSignatureUrl);
+      setSignatureSource("");
+      setValue("signature", existingSignatureUrl);
+      setValue("previous_signature", existingSignatureUrl);
+      
+      // Clear any signature errors
+      if (clearErrors) {
+        clearErrors("signature");
+      }
+    }
+  }, [existingSignatureUrl, setValue, clearErrors]);
+
+  // Clear errors when recommendation is changed
+  useEffect(() => {
+    if (recommendationValue && recommendationValue !== "" && clearErrors) {
+      clearErrors("recommendation");
+    }
+  }, [recommendationValue, clearErrors]);
+
+  // Clear errors when signature is changed
+  useEffect(() => {
+    if (existingSignatureUrl && existingSignatureUrl !== "" && clearErrors) {
+      clearErrors("signature");
+    }
+  }, [existingSignatureUrl, clearErrors]);
+
+  // Custom submit handler to ensure signature data is properly processed
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate all fields at once
+    let hasErrors = false;
+    
+    // Validate recommendation
+    if (!recommendationValue || recommendationValue === "") {
+      if (setError) {
+        setError("recommendation", {
+          type: "manual",
+          message: "Recommendation is required."
+        });
+      }
+      hasErrors = true;
+    }
+    
+    // Validate signature
+    const signatureValue = watch ? watch("signature") : null;
+    if (!signatureValue || signatureValue === "") {
+      if (setError) {
+        setError("signature", {
+          type: "manual",
+          message: "Signature is required (draw or upload)."
+        });
+      }
+      hasErrors = true;
+    }
+    
+    // If there are errors, stop submission
+    if (hasErrors) {
+      return;
+    }
+    
+    // Make sure signature data is in the correct format before submission
+    if (signatureValue && typeof signatureValue === 'object' && !(signatureValue instanceof File)) {
+      try {
+        if (signatureUrl) {
+          setValue("signature", signatureUrl);
+        }
+      } catch (error) {
+        console.error("Error processing signature before submission:", error);
+      }
+    }
+    
+    // Call the original onSubmit
+    onSubmit(e);
+  };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleFormSubmit}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
-
         {/* Previous Approvals */}
         {approvals.length > 0 && (
           <div className="mb-6">
@@ -113,13 +302,19 @@ function Reccomendation({
                 Your Recommendation
                 <span className="text-red-600">*</span>
               </label>
+              {errors && errors.recommendation && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.recommendation.message || "Recommendation is required."}
+                  </p>
+                )}
               <div className="relative mt-2">
                 <textarea
-                  {...register("recommendation")}
+                  {...register("recommendation", { required: true })}
                   id="recommendation"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   rows={4}
                 />
+                
               </div>
             </div>
           </div>
@@ -130,6 +325,11 @@ function Reccomendation({
           <>
             <div className="mt-4">
               <h1 className="text-lg font-semibold">Your Signature</h1>
+              {errors && errors.signature && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.signature.message || "Signature is required (draw or upload)."}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-6 mt-4">
               <div>
@@ -138,6 +338,7 @@ function Reccomendation({
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Draw Signature
+                  {!existingSignatureUrl && <span className="text-red-600">*</span>}
                 </label>
                 <div className="relative mt-2">
                   <button
@@ -155,16 +356,14 @@ function Reccomendation({
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Upload Signature
+                  {!existingSignatureUrl && <span className="text-red-600">*</span>}
                 </label>
                 <div className="relative mt-2">
                   <input
                     id="signature"
-                    {...register("signature")}
-                    onChange={(e) => {
-                      e.target.value ? setSignatureUrl("") : null;
-                      e.target.value ? setAttachmentExist(true) : null;
-                    }}
                     type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
                     className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
                   />
                   {attachmentExist ? (
@@ -174,6 +373,8 @@ function Reccomendation({
                       onClick={() => {
                         setValue("signature", "");
                         setAttachmentExist(false);
+                        setSignatureUrl("");
+                        setSignatureSource("");
                       }}
                     >
                       Remove Attachment
@@ -184,12 +385,45 @@ function Reccomendation({
             </div>
           </>
         )}
+        
+        {/* Signature Preview */}
+        {signatureUrl && (
+          <div className="px-4 md:px-0 mt-4">
+            <div
+              className={`text-center font-semibold mb-2 ${
+                signatureSource === "draw" || signatureSource === "upload"
+                  ? "text-red-600"
+                  : "text-green-600"
+              }`}
+            >
+              {signatureSource === "draw" || signatureSource === "upload" ? "Preview" : "Existing Signature"}
+            </div>
+            {typeof Image !== 'undefined' ? (
+              <Image
+                className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6"
+                src={signatureUrl}
+                width={500}
+                height={200}
+                alt="signatureImage"
+              />
+            ) : (
+              <img
+                className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6 h-32"
+                src={signatureUrl}
+                alt="signatureImage"
+              />
+            )}
+          </div>
+        )}
       </div>
       {drawSignatureModal && (
         <DrawSignatureModal
           isOpen={drawSignatureModal}
           setIsOpen={setDrawSignatureModal}
-          setSignatureUrl={setSignatureUrl}
+          setSignatureUrl={(url: any) => {
+            setSignatureUrl(url);
+            handleDrawnSignature(url);
+          }}
         />
       )}
       <hr />
@@ -207,7 +441,10 @@ function Reccomendation({
               type="button"
               onClick={() => {
                 setValue('status', 'rejected');
-                onSubmit();
+                // Ensure signature is properly formatted before submission
+                handleFormSubmit({
+                  preventDefault: () => {}
+                } as React.FormEvent);
               }}
               className="w-auto rounded-md bg-red-600 px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
             >
@@ -239,7 +476,10 @@ function Reccomendation({
               type="button"
               onClick={() => {
                 setValue('status', 'approved');
-                onSubmit();
+                // Ensure signature is properly formatted before submission
+                handleFormSubmit({
+                  preventDefault: () => {}
+                } as React.FormEvent);
               }}
               className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
@@ -274,4 +514,4 @@ function Reccomendation({
   );
 }
 
-export default Reccomendation;
+export default Recommendation;

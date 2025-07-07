@@ -36,6 +36,9 @@ function EmployeeProfile({
   const [positionItems, setPositionItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
   const { data: positionData } = useGetPositionItems();
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
+  const [watchedEmployeeId, setWatchedEmployeeId] = useState('');
 
   useEffect(() => {
     if (employeeData) {
@@ -48,6 +51,30 @@ function EmployeeProfile({
       setPositionItems(positionData);
     }
   }, [positionData]);
+
+  useEffect(() => {
+    const id = watch('employee');
+    setWatchedEmployeeId(id ? String(id) : '');
+  }, [watch('employee')]);
+
+  useEffect(() => {
+    if (isEdit && employeeItems.length > 0 && watchedEmployeeId) {
+      const selectedEmployee = employeeItems.find(
+        (item: any) => String(item.id) === watchedEmployeeId
+      );
+      if (selectedEmployee) {
+        setEmployeeSearch(`${selectedEmployee.firstname} ${selectedEmployee.lastname}`);
+        setEmployeeSelected(true);
+      } else {
+        setEmployeeSearch('');
+        setEmployeeSelected(false);
+      }
+    }
+    if (isEdit && (!watchedEmployeeId || employeeItems.length === 0)) {
+      setEmployeeSearch('');
+      setEmployeeSelected(false);
+    }
+  }, [employeeItems, isEdit, watchedEmployeeId]);
 
   const onSubmit = (data: any) => {
     if (isEdit) {
@@ -106,27 +133,84 @@ function EmployeeProfile({
         <div className='grid grid-cols-3 gap-6 mt-4 pb-6'>
           <div>
             <label
-              htmlFor='total_all_disabling_injuries_illnesses'
+              htmlFor='employee'
               className='block text-sm font-medium leading-6 text-gray-900'
             >
               Employee Name
               <span className='text-red-600'>*</span>
             </label>
             <div className='relative mt-2'>
-              <select
+              <input
+                id='employee-search'
+                type='text'
+                placeholder='Select...'
+                value={employeeSearch}
+                onChange={e => setEmployeeSearch(e.target.value)}
+                className={`appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6${isEdit ? ' opacity-60' : ''}`}
+                onClick={() => {
+                  if (!employeeSelected && !isEdit) {
+                    const dropdown = document.getElementById('employee-dropdown');
+                    if (dropdown) {
+                      dropdown.classList.toggle('hidden');
+                    }
+                  }
+                }}
+                readOnly={employeeSelected || isEdit}
                 disabled={isEdit}
-                id='employee'
-                {...register('employee', { required: true })}
-                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              />
+              <div
+                className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'
+                onClick={() => {
+                  if (!employeeSelected && !isEdit) {
+                    const dropdown = document.getElementById('employee-dropdown');
+                    if (dropdown) {
+                      dropdown.classList.toggle('hidden');
+                    }
+                  }
+                }}
               >
-                <option value=''>Select...</option>
-                {employeeItems.map((item: any) => {
-                  return <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>;
-                })}
-              </select>
-              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                <SelectChevronDown />
+                {!employeeSelected ? (
+                  <span>
+                    <SelectChevronDown />
+                  </span>
+                ) : !isEdit ? (
+                  <button
+                    type='button'
+                    className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl pointer-events-auto'
+                    onClick={() => {
+                      setValue('employee', '');
+                      setEmployeeSearch('');
+                      setEmployeeSelected(false);
+                    }}
+                    tabIndex={-1}
+                  >
+                    ×
+                  </button>
+                ) : (
+                  <span>
+                    <SelectChevronDown />
+                  </span>
+                )}
               </div>
+              <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+                {employeeItems
+                  .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
+                  .map((item: any) => (
+                    <div
+                      key={item.id}
+                      className='px-3 py-2 bg-[#eeefee] text-sm text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
+                      onClick={() => {
+                        setValue('employee', item.id);
+                        setEmployeeSearch(`${item.firstname} ${item.lastname}`);
+                        setEmployeeSelected(true);
+                        document.getElementById('employee-dropdown')?.classList.add('hidden');
+                      }}
+                    >
+                      {`${item.firstname} ${item.lastname}`}
+                    </div>
+                  ))}
+              </div>
+              <input type="hidden" {...register('employee', { required: true })} />
             </div>
           </div>
           <div>

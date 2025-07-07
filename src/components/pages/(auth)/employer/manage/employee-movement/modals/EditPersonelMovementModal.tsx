@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import EmployeeProfile from "./tabs/EmployeeProfile";
-import Reccomendation from "./tabs/Reccomendation";
+import Recommendation from "./tabs/Recommendation";
 import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
@@ -29,7 +29,7 @@ function PrintPersonelMovementModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } =
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
   const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
@@ -108,17 +108,38 @@ function PrintPersonelMovementModal({
 
     if (currentUserApproval) {
       // If there's a current approval, submit the approval
-      submitApproval(
-        { 
-          personnel_movement_id: isOpen.id, 
-          data: {
-            recommendation: data.recommendation,
-            signature: data.signature,
-            status: data.status || "approved"
-          }
-        }, 
-        callbackReq
-      );
+      // Process signature data before submission
+      let signatureData = data.signature;
+      
+      // Handle File objects from drawn or uploaded signatures
+      if (signatureData instanceof File) {
+        // For File objects, we'll need to create a FormData object
+        const formData = new FormData();
+        formData.append('recommendation', data.recommendation);
+        formData.append('signature', signatureData);
+        formData.append('status', data.status || "approved");
+        
+        submitApproval(
+          { 
+            personnel_movement_id: isOpen.id, 
+            data: formData
+          }, 
+          callbackReq
+        );
+      } else {
+        // For string URLs or other data types
+        submitApproval(
+          { 
+            personnel_movement_id: isOpen.id, 
+            data: {
+              recommendation: data.recommendation,
+              signature: signatureData,
+              status: data.status || "approved"
+            }
+          }, 
+          callbackReq
+        );
+      }
     } else {
       // Otherwise, update the PMF details
       editPersonelMovement(
@@ -172,7 +193,7 @@ function PrintPersonelMovementModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Personal Movement Form (PMF)
+                    Update Personal Movement Form (PMF)
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
@@ -192,7 +213,7 @@ function PrintPersonelMovementModal({
                   />
                 )}
                 {selectedTab === 2 && (
-                  <Reccomendation
+                  <Recommendation
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
@@ -201,6 +222,10 @@ function PrintPersonelMovementModal({
                     hasHrRecommendation={true}
                     approvals={approvals}
                     currentUserApproval={currentUserApproval}
+                    watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

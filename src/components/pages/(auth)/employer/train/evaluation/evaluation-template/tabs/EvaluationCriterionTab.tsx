@@ -29,6 +29,7 @@ function EvaluationCriterionTab({
   setSelectedTab: any;
 }) {
   const childrenRef = useRef<any>({});
+  const sectionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'evaluation_criterion',
@@ -51,6 +52,13 @@ function EvaluationCriterionTab({
         },
       ],
     });
+    
+    setTimeout(() => {
+      const lastIndex = fields.length;
+      if (sectionRefs.current[lastIndex]) {
+        sectionRefs.current[lastIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const handleOpenModal = (index: number) => {
@@ -119,7 +127,10 @@ function EvaluationCriterionTab({
                           <Draggable key={item.id} draggableId={item.id} index={index}>
                             {(provided: any, snapshot: any) => (
                               <div
-                                ref={provided.innerRef}
+                                ref={(el) => {
+                                  provided.innerRef(el);
+                                  sectionRefs.current[index] = el;
+                                }}
                                 {...provided.draggableProps}
                                 className='relative border-2 rounded-md mb-4 pb-3'
                                 style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
