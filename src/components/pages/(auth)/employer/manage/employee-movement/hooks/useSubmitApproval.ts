@@ -4,19 +4,32 @@ import { getCookie } from 'cookies-next';
 async function submitApproval(personnel_movement_id: number, data: any) {
   try {
     const token = getCookie('token');
-    const formData = new FormData();
+    
+    // Check if data is already a FormData object
+    let formData: FormData;
+    if (data instanceof FormData) {
+      formData = data;
+    } else {
+      formData = new FormData();
 
-    // Handle signature if it's a base64 string
-    if (data.signature && data.signature.startsWith('data:')) {
-      const signatureBlob = await fetch(data.signature).then((res) => res.blob());
-      formData.append('signature', signatureBlob, 'signature.jpg');
-    } else if (data.signature) {
-      formData.append('signature', data.signature);
+      // Handle signature if it's a base64 string
+      if (data.signature && typeof data.signature === 'string' && data.signature.startsWith('data:')) {
+        try {
+          const signatureBlob = await fetch(data.signature).then((res) => res.blob());
+          formData.append('signature', signatureBlob, 'signature.jpg');
+        } catch (error) {
+          console.error('Error processing signature:', error);
+          // Fallback to using the string directly
+          formData.append('signature', data.signature);
+        }
+      } else if (data.signature) {
+        formData.append('signature', data.signature);
+      }
+
+      // Add other fields
+      formData.append('recommendation', data.recommendation || '');
+      formData.append('status', data.status || 'approved');
     }
-
-    // Add other fields
-    formData.append('recommendation', data.recommendation || '');
-    formData.append('status', data.status || 'approved');
 
     const config = {
       method: 'POST',

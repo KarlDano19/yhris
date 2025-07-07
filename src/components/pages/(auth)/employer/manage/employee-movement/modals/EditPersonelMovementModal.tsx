@@ -29,7 +29,7 @@ function PrintPersonelMovementModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } =
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
   const { data: personelMovementData, refetch: refetchPersonelMovement, remove: removePersonelMovement } = useGetAddPersonelMovementDetails(isOpen.id);
@@ -108,17 +108,38 @@ function PrintPersonelMovementModal({
 
     if (currentUserApproval) {
       // If there's a current approval, submit the approval
-      submitApproval(
-        { 
-          personnel_movement_id: isOpen.id, 
-          data: {
-            recommendation: data.recommendation,
-            signature: data.signature,
-            status: data.status || "approved"
-          }
-        }, 
-        callbackReq
-      );
+      // Process signature data before submission
+      let signatureData = data.signature;
+      
+      // Handle File objects from drawn or uploaded signatures
+      if (signatureData instanceof File) {
+        // For File objects, we'll need to create a FormData object
+        const formData = new FormData();
+        formData.append('recommendation', data.recommendation);
+        formData.append('signature', signatureData);
+        formData.append('status', data.status || "approved");
+        
+        submitApproval(
+          { 
+            personnel_movement_id: isOpen.id, 
+            data: formData
+          }, 
+          callbackReq
+        );
+      } else {
+        // For string URLs or other data types
+        submitApproval(
+          { 
+            personnel_movement_id: isOpen.id, 
+            data: {
+              recommendation: data.recommendation,
+              signature: signatureData,
+              status: data.status || "approved"
+            }
+          }, 
+          callbackReq
+        );
+      }
     } else {
       // Otherwise, update the PMF details
       editPersonelMovement(
@@ -201,6 +222,10 @@ function PrintPersonelMovementModal({
                     hasHrRecommendation={true}
                     approvals={approvals}
                     currentUserApproval={currentUserApproval}
+                    watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>
