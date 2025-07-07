@@ -59,7 +59,13 @@ export default function IncidentReportModal({
         reset({
           name: '',
           incidentDate: new Date().toISOString(),
+          position: '',
+          department: '',
+          incidentPlace: '',
+          briefBackground: ''
         });
+        setEmployeeSearch('');
+        setEmployeeSelected(false);
         refetch();
       },
       onError: (err: any) => {
