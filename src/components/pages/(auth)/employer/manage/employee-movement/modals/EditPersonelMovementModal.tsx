@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import EmployeeProfile from "./tabs/EmployeeProfile";
-import Reccomendation from "./tabs/Reccomendation";
+import Recommendation from "./tabs/Recommendation";
 import useEditPersonelMovementDetails from "../hooks/useEditPersonelMovementDetails";
 import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovementDetails";
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
@@ -192,7 +192,7 @@ function PrintPersonelMovementModal({
                   />
                 )}
                 {selectedTab === 2 && (
-                  <Reccomendation
+                  <Recommendation
                     register={register}
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}

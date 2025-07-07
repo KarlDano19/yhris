@@ -6,7 +6,7 @@ import DrawSignatureModal from "../DrawSignatureModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
-function Reccomendation({
+function Recommendation({
   register,
   onSubmit,
   setSelectedTab,
@@ -274,4 +274,4 @@ function Reccomendation({
   );
 }
 
-export default Reccomendation;
+export default Recommendation;
