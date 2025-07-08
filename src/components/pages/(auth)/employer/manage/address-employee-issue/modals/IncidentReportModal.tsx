@@ -48,6 +48,8 @@ export default function IncidentReportModal({
   // Character limit state for brief background
   const maxLength = 430;
   const [hasShownToast, setHasShownToast] = useState(false);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
   const briefBackgroundValue = watch('briefBackground') || '';
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -57,7 +59,13 @@ export default function IncidentReportModal({
         reset({
           name: '',
           incidentDate: new Date().toISOString(),
+          position: '',
+          department: '',
+          incidentPlace: '',
+          briefBackground: ''
         });
+        setEmployeeSearch('');
+        setEmployeeSelected(false);
         refetch();
       },
       onError: (err: any) => {
@@ -138,20 +146,70 @@ export default function IncidentReportModal({
                         Employee Name<span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
-                        <select
+                        <input
                           id='name'
-                          {...register('name', { required: true })}
-                          className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          type='text'
+                          placeholder='Select...'
+                          value={employeeSearch}
+                          onChange={e => setEmployeeSearch(e.target.value)}
+                          className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                          onClick={() => {
+                            if (!employeeSelected) {
+                              const dropdown = document.getElementById('employee-dropdown');
+                              if (dropdown) {
+                                dropdown.classList.toggle('hidden');
+                              }
+                            }
+                          }}
+                          readOnly={employeeSelected}
+                        />
+                        <div
+                          className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
+                          onClick={() => {
+                            if (!employeeSelected) {
+                              const dropdown = document.getElementById('employee-dropdown');
+                              if (dropdown) {
+                                dropdown.classList.toggle('hidden');
+                              }
+                            }
+                          }}
                         >
-                          <option value='' disabled>Select...</option>
-                          {employeeItems.map((item: any) => {
-                            return (
-                              <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
-                            );
-                          })}
-                        </select>
-                        <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                          <SelectChevronDown />
+                          {!employeeSelected ? (
+                            <span>
+                              <SelectChevronDown />
+                            </span>
+                          ) : (
+                            <button
+                              type='button'
+                              className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
+                              onClick={() => {
+                                setValue('name', '');
+                                setEmployeeSearch('');
+                                setEmployeeSelected(false);
+                              }}
+                              tabIndex={-1}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                        <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+                          {employeeItems
+                            .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
+                            .map((item: any) => (
+                              <div
+                                key={item.id}
+                                className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
+                                onClick={() => {
+                                  setValue('name', item.id);
+                                  setEmployeeSearch(`${item.firstname} ${item.lastname}`);
+                                  setEmployeeSelected(true);
+                                  document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                }}
+                              >
+                                {`${item.firstname} ${item.lastname}`}
+                              </div>
+                            ))}
                         </div>
                       </div>
                     </div>

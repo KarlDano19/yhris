@@ -7,13 +7,16 @@ import Link from 'next/link';
 import CreateThirdPartyIntegrationModal from '../third-party-platform/modals/CreateThirdPartyIntegrationModal';
 import useGetThirdPartyIntegrationItems from '../third-party-platform/hooks/useGetThirdPartyIntegrationItems';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, XMarkIcon, TrashIcon } from '@heroicons/react/24/solid';
 import useGetApprovalItems from './hooks/useGetApprovalItems';
 import useAddApproval from './hooks/useAddApproval';
 import CustomToast from '@/components/CustomToast';
 import toast from 'react-hot-toast';
 import { useForm, Controller } from 'react-hook-form';
 import useGetUsers from '@/components/hooks/useGetUsers';
+import DeleteApprovalModal from './modal/DeleteModal';
+import useGetApprovalDetails from './hooks/useGetApprovalDetails';
+import useEditApproval from './hooks/useEditApproval';
 
 interface User {
   id: number;
@@ -26,14 +29,21 @@ interface ApproverTag {
   name: string;
 }
 
+type T_ModalData = {
+  id: number;
+  open: boolean;
+  code?: string;
+};
+
 function Content() {
   const broadcastChannel = new BroadcastChannel('settings-integration-channel');
   const [approverTags, setApproverTags] = useState<ApproverTag[]>([]);
   const [inputApprover, setInputApprover] = useState('');
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = useForm();
   const [approvalItems, setApprovalItems] = useState<any>([]);
+  const [isDeleteApprovalModalOpen, setIsDeleteApprovalModalOpen] = useState<T_ModalData | null>(null);
   const {
     data: dataApprovalItems,
     isLoading: isGetApprovalItemsLoading,
@@ -41,7 +51,8 @@ function Content() {
   } = useGetApprovalItems();
   const { mutate: addApproval, isLoading: isAddApprovalLoading } = useAddApproval();
   const { data: dataUsers = [], isLoading: isGetUsersLoading } = useGetUsers();
-
+  const { data: dataApprovalDetails, isLoading: isGetApprovalDetailsLoading } = useGetApprovalDetails(isDeleteApprovalModalOpen?.id || null);
+  const { mutate: editApproval, isLoading: isEditApprovalLoading } = useEditApproval();
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputApprover(value);
@@ -73,6 +84,16 @@ function Content() {
     setApproverTags(approverTags.filter((tag) => tag.id !== idToRemove));
   };
 
+  // Function to calculate the next sequence number
+  const getNextSequenceNumber = () => {
+    if (!approvalItems || approvalItems.length === 0) {
+      return 1;
+    }
+    
+    const maxSequence = Math.max(...approvalItems.map((item: any) => item.sequence || 0));
+    return maxSequence + 1;
+  };
+
   const onSubmit = handleSubmit((data) => {
     const submissionData = {
       ...data,
@@ -84,7 +105,7 @@ function Content() {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
-        reset({ stage_name: '' });
+        reset({ stage_name: '', sequence: '' });
         setApproverTags([]); 
         setInputApprover('');
         // Refetch the updated data
@@ -105,6 +126,14 @@ function Content() {
     refetchApprovalItems();
   }, []);
 
+  // Set initial sequence number when component mounts
+  useEffect(() => {
+    if (approvalItems.length > 0) {
+      const nextSequence = getNextSequenceNumber();
+      setValue('sequence', nextSequence);
+    }
+  }, [approvalItems, setValue]);
+
   useEffect(() => {
     if (dataApprovalItems && Array.isArray(dataApprovalItems)) {
       // Add Array check
@@ -113,8 +142,12 @@ function Content() {
         created_at: Intl.DateTimeFormat('en-US').format(new Date(item.created_at)),
       }));
       setApprovalItems(formattedItems);
+      
+      // Auto-fill the sequence field with the next number
+      const nextSequence = getNextSequenceNumber();
+      setValue('sequence', nextSequence);
     }
-  }, [dataApprovalItems]);
+  }, [dataApprovalItems, setValue]);
 
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
@@ -149,9 +182,16 @@ function Content() {
                   </div>
                   <div className='px-4 py-2'>
                     {approvalItems.map((item: any) => (
-                      <div key={item.id}>
-                        <h1 className='text-sm font-semibold text-gray-500 pl-4'>{item.stage_name}</h1>
-                        <hr className='border-b-[0px] border-[#2C3F58] border-1 mt-2' />
+                      <div key={item.id} className='flex justify-between mb-2 border-b border-gray-300 pb-2'>
+                        <div className='flex gap-2 items-center justify-between w-full'>
+                          <h1 className='text-sm font-semibold text-gray-500 pl-4'>{item.stage_name}</h1>
+                          <hr className='border-b-[0px] border-[#2C3F58] border-1 mt-2' />
+                        </div>
+                        <div className='flex gap-2 justify-end w-full'>
+                        <button type='button' onClick={() => setIsDeleteApprovalModalOpen({ id: item.id, open: true })}>
+                          <TrashIcon className='w-5 h-5 text-red-500' />
+                        </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -264,6 +304,13 @@ function Content() {
           </div>
         </div>
       </div>
+      {isDeleteApprovalModalOpen && (
+      <DeleteApprovalModal
+        refetch={refetchApprovalItems}
+          isOpen={isDeleteApprovalModalOpen}
+          setIsOpen={setIsDeleteApprovalModalOpen}
+        />
+      )}
     </>
   );
 }
