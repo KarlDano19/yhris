@@ -5,7 +5,7 @@ export async function sendEmail(data: any) {
   try {
     const token = getCookie("token");
     let config: any = {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: `Token ${token}`,
       },

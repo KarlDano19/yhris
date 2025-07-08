@@ -12,10 +12,12 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useSendEmail from '../hooks/useSendEmail'
+import useGetSafetyAndHealthPolicyDetails from '../hooks/useGetSafetyANdHelathPolicyDetails'
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
@@ -64,9 +66,26 @@ export default function SendEmailModal({
     const { mutate, isLoading } = useSendEmail();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
+    // Add hook to fetch Safety and Health Policy details
+    const { data: safetyAndHealthPolicyData } = useGetSafetyAndHealthPolicyDetails();
+
     // Add state for attachment
     const [attachment, setAttachment] = useState<File | null>(null);
     const [attachmentExist, setAttachmentExist] = useState(false);
+
+    // Get filename from attachment URL
+    const getFilenameFromUrl = (url: string) => {
+        if (!url) return '';
+        
+        // Remove AWS credentials from the URL if present
+        let cleanUrl = url;
+        if (url.includes('?AWSAccessKeyId=')) {
+            cleanUrl = url.split('?AWSAccessKeyId=')[0];
+        }
+        
+        const urlParts = cleanUrl.split('/');
+        return urlParts[urlParts.length - 1];
+    };
 
     // Handle file attachment upload
     const handleAttachmentUpload = ({ target }: { target: any }) => {
@@ -115,24 +134,28 @@ export default function SendEmailModal({
         let payload: any;
         if (attachment) {
           payload = new FormData();
-          payload.append('template', data.template);
           payload.append('to', JSON.stringify(tagsTo));
-          payload.append('message', data.message);
+          payload.append('context', data.message);
           if (tagsCc.length > 0) payload.append('cc', JSON.stringify(tagsCc));
           if (tagsBcc.length > 0) payload.append('bcc', JSON.stringify(tagsBcc));
+          payload.append('subject', 'Safety and Health Policy Document');
           payload.append('attachment', attachment);
         } else {
           payload = {
-            ...data,
             to: tagsTo,
             cc: tagsCc.length > 0 ? tagsCc : undefined,
-            bcc: tagsBcc.length > 0 ? tagsBcc : undefined
+            bcc: tagsBcc.length > 0 ? tagsBcc : undefined,
+            subject: 'Safety and Health Policy Document',
+            context: data.message
           };
         }
         const callbackReq = {
             onSuccess: () => {
                 setIsOpen({open: false });
                 refetch();
+                // Clear attachment state after successful send
+                setAttachment(null);
+                setAttachmentExist(false);
                 toast.custom(() => <CustomToast message={'Successfully sent email.'} type='success' />, {
                     duration: 5000,
                   });
@@ -331,12 +354,30 @@ export default function SendEmailModal({
                               />
                             </div>
                           </div>
-                          {/* Attachment upload */}
+                          {/* Attachment section */}
                           <div className='sm:col-span-4 mt-4'>
                             <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
                               Attachment
                             </label>
                             <div className='mt-2'>
+                              {/* Display existing attachment from backend */}
+                              {safetyAndHealthPolicyData?.attachment && (
+                                <div className="mb-3 p-3 bg-gray-50 rounded-md">
+                                  <div className="flex items-center gap-2">
+                                    <ClipIcon hasFile={true} />
+                                    <span className="text-sm text-gray-600">
+                                      {getFilenameFromUrl(safetyAndHealthPolicyData.attachment)}
+                                    </span>
+                                    <ArrowTopRightOnSquareIcon 
+                                      className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
+                                      onClick={() => window.open(safetyAndHealthPolicyData.attachment, '_blank')}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">Current attachment (will be included in email)</p>
+                                </div>
+                              )}
+                              
+                              {/* File upload for new attachment */}
                               <input
                                 id='attachment'
                                 type='file'
@@ -352,11 +393,11 @@ export default function SendEmailModal({
                                     setAttachmentExist(false);
                                   }}
                                 >
-                                  Remove Attachment
+                                  Remove New Attachment
                                 </button>
                               ) : null}
                             </div>
-                            <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
+                            <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb. <span className='text-red-600'>Upload a new file to replace the current attachment.</span></p>
                           </div>
                         </div>
                         <hr />
