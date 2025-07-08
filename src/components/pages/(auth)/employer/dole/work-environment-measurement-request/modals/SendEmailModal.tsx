@@ -87,6 +87,14 @@ export default function SendEmailModal({
         }
     }, [selectedTemplate, dataEmailTemplate, employeeEmail, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
+    const customCloseModal = () => {
+        // Reset form state
+        // add reset state here if needed
+        
+        // Close the modal
+        setIsOpen({ id: 0, open: false });
+    };
+
     const onSubmit = handleSubmit((data) => {
         const payload = {
             ...data,
@@ -137,7 +145,7 @@ export default function SendEmailModal({
                     <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                       <div className='flex bg-savoy-blue p-2 items-center'>
                         <h3 className='flex-1 text-white ml-2 font-semibold'>Send Contract</h3>
-                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen({ id: 0, open: false })} />
+                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                       </div>
                       <form onSubmit={onSubmit}>
                         <div className='px-4 pt-4 pb-6'>
@@ -311,7 +319,7 @@ export default function SendEmailModal({
                           <button
                             type='button'
                             className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                            // onClick={() => customCloseModal()}
+                            onClick={() => customCloseModal()}
                             ref={cancelButtonRef}
                           >
                             Close
