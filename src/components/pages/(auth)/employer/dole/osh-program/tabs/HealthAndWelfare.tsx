@@ -1158,7 +1158,7 @@ export default function HealthAndWelfare({
                 Safety and Health Promotion, training and education provided to
                 workers
               </label>
-              <div className="mt-4 w-full overflow-x-auto">
+              <div className="mt-4 w-full">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
