@@ -87,8 +87,14 @@ function ReportInformation({
 
   // Update form values when totals change
   useEffect(() => {
-    setValue("total_employees_male", totals.male);
-    setValue("total_employees_female", totals.female);
+    // Only update if the value actually changed
+    if (watch("total_employees_male") !== totals.male) {
+      setValue("total_employees_male", totals.male);
+    }
+    if (watch("total_employees_female") !== totals.female) {
+      setValue("total_employees_female", totals.female);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totals, setValue]);
 
   // For mobile inputs, use watch and setValue for each shift
