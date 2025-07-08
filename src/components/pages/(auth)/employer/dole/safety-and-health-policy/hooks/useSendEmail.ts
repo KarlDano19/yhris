@@ -4,21 +4,28 @@ import { getCookie } from "cookies-next";
 export async function sendEmail(data: any) {
   try {
     const token = getCookie("token");
-    const payloads = {
-      bcc: data.bcc,
-      cc: data.cc,
-      subject: `Work Environment Measurement Request`,
-      to: data.to,
-      context: data.message,
-    };
-    const config = {
+    let config: any = {
       method: "POST",
       headers: {
-        "content-type": "application/json",
         Authorization: `Token ${token}`,
       },
-      body: JSON.stringify(payloads),
     };
+
+    // If data is FormData (has attachment), use it directly
+    if (typeof FormData !== "undefined" && data instanceof FormData) {
+      config.body = data;
+      // Do NOT set content-type header for FormData!
+    } else {
+      config.headers["content-type"] = "application/json";
+      config.body = JSON.stringify({
+        bcc: data.bcc,
+        cc: data.cc,
+        subject: `Safety and Health Policy Document`,
+        to: data.to,
+        context: data.message,
+      });
+    }
+
     if (token) {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/safety-and-health-policies/send-email/`,
