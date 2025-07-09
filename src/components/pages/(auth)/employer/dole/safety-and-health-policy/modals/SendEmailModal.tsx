@@ -151,7 +151,7 @@ export default function SendEmailModal({
         }
         const callbackReq = {
             onSuccess: () => {
-                setIsOpen({open: false });
+                setIsOpen(null);
                 refetch();
                 // Clear attachment state after successful send
                 setAttachment(null);
@@ -172,13 +172,13 @@ export default function SendEmailModal({
       // add reset state here if needed
       
       // Close the modal
-      setIsOpen({open: false });
+      setIsOpen(null);
     };
 
     return (
         <>
           <Transition.Root show={isOpen.open} as={Fragment}>
-            <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {}}>
+            <Dialog as='div' className='relative z-20' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
               <Transition.Child
                 as={Fragment}
                 enter='ease-out duration-300'
@@ -191,7 +191,7 @@ export default function SendEmailModal({
                 <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
               </Transition.Child>
     
-              <div className='fixed inset-0 z-10 overflow-y-auto'>
+              <div className='fixed inset-0 z-20 overflow-y-auto'>
                 <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
                   <Transition.Child
                     as={Fragment}
@@ -205,7 +205,7 @@ export default function SendEmailModal({
                     <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                       <div className='flex bg-savoy-blue p-2 items-center'>
                         <h3 className='flex-1 text-white ml-2 font-semibold'>Send Contract</h3>
-                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen({open: false })} />
+                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                       </div>
                       <form onSubmit={onSubmit}>
                         <div className='px-4 pt-4 pb-6'>

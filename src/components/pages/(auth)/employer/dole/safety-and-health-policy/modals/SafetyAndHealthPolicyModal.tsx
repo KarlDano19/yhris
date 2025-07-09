@@ -284,15 +284,16 @@ function SafetyAndHealthPolicyModal({
               </Transition.Child>
             </div>
           </div>
+          
+          {isSendEmailModalOpen && (
+            <SendEmailModal
+              refetch={refetchSafetyAndHealthPolicyDetails}
+              isOpen={isSendEmailModalOpen}
+              setIsOpen={setIsSendEmailModalOpen}
+            />
+          )}
         </Dialog>
       </Transition.Root>
-      {isSendEmailModalOpen && (
-        <SendEmailModal
-          refetch={refetchSafetyAndHealthPolicyDetails}
-          isOpen={isSendEmailModalOpen}
-          setIsOpen={setIsSendEmailModalOpen}
-        />
-      )}
     </>
   );
 }
