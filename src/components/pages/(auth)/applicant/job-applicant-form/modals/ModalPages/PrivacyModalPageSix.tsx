@@ -67,9 +67,9 @@ export default function PrivacyModaPagelSix({
                 <p className='text-sm'>Unit #12 2F E-Max Building</p>
                 <p className='text-sm'>Masterson Avenue, Upper Balulang</p>
                 <p className='text-sm'>Cagayan de Oro City, Philippines 9000</p>
-                <p className='text-sm'>Email: dpo@yahshuagroup.com</p>
-                <p className='text-sm ml-11'> dpo@abba.works</p>
-                <p className='text-sm mt-16'>Date last updated: 31 October 2023</p>
+                <p className='text-sm'>Email: dpo@abba.works</p>
+                <p className='text-sm ml-11'> dpo@yahshuagroup.com</p>
+                <p className='text-sm mt-16'>Date last updated: 27 June 2025</p>
             </div>
           </div>
         </div>
