@@ -58,7 +58,7 @@ export default function PrivacyModaPagelOne({
                   We are committed to fully protecting your personal data privacy in compliance with Republic Act No. 10173, otherwise known as the Data Privacy Act of 2012 (DPA), its Implementing Rules and Regulations (IRR), relevant issuances of the National Privacy Commission (NPC) and other related laws, rules, regulations, and issuances.
                   </p>
                   <p className='text-sm'>
-                  We shall detail the manner in which we process your personal information and provide a separate privacy notice in an appropriate format and manner whenever we collect personal information through other channels (e.g., publicly accessible data processing online systems, mobile apps, logbook and CCTV in our office, or during events where participants' personal information is gathered through attendance sheets, registration forms, or evaluation forms).
+                  We shall detail the manner in which we process your personal information and provide a separate privacy notice in an appropriate format and manner whenever we collect personal information through other channels (e.g., publicly accessible data processing online systems, mobile apps, logbook and CCTV in our office, or during events where participants personal information is gathered through attendance sheets, registration forms, or evaluation forms).
                   </p>
                   <p className='text-sm'>
                   In all instances, we assure you that processing your personal information will strictly follow the provisions of DPA, especially the general data privacy principles of Transparency, Legitimate Purpose, and Proportionality.
