@@ -82,21 +82,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (shcMinutesMeetingData) {
-      shcMinutesMeetingData.records.map((item: any) => {
-        const incidentDate = new Date(item.date_of_meeting);
-        item.date_of_meeting = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+      const formattedRecords = shcMinutesMeetingData.records.map((item: any) => {
+        // Create a new object to avoid mutating the original data
+        const formattedItem = { ...item };
+        
+        // Format date
+        const incidentDate = new Date(formattedItem.date_of_meeting);
+        formattedItem.date_of_meeting = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
 
         // Format time_of_meeting to 12-hour format
-        if (item.time_of_meeting) {
-          const [hours, minutes, seconds] = item.time_of_meeting.split(":");
+        if (formattedItem.time_of_meeting) {
+          const [hours, minutes, seconds] = formattedItem.time_of_meeting.split(":");
           const date = new Date();
           date.setHours(Number(hours), Number(minutes), Number(seconds || 0));
-          item.time_of_meeting = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+          formattedItem.time_of_meeting = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
         }
+        
+        // Ensure attendees and absentees are arrays
+        formattedItem.attendees = Array.isArray(formattedItem.attendees) ? formattedItem.attendees : [];
+        formattedItem.absentees = Array.isArray(formattedItem.absentees) ? formattedItem.absentees : [];
 
-        return item;
+        return formattedItem;
       });
-      setShcMinutesMeetingItems(shcMinutesMeetingData.records);
+      
+      setShcMinutesMeetingItems(formattedRecords);
       setPagination({
         totalPages: shcMinutesMeetingData.total_pages,
         totalRecords: shcMinutesMeetingData.total_records,
@@ -219,8 +228,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.time_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.venue}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.attendees.length}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.absentees.length}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{Array.isArray(item.attendees) ? item.attendees.length : 0}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{Array.isArray(item.absentees) ? item.absentees.length : 0}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
               <button

@@ -44,24 +44,26 @@ async function addShcMinutesMeeting(data: any) {
       }
     }
     
+    // Ensure attendees and absentees are arrays
+    const attendees = Array.isArray(data.attendees) ? data.attendees : [];
+    const absentees = Array.isArray(data.absentees) ? data.absentees : [];
+    
     // Add all other form fields
     for (const key in data) {
-      if (key !== 'signature') {
-        if (key === 'attendees' && Array.isArray(data[key])) {
-          // Append attendees as array of integers
-          data[key].forEach((attendee: number) => {
-            formData.append("attendees", attendee.toString());
-          });
-        } else if (key === 'absentees' && Array.isArray(data[key])) {
-          // Append absentees as array of integers
-          data[key].forEach((absentee: number) => {
-            formData.append("absentees", absentee.toString());
-          });
-        } else {
-          formData.append(key, data[key]);
-        }
+      if (key !== 'signature' && key !== 'attendees' && key !== 'absentees') {
+        formData.append(key, data[key]);
       }
     }
+    
+    // Append attendees as array of integers
+    attendees.forEach((attendee: number) => {
+      formData.append("attendees", attendee.toString());
+    });
+    
+    // Append absentees as array of integers
+    absentees.forEach((absentee: number) => {
+      formData.append("absentees", absentee.toString());
+    });
 
     const config = {
       method: "POST",

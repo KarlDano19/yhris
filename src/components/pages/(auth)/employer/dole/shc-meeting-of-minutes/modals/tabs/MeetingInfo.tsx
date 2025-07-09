@@ -30,6 +30,8 @@ export default function MeetingInfo({
 }) {
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
+  const [attendeeOptions, setAttendeeOptions] = useState<any>([]);
+  const [absenteeOptions, setAbsenteeOptions] = useState<any>([]);
 
   useEffect(() => {
     if (employeeData) {
@@ -38,8 +40,28 @@ export default function MeetingInfo({
         label: `${item.firstname} ${item.lastname}`,
       }));
       setEmployeeItems(formattedEmployees);
+      setAttendeeOptions(formattedEmployees);
+      setAbsenteeOptions(formattedEmployees);
     }
   }, [employeeData]);
+
+  // Update available options when attendees change
+  useEffect(() => {
+    if (employeeItems.length > 0) {
+      const selectedAttendees = control._formValues?.attendees || [];
+      const selectedAbsentees = control._formValues?.absentees || [];
+      
+      // Filter out attendees from absentee options
+      setAbsenteeOptions(
+        employeeItems.filter((item: any) => !selectedAttendees.includes(item.value))
+      );
+      
+      // Filter out absentees from attendee options
+      setAttendeeOptions(
+        employeeItems.filter((item: any) => !selectedAbsentees.includes(item.value))
+      );
+    }
+  }, [control._formValues?.attendees, control._formValues?.absentees, employeeItems]);
 
   useEffect(() => {
     if (control._formValues?.attendees && Array.isArray(control._formValues.attendees) && control._formValues.attendees.length > 0) {
@@ -58,7 +80,6 @@ export default function MeetingInfo({
     const timeOfMeeting = control._formValues?.time_of_meeting;
     const venue = control._formValues?.venue;
     const attendees = control._formValues?.attendees;
-    const absentees = control._formValues?.absentees;
 
     if (!timeOfMeeting) {
       const el = document.getElementById("time_of_meeting");
@@ -76,13 +97,6 @@ export default function MeetingInfo({
       setError("attendees", {
         type: "manual",
         message: "Please select at least one Attendee."
-      });
-      hasError = true;
-    }
-    if (!absentees || !Array.isArray(absentees) || absentees.length === 0) {
-      setError("absentees", {
-        type: "manual",
-        message: "Please select at least one Absentee."
       });
       hasError = true;
     }
@@ -197,9 +211,9 @@ export default function MeetingInfo({
                 <Select
                   className="basic-multi-select"
                   classNamePrefix="select"
-                  options={employeeItems}
+                  options={attendeeOptions}
                   value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                  onChange={(val) => {
+                  onChange={(val: any) => {
                     clearErrors("attendees");
                     onChange(val ? val.map((item: any) => item.value) : []);
                   }}
@@ -222,25 +236,19 @@ export default function MeetingInfo({
               htmlFor="absentees"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Absentees<span className="text-red-600">*</span>
+              Absentees
             </label>
-            {errors.absentees && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.absentees.message || "Please select at least one Absentee."}
-              </p>
-            )}
             <Controller
               name="absentees"
               control={control}
-              rules={{ required: true }}
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
                 <Select
                   className="basic-multi-select"
                   classNamePrefix="select"
-                  options={employeeItems}
-                  value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                  onChange={(val) => {
-                    clearErrors("absentees");
+                  options={absenteeOptions}
+                  value={employeeItems.filter((item: any) => (value || [])?.includes(item.value))}
+                  onChange={(val: any) => {
                     onChange(val ? val.map((item: any) => item.value) : []);
                   }}
                   components={{
