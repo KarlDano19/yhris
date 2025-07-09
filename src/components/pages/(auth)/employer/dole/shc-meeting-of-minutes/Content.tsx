@@ -245,13 +245,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <DeleteIcon />
               </button>
               <button
+                className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
+                // disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
+                disabled={true}
+                data-tooltip-id='email-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
               >
                 <EmailLogo />
               </button>
@@ -478,6 +483,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip' />
+      <Tooltip id='email-tooltip' />
     </>
   );
 }

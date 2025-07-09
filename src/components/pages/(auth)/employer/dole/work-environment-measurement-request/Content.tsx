@@ -253,12 +253,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
+                disabled={true}
+                data-tooltip-id='email-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
               >
                 <EmailLogo />
               </button>
@@ -667,6 +672,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='email-tooltip'/>
     </>
   );
 }

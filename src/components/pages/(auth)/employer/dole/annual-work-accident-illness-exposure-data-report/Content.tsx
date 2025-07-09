@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { Tooltip } from 'react-tooltip';
 
 import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from './modals/SendEmailModal';
@@ -251,13 +252,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                // disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                disabled={true}
+                data-tooltip-id='email-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
               >
                 <EmailLogo />
               </button>
@@ -760,6 +766,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
         </div>
       </div> */}
+      <Tooltip id='email-tooltip'/>
     </>
   );
 }
