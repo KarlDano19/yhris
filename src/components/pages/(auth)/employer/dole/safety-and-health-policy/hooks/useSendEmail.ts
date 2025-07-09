@@ -16,14 +16,19 @@ export async function sendEmail(data: any) {
       config.body = data;
       // Do NOT set content-type header for FormData!
     } else {
-      config.headers["content-type"] = "application/json";
-      config.body = JSON.stringify({
+      // For non-FormData requests, ensure we're explicitly setting context from message
+      const message = data.message || data.context || "";
+      
+      const jsonPayload = {
         bcc: data.bcc,
         cc: data.cc,
         subject: `Safety and Health Policy Document`,
         to: data.to,
-        context: data.message,
-      });
+        context: message
+      };
+      
+      config.headers["content-type"] = "application/json";
+      config.body = JSON.stringify(jsonPayload);
     }
 
     if (token) {
@@ -31,6 +36,7 @@ export async function sendEmail(data: any) {
         `${process.env.NEXT_PUBLIC_API_URL}/api/safety-and-health-policies/send-email/`,
         config
       );
+      
       if (!res.ok) {
         throw res.json();
       }

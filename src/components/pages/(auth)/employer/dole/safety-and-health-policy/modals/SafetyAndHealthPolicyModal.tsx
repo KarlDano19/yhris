@@ -246,7 +246,7 @@ function SafetyAndHealthPolicyModal({
                             onClick={() => setIsEdit(false)}
                             ref={cancelButtonRef}
                           >
-                            Close
+                            Cancel
                           </button>
                         </div>
                       </form>
