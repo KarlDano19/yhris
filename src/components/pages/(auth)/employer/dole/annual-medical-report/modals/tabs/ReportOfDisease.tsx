@@ -135,7 +135,6 @@ function ReportOfDisease({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Number of consultations/treatments for the following diseases:
-              <span className="text-red-600">*</span>
             </label>
 
             {/* Skin */}

@@ -146,7 +146,6 @@ function OccupationalHealthService({
           >
             b. Number of workers who underwent the following medical
             examination:
-            <span className="text-red-600">*</span>
           </label>
             {/* Desktop header - hidden on mobile */}
             <div className="hidden md:grid md:grid-cols-5 gap-4">

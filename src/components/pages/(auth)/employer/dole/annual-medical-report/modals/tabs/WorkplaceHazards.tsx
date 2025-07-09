@@ -572,6 +572,7 @@ function WorkplaceSafetyCompliance({
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Date of Report
+                <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
                 <Controller

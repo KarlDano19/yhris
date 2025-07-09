@@ -185,7 +185,6 @@ function WorkplaceWelfare({
         <div>
           <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
             c. Other Health Programs:
-            <span className="text-red-600">*</span>
           </label>
           {/* Desktop layout start */}
           <div className="hidden md:grid md:grid-cols-4 md:gap-2">
