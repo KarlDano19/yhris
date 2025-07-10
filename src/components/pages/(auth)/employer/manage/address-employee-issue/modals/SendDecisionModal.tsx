@@ -77,7 +77,7 @@ export default function SendDecisionModal({
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       if (employeeIssueItemsCopy[itemIndex]) {
         setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([]);
+        // Do not clear tagsTo here to preserve the To field
       }
     }
   }, [isOpen]);
