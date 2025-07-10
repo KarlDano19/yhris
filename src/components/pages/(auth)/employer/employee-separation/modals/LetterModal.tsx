@@ -136,7 +136,7 @@ export default function LetterModal({
   };
 
   const customCloseModal = () => {
-    reset();
+    // reset();
     setIsOpen(null);
   };
 
