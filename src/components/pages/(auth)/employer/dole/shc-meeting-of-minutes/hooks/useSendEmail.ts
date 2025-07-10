@@ -7,7 +7,7 @@ export async function sendEmail(data: any) {
     const payloads = {
       bcc: data.bcc,
       cc: data.cc,
-      subject: `SHC Meeting of Minutes`,
+      subject: data.subject,
       to: data.to,
       context: data.message,
     };

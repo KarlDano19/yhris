@@ -140,7 +140,7 @@ export default function IntroduceModal({
       if (data.template) {
         const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
         if (template) {
-          orientItemCopy[itemIndex].introduceTeam.template = template.subject;
+      orientItemCopy[itemIndex].introduceTeam.template = template.subject;
         }
       }
       
@@ -240,24 +240,24 @@ export default function IntroduceModal({
                             onChange={(event) => {
                               setValue('template', event.target.value);
                               if (event.target.value) {
-                                const template = dataEmailTemplate.find(
-                                  (item: any) => item.id === parseInt(event.target.value)
-                                );
-                                if (template) {
-                                  if (applicantEmail) {
-                                    setTagsTo([applicantEmail, ...template.to]);
-                                  } else {
-                                    setTagsTo(template.to);
-                                  }
-                                  if (template.bcc) {
-                                    setIsBCCOpen(true);
-                                    setTagsBcc(template.bcc);
-                                  }
-                                  if (template.cc) {
-                                    setIsCCOPen(true);
-                                    setTagsCc(template.cc);
-                                  }
-                                  setValue('message', template.body);
+                              const template = dataEmailTemplate.find(
+                                (item: any) => item.id === parseInt(event.target.value)
+                              );
+                              if (template) {
+                                if (applicantEmail) {
+                                  setTagsTo([applicantEmail, ...template.to]);
+                                } else {
+                                  setTagsTo(template.to);
+                                }
+                                if (template.bcc) {
+                                  setIsBCCOpen(true);
+                                  setTagsBcc(template.bcc);
+                                }
+                                if (template.cc) {
+                                  setIsCCOPen(true);
+                                  setTagsCc(template.cc);
+                                }
+                                setValue('message', template.body);
                                   setValue('subject', template.subject);
                                   clearErrors('message');
                                   clearErrors('subject');

@@ -462,7 +462,7 @@ export default function SignDocumentsModal({
                           
                           // Check if all validations pass
                           if (!subjectValid || !messageValid || tagsTo.length === 0) {
-                            e.preventDefault();
+                              e.preventDefault();
                             // Set error for "to" field if no recipients
                             if (tagsTo.length === 0) {
                               setError('to', {
