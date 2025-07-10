@@ -62,7 +62,7 @@ export default function RiskManagement({
             Emergency and Disaster Preparedness
           </label>
         </div>
-        <div className="mt-4 w-full">
+        <div className="mt-4 w-full overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
               <tr>

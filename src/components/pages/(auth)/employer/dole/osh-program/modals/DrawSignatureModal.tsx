@@ -116,7 +116,7 @@ import {
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+                <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
                   <div className="flex bg-savoy-blue p-2 items-center">
                     <h3 className="flex-1 text-white ml-2 font-semibold">
                       Draw Signature
@@ -128,24 +128,27 @@ import {
                   </div>
                   <div className="p-4">
                     <button
-                      className="text-right w-full underline"
+                      className="text-right w-full underline text-sm sm:text-base"
                       onClick={clearSignature}
                     >
                       Clear
                     </button>
-                    <div id="memo-canvas" className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 mt-2">
-                      <SignatureCanvas
-                        ref={signatureCanvasRef}
-                        canvasProps={{
-                          width: 900,
-                          height: 200,
-                          className: "",
-                        }}
-                      />
+                    <div id="memo-canvas" className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 mt-2 overflow-x-auto">
+                      <div className="w-full">
+                        <SignatureCanvas
+                          ref={signatureCanvasRef}
+                          canvasProps={{
+                            width: 900,
+                            height: 200,
+                            className: "mx-auto block rounded bg-white border",
+                            style: { width: '100%', maxWidth: 900, height: 200 }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                   <hr />
-                  <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4">
+                  <div className="mt-5 sm:mt-4 flex flex-col-reverse gap-2 sm:flex-row-reverse sm:gap-0 px-4">
                     <button
                       type="submit"
                       className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"

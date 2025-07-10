@@ -6,30 +6,45 @@ async function addAnnualAccidentIllnessReport(data: any) {
     const token = getCookie("token");
 
     if (data.date_of_report) {
-      const reportDate = new Date(data.date_of_report);
-      if (!isNaN(reportDate.getTime())) {
-        data.date_of_report = reportDate.toISOString().split("T")[0];
+      const dateOfReport = new Date(data.date_of_report);
+      if (!isNaN(dateOfReport.getTime())) {
+        // Adjust for timezone offset to preserve local date
+        const offset = dateOfReport.getTimezoneOffset();
+        const adjustedDate = new Date(dateOfReport.getTime() - offset * 60000);
+        data.date_of_report = adjustedDate.toISOString().split("T")[0];
       }
     }
 
-    if (data.signature && data.signature.length) {
-      const signatureBlob = await fetch(`${data.signature}`).then((res) => res.blob());
-      const formData = new FormData();
-      formData.append('signature', signatureBlob, 'signature.jpg');
+    // Always use FormData when there's a signature
+    let formData;
+    if (data.signature) {
+      formData = new FormData();
+      
+      // Handle different signature types
+      if (data.signature instanceof File) {
+        // If it's already a File object, use it directly
+        formData.append('signature', data.signature);
+      } else if (typeof data.signature === 'string' && data.signature.startsWith('data:')) {
+        // If it's a data URL (from drawing)
+        const signatureBlob = await fetch(data.signature).then((res) => res.blob());
+        formData.append('signature', signatureBlob, 'signature.png');
+      }
+      
+      // Add all other form fields
       for (const key in data) {
         if (key !== 'signature') {
           formData.append(key, data[key]);
         }
       }
-      data = formData;
     }
 
     const config = {
       method: "POST",
       headers: {
         Authorization: `Token ${token}`,
+        ...(formData ? {} : { "Content-Type": "application/json" }),
       },
-      body: data instanceof FormData ? data : JSON.stringify(data),
+      body: formData || JSON.stringify(data),
     };
 
     const res = await fetch(

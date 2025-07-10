@@ -12,10 +12,12 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useSendEmail from '../hooks/useSendEmail'
+import useGetSafetyAndHealthPolicyDetails from '../hooks/useGetSafetyANdHelathPolicyDetails'
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
@@ -64,6 +66,41 @@ export default function SendEmailModal({
     const { mutate, isLoading } = useSendEmail();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
+    // Add hook to fetch Safety and Health Policy details
+    const { data: safetyAndHealthPolicyData } = useGetSafetyAndHealthPolicyDetails();
+
+    // Add state for attachment
+    const [attachment, setAttachment] = useState<File | null>(null);
+    const [attachmentExist, setAttachmentExist] = useState(false);
+
+    // Get filename from attachment URL
+    const getFilenameFromUrl = (url: string) => {
+        if (!url) return '';
+        
+        // Remove AWS credentials from the URL if present
+        let cleanUrl = url;
+        if (url.includes('?AWSAccessKeyId=')) {
+            cleanUrl = url.split('?AWSAccessKeyId=')[0];
+        }
+        
+        const urlParts = cleanUrl.split('/');
+        return urlParts[urlParts.length - 1];
+    };
+
+    // Handle file attachment upload
+    const handleAttachmentUpload = ({ target }: { target: any }) => {
+      const file = target.files[0];
+      if (!file) return;
+      if (file.size <= 5000000) {
+        setAttachment(file);
+        setAttachmentExist(true);
+      } else {
+        toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+          duration: 5000,
+        });
+      }
+    };
+
     useEffect(() => {
         if (selectedTemplate && dataEmailTemplate) {
             const template = dataEmailTemplate.find((item: any) => item.id === parseInt(selectedTemplate));
@@ -93,14 +130,32 @@ export default function SendEmailModal({
     }, [selectedTemplate, dataEmailTemplate, employeeEmail, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
     const onSubmit = handleSubmit((data) => {
-        const payload = {
-            ...data,
+        // If attachment exists, use FormData
+        let payload: any;
+        if (attachment) {
+          payload = new FormData();
+          payload.append('to', JSON.stringify(tagsTo));
+          payload.append('context', data.message);
+          if (tagsCc.length > 0) payload.append('cc', JSON.stringify(tagsCc));
+          if (tagsBcc.length > 0) payload.append('bcc', JSON.stringify(tagsBcc));
+          payload.append('subject', 'Safety and Health Policy Document');
+          payload.append('attachment', attachment);
+        } else {
+          payload = {
             to: tagsTo,
-        };
+            cc: tagsCc.length > 0 ? tagsCc : undefined,
+            bcc: tagsBcc.length > 0 ? tagsBcc : undefined,
+            subject: 'Safety and Health Policy Document',
+            context: data.message
+          };
+        }
         const callbackReq = {
             onSuccess: () => {
-                setIsOpen({open: false });
+                setIsOpen(null);
                 refetch();
+                // Clear attachment state after successful send
+                setAttachment(null);
+                setAttachmentExist(false);
                 toast.custom(() => <CustomToast message={'Successfully sent email.'} type='success' />, {
                     duration: 5000,
                   });
@@ -112,10 +167,18 @@ export default function SendEmailModal({
         mutate(payload, callbackReq);
     })
 
+    const customCloseModal = () => {
+      // Reset form state
+      // add reset state here if needed
+      
+      // Close the modal
+      setIsOpen(null);
+    };
+
     return (
         <>
           <Transition.Root show={isOpen.open} as={Fragment}>
-            <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen({open: false })}>
+            <Dialog as='div' className='relative z-20' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
               <Transition.Child
                 as={Fragment}
                 enter='ease-out duration-300'
@@ -128,7 +191,7 @@ export default function SendEmailModal({
                 <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
               </Transition.Child>
     
-              <div className='fixed inset-0 z-10 overflow-y-auto'>
+              <div className='fixed inset-0 z-20 overflow-y-auto'>
                 <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
                   <Transition.Child
                     as={Fragment}
@@ -142,7 +205,7 @@ export default function SendEmailModal({
                     <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                       <div className='flex bg-savoy-blue p-2 items-center'>
                         <h3 className='flex-1 text-white ml-2 font-semibold'>Send Contract</h3>
-                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen({open: false })} />
+                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
                       </div>
                       <form onSubmit={onSubmit}>
                         <div className='px-4 pt-4 pb-6'>
@@ -291,6 +354,51 @@ export default function SendEmailModal({
                               />
                             </div>
                           </div>
+                          {/* Attachment section */}
+                          <div className='sm:col-span-4 mt-4'>
+                            <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                              Attachment
+                            </label>
+                            <div className='mt-2'>
+                              {/* Display existing attachment from backend */}
+                              {safetyAndHealthPolicyData?.attachment && (
+                                <div className="mb-3 p-3 bg-gray-50 rounded-md">
+                                  <div className="flex items-center gap-2">
+                                    <ClipIcon hasFile={true} />
+                                    <span className="text-sm text-gray-600">
+                                      {getFilenameFromUrl(safetyAndHealthPolicyData.attachment)}
+                                    </span>
+                                    <ArrowTopRightOnSquareIcon 
+                                      className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
+                                      onClick={() => window.open(safetyAndHealthPolicyData.attachment, '_blank')}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">Current attachment (will be included in email)</p>
+                                </div>
+                              )}
+                              
+                              {/* File upload for new attachment */}
+                              <input
+                                id='attachment'
+                                type='file'
+                                onChange={handleAttachmentUpload}
+                                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                              />
+                              {attachmentExist ? (
+                                <button
+                                  type='button'
+                                  className='underline text-savoy-blue text-sm mt-1'
+                                  onClick={() => {
+                                    setAttachment(null);
+                                    setAttachmentExist(false);
+                                  }}
+                                >
+                                  Remove New Attachment
+                                </button>
+                              ) : null}
+                            </div>
+                            <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb. <span className='text-red-600'>Upload a new file to replace the current attachment.</span></p>
+                          </div>
                         </div>
                         <hr />
                         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
@@ -314,7 +422,7 @@ export default function SendEmailModal({
                           <button
                             type='button'
                             className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                            // onClick={() => customCloseModal()}
+                            onClick={() => customCloseModal()}
                             ref={cancelButtonRef}
                           >
                             Close

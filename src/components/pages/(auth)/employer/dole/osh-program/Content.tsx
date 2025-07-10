@@ -516,36 +516,75 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         )}
         
-        <div className="mt-8 flex flex-row justify-between space-x-2">
-          <div onClick={() => handleTabChange(1 as TabNumber)} className="cursor-pointer">
-            <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
-              Company Profile
-            </h1>
+        <div className="mt-8">
+          {/* Desktop tabs */}
+          <div className="hidden md:flex flex-row justify-between space-x-2">
+            <div onClick={() => handleTabChange(1 as TabNumber)} className="cursor-pointer">
+              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+                Company Profile
+              </h1>
+            </div>
+            <div onClick={() => handleTabChange(2 as TabNumber)} className="cursor-pointer">
+              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 2 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+                OSH Program and Policy
+              </h1>
+            </div>
+            <div onClick={() => handleTabChange(3 as TabNumber)} className="cursor-pointer">
+              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 3 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+                Risk Management
+              </h1>
+            </div>
+            <div onClick={() => handleTabChange(4 as TabNumber)} className="cursor-pointer">
+              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 4 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+                Health and Welfare Program
+              </h1>
+            </div>
+            <div onClick={() => handleTabChange(5 as TabNumber)} className="cursor-pointer">
+              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 5 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+                Safety Measures
+              </h1>
+            </div>
+            <div onClick={() => handleTabChange(6 as TabNumber)} className="cursor-pointer">
+              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 6 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+                Compliance and Cost
+              </h1>
+            </div>
           </div>
-          <div onClick={() => handleTabChange(2 as TabNumber)} className="cursor-pointer">
-            <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 2 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
-              OSH Program and Policy
-            </h1>
-          </div>
-          <div onClick={() => handleTabChange(3 as TabNumber)} className="cursor-pointer">
-            <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 3 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
-              Risk Management
-            </h1>
-          </div>
-          <div onClick={() => handleTabChange(4 as TabNumber)} className="cursor-pointer">
-            <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 4 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
-              Health and Welfare Program
-            </h1>
-          </div>
-          <div onClick={() => handleTabChange(5 as TabNumber)} className="cursor-pointer">
-            <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 5 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
-              Safety Measures
-            </h1>
-          </div>
-          <div onClick={() => handleTabChange(6 as TabNumber)} className="cursor-pointer">
-            <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 6 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
-              Compliance and Cost
-            </h1>
+
+          {/* Mobile tabs - horizontal scrollable */}
+          <div className="md:hidden overflow-x-auto">
+            <div className="flex space-x-4 min-w-max px-4">
+              <div onClick={() => handleTabChange(1 as TabNumber)} className="cursor-pointer flex-shrink-0">
+                <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${selectedTab === 1 ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>
+                  Company Profile
+                </h1>
+              </div>
+              <div onClick={() => handleTabChange(2 as TabNumber)} className="cursor-pointer flex-shrink-0">
+                <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${selectedTab === 2 ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>
+                  OSH Program
+                </h1>
+              </div>
+              <div onClick={() => handleTabChange(3 as TabNumber)} className="cursor-pointer flex-shrink-0">
+                <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${selectedTab === 3 ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>
+                  Risk Management
+                </h1>
+              </div>
+              <div onClick={() => handleTabChange(4 as TabNumber)} className="cursor-pointer flex-shrink-0">
+                <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${selectedTab === 4 ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>
+                  Health & Welfare
+                </h1>
+              </div>
+              <div onClick={() => handleTabChange(5 as TabNumber)} className="cursor-pointer flex-shrink-0">
+                <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${selectedTab === 5 ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>
+                  Safety Measures
+                </h1>
+              </div>
+              <div onClick={() => handleTabChange(6 as TabNumber)} className="cursor-pointer flex-shrink-0">
+                <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${selectedTab === 6 ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>
+                  Compliance
+                </h1>
+              </div>
+            </div>
           </div>
         </div>
         {selectedTab === 1 && (

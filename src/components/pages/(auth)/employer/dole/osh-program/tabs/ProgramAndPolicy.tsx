@@ -206,8 +206,8 @@ export default function ProgramAndPolicy({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
-          <div className="sm:col-span-4 mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4">
+          <div className="sm:col-span-4 mt-4 mb-6 md:mb-0">
             <label
               htmlFor="message"
               className="block text-sm font-medium leading-6 text-gray-900"
@@ -217,7 +217,7 @@ export default function ProgramAndPolicy({
             <h1 className="text-sm text-gray-500">
               (DO 198-18, Chapter IV, Section 12)
             </h1>
-            <div className="mt-2 h-72 mb-12">
+            <div className="mt-2 h-48 sm:h-72 mb-8 sm:mb-16">
               <textarea
                 rows={4}
                 {...register("basic_components")}
@@ -236,14 +236,14 @@ export default function ProgramAndPolicy({
               />
             </div>
           </div>
-          <div className="sm:col-span-4 mt-4">
+          <div className="sm:col-span-4 mt-6 md:mt-4 mb-6 md:mb-0">
             <label
               htmlFor="message"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Company Commitment to Comply with OSH Policy
             </label>
-            <div className="mt-2 h-72 mb-12">
+            <div className="mt-2 h-48 sm:h-72 mb-8 sm:mb-12">
               <textarea
                 rows={4}
                 {...register("company_commitment")}
@@ -263,8 +263,8 @@ export default function ProgramAndPolicy({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
+          <div className="mt-6 md:mt-0">
             <label
               htmlFor="email"
               className="block text-sm font-medium leading-6 text-gray-900"
@@ -346,7 +346,7 @@ export default function ProgramAndPolicy({
             <div className="relative mt-2">
               <button
                 type="button"
-                className={`w-full rounded-md bg-white border  px-14 py-1.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600
+                className={`w-full rounded-md bg-white border px-4 sm:px-14 py-2 sm:py-1.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600
                 ${isMissingField('signature') ? 'border-red-500' : 'border-savoy-blue'}`}
                 onClick={toggleDrawSignatureModal}
               >
@@ -354,18 +354,18 @@ export default function ProgramAndPolicy({
               </button>
               {drawnSignaturePreview && (
                 <div className="mt-3 border rounded-lg overflow-hidden bg-gray-50">
-                  <div className="p-3 border-b bg-white flex justify-between items-center">
+                  <div className="p-3 border-b bg-white flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <p className="text-sm font-medium text-gray-700">Signature Preview</p>
                     <button
                       type="button"
-                      className="text-savoy-blue text-sm underline"
+                      className="text-savoy-blue text-sm underline self-start sm:self-auto"
                       onClick={clearDrawnSignature}
                     >
                       Remove Attachment
                     </button>
                   </div>
                   <div className="p-4 flex justify-center items-center bg-white">
-                    <div className="relative w-full h-[100px]">
+                    <div className="relative w-full h-[80px] sm:h-[100px]">
                       <img
                         src={drawnSignaturePreview}
                         alt="Drawn Signature Preview"
@@ -398,18 +398,18 @@ export default function ProgramAndPolicy({
               <p className="mt-1 text-sm text-gray-500">Maximum file size: 10 MB</p>
               {uploadedSignaturePreview && (
                 <div className="mt-3 border rounded-lg overflow-hidden bg-gray-50">
-                  <div className="p-3 border-b bg-white flex justify-between items-center">
+                  <div className="p-3 border-b bg-white flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <p className="text-sm font-medium text-gray-700">Signature Preview</p>
                     <button
                       type="button"
-                      className="text-savoy-blue text-sm underline"
+                      className="text-savoy-blue text-sm underline self-start sm:self-auto"
                       onClick={clearUploadedSignature}
                     >
                       Remove Attachment
                     </button>
                   </div>
                   <div className="p-4 flex justify-center items-center bg-white">
-                    <div className="relative w-full h-[100px]">
+                    <div className="relative w-full h-[80px] sm:h-[100px]">
                       <img
                         src={uploadedSignaturePreview}
                         alt="Uploaded Signature Preview"

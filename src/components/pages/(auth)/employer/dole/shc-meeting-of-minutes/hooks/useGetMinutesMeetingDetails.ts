@@ -30,9 +30,9 @@ async function getMinutesMeetingDetails(shc_meeting_minutes_id: number | null) {
 
 function useGetMinutesMeetingDetails(shc_meeting_minutes_id: number | null) {
   const query = useQuery(
-    ["minutesMeetingDetailsCache"],
+    ["minutesMeetingDetailsCache", shc_meeting_minutes_id],
     () => getMinutesMeetingDetails(shc_meeting_minutes_id),
-    { enabled: false, refetchOnWindowFocus: false, keepPreviousData: true }
+    { enabled: !!shc_meeting_minutes_id, refetchOnWindowFocus: false, keepPreviousData: true }
   );
   return query;
 }

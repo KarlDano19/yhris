@@ -82,13 +82,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (shcMinutesMeetingData) {
-      shcMinutesMeetingData.records.map((item: any) => {
-        const incidentDate = new Date(item.date_of_meeting);
-        item.date_of_meeting = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+      const formattedRecords = shcMinutesMeetingData.records.map((item: any) => {
+        // Create a new object to avoid mutating the original data
+        const formattedItem = { ...item };
+        
+        // Format date
+        const incidentDate = new Date(formattedItem.date_of_meeting);
+        formattedItem.date_of_meeting = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
 
-        return item;
+        // Format time_of_meeting to 12-hour format
+        if (formattedItem.time_of_meeting) {
+          const [hours, minutes, seconds] = formattedItem.time_of_meeting.split(":");
+          const date = new Date();
+          date.setHours(Number(hours), Number(minutes), Number(seconds || 0));
+          formattedItem.time_of_meeting = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+        
+        // Ensure attendees and absentees are arrays
+        formattedItem.attendees = Array.isArray(formattedItem.attendees) ? formattedItem.attendees : [];
+        formattedItem.absentees = Array.isArray(formattedItem.absentees) ? formattedItem.absentees : [];
+
+        return formattedItem;
       });
-      setShcMinutesMeetingItems(shcMinutesMeetingData.records);
+      
+      setShcMinutesMeetingItems(formattedRecords);
       setPagination({
         totalPages: shcMinutesMeetingData.total_pages,
         totalRecords: shcMinutesMeetingData.total_records,
@@ -211,10 +228,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.time_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.venue}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.attendees.length}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.absentees.length}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{Array.isArray(item.attendees) ? item.attendees.length : 0}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{Array.isArray(item.absentees) ? item.absentees.length : 0}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-            <div className='flex space-x-2'>
+            <div className='flex items-center justify-center space-x-2'>
               <button
                 onClick={() =>
                   setIsUpdateShcMinutesMeetingModalOpen({
@@ -237,13 +254,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <DeleteIcon />
               </button>
               <button
+                className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
+                // disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
+                disabled={true}
+                data-tooltip-id='email-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
               >
                 <EmailLogo />
               </button>
@@ -319,27 +341,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-full lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
                   data-tooltip-content='Search for: Venue'
                   data-tooltip-place='bottom'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                  className='block flex-1 rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100 flex items-center justify-center'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={handleSearch}
-            >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
@@ -415,7 +435,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Absentees
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
                         Actions
                       </th>
                     </tr>
@@ -423,15 +443,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+              <Pagination
+                pagination={pagination}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageSizeChange={pageSizeChange}
+                onPageChange={paginationChange}
+              />
           </div>
         </div>
       </div>
@@ -472,6 +492,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip' />
+      <Tooltip id='email-tooltip' />
     </>
   );
 }

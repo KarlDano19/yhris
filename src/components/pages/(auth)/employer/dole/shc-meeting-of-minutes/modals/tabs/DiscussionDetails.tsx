@@ -1,27 +1,20 @@
 "use client";
 
 import {
-  Dispatch,
-  Fragment,
-  useRef,
   useEffect,
   useState,
   useMemo,
 } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
+import dynamic from "next/dynamic";
 
-import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
+import "react-quill/dist/quill.snow.css";
+
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
-import "react-quill/dist/quill.snow.css";
-import dynamic from "next/dynamic";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
+
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function DiscussionDetails({
   control,
@@ -54,7 +47,7 @@ export default function DiscussionDetails({
 
   return (
     <form onSubmit={onSubmit}>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pt-4 pb-16 md:pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
             <div className="flex-shrink-0">
@@ -92,7 +85,14 @@ export default function DiscussionDetails({
         </div>
       </div>
       <hr />
-      <div className="py-4 px-4 text-right">
+      <div className="flex justify-between py-4 px-4">
+        <button
+          type="button"
+          className="w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          onClick={() => setSelectedTab(1)}
+        >
+          Back
+        </button>
         <button
           type="submit"
           className="w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

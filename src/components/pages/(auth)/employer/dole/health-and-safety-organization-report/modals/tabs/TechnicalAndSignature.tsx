@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import { Tooltip } from 'react-tooltip';
+import toast from "react-hot-toast";
 
+import CustomToast from "@/components/CustomToast";
 import DrawSignatureModal from "../DrawSignatureModals";
 import InfoIcon from '@/svg/InfoIcon';
 
@@ -31,26 +33,124 @@ function TechnicalAndSignature({
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [technicalFileUrl, setTechnicalFileUrl] = useState<string>("");
   const [attachmentTechnicalExist, setAttachmentTechnicalExist] = useState(false);
+  const [signatureSource, setSignatureSource] = useState<string>("");
+  const [technicalFileSource, setTechnicalFileSource] = useState<string>("");
+  const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
 
   // Watch for existing file URLs from form
   const existingTechnicalFileUrl = watch("technical_information_file");
   const existingSignatureUrl = watch("signature");
 
+  // Track current signature source and file
+  useEffect(() => {
+    const currentSignature = watch("signature");
+    const currentSource = watch("signature_source");
+    
+    if (currentSignature && typeof currentSignature === "string") {
+      setPreviousSignatureFile(currentSignature);
+      return;
+    }
+
+    // Only show previews for unsaved signatures
+    if (currentSource === "draw") {
+    } else if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  // Track current technical file source and file
+  useEffect(() => {
+    const currentFile = watch("technical_information_file");
+    const currentSource = watch("technical_file_source");
+    
+    if (currentFile && typeof currentFile === "string") {
+      return;
+    }
+
+    // Only show previews for unsaved files
+    if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  const handleTechnicalFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("technical_information_file", file);
+      setValue("technical_file_source", "upload");
+      setTechnicalFileSource("upload");
+      setTechnicalFileUrl(URL.createObjectURL(file));
+      setAttachmentTechnicalExist(true);
+    }
+  };
+
+  const handleSignatureFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("signature", file);
+      setValue("previous_signature", previousSignatureFile);
+      setValue("signature_source", "upload");
+      setSignatureSource("upload");
+      setSignatureUrl(URL.createObjectURL(file));
+      setAttachmentExist(true);
+    }
+  };
+
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
   };
 
+  // Handle drawn signature from modal
+  const handleDrawnSignature = (drawnSignatureDataUrl: string) => {
+    // Convert data URL to Blob
+    fetch(drawnSignatureDataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        // Create a File object from the Blob
+        const file = new File([blob], "signature.png", { type: "image/png" });
+        
+        // Update form state with the File object
+        setValue("signature", file);
+        setValue("signature_source", "draw");
+        setSignatureSource("draw");
+        setSignatureUrl(drawnSignatureDataUrl);
+      });
+  };
+
   useEffect(() => {
     if (signatureUrl) {
-      setValue("signature", signatureUrl);
+      // If signatureUrl is a data URL from drawing
+      if (signatureUrl.startsWith('data:')) {
+        fetch(signatureUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], "signature.png", { type: "image/png" });
+            setValue("signature", file);
+            setValue("signature_source", "draw");
+            setSignatureSource("draw");
+          })
+          .catch(err => {
+            console.error("Error converting signature data URL to file:", err);
+          });
+      } else if (signatureUrl.startsWith('blob:')) {
+        // Uploaded file preview
+        setSignatureSource("upload");
+      } else {
+        setValue("signature", signatureUrl);
+        setValue("previous_signature", signatureUrl);
+        setValue("signature_source", "draw");
+        setSignatureSource("");
+      }
     }
   }, [signatureUrl, setValue]);
 
   useEffect(() => {
     if (technicalFileUrl) {
-      setValue("technical_information_file", technicalFileUrl);
-    } else {
-      setTechnicalFileUrl("");
+      // If technicalFileUrl is a blob URL from upload
+      if (technicalFileUrl.startsWith('blob:')) {
+        setTechnicalFileSource("upload");
+      } else {
+        setValue("technical_information_file", technicalFileUrl);
+        setTechnicalFileSource("");
+      }
     }
   }, [technicalFileUrl, setValue]);
 
@@ -58,6 +158,7 @@ function TechnicalAndSignature({
   useEffect(() => {
     if (existingTechnicalFileUrl && typeof existingTechnicalFileUrl === 'string' && existingTechnicalFileUrl.startsWith('http')) {
       setAttachmentTechnicalExist(true);
+      setTechnicalFileSource("");
     }
   }, [existingTechnicalFileUrl]);
 
@@ -65,6 +166,7 @@ function TechnicalAndSignature({
     if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
       setAttachmentExist(true);
       setSignatureUrl(existingSignatureUrl);
+      setSignatureSource("");
     }
   }, [existingSignatureUrl]);
 
@@ -100,35 +202,23 @@ function TechnicalAndSignature({
 
       // Show toast for each missing required field
       if (isTechFileMissing) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Technical Information file is required." type="error" />, { duration: 5000 });
-          });
-        });
+        toast.dismiss();
+        toast.custom(() => <CustomToast message="Technical Information file is required." type="error" />);
         return;
       }
       if (!submittedByValue) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Submitted By is required." type="error" />, { duration: 5000 });
-          });
-        });
+        const el = document.getElementById("submitted_by");
+        if (el) el.focus();
         return;
       }
       if (!positionValue) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Position is required." type="error" />, { duration: 5000 });
-          });
-        });
+        const el = document.getElementById("position");
+        if (el) el.focus();
         return;
       }
       if (!signatureValue) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          import('@/components/CustomToast').then(({ default: CustomToast }) => {
-            toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />, { duration: 5000 });
-          });
-        });
+        toast.dismiss();
+        toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />);
         return;
       }
       // Call the original onSubmit
@@ -150,7 +240,7 @@ function TechnicalAndSignature({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div className="flex-1">
             <label
               htmlFor="technical_information_file"
@@ -174,13 +264,9 @@ function TechnicalAndSignature({
             <div className="relative mt-2">
               <input
                 id="technical_information_file"
-                {...register("technical_information_file")}
-                onChange={(e) => {
-                  e.target.value ? setTechnicalFileUrl("") : null;
-                  e.target.value ? setAttachmentTechnicalExist(true) : null;
-                }}
                 type="file"
-                disabled={!!(existingTechnicalFileUrl && typeof existingTechnicalFileUrl === 'string' && existingTechnicalFileUrl.startsWith('http'))}
+                accept="*/*"
+                onChange={handleTechnicalFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               {attachmentTechnicalExist ? (
@@ -195,35 +281,14 @@ function TechnicalAndSignature({
                       >
                         View Existing File
                       </a>
-                      <button
-                        type="button"
-                        className="underline text-red-600 text-sm"
-                        onClick={() => {
-                          setValue("technical_information_file", "");
-                          setAttachmentTechnicalExist(false);
-                        }}
-                      >
-                        Remove
-                      </button>
                     </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="underline text-savoy-blue text-sm"
-                      onClick={() => {
-                        setValue("technical_information_file", "");
-                        setAttachmentTechnicalExist(false);
-                      }}
-                    >
-                      Remove Attachment
-                    </button>
-                  )}
+                  ) : null}
                 </div>
               ) : null}
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div>
             <label
               htmlFor="submitted_by"
@@ -259,10 +324,10 @@ function TechnicalAndSignature({
             </div>
           </div>
         </div>
-        <div className="mt-4 pl-6 pr-6">
+        <div className="mt-4 px-2 md:px-6">
           <h1 className="text-sm font-medium">Signature</h1>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div>
             <label
               htmlFor="draw_signature"
@@ -304,71 +369,30 @@ function TechnicalAndSignature({
             <div className="relative mt-2">
               <input
                 id="signature"
-                {...register("signature")}
-                onChange={(e) => {
-                  const file = e.target.files && e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setSignatureUrl(reader.result as string);
-                      setAttachmentExist(true);
-                    };
-                    reader.readAsDataURL(file);
-                  } else {
-                    setSignatureUrl("");
-                    setAttachmentExist(false);
-                  }
-                }}
                 type="file"
-                disabled={!!(existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http'))}
+                accept="image/*"
+                onChange={handleSignatureFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
-              {attachmentExist ? (
-                <div className="mt-2">
-                  {existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http') ? (
-                    <div className="flex items-center space-x-2">
-                      <a 
-                        href={existingSignatureUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-savoy-blue text-sm underline"
-                      >
-                        View Existing File
-                      </a>
-                      <button
-                        type="button"
-                        className="underline text-red-600 text-sm"
-                        onClick={() => {
-                          setValue("signature", "");
-                          setAttachmentExist(false);
-                          setSignatureUrl("");
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="underline text-savoy-blue text-sm"
-                      onClick={() => {
-                        setValue("signature", "");
-                        setAttachmentExist(false);
-                      }}
-                    >
-                      Remove Attachment
-                    </button>
-                  )}
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
       </div>
-      {signatureUrl !== "" && (
-        <div className="mt-4">
+      
+      {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) */}
+      {signatureUrl && (
+        <div className="mt-4 px-4 md:px-0">
+          <div
+            className={`text-center font-semibold mb-2 ${
+              signatureSource === "draw" || signatureSource === "upload"
+                ? "text-red-600"
+                : "text-green-600"
+            }`}
+          >
+            {signatureSource === "draw" || signatureSource === "upload" ? "Preview" : "Existing Signature"}
+          </div>
           <Image
-            className="border-0 ring-1 ring-inset ring-gray-300 m-auto"
+            className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6"
             src={signatureUrl}
             width={500}
             height={200}
@@ -376,13 +400,18 @@ function TechnicalAndSignature({
           />
         </div>
       )}
+      
       {drawSignatureModal && (
         <DrawSignatureModal
           isOpen={drawSignatureModal}
           setIsOpen={setDrawSignatureModal}
-          setSignatureUrl={setSignatureUrl}
+          setSignatureUrl={(url: any) => {
+            setSignatureUrl(url);
+            handleDrawnSignature(url);
+          }}
         />
       )}
+      
       <hr />
       <div className="flex justify-between py-4 px-4">
         <button

@@ -253,12 +253,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
+                disabled={true}
+                data-tooltip-id='email-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
               >
                 <EmailLogo />
               </button>
@@ -347,8 +352,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
+              <div className='flex flex-row w-full items-center gap-2'>
                   <input
                   type='text'
                   name='search'
@@ -360,14 +364,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
-              </div>
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={handleSearch}
+                >
+                    <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
             </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={handleSearch}
-            >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
@@ -454,15 +457,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+              <Pagination
+                pagination={pagination}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageSizeChange={pageSizeChange}
+                onPageChange={paginationChange}
+              />
           </div>
         </div>
       </div>
@@ -669,6 +672,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='email-tooltip'/>
     </>
   );
 }

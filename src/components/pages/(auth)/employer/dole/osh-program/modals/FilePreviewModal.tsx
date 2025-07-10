@@ -241,7 +241,7 @@ export default function FilePreviewModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     {displayTitle} {fileName ? `- ${fileName}` : ''}
@@ -252,12 +252,39 @@ export default function FilePreviewModal({
                   />
                 </div>
                 
-                <div className="p-4 flex justify-center min-h-[400px] items-center">
+                <div className="p-4 flex justify-center min-h-[200px] items-center">
                   {!normalizedUrl && (
                     <div className="text-gray-500">No {fileType === 'image' ? 'image' : 'file'} available</div>
                   )}
-                  
-                  {normalizedUrl && renderFileContent()}
+                  {normalizedUrl && (
+                    fileType === 'image' ? (
+                      <img 
+                        src={normalizedUrl} 
+                        alt={fileName || title} 
+                        className="max-h-[60vh] w-full max-w-[95vw] object-contain"
+                        key={normalizedUrl}
+                      />
+                    ) : fileType === 'pdf' ? (
+                      <div className="w-full h-[60vh] flex flex-col">
+                        <iframe 
+                          src={`${normalizedUrl}#toolbar=1&view=FitH`} 
+                          className="w-full h-full border-0 max-w-[95vw]"
+                          title={fileName || "PDF Preview"}
+                          allowFullScreen
+                        />
+                        <div className="mt-2 text-center">
+                          <a 
+                            href={normalizedUrl} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="text-savoy-blue hover:underline"
+                          >
+                            Open PDF in new tab
+                          </a>
+                        </div>
+                      </div>
+                    ) : renderFileContent()
+                  )}
                 </div>
                 
                 <hr />

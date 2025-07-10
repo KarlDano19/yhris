@@ -2,27 +2,22 @@
 
 import { useEffect, useState } from "react";
 
-import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 
-import useGetWorkAccidentIlnessReportsItems from "../../hooks/useGetWorkAccidentIlnessReportsItems";
-
-import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
+import useGetDisablingInjuryData from "../../hooks/useGetDisablingInjuryData";
 
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function InjurySummary({
-  control,
   register,
   onSubmit,
   setSelectedTab,
   setValue,
   isLoading,
+  watch,
+  initialEmployeeHours = 0,
+  initialDaysLost = 0,
 }: {
   control: any;
   register: any;
@@ -30,46 +25,115 @@ function InjurySummary({
   setSelectedTab: any;
   setValue: any;
   isLoading: boolean;
+  watch: any;
+  initialEmployeeHours?: number;
+  initialDaysLost?: number;
 }) {
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient
-    .getQueryCache()
-    .find(["employerProfileCache"]) as {
-    state: { data: CachedProfileData } | undefined;
-  };
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
-  const [attachmentExist, setAttachmentExist] = useState(false);
-  const [totalDisablingInjuries, setTotalDisablingInjuries] =
-    useState<number>(0);
+  const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
   const [employeeHours, setEmployeeHours] = useState<number>(0);
   const [daysLost, setDaysLost] = useState<number>(0);
-  const { data: reportsData, refetch: refetchReportsData } = useGetWorkAccidentIlnessReportsItems();
+  const [signatureSource, setSignatureSource] = useState<string>("");
+
+  // Watch for existing signature URL from form
+  const existingSignatureUrl = watch("signature");
+
+  const { data: reportsData, refetch: refetchReportsData } = useGetDisablingInjuryData();
+
+  // Track current signature source and file
+  useEffect(() => {
+    const currentSignature = watch("signature");
+    const currentSource = watch("signature_source");
+    
+    if (currentSignature && typeof currentSignature === "string") {
+      setPreviousSignatureFile(currentSignature);
+      return;
+    }
+
+    // Only show previews for unsaved signatures
+    if (currentSource === "draw") {
+    } else if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("signature", file);
+      setValue("previous_signature", previousSignatureFile);
+      setValue("signature_source", "upload");
+      setSignatureSource("upload");
+      setSignatureUrl(URL.createObjectURL(file));
+    }
+  };
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
+    if (!drawSignatureModal) {
+    }
+  };
+
+  // Handle drawn signature from modal
+  const handleDrawnSignature = (drawnSignatureDataUrl: string) => {
+    // Convert data URL to Blob
+    fetch(drawnSignatureDataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        // Create a File object from the Blob
+        const file = new File([blob], "signature.png", { type: "image/png" });
+        
+        // Update form state with the File object
+        setValue("signature", file);
+        setValue("signature_source", "draw");
+        setSignatureSource("draw");
+        setSignatureUrl(drawnSignatureDataUrl);
+      });
   };
 
   useEffect(() => {
     if (signatureUrl) {
-      setValue("signature", signatureUrl);
-    } else {
-      setSignatureUrl("");
+      // If signatureUrl is a data URL from drawing
+      if (signatureUrl.startsWith('data:')) {
+        fetch(signatureUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], "signature.png", { type: "image/png" });
+            setValue("signature", file);
+            setValue("signature_source", "draw");
+            setSignatureSource("draw");
+          })
+          .catch(err => {
+            console.error("Error converting signature data URL to file:", err);
+          });
+      } else if (signatureUrl.startsWith('blob:')) {
+        // Uploaded file preview
+        setSignatureSource("upload");
+      } else {
+        setValue("signature", signatureUrl);
+        setValue("previous_signature", signatureUrl);
+        setValue("signature_source", "draw");
+        setSignatureSource("");
+      }
     }
-    if (!drawSignatureModal && signatureUrl) {
-      setSignatureUrl("");
+  }, [signatureUrl, setValue]);
+
+  // Check if there are existing signature URLs (for edit mode)
+  useEffect(() => {
+    if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
+      setSignatureUrl(existingSignatureUrl);
+      setSignatureSource("");
     }
-  }, [signatureUrl, setValue, drawSignatureModal]);
+  }, [existingSignatureUrl]);
 
   useEffect(() => {
     if (employeeHours > 0) {
-      const calculatedFrequencyRate =
-        (totalDisablingInjuries * 1000000) / employeeHours;
+      const calculatedFrequencyRate = 0;
       setValue("frequency_rate", calculatedFrequencyRate);
     } else {
       setValue("frequency_rate", 0);
     }
-  }, [totalDisablingInjuries, employeeHours, setValue]);
+  }, [employeeHours, setValue]);
 
   useEffect(() => {
     if (employeeHours > 0) {
@@ -86,12 +150,20 @@ function InjurySummary({
 
   useEffect(() => {
     if (reportsData && reportsData.records) {
-      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
-      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
-      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
+      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury === true).length;
+      const totalNonDisabling = reportsData.records.filter((report: any) => report.disabling_injury === false).length;
+      setValue("total_disabling_injuries", totalDisabling);
       setValue("total_non_disabling_injuries", totalNonDisabling);
+    } else {
+      setValue("total_disabling_injuries", 0);
+      setValue("total_non_disabling_injuries", 0);
     }
   }, [reportsData, setValue]);
+
+  useEffect(() => {
+    setEmployeeHours(initialEmployeeHours);
+    setDaysLost(initialDaysLost);
+  }, [initialEmployeeHours, initialDaysLost]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -111,22 +183,21 @@ function InjurySummary({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
-              htmlFor="total_all_disabling_injuries_illnesses"
+              htmlFor="total_disabling_injuries"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Total-All Disabling Injuries/ Illnesses
-              <span className="text-red-600">*</span>
+              Total: All Disabling Injuries/ Illnesses
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("total_all_disabling_injuries_illnesses")}
-                disabled
-                id="total_all_disabling_injuries_illnesses"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                {...register("total_disabling_injuries")}
+                readOnly
+                id="total_disabling_injuries"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -135,16 +206,15 @@ function InjurySummary({
               htmlFor="total_non_disabling_injuries"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Total-Non-Disabling Injuries
-              <span className="text-red-600">*</span>
+              Total: Non-Disabling Injuries
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
                 {...register("total_non_disabling_injuries")}
-                disabled
+                readOnly
                 id="total_non_disabling_injuries"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -161,8 +231,8 @@ function InjurySummary({
                 type="text"
                 {...register("frequency_rate", { required: true })}
                 id="frequency_rate"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                // disabled
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                readOnly
               />
             </div>
           </div>
@@ -179,8 +249,8 @@ function InjurySummary({
                 type="text"
                 {...register("severity_rate", { required: true })}
                 id="severity_rate"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-                // disabled
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                readOnly
               />
             </div>
           </div>
@@ -188,7 +258,7 @@ function InjurySummary({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Signature</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="name_signature"
@@ -203,7 +273,7 @@ function InjurySummary({
                 {...register("name_signature", {
                   required: true,
                 })}
-                id="naname_signatureme"
+                id="name_signature"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
@@ -235,37 +305,49 @@ function InjurySummary({
             <div className="relative mt-2">
               <input
                 id="signature"
-                {...register("signature")}
-                onChange={(e) => {
-                  e.target.value ? setSignatureUrl("") : null;
-                  e.target.value ? setAttachmentExist(true) : null;
-                }}
                 type="file"
-                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
-              {attachmentExist ? (
-                <button
-                  type="button"
-                  className="underline text-savoy-blue text-sm"
-                  onClick={() => {
-                    setValue("signature", "");
-                    setAttachmentExist(false);
-                  }}
-                >
-                  Remove Attachment
-                </button>
-              ) : null}
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) and no previews */}
+      {signatureUrl && (
+        <div className="px-4 md:px-0 mt-4">
+          <div
+            className={`text-center font-semibold mb-2 ${
+              signatureSource === "draw" || signatureSource === "upload"
+                ? "text-red-600"
+                : "text-green-600"
+            }`}
+          >
+            {signatureSource === "draw" || signatureSource === "upload" ? "Preview" : "Existing Signature"}
+          </div>
+          <Image
+            className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6"
+            src={signatureUrl}
+            width={500}
+            height={200}
+            alt="signatureImage"
+          />
+        </div>
+      )}
+      
       {drawSignatureModal && (
         <DrawSignatureModal
           isOpen={drawSignatureModal}
           setIsOpen={setDrawSignatureModal}
-          setSignatureUrl={setSignatureUrl}
+          setSignatureUrl={(url: any) => {
+            setSignatureUrl(url);
+            handleDrawnSignature(url);
+          }}
         />
       )}
+      
       <hr />
       <div className="flex justify-between py-4 px-4">
         <button

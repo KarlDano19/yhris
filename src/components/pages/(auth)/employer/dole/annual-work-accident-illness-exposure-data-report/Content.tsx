@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useRef } from 'react';
 
 import Link from 'next/link';
 
@@ -8,8 +8,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { Tooltip } from 'react-tooltip';
 
-import UpdateReportModal from './modals/UpdateReportModal';
 import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
@@ -19,11 +19,13 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
 import CreateReportModal from './modals/CreateReportModal';
+import EditReportModal from './modals/EditReportModal';
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
+import { createPortal } from 'react-dom';
 
 type PaginationProps = {
   totalRecords: number;
@@ -35,6 +37,14 @@ type T_ModalData = {
   open: boolean;
 };
 
+function PortalMenuItems({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  if (typeof window === 'undefined') return null;
+  return createPortal(
+    <div {...props}>{children}</div>,
+    document.body
+  );
+}
+
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const queryClient = useQueryClient();
   const cachedWAIReport = queryClient.getQueryCache().find(['workAccidentIlnessReportsItemsCache']) as {
@@ -43,7 +53,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [annualAccidentIllnessReportItems, setAnnualAccidentIllnessReportItems] = useState<any>([]);
   const [isDeleteAnnualAccidentIllnessReportModalOpen, setIsDeleteAnnualAccidentIllnessReportModalOpen] =
     useState<T_ModalData | null>(null);
-  const [isUpdateAnnualAccidentIllnessReportModalOpen, setIsUpdateAnnualAccidentIllnessReportModalOpen] =
+  const [isEditAnnualAccidentIllnessReportModalOpen, setIsEditAnnualAccidentIllnessReportModalOpen] =
     useState<T_ModalData | null>(null);
   const [isCreateAnnualAccidentIllnessReportModalOpen, setIsCreateAnnualAccidentIllnessReportModalOpen] =
     useState<boolean>(false);
@@ -73,6 +83,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -241,7 +253,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex space-x-2'>
               <button
                 onClick={() =>
-                  setIsUpdateAnnualAccidentIllnessReportModalOpen({
+                  setIsEditAnnualAccidentIllnessReportModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -251,82 +263,112 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                // disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                disabled={true}
+                data-tooltip-id='email-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
               >
                 <EmailLogo />
               </button>
               <div className='flex-1 flex justify-end'>
-                <Menu as='div' className='relative'>
-                  <Menu.Button className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                    <span className='sr-only'>Open options</span>
-                    <div className='flex gap-4'>
-                      <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
-                    </div>
-                  </Menu.Button>
-                  <Transition
-                    as={Fragment}
-                    enter='transition ease-out duration-100'
-                    enterFrom='transform opacity-0 scale-95'
-                    enterTo='transform opacity-100 scale-100'
-                    leave='transition ease-in duration-75'
-                    leaveFrom='transform opacity-100 scale-100'
-                    leaveTo='transform opacity-0 scale-95'
-                  >
-                    <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                      <div className='py-1'>
-                        {[
-                          {
-                            name: 'Download',
-                            action: () => {
-                              setIsExportProgressModalOpen(true);
-                            },
-                          },
-                          {
-                            name: 'Print',
-                            action: () => {
-                              handlePrint();
-                            },
-                          },
-                          {
-                            name: 'Edit',
-                            action: () => {
-                              setIsExportProgressModalOpen(true);
-                            },
-                          },
-                          {
-                            name: 'Delete',
-                            action: () => {
-                              setIsDeleteAnnualAccidentIllnessReportModalOpen({
-                                id: item.id,
-                                open: true,
-                              });
-                            },
-                          },
-                        ].map((menuItem) => (
-                          <Menu.Item key={menuItem.name}>
-                            {({ active }) => (
-                              <span
-                                className={classNames(
-                                  'block px-4 py-2 text-sm cursor-pointer text-center',
-                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                                )}
-                                onClick={menuItem.action}
-                              >
-                                {menuItem.name}
-                              </span>
-                            )}
-                          </Menu.Item>
-                        ))}
+                <div style={{ position: 'relative', overflow: 'visible' }}>
+                  <Menu as='div' className='relative'>
+                    <Menu.Button
+                      ref={menuButtonRef}
+                      onClick={() => {
+                        if (menuButtonRef.current) {
+                          const rect = menuButtonRef.current.getBoundingClientRect();
+                          setMenuPosition({
+                            top: rect.bottom + window.scrollY,
+                            left: rect.right - 138 + window.scrollX, // adjust 138 to your menu width
+                          });
+                        }
+                      }}
+                      className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                    >
+                      <span className='sr-only'>Open options</span>
+                      <div className='flex gap-4'>
+                        <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
                       </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
+                    </Menu.Button>
+                    <Transition
+                      as={Fragment}
+                      enter='transition ease-out duration-100'
+                      enterFrom='transform opacity-0 scale-95'
+                      enterTo='transform opacity-100 scale-100'
+                      leave='transition ease-in duration-75'
+                      leaveFrom='transform opacity-100 scale-100'
+                      leaveTo='transform opacity-0 scale-95'
+                    >
+                      <Menu.Items>
+                        {() => (
+                          <PortalMenuItems
+                            className="z-50 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                            style={{
+                              position: 'fixed',
+                              top: menuPosition.top,
+                              left: menuPosition.left,
+                            }}
+                          >
+                            <div className='py-1'>
+                              {[
+                                {
+                                  name: 'Download',
+                                  action: () => {
+                                    setIsExportProgressModalOpen(true);
+                                  },
+                                },
+                                // {
+                                //   name: 'Print',
+                                //   action: () => {
+                                //     handlePrint();
+                                //   },
+                                // },
+                                // {
+                                //   name: 'Edit',
+                                //   action: () => {
+                                //     setIsExportProgressModalOpen(true);
+                                //   },
+                                // },
+                                {
+                                  name: 'Delete',
+                                  action: () => {
+                                    setIsDeleteAnnualAccidentIllnessReportModalOpen({
+                                      id: item.id,
+                                      open: true,
+                                    });
+                                  },
+                                },
+                              ].map((menuItem) => (
+                                <Menu.Item key={menuItem.name}>
+                                  {({ active }) => (
+                                    <span
+                                      className={classNames(
+                                        'block px-4 py-2 text-sm cursor-pointer text-center',
+                                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                      )}
+                                      onClick={menuItem.action}
+                                    >
+                                      {menuItem.name}
+                                    </span>
+                                  )}
+                                </Menu.Item>
+                              ))}
+                            </div>
+                          </PortalMenuItems>
+                        )}
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
+                </div>
               </div>
             </div>
           </td>
@@ -495,15 +537,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+              <Pagination
+                pagination={pagination}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageSizeChange={pageSizeChange}
+                onPageChange={paginationChange}
+              />
           </div>
         </div>
       </div>
@@ -531,11 +573,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteAnnualAccidentIllnessReportModalOpen}
         />
       )}
-      {isUpdateAnnualAccidentIllnessReportModalOpen && (
-        <UpdateReportModal
+      {isEditAnnualAccidentIllnessReportModalOpen && (
+        <EditReportModal
           refetch={annualAccidentIllnessReportRefetch}
-          isOpen={isUpdateAnnualAccidentIllnessReportModalOpen}
-          setIsOpen={setIsUpdateAnnualAccidentIllnessReportModalOpen}
+          isOpen={isEditAnnualAccidentIllnessReportModalOpen}
+          setIsOpen={setIsEditAnnualAccidentIllnessReportModalOpen}
         />
       )}
       {isExportProgressModalOpen && (
@@ -758,6 +800,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
         </div>
       </div> */}
+      <Tooltip id='email-tooltip'/>
     </>
   );
 }

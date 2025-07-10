@@ -60,7 +60,7 @@ export default function DeleteWorkAccidentIllnessReportModal({
         </Transition.Child>
 
         <div className='fixed inset-0 z-10 overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+          <div className='flex min-h-full items-center justify-center p-4 text-center'>
             <Transition.Child
               as={Fragment}
               enter='ease-out duration-300'
@@ -70,29 +70,29 @@ export default function DeleteWorkAccidentIllnessReportModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
-                <div className='flex justify-center py-8 px-2'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-4 w-full max-w-full mx-2 md:my-8 md:w-[500px]'>
+                <div className='flex justify-center py-6 md:py-8 px-2'>
                   <WarningRed />
                 </div>
-                <div className='text-xl px-20 text-center'>
-                  <p className='text-xl text-gray-600 font-bold'>
+                <div className='px-4 md:px-20 text-center'>
+                  <p className='text-lg md:text-xl text-gray-600 font-bold'>
                     Are you sure you want to <span className='text-red-500'>delete</span> this entry?
                   </p>
                 </div>
-                <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
-                  <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
+                <div className='flex flex-row justify-center w-full gap-3 md:gap-8 px-4 pt-8 md:pt-10 pb-5 md:pb-7'>
+                  <span className='flex w-full rounded-md shadow-sm md:w-auto'>
                     <button
                       type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-6 md:px-20 py-2 text-sm md:text-base bg-white leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150'
                       onClick={() => customCloseModal()}
                     >
                       No
                     </button>
                   </span>
-                  <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
+                  <span className='flex w-full rounded-md shadow-sm md:w-auto'>
                     <button
                       type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-6 md:px-20 py-2 text-sm md:text-base bg-blue-600 leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150'
                       onClick={() => onSubmit()}
                       disabled={isLoading}
                     >
