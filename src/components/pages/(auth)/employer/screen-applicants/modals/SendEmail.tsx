@@ -3,7 +3,10 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { useForm } from "react-hook-form";
+import { Tooltip } from "react-tooltip";
+import toast from "react-hot-toast";
 
+import CustomToast from "@/components/CustomToast";
 import { initialActionState } from "../lib/initialActionState";
 import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItems";
 import useTagTo from "@/components/hooks/useTagTo";
@@ -20,6 +23,13 @@ import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import { ContextTypes, SendEmailPropTypes as PropTypes } from "../types";
 
 import "react-quill/dist/quill.snow.css";
+
+// Helper function to check if HTML content is empty
+const isHtmlEmpty = (html: string | null | undefined): boolean => {
+  if (!html) return true;
+  const trimmed = html.trim();
+  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
+};
 
 export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,7 +56,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   );
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } =
     useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, setValue, watch } = useForm({
+  const { register, handleSubmit, setValue, watch, trigger, formState: { errors }, setError, clearErrors } = useForm({
     defaultValues: {
       bcc: "",
       cc: "",
@@ -63,12 +73,66 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
     setTagsTo([actionState.email]);
   }, []);
 
+  // Clear errors when tagsTo changes
+  useEffect(() => {
+    if (tagsTo.length > 0) {
+      clearErrors('email');
+    }
+  }, [tagsTo, clearErrors]);
+
+  // Clear errors when subject changes
+  useEffect(() => {
+    const subjectContent = watch('subject');
+    if (subjectContent && subjectContent.trim() !== '') {
+      clearErrors('subject');
+    }
+  }, [watch('subject'), clearErrors]);
+
+  // Clear errors when message changes
+  useEffect(() => {
+    const messageContent = watch('message');
+    // Only clear errors when message has actual content
+    if (!isHtmlEmpty(messageContent)) {
+      clearErrors('message');
+    }
+  }, [watch('message'), clearErrors]);
+
   const handleClose = () => {
     setIsOpen(false);
     setTimeout(() => setActionState(initialActionState), 400);
   };
 
   const handleOnSubmit = (data: any) => {
+    // Validate "To" field manually since it uses tags
+    if (tagsTo.length === 0) {
+      setError('email', {
+        type: 'manual',
+        message: 'At least one recipient is required'
+      });
+      toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+      return;
+    }
+
+    // Validate subject
+    if (!data.subject && !customSubject) {
+      setError('subject', {
+        type: 'manual',
+        message: 'Subject is required'
+      });
+      toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+      return;
+    }
+
+    // Validate message
+    if (isHtmlEmpty(data.message)) {
+      setError('message', {
+        type: 'manual',
+        message: 'Message is required'
+      });
+      toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+      return;
+    }
+
     const template = data.template ? dataEmailTemplate.find(
       (item: any) => item.id === parseInt(data.template)
     ) : null;
@@ -119,6 +183,9 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                       }
                       setValue("message", template.body);
                       setValue("subject", template.subject);
+                      setCustomSubject(template.subject);
+                      clearErrors('subject');
+                      clearErrors('message');
                     }
                   } else {
                     // Clear template-related fields if no template is selected
@@ -127,6 +194,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                     setTagsBcc([]);
                     setValue("message", "");
                     setValue("subject", "");
+                    setCustomSubject("");
                   }
                 }}
               >
@@ -149,11 +217,27 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
             >
               Subject<span className="text-red-600">*</span>
             </label>
+            {errors.subject && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.subject.message || 'Subject is required'}
+              </p>
+            )}
             <input
               id="subject"
               type="text"
-              {...register("subject")}
-              onChange={(e) => setCustomSubject(e.target.value)}
+              {...register("subject", { required: 'Subject is required' })}
+              onChange={(e) => {
+                setCustomSubject(e.target.value);
+                setValue('subject', e.target.value);
+                if (e.target.value.trim() !== '') {
+                  clearErrors('subject');
+                } else {
+                  setError('subject', {
+                    type: 'manual',
+                    message: 'Subject is required'
+                  });
+                }
+              }}
               className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             />
           </div>
@@ -164,9 +248,18 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
             >
               To<span className="text-red-600">*</span>
             </label>
+            {errors.email && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.email.message}
+              </p>
+            )}
             <div className="mt-2 flex rounded-md shadow-sm">
               <div className="relative flex flex-grow items-stretch focus-within:z-10">
-                <div className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full">
+                <div 
+                  className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full"
+                  data-tooltip-id='to-section-tooltip'
+                  data-tooltip-place='bottom'
+                >
                   {tagsTo.map((tagTo: string) => (
                     <div
                       key={tagTo}
@@ -185,9 +278,16 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                     type="text"
                     value={inputTo}
                     onKeyDown={handleKeyDownTo}
-                    onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
+                    onChange={(e) => setInputTo(e.target.value)}
                     className="focus:none outline-none px-2 py-1 grow"
                   />
+                  <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                    <div className='px-1'>
+                      <h2 className='text-[12px] font-medium'>
+                        Add multiple recipients by pressing Tab or Enter.
+                      </h2>
+                    </div>
+                  </Tooltip>
                 </div>
               </div>
               <button
@@ -223,7 +323,11 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 CC
               </label>
               <div className="mt-2">
-                <div className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full">
+                <div 
+                  className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full"
+                  data-tooltip-id='cc-section-tooltip'
+                  data-tooltip-place='bottom'
+                >
                   {tagsCc.map((tag: string) => (
                     <div
                       key={tag}
@@ -242,9 +346,16 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                     type="text"
                     value={inputCc}
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
+                    onChange={(e) => setInputCc(e.target.value)}
                     className="focus:none outline-none px-2 py-1 grow rounded-md"
                   />
+                  <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                    <div className='px-1'>
+                      <h2 className='text-[12px] font-medium'>
+                        Add multiple recipients by pressing Tab or Enter.
+                      </h2>
+                    </div>
+                  </Tooltip>
                 </div>
               </div>
             </div>
@@ -258,7 +369,11 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 BCC
               </label>
               <div className="mt-2">
-                <div className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm">
+                <div 
+                  className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm"
+                  data-tooltip-id='bcc-section-tooltip'
+                  data-tooltip-place='bottom'
+                >
                   {tagsBcc.map((tagBcc: string) => (
                     <div
                       key={tagBcc}
@@ -277,9 +392,16 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                     type="text"
                     value={inputBcc}
                     onKeyDown={handleKeyDownBcc}
-                    onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
+                    onChange={(e) => setInputBcc(e.target.value)}
                     className="focus:none outline-none px-2 py-1 grow rounded-md"
                   />
+                  <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                    <div className='px-1'>
+                      <h2 className='text-[12px] font-medium'>
+                        Add multiple recipients by pressing Tab or Enter.
+                      </h2>
+                    </div>
+                  </Tooltip>
                 </div>
               </div>
             </div>
@@ -291,15 +413,32 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
             >
               Message<span className="text-red-600">*</span>
             </label>
+            {errors.message && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.message.message || 'Message is required'}
+              </p>
+            )}
             <div className="mt-2 h-72 mb-12">
               <textarea
-                {...register("message", { required: true })}
+                {...register("message", { required: 'Message is required' })}
                 rows={4}
                 id="message"
                 hidden
               />
               <ReactQuill
-                onChange={(value) => setValue("message", value)}
+                onChange={(value) => {
+                  setValue("message", value);
+                  // Only clear errors when there is actual content
+                  if (!isHtmlEmpty(value)) {
+                    clearErrors('message');
+                  } else {
+                    // Set error when content is empty or just a blank line
+                    setError('message', {
+                      type: 'manual',
+                      message: 'Message is required'
+                    });
+                  }
+                }}
                 formats={QUILL_FORMATS}
                 modules={QUILL_MODULES}
                 style={{ height: "100%", padding: "5px 8px !important" }}
@@ -321,6 +460,44 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
           <button
             type="submit"
             className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]"
+            onClick={async (e) => {
+              // Trigger validation for all required fields
+              const subjectValid = await trigger('subject');
+              
+              // Check message content specifically for empty HTML
+              const messageContent = watch('message');
+              let messageValid = !isHtmlEmpty(messageContent);
+              
+              if (!messageValid) {
+                setError('message', {
+                  type: 'manual',
+                  message: 'Message is required'
+                });
+              }
+              
+              // Check if all validations pass
+              if (!subjectValid || !messageValid || tagsTo.length === 0) {
+                e.preventDefault();
+                // Set error for "email" field if no recipients
+                if (tagsTo.length === 0) {
+                  setError('email', {
+                    type: 'manual',
+                    message: 'At least one recipient is required'
+                  });
+                }
+                toast.custom(
+                  () => (
+                    <CustomToast
+                      message={'You cannot proceed due to incomplete fields. Please review.'}
+                      type='error'
+                    />
+                  ),
+                  {
+                    duration: 2000,
+                  }
+                );
+              }
+            }}
           >
             Send
           </button>
