@@ -77,31 +77,6 @@ export default function SendNTEModal({
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
-  // Reset all form data when modal opens or closes
-  // useEffect(() => {
-  //   // Only reset when modal is actually closed
-  //   if (!isOpen) {
-  //     setTagsTo([]);
-  //     setTagsCc([]);
-  //     setTagsBcc([]);
-  //     setInputTo('');
-  //     setInputCc('');
-  //     setInputBcc('');
-  //     setIsCCOpen(false);
-  //     setIsBCCOpen(false);
-  //     setApplicantEmail(null);
-  //     reset();
-  //   } else if (isOpen?.id && employeeIssueItems?.length > 0) {
-  //     // Only set email data if modal is opening with an ID AND we have valid data
-  //     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-  //     // Don't auto-populate the To field
-  //     if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
-  //       setApplicantEmail(employeeIssueItems[itemIndex].email);
-  //       // Removed setTagsTo here to prevent auto-population
-  //     }
-  //   }
-  // }, [isOpen, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
-
   // Prefill fields from backend when details are loaded
   useEffect(() => {
     if (employeeIssueDetails) {
