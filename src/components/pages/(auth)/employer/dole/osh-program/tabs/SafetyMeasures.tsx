@@ -110,7 +110,7 @@ export default function SafetyMeasures({
 
   return (
     <form>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-2 sm:px-4 pt-4 pb-6">
         {validationMessage && (
           <div className="rounded-md bg-red-50 p-4 mb-3">
             <div className="flex">
@@ -125,7 +125,7 @@ export default function SafetyMeasures({
             </div>
           </div>
         )}
-        <div className="grid grid-cols-2 gap-6 mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4">
           <div className="sm:col-span-4 mt-4 mb-4">
             <label
               htmlFor="message"
@@ -137,52 +137,52 @@ export default function SafetyMeasures({
                 application, use, handling, cleaning and maintenance.
               </h1>
             </label>
-            <div className="mt-4 w-3/4">
-              <table className="min-w-full divide-y divide-gray-300 text-center">
-                <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    >
-                      PPE Provided
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    >
-                      No. Of Workers
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {ppeFields.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="cursor-pointer border-b border-gray-200"
-                    >
-                      <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                        <input
-                          type="text"
-                          {...register(`ppe.${index}.ppe_provided`)}
-                          id={`ppe.${index}.ppe_provided`}
-                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        />
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                        <input
-                          min="0"
-                          defaultValue={0}
-                          type="number"
-                          {...register(`ppe.${index}.no_of_workers`)}
-                          id={`ppe.${index}.no_of_workers`}
-                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        />
-                      </td>
+            <div className="mt-4 w-full lg:w-3/4">
+                <table className="min-w-full divide-y divide-gray-300 text-center">
+                  <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        PPE Provided
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        No. Of Workers
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {ppeFields.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="cursor-pointer border-b border-gray-200"
+                      >
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                          <input
+                            type="text"
+                            {...register(`ppe.${index}.ppe_provided`)}
+                            id={`ppe.${index}.ppe_provided`}
+                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          />
+                        </td>
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                          <input
+                            min="0"
+                            defaultValue={0}
+                            type="number"
+                            {...register(`ppe.${index}.no_of_workers`)}
+                            id={`ppe.${index}.no_of_workers`}
+                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
             </div>
             <div className="flex justify-start mt-4">
               <button
@@ -190,7 +190,7 @@ export default function SafetyMeasures({
                   e.preventDefault(); // Prevent any default action
                   ppeAppend({ id: ppeAppend.length }); // Add new line
                 }}
-                className="bg-savoy-blue text-white px-4 py-2 rounded-md"
+                className="bg-savoy-blue text-white px-4 py-2 rounded-md text-sm"
               >
                 Add new line
               </button>
@@ -209,7 +209,7 @@ export default function SafetyMeasures({
             public about the hazards within the workplace.
           </h1>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-6 w-1/2">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full md:w-1/2">
           <div>
             <div className="relative mt-2">
               <label
@@ -263,7 +263,7 @@ export default function SafetyMeasures({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4">
           <div className="sm:col-span-4 mt-4 mb-4">
             <label
               htmlFor="message"
@@ -283,635 +283,637 @@ export default function SafetyMeasures({
               </h1>
             </label>
             <div className="mt-4 w-full">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200 text-cente">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    >
-                      Facilities
-                    </th>
-                    <th
-                      scope="col"
-                      colSpan={2}
-                      className="px-3py-3.5 text-sm font-semibold text-gray-900"
-                    >
-                      Provided
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    >
-                      Remarks
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    ></th>
-                  </tr>
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    ></th>
-                    <th
-                      scope="col"
-                      className="px-3 col-span-2 py-3.5 text-sm font-semibold text-gray-900"
-                    >
-                      Yes
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    >
-                      No
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    ></th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                    ></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr className="cursor-pointer border-b border-gray-200">
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Adequate supply of drinking water
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="adequate_supply_of_drinking_water"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="adequate_supply_of_drinking_water"
-                              id="adequate_supply_yes"
-                              checked={value === true}
-                              onChange={() => onChange(true)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="adequate_supply_of_drinking_water"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="adequate_supply_of_drinking_water"
-                              id="adequate_supply_no"
-                              checked={value === false}
-                              onChange={() => onChange(false)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="text"
-                        {...register(
-                          `adequate_supply_of_drinking_water_remarks`
-                        )}
-                        id={`adequate_supply_of_drinking_water_remarks`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        id={`adequate_supply_of_drinking_water_attachment`}
-                        {...register(`adequate_supply_of_drinking_water_attachment`)}
-                        type="file"
-                        className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setValue('adequate_supply_of_drinking_water_attachment', file);
-                          }
-                        }}
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <label
-                          htmlFor={`adequate_supply_of_drinking_water_attachment`}
-                          className="cursor-pointer"
-                        >
-                          <ClipIcon hasFile={!!watch("adequate_supply_of_drinking_water_attachment")} />
-                        </label>
-                        
-                        {!!watch("adequate_supply_of_drinking_water_attachment") && typeof watch("adequate_supply_of_drinking_water_attachment") === 'string' && (
-                          <EyeIcon 
-                            className="h-5 w-5 text-savoy-blue cursor-pointer"
-                            onClick={() => openFilePreview(watch("adequate_supply_of_drinking_water_attachment"))}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200 text-cente">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        Facilities
+                      </th>
+                      <th
+                        scope="col"
+                        colSpan={2}
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        Provided
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        Remarks
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      ></th>
+                    </tr>
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      ></th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 col-span-2 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        Yes
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      >
+                        No
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      ></th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      ></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    <tr className="cursor-pointer border-b border-gray-200">
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        Adequate supply of drinking water
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="adequate_supply_of_drinking_water"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="adequate_supply_of_drinking_water"
+                                id="adequate_supply_yes"
+                                checked={value === true}
+                                onChange={() => onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            )}
                           />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="cursor-pointer border-b border-gray-200">
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Adequate sanitary and washing facilities
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="adequate_sanitary_and_washing_facilities"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="adequate_sanitary_and_washing_facilities"
-                              id="adequate_sanitary_yes"
-                              checked={value === true}
-                              onChange={() => onChange(true)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="adequate_sanitary_and_washing_facilities"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="adequate_sanitary_and_washing_facilities"
-                              id="adequate_sanitary_no"
-                              checked={value === false}
-                              onChange={() => onChange(false)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="text"
-                        {...register(
-                          `adequate_sanitary_and_washing_facilities_remarks`
-                        )}
-                        id={`adequate_sanitary_and_washing_facilities_remarks`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        id={`adequate_sanitary_and_washing_facilities_attachment`}
-                        {...register(`adequate_sanitary_and_washing_facilities_attachment`)}
-                        type="file"
-                        className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setValue('adequate_sanitary_and_washing_facilities_attachment', file);
-                          }
-                        }}
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <label
-                          htmlFor={`adequate_sanitary_and_washing_facilities_attachment`}
-                          className="cursor-pointer"
-                        >
-                          <ClipIcon hasFile={!!watch("adequate_sanitary_and_washing_facilities_attachment")} />
-                        </label>
-                        
-                        {!!watch("adequate_sanitary_and_washing_facilities_attachment") && typeof watch("adequate_sanitary_and_washing_facilities_attachment") === 'string' && (
-                          <EyeIcon 
-                            className="h-5 w-5 text-savoy-blue cursor-pointer"
-                            onClick={() => openFilePreview(watch("adequate_sanitary_and_washing_facilities_attachment"))}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="adequate_supply_of_drinking_water"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="adequate_supply_of_drinking_water"
+                                id="adequate_supply_no"
+                                checked={value === false}
+                                onChange={() => onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            )}
                           />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="cursor-pointer border-b border-gray-200">
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Suitable living accommodation (if applicable)
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="suitable_living_accommodation"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="suitable_living_accommodation"
-                              id="suitable_living_yes"
-                              checked={value === true}
-                              onChange={() => onChange(true)}
-                              className="w-4 h-4"
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          type="text"
+                          {...register(
+                            `adequate_supply_of_drinking_water_remarks`
+                          )}
+                          id={`adequate_supply_of_drinking_water_remarks`}
+                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          id={`adequate_supply_of_drinking_water_attachment`}
+                          {...register(`adequate_supply_of_drinking_water_attachment`)}
+                          type="file"
+                          className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setValue('adequate_supply_of_drinking_water_attachment', file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor={`adequate_supply_of_drinking_water_attachment`}
+                            className="cursor-pointer"
+                          >
+                            <ClipIcon hasFile={!!watch("adequate_supply_of_drinking_water_attachment")} />
+                          </label>
+                          
+                          {!!watch("adequate_supply_of_drinking_water_attachment") && typeof watch("adequate_supply_of_drinking_water_attachment") === 'string' && (
+                            <EyeIcon 
+                              className="h-5 w-5 text-savoy-blue cursor-pointer"
+                              onClick={() => openFilePreview(watch("adequate_supply_of_drinking_water_attachment"))}
                             />
                           )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="suitable_living_accommodation"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="suitable_living_accommodation"
-                              id="suitable_living_no"
-                              checked={value === false}
-                              onChange={() => onChange(false)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="text"
-                        {...register(`suitable_living_accommodation_remarks`)}
-                        id={`suitable_living_accommodation_remarks`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        id={`suitable_living_accommodation_attachment`}
-                        {...register(`suitable_living_accommodation_attachment`)}
-                        type="file"
-                        className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setValue('suitable_living_accommodation_attachment', file);
-                          }
-                        }}
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <label
-                          htmlFor={`suitable_living_accommodation_attachment`}
-                          className="cursor-pointer"
-                        >
-                          <ClipIcon hasFile={!!watch("suitable_living_accommodation_attachment")} />
-                        </label>
-                        
-                        {!!watch("suitable_living_accommodation_attachment") && typeof watch("suitable_living_accommodation_attachment") === 'string' && (
-                          <EyeIcon 
-                            className="h-5 w-5 text-savoy-blue cursor-pointer"
-                            onClick={() => openFilePreview(watch("suitable_living_accommodation_attachment"))}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="cursor-pointer border-b border-gray-200">
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        Adequate sanitary and washing facilities
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="adequate_sanitary_and_washing_facilities"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="adequate_sanitary_and_washing_facilities"
+                                id="adequate_sanitary_yes"
+                                checked={value === true}
+                                onChange={() => onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            )}
                           />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="cursor-pointer border-b border-gray-200">
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Separate sanitary, washing and sleeping facilities (if
-                      applicable)
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="separate_sanitary_washing_and_sleeping_facilities"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="separate_sanitary_washing_and_sleeping_facilities"
-                              id="separate_sanitary_yes"
-                              checked={value === true}
-                              onChange={() => onChange(true)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="separate_sanitary_washing_and_sleeping_facilities"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="separate_sanitary_washing_and_sleeping_facilities"
-                              id="separate_sanitary_no"
-                              checked={value === false}
-                              onChange={() => onChange(false)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="text"
-                        {...register(
-                          `separate_sanitary_washing_and_sleeping_facilities_remarks`
-                        )}
-                        id={`separate_sanitary_washing_and_sleeping_facilities_remarks`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        id={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
-                        {...register(
-                          `separate_sanitary_washing_and_sleeping_facilities_attachment`
-                        )}
-                        type="file"
-                        className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setValue('separate_sanitary_washing_and_sleeping_facilities_attachment', file);
-                          }
-                        }}
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <label
-                          htmlFor={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
-                          className="cursor-pointer"
-                        >
-                          <ClipIcon hasFile={!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment")} />
-                        </label>
-                        
-                        {!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment") && typeof watch("separate_sanitary_washing_and_sleeping_facilities_attachment") === 'string' && (
-                          <EyeIcon 
-                            className="h-5 w-5 text-savoy-blue cursor-pointer"
-                            onClick={() => openFilePreview(watch("separate_sanitary_washing_and_sleeping_facilities_attachment"))}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="adequate_sanitary_and_washing_facilities"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="adequate_sanitary_and_washing_facilities"
+                                id="adequate_sanitary_no"
+                                checked={value === false}
+                                onChange={() => onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            )}
                           />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="cursor-pointer border-b border-gray-200">
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Lactation station (in consonance with DOLE D.O. 143-15)
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="lactation_station"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="lactation_station"
-                              id="lactation_station_yes"
-                              checked={value === true}
-                              onChange={() => onChange(true)}
-                              className="w-4 h-4"
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          type="text"
+                          {...register(
+                            `adequate_sanitary_and_washing_facilities_remarks`
+                          )}
+                          id={`adequate_sanitary_and_washing_facilities_remarks`}
+                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          id={`adequate_sanitary_and_washing_facilities_attachment`}
+                          {...register(`adequate_sanitary_and_washing_facilities_attachment`)}
+                          type="file"
+                          className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setValue('adequate_sanitary_and_washing_facilities_attachment', file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor={`adequate_sanitary_and_washing_facilities_attachment`}
+                            className="cursor-pointer"
+                          >
+                            <ClipIcon hasFile={!!watch("adequate_sanitary_and_washing_facilities_attachment")} />
+                          </label>
+                          
+                          {!!watch("adequate_sanitary_and_washing_facilities_attachment") && typeof watch("adequate_sanitary_and_washing_facilities_attachment") === 'string' && (
+                            <EyeIcon 
+                              className="h-5 w-5 text-savoy-blue cursor-pointer"
+                              onClick={() => openFilePreview(watch("adequate_sanitary_and_washing_facilities_attachment"))}
                             />
                           )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="lactation_station"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="lactation_station"
-                              id="lactation_station_no"
-                              checked={value === false}
-                              onChange={() => onChange(false)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="text"
-                        {...register(`lactation_station_remarks`)}
-                        id={`lactation_station_remarks`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        id={`lactation_station_attachment`}
-                        {...register(`lactation_station_attachment`)}
-                        type="file"
-                        className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setValue('lactation_station_attachment', file);
-                          }
-                        }}
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <label
-                          htmlFor={`lactation_station_attachment`}
-                          className="cursor-pointer"
-                        >
-                          <ClipIcon hasFile={!!watch("lactation_station_attachment")} />
-                        </label>
-                        
-                        {!!watch("lactation_station_attachment") && typeof watch("lactation_station_attachment") === 'string' && (
-                          <EyeIcon 
-                            className="h-5 w-5 text-savoy-blue cursor-pointer"
-                            onClick={() => openFilePreview(watch("lactation_station_attachment"))}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="cursor-pointer border-b border-gray-200">
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        Suitable living accommodation (if applicable)
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="suitable_living_accommodation"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="suitable_living_accommodation"
+                                id="suitable_living_yes"
+                                checked={value === true}
+                                onChange={() => onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            )}
                           />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="cursor-pointer border-b border-gray-200">
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Ramps, railings, and the like
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="ramps_railings_and_like"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="ramps_railings_and_like"
-                              id="ramps_railings_yes"
-                              checked={value === true}
-                              onChange={() => onChange(true)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="ramps_railings_and_like"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="ramps_railings_and_like"
-                              id="ramps_railings_no"
-                              checked={value === false}
-                              onChange={() => onChange(false)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="text"
-                        {...register(`ramps_railings_and_like_remarks`)}
-                        id={`ramps_railings_and_like_remarks`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        id={`ramps_railings_and_like_attachment`}
-                        {...register(`ramps_railings_and_like_attachment`)}
-                        type="file"
-                        className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setValue('ramps_railings_and_like_attachment', file);
-                          }
-                        }}
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <label
-                          htmlFor={`ramps_railings_and_like_attachment`}
-                          className="cursor-pointer"
-                        >
-                          <ClipIcon hasFile={!!watch("ramps_railings_and_like_attachment")} />
-                        </label>
-                        
-                        {!!watch("ramps_railings_and_like_attachment") && typeof watch("ramps_railings_and_like_attachment") === 'string' && (
-                          <EyeIcon 
-                            className="h-5 w-5 text-savoy-blue cursor-pointer"
-                            onClick={() => openFilePreview(watch("ramps_railings_and_like_attachment"))}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="suitable_living_accommodation"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="suitable_living_accommodation"
+                                id="suitable_living_no"
+                                checked={value === false}
+                                onChange={() => onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            )}
                           />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="cursor-pointer border-b border-gray-200">
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      Other workers' welfare facilities as prescribed by OSHS
-                      and other related issuances
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="other_workers_welfare_facilities"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="other_workers_welfare_facilities"
-                              id="other_workers_yes"
-                              checked={value === true}
-                              onChange={() => onChange(true)}
-                              className="w-4 h-4"
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          type="text"
+                          {...register(`suitable_living_accommodation_remarks`)}
+                          id={`suitable_living_accommodation_remarks`}
+                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          id={`suitable_living_accommodation_attachment`}
+                          {...register(`suitable_living_accommodation_attachment`)}
+                          type="file"
+                          className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setValue('suitable_living_accommodation_attachment', file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor={`suitable_living_accommodation_attachment`}
+                            className="cursor-pointer"
+                          >
+                            <ClipIcon hasFile={!!watch("suitable_living_accommodation_attachment")} />
+                          </label>
+                          
+                          {!!watch("suitable_living_accommodation_attachment") && typeof watch("suitable_living_accommodation_attachment") === 'string' && (
+                            <EyeIcon 
+                              className="h-5 w-5 text-savoy-blue cursor-pointer"
+                              onClick={() => openFilePreview(watch("suitable_living_accommodation_attachment"))}
                             />
                           )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name="other_workers_welfare_facilities"
-                          defaultValue={null}
-                          render={({ field: { value, onChange } }) => (
-                            <input
-                              type="checkbox"
-                              name="other_workers_welfare_facilities"
-                              id="other_workers_no"
-                              checked={value === false}
-                              onChange={() => onChange(false)}
-                              className="w-4 h-4"
-                            />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        type="text"
-                        {...register(
-                          `other_workers_welfare_facilities_remarks`
-                        )}
-                        id={`other_workers_welfare_facilities_remarks`}
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <input
-                        id={`other_workers_welfare_facilities_attachment`}
-                        {...register(`other_workers_welfare_facilities_attachment`)}
-                        type="file"
-                        className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setValue('other_workers_welfare_facilities_attachment', file);
-                          }
-                        }}
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <label
-                          htmlFor={`other_workers_welfare_facilities_attachment`}
-                          className="cursor-pointer"
-                        >
-                          <ClipIcon hasFile={!!watch("other_workers_welfare_facilities_attachment")} />
-                        </label>
-                        
-                        {!!watch("other_workers_welfare_facilities_attachment") && typeof watch("other_workers_welfare_facilities_attachment") === 'string' && (
-                          <EyeIcon 
-                            className="h-5 w-5 text-savoy-blue cursor-pointer"
-                            onClick={() => openFilePreview(watch("other_workers_welfare_facilities_attachment"))}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="cursor-pointer border-b border-gray-200">
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        Separate sanitary, washing and sleeping facilities (if
+                        applicable)
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="separate_sanitary_washing_and_sleeping_facilities"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="separate_sanitary_washing_and_sleeping_facilities"
+                                id="separate_sanitary_yes"
+                                checked={value === true}
+                                onChange={() => onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            )}
                           />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="separate_sanitary_washing_and_sleeping_facilities"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="separate_sanitary_washing_and_sleeping_facilities"
+                                id="separate_sanitary_no"
+                                checked={value === false}
+                                onChange={() => onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            )}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          type="text"
+                          {...register(
+                            `separate_sanitary_washing_and_sleeping_facilities_remarks`
+                          )}
+                          id={`separate_sanitary_washing_and_sleeping_facilities_remarks`}
+                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          id={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
+                          {...register(
+                            `separate_sanitary_washing_and_sleeping_facilities_attachment`
+                          )}
+                          type="file"
+                          className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setValue('separate_sanitary_washing_and_sleeping_facilities_attachment', file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor={`separate_sanitary_washing_and_sleeping_facilities_attachment`}
+                            className="cursor-pointer"
+                          >
+                            <ClipIcon hasFile={!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment")} />
+                          </label>
+                          
+                          {!!watch("separate_sanitary_washing_and_sleeping_facilities_attachment") && typeof watch("separate_sanitary_washing_and_sleeping_facilities_attachment") === 'string' && (
+                            <EyeIcon 
+                              className="h-5 w-5 text-savoy-blue cursor-pointer"
+                              onClick={() => openFilePreview(watch("separate_sanitary_washing_and_sleeping_facilities_attachment"))}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="cursor-pointer border-b border-gray-200">
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        Lactation station (in consonance with DOLE D.O. 143-15)
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="lactation_station"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="lactation_station"
+                                id="lactation_station_yes"
+                                checked={value === true}
+                                onChange={() => onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            )}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="lactation_station"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="lactation_station"
+                                id="lactation_station_no"
+                                checked={value === false}
+                                onChange={() => onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            )}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          type="text"
+                          {...register(`lactation_station_remarks`)}
+                          id={`lactation_station_remarks`}
+                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          id={`lactation_station_attachment`}
+                          {...register(`lactation_station_attachment`)}
+                          type="file"
+                          className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setValue('lactation_station_attachment', file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor={`lactation_station_attachment`}
+                            className="cursor-pointer"
+                          >
+                            <ClipIcon hasFile={!!watch("lactation_station_attachment")} />
+                          </label>
+                          
+                          {!!watch("lactation_station_attachment") && typeof watch("lactation_station_attachment") === 'string' && (
+                            <EyeIcon 
+                              className="h-5 w-5 text-savoy-blue cursor-pointer"
+                              onClick={() => openFilePreview(watch("lactation_station_attachment"))}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="cursor-pointer border-b border-gray-200">
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        Ramps, railings, and the like
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="ramps_railings_and_like"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="ramps_railings_and_like"
+                                id="ramps_railings_yes"
+                                checked={value === true}
+                                onChange={() => onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            )}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="ramps_railings_and_like"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="ramps_railings_and_like"
+                                id="ramps_railings_no"
+                                checked={value === false}
+                                onChange={() => onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            )}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          type="text"
+                          {...register(`ramps_railings_and_like_remarks`)}
+                          id={`ramps_railings_and_like_remarks`}
+                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          id={`ramps_railings_and_like_attachment`}
+                          {...register(`ramps_railings_and_like_attachment`)}
+                          type="file"
+                          className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setValue('ramps_railings_and_like_attachment', file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor={`ramps_railings_and_like_attachment`}
+                            className="cursor-pointer"
+                          >
+                            <ClipIcon hasFile={!!watch("ramps_railings_and_like_attachment")} />
+                          </label>
+                          
+                          {!!watch("ramps_railings_and_like_attachment") && typeof watch("ramps_railings_and_like_attachment") === 'string' && (
+                            <EyeIcon 
+                              className="h-5 w-5 text-savoy-blue cursor-pointer"
+                              onClick={() => openFilePreview(watch("ramps_railings_and_like_attachment"))}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="cursor-pointer border-b border-gray-200">
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        Other workers&apos; welfare facilities as prescribed by OSHS
+                        and other related issuances
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="other_workers_welfare_facilities"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="other_workers_welfare_facilities"
+                                id="other_workers_yes"
+                                checked={value === true}
+                                onChange={() => onChange(true)}
+                                className="w-4 h-4"
+                              />
+                            )}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <div className="flex justify-center">
+                          <Controller
+                            control={control}
+                            name="other_workers_welfare_facilities"
+                            defaultValue={null}
+                            render={({ field: { value, onChange } }) => (
+                              <input
+                                type="checkbox"
+                                name="other_workers_welfare_facilities"
+                                id="other_workers_no"
+                                checked={value === false}
+                                onChange={() => onChange(false)}
+                                className="w-4 h-4"
+                              />
+                            )}
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          type="text"
+                          {...register(
+                            `other_workers_welfare_facilities_remarks`
+                          )}
+                          id={`other_workers_welfare_facilities_remarks`}
+                          className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <input
+                          id={`other_workers_welfare_facilities_attachment`}
+                          {...register(`other_workers_welfare_facilities_attachment`)}
+                          type="file"
+                          className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setValue('other_workers_welfare_facilities_attachment', file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor={`other_workers_welfare_facilities_attachment`}
+                            className="cursor-pointer"
+                          >
+                            <ClipIcon hasFile={!!watch("other_workers_welfare_facilities_attachment")} />
+                          </label>
+                          
+                          {!!watch("other_workers_welfare_facilities_attachment") && typeof watch("other_workers_welfare_facilities_attachment") === 'string' && (
+                            <EyeIcon 
+                              className="h-5 w-5 text-savoy-blue cursor-pointer"
+                              onClick={() => openFilePreview(watch("other_workers_welfare_facilities_attachment"))}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -923,15 +925,15 @@ export default function SafetyMeasures({
             Emergency and Disaster Preparedness
           </label>
         </div>
-        <div className="mt-4 flex flex-row">
+        <div className="mt-4 flex flex-col sm:flex-row">
           <label
             htmlFor="message"
-            className="block text-sm font-medium leading-6 text-gray-900 pl-4"
+            className="block text-sm font-medium leading-6 text-gray-900 pl-0 sm:pl-4 mb-2 sm:mb-0"
           >
             Written Emergency and Disaster Program?
           </label>
-          <div className="grid grid-cols-4 gap-10 pl-4">
-            <div className="relative pl-4 flex gap-2">
+          <div className="grid grid-cols-2 gap-4 sm:gap-10 pl-0 sm:pl-4">
+            <div className="relative pl-0 sm:pl-4 flex gap-2">
               <Controller
                 control={control}
                 name="written_emergency_and_disaster_program"
@@ -953,7 +955,7 @@ export default function SafetyMeasures({
                 Yes
               </label>
             </div>
-            <div className="relative pl-4 flex gap-2">
+            <div className="relative pl-0 sm:pl-4 flex gap-2">
               <Controller
                 control={control}
                 name="written_emergency_and_disaster_program"
@@ -986,81 +988,83 @@ export default function SafetyMeasures({
           </label>
         </div>
         <div className="mt-4 w-full">
-          <table className="min-w-full divide-y divide-gray-300 text-center">
-            <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                >
-                  Type of Drills (fire, earthquake)
-                </th>
-                <th
-                  scope="col"
-                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                >
-                  Date
-                </th>
-                <th
-                  scope="col"
-                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
-                >
-                  Responsible person/position
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {drillsFields.map((field, index) => (
-                <tr
-                  className="cursor-pointer border-b border-gray-200"
-                  key={field.id}
-                >
-                  <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                    <input
-                      type="text"
-                      {...register(`drills.${index}.type_of_drills`)}
-                      id={`drills.${index}.type_of_drills`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                    />
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                    <div className="relative mt-2">
-                      <Controller
-                        control={control}
-                        name={`drills.${index}.date`}
-                        render={({ field }) => (
-                          <CustomDatePicker
-                            id={`drills.${index}.date`}
-                            placeholder={"mm/dd/yyyy"}
-                            className={
-                              "block w-full py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                            }
-                            selected={
-                              field.value ? new Date(field.value) : null
-                            }
-                            pickerOnChange={(date: any) => field.onChange(date)}
-                            inputOnChange={(value: any) =>
-                              field.onChange(value)
-                            }
-                          />
-                        )}
-                      />
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                    <input
-                      type="text"
-                      {...register(
-                        `drills.${index}.responsible_person_position`
-                      )}
-                      id={`drills.${index}.responsible_person_position`}
-                      className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                    />
-                  </td>
+          <div className="overflow-y-auto md:overflow-y-visible">
+            <table className="min-w-full divide-y divide-gray-300 text-center">
+              <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                  >
+                    Type of Drills (fire, earthquake)
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                  >
+                    Date
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                  >
+                    Responsible person/position
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {drillsFields.map((field, index) => (
+                  <tr
+                    className="cursor-pointer border-b border-gray-200"
+                    key={field.id}
+                  >
+                    <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                      <input
+                        type="text"
+                        {...register(`drills.${index}.type_of_drills`)}
+                        id={`drills.${index}.type_of_drills`}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                      />
+                    </td>
+                    <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                      <div className="relative mt-2">
+                        <Controller
+                          control={control}
+                          name={`drills.${index}.date`}
+                          render={({ field }) => (
+                            <CustomDatePicker
+                              id={`drills.${index}.date`}
+                              placeholder={"mm/dd/yyyy"}
+                              className={
+                                "block w-full py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                              }
+                              selected={
+                                field.value ? new Date(field.value) : null
+                              }
+                              pickerOnChange={(date: any) => field.onChange(date)}
+                              inputOnChange={(value: any) =>
+                                field.onChange(value)
+                              }
+                            />
+                          )}
+                        />
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                      <input
+                        type="text"
+                        {...register(
+                          `drills.${index}.responsible_person_position`
+                        )}
+                        id={`drills.${index}.responsible_person_position`}
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         <div className="flex justify-start mt-4">
           <button
@@ -1081,63 +1085,67 @@ export default function SafetyMeasures({
             Solid Waste Management System
           </label>
         </div>
-        <div className="mt-4 flex flex-row">
-          <label
-            htmlFor="message"
-            className="block text-sm font-medium leading-6 text-gray-900 pl-4"
-          >
-            Written Pollution Control Program?
-          </label>
-          <div className="grid grid-cols-4 gap-10 pl-4">
-            <div className="relative pl-4 flex gap-2 mb-6">
-              <Controller
-                control={control}
-                name="written_pollution_control_program"
-                defaultValue={null}
-                render={({ field: { value, onChange } }) => (
-                  <input
-                    type="radio"
-                    id="written_pollution_yes"
-                    checked={value === true}
-                    onChange={(e) => {
-                      const newValue = e.target.checked ? true : null;
-                      onChange(newValue);
-                    }}
-                    className="w-4 h-4 mt-1"
-                  />
-                )}
-              />
-              <label htmlFor="written_pollution_yes" className="ml-2 mt-0.5">
-                Yes
-              </label>
-            </div>
-            <div className="relative pl-4 flex gap-2 mb-6">
-              <Controller
-                control={control}
-                name="written_pollution_control_program"
-                defaultValue={null}
-                render={({ field: { value, onChange } }) => (
-                  <input
-                    type="radio"
-                    id="written_pollution_no"
-                    checked={value === false}
-                    onChange={(e) => {
-                      const newValue = e.target.checked ? false : null;
-                      onChange(newValue);
-                    }}
-                    className="w-4 h-4 mt-1"
-                  />
-                )}
-              />
-              <label htmlFor="written_pollution_no" className="ml-2 mt-0.5">
-                No
-              </label>
-            </div>
-          </div>
-          <div className="flex flex-row whitespace-nowrap gap-4">
+        <div className="mt-4 w-full flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-0">
+          {/* Left: Label and radio group */}
+          <div className="flex flex-col md:flex-row md:items-center gap-2">
             <label
               htmlFor="message"
-              className="block text-sm font-medium leading-6 text-gray-900 pl-4"
+              className="block text-sm font-medium leading-6 text-gray-900 md:mr-4"
+            >
+              Written Pollution Control Program?
+            </label>
+            <div className="flex flex-row gap-4">
+              <div className="flex items-center gap-2">
+                <Controller
+                  control={control}
+                  name="written_pollution_control_program"
+                  defaultValue={null}
+                  render={({ field: { value, onChange } }) => (
+                    <input
+                      type="radio"
+                      id="written_pollution_yes"
+                      checked={value === true}
+                      onChange={(e) => {
+                        const newValue = e.target.checked ? true : null;
+                        onChange(newValue);
+                      }}
+                      className="w-4 h-4"
+                    />
+                  )}
+                />
+                <label htmlFor="written_pollution_yes" className="ml-2 mt-0.5">
+                  Yes
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Controller
+                  control={control}
+                  name="written_pollution_control_program"
+                  defaultValue={null}
+                  render={({ field: { value, onChange } }) => (
+                    <input
+                      type="radio"
+                      id="written_pollution_no"
+                      checked={value === false}
+                      onChange={(e) => {
+                        const newValue = e.target.checked ? false : null;
+                        onChange(newValue);
+                      }}
+                      className="w-4 h-4"
+                    />
+                  )}
+                />
+                <label htmlFor="written_pollution_no" className="ml-2 mt-0.5">
+                  No
+                </label>
+              </div>
+            </div>
+          </div>
+          {/* Right: Name field */}
+          <div className="w-full md:w-auto md:ml-auto flex items-center mt-2 md:mt-0 flex-col md:flex-row">
+            <label
+              htmlFor="companypolution_control_officer_name"
+              className="block text-sm font-medium leading-6 text-gray-900 mr-2 whitespace-nowrap"
             >
               Name of Pollution Control Officer
             </label>
@@ -1145,12 +1153,12 @@ export default function SafetyMeasures({
               type="text"
               {...register("polution_control_officer")}
               id="companypolution_control_officer_name"
-              className="rounded-md w-full border border-gray-300 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 mb-4"
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
-        <div className="sm:col-span-4 mt-4">
-          <div className="mt-2 h-72 mb-12">
+        <div className="sm:col-span-4 mt-4 mb-24 md:mb-0">
+          <div className="mt-2 h-48 sm:h-72 mb-8 sm:mb-12">
             <textarea
               rows={4}
               {...register("waste_management_system_message")}
@@ -1206,7 +1214,7 @@ export default function SafetyMeasures({
           >
             Prohibited Acts and Penalties/sanctions for violations on OSH
           </label>
-          <div className="mt-2 h-72 mb-12">
+          <div className="mt-2 h-48 sm:h-72 mb-20 md:mb-12">
             <textarea
               rows={4}
               {...register("prohibited_acts_and_penalties_message")}

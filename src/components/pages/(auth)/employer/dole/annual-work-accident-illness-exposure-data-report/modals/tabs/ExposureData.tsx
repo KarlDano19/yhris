@@ -79,7 +79,7 @@ function ExposureData({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
               htmlFor="date_of_report"
@@ -118,9 +118,10 @@ function ExposureData({
             <div className="relative mt-2">
               <input
                 type="text"
+                readOnly
                 {...register("company_name", { required: true })}
                 id="company_name"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -135,9 +136,10 @@ function ExposureData({
             <div className="relative mt-2">
               <input
                 type="text"
+                readOnly
                 {...register("type_of_industry", { required: true })}
                 id="type_of_industry"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -152,15 +154,16 @@ function ExposureData({
             <div className="relative mt-2">
               <input
                 type="text"
+                readOnly
                 {...register("address", { required: true })}
                 id="address"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
         </div>
         <hr />
-        <div className="grid grid-cols-2 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
           <div className="mt-4">
             <h1 className="text-lg font-semibold">Personal Information</h1>
           </div>
@@ -182,7 +185,7 @@ function ExposureData({
           </div>
         </div>
         <hr className="border-b border-gray-200 mt-6 border-dashed" />
-        <div className="grid grid-cols-2 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
               htmlFor="number_of_employees"
@@ -193,11 +196,11 @@ function ExposureData({
             </label>
             <div className="relative mt-2">
               <input
-                disabled
+                readOnly
                 type="text"
                 {...register("number_of_employees", { required: true })}
                 id="number_of_employees"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>

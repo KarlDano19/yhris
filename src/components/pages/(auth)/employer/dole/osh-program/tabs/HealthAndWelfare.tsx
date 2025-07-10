@@ -141,7 +141,7 @@ export default function HealthAndWelfare({
               a. Routine
             </label>
           </div>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="relative mt-2 pl-4 flex gap-2">
               <Controller
                 control={control}
@@ -251,7 +251,7 @@ export default function HealthAndWelfare({
               b. Special
             </label>
           </div>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="relative mt-2 pl-4 flex gap-2">
               <input
                 type="checkbox"
@@ -276,7 +276,7 @@ export default function HealthAndWelfare({
                 ECG
               </label>
             </div>
-            <div className="relative mt-2 pl-4 flex gap-2">
+            <div className="relative mt-2 pl-4 flex gap-2 items-center">
               <Controller
                 control={control}
                 name="special_medical_surveillance"
@@ -291,10 +291,8 @@ export default function HealthAndWelfare({
                         field.value.filter((item: string) => !(item && item.startsWith("Others"))) : [];
                       
                       if (e.target.checked) {
-                        // Initially just add "Others" - will be replaced with "Others: value" when input changes
                         field.onChange([...currentValue, "Others"]);
                       } else {
-                        // Remove any "Others" or "Others: something" values
                         field.onChange(currentValue);
                         setValue("special_medical_surveillance_other", "");
                       }
@@ -302,18 +300,16 @@ export default function HealthAndWelfare({
                   />
                 )}
               />
-              <label htmlFor="others" className="ml-2 mt-1">
+              <label htmlFor="others" className="ml-2 mt-1 whitespace-nowrap">
                 Others, please specify
               </label>
-            </div>
-            {Array.isArray(watch("special_medical_surveillance")) && 
-             watch("special_medical_surveillance").some((item: string) => item === "Others" || (item && item.startsWith("Others:"))) && (
-              <div className="mt-2 ml-10">
+              {Array.isArray(watch("special_medical_surveillance")) && 
+                watch("special_medical_surveillance").some((item: string) => item === "Others" || (item && item.startsWith("Others:"))) && (
                 <input
                   type="text"
                   id="special_medical_surveillance_other"
                   placeholder="Please specify"
-                  className="rounded-md w-full max-w-xs border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  className="rounded-md ml-2 w-full md:w-60 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   value={(() => {
                     const values = watch("special_medical_surveillance") || [];
                     const othersValue = values.find((item: string) => item && item.startsWith("Others:"));
@@ -334,8 +330,8 @@ export default function HealthAndWelfare({
                     }
                   }}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <div className="mt-4">
             <label
@@ -345,7 +341,7 @@ export default function HealthAndWelfare({
               c. Schedule of annual medical examination
             </label>
           </div>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
             <div className="relative mt-2 pl-4 flex gap-2">
               <input
                 type="checkbox"
@@ -403,7 +399,7 @@ export default function HealthAndWelfare({
               d. Is random drug testing conducted?
             </label>
           </div>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
             <div className="relative mt-2 pl-4 flex gap-2">
               <Controller
                 control={control}
@@ -453,7 +449,7 @@ export default function HealthAndWelfare({
               First-Aid, Health Care Medicines and Equipment Facilities
             </label>
           </div>
-          <div className="grid grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-4">
             <div>
               <label
                 htmlFor="company_name"
@@ -496,7 +492,7 @@ export default function HealthAndWelfare({
                 htmlFor="company_name"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Hospitals you're affiliated with
+                Hospitals you&apos;re affiliated with
                 <span className="text-red-600">*</span>
               </label>
               <div className="relative mt-2">
@@ -549,7 +545,7 @@ export default function HealthAndWelfare({
               establish an OSH committee composed of the following:
             </label>
           </div>
-          <div className="grid grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-4">
             <div>
               <label
                 htmlFor="company_name"
@@ -613,7 +609,7 @@ export default function HealthAndWelfare({
               be composed of the following:
             </label>
           </div>
-          <div className="grid grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-4">
             <div>
               <label
                 htmlFor="company_name"
@@ -649,7 +645,7 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="gap-6 mt-4">
+          <div className="gap-4 sm:gap-6 mt-4">
             <div>
               <label
                 htmlFor="company_name"
@@ -658,7 +654,7 @@ export default function HealthAndWelfare({
                 Ex-Officio Members
                 <span className="text-red-600">*</span>
               </label>
-              <div className="relative mt-2 grid grid-cols-3 gap-6">
+              <div className="relative mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <input
                   type="text"
                   {...register("ex_officio_members")}
@@ -680,7 +676,7 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="gap-6 mt-4">
+          <div className="gap-4 sm:gap-6 mt-4">
             <div>
               <label
                 htmlFor="company_name"
@@ -689,7 +685,7 @@ export default function HealthAndWelfare({
                 Members
                 <span className="text-red-600">*</span>
               </label>
-              <div className="relative mt-2 grid grid-cols-3 gap-6">
+              <div className="relative mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <input
                   type="text"
                   {...register("members")}
@@ -714,7 +710,7 @@ export default function HealthAndWelfare({
               housed under one building or complex including malls.
             </label>
           </div>
-          <div className="grid grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-4">
             <div>
               <label
                 htmlFor="company_name"
@@ -750,7 +746,7 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="gap-6 mt-4">
+          <div className="gap-4 sm:gap-6 mt-4">
             <div>
               <label
                 htmlFor="company_name"
@@ -763,7 +759,7 @@ export default function HealthAndWelfare({
                   Joint OSH Committee
                 </h1>
               </label>
-              <div className="relative mt-2 grid grid-cols-3 gap-6">
+              <div className="relative mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <input
                   type="text"
                   {...register("ex_officio_members_1")}
@@ -779,14 +775,14 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="gap-6 mt-4">
+          <div className="gap-4 sm:gap-6 mt-4">
             <div>
               <h1 className="text-sm text-gray-500">
-                Name of two (2) workers' representatives one from which must be
+                Name of two (2) workers&apos; representatives one from which must be
                 from a union if organized from any establishments under the
                 building
               </h1>
-              <div className="relative mt-2 grid grid-cols-3 gap-6">
+              <div className="relative mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <input
                   type="text"
                   {...register("ex_officio_members_3")}
@@ -862,7 +858,7 @@ export default function HealthAndWelfare({
               OSH Personnel and Facilities
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-4">
             <div className="sm:col-span-4 mt-4">
               <label
                 htmlFor="message"
@@ -874,31 +870,31 @@ export default function HealthAndWelfare({
                 Safety Officer(s): (attach certificate of training/s prescribed by
                 DOLE)
               </h1>
-              <div className="mt-4 w-1/2">
+              <div className="mt-4 w-full overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-2 sm:px-3 py-3.5 text-xs sm:text-sm font-semibold text-gray-900"
                       >
                         Name of Safety Officer
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-2 sm:px-3 py-3.5 text-xs sm:text-sm font-semibold text-gray-900"
                       >
                         Training(s) and its No. of Hrs
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-2 sm:px-3 py-3.5 text-xs sm:text-sm font-semibold text-gray-900"
                       >
                         Certificate
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-2 sm:px-3 py-3.5 text-xs sm:text-sm font-semibold text-gray-900"
                       ></th>
                     </tr>
                   </thead>
@@ -908,28 +904,28 @@ export default function HealthAndWelfare({
                         key={item.id}
                         className="cursor-pointer border-b border-gray-200"
                       >
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <input
                             type="text"
                             {...register(`safety_officers.${index}.name`)}
                             id={`safety_officers.${index}.name`}
-                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                            className="rounded-md w-full border-0 px-2 sm:px-3 py-1.5 text-gray-900 placeholder:text-gray-400 text-xs sm:text-sm sm:leading-6"
                           />
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <input
                             type="text"
                             {...register(`safety_officers.${index}.training_and_hours`)}
                             id={`safety_officers.${index}.training_and_hours`}
-                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                            className="rounded-md w-full border-0 px-2 sm:px-3 py-1.5 text-gray-900 placeholder:text-gray-400 text-xs sm:text-sm sm:leading-6"
                           />
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <div className="flex items-center justify-center gap-2">
                             <input
                               id={`certificate_${item.id || index}`}
                               type="file"
-                              className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                              className="hidden rounded-md w-full border-0 px-2 sm:px-3 py-1.5 text-gray-900 placeholder:text-gray-400 text-xs sm:text-sm sm:leading-6"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
@@ -949,20 +945,20 @@ export default function HealthAndWelfare({
                             
                             {!!watch(`safety_officers.${index}.certificate`) && typeof watch(`safety_officers.${index}.certificate`) === 'string' && (
                               <EyeIcon 
-                                className="h-5 w-5 text-savoy-blue cursor-pointer"
+                                className="h-4 w-4 sm:h-5 sm:w-5 text-savoy-blue cursor-pointer"
                                 onClick={() => openFilePreview(watch(`safety_officers.${index}.certificate`))}
                               />
                             )}
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
                           <div className="flex justify-center items-center">
                             <button
                               type="button"
-                              className="flex justify-center items-center rounded-md bg-red-600 p-2 text-white"
+                              className="flex justify-center items-center rounded-md bg-red-600 p-1.5 sm:p-2 text-white"
                               onClick={() => safetyOfficerRemove(index)}
                             >
-                              <MinusIcon className="h-5 w-5" />
+                              <MinusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                             </button>
                           </div>
                         </td>
@@ -983,14 +979,14 @@ export default function HealthAndWelfare({
                       certificate: null
                     });
                   }}
-                  className="bg-savoy-blue text-white px-4 py-2 rounded-md"
+                  className="bg-savoy-blue text-white px-3 sm:px-4 py-2 rounded-md text-sm"
                 >
                   Add new line
                 </button>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1  gap-6 mt-4">
             <div className="sm:col-span-4 mt-4">
               <label
                 htmlFor="message"
@@ -1003,7 +999,7 @@ export default function HealthAndWelfare({
                   facilities based on the total number of workers.
                 </h1>
               </label>
-              <div className="mt-4 w-full">
+              <div className="mt-4 w-full overflow-auto">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200 text-cente">
                     <tr>
@@ -1153,7 +1149,7 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <div className="sm:col-span-4 mt-4">
               <label
                 htmlFor="message"
@@ -1271,7 +1267,7 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="mt-4 w-2/3">
+          <div className="mt-4 w-full md:w-2/3">
             <table className="min-w-full divide-y divide-gray-300 text-center">
               <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                 <tr>
@@ -1362,7 +1358,7 @@ export default function HealthAndWelfare({
               Add new line
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <div className="sm:col-span-4 mt-4">
               <label
                 htmlFor="message"
@@ -1370,7 +1366,7 @@ export default function HealthAndWelfare({
               >
                  Conduct of Tool Box Meetings/ Safety Meetings (if applicable)
               </label>
-              <div className="mt-4 w-2/3">
+              <div className="mt-4 w-full md:w-2/3">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
@@ -1465,7 +1461,7 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <div className="sm:col-span-4 mt-4">
               <label
                 htmlFor="message"
@@ -1500,7 +1496,7 @@ export default function HealthAndWelfare({
                   Medical Report (AMR)
                 </h1>
               </label>
-              <div className="mt-4 w-2/3">
+              <div className="mt-4 w-full md:w-2/3">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>

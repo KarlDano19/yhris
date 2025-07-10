@@ -1,35 +1,79 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
-
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function WEMDetailsRequest({
   control,
   register,
   handleSubmit,
   setSelectedTab,
+  getValues,
+  watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  getValues: any;
+  watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
-  const onSubmit = handleSubmit(() => {
+  // Clear errors when user makes a valid selection
+  const purposeOfWemRequest = watch("purpose_of_wem_request");
+  const wemConductedBy = watch("wem_conducted_by");
+  const lastWemDate = watch("last_wem_date");
+
+  useEffect(() => {
+    if (purposeOfWemRequest && purposeOfWemRequest.length > 0) {
+      clearErrors("purpose_of_wem_request");
+    }
+    if (wemConductedBy && wemConductedBy.length > 0) {
+      clearErrors("wem_conducted_by");
+    }
+    if (lastWemDate) {
+      clearErrors("last_wem_date");
+    }
+  }, [purposeOfWemRequest, wemConductedBy, lastWemDate, clearErrors]);
+
+  const onValid = (data: any) => {
+    if (!data.purpose_of_wem_request || (Array.isArray(data.purpose_of_wem_request) && data.purpose_of_wem_request.length === 0)) {
+      setError("purpose_of_wem_request", {
+        type: "manual",
+        message: "Please select at least one Purpose of WEM Request."
+      });
+      return;
+    }
+    if (!data.wem_conducted_by || (Array.isArray(data.wem_conducted_by) && data.wem_conducted_by.length === 0)) {
+      setError("wem_conducted_by", {
+        type: "manual",
+        message: "Please select at least one WEM Conducted By option."
+      });
+      return;
+    }
+    if (!data.last_wem_date || data.last_wem_date === "") {
+      setError("last_wem_date", {
+        type: "manual",
+        message: "Please select the Last WEM Date."
+      });
+      return;
+    }
     setSelectedTab(3);
-  });
+  };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleSubmit(onValid)}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -46,10 +90,10 @@ function WEMDetailsRequest({
             </div>
           </div>
         </div>
-        <div className="mt-4 pl-6">
+        <div className="mt-4 pl-4 md:pl-6">
           <h1 className="text-lg font-semibold">WEM Details Request</h1>
         </div>
-        <div className="gap-6 mt-4 pl-6">
+        <div className="gap-6 mt-4 pl-4 md:pl-6">
           <div>
             <label
               htmlFor="purpose_of_wem_request"
@@ -58,7 +102,12 @@ function WEMDetailsRequest({
               Purpose of WEM Request
               <span className="text-red-600">*</span>
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            {errors.purpose_of_wem_request && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.purpose_of_wem_request.message || "Please select at least one Purpose of WEM Request."}
+              </p>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
@@ -103,7 +152,7 @@ function WEMDetailsRequest({
                   ISO Compliance
                 </label>
               </div>
-              <div className="relative mt-2 flex items-center gap-2">
+              <div className="relative mt-2 flex items-center gap-2 md:col-span-2">
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
@@ -117,7 +166,7 @@ function WEMDetailsRequest({
                   </span>
                 </label>
               </div>
-              <div className="relative flex gap-2 mt-6">
+              <div className="relative flex gap-2 mt-6 md:col-span-2">
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
@@ -131,7 +180,7 @@ function WEMDetailsRequest({
             </div>
           </div>
         </div>
-        <div className="gap-6 mt-4 pl-6">
+        <div className="gap-6 mt-4 pl-4 md:pl-6">
           <div>
             <label
               htmlFor="wem_conducted_by"
@@ -140,7 +189,12 @@ function WEMDetailsRequest({
               WEM Conducted By
               <span className="text-red-600">*</span>
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            {errors.wem_conducted_by && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.wem_conducted_by.message || "Please select at least one WEM Conducted By option."}
+              </p>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
@@ -177,7 +231,7 @@ function WEMDetailsRequest({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4 pl-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 pl-4 md:pl-6">
           <div>
             <label
               htmlFor="last_wem_date"
@@ -186,6 +240,11 @@ function WEMDetailsRequest({
               Last WEM Date
               <span className="text-red-600">*</span>
             </label>
+            {errors.last_wem_date && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.last_wem_date.message || "Please select the Last WEM Date."}
+              </p>
+            )}
             <div className="relative mt-2">
               <Controller
                 control={control}

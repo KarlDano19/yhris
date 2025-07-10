@@ -19,21 +19,35 @@ async function updateHealthAndSafetyReport(data: any, health_and_safety_report_i
       const formData = new FormData();
       
       // Handle policy_and_program_file
-      if (data.policy_and_program_file && data.policy_and_program_file.length > 0) {
-        formData.append("policy_and_program_file", data.policy_and_program_file[0]);
+      if (data.policy_and_program_file) {
+        if (data.policy_and_program_file instanceof File) {
+          formData.append("policy_and_program_file", data.policy_and_program_file);
+        } else if (data.policy_and_program_file.length > 0) {
+          formData.append("policy_and_program_file", data.policy_and_program_file[0]);
+        }
       }
       
       // Handle technical_information_file
-      if (data.technical_information_file && data.technical_information_file.length > 0) {
-        formData.append("technical_information_file", data.technical_information_file[0]);
+      if (data.technical_information_file) {
+        if (data.technical_information_file instanceof File) {
+          formData.append("technical_information_file", data.technical_information_file);
+        } else if (data.technical_information_file.length > 0) {
+          formData.append("technical_information_file", data.technical_information_file[0]);
+        }
       }
       
-      // Handle signature (existing logic)
-      if (data.signature && data.signature.length) {
-        const signatureBlob = await fetch(`${data.signature}`).then((res) =>
-          res.blob()
-        );
-        formData.append("signature", signatureBlob, "signature.jpg");
+      // Handle signature (matching annual accident illness pattern)
+      if (data.signature) {
+        if (data.signature instanceof File) {
+          // If it's already a File object, use it directly
+          formData.append('signature', data.signature);
+        } else if (typeof data.signature === 'string' && data.signature.startsWith('data:')) {
+          // If it's a data URL (from drawing)
+          const signatureBlob = await fetch(data.signature).then((res) => res.blob());
+          formData.append('signature', signatureBlob, 'signature.png');
+        } else if (typeof data.signature === 'string' && data.signature.startsWith('http')) {
+          // If it's an existing URL, skip it (don't append to FormData)
+        }
       }
       
       // Add all other fields
@@ -51,7 +65,7 @@ async function updateHealthAndSafetyReport(data: any, health_and_safety_report_i
       headers: {
         Authorization: `Token ${token}`,
         // Don't set content-type for FormData, let the browser set it with boundary
-        ...(data instanceof FormData ? {} : { "content-type": "application/json" }),
+        ...(data instanceof FormData ? {} : { "Content-Type": "application/json" }),
       },
       body: data instanceof FormData ? data : JSON.stringify(data),
     };

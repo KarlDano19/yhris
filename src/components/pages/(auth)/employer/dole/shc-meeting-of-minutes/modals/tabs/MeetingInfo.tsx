@@ -1,13 +1,10 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
+import { Controller } from "react-hook-form";
 import Select from 'react-select';
 
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
@@ -19,18 +16,22 @@ export default function MeetingInfo({
   register,
   handleSubmit,
   setSelectedTab,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
-  const onSubmit = handleSubmit(() => {
-    setSelectedTab(2);
-  });
-
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
+  const [attendeeOptions, setAttendeeOptions] = useState<any>([]);
+  const [absenteeOptions, setAbsenteeOptions] = useState<any>([]);
 
   useEffect(() => {
     if (employeeData) {
@@ -39,8 +40,70 @@ export default function MeetingInfo({
         label: `${item.firstname} ${item.lastname}`,
       }));
       setEmployeeItems(formattedEmployees);
+      setAttendeeOptions(formattedEmployees);
+      setAbsenteeOptions(formattedEmployees);
     }
   }, [employeeData]);
+
+  // Update available options when attendees change
+  useEffect(() => {
+    if (employeeItems.length > 0) {
+      const selectedAttendees = control._formValues?.attendees || [];
+      const selectedAbsentees = control._formValues?.absentees || [];
+      
+      // Filter out attendees from absentee options
+      setAbsenteeOptions(
+        employeeItems.filter((item: any) => !selectedAttendees.includes(item.value))
+      );
+      
+      // Filter out absentees from attendee options
+      setAttendeeOptions(
+        employeeItems.filter((item: any) => !selectedAbsentees.includes(item.value))
+      );
+    }
+  }, [control._formValues?.attendees, control._formValues?.absentees, employeeItems]);
+
+  useEffect(() => {
+    if (control._formValues?.attendees && Array.isArray(control._formValues.attendees) && control._formValues.attendees.length > 0) {
+      clearErrors("attendees");
+    }
+  }, [control._formValues?.attendees, clearErrors]);
+
+  useEffect(() => {
+    if (control._formValues?.absentees && Array.isArray(control._formValues.absentees) && control._formValues.absentees.length > 0) {
+      clearErrors("absentees");
+    }
+  }, [control._formValues?.absentees, clearErrors]);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const timeOfMeeting = control._formValues?.time_of_meeting;
+    const venue = control._formValues?.venue;
+    const attendees = control._formValues?.attendees;
+
+    if (!timeOfMeeting) {
+      const el = document.getElementById("time_of_meeting");
+      if (el) el.focus();
+      return;
+    }
+    if (!venue) {
+      const el = document.getElementById("venue");
+      if (el) el.focus();
+      return;
+    }
+
+    let hasError = false;
+    if (!attendees || !Array.isArray(attendees) || attendees.length === 0) {
+      setError("attendees", {
+        type: "manual",
+        message: "Please select at least one Attendee."
+      });
+      hasError = true;
+    }
+    if (hasError) return;
+
+    setSelectedTab(2);
+  };
 
   return (
     <form onSubmit={onSubmit}>
@@ -60,7 +123,7 @@ export default function MeetingInfo({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="email"
@@ -112,11 +175,12 @@ export default function MeetingInfo({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Venue
+              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("venue")}
+                {...register("venue", { required: true })}
                 id="venue"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
@@ -126,7 +190,7 @@ export default function MeetingInfo({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Attendance</h1>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="attendees"
@@ -134,31 +198,36 @@ export default function MeetingInfo({
             >
               Attendees<span className="text-red-600">*</span>
             </label>
+            {errors.attendees && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.attendees.message || "Please select at least one Attendee."}
+              </p>
+            )}
             <Controller
               name="attendees"
               control={control}
               rules={{ required: true }}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <>
-                  <Select
-                    className="basic-multi-select"
-                    classNamePrefix="select"
-                    options={employeeItems}
-                    value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                    onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
-                    components={{
-                      DropdownIndicator: () => (
-                        <div className="pointer-events-none px-2">
-                          <SelectChevronDown />
-                        </div>
-                      ),
-                      IndicatorSeparator: () => null,
-                    }}
-                    isClearable={false}
-                    isMulti
-                  />
-                  {error && <p className="text-red-500 text-sm mt-1 ml-1">{error.message}</p>}
-                </>
+                <Select
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  options={attendeeOptions}
+                  value={employeeItems.filter((item: any) => value?.includes(item.value))}
+                  onChange={(val: any) => {
+                    clearErrors("attendees");
+                    onChange(val ? val.map((item: any) => item.value) : []);
+                  }}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className="pointer-events-none px-2">
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable={false}
+                  isMulti
+                />
               )}
             />
           </div>
@@ -167,33 +236,32 @@ export default function MeetingInfo({
               htmlFor="absentees"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Absentees<span className="text-red-600">*</span>
+              Absentees
             </label>
             <Controller
               name="absentees"
               control={control}
-              rules={{ required: true }}
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <>
-                  <Select
-                    className="basic-multi-select"
-                    classNamePrefix="select"
-                    options={employeeItems}
-                    value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                    onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
-                    components={{
-                      DropdownIndicator: () => (
-                        <div className="pointer-events-none px-2">
-                          <SelectChevronDown />
-                        </div>
-                      ),
-                      IndicatorSeparator: () => null,
-                    }}
-                    isClearable={false}
-                    isMulti
-                  />
-                  {error && <p className="text-red-500 text-sm mt-1 ml-1">{error.message}</p>}
-                </>
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  options={absenteeOptions}
+                  value={employeeItems.filter((item: any) => (value || [])?.includes(item.value))}
+                  onChange={(val: any) => {
+                    onChange(val ? val.map((item: any) => item.value) : []);
+                  }}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className="pointer-events-none px-2">
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable={false}
+                  isMulti
+                />
               )}
             />
           </div>

@@ -8,6 +8,16 @@ async function updateAnnualAccidentIllnessReport(
   try {
     const token = getCookie("token");
 
+    if (data.date_of_report) {
+      const dateOfReport = new Date(data.date_of_report);
+      if (!isNaN(dateOfReport.getTime())) {
+        // Adjust for timezone offset to preserve local date
+        const offset = dateOfReport.getTimezoneOffset();
+        const adjustedDate = new Date(dateOfReport.getTime() - offset * 60000);
+        data.date_of_report = adjustedDate.toISOString().split("T")[0];
+      }
+    }
+
     if (data.date_of_application) {
       const applicationDate = new Date(data.date_of_application);
       if (!isNaN(applicationDate.getTime())) {
@@ -17,13 +27,27 @@ async function updateAnnualAccidentIllnessReport(
       }
     }
 
+    let formData;
+    if (data.signature && typeof data.signature !== 'string') {
+      formData = new FormData();
+      formData.append('signature', data.signature);
+      
+      for (const key in data) {
+        if (key !== 'signature') {
+          formData.append(key, data[key]);
+        }
+      }
+    } else {
+      formData = data;
+    }
+
     const config = {
       method: "PATCH",
       headers: {
-        "content-type": "application/json",
         Authorization: `Token ${token}`,
+        ...(formData instanceof FormData ? {} : { "content-type": "application/json" }),
       },
-      body: JSON.stringify(data),
+      body: formData instanceof FormData ? formData : JSON.stringify(formData),
     };
 
     const res = await fetch(

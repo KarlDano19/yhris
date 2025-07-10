@@ -49,7 +49,7 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
   }, [isMenuShow]);
 
   return (
-    <div className='fixed z-50 bottom-4 right-6 cursor-pointer'>
+    <div className='fixed z-10 md:z-50 bottom-4 right-6 cursor-pointer'>
       <div
         onClick={() => setShowMenu(!isMenuShow)}
         className={`${

@@ -9,7 +9,7 @@ import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentI
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import PersonalInformation from './tabs/PersonalInformation';
-import EmployementDetails from './tabs/EmployementDetails';
+import EmploymentDetails from './tabs/EmploymentDetails';
 import InjuryDetails from './tabs/InjuryDetails';
 import IllnessDetails from './tabs/IllnessDetails';
 
@@ -83,6 +83,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
       setValue('days_of_absence_illness', workAccidentIllnessReportData.days_of_absence_illness);
       setValue('days_chargeable_illness', workAccidentIllnessReportData.days_chargeable_illness);
       setValue('date_returned_to_work_illness', workAccidentIllnessReportData.date_returned_to_work_illness);
+      setValue('disabling_injury', workAccidentIllnessReportData.disabling_injury ? 'yes' : 'no');
     }
   }, [workAccidentIllnessReportData]);
 
@@ -93,6 +94,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
   }
 
   const onSubmit = handleSubmit((data: any) => {
+    data.disabling_injury = data.disabling_injury === 'yes';
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -116,7 +118,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => customCloseModal()}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}
@@ -141,13 +143,13 @@ export default function UpdateWorkAccidentIllnessReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center">
-                  <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Create Work Accident/Illness Report
+                  <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
+                    Edit Work Accident/Illness Report
                   </h3>
                   <XCircleIcon
-                    className="w-8 h-8 text-white cursor-pointer"
+                    className="w-6 h-6 sm:w-8 sm:h-8 text-white cursor-pointer"
                     onClick={() => customCloseModal()}
                   />
                 </div>
@@ -160,7 +162,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
                   />
                 )}
                 {selectedTab === 2 && (
-                  <EmployementDetails
+                  <EmploymentDetails
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
