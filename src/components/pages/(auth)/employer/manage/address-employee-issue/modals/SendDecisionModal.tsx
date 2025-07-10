@@ -140,15 +140,15 @@ export default function SendDecisionModal({
       if (tagsBcc) {
         employeeIssueItemsCopy[itemIndex].sendDecisionForm.bcc = tagsBcc;
       }
-      const plainMessage = stripHtml(data.message);
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = plainMessage;
+      // Store message as HTML (preserve formatting)
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = data.message;
       employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
       // Save decision_to, decision_cc, decision_bcc as JSON stringified arrays
       employeeIssueItemsCopy[itemIndex].decision_subject = data.subject;
       employeeIssueItemsCopy[itemIndex].decision_to = JSON.stringify(tagsTo);
       employeeIssueItemsCopy[itemIndex].decision_cc = JSON.stringify(tagsCc);
       employeeIssueItemsCopy[itemIndex].decision_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].decision_message = plainMessage;
+      employeeIssueItemsCopy[itemIndex].decision_message = data.message;
       const callbackReq = {
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
@@ -221,11 +221,18 @@ export default function SendDecisionModal({
                               if (template) {
                                 setValue('subject', template.subject);
                                 if (applicantEmail) {
-                                  setTagsTo([applicantEmail, ...template.to]);
+                                  // Check if template.to already contains the applicant email to avoid duplicates
+                                  const templateRecipients = template.to || [];
+                                  if (!templateRecipients.includes(applicantEmail)) {
+                                    // Only add applicantEmail if it's not already in the template recipients
+                                    setTagsTo([applicantEmail, ...templateRecipients]);
+                                  } else {
+                                    // Use template recipients as is since it already includes the applicant email
+                                    setTagsTo(templateRecipients);
+                                  }
                                 } else {
-                                  setTagsTo(template.to);
+                                  setTagsTo(template.to || []);
                                 }
-                                // setTagsTo(template.to || []);
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);

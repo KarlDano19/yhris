@@ -161,15 +161,14 @@ export default function SendNTEModal({
       if (tagsBcc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
       }
-      // Store only plain text (strip HTML)
-      const plainMessage = stripHtml(data.message);
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = plainMessage;
+      // Store message as HTML (preserve formatting)
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
       // Save nte_to, nte_cc, nte_bcc as JSON stringified arrays
       employeeIssueItemsCopy[itemIndex].nte_subject = data.subject;
       employeeIssueItemsCopy[itemIndex].nte_to = JSON.stringify(tagsTo);
       employeeIssueItemsCopy[itemIndex].nte_cc = JSON.stringify(tagsCc);
       employeeIssueItemsCopy[itemIndex].nte_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].nte_message = plainMessage;
+      employeeIssueItemsCopy[itemIndex].nte_message = data.message;
       // Include PDF attachment if available
       if (pdfAttachment) {
         employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;
@@ -264,11 +263,18 @@ export default function SendNTEModal({
                               if (template) {
                                 setValue('subject', template.subject);
                                 if (applicantEmail) {
-                                  setTagsTo([applicantEmail, ...template.to]);
+                                  // Check if template.to already contains the applicant email to avoid duplicates
+                                  const templateRecipients = template.to || [];
+                                  if (!templateRecipients.includes(applicantEmail)) {
+                                    // Only add applicantEmail if it's not already in the template recipients
+                                    setTagsTo([applicantEmail, ...templateRecipients]);
+                                  } else {
+                                    // Use template recipients as is since it already includes the applicant email
+                                    setTagsTo(templateRecipients);
+                                  }
                                 } else {
-                                  setTagsTo(template.to);
+                                  setTagsTo(template.to || []);
                                 }
-                                // setTagsTo(template.to || []);
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);

@@ -245,9 +245,17 @@ export default function IntroduceModal({
                               );
                               if (template) {
                                 if (applicantEmail) {
-                                  setTagsTo([applicantEmail, ...template.to]);
+                                  // Check if template.to already contains the applicant email to avoid duplicates
+                                  const templateRecipients = template.to || [];
+                                  if (!templateRecipients.includes(applicantEmail)) {
+                                    // Only add applicantEmail if it's not already in the template recipients
+                                    setTagsTo([applicantEmail, ...templateRecipients]);
+                                  } else {
+                                    // Use template recipients as is since it already includes the applicant email
+                                    setTagsTo(templateRecipients);
+                                  }
                                 } else {
-                                  setTagsTo(template.to);
+                                  setTagsTo(template.to || []);
                                 }
                                 if (template.bcc) {
                                   setIsBCCOpen(true);

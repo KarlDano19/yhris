@@ -169,17 +169,29 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                     );
                     if (template) {
                       if (actionState.email) {
-                        setTagsTo([actionState.email, ...template.to]);
+                        // Check if template.to already contains the applicant email to avoid duplicates
+                        const templateRecipients = template.to || [];
+                        if (!templateRecipients.includes(actionState.email)) {
+                          // Only add applicantEmail if it's not already in the template recipients
+                          setTagsTo([actionState.email, ...templateRecipients]);
+                        } else {
+                          // Use template recipients as is since it already includes the applicant email
+                          setTagsTo(templateRecipients);
+                        }
                       } else {
-                        setTagsTo(template.to);
+                        setTagsTo(template.to || []);
                       }
                       if (template.bcc) {
                         setIsBCCOpen(true);
                         setTagsBcc(template.bcc);
+                      } else {
+                        setTagsBcc([]);
                       }
                       if (template.cc) {
                         setIsCCOPen(true);
                         setTagsCc(template.cc);
+                      } else {
+                        setTagsCc([]);
                       }
                       setValue("message", template.body);
                       setValue("subject", template.subject);
