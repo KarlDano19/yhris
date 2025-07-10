@@ -36,6 +36,13 @@ type FormValues = {
   to: string;
 };
 
+// Helper function to check if HTML content is empty
+const isHtmlEmpty = (html: string | null | undefined): boolean => {
+  if (!html) return true;
+  const trimmed = html.trim();
+  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
+};
+
 function stripHtml(html: string) {
   const tmp = document.createElement('DIV');
   tmp.innerHTML = html;
@@ -78,6 +85,18 @@ export default function SendNTEModal({
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
+  useEffect(() => {
+    if (isOpen && isOpen.id) {
+      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
+      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
+      if (employeeIssueItemsCopy[itemIndex]) {
+        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
+        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+      }
+    }
+  }, [isOpen]);
+
+
   // Prefill fields from backend when details are loaded
   useEffect(() => {
     if (employeeIssueDetails) {
@@ -92,6 +111,14 @@ export default function SendNTEModal({
     }
   }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
+  // Clear errors when subject changes
+  useEffect(() => {
+    const subjectContent = watch('subject');
+    if (subjectContent && subjectContent.trim() !== '') {
+      clearErrors('subject');
+    }
+  }, [watch('subject'), clearErrors]);
+
   // Clear errors when tagsTo changes
   useEffect(() => {
     if (tagsTo.length > 0) {
@@ -101,7 +128,9 @@ export default function SendNTEModal({
 
   // Clear errors when message changes
   useEffect(() => {
-    if (watch('message') && watch('message').trim() !== '') {
+    const messageContent = watch('message');
+    // Only clear errors when message has actual content
+    if (!isHtmlEmpty(messageContent)) {
       clearErrors('message');
     }
   }, [watch('message'), clearErrors]);
@@ -234,9 +263,12 @@ export default function SendNTEModal({
                               );
                               if (template) {
                                 setValue('subject', template.subject);
-                                // Just set the template's to addresses directly
-                                setTagsTo(template.to || []);
-                                
+                                if (applicantEmail) {
+                                  setTagsTo([applicantEmail, ...template.to]);
+                                } else {
+                                  setTagsTo(template.to);
+                                }
+                                // setTagsTo(template.to || []);
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);
@@ -277,6 +309,17 @@ export default function SendNTEModal({
                           id='subject'
                           {...register('subject', { required: 'Subject is required' })}
                           className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          onChange={(e) => {
+                            setValue('subject', e.target.value);
+                            if (e.target.value.trim() !== '') {
+                              clearErrors('subject');
+                            } else {
+                              setError('subject', {
+                                type: 'manual',
+                                message: 'Subject is required'
+                              });
+                            }
+                          }}
                         />
 
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -436,7 +479,16 @@ export default function SendNTEModal({
                           <ReactQuill
                             onChange={(value) => {
                               setValue('message', value);
-                              trigger('message');
+                              // Only clear errors when there is actual content
+                              if (!isHtmlEmpty(value)) {
+                                clearErrors('message');
+                              } else {
+                                // Set error when content is empty or just a blank line
+                                setError('message', {
+                                  type: 'manual',
+                                  message: 'Message is required'
+                                });
+                              }
                             }}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
@@ -479,14 +531,24 @@ export default function SendNTEModal({
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                         disabled={isLoading}
-                        onClick={async () => {
+                        onClick={async (e) => {
                           // Trigger validation for all required fields
                           const subjectValid = await trigger('subject');
-                          const messageValid = await trigger('message');
-                          const toValid = await trigger('to');
+                          
+                          // Check message content specifically for empty HTML
+                          const messageContent = watch('message');
+                          let messageValid = !isHtmlEmpty(messageContent);
+                          
+                          if (!messageValid) {
+                            setError('message', {
+                              type: 'manual',
+                              message: 'Message is required'
+                            });
+                          }
                           
                           // Check if all validations pass
-                          if (!subjectValid || !toValid || !messageValid) {
+                          if (!subjectValid || !messageValid || tagsTo.length === 0) {
+                            e.preventDefault();
                             // Set error for "to" field if no recipients
                             if (tagsTo.length === 0) {
                               setError('to', {
