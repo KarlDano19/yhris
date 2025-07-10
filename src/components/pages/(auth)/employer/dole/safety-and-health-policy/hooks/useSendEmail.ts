@@ -22,7 +22,7 @@ export async function sendEmail(data: any) {
       const jsonPayload = {
         bcc: data.bcc,
         cc: data.cc,
-        subject: `Safety and Health Policy Document`,
+        subject: data.subject,
         to: data.to,
         context: message
       };

@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
@@ -23,8 +24,16 @@ import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
 
+// Helper function to check if HTML content is empty
+const isHtmlEmpty = (html: string | null | undefined): boolean => {
+  if (!html) return true;
+  const trimmed = html.trim();
+  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
+};
+
 type FormValues = {
     template: string;
+    subject: string;
     to: string;
     message: string;
     cc: string;
@@ -55,9 +64,10 @@ export default function SendEmailModal({
     const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
     const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
     const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-    const { register, handleSubmit, reset, setValue, watch } = useForm<FormValues>({
+    const { register, handleSubmit, reset, setValue, watch, trigger, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
         defaultValues: {
             template: '',
+            subject: '',
             to: '',
             message: '',
         },
@@ -72,6 +82,30 @@ export default function SendEmailModal({
     // Add state for attachment
     const [attachment, setAttachment] = useState<File | null>(null);
     const [attachmentExist, setAttachmentExist] = useState(false);
+
+    // Clear errors when tagsTo changes
+    useEffect(() => {
+      if (tagsTo.length > 0) {
+        clearErrors('to');
+      }
+    }, [tagsTo, clearErrors]);
+
+    // Clear errors when message changes
+    useEffect(() => {
+      const messageContent = watch('message');
+      // Only clear errors when message has actual content
+      if (!isHtmlEmpty(messageContent)) {
+        clearErrors('message');
+      }
+    }, [watch('message'), clearErrors]);
+
+    // Clear errors when subject changes
+    useEffect(() => {
+      const subjectValue = watch('subject');
+      if (subjectValue && subjectValue.trim() !== '') {
+        clearErrors('subject');
+      }
+    }, [watch('subject'), clearErrors]);
 
     // Get filename from attachment URL
     const getFilenameFromUrl = (url: string) => {
@@ -119,6 +153,9 @@ export default function SendEmailModal({
                     setTagsCc(template.cc);
                 }
                 setValue('message', template.body);
+                setValue('subject', template.subject);
+                clearErrors('message');
+                clearErrors('subject');
             }
         } else {
             // Clear template-related fields if no template is selected
@@ -126,10 +163,41 @@ export default function SendEmailModal({
             setTagsCc([]);
             setTagsBcc([]);
             setValue('message', '');
+            // Don't reset subject to default here to allow manual entry
         }
-    }, [selectedTemplate, dataEmailTemplate, employeeEmail, setTagsTo, setTagsCc, setTagsBcc, setValue]);
+    }, [selectedTemplate, dataEmailTemplate, employeeEmail, setTagsTo, setTagsCc, setTagsBcc, setValue, clearErrors]);
 
     const onSubmit = handleSubmit((data) => {
+        // Validate "To" field manually since it uses tags
+        if (tagsTo.length === 0) {
+          setError('to', {
+            type: 'manual',
+            message: 'At least one recipient is required'
+          });
+          toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+          return;
+        }
+
+        // Validate subject
+        if (!data.subject || data.subject.trim() === '') {
+          setError('subject', {
+            type: 'manual',
+            message: 'Subject is required'
+          });
+          toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+          return;
+        }
+
+        // Validate message
+        if (isHtmlEmpty(data.message)) {
+          setError('message', {
+            type: 'manual',
+            message: 'Message is required'
+          });
+          toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+          return;
+        }
+
         // If attachment exists, use FormData
         let payload: any;
         if (attachment) {
@@ -138,14 +206,14 @@ export default function SendEmailModal({
           payload.append('context', data.message);
           if (tagsCc.length > 0) payload.append('cc', JSON.stringify(tagsCc));
           if (tagsBcc.length > 0) payload.append('bcc', JSON.stringify(tagsBcc));
-          payload.append('subject', 'Safety and Health Policy Document');
+          payload.append('subject', data.subject);
           payload.append('attachment', attachment);
         } else {
           payload = {
             to: tagsTo,
             cc: tagsCc.length > 0 ? tagsCc : undefined,
             bcc: tagsBcc.length > 0 ? tagsBcc : undefined,
-            subject: 'Safety and Health Policy Document',
+            subject: data.subject,
             context: data.message
           };
         }
@@ -165,11 +233,13 @@ export default function SendEmailModal({
             }
         }
         mutate(payload, callbackReq);
-    })
+    });
 
     const customCloseModal = () => {
       // Reset form state
-      // add reset state here if needed
+      reset();
+      setAttachment(null);
+      setAttachmentExist(false);
       
       // Close the modal
       setIsOpen(null);
@@ -205,7 +275,7 @@ export default function SendEmailModal({
                     <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                       <div className='flex bg-savoy-blue p-2 items-center'>
                         <h3 className='flex-1 text-white ml-2 font-semibold'>Send Contract</h3>
-                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                       </div>
                       <form onSubmit={onSubmit}>
                         <div className='px-4 pt-4 pb-6'>
@@ -213,12 +283,18 @@ export default function SendEmailModal({
                             <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                               Email Template
                             </label>
+                            {errors.template && (
+                              <p className="text-xs text-red-600 mt-1">
+                                {errors.template.message}
+                              </p>
+                            )}
                             <div className='relative mt-2'>
                               <select
                                 id='template'
                                 {...register('template')}
                                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 onChange={(event) => {
+                                    setValue('template', event.target.value);
                                     setSelectedTemplate(event.target.value);
                                 }}
                               >
@@ -234,13 +310,53 @@ export default function SendEmailModal({
                               </div>
                             </div>
                           </div>
+
+                          <div className='sm:col-span-4 mt-4'>
+                            <label htmlFor='subject' className='block text-sm font-medium leading-6 text-gray-900'>
+                              Subject<span className='text-red-600'>*</span>
+                            </label>
+                            {errors.subject && (
+                              <p className="text-xs text-red-600 mt-1">
+                                {errors.subject.message || 'Subject is required'}
+                              </p>
+                            )}
+                            <div className='relative mt-2'>
+                              <input
+                                type="text"
+                                id="subject"
+                                {...register('subject', { required: 'Subject is required' })}
+                                className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                onChange={(e) => {
+                                  setValue('subject', e.target.value);
+                                  if (e.target.value.trim() !== '') {
+                                    clearErrors('subject');
+                                  } else {
+                                    setError('subject', {
+                                      type: 'manual',
+                                      message: 'Subject is required'
+                                    });
+                                  }
+                                }}
+                              />
+                            </div>
+                          </div>
+
                           <div className='sm:col-span-4 mt-4'>
                             <label htmlFor='to' className='block text-sm font-medium leading-6 text-gray-900'>
                               To<span className='text-red-600'>*</span>
                             </label>
+                            {errors.to && (
+                              <p className="text-xs text-red-600 mt-1">
+                                {errors.to.message}
+                              </p>
+                            )}
                             <div className='mt-2 flex rounded-md shadow-sm'>
                               <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                                <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                                <div 
+                                  className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                                  data-tooltip-id='to-section-tooltip'
+                                  data-tooltip-place='bottom'
+                                >
                                   {tagsTo.map((tagTo: string) => (
                                     <div
                                       key={tagTo}
@@ -256,9 +372,16 @@ export default function SendEmailModal({
                                     type='text'
                                     value={inputTo}
                                     onKeyDown={handleKeyDownTo}
-                                    onChange={(e) => setInputTo(e.target.value)} // Update input state
+                                    onChange={(e) => setInputTo(e.target.value)}
                                     className='focus:none outline-none px-2 py-1 grow'
                                   />
+                                  <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                    <div className='px-1'>
+                                      <h2 className='text-[12px] font-medium'>
+                                        Add multiple recipients by pressing Tab or Enter.
+                                      </h2>
+                                    </div>
+                                  </Tooltip>
                                 </div>
                               </div>
                               <button
@@ -287,7 +410,11 @@ export default function SendEmailModal({
                                 CC
                               </label>
                               <div className='mt-2'>
-                                <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                                <div 
+                                  className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                                  data-tooltip-id='cc-section-tooltip'
+                                  data-tooltip-place='bottom'
+                                >
                                   {tagsCc.map((tag: string) => (
                                     <div
                                       key={tag}
@@ -303,9 +430,16 @@ export default function SendEmailModal({
                                     type='text'
                                     value={inputCc}
                                     onKeyDown={handleKeyDown}
-                                    onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
+                                    onChange={(e) => setInputCc(e.target.value)}
                                     className='focus:none outline-none px-2 py-1 grow rounded-md'
                                   />
+                                  <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                    <div className='px-1'>
+                                      <h2 className='text-[12px] font-medium'>
+                                        Add multiple recipients by pressing Tab or Enter.
+                                      </h2>
+                                    </div>
+                                  </Tooltip>
                                 </div>
                               </div>
                             </div>
@@ -316,7 +450,11 @@ export default function SendEmailModal({
                                 BCC
                               </label>
                               <div className='mt-2'>
-                                <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                                <div 
+                                  className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'
+                                  data-tooltip-id='bcc-section-tooltip'
+                                  data-tooltip-place='bottom'
+                                >
                                   {tagsBcc.map((tagBcc: string) => (
                                     <div
                                       key={tagBcc}
@@ -332,9 +470,16 @@ export default function SendEmailModal({
                                     type='text'
                                     value={inputBcc}
                                     onKeyDown={handleKeyDownBcc}
-                                    onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
+                                    onChange={(e) => setInputBcc(e.target.value)}
                                     className='focus:none outline-none px-2 py-1 grow rounded-md'
                                   />
+                                  <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                    <div className='px-1'>
+                                      <h2 className='text-[12px] font-medium'>
+                                        Add multiple recipients by pressing Tab or Enter.
+                                      </h2>
+                                    </div>
+                                  </Tooltip>
                                 </div>
                               </div>
                             </div>
@@ -343,10 +488,27 @@ export default function SendEmailModal({
                             <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                               Message<span className='text-red-600'>*</span>
                             </label>
+                            {errors.message && (
+                              <p className="text-xs text-red-600 mt-1">
+                                {errors.message.message || 'Message is required'}
+                              </p>
+                            )}
                             <div className='mt-2 h-72 mb-12'>
-                              <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
+                              <textarea rows={4} {...register('message', { required: 'Message is required' })} id='message' hidden />
                               <ReactQuill
-                                onChange={(value) => setValue('message', value)}
+                                onChange={(value) => {
+                                  setValue('message', value);
+                                  // Only clear errors when there is actual content
+                                  if (!isHtmlEmpty(value)) {
+                                    clearErrors('message');
+                                  } else {
+                                    // Set error when content is empty or just a blank line
+                                    setError('message', {
+                                      type: 'manual',
+                                      message: 'Message is required'
+                                    });
+                                  }
+                                }}
                                 formats={QUILL_FORMATS}
                                 modules={QUILL_MODULES}
                                 style={{ height: '100%', padding: '5px 8px !important' }}
@@ -406,6 +568,44 @@ export default function SendEmailModal({
                             type='submit'
                             className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto disabled:opacity-50'
                             disabled={isLoading}
+                            onClick={async (e) => {
+                              // Trigger validation for all required fields
+                              const subjectValid = await trigger('subject');
+                              
+                              // Check message content specifically for empty HTML
+                              const messageContent = watch('message');
+                              let messageValid = !isHtmlEmpty(messageContent);
+                              
+                              if (!messageValid) {
+                                setError('message', {
+                                  type: 'manual',
+                                  message: 'Message is required'
+                                });
+                              }
+                              
+                              // Check if all validations pass
+                              if (!subjectValid || !messageValid || tagsTo.length === 0) {
+                                e.preventDefault();
+                                // Set error for "to" field if no recipients
+                                if (tagsTo.length === 0) {
+                                  setError('to', {
+                                    type: 'manual',
+                                    message: 'At least one recipient is required'
+                                  });
+                                }
+                                toast.custom(
+                                  () => (
+                                    <CustomToast
+                                      message={'You cannot proceed due to incomplete fields. Please review.'}
+                                      type='error'
+                                    />
+                                  ),
+                                  {
+                                    duration: 2000,
+                                  }
+                                );
+                              }
+                            }}
                           >
                             {isLoading ? (
                               <div
