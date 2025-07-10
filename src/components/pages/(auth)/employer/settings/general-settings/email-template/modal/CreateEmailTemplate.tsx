@@ -266,7 +266,7 @@ export default function EmailTemplateModal({
                       </div>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Attachements<span className='text-red-600'></span>
+                          Attachments<span className='text-red-600'></span>
                         </label>
                         <div>
                           <div

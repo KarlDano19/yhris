@@ -28,6 +28,7 @@ import 'react-quill/dist/quill.snow.css';
 
 type FormValues = {
   template: string;
+  subject: string;
   email: string;
   message: string;
   cc: string;
@@ -104,6 +105,7 @@ export default function SendNTEModal({
   // Prefill fields from backend when details are loaded
   useEffect(() => {
     if (employeeIssueDetails) {
+      setValue('subject', employeeIssueDetails.nte_subject || '');
       setTagsTo(employeeIssueDetails.nte_to ? JSON.parse(employeeIssueDetails.nte_to) : []);
       setTagsCc(employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : []);
       setTagsBcc(employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []);
@@ -123,6 +125,7 @@ export default function SendNTEModal({
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'nte';
       employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template ? template.subject : '';
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.subject = data.subject;
       employeeIssueItemsCopy[itemIndex].issueNTEForm.to = tagsTo;
       if (tagsCc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = tagsCc;
@@ -134,6 +137,7 @@ export default function SendNTEModal({
       const plainMessage = stripHtml(data.message);
       employeeIssueItemsCopy[itemIndex].issueNTEForm.message = plainMessage;
       // Save nte_to, nte_cc, nte_bcc as JSON stringified arrays
+      employeeIssueItemsCopy[itemIndex].nte_subject = data.subject;
       employeeIssueItemsCopy[itemIndex].nte_to = JSON.stringify(tagsTo);
       employeeIssueItemsCopy[itemIndex].nte_cc = JSON.stringify(tagsCc);
       employeeIssueItemsCopy[itemIndex].nte_bcc = JSON.stringify(tagsBcc);
@@ -230,6 +234,7 @@ export default function SendNTEModal({
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
+                                setValue('subject', template.subject);
                                 // Just set the template's to addresses directly
                                 setTagsTo(template.to || []);
                                 
@@ -260,6 +265,16 @@ export default function SendNTEModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            Subject<span className='text-red-600'>*</span>
+                        </label>
+                        <input
+                          type='text'
+                          id='subject'
+                          {...register('subject', { required: true })}
+                          className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                        />
+
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>

@@ -25,6 +25,7 @@ import 'react-quill/dist/quill.snow.css';
 
 type FormValues = {
   template: string;
+  subject: string;
   email: string;
   message: string;
   cc: string;
@@ -89,6 +90,7 @@ export default function SendDecisionModal({
       employeeIssueItemsCopy[itemIndex].id = isOpen.id;
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'decision';
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.subject = data.subject;
       employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = template.subject;
       employeeIssueItemsCopy[itemIndex].sendDecisionForm.to = tagsTo;
       if (tagsCc) {
@@ -101,6 +103,7 @@ export default function SendDecisionModal({
       employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = plainMessage;
       employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
       // Save decision_to, decision_cc, decision_bcc as JSON stringified arrays
+      employeeIssueItemsCopy[itemIndex].decision_subject = data.subject;
       employeeIssueItemsCopy[itemIndex].decision_to = JSON.stringify(tagsTo);
       employeeIssueItemsCopy[itemIndex].decision_cc = JSON.stringify(tagsCc);
       employeeIssueItemsCopy[itemIndex].decision_bcc = JSON.stringify(tagsBcc);
@@ -175,6 +178,7 @@ export default function SendDecisionModal({
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
+                                setValue('subject', template.subject);
                                 // Just set the template's to addresses directly
                                 setTagsTo(template.to || []);
                                 
@@ -205,6 +209,15 @@ export default function SendDecisionModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Subject<span className='text-red-600'>*</span>
+                        </label>
+                        <input
+                          type='text'
+                          id='subject'
+                          {...register('subject', { required: true })}
+                          className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                        />
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
