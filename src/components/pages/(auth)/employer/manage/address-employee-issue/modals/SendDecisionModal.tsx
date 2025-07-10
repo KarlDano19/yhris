@@ -27,6 +27,7 @@ type FormValues = {
   template: string;
   subject: string;
   email: string;
+  to: string;
   message: string;
   cc: string;
   bcc: string;
@@ -62,7 +63,7 @@ export default function SendDecisionModal({
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, reset, watch, setValue } = useForm<FormValues>({
+  const { register, handleSubmit, reset, watch, setValue, trigger, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
     defaultValues: {
       template: '',
       message: '',
@@ -82,7 +83,30 @@ export default function SendDecisionModal({
     }
   }, [isOpen]);
 
+  // Clear errors when tagsTo changes
+  useEffect(() => {
+    if (tagsTo.length > 0) {
+      clearErrors('to');
+    }
+  }, [tagsTo, clearErrors]);
+
+  // Clear errors when message changes
+  useEffect(() => {
+    if (watch('message') && watch('message').trim() !== '') {
+      clearErrors('message');
+    }
+  }, [watch('message'), clearErrors]);
+
   const onSubmit = handleSubmit((data) => {
+    // Validate "To" field manually since it uses tags
+    if (tagsTo.length === 0) {
+      setError('to', {
+        type: 'manual',
+        message: 'At least one recipient is required'
+      });
+      toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+      return;
+    }
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
@@ -91,7 +115,7 @@ export default function SendDecisionModal({
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'decision';
       employeeIssueItemsCopy[itemIndex].sendDecisionForm.subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = template.subject;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = template ? template.subject : '';
       employeeIssueItemsCopy[itemIndex].sendDecisionForm.to = tagsTo;
       if (tagsCc) {
         employeeIssueItemsCopy[itemIndex].sendDecisionForm.cc = tagsCc;
@@ -212,15 +236,25 @@ export default function SendDecisionModal({
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           Subject<span className='text-red-600'>*</span>
                         </label>
+                        {errors.subject && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.subject.message}
+                          </p>
+                        )}
                         <input
                           type='text'
                           id='subject'
-                          {...register('subject', { required: true })}
+                          {...register('subject', { required: 'Subject is required' })}
                           className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         />
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
+                        {errors.to && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.to.message}
+                          </p>
+                        )}
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                             <div 
@@ -359,10 +393,18 @@ export default function SendDecisionModal({
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
+                        {errors.message && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.message.message}
+                          </p>
+                        )}
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
+                          <textarea rows={4} {...register('message', { required: 'Message is required' })} id='message' hidden />
                           <ReactQuill
-                            onChange={(value) => setValue('message', value)}
+                            onChange={(value) => {
+                              setValue('message', value);
+                              trigger('message');
+                            }}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%', padding: '5px 8px !important' }}
@@ -377,6 +419,33 @@ export default function SendDecisionModal({
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                         disabled={isLoading}
+                        onClick={async () => {
+                          // Trigger validation for all required fields
+                          const subjectValid = await trigger('subject');
+                          const messageValid = await trigger('message');
+                          const toValid = await trigger('to');
+                          // Check if all validations pass
+                          if (!subjectValid || !toValid || !messageValid) {
+                            // Set error for "to" field if no recipients
+                            if (tagsTo.length === 0) {
+                              setError('to', {
+                                type: 'manual',
+                                message: 'At least one recipient is required'
+                              });
+                            }
+                            toast.custom(
+                              () => (
+                                <CustomToast
+                                  message={'You cannot proceed due to incomplete fields. Please review.'}
+                                  type='error'
+                                />
+                              ),
+                              {
+                                duration: 2000,
+                              }
+                            );
+                          }
+                        }}
                       >
                         {isLoading && (
                           <div role='status'>
