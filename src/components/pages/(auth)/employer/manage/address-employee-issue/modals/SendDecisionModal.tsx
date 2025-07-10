@@ -166,12 +166,12 @@ export default function SendDecisionModal({
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Email Template<span className='text-red-600'>*</span>
+                          Email Template
                         </label>
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(event) => {
                               const template = dataEmailTemplate.find(
