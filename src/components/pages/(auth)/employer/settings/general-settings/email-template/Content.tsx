@@ -43,13 +43,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataEmailTemplate && !isGetEmailTemplateLoading) {
-      dataEmailTemplate.map((item: any) => {
-        item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
-        return item;
-      });
-      setEmailTemplatesItems(dataEmailTemplate);
+      setEmailTemplatesItems(
+        dataEmailTemplate.map((item: any) => ({
+          ...item,
+          created_at: (() => {
+            const d = new Date(item.created_at);
+            return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString('en-US');
+          })(),
+        }))
+      );
     }
-  }, [dataEmailTemplate]);
+  }, [dataEmailTemplate, isGetEmailTemplateLoading]);
 
   useEffect(() => {
     if (selectedEmailTemplateId) {
