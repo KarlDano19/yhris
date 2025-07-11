@@ -1,4 +1,6 @@
-import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useState, useEffect, useMemo } from 'react';
+
+import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -15,6 +17,16 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { T_LetterModal } from '@/types/globals';
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
+
+// Helper function to check if HTML content is empty
+const isHtmlEmpty = (html: string | null | undefined): boolean => {
+  if (!html) return true;
+  const trimmed = html.trim();
+  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
+};
 
 type FormValues = {
   date: string;
@@ -37,6 +49,7 @@ export default function LetterModal({
   setIsOpen: Dispatch<T_LetterModal | null>;
 }) {
   const cancelButtonRef = useRef(null);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [letterType, setLetterType] = useState('');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -72,7 +85,8 @@ export default function LetterModal({
   // Clear errors when message changes
   useEffect(() => {
     const messageContent = watch('message');
-    if (messageContent && messageContent.trim() !== '') {
+    // Only clear errors when message has actual content
+    if (!isHtmlEmpty(messageContent)) {
       clearErrors('message');
     }
   }, [watch('message'), clearErrors]);
@@ -268,24 +282,26 @@ export default function LetterModal({
                             {errors.message.message || 'Message is required'}
                           </p>
                         )}
-                        <div className='mt-2'>
-                          <textarea
-                            rows={4}
-                            {...register('message', { required: 'Message is required' })}
-                            id='message'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                            defaultValue={''}
-                            onChange={(e) => {
-                              setValue('message', e.target.value);
-                              if (e.target.value.trim() !== '') {
+                        <div className='mt-2 h-72 mb-12'>
+                          <textarea rows={4} {...register('message', { required: 'Message is required' })} id='message' hidden />
+                          <ReactQuill
+                            onChange={(value) => {
+                              setValue('message', value);
+                              // Only clear errors when there is actual content
+                              if (!isHtmlEmpty(value)) {
                                 clearErrors('message');
                               } else {
+                                // Set error when content is empty or just a blank line
                                 setError('message', {
                                   type: 'manual',
                                   message: 'Message is required'
                                 });
                               }
                             }}
+                            formats={QUILL_FORMATS}
+                            modules={QUILL_MODULES}
+                            style={{ height: '100%', padding: '5px 8px !important' }}
+                            value={watch('message')}
                           />
                         </div>
                       </div>
@@ -298,7 +314,17 @@ export default function LetterModal({
                         onClick={async (e) => {
                           // Trigger validation for all required fields
                           const dateValid = await trigger('date');
-                          const messageValid = await trigger('message');
+                          
+                          // Check message content specifically for empty HTML
+                          const messageContent = watch('message');
+                          let messageValid = !isHtmlEmpty(messageContent);
+                          
+                          if (!messageValid) {
+                            setError('message', {
+                              type: 'manual',
+                              message: 'Message is required'
+                            });
+                          }
                           
                           // Check if all validations pass
                           if (!dateValid || !messageValid || tagsTo.length === 0) {
