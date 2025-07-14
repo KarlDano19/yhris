@@ -9,7 +9,7 @@ interface Field {
   value: any;
 }
 
-export default function CreateJobPageOne({
+export default function CreateJobPageTitleInfo({
   control,
   Controller,
   register,
@@ -514,7 +514,7 @@ export default function CreateJobPageOne({
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
         <button
-          id='pageOneNextBtn'
+          id='pageTitleInfoNextBtn'
           type='submit'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
         >

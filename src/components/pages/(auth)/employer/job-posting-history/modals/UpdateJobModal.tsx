@@ -6,13 +6,13 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import SalaryRangeModal from '../../modals/SalaryRangeModal';
-import CreateJobPageOne from '../../modals/ModalPages/CreateJobPageOne';
-import CreateJobPageTwo from '../../modals/ModalPages/CreateJobPageTwo';
-import CreateJobPageThree from '../../modals/ModalPages/CreateJobPageThree';
-import CreateJobPageFour from '../../modals/ModalPages/CreateJobPageFour';
-import CreateJobPageFive from '../../modals/ModalPages/CreateJobPageFive';
-import CreateJobPageSix from '../../modals/ModalPages/CreateJobPageSix';
-import CreateJobPageSeven from '../../modals/ModalPages/CreateJobPageSeven';
+import CreateJobPageOne from '../../modals/ModalPages/CreateJobPageJobTitleInfo';
+import CreateJobPageTwo from '../../modals/ModalPages/CreateJobPageJobType';
+import CreateJobPageThree from '../../modals/ModalPages/CreateJobPageSalary';
+import CreateJobPageFour from '../../modals/ModalPages/CreateJobPageJobDescription';
+import CreateJobPageFive from '../../modals/ModalPages/CreateJobPagePostAs';
+import CreateJobPageSix from '../../modals/ModalPages/CreateJobPagePreview';
+import CreateJobPageSeven from '../../modals/ModalPages/CreateJobPagePlatform';
 
 import useGetJobDetails from '../hooks/useGetJobPostDetails';
 import useUpdateJobPostItems from '../hooks/useUpdateJobPostItems';
