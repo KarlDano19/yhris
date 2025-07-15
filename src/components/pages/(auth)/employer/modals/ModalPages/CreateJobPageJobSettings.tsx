@@ -43,6 +43,10 @@ export default function CreateJobPageJobSettings({
   const [showPresetOptions, setShowPresetOptions] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  
+  // Rejection settings state
+  const [isRejectionSettingsOpen, setIsRejectionSettingsOpen] = useState(false);
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState(true);
 
   // Selected preset options
   const [selectedPresets, setSelectedPresets] = useState(['drivers-license', 'education']);
@@ -137,6 +141,16 @@ export default function CreateJobPageJobSettings({
       setShowPresetOptions(true);
     }
   };
+  
+  // Toggle rejection settings section
+  const toggleRejectionSettings = () => {
+    setIsRejectionSettingsOpen(!isRejectionSettingsOpen);
+  };
+  
+  // Toggle auto-reject functionality
+  const toggleAutoReject = () => {
+    setAutoRejectEnabled(!autoRejectEnabled);
+  };
 
   // Handle submission with validation
   const handleSubmit = () => {
@@ -173,7 +187,7 @@ export default function CreateJobPageJobSettings({
                 >
                   {/* Edit Icon */}
                   <span className="sr-only">Edit</span>
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 17.25V20h2.75l8.06-8.06-2.75-2.75L4 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" fill="#64748b"/></svg>
+                  <EditIcon />
                 </button>
               </div>
 
@@ -300,16 +314,50 @@ export default function CreateJobPageJobSettings({
           <div className="flex items-start justify-between border-b border-gray-200 py-4">
             <div>
               <div className="text-sm font-medium text-gray-900 mb-1">Rejection settings</div>
-              <div className="text-sm text-gray-900">Enabled</div>
+              <div className="text-sm text-gray-900">{autoRejectEnabled ? 'Enabled' : 'Disabled'}</div>
               <div className="text-xs text-gray-500 max-w-md">
                 Filter out and send rejections to applicants who don't provide ideal answers to must-have screening questions.
               </div>
             </div>
-            <button type="button" className="ml-4 p-1 rounded hover:bg-gray-100">
+            <button 
+              type="button" 
+              className="ml-4 p-1 rounded hover:bg-gray-100"
+              onClick={toggleRejectionSettings}
+            >
               <span className="sr-only">Edit</span>
               <EditIcon />
             </button>
           </div>
+
+          {/* Expanded Rejection Settings */}
+          {isRejectionSettingsOpen && (
+            <div className="py-4 border-b border-gray-200">
+              <div className="bg-white p-4 rounded-md border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-sm font-medium text-gray-900">Automatic rejection</div>
+                  <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                    <input 
+                      type="checkbox" 
+                      name="toggle" 
+                      id="autoReject" 
+                      checked={autoRejectEnabled}
+                      onChange={toggleAutoReject}
+                      className="checked:bg-savoy-blue outline-none focus:outline-none right-4 checked:right-0 duration-200 ease-in absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                    />
+                    <label 
+                      htmlFor="autoReject" 
+                      className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${autoRejectEnabled ? 'bg-savoy-blue/40' : ''}`}
+                    ></label>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">
+                  {autoRejectEnabled 
+                    ? "Applicants who don't provide ideal answers to must-have screening questions will be automatically rejected."
+                    : "Applicants who don't provide ideal answers to must-have screening questions will still be considered."}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <hr />
