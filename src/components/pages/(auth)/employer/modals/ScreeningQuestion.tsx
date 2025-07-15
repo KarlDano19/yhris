@@ -73,4 +73,4 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
   );
 };
 
-export default ScreeningQuestion; 
+export default ScreeningQuestion;
