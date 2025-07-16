@@ -98,8 +98,8 @@ function SchedulerInfoTab({
                 </option>
                 <option value='week'>Week</option>
                 <option value='month'>Month</option>
-                <option value='quarter'>Quarter</option>
-                <option value='year'>Year</option>
+                {/* <option value='quarter'>Quarter</option> */}
+                {/* <option value='year'>Year</option> */}
               </select>
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -123,8 +123,8 @@ function SchedulerInfoTab({
               </option>
               <option value='3 days'>3 days before</option>
               <option value='1 day'>1 day before</option>
-              <option value='1 hour'>1 hour before</option>
-              <option value='30 minutes'>30 minutes before</option>
+              {/* <option value='1 hour'>1 hour before</option> */}
+              {/* <option value='30 minutes'>30 minutes before</option> */}
             </select>
             <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
               <SelectChevronDown />
