@@ -269,7 +269,7 @@ function PreferencesTab({
         <button
           type='button'
           className='rounded-md w-full md:w-auto bg-white px-14 py-2.5 text-sm font-semibold text-savoy-blue border border-savoy-blue shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setCurrentTab(1)}
+          onClick={() => setCurrentTab(2)}
         >
           BACK
         </button>

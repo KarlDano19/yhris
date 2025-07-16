@@ -95,7 +95,13 @@ export default function CreateJobModal({
 
   const fifthFormSubmit = () => {
     const data = fifthForm.getValues();
-    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    // Include screening questions and auto-reject settings
+    const jobSettings = {
+      ...data,
+      screeningQuestions: window.screeningQuestions || [],
+      autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true
+    };
+    setCombinedFormData((prev: any) => ({ ...prev, ...jobSettings }));
     setPageNumber(6);
   };
 

@@ -14,11 +14,13 @@ import SuggestionModal from './modals/SuggestionModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
 import useGetJobDetails from './hooks/useGetJobDetails';
 import ProfileTab from './ProfileTab';
+import ScreeningQuestionTab from './ScreeningQuestionTab';
 import PreferencesTab from './PreferencesTab';
 
 const Content = () => {
   const params = useParams();
   const firstForm = useForm();
+  const screeningForm = useForm();
   const secondForm = useForm();
   const [isSuggestModal, setSuggestModal] = useState(false);
   const [jobDetailData, setJobDetailData] = useState<any>({});
@@ -40,12 +42,23 @@ const Content = () => {
     setCombinedFormData((prev: any) => ({ ...prev, ...data }));
     setCurrentTab(2);
   };
+  
+  const screeningSubmit = (data: any) => {
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setCurrentTab(3);
+  };
 
   const handleConfirmation = (isConfirmed: boolean) => {
     setConfirmModal(false);
     if (isConfirmed) {
       const finalData = { ...combinedFormData, ...secondForm.getValues() };
       finalData['jobPosting'] = params.id;
+      
+      // Add screening question answers if they exist
+      if (screeningForm.getValues().screeningAnswers) {
+        finalData['screeningAnswers'] = screeningForm.getValues().screeningAnswers;
+      }
+      
       const callBackReq = {
         onSuccess: () => {
           setOpenSubmitModal(true);
@@ -54,7 +67,7 @@ const Content = () => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
-          if (err === 'Curriculum Vitae/Resume: Invalid file type') {
+          if (err.includes('Invalid file type')) {
             setSuggestModal(true);
           }
         },
@@ -84,6 +97,17 @@ const Content = () => {
             />
           </div>
           <div style={{ display: currentTab === 2 ? 'block' : 'none' }}>
+            <ScreeningQuestionTab
+              register={screeningForm.register}
+              watch={screeningForm.watch}
+              setValue={screeningForm.setValue}
+              handleSubmit={screeningForm.handleSubmit}
+              setCurrentTab={setCurrentTab}
+              jobPostingData={jobDetailData}
+              nextTab={3}
+            />
+          </div>
+          <div style={{ display: currentTab === 3 ? 'block' : 'none' }}>
             <PreferencesTab
               control={secondForm.control}
               register={secondForm.register}

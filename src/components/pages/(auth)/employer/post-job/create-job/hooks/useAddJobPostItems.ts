@@ -26,6 +26,20 @@ async function addJobPost(jobPost: any) {
     formData.append('og_image_width', '300');
     formData.append('og_image_height', '300');
 
+    // Add screening questions and auto-reject settings
+    if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {
+      console.log('Adding screening questions:', jobPost.screeningQuestions);
+      formData.append('screening_questions', JSON.stringify(jobPost.screeningQuestions));
+    }
+    
+    if (jobPost.autoRejectEnabled !== undefined) {
+      console.log('Auto-reject enabled:', jobPost.autoRejectEnabled);
+      formData.append('auto_reject_enabled', jobPost.autoRejectEnabled.toString());
+    } else {
+      // Default to true if not specified
+      formData.append('auto_reject_enabled', 'true');
+    }
+
     if (jobPost.jobDescriptionFile.length) {
       formData.append('uploaded_job_description', jobPost.jobDescriptionFile);
     }

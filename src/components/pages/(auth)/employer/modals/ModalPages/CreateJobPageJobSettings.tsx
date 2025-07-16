@@ -5,6 +5,14 @@ import CustomScreeningForm from '../CustomScreeningForm';
 import PresetQuestionOptions, { PRESET_QUESTIONS } from '../PresetQuestionOptions';
 import EditIcon from '@/svg/EditIcon';
 
+// Extend Window interface to include our custom properties
+declare global {
+  interface Window {
+    screeningQuestions: any[];
+    autoRejectEnabled: boolean;
+  }
+}
+
 export default function CreateJobPageJobSettings({
   setPageNumber,
   onSubmit,
@@ -160,6 +168,11 @@ export default function CreateJobPageJobSettings({
       return;
     }
     setValidationError(null);
+    
+    // Add screening questions and auto-reject settings to global form state
+    window.screeningQuestions = screeningQuestions;
+    window.autoRejectEnabled = autoRejectEnabled;
+    
     onSubmit();
   };
 
