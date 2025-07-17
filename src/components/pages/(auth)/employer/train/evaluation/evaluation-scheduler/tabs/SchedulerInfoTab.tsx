@@ -45,6 +45,18 @@ function SchedulerInfoTab({
     return () => clearTimeout(timer);
   }, []);
 
+  // Show tooltip when user selects week
+  useEffect(() => {
+    if (selectedFrequencyUnit === 'week') {
+      setShowTooltip(true);
+      const timer = setTimeout(() => {
+        setShowTooltip(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedFrequencyUnit]);
+
   const handleMouseEnter = () => {
     setShowTooltip(true);
   };
@@ -99,7 +111,12 @@ function SchedulerInfoTab({
                 isOpen={showTooltip}
               >
                 <div>
-                  <h2 className='text-[12px] font-medium'>Select week or month first.</h2>
+                  <h2 className='text-[12px] font-medium'>
+                    {selectedFrequencyUnit === 'week' 
+                      ? 'The week starts with Sunday-1 to Saturday-6'
+                      : 'Select week or month first.'
+                    }
+                  </h2>
                 </div>
               </Tooltip>
           </label>
