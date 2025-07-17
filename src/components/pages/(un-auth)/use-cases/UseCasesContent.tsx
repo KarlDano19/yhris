@@ -29,8 +29,8 @@ const useCases = [
       "Centralized performance history",
       "Scheduled reviews with deadline tracking",
       "Evaluation assignment and monitoring",
-      "Performance tracking (coming soon)",
-      "Completion monitoring (coming soon)"
+      "Performance tracking",
+      "Completion monitoring"
     ],
     href: "/use-cases/performance-management"
   }

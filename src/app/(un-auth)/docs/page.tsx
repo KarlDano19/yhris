@@ -270,11 +270,11 @@ const DocsPage = () => {
                     <li>Team members log in using their new YAHSHUA HRIS credentials (not their YAHSHUA Payroll credentials)</li>
                   </ol>
 
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-                    <h4 className="font-semibold text-blue-800 mb-2">🔄 Coming Soon</h4>
-                    <p className="text-blue-700 text-sm">
-                      We're working on allowing sub-users from YAHSHUA Payroll to directly log into YAHSHUA HRIS 
-                      using their existing credentials. This will eliminate the need for separate accounts.
+                  <div className="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6">
+                    <h4 className="font-semibold text-orange-800 mb-2">⚠️ Important Access Note</h4>
+                    <p className="text-orange-700 text-sm">
+                      Only the <strong>Owner Admin</strong> from YAHSHUA Payroll can access YAHSHUA HRIS for data syncing and integration. 
+                      Sub-users cannot directly sync or access integration features at this time.
                     </p>
                   </div>
 
@@ -497,9 +497,9 @@ const DocsPage = () => {
                     </ul>
                   </div>
 
-                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                    <h4 className="font-semibold text-blue-800 mb-2">🔄 Coming Soon</h4>
-                    <ul className="list-disc list-inside space-y-1 text-blue-700 text-sm">
+                  <div className="bg-green-50 p-4 rounded-lg mb-6">
+                    <h4 className="font-semibold text-green-800 mb-2">✅ Now Available</h4>
+                    <ul className="list-disc list-inside space-y-1 text-green-700 text-sm">
                       <li>Full compensation details</li>
                       <li>Performance review scores and ratings</li>
                     </ul>
