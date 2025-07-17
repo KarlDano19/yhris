@@ -113,7 +113,7 @@ function SchedulerInfoTab({
                 <div>
                   <h2 className='text-[12px] font-medium'>
                     {selectedFrequencyUnit === 'week' 
-                      ? 'The week starts with Sunday-1 to Saturday-6'
+                      ? 'The week starts with Sunday-1 to Saturday-7'
                       : 'Select week or month first.'
                     }
                   </h2>
