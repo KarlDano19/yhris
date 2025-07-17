@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -11,10 +10,33 @@ import useAddEvaluationScheduler from '../hooks/useAddEvaluationScheduler';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-function CreateEvaluationSchedulerModal({ refetch, isOpen, setIsOpen }: { refetch: any; isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
+interface CreateEvaluationSchedulerModalProps {
+  refetch: any;
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
+  register: any;
+  watch: any;
+  handleSubmit: any;
+  reset: any;
+  control: any;
+  setValue: any;
+  Controller: any;
+}
+
+function CreateEvaluationSchedulerModal({
+  refetch,
+  isOpen,
+  setIsOpen,
+  register,
+  watch,
+  handleSubmit,
+  reset,
+  control,
+  setValue,
+  Controller,
+}: CreateEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
-  const { register, watch, handleSubmit, reset, control, setValue } = useForm();
   const { mutate, isLoading } = useAddEvaluationScheduler();
 
   const onSubmit = handleSubmit((data: any) => {

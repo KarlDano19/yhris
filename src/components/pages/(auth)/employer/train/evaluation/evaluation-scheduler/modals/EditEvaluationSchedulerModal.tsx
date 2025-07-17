@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+// Controller is now passed as a prop
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -12,20 +12,34 @@ import useUpdateEvaluationScheduler from '../hooks/useUpdateEvaluationScheduler'
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-function CreateEvaluationSchedulerModal({
-  refetch,
-  isOpen,
-  setIsOpen,
-  selectedEvaluationSchedulerId,
-}: {
+interface EditEvaluationSchedulerModalProps {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   selectedEvaluationSchedulerId: number | null;
-}) {
+  register: any;
+  setValue: any;
+  watch: any;
+  handleSubmit: any;
+  control: any;
+  reset: any;
+  Controller: any;
+}
+
+function EditEvaluationSchedulerModal({
+  refetch,
+  isOpen,
+  setIsOpen,
+  selectedEvaluationSchedulerId,
+  register,
+  setValue,
+  watch,
+  handleSubmit,
+  control,
+  Controller,
+}: EditEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
-  const { register, setValue, watch, handleSubmit, control } = useForm();
   const {
     data: dataEvaluationSchedulerDetails,
     refetch: refetchEvaluationSchedulerDetails,
@@ -51,7 +65,7 @@ function CreateEvaluationSchedulerModal({
       setValue('message', dataEvaluationSchedulerDetails.message);
       setValue('attachment', dataEvaluationSchedulerDetails.attachment);
     }
-  }, [dataEvaluationSchedulerDetails]);
+  }, [dataEvaluationSchedulerDetails, setValue]);
 
   const customCloseModal = () => {
     evaluationSchedulerDetailRemove();
@@ -134,4 +148,4 @@ function CreateEvaluationSchedulerModal({
   );
 }
 
-export default CreateEvaluationSchedulerModal;
+export default EditEvaluationSchedulerModal;
