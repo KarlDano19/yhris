@@ -105,7 +105,13 @@ function CreateEvaluationSchedulerModal({
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   {selectedTab === 1 && (
-                    <SchedulerInfoTab register={register} handleSubmit={handleSubmit} setSelectedTab={setSelectedTab} />
+                    <SchedulerInfoTab 
+                      register={register} 
+                      handleSubmit={handleSubmit} 
+                      setSelectedTab={setSelectedTab} 
+                      watch={watch}
+                      setValue={setValue}
+                    />
                   )}
                   {selectedTab === 2 && (
                     <EmployeeAssigneeTab

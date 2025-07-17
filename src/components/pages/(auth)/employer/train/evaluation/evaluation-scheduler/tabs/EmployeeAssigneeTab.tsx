@@ -1,16 +1,16 @@
 import { useEffect, useState, useMemo } from "react";
-import dynamic from "next/dynamic";
-import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import "react-quill/dist/quill.snow.css";
 
+import Link from "next/link";
+import dynamic from "next/dynamic";
+
+import "react-quill/dist/quill.snow.css";
 import Select from "react-select";
 
+import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import classNames from "@/helpers/classNames";
 
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
-
 import SelectChevronDown from "@/svg/SelectChevronDown";
-import Link from "next/link";
 
 interface Field {
   onChange: (value: any) => void;

@@ -14,7 +14,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 function CreateEvaluationSchedulerModal({ refetch, isOpen, setIsOpen }: { refetch: any; isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
-  const { register, watch, handleSubmit, reset, control } = useForm();
+  const { register, watch, handleSubmit, reset, control, setValue } = useForm();
   const { mutate, isLoading } = useAddEvaluationScheduler();
 
   const onSubmit = handleSubmit((data: any) => {
@@ -66,7 +66,13 @@ function CreateEvaluationSchedulerModal({ refetch, isOpen, setIsOpen }: { refetc
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
                   {selectedTab === 1 && (
-                    <SchedulerInfoTab register={register} handleSubmit={handleSubmit} setSelectedTab={setSelectedTab} />
+                    <SchedulerInfoTab 
+                      register={register} 
+                      handleSubmit={handleSubmit} 
+                      setSelectedTab={setSelectedTab} 
+                      watch={watch}
+                      setValue={setValue}
+                    />
                   )}
                   {selectedTab === 2 && (
                     <EmployeeAssigneeTab
