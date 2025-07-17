@@ -25,10 +25,19 @@ import 'react-quill/dist/quill.snow.css';
 
 type FormValues = {
   template: string;
+  subject: string;
   email: string;
+  to: string;
   message: string;
   cc: string;
   bcc: string;
+};
+
+// Helper function to check if HTML content is empty
+const isHtmlEmpty = (html: string | null | undefined): boolean => {
+  if (!html) return true;
+  const trimmed = html.trim();
+  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
 
 function stripHtml(html: string) {
@@ -61,7 +70,7 @@ export default function SendDecisionModal({
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, reset, watch, setValue } = useForm<FormValues>({
+  const { register, handleSubmit, reset, watch, setValue, trigger, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
     defaultValues: {
       template: '',
       message: '',
@@ -76,12 +85,45 @@ export default function SendDecisionModal({
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       if (employeeIssueItemsCopy[itemIndex]) {
         setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([]);
+        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
       }
     }
   }, [isOpen]);
 
+  // Clear errors when tagsTo changes
+  useEffect(() => {
+    if (tagsTo.length > 0) {
+      clearErrors('to');
+    }
+  }, [tagsTo, clearErrors]);
+
+  // Clear errors when subject changes
+  useEffect(() => {
+    const subjectContent = watch('subject');
+    if (subjectContent && subjectContent.trim() !== '') {
+      clearErrors('subject');
+    }
+  }, [watch('subject'), clearErrors]);
+
+  // Clear errors when message changes
+  useEffect(() => {
+    const messageContent = watch('message');
+    // Only clear errors when message has actual content
+    if (!isHtmlEmpty(messageContent)) {
+      clearErrors('message');
+    }
+  }, [watch('message'), clearErrors]);
+
   const onSubmit = handleSubmit((data) => {
+    // Validate "To" field manually since it uses tags
+    if (tagsTo.length === 0) {
+      setError('to', {
+        type: 'manual',
+        message: 'At least one recipient is required'
+      });
+      toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+      return;
+    }
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
@@ -89,7 +131,8 @@ export default function SendDecisionModal({
       employeeIssueItemsCopy[itemIndex].id = isOpen.id;
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'decision';
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = template.subject;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.subject = data.subject;
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = template ? template.subject : '';
       employeeIssueItemsCopy[itemIndex].sendDecisionForm.to = tagsTo;
       if (tagsCc) {
         employeeIssueItemsCopy[itemIndex].sendDecisionForm.cc = tagsCc;
@@ -97,14 +140,15 @@ export default function SendDecisionModal({
       if (tagsBcc) {
         employeeIssueItemsCopy[itemIndex].sendDecisionForm.bcc = tagsBcc;
       }
-      const plainMessage = stripHtml(data.message);
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = plainMessage;
+      // Store message as HTML (preserve formatting)
+      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = data.message;
       employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
       // Save decision_to, decision_cc, decision_bcc as JSON stringified arrays
+      employeeIssueItemsCopy[itemIndex].decision_subject = data.subject;
       employeeIssueItemsCopy[itemIndex].decision_to = JSON.stringify(tagsTo);
       employeeIssueItemsCopy[itemIndex].decision_cc = JSON.stringify(tagsCc);
       employeeIssueItemsCopy[itemIndex].decision_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].decision_message = plainMessage;
+      employeeIssueItemsCopy[itemIndex].decision_message = data.message;
       const callbackReq = {
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
@@ -163,21 +207,32 @@ export default function SendDecisionModal({
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Email Template<span className='text-red-600'>*</span>
+                          Email Template
                         </label>
                         <div className='relative mt-2'>
                           <select
                             id='template'
-                            {...register('template', { required: true })}
+                            {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(event) => {
                               const template = dataEmailTemplate.find(
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
-                                // Just set the template's to addresses directly
-                                setTagsTo(template.to || []);
-                                
+                                setValue('subject', template.subject);
+                                if (applicantEmail) {
+                                  // Check if template.to already contains the applicant email to avoid duplicates
+                                  const templateRecipients = template.to || [];
+                                  if (!templateRecipients.includes(applicantEmail)) {
+                                    // Only add applicantEmail if it's not already in the template recipients
+                                    setTagsTo([applicantEmail, ...templateRecipients]);
+                                  } else {
+                                    // Use template recipients as is since it already includes the applicant email
+                                    setTagsTo(templateRecipients);
+                                  }
+                                } else {
+                                  setTagsTo(template.to || []);
+                                }
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);
@@ -206,8 +261,38 @@ export default function SendDecisionModal({
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Subject<span className='text-red-600'>*</span>
+                        </label>
+                        {errors.subject && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.subject.message}
+                          </p>
+                        )}
+                        <input
+                          type='text'
+                          id='subject'
+                          {...register('subject', { required: 'Subject is required' })}
+                          className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          onChange={(e) => {
+                            setValue('subject', e.target.value);
+                            if (e.target.value.trim() !== '') {
+                              clearErrors('subject');
+                            } else {
+                              setError('subject', {
+                                type: 'manual',
+                                message: 'Subject is required'
+                              });
+                            }
+                          }}
+                        />
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
+                        {errors.to && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.to.message}
+                          </p>
+                        )}
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                             <div 
@@ -346,10 +431,27 @@ export default function SendDecisionModal({
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
+                        {errors.message && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.message.message}
+                          </p>
+                        )}
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
+                          <textarea rows={4} {...register('message', { required: 'Message is required' })} id='message' hidden />
                           <ReactQuill
-                            onChange={(value) => setValue('message', value)}
+                            onChange={(value) => {
+                              setValue('message', value);
+                              // Only clear errors when there is actual content
+                              if (!isHtmlEmpty(value)) {
+                                clearErrors('message');
+                              } else {
+                                // Set error when content is empty or just a blank line
+                                setError('message', {
+                                  type: 'manual',
+                                  message: 'Message is required'
+                                });
+                              }
+                            }}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%', padding: '5px 8px !important' }}
@@ -364,6 +466,44 @@ export default function SendDecisionModal({
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                         disabled={isLoading}
+                        onClick={async (e) => {
+                          // Trigger validation for all required fields
+                          const subjectValid = await trigger('subject');
+                          
+                          // Check message content specifically for empty HTML
+                          const messageContent = watch('message');
+                          let messageValid = !isHtmlEmpty(messageContent);
+                          
+                          if (!messageValid) {
+                            setError('message', {
+                              type: 'manual',
+                              message: 'Message is required'
+                            });
+                          }
+                          
+                          // Check if all validations pass
+                          if (!subjectValid || !messageValid || tagsTo.length === 0) {
+                            e.preventDefault();
+                            // Set error for "to" field if no recipients
+                            if (tagsTo.length === 0) {
+                              setError('to', {
+                                type: 'manual',
+                                message: 'At least one recipient is required'
+                              });
+                            }
+                            toast.custom(
+                              () => (
+                                <CustomToast
+                                  message={'You cannot proceed due to incomplete fields. Please review.'}
+                                  type='error'
+                                />
+                              ),
+                              {
+                                duration: 2000,
+                              }
+                            );
+                          }
+                        }}
                       >
                         {isLoading && (
                           <div role='status'>

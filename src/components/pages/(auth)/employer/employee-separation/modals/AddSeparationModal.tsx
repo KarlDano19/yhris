@@ -35,6 +35,14 @@ export default function AddSeparationModal({
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
 
+  const resetForm = () => {
+    reset({
+      date: new Date().toISOString(),
+    });
+    setEmployeeSearch('');
+    setEmployeeSelected(false);
+  };
+
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: () => {
@@ -43,7 +51,7 @@ export default function AddSeparationModal({
         });
         setIsOpen(false);
         refetch();
-        reset();
+        resetForm();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
