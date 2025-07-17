@@ -21,11 +21,12 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         data.subject = employeeIssue.issueNTEForm.subject
           ? employeeIssue.issueNTEForm.subject
           : `NTE | ${employeeIssue.issueNTEForm.template}`;
+        data.nte_subject = employeeIssue.issueNTEForm.subject;
         data.to = employeeIssue.issueNTEForm.to;
         data.cc = employeeIssue.issueNTEForm.cc;
         data.bcc = employeeIssue.issueNTEForm.bcc;
         data.context = employeeIssue.issueNTEForm.message;
-        data.nte_subject = employeeIssue.issueNTEForm.subject;
+        data.nte_subject = employeeIssue.nte_subject;
         data.nte_to = employeeIssue.nte_to;
         data.nte_cc = employeeIssue.nte_cc;
         data.nte_bcc = employeeIssue.nte_bcc;
@@ -35,11 +36,11 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         data.subject = employeeIssue.sendDecisionForm.subject
           ? employeeIssue.sendDecisionForm.subject
           : `Decision | ${employeeIssue.sendDecisionForm.template}`;
+        data.decision_subject = employeeIssue.sendDecisionForm.subject;
         data.to = employeeIssue.sendDecisionForm.to;
         data.cc = employeeIssue.sendDecisionForm.cc;
         data.bcc = employeeIssue.sendDecisionForm.bcc;
         data.context = employeeIssue.sendDecisionForm.message;
-        data.decision_subject = employeeIssue.sendDecisionForm.subject;
         data.decision_to = employeeIssue.decision_to;
         data.decision_cc = employeeIssue.decision_cc;
         data.decision_bcc = employeeIssue.decision_bcc;
