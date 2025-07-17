@@ -80,45 +80,7 @@ function SchedulerInfoTab({
   return (
     <form onSubmit={onSubmit}>
       <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-6 pt-6 pb-8'>
-        <div className='sm:col-span-4 mt-2 w-full'>
-          <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-            Scheduler Name<span className='text-red-600'>*</span>
-          </label>
-          <input
-            id='name'
-            type='text'
-            {...register('name', { required: true })}
-            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-          />
-        </div>
-        <div className='sm:col-span-4 mt-2 w-full'>
-          <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-            Evaluation Template<span className='text-red-600'>*</span>
-          </label>
-          <div className='relative mt-2'>
-            <select
-              id='evaluation_template'
-              {...register('evaluation_template', { required: true })}
-              className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-              defaultValue=''
-            >
-              <option value='' disabled>
-                Select...
-              </option>
-              {evaluationItems.map((item: any, index: number) => {
-                return (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                );
-              })}
-            </select>
-            <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-              <SelectChevronDown />
-            </div>
-          </div>
-        </div>
-        <div className='sm:col-span-4 mt-2 w-full'>
+      <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
             Evaluation Schedule<span className='text-red-600'>*</span>
               <div
@@ -169,7 +131,7 @@ function SchedulerInfoTab({
                   ))
                 }
               </select>
-              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1'>
+              <div className='pointer-events-none absolute inset-y-0 right-1 flex items-center pr-1'>
                 <SelectChevronDown />
               </div>
             </div>
@@ -192,6 +154,44 @@ function SchedulerInfoTab({
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
               </div>
+            </div>
+          </div>
+        </div>
+        <div className='sm:col-span-4 mt-2 w-full'>
+          <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+            Scheduler Name<span className='text-red-600'>*</span>
+          </label>
+          <input
+            id='name'
+            type='text'
+            {...register('name', { required: true })}
+            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+          />
+        </div>
+        <div className='sm:col-span-4 mt-2 w-full'>
+          <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+            Evaluation Template<span className='text-red-600'>*</span>
+          </label>
+          <div className='relative mt-2'>
+            <select
+              id='evaluation_template'
+              {...register('evaluation_template', { required: true })}
+              className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              defaultValue=''
+            >
+              <option value='' disabled>
+                Select...
+              </option>
+              {evaluationItems.map((item: any, index: number) => {
+                return (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                );
+              })}
+            </select>
+            <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+              <SelectChevronDown />
             </div>
           </div>
         </div>
