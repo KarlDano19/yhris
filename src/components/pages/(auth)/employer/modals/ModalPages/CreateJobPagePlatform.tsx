@@ -40,10 +40,28 @@ export default function CreateJobPagePlatform({
   }, [selectedOptions, setValue]);
 
   useEffect(() => {
-    if (getValues && getValues('shared_to')) {
-      setSelectedOptions(getValues('shared_to'));
+    if (getValues) {
+      // Check for shared_to first (from API data)
+      const sharedTo = getValues('shared_to');
+      if (sharedTo) {
+        // Handle both string and array formats
+        if (typeof sharedTo === 'string') {
+          setSelectedOptions(sharedTo.split(',').map(item => item.trim()));
+        } else if (Array.isArray(sharedTo)) {
+          setSelectedOptions(sharedTo);
+        }
+      }
+      // Check for postIn (from form data) as fallback
+      else if (getValues('postIn')) {
+        const postIn = getValues('postIn');
+        if (Array.isArray(postIn)) {
+          setSelectedOptions(postIn);
+        } else if (typeof postIn === 'string') {
+          setSelectedOptions(postIn.split(',').map(item => item.trim()));
+        }
+      }
     }
-  }, [pageNumber]);
+  }, [pageNumber, getValues]);
 
   return (
     <>
