@@ -66,7 +66,7 @@ export default function OrientOptionModal({
                       disabled={true}
                     >
                       <img className='w-11 h-12 m-2 cursor-pointer' src={`/assets/dolo.png`} />
-                      <span className='text-[12px] font-semibold'>YAHSHUA DOLO<br/>Traning App</span>
+                      <span className='text-[12px] font-semibold'>YAHSHUA DOLO<br/>Training App</span>
                     </button>
                     <button
                       className='flex flex-col items-center shadow-md border-[1px] border-savoy-blue rounded-[20px] py-5 mx-4 w-[150px] disabled:opacity-50'
