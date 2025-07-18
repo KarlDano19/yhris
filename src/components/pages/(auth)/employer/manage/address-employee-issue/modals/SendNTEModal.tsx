@@ -28,10 +28,19 @@ import 'react-quill/dist/quill.snow.css';
 
 type FormValues = {
   template: string;
+  subject: string;
   email: string;
   message: string;
   cc: string;
   bcc: string;
+  to: string;
+};
+
+// Helper function to check if HTML content is empty
+const isHtmlEmpty = (html: string | null | undefined): boolean => {
+  if (!html) return true;
+  const trimmed = html.trim();
+  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
 
 function stripHtml(html: string) {
@@ -64,7 +73,7 @@ export default function SendNTEModal({
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, reset, watch, setValue, trigger } = useForm<FormValues>({
+  const { register, handleSubmit, reset, watch, setValue, trigger, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
     defaultValues: {
       template: '',
       message: '',
@@ -76,34 +85,22 @@ export default function SendNTEModal({
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
-  // Reset all form data when modal opens or closes
-  // useEffect(() => {
-  //   // Only reset when modal is actually closed
-  //   if (!isOpen) {
-  //     setTagsTo([]);
-  //     setTagsCc([]);
-  //     setTagsBcc([]);
-  //     setInputTo('');
-  //     setInputCc('');
-  //     setInputBcc('');
-  //     setIsCCOpen(false);
-  //     setIsBCCOpen(false);
-  //     setApplicantEmail(null);
-  //     reset();
-  //   } else if (isOpen?.id && employeeIssueItems?.length > 0) {
-  //     // Only set email data if modal is opening with an ID AND we have valid data
-  //     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-  //     // Don't auto-populate the To field
-  //     if (itemIndex !== -1 && employeeIssueItems[itemIndex]?.email) {
-  //       setApplicantEmail(employeeIssueItems[itemIndex].email);
-  //       // Removed setTagsTo here to prevent auto-population
-  //     }
-  //   }
-  // }, [isOpen, employeeIssueItems, reset, setTagsBcc, setTagsCc, setTagsTo]);
+  useEffect(() => {
+    if (isOpen && isOpen.id) {
+      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
+      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
+      if (employeeIssueItemsCopy[itemIndex]) {
+        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
+        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+      }
+    }
+  }, [isOpen]);
+
 
   // Prefill fields from backend when details are loaded
   useEffect(() => {
     if (employeeIssueDetails) {
+      setValue('subject', employeeIssueDetails.nte_subject || '');
       setTagsTo(employeeIssueDetails.nte_to ? JSON.parse(employeeIssueDetails.nte_to) : []);
       setTagsCc(employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : []);
       setTagsBcc(employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []);
@@ -114,7 +111,40 @@ export default function SendNTEModal({
     }
   }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
+  // Clear errors when subject changes
+  useEffect(() => {
+    const subjectContent = watch('subject');
+    if (subjectContent && subjectContent.trim() !== '') {
+      clearErrors('subject');
+    }
+  }, [watch('subject'), clearErrors]);
+
+  // Clear errors when tagsTo changes
+  useEffect(() => {
+    if (tagsTo.length > 0) {
+      clearErrors('to');
+    }
+  }, [tagsTo, clearErrors]);
+
+  // Clear errors when message changes
+  useEffect(() => {
+    const messageContent = watch('message');
+    // Only clear errors when message has actual content
+    if (!isHtmlEmpty(messageContent)) {
+      clearErrors('message');
+    }
+  }, [watch('message'), clearErrors]);
+
   const onSubmit = handleSubmit((data) => {
+    // Validate "To" field manually since it uses tags
+    if (tagsTo.length === 0) {
+      setError('to', {
+        type: 'manual',
+        message: 'At least one recipient is required'
+      });
+      return;
+    }
+
     if (isOpen && isOpen.id) {
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
@@ -123,6 +153,7 @@ export default function SendNTEModal({
       employeeIssueItemsCopy[itemIndex].actionType = 'sending';
       employeeIssueItemsCopy[itemIndex].emailType = 'nte';
       employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template ? template.subject : '';
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.subject = data.subject;
       employeeIssueItemsCopy[itemIndex].issueNTEForm.to = tagsTo;
       if (tagsCc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = tagsCc;
@@ -130,14 +161,14 @@ export default function SendNTEModal({
       if (tagsBcc) {
         employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
       }
-      // Store only plain text (strip HTML)
-      const plainMessage = stripHtml(data.message);
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = plainMessage;
+      // Store message as HTML (preserve formatting)
+      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
       // Save nte_to, nte_cc, nte_bcc as JSON stringified arrays
+      employeeIssueItemsCopy[itemIndex].nte_subject = data.subject;
       employeeIssueItemsCopy[itemIndex].nte_to = JSON.stringify(tagsTo);
       employeeIssueItemsCopy[itemIndex].nte_cc = JSON.stringify(tagsCc);
       employeeIssueItemsCopy[itemIndex].nte_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].nte_message = plainMessage;
+      employeeIssueItemsCopy[itemIndex].nte_message = data.message;
       // Include PDF attachment if available
       if (pdfAttachment) {
         employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;
@@ -230,9 +261,20 @@ export default function SendNTEModal({
                                 (item: any) => item.id === parseInt(event.target.value)
                               );
                               if (template) {
-                                // Just set the template's to addresses directly
-                                setTagsTo(template.to || []);
-                                
+                                setValue('subject', template.subject);
+                                if (applicantEmail) {
+                                  // Check if template.to already contains the applicant email to avoid duplicates
+                                  const templateRecipients = template.to || [];
+                                  if (!templateRecipients.includes(applicantEmail)) {
+                                    // Only add applicantEmail if it's not already in the template recipients
+                                    setTagsTo([applicantEmail, ...templateRecipients]);
+                                  } else {
+                                    // Use template recipients as is since it already includes the applicant email
+                                    setTagsTo(templateRecipients);
+                                  }
+                                } else {
+                                  setTagsTo(template.to || []);
+                                }
                                 if (template.bcc) {
                                   setIsBCCOpen(true);
                                   setTagsBcc(template.bcc);
@@ -261,8 +303,39 @@ export default function SendNTEModal({
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            Subject<span className='text-red-600'>*</span>
+                        </label>
+                        {errors.subject && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.subject.message}
+                          </p>
+                        )}
+                        <input
+                          type='text'
+                          id='subject'
+                          {...register('subject', { required: 'Subject is required' })}
+                          className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          onChange={(e) => {
+                            setValue('subject', e.target.value);
+                            if (e.target.value.trim() !== '') {
+                              clearErrors('subject');
+                            } else {
+                              setError('subject', {
+                                type: 'manual',
+                                message: 'Subject is required'
+                              });
+                            }
+                          }}
+                        />
+
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
+                        {errors.to && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.to.message}
+                          </p>
+                        )}
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                             <div 
@@ -316,6 +389,7 @@ export default function SendNTEModal({
                             BCC
                           </button>
                         </div>
+                        
                       </div>
                       {isCCOpen && (
                         <div className='sm:col-span-4 mt-4'>
@@ -401,10 +475,27 @@ export default function SendNTEModal({
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
+                        {errors.message && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {errors.message.message}
+                          </p>
+                        )}
                         <div className='mt-2 h-72'>
-                          <textarea rows={4} {...register('message', { required: true })} id='message' hidden />
+                          <textarea rows={4} {...register('message', { required: 'Message is required' })} id='message' hidden />
                           <ReactQuill
-                            onChange={(value) => setValue('message', value)}
+                            onChange={(value) => {
+                              setValue('message', value);
+                              // Only clear errors when there is actual content
+                              if (!isHtmlEmpty(value)) {
+                                clearErrors('message');
+                              } else {
+                                // Set error when content is empty or just a blank line
+                                setError('message', {
+                                  type: 'manual',
+                                  message: 'Message is required'
+                                });
+                              }
+                            }}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%', padding: '5px 8px !important' }}
@@ -446,13 +537,31 @@ export default function SendNTEModal({
                         type='submit'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                         disabled={isLoading}
-                        onClick={async () => {
-                          const email = await trigger('email');
-                          const template = await trigger('template');
-                          const message = await trigger('template');
-                          const results = [email, template, message];
-                          const incomplete = results.some((item: boolean) => !item);
-                          if (incomplete) {
+                        onClick={async (e) => {
+                          // Trigger validation for all required fields
+                          const subjectValid = await trigger('subject');
+                          
+                          // Check message content specifically for empty HTML
+                          const messageContent = watch('message');
+                          let messageValid = !isHtmlEmpty(messageContent);
+                          
+                          if (!messageValid) {
+                            setError('message', {
+                              type: 'manual',
+                              message: 'Message is required'
+                            });
+                          }
+                          
+                          // Check if all validations pass
+                          if (!subjectValid || !messageValid || tagsTo.length === 0) {
+                            e.preventDefault();
+                            // Set error for "to" field if no recipients
+                            if (tagsTo.length === 0) {
+                              setError('to', {
+                                type: 'manual',
+                                message: 'At least one recipient is required'
+                              });
+                            }
                             toast.custom(
                               () => (
                                 <CustomToast

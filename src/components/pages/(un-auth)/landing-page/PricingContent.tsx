@@ -234,7 +234,7 @@ const PricingContent: React.FC = () => {
             {/* Payroll Only */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden hidden">
               <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center py-6">
-                <h2 className="text-2xl font-bold mb-2">YAHSHUA Payroll (Coming Soon)</h2>
+                <h2 className="text-2xl font-bold mb-2">YAHSHUA Payroll</h2>
                 <p className="text-blue-100">Automated Payroll Processing</p>
               </div>
               <div className="p-6">
@@ -248,7 +248,7 @@ const PricingContent: React.FC = () => {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-start gap-2">
                     <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Automated Payroll Processing (Coming Soon)</span>
+                    <span className="text-sm">Automated Payroll Processing</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -283,7 +283,7 @@ const PricingContent: React.FC = () => {
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-[#FFC107] overflow-hidden relative hidden">
               <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-[#FFC107] text-white text-center py-6 pt-8">
                 <h2 className="text-2xl font-bold mb-2">Complete Bundle</h2>
-                <p className="text-blue-100">YAHSHUA HRIS + YAHSHUA Payroll (Coming Soon)</p>
+                <p className="text-blue-100">YAHSHUA HRIS + YAHSHUA Payroll</p>
               </div>
               <div className="p-6">
                 <div className="text-center mb-6">
@@ -296,7 +296,7 @@ const PricingContent: React.FC = () => {
                     <p className="text-green-800 font-medium text-sm mb-1">Bundle Savings:</p>
                     <div className="text-xs text-green-700 space-y-1">
                       <div className="flex justify-between">
-                        <span>YAHSHUA HRIS + Payroll (Coming Soon):</span>
+                        <span>YAHSHUA HRIS + Payroll:</span>
                         <span>₱11,000</span>
                       </div>
                       <div className="flex justify-between font-medium">
@@ -314,11 +314,11 @@ const PricingContent: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Complete YAHSHUA Payroll System (Coming Soon)</span>
+                    <span>Complete YAHSHUA Payroll System</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Seamless HRIS-Payroll Integration (Coming Soon)</span>
+                    <span>Seamless HRIS-Payroll Integration</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
@@ -359,7 +359,7 @@ const PricingContent: React.FC = () => {
                         <p className="text-green-800 font-medium mb-2">Bundle Savings Breakdown:</p>
                         <div className="text-sm text-green-700 space-y-1">
                           <div className="flex justify-between">
-                            <span>YAHSHUA Payroll System (Coming Soon):</span>
+                            <span>YAHSHUA Payroll System:</span>
                             <span>₱7,000</span>
                           </div>
                           <div className="flex justify-between">
@@ -408,7 +408,7 @@ const PricingContent: React.FC = () => {
                         <CheckIcon className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="text-gray-800 font-medium">Complete YAHSHUA Payroll System (Coming Soon)</p>
+                            <p className="text-gray-800 font-medium">Complete YAHSHUA Payroll System</p>
                           </div>
                           <p className="text-gray-600 text-sm">Automated payroll processing, tax calculations, and compliance</p>
                             <a 
