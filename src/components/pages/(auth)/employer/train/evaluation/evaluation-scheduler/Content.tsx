@@ -18,6 +18,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import { useQueryClient } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [evaluationSchedulerItems, setEvaluationSchedulerItems] = useState<any>([]);
@@ -41,6 +42,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   } = useGetEvaluationSchedulerItems(itemsFilter);
 
   const [isSearching, setIsSearching] = useState(false);
+  const formMethods = useForm();
+  const editFormMethods = useForm();
 
   useEffect(() => {
     refetchEvaluationScheduler();
@@ -297,6 +300,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={refetchEvaluationScheduler}
           isOpen={isCreateEvaluationSchedulerOpen}
           setIsOpen={setIsCreateEvaluationSchedulerOpen}
+          {...formMethods}
+          Controller={Controller}
         />
       )}
       {isEditEvaluationSchedulerModalOpen && selectedEvaluationSchedulerId && (
@@ -305,6 +310,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEditEvaluationSchedulerModalOpen}
           setIsOpen={setIsEditEvaluationSchedulerModalOpen}
           selectedEvaluationSchedulerId={selectedEvaluationSchedulerId}
+          {...editFormMethods}
+          Controller={Controller}
         />
       )}
       {isDeleteEvaluationSchedulerModalOpen && selectedEvaluationSchedulerId && (
