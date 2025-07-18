@@ -141,7 +141,7 @@ function SchedulerInfoTab({
                   ))
                 }
                 {selectedFrequencyUnit === 'month' && 
-                  Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                  Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
                     <option key={day} value={day}>
                       {day}
                     </option>
