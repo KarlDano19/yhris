@@ -57,6 +57,21 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
       formData.append('offered_benefits', '');
     }
 
+    // Add screening questions and auto-reject settings
+    if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {
+      console.log('Adding screening questions:', jobPost.screeningQuestions);
+      formData.append('screening_questions', JSON.stringify(jobPost.screeningQuestions));
+    }
+    
+    if (jobPost.autoRejectEnabled !== undefined) {
+      console.log('Auto-reject enabled:', jobPost.autoRejectEnabled);
+      formData.append('auto_reject_enabled', jobPost.autoRejectEnabled.toString());
+    } else {
+      // Default to true if not specified
+      formData.append('auto_reject_enabled', 'true');
+    }
+
+    
     const config = {
       method: 'PATCH',
       headers: {

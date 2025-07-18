@@ -41,7 +41,7 @@ const menuList = [
 
 export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: PropTypes) {
   const { state, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const { image, name, id, screeningFit } = applicant;
+  const { image, name, id } = applicant;
 
   const handleOpenMenu = () => {
     if (isOpenMenu) {
@@ -56,9 +56,6 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
   const isWithdrawn = applicant.status === 'withdrawn';
   const isPassedFinalInterview = applicant.status === 'hired';
   
-  // Determine if applicant is a good fit based on screening answers
-  const isGoodFit = screeningFit === 'good' || (!isRejected && !isWithdrawn);
-
   const capitalizeFirstLetter = (text: any) => {
     return text.replace(/(?:^|\s)\S/, function (match: any) {
       return match.toUpperCase();
@@ -80,34 +77,27 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
       <div className='w-8 h-8 overflow-hidden rounded-full ml-2'>
         <img src={image} alt={name} width='50' height='50' className='w-full h-full object-cover' />
       </div>
-      <div className="flex flex-col">
-        <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
-          {name}
-          {isPassedFinalInterview && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-          {isRejected && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-          {isWithdrawn && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-        </p>
-        {screeningFit && (
-          <span className={`text-xs ${screeningFit === 'good' ? 'text-green-500' : 'text-red-500'}`}>
-            {screeningFit === 'good' ? 'Good Fit' : 'Not Fit'}
+      <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
+        {name}
+        {isPassedFinalInterview && (
+          <span>
+            <br />
+            {capitalizeFirstLetter(applicant.status)}
           </span>
         )}
-      </div>
+        {isRejected && (
+          <span>
+            <br />
+            {capitalizeFirstLetter(applicant.status)}
+          </span>
+        )}
+        {isWithdrawn && (
+          <span>
+            <br />
+            {capitalizeFirstLetter(applicant.status)}
+          </span>
+        )}
+      </p>
       <button onClick={handleOpenMenu} type='button' className='ml-auto text-indigo-dye disabled:text-gray-400'>
         <EllipsisVerticalIcon className='w-7 h-7' />
       </button>

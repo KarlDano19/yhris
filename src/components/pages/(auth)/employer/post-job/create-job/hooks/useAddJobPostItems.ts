@@ -8,7 +8,7 @@ async function addJobPost(jobPost: any) {
     formData.append('country', jobPost.country);
     formData.append('language', jobPost.language);
     formData.append('job_title', jobPost.jobTitle);
-    formData.append('advertise_to', jobPost.placeAdvertise);
+    formData.append('advertise_to', Array.isArray(jobPost.placeAdvertise) ? jobPost.placeAdvertise.join() : jobPost.placeAdvertise);
     formData.append('job_type', jobPost.jobType.join());
     formData.append('job_schedule', jobPost.schedule.join());
     formData.append('required_slot', jobPost.hireCount.toString());

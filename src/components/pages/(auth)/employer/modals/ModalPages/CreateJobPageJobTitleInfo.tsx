@@ -16,6 +16,7 @@ export default function CreateJobPageTitleInfo({
   handleSubmit,
   setPageNumber,
   onSubmit,
+  errors,
 }: {
   control: any;
   Controller: any;
@@ -23,6 +24,7 @@ export default function CreateJobPageTitleInfo({
   handleSubmit: any;
   setPageNumber: Dispatch<number>;
   onSubmit: (data: any) => void;
+  errors?: any;
 }) {
   const advertiseOptions = [
     {
@@ -480,20 +482,29 @@ export default function CreateJobPageTitleInfo({
               Where would you like to advertise this job?
               <span className='text-red-600'>*</span>
             </label>
+            {errors && errors.placeAdvertise && (
+              <p className='text-xs text-red-600 mt-1'>
+                {errors.placeAdvertise.message || "Please select at least one location to advertise the job."}
+              </p>
+            )}
             <div className='mt-2'>
               <Controller
                 name='placeAdvertise'
                 control={control}
                 rules={{
-                  required: true,
+                  required: "Please select at least one location to advertise the job",
                 }}
                 render={({ field: { onChange, value } }: { field: Field }) => (
                   <Select
                     className='text-sm'
                     classNamePrefix='select'
                     options={advertiseOptions}
-                    value={advertiseOptions.find((item: any) => item.value === value)}
-                    onChange={(val) => onChange(val ? val.value : [])}
+                    value={advertiseOptions.filter((item: any) => 
+                      Array.isArray(value) 
+                        ? value.includes(item.value) 
+                        : item.value === value
+                    )}
+                    onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
                     components={{
                       DropdownIndicator: () => (
                         <div className='pointer-events-none px-2'>
@@ -503,7 +514,9 @@ export default function CreateJobPageTitleInfo({
                       IndicatorSeparator: () => null,
                     }}
                     isClearable={false}
+                    isMulti
                     noOptionsMessage={() => null}
+                    placeholder="Select locations..."
                   />
                 )}
               />

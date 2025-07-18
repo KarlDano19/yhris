@@ -38,7 +38,7 @@ export default function CreateJobPageJobSettings({
       question: "Have you completed the following level of education: Bachelor's Degree?",
       idealAnswer: 'Yes',
       responseType: 'Yes / No',
-      mustHave: false,
+      mustHave: true,
       recommended: true,
       editable: false,
       degree: "Bachelor's Degree",
