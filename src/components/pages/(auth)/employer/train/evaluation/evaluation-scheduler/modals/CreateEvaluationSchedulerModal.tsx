@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -11,10 +10,33 @@ import useAddEvaluationScheduler from '../hooks/useAddEvaluationScheduler';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-function CreateEvaluationSchedulerModal({ refetch, isOpen, setIsOpen }: { refetch: any; isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
+interface CreateEvaluationSchedulerModalProps {
+  refetch: any;
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
+  register: any;
+  watch: any;
+  handleSubmit: any;
+  reset: any;
+  control: any;
+  setValue: any;
+  Controller: any;
+}
+
+function CreateEvaluationSchedulerModal({
+  refetch,
+  isOpen,
+  setIsOpen,
+  register,
+  watch,
+  handleSubmit,
+  reset,
+  control,
+  setValue,
+  Controller,
+}: CreateEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
-  const { register, watch, handleSubmit, reset, control } = useForm();
   const { mutate, isLoading } = useAddEvaluationScheduler();
 
   const onSubmit = handleSubmit((data: any) => {
@@ -60,13 +82,19 @@ function CreateEvaluationSchedulerModal({ refetch, isOpen, setIsOpen }: { refetc
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Create Evaluation Scheduler</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
                   {selectedTab === 1 && (
-                    <SchedulerInfoTab register={register} handleSubmit={handleSubmit} setSelectedTab={setSelectedTab} />
+                    <SchedulerInfoTab 
+                      register={register} 
+                      handleSubmit={handleSubmit} 
+                      setSelectedTab={setSelectedTab} 
+                      watch={watch}
+                      setValue={setValue}
+                    />
                   )}
                   {selectedTab === 2 && (
                     <EmployeeAssigneeTab

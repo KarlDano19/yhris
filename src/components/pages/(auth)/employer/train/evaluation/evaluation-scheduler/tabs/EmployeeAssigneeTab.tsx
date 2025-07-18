@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
+import Link from "next/link";
+import dynamic from "next/dynamic";
+
+import "react-quill/dist/quill.snow.css";
 import Select from "react-select";
 
+import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import classNames from "@/helpers/classNames";
 
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
-
 import SelectChevronDown from "@/svg/SelectChevronDown";
-import Link from "next/link";
 
 interface Field {
   onChange: (value: any) => void;
@@ -47,6 +50,19 @@ function EmployeeAssigneeTab({
   const getFilename = (file: string) => {
     return file.split("/").pop();
   };
+
+  // Move ReactQuill memoization here
+  const ReactQuill = useMemo(() => dynamic(() => import("react-quill"), { ssr: false }), []);
+
+  // Set default message value for Quill editor
+  const defaultMessage = `<p>A blessed day, Beloveds!</p><br><p>A gentle reminder to accomplish your evaluation on time.</p>`;
+
+  useEffect(() => {
+    // Set the default value for message if not already set
+    if (control && control._defaultValues && control._defaultValues.message === undefined) {
+      control._defaultValues.message = defaultMessage;
+    }
+  }, [control]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -156,10 +172,27 @@ function EmployeeAssigneeTab({
           >
             Message<span className="text-red-600">*</span>
           </label>
-          <textarea
-            id="message"
-            {...register("message", { required: true })}
-            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6"
+          <Controller
+            name="message"
+            control={control}
+            defaultValue={defaultMessage}
+            rules={{ required: "Please enter a message" }}
+            render={({ field: { onChange, value }, fieldState: { error } }: { field: { onChange: (value: any) => void; value: any }, fieldState: { error?: { message?: string } } }) => (
+              <>
+                <div className="mt-2 h-72 mb-4">
+                  <ReactQuill
+                    onChange={onChange}
+                    formats={QUILL_FORMATS}
+                    modules={QUILL_MODULES}
+                    style={{ height: "100%", padding: "5px 8px !important" }}
+                    value={value || defaultMessage}
+                  />
+                </div>
+                {error && (
+                  <p className="text-red-500 text-sm mt-1 ml-1">{error.message}</p>
+                )}
+              </>
+            )}
           />
         </div>
         {/* TODO: Add attachment */}
