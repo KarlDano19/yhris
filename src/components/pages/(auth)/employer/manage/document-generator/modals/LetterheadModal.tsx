@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 // Sample letterhead images
 const SAMPLE_LETTERHEADS = [
-  { path: '/assets/images/letterhead/sample-letterhead.png' },
+  { path: '/assets/images/letterhead/generic-letterhead.png' },
   // { path: '/assets/images/letterhead/YOWI.png' },
   // { path: '/assets/images/letterhead/TAI.png' },
   // { path: '/assets/images/letterhead/Shell.jpg' },
@@ -16,6 +16,7 @@ interface LetterheadModalProps {
   onSelect: (path: string) => void;
   onUpload: (file: File) => void;
   selectedPath?: string;
+  showToast?: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 export default function LetterheadModal({ 
@@ -23,7 +24,8 @@ export default function LetterheadModal({
   onClose, 
   onSelect, 
   onUpload,
-  selectedPath 
+  selectedPath,
+  showToast
 }: LetterheadModalProps) {
   
   // Add body class to prevent scrolling when modal is open
@@ -101,9 +103,24 @@ export default function LetterheadModal({
                   alert('File size exceeds 2MB limit.');
                   return;
                 }
-                
-                onUpload(file);
-                onClose();
+
+                // Check image dimensions for A4 (aspect ratio ~0.707)
+                const img = new window.Image();
+                img.onload = () => {
+                  const aspectRatio = img.width / img.height;
+                  // A4 aspect ratio is 210/297 = 0.707, allow small margin
+                  if (aspectRatio < 0.69 || aspectRatio > 0.73) {
+                    // Use toast for error
+                    if (showToast) showToast('Please upload an image with A4 bond paper size (210x297mm).', 'error');
+                    return;
+                  }
+                  onUpload(file);
+                  onClose();
+                };
+                img.onerror = () => {
+                  if (showToast) showToast('Failed to read image. Please try another file.', 'error');
+                };
+                img.src = URL.createObjectURL(file);
               }
             };
             
@@ -121,7 +138,7 @@ export default function LetterheadModal({
           <p className="text-blue-500 hover:underline focus:outline-none">
             Upload your own letterhead image
           </p>
-          <p className="text-sm text-gray-500 mt-1">PNG, JPG, GIF up to 2MB</p>
+          <p className="text-sm text-gray-500 mt-1">PNG, JPG up to 10MB. Only A4 bond paper size (210x297mm) is allowed.</p>
         </div>
         
         <div className="flex justify-end">

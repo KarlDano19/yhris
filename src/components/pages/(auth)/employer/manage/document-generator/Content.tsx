@@ -573,6 +573,11 @@ export default function Content() {
         selectedPath={documentType === 'employee-certificate' ? 
           (currentData as EmployeeCertificateFormData).sampleLetterheadPath : 
           ''}
+        showToast={(message, type = 'error') => {
+          toast.custom(() => (
+            <CustomToast message={message} type={type} onClose={() => setToastMessage(null)} />
+          ));
+        }}
       />
       
       <LogoModal 
