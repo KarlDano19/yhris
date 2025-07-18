@@ -102,32 +102,34 @@ export default function Content() {
         return { ...applicant, screeningFit: 'bad' };
       }
       
-      // Compare answers to ideal answers
-      let mustHaveMatches = true;
-      let totalMatches = 0;
-      let totalQuestions = 0;
+      // Only check if mustHave questions match their ideal answers
+      let isGoodFit = true;
       
-      // Process each answer and check if it matches the ideal answer
+      // Process each answer and check if it matches the ideal answer for mustHave questions
       answers.forEach((answer: { question: string; answer: string }) => {
         const question = screeningQuestions.find(q => q.question === answer.question);
-        if (question) {
-          totalQuestions++;
+        if (question && question.mustHave) {
           const isMatch = answer.answer.toLowerCase() === question.idealAnswer.toLowerCase();
           
           // If it's a must-have and doesn't match, applicant is not a good fit
-          if (question.mustHave && !isMatch) {
-            mustHaveMatches = false;
+          if (!isMatch) {
+            isGoodFit = false;
           }
-          
-          if (isMatch) totalMatches++;
         }
       });
       
-      // Determine if applicant is a good fit
-      // 1. All must-haves must match
-      // 2. At least 70% of answers should match ideal answers
-      const matchPercentage = totalQuestions > 0 ? totalMatches / totalQuestions : 0;
-      const isGoodFit = mustHaveMatches && (matchPercentage >= 0.7);
+      // Check if any mustHave questions were not answered
+      screeningQuestions.forEach(question => {
+        if (question.mustHave) {
+          const wasAnswered = answers.some(
+            (answer: { question: string }) => answer.question === question.question
+          );
+          
+          if (!wasAnswered) {
+            isGoodFit = false;
+          }
+        }
+      });
       
       return { 
         ...applicant, 

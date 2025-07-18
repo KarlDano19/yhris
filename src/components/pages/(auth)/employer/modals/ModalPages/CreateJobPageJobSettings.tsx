@@ -20,31 +20,39 @@ export default function CreateJobPageJobSettings({
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
 }) {
-  // Example questions state (could be lifted up or made dynamic)
-  const [screeningQuestions, setScreeningQuestions] = useState([
-    {
-      id: 1,
-      question: "Do you have a valid driver's license?",
-      idealAnswer: 'Yes',
-      responseType: 'Yes / No',
-      mustHave: true,
-      recommended: true,
-      editable: false,
-      degree: undefined,
-      presetId: 'drivers-license',
-    },
-    {
-      id: 2,
-      question: "Have you completed the following level of education: Bachelor's Degree?",
-      idealAnswer: 'Yes',
-      responseType: 'Yes / No',
-      mustHave: true,
-      recommended: true,
-      editable: false,
-      degree: "Bachelor's Degree",
-      presetId: 'education',
-    },
-  ]);
+  // Initialize from any existing screening questions (for editing)
+  const [screeningQuestions, setScreeningQuestions] = useState(() => {
+    // Use existing screening questions from window if available (for edit mode)
+    if (window.screeningQuestions && window.screeningQuestions.length > 0) {
+      return window.screeningQuestions;
+    }
+    
+    // Default questions
+    return [
+      {
+        id: 1,
+        question: "Do you have a valid driver's license?",
+        idealAnswer: 'Yes',
+        responseType: 'Yes / No',
+        mustHave: true,
+        recommended: true,
+        editable: false,
+        degree: undefined,
+        presetId: 'drivers-license',
+      },
+      {
+        id: 2,
+        question: "Have you completed the following level of education: Bachelor's Degree?",
+        idealAnswer: 'Yes',
+        responseType: 'Yes / No',
+        mustHave: true,
+        recommended: true,
+        editable: false,
+        degree: "Bachelor's Degree",
+        presetId: 'education',
+      },
+    ];
+  });
   
   const [isScreeningOpen, setIsScreeningOpen] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -54,10 +62,20 @@ export default function CreateJobPageJobSettings({
   
   // Rejection settings state
   const [isRejectionSettingsOpen, setIsRejectionSettingsOpen] = useState(false);
-  const [autoRejectEnabled, setAutoRejectEnabled] = useState(true);
+  // Initialize auto-reject settings from window if available
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState(() => {
+    return window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true;
+  });
 
-  // Selected preset options
-  const [selectedPresets, setSelectedPresets] = useState(['drivers-license', 'education']);
+  // Selected preset options - initialize from existing questions
+  const [selectedPresets, setSelectedPresets] = useState(() => {
+    if (window.screeningQuestions && window.screeningQuestions.length > 0) {
+      return window.screeningQuestions
+        .filter(q => q.presetId)
+        .map(q => q.presetId);
+    }
+    return ['drivers-license', 'education'];
+  });
 
   // Handlers for question actions
   const handleRemove = (id: number) => {

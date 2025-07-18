@@ -155,13 +155,13 @@ export default function UpdateJobModal({
 
   const fifthFormSubmit = () => {
     const data = fifthForm.getValues();
-    // // Include screening questions and auto-reject settings
-    // const jobSettings = {
-    //   ...data,
-    //   screeningQuestions: window.screeningQuestions || [],
-    //   autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true
-    // };
-    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    // Include screening questions and auto-reject settings
+    const jobSettings = {
+      ...data,
+      screeningQuestions: window.screeningQuestions || [],
+      autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true
+    };
+    setCombinedFormData((prev: any) => ({ ...prev, ...jobSettings }));
     setPageNumber(6);
   };
 
@@ -179,7 +179,7 @@ export default function UpdateJobModal({
 
 
   const onSubmit = () => {
-    const data = seventhForm.getValues();
+    const data = eighthForm.getValues();
     const finalData = { ...combinedFormData, ...data };
     
     // Ensure screening questions and auto-reject settings are included
@@ -217,9 +217,9 @@ export default function UpdateJobModal({
     sixthForm.reset();
     seventhForm.reset();
     eighthForm.reset();
-    // // Reset global variables used for screening questions
-    // window.screeningQuestions = [];
-    // window.autoRejectEnabled = true;
+    // Reset global variables used for screening questions
+    window.screeningQuestions = [];
+    window.autoRejectEnabled = true;
     
     setPageNumber(1);
     setIsOpen({ id: null, open: false });
