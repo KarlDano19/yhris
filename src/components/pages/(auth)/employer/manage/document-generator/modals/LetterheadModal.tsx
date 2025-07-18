@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 
 // Sample letterhead images
 const SAMPLE_LETTERHEADS = [
-  { path: '/assets/images/letterhead/YAHSHUA-ABBA.png' },
-  { path: '/assets/images/letterhead/YOWI.png' },
-  { path: '/assets/images/letterhead/TAI.png' },
-  { path: '/assets/images/letterhead/Shell.jpg' },
+  { path: '/assets/images/letterhead/sample-letterhead.png' },
+  // { path: '/assets/images/letterhead/YOWI.png' },
+  // { path: '/assets/images/letterhead/TAI.png' },
+  // { path: '/assets/images/letterhead/Shell.jpg' },
 ];
 
 interface LetterheadModalProps {
