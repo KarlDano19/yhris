@@ -67,7 +67,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataJobPost]);
 
-  const lastSearchedValue = useRef(itemsFilter.search || '');
+  const lastSearchedValue = useRef('');
 
   return (
     <div className='min-h-screen'>
@@ -93,20 +93,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setItemsFilter({ ...itemsFilter, search: newValue });
-
-                    // If the previous value was not empty and the new value is empty, refetch
-                    if (lastSearchedValue.current !== '' && newValue === '') {
-                      refetchJobPost();
-                      lastSearchedValue.current = '';
-                    }
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      const value = e.currentTarget.value;
-                      if (value !== lastSearchedValue.current) {
-                        refetchJobPost();
-                        lastSearchedValue.current = value;
-                      }
+                      refetchJobPost();
                     }
                   }}
                   placeholder='Search ...'
