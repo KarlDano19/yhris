@@ -573,7 +573,7 @@ const Content = () => {
       </NoticeModal>
       <NoticeModal isOpen={isSendOrientLink} setIsOpen={setIsSendOrientLink}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-          Would you like send the orientation link to the New Hire's registered email or send to his/her new company
+          Would you like send the orientation link to the New Hire&apos;s registered email or send to his/her new company
           email?
         </h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
@@ -652,7 +652,7 @@ const Content = () => {
               setNewHireOriented(false);
             }}
           >
-            NO, I DON'T.
+            NO, I DON&apos;T.
           </button>
         </div>
       </NoticeModal>

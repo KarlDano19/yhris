@@ -46,9 +46,10 @@ export default function CreateMemoModal({
     }
     
     // Validate that all email addresses in tagsTo are valid
-    const invalidEmails = tagsTo.filter(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'));
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const invalidEmails = tagsTo.filter(email => !emailRegex.test(email));
     if (invalidEmails.length > 0) {
-      toast.custom(() => <CustomToast message={'Only valid email addresses with format example@domain.com are allowed'} type='error' />, {
+      toast.custom(() => <CustomToast message={'Please enter valid email addresses'} type='error' />, {
         duration: 5000,
       });
       return; // Prevent form submission
@@ -365,7 +366,8 @@ export default function CreateMemoModal({
                       onClick={async (e) => {
                         const title = await trigger('title');
                         // Check if tagsTo array exists and validate all emails
-                        const toFieldValid = tagsTo.length > 0 && tagsTo.every(email => email.includes('@') && email.toLowerCase().endsWith('.com'));
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        const toFieldValid = tagsTo.length > 0 && tagsTo.every(email => emailRegex.test(email));
                         const results = [title, toFieldValid];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
@@ -373,8 +375,8 @@ export default function CreateMemoModal({
                           let message = '';
                           if (tagsTo.length === 0) {
                             message = 'Email address is required';
-                          } else if (tagsTo.some(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'))) {
-                            message = 'Only valid email addresses with format example@domain.com are allowed';
+                          } else if (tagsTo.some(email => !emailRegex.test(email))) {
+                            message = 'Please enter valid email addresses';
                           } else {
                             message = 'You cannot proceed due to incomplete fields. Please review.';
                           }
