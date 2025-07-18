@@ -120,8 +120,11 @@ export default function CreateJobPageJobSettings({
       setEditingQuestion(null);
     } else {
       // Add new question
+      // Generate a consistent integer ID instead of timestamp
+      const newId = Math.max(...screeningQuestions.map(q => q.id), 0) + 1;
       const newQuestion = { 
         ...questionData, 
+        id: newId,
         editable: false, 
         recommended: false,
         presetId: 'custom-question'
@@ -153,10 +156,12 @@ export default function CreateJobPageJobSettings({
       // Add the preset question
       const preset = PRESET_QUESTIONS[presetId as keyof typeof PRESET_QUESTIONS];
       if (preset) {
+        // Generate a consistent integer ID instead of timestamp
+        const newId = Math.max(...screeningQuestions.map(q => q.id), 0) + 1;
         setScreeningQuestions(prev => [
           ...prev, 
           {
-            id: Date.now(),
+            id: newId,
             question: preset.question,
             idealAnswer: preset.idealAnswer,
             responseType: preset.responseType,
