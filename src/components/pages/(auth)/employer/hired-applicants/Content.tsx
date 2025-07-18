@@ -18,6 +18,7 @@ type PaginationProps = {
 };
 
 const Content = () => {
+  const [inputValue, setInputValue] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
@@ -39,6 +40,14 @@ const Content = () => {
 
   useEffect(() => {
     if (data && data.total_pages && data.total_records) {
+      // Sort: records with hired_applicant_applied_no > 0 first
+      if (data.records && Array.isArray(data.records)) {
+        data.records = [...data.records].sort((a, b) => {
+          const aHasHired = (a.hired_applicant_applied_no || 0) > 0 ? 1 : 0;
+          const bHasHired = (b.hired_applicant_applied_no || 0) > 0 ? 1 : 0;
+          return bHasHired - aHasHired;
+        });
+      }
       setPagination({
         totalPages: data.total_pages,
         totalRecords: data.total_records,
@@ -75,23 +84,13 @@ const Content = () => {
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  value={itemsFilter.search}
+                  value={inputValue}
                   onChange={(e) => {
-                    const newValue = e.target.value;
-                    setItemsFilter({ ...itemsFilter, search: newValue });
-                    // If the previous value was not empty and the new value is empty, refetch
-                    if (lastSearchedValue.current !== '' && newValue === '') {
-                      refetch();
-                      lastSearchedValue.current = '';
-                    }
+                    setInputValue(e.target.value);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      const value = e.currentTarget.value;
-                      if (value !== lastSearchedValue.current) {
-                        refetch();
-                        lastSearchedValue.current = value;
-                      }
+                      setItemsFilter({ ...itemsFilter, search: inputValue });
                     }
                   }}
                   placeholder='Search ...'
@@ -100,7 +99,7 @@ const Content = () => {
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={() => refetch()}
+              onClick={() => setItemsFilter({ ...itemsFilter, search: inputValue })}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
