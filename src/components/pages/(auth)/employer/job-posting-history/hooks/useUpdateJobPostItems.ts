@@ -71,18 +71,12 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
       formData.append('offered_benefits', '');
     }
 
-    // Handle screening questions - use a simple array of question objects
-    if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {
-      // Remove any properties that might cause issues
-      const simplifiedQuestions = jobPost.screeningQuestions.map((q: any) => ({
-        question: q.question,
-        idealAnswer: q.idealAnswer,
-        responseType: q.responseType,
-        mustHave: q.mustHave
-      }));
-      
-      // Convert to string but avoid JSON.stringify which might cause issues
-      formData.append('screening_questions', JSON.stringify(simplifiedQuestions));
+    // Add screening questions and auto-reject settings
+    let screeningQuestionsPayload = jobPost.screeningQuestions;
+    if (typeof screeningQuestionsPayload === 'string') {
+      formData.append('screening_questions', screeningQuestionsPayload);
+    } else {
+      formData.append('screening_questions', JSON.stringify(screeningQuestionsPayload || []));
     }
     
     // Auto-reject setting

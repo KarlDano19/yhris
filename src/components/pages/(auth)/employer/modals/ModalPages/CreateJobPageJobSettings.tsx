@@ -1,4 +1,4 @@
-import { Dispatch, useState } from 'react';
+import { useEffect, Dispatch, useState } from 'react';
 import ToggleSection from '../ToggleSection';
 import ScreeningQuestion from '../ScreeningQuestion';
 import CustomScreeningForm from '../CustomScreeningForm';
@@ -16,17 +16,19 @@ declare global {
 export default function CreateJobPageJobSettings({
   setPageNumber,
   onSubmit,
+  screeningQuestions: initialScreeningQuestions,
+  autoRejectEnabled: initialAutoRejectEnabled,
 }: {
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
+  screeningQuestions?: any[];
+  autoRejectEnabled?: boolean;
 }) {
-  // Initialize from any existing screening questions (for editing)
-  const [screeningQuestions, setScreeningQuestions] = useState(() => {
-    // Use existing screening questions from window if available (for edit mode)
-    if (window.screeningQuestions && window.screeningQuestions.length > 0) {
-      return window.screeningQuestions;
+  // Only use default questions if no screeningQuestions are provided
+  const [screeningQuestions, setScreeningQuestions] = useState<any[]>(() => {
+    if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
+      return initialScreeningQuestions;
     }
-    
     // Default questions
     return [
       {
@@ -54,6 +56,13 @@ export default function CreateJobPageJobSettings({
     ];
   });
   
+  // Sync the prop to state in CreateJobPageJobSettings
+  useEffect(() => {
+    if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
+      setScreeningQuestions(initialScreeningQuestions);
+    }
+  }, [initialScreeningQuestions]);
+
   const [isScreeningOpen, setIsScreeningOpen] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showPresetOptions, setShowPresetOptions] = useState(false);
@@ -63,9 +72,11 @@ export default function CreateJobPageJobSettings({
   // Rejection settings state
   const [isRejectionSettingsOpen, setIsRejectionSettingsOpen] = useState(false);
   // Initialize auto-reject settings from window if available
-  const [autoRejectEnabled, setAutoRejectEnabled] = useState(() => {
-    return window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true;
-  });
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState<boolean>(
+    initialAutoRejectEnabled !== undefined
+      ? initialAutoRejectEnabled
+      : (window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true)
+  );
 
   // Selected preset options - initialize from existing questions
   const [selectedPresets, setSelectedPresets] = useState(() => {
@@ -347,7 +358,7 @@ export default function CreateJobPageJobSettings({
               <div className="text-sm font-medium text-gray-900 mb-1">Rejection settings</div>
               <div className="text-sm text-gray-900">{autoRejectEnabled ? 'Enabled' : 'Disabled'}</div>
               <div className="text-xs text-gray-500 max-w-md">
-                Filter out and send rejections to applicants who don't provide ideal answers to must-have screening questions.
+                Filter out and send rejections to applicants who don&apos;t provide ideal answers to must-have screening questions.
               </div>
             </div>
             <button 

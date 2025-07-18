@@ -49,6 +49,8 @@ export default function UpdateJobModal({
   const [hasSalaryRange, setHasSalaryRange] = useState(false);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
   const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
+  const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState(true);
   const {
     data: jobPostDataDetails,
     refetch: refetchJobPostDetails,
@@ -75,7 +77,9 @@ export default function UpdateJobModal({
     if (jobPostDataDetails) {
       firstForm.reset({
         jobTitle: jobPostDataDetails.job_title,
-        placeAdvertise: jobPostDataDetails.advertise_to,
+        placeAdvertise: jobPostDataDetails.advertise_to
+          ? jobPostDataDetails.advertise_to.split(',').map((s: string) => s.trim())
+          : [],
         country: jobPostDataDetails.country,
         language: jobPostDataDetails.language,
       });
@@ -108,16 +112,26 @@ export default function UpdateJobModal({
         qualifications: jobPostDataDetails.qualifications,
         notesRemarks: jobPostDataDetails.job_remark,
       });
-      
-      // Initialize job settings with screening questions if available
+      // Normalize screening questions for the Job Settings page
       if (jobPostDataDetails.screening_questions) {
-        // Set global variables for screening questions
-        window.screeningQuestions = jobPostDataDetails.screening_questions || [];
-        window.autoRejectEnabled = jobPostDataDetails.auto_reject_enabled !== undefined 
-          ? jobPostDataDetails.auto_reject_enabled 
-          : true;
+        const normalizedQuestions = jobPostDataDetails.screening_questions.map((q: any, idx: number) => ({
+          id: q.id || idx + 1,
+          question: q.question || q.text || '',
+          idealAnswer: q.idealAnswer || q.ideal_answer || 'Yes',
+          responseType: q.responseType || q.response_type || 'Yes / No',
+          mustHave: q.mustHave !== undefined ? q.mustHave : (q.must_have !== undefined ? q.must_have : true),
+          recommended: q.recommended !== undefined ? q.recommended : false,
+          editable: q.editable !== undefined ? q.editable : false,
+          degree: q.degree,
+          presetId: q.presetId || q.preset_id,
+        }));
+        setScreeningQuestions(normalizedQuestions);
+        setAutoRejectEnabled(
+          jobPostDataDetails.auto_reject_enabled !== undefined
+            ? jobPostDataDetails.auto_reject_enabled
+            : true
+        );
       }
-      
       fifthForm.reset({
         postAs: jobPostDataDetails.poster_type,
         uploaded_image: jobPostDataDetails.uploaded_image,
@@ -158,8 +172,8 @@ export default function UpdateJobModal({
     // Include screening questions and auto-reject settings
     const jobSettings = {
       ...data,
-      screeningQuestions: window.screeningQuestions || [],
-      autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true
+      screeningQuestions: screeningQuestions || [],
+      autoRejectEnabled: autoRejectEnabled !== undefined ? autoRejectEnabled : true
     };
     setCombinedFormData((prev: any) => ({ ...prev, ...jobSettings }));
     setPageNumber(6);
@@ -183,12 +197,12 @@ export default function UpdateJobModal({
     const finalData = { ...combinedFormData, ...data };
     
     // Ensure screening questions and auto-reject settings are included
-    if (!finalData.screeningQuestions && window.screeningQuestions) {
-      finalData.screeningQuestions = window.screeningQuestions;
+    if (!finalData.screeningQuestions && screeningQuestions) {
+      finalData.screeningQuestions = screeningQuestions;
     }
     
-    if (finalData.autoRejectEnabled === undefined && window.autoRejectEnabled !== undefined) {
-      finalData.autoRejectEnabled = window.autoRejectEnabled;
+    if (finalData.autoRejectEnabled === undefined && autoRejectEnabled !== undefined) {
+      finalData.autoRejectEnabled = autoRejectEnabled;
     }
     
     const callbackReq = {
@@ -218,8 +232,8 @@ export default function UpdateJobModal({
     seventhForm.reset();
     eighthForm.reset();
     // Reset global variables used for screening questions
-    window.screeningQuestions = [];
-    window.autoRejectEnabled = true;
+    setScreeningQuestions([]);
+    setAutoRejectEnabled(true);
     
     setPageNumber(1);
     setIsOpen({ id: null, open: false });
@@ -254,7 +268,7 @@ export default function UpdateJobModal({
               >
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Job Form</h3>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Update Job Form</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   <div style={{ display: pageNumber == 1 ? 'block' : 'none' }}>
@@ -309,6 +323,8 @@ export default function UpdateJobModal({
                     <CreateJobPageJobSettings
                       setPageNumber={setPageNumber}
                       onSubmit={fifthFormSubmit}
+                      screeningQuestions={screeningQuestions}
+                      autoRejectEnabled={autoRejectEnabled}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
@@ -335,10 +351,10 @@ export default function UpdateJobModal({
                   <div style={{ display: pageNumber == 8 ? 'block' : 'none' }}>
                     <CreateJobPagePlatform
                       isLoading={isLoading}
-                      setValue={eighthForm.setValue}
-                      getValues={eighthForm.getValues}
+                      setValue={seventhForm.setValue}
+                      getValues={seventhForm.getValues}
                       setPageNumber={setPageNumber}
-                      register={eighthForm.register}
+                      register={seventhForm.register}
                       onSubmit={onSubmit}
                       pageNumber={pageNumber}
                       isEdit={true}
