@@ -35,10 +35,14 @@ async function getEvaluationTemplateItems(filters: any) {
 }
 
 function useGetEvaluationTemplateItems(filters: any) {
-  const query = useQuery(['evaluationTemplateListItemsCache'], () => getEvaluationTemplateItems(filters), {
-    enabled: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    ['evaluationTemplateListItemsCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
+    () => getEvaluationTemplateItems(filters),
+    {
+      // enabled: false,
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }

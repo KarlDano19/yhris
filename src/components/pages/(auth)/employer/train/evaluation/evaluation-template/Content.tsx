@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import DeleteEvaluationModal from './modals/DeleteEvaluationTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
@@ -30,25 +31,76 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const {
     data: dataEvaluation,
     isLoading: isGetEvaluationLoading,
     refetch: refetchEvaluation,
-  } = useGetEvaluationTemplateItems(itemsFilter);
+  } = useGetEvaluationTemplateItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    refetchEvaluation();
-  }, []);
-
-  useEffect(() => {
     if (dataEvaluation) {
-      dataEvaluation.map((item: any) => {
-        item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataEvaluation.records) {
+        items = dataEvaluation.records.map((item: any) => {
+          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          return item;
+        });
+        totalPages = dataEvaluation.total_pages || 1;
+        totalRecords = dataEvaluation.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataEvaluation)) {
+        items = dataEvaluation.map((item: any) => {
+          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          return item;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setEvaluationItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setEvaluationItems(dataEvaluation);
     }
-  }, [dataEvaluation]);
+  }, [dataEvaluation, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   useEffect(() => {
     if (selectedEvaluationTemplateId) {
@@ -95,7 +147,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    refetchEvaluation();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
   };
 
   useEffect(() => {
@@ -233,7 +288,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for Evaluation Template Name'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
                 </div>
@@ -281,7 +341,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {evaluationItems.length}</p>
+                <Pagination
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={pageSizeChange}
+                  onPageChange={paginationChange}
+                />
               </div>
             </div>
           </div>
