@@ -18,7 +18,18 @@ async function getEvaluationTemplateItems() {
       if (!res.ok) {
         throw res.json();
       }
-      return res.json();
+      const data = await res.json();
+      
+      // Handle paginated response structure
+      if (data.records) {
+        return data.records;
+      }
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(data)) {
+        return data;
+      }
+      
+      return [];
     }
     return [];
   } catch (err: any) {
