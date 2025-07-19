@@ -115,7 +115,7 @@ export default function UpdateJobModal({
       // Normalize screening questions for the Job Settings page
       if (jobPostDataDetails.screening_questions) {
         const normalizedQuestions = jobPostDataDetails.screening_questions.map((q: any, idx: number) => ({
-          id: q.id || idx + 1,
+          id: q.id || q.question_id || idx + 1,
           question: q.question || q.text || '',
           idealAnswer: q.idealAnswer || q.ideal_answer || 'Yes',
           responseType: q.responseType || q.response_type || 'Yes / No',
@@ -125,6 +125,7 @@ export default function UpdateJobModal({
           degree: q.degree,
           presetId: q.presetId || q.preset_id,
         }));
+        console.log('Normalized questions:', normalizedQuestions);
         setScreeningQuestions(normalizedQuestions);
         setAutoRejectEnabled(
           jobPostDataDetails.auto_reject_enabled !== undefined
@@ -168,14 +169,12 @@ export default function UpdateJobModal({
   };
 
   const fifthFormSubmit = () => {
-    const data = fifthForm.getValues();
-    // Include screening questions and auto-reject settings
-    const jobSettings = {
-      ...data,
-      screeningQuestions: screeningQuestions || [],
-      autoRejectEnabled: autoRejectEnabled !== undefined ? autoRejectEnabled : true
-    };
-    setCombinedFormData((prev: any) => ({ ...prev, ...jobSettings }));
+    // Include screening questions and auto-reject settings in the form data
+    setCombinedFormData((prev: any) => ({
+      ...prev,
+      screeningQuestions: screeningQuestions,
+      autoRejectEnabled: autoRejectEnabled
+    }));
     setPageNumber(6);
   };
 
@@ -196,14 +195,16 @@ export default function UpdateJobModal({
     const data = eighthForm.getValues();
     const finalData = { ...combinedFormData, ...data };
     
-    // Ensure screening questions and auto-reject settings are included
-    if (!finalData.screeningQuestions && screeningQuestions) {
+    // Ensure screening questions are included in the final data
+    if (!finalData.screeningQuestions && screeningQuestions.length > 0) {
       finalData.screeningQuestions = screeningQuestions;
     }
     
-    if (finalData.autoRejectEnabled === undefined && autoRejectEnabled !== undefined) {
+    if (finalData.autoRejectEnabled === undefined) {
       finalData.autoRejectEnabled = autoRejectEnabled;
     }
+    
+    console.log('Submitting job post with screening questions:', finalData.screeningQuestions);
     
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -325,6 +326,8 @@ export default function UpdateJobModal({
                       onSubmit={fifthFormSubmit}
                       screeningQuestions={screeningQuestions}
                       autoRejectEnabled={autoRejectEnabled}
+                      setScreeningQuestions={setScreeningQuestions}
+                      setAutoRejectEnabled={setAutoRejectEnabled}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>

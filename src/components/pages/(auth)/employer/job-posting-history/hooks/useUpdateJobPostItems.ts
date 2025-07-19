@@ -72,11 +72,26 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     }
 
     // Add screening questions and auto-reject settings
-    let screeningQuestionsPayload = jobPost.screeningQuestions;
-    if (typeof screeningQuestionsPayload === 'string') {
-      formData.append('screening_questions', screeningQuestionsPayload);
+    if (jobPost.screeningQuestions && Array.isArray(jobPost.screeningQuestions) && jobPost.screeningQuestions.length > 0) {
+      // Format questions to match backend expectations
+      const formattedQuestions = jobPost.screeningQuestions.map((q: any) => ({
+        id: q.id, // Preserve the ID
+        question: q.question,
+        idealAnswer: q.idealAnswer,
+        responseType: q.responseType,
+        mustHave: q.mustHave,
+        // Only include degree if it exists
+        ...(q.degree ? { degree: q.degree } : {}),
+        // Include presetId if it exists
+        ...(q.presetId ? { presetId: q.presetId } : {})
+      }));
+      
+      // Convert to JSON string for backend
+      formData.append('screening_questions', JSON.stringify(formattedQuestions));
+      console.log('Sending screening questions to backend:', formattedQuestions);
     } else {
-      formData.append('screening_questions', JSON.stringify(screeningQuestionsPayload || []));
+      // Send empty array if no questions
+      formData.append('screening_questions', JSON.stringify([]));
     }
     
     // Auto-reject setting

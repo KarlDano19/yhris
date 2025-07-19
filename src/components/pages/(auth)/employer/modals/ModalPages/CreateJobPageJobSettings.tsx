@@ -18,14 +18,18 @@ export default function CreateJobPageJobSettings({
   onSubmit,
   screeningQuestions: initialScreeningQuestions,
   autoRejectEnabled: initialAutoRejectEnabled,
+  setScreeningQuestions,
+  setAutoRejectEnabled,
 }: {
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   screeningQuestions?: any[];
   autoRejectEnabled?: boolean;
+  setScreeningQuestions?: (questions: any[]) => void;
+  setAutoRejectEnabled?: (enabled: boolean) => void;
 }) {
   // Only use default questions if no screeningQuestions are provided
-  const [screeningQuestions, setScreeningQuestions] = useState<any[]>(() => {
+  const [screeningQuestions, setLocalScreeningQuestions] = useState<any[]>(() => {
     if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
       return initialScreeningQuestions;
     }
@@ -59,9 +63,56 @@ export default function CreateJobPageJobSettings({
   // Sync the prop to state in CreateJobPageJobSettings
   useEffect(() => {
     if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
-      setScreeningQuestions(initialScreeningQuestions);
+      setLocalScreeningQuestions(initialScreeningQuestions);
     }
   }, [initialScreeningQuestions]);
+
+  // Deduplicate questions when initializing
+  useEffect(() => {
+    if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
+      // Check for duplicate questions
+      const questionMap = new Map();
+      const uniqueQuestions = [];
+      
+      for (const question of initialScreeningQuestions) {
+        const lowerQuestion = question.question.toLowerCase();
+        
+        // Check if we have a similar question
+        let key = '';
+        if (lowerQuestion.includes("driver's license")) {
+          key = 'drivers-license';
+        } else if (lowerQuestion.includes("background check")) {
+          key = 'background-check';
+        } else if (lowerQuestion.includes("drug test")) {
+          key = 'drug-test';
+        } else if (lowerQuestion.includes("education") || lowerQuestion.includes("degree")) {
+          key = 'education';
+        } else {
+          key = question.id;
+        }
+        
+        // If we haven't seen this question type before, add it
+        if (!questionMap.has(key)) {
+          questionMap.set(key, true);
+          uniqueQuestions.push({
+            ...question,
+            presetId: key === question.id ? question.presetId : key
+          });
+        }
+      }
+      
+      // Only update if we found duplicates
+      if (uniqueQuestions.length < initialScreeningQuestions.length) {
+        console.log('Deduplicating questions:', uniqueQuestions);
+        setLocalScreeningQuestions(uniqueQuestions);
+        
+        // Update parent component state if available
+        if (setScreeningQuestions) {
+          setScreeningQuestions(uniqueQuestions);
+        }
+      }
+    }
+  }, [initialScreeningQuestions, setScreeningQuestions]);
 
   const [isScreeningOpen, setIsScreeningOpen] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -71,27 +122,94 @@ export default function CreateJobPageJobSettings({
   
   // Rejection settings state
   const [isRejectionSettingsOpen, setIsRejectionSettingsOpen] = useState(false);
-  // Initialize auto-reject settings from window if available
-  const [autoRejectEnabled, setAutoRejectEnabled] = useState<boolean>(
-    initialAutoRejectEnabled !== undefined
-      ? initialAutoRejectEnabled
-      : (window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true)
+  // Initialize auto-reject settings
+  const [localAutoRejectEnabled, setLocalAutoRejectEnabled] = useState<boolean>(
+    initialAutoRejectEnabled !== undefined ? initialAutoRejectEnabled : true
   );
 
   // Selected preset options - initialize from existing questions
   const [selectedPresets, setSelectedPresets] = useState(() => {
-    if (window.screeningQuestions && window.screeningQuestions.length > 0) {
-      return window.screeningQuestions
+    const presets = new Set<string>();
+    
+    if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
+      // First add any explicit presetIds
+      initialScreeningQuestions
         .filter(q => q.presetId)
-        .map(q => q.presetId);
+        .forEach(q => presets.add(q.presetId));
+      
+      // Then check for matches by question content
+      initialScreeningQuestions.forEach(q => {
+        // Check for driver's license question
+        if (q.question.toLowerCase().includes("driver's license")) {
+          presets.add('drivers-license');
+        }
+        // Check for background check question
+        if (q.question.toLowerCase().includes("background check")) {
+          presets.add('background-check');
+        }
+        // Check for education question
+        if (q.question.toLowerCase().includes("education") || 
+            q.question.toLowerCase().includes("degree")) {
+          presets.add('education');
+        }
+        // Check for drug test question
+        if (q.question.toLowerCase().includes("drug test")) {
+          presets.add('drug-test');
+        }
+      });
+      
+      return Array.from(presets);
     }
+    
     return ['drivers-license', 'education'];
   });
+  
+  // Update selected presets when questions change
+  useEffect(() => {
+    const presets = new Set<string>();
+    
+    if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
+      // First add any explicit presetIds
+      initialScreeningQuestions
+        .filter(q => q.presetId)
+        .forEach(q => presets.add(q.presetId));
+      
+      // Then check for matches by question content
+      initialScreeningQuestions.forEach(q => {
+        // Check for driver's license question
+        if (q.question.toLowerCase().includes("driver's license")) {
+          presets.add('drivers-license');
+        }
+        // Check for background check question
+        if (q.question.toLowerCase().includes("background check")) {
+          presets.add('background-check');
+        }
+        // Check for education question
+        if (q.question.toLowerCase().includes("education") || 
+            q.question.toLowerCase().includes("degree")) {
+          presets.add('education');
+        }
+        // Check for drug test question
+        if (q.question.toLowerCase().includes("drug test")) {
+          presets.add('drug-test');
+        }
+      });
+      
+      setSelectedPresets(Array.from(presets));
+      console.log("Updated selected presets:", Array.from(presets));
+    }
+  }, [initialScreeningQuestions]);
 
   // Handlers for question actions
   const handleRemove = (id: number) => {
     const question = screeningQuestions.find(q => q.id === id);
-    setScreeningQuestions((prev) => prev.filter((q) => q.id !== id));
+    const updatedQuestions = screeningQuestions.filter((q) => q.id !== id);
+    setLocalScreeningQuestions(updatedQuestions);
+    
+    // Update parent component state if available
+    if (setScreeningQuestions) {
+      setScreeningQuestions(updatedQuestions);
+    }
     
     // If it's a preset question, remove it from selected presets
     if (question?.presetId) {
@@ -100,9 +218,15 @@ export default function CreateJobPageJobSettings({
   };
 
   const handleToggleMustHave = (id: number) => {
-    setScreeningQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, mustHave: !q.mustHave } : q))
+    const updatedQuestions = screeningQuestions.map((q) => 
+      q.id === id ? { ...q, mustHave: !q.mustHave } : q
     );
+    setLocalScreeningQuestions(updatedQuestions);
+    
+    // Update parent component state if available
+    if (setScreeningQuestions) {
+      setScreeningQuestions(updatedQuestions);
+    }
   };
 
   const handleEdit = (id: number) => {
@@ -114,10 +238,14 @@ export default function CreateJobPageJobSettings({
   const handleSaveQuestion = (questionData: any) => {
     if (editingQuestion !== null) {
       // Update existing question
-      setScreeningQuestions(prev => 
-        prev.map(q => q.id === editingQuestion ? { ...questionData, editable: false } : q)
-      );
+      const updatedQuestions = screeningQuestions.map(q => q.id === editingQuestion ? { ...questionData, editable: false } : q);
+      setLocalScreeningQuestions(updatedQuestions);
       setEditingQuestion(null);
+      
+      // Update parent component state if available
+      if (setScreeningQuestions) {
+        setScreeningQuestions(updatedQuestions);
+      }
     } else {
       // Add new question
       // Generate a consistent integer ID instead of timestamp
@@ -129,7 +257,13 @@ export default function CreateJobPageJobSettings({
         recommended: false,
         presetId: 'custom-question'
       };
-      setScreeningQuestions(prev => [...prev, newQuestion]);
+      const updatedQuestions = [...screeningQuestions, newQuestion];
+      setLocalScreeningQuestions(updatedQuestions);
+      
+      // Update parent component state if available
+      if (setScreeningQuestions) {
+        setScreeningQuestions(updatedQuestions);
+      }
       
       // Add to selected presets if not already there
       if (!selectedPresets.includes('custom-question')) {
@@ -148,19 +282,72 @@ export default function CreateJobPageJobSettings({
     if (selectedPresets.includes(presetId)) {
       // Remove the preset
       setSelectedPresets(prev => prev.filter(id => id !== presetId));
-      setScreeningQuestions(prev => prev.filter(q => q.presetId !== presetId));
+      
+      // Remove questions with this presetId or matching content
+      let filteredQuestions = [...screeningQuestions];
+      
+      if (presetId === 'drivers-license') {
+        filteredQuestions = filteredQuestions.filter(q => 
+          !q.question.toLowerCase().includes("driver's license") && q.presetId !== presetId
+        );
+      } else if (presetId === 'background-check') {
+        filteredQuestions = filteredQuestions.filter(q => 
+          !q.question.toLowerCase().includes("background check") && q.presetId !== presetId
+        );
+      } else if (presetId === 'drug-test') {
+        filteredQuestions = filteredQuestions.filter(q => 
+          !q.question.toLowerCase().includes("drug test") && q.presetId !== presetId
+        );
+      } else if (presetId === 'education') {
+        filteredQuestions = filteredQuestions.filter(q => 
+          !(q.question.toLowerCase().includes("education") || 
+            q.question.toLowerCase().includes("degree")) && q.presetId !== presetId
+        );
+      } else {
+        // Default case - just filter by presetId
+        filteredQuestions = filteredQuestions.filter(q => q.presetId !== presetId);
+      }
+      
+      setLocalScreeningQuestions(filteredQuestions);
+      
+      // Update parent component state if available
+      if (setScreeningQuestions) {
+        setScreeningQuestions(filteredQuestions);
+      }
     } else {
       // Add the preset
       setSelectedPresets(prev => [...prev, presetId]);
       
-      // Add the preset question
+      // Check if we already have a similar question to avoid duplicates
       const preset = PRESET_QUESTIONS[presetId as keyof typeof PRESET_QUESTIONS];
       if (preset) {
-        // Generate a consistent integer ID instead of timestamp
-        const newId = Math.max(...screeningQuestions.map(q => q.id), 0) + 1;
-        setScreeningQuestions(prev => [
-          ...prev, 
-          {
+        // Check for existing similar questions
+        let hasDuplicate = false;
+        
+        if (presetId === 'drivers-license') {
+          hasDuplicate = screeningQuestions.some(q => 
+            q.question.toLowerCase().includes("driver's license")
+          );
+        } else if (presetId === 'background-check') {
+          hasDuplicate = screeningQuestions.some(q => 
+            q.question.toLowerCase().includes("background check")
+          );
+        } else if (presetId === 'drug-test') {
+          hasDuplicate = screeningQuestions.some(q => 
+            q.question.toLowerCase().includes("drug test")
+          );
+        } else if (presetId === 'education') {
+          hasDuplicate = screeningQuestions.some(q => 
+            q.question.toLowerCase().includes("education") || 
+            q.question.toLowerCase().includes("degree")
+          );
+        }
+        
+        // Only add if not a duplicate
+        if (!hasDuplicate) {
+          // Generate a consistent integer ID instead of timestamp
+          const newId = Math.max(...screeningQuestions.map(q => q.id || 0), 0) + 1;
+          const newQuestion = {
             id: newId,
             question: preset.question,
             idealAnswer: preset.idealAnswer,
@@ -170,8 +357,41 @@ export default function CreateJobPageJobSettings({
             editable: false,
             degree: undefined,
             presetId: presetId
+          };
+          
+          console.log('Adding preset question:', newQuestion);
+          const updatedQuestions = [...screeningQuestions, newQuestion];
+          setLocalScreeningQuestions(updatedQuestions);
+          
+          // Update parent component state if available
+          if (setScreeningQuestions) {
+            setScreeningQuestions(updatedQuestions);
           }
-        ]);
+        } else {
+          console.log('Skipping duplicate preset question for:', presetId);
+          // Just update the existing question's presetId
+          const updatedQuestions = screeningQuestions.map(q => {
+            if (presetId === 'drivers-license' && q.question.toLowerCase().includes("driver's license")) {
+              return { ...q, presetId };
+            } else if (presetId === 'background-check' && q.question.toLowerCase().includes("background check")) {
+              return { ...q, presetId };
+            } else if (presetId === 'drug-test' && q.question.toLowerCase().includes("drug test")) {
+              return { ...q, presetId };
+            } else if (presetId === 'education' && 
+                      (q.question.toLowerCase().includes("education") || 
+                       q.question.toLowerCase().includes("degree"))) {
+              return { ...q, presetId };
+            }
+            return q;
+          });
+          
+          setLocalScreeningQuestions(updatedQuestions);
+          
+          // Update parent component state if available
+          if (setScreeningQuestions) {
+            setScreeningQuestions(updatedQuestions);
+          }
+        }
       }
     }
   };
@@ -191,7 +411,13 @@ export default function CreateJobPageJobSettings({
   
   // Toggle auto-reject functionality
   const toggleAutoReject = () => {
-    setAutoRejectEnabled(!autoRejectEnabled);
+    const newValue = !localAutoRejectEnabled;
+    setLocalAutoRejectEnabled(newValue);
+    
+    // Update parent component state if available
+    if (setAutoRejectEnabled) {
+      setAutoRejectEnabled(newValue);
+    }
   };
 
   // Handle submission with validation
@@ -203,9 +429,18 @@ export default function CreateJobPageJobSettings({
     }
     setValidationError(null);
     
-    // Add screening questions and auto-reject settings to global form state
+    // Update parent component state if available
+    if (setScreeningQuestions) {
+      setScreeningQuestions(screeningQuestions);
+    }
+    
+    if (setAutoRejectEnabled) {
+      setAutoRejectEnabled(localAutoRejectEnabled);
+    }
+    
+    // For backward compatibility, also update window globals
     window.screeningQuestions = screeningQuestions;
-    window.autoRejectEnabled = autoRejectEnabled;
+    window.autoRejectEnabled = localAutoRejectEnabled;
     
     onSubmit();
   };
@@ -361,7 +596,7 @@ export default function CreateJobPageJobSettings({
           <div className="flex items-start justify-between border-b border-gray-200 py-4">
             <div>
               <div className="text-sm font-medium text-gray-900 mb-1">Rejection settings</div>
-              <div className="text-sm text-gray-900">{autoRejectEnabled ? 'Enabled' : 'Disabled'}</div>
+              <div className="text-sm text-gray-900">{localAutoRejectEnabled ? 'Enabled' : 'Disabled'}</div>
               <div className="text-xs text-gray-500 max-w-md">
                 Filter out and send rejections to applicants who don&apos;t provide ideal answers to must-have screening questions.
               </div>
@@ -387,18 +622,18 @@ export default function CreateJobPageJobSettings({
                       type="checkbox" 
                       name="toggle" 
                       id="autoReject" 
-                      checked={autoRejectEnabled}
+                      checked={localAutoRejectEnabled}
                       onChange={toggleAutoReject}
                       className="checked:bg-savoy-blue outline-none focus:outline-none right-4 checked:right-0 duration-200 ease-in absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
                     />
                     <label 
                       htmlFor="autoReject" 
-                      className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${autoRejectEnabled ? 'bg-savoy-blue/40' : ''}`}
+                      className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${localAutoRejectEnabled ? 'bg-savoy-blue/40' : ''}`}
                     ></label>
                   </div>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {autoRejectEnabled 
+                  {localAutoRejectEnabled 
                     ? "Applicants who don't provide ideal answers to must-have screening questions will be automatically rejected."
                     : "Applicants who don't provide ideal answers to must-have screening questions will still be considered."}
                 </p>
