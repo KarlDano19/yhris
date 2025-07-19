@@ -35,28 +35,28 @@ export default function CreateJobPageJobSettings({
     }
     // Default questions
     return [
-      {
-        id: 1,
-        question: "Do you have a valid driver's license?",
-        idealAnswer: 'Yes',
-        responseType: 'Yes / No',
-        mustHave: true,
-        recommended: true,
-        editable: false,
-        degree: undefined,
-        presetId: 'drivers-license',
-      },
-      {
-        id: 2,
-        question: "Have you completed the following level of education: Bachelor's Degree?",
-        idealAnswer: 'Yes',
-        responseType: 'Yes / No',
-        mustHave: true,
-        recommended: true,
-        editable: false,
-        degree: "Bachelor's Degree",
-        presetId: 'education',
-      },
+    {
+      id: 1,
+      question: "Do you have a valid driver's license?",
+      idealAnswer: 'Yes',
+      responseType: 'Yes / No',
+      mustHave: true,
+      recommended: true,
+      editable: false,
+      degree: undefined,
+      presetId: 'drivers-license',
+    },
+    {
+      id: 2,
+      question: "Have you completed the following level of education: Bachelor's Degree?",
+      idealAnswer: 'Yes',
+      responseType: 'Yes / No',
+      mustHave: true,
+      recommended: true,
+      editable: false,
+      degree: "Bachelor's Degree",
+      presetId: 'education',
+    },
     ];
   });
   
@@ -113,7 +113,7 @@ export default function CreateJobPageJobSettings({
       }
     }
   }, [initialScreeningQuestions, setScreeningQuestions]);
-
+  
   const [isScreeningOpen, setIsScreeningOpen] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showPresetOptions, setShowPresetOptions] = useState(false);
