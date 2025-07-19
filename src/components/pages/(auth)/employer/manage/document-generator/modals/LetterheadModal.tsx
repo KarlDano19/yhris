@@ -98,9 +98,9 @@ export default function LetterheadModal({
               if (target.files && target.files[0]) {
                 const file = target.files[0];
                 
-                // Check file size (2MB limit)
-                if (file.size > 2 * 1024 * 1024) {
-                  alert('File size exceeds 2MB limit.');
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                  if (showToast) showToast('File size exceeds 10MB limit.', 'error');
                   return;
                 }
 
