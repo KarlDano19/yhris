@@ -20,6 +20,18 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
   const [openMenuId, setOpenMenuId] = useState(null)
   const [activeTab, setActiveTab] = useState('Good Fit')
 
+  // Reset active tab if current tab is not in filters
+  useEffect(() => {
+    if (filters && !filters.rating.includes(activeTab)) {
+      // Set the active tab to the first available option in the filters
+      if (filters.rating.includes('Good Fit')) {
+        setActiveTab('Good Fit');
+      } else if (filters.rating.includes('Not Fit')) {
+        setActiveTab('Not Fit');
+      }
+    }
+  }, [filters, activeTab]);
+
   useEffect(() => {
     // closes dropdowns & menus after showing modals
     setStageDropdownId(null)
@@ -29,7 +41,7 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
   // Update filters based on active tab
   const tabFilters: FilterOptions = {
     rating: [activeTab],
-    status: filters?.status || ['Ongoing', 'Passed', 'Withdrawn', 'Rejected'],
+    status: filters?.status || ['Ongoing', 'Passed', 'Withdrawn', 'Rejected', 'Hired'],
   };
 
   return (

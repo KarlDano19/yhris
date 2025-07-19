@@ -36,8 +36,10 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
         isNotFit = applicant.screeningFit === 'bad';
       } else {
         // Fall back to status-based logic
-        isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing' || applicant.status === 'hired';
+        isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing';
         isNotFit = applicant.status === 'rejected' || applicant.status === 'withdrawn';
+        
+        // Hired status is handled separately through the status filter
       }
       
       // Check if the applicant matches the active tab
@@ -46,16 +48,16 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
         matchesRating = true;
       } else if (filters.rating.includes('Not Fit') && isNotFit) {
         matchesRating = true;
-      } else if (filters.rating.length === 0) {
+      } else if (applicant.status === 'hired' && filters.status.includes('Hired')) {
+        // Special case for hired applicants - show them if Hired status is selected
+        // regardless of Good Fit/Not Fit tab
         matchesRating = true;
       }
       
-      // Filter by status (ongoing, passed, withdrawn, rejected)
-      const matchesStatus = 
-        filters.status.some(status => 
-          applicant.status && status.toLowerCase() === applicant.status.toLowerCase()
-        ) || 
-        filters.status.length === 0;
+      // Filter by status (ongoing, passed, withdrawn, rejected, hired)
+      const matchesStatus = filters.status.some(status => 
+        applicant.status && status.toLowerCase() === applicant.status.toLowerCase()
+      );
       
       return matchesRating && matchesStatus;
     });

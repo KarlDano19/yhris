@@ -74,7 +74,7 @@ export default function Content() {
   })?.requirements;
   const { mutate: emailMutate } = useSendEmail();
   const [filters, setFilters] = useState<FilterOptions>({
-    rating: ['Good Fit'],
+    rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed'],
   });
   

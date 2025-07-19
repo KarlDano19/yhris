@@ -15,7 +15,7 @@ export type FilterOptions = {
 export default function Filter({ onFilterChange }: FilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
-    rating: ['Good Fit'],
+    rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed'],
   });
 
@@ -26,6 +26,10 @@ export default function Filter({ onFilterChange }: FilterProps) {
   const handleRatingChange = (rating: string) => {
     let newRating;
     if (filters.rating.includes(rating)) {
+      // Don't allow unchecking if this is the only option selected
+      if (filters.rating.length === 1) {
+        return;
+      }
       newRating = filters.rating.filter((r) => r !== rating);
     } else {
       newRating = [...filters.rating, rating];
@@ -39,6 +43,10 @@ export default function Filter({ onFilterChange }: FilterProps) {
   const handleStatusChange = (status: string) => {
     let newStatus;
     if (filters.status.includes(status)) {
+      // Don't allow unchecking if this is the only option selected
+      if (filters.status.length === 1) {
+        return;
+      }
       newStatus = filters.status.filter((s) => s !== status);
     } else {
       newStatus = [...filters.status, status];
@@ -123,6 +131,15 @@ export default function Filter({ onFilterChange }: FilterProps) {
                   onChange={() => handleStatusChange('Rejected')}
                 />
                 <span className="text-sm text-gray-800">Rejected</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="rounded text-blue-500 focus:ring-blue-500"
+                  checked={filters.status.includes('Hired')}
+                  onChange={() => handleStatusChange('Hired')}
+                />
+                <span className="text-sm text-gray-800">Hired</span>
               </label>
             </div>
           </div>
