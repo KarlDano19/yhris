@@ -35,10 +35,13 @@ async function getSeparationItems(filters: any) {
 }
 
 function useGetSeparationItems(filters: any) {
-  const query = useQuery(['separationsItemsCache'], () => getSeparationItems(filters), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    ['separationsItemsCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
+    () => getSeparationItems(filters),
+    {
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }

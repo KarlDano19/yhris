@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import LetterModal from './modals/LetterModal';
 import SignDocumentsModal from './modals/SignDocumentsModal';
@@ -41,6 +42,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
   const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
@@ -48,7 +64,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
   const [isDeleteSepartionModalOpen, setIsDeleteSepartionModalOpen] = useState<T_DeleteSepartionModal | null>(null);
   const { mutate, isLoading } = usePatchSeparation();
-  const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems(itemsFilter);
+  const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
@@ -87,6 +107,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     mutate(separationItemsCopy[itemIndex], callbackReq);
   };
 
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
@@ -103,7 +133,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    refetch();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
   };
 
   useEffect(() => {
@@ -118,56 +151,124 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataSeparation) {
-      dataSeparation.map((separation: any) => {
-        separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
-        separation['name'] = separation.name;
-        separation['reasonForLeaving'] = separation.reason_of_leaving;
-        separation['isLetterSent'] = separation.is_letter_sent;
-        separation['isLetterReceived'] = separation.is_letter_received;
-        separation['letterReceivedDate'] =
-          separation.letter_received_date &&
-          new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
-        separation['isDocumentsSent'] = separation.is_documents_sent;
-        separation['isDocumentsReceived'] = separation.is_documents_received;
-        separation['documentReceivedDate'] =
-          separation.documents_received_date &&
-          new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
-        separation['isLastPayReleased'] = separation.is_last_pay_released;
-        separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
-        separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
-        separation['quitclaimReceivedDate'] =
-          separation.quit_claim_received_date &&
-          new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
-        separation['separationLetter'] = {
-          date: '',
-          to: '',
-          message: '',
-        };
-        separation['acceptanceLetter'] = {
-          date: '',
-          to: '',
-          message: '',
-        };
-        separation['signDocuments'] = {
-          template: '',
-          to: '',
-          message: '',
-        };
-        separation['lastPay'] = {
-          template: '',
-          to: '',
-          message: '',
-        };
-        separation['quitClaim'] = {
-          template: '',
-          to: '',
-          message: '',
-        };
-        return separation;
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataSeparation.records) {
+        items = dataSeparation.records.map((separation: any) => {
+          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['name'] = separation.name;
+          separation['reasonForLeaving'] = separation.reason_of_leaving;
+          separation['isLetterSent'] = separation.is_letter_sent;
+          separation['isLetterReceived'] = separation.is_letter_received;
+          separation['letterReceivedDate'] =
+            separation.letter_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['isDocumentsSent'] = separation.is_documents_sent;
+          separation['isDocumentsReceived'] = separation.is_documents_received;
+          separation['documentReceivedDate'] =
+            separation.documents_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
+          separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
+          separation['quitclaimReceivedDate'] =
+            separation.quit_claim_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['separationLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['acceptanceLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['signDocuments'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['lastPay'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['quitClaim'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          return separation;
+        });
+        totalPages = dataSeparation.total_pages || 1;
+        totalRecords = dataSeparation.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataSeparation)) {
+        items = dataSeparation.map((separation: any) => {
+          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['name'] = separation.name;
+          separation['reasonForLeaving'] = separation.reason_of_leaving;
+          separation['isLetterSent'] = separation.is_letter_sent;
+          separation['isLetterReceived'] = separation.is_letter_received;
+          separation['letterReceivedDate'] =
+            separation.letter_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['isDocumentsSent'] = separation.is_documents_sent;
+          separation['isDocumentsReceived'] = separation.is_documents_received;
+          separation['documentReceivedDate'] =
+            separation.documents_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
+          separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
+          separation['quitclaimReceivedDate'] =
+            separation.quit_claim_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['separationLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['acceptanceLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['signDocuments'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['lastPay'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['quitClaim'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          return separation;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setSeparationItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setSeparationItems(dataSeparation);
     }
-  }, [dataSeparation]);
+  }, [dataSeparation, pageSize]);
 
   const renderRows = () => {
     if (isSearching || isGetSeparationLoading) {
@@ -330,9 +431,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   data-tooltip-id='search-tooltip'
                   data-tooltip-content='Search for: Employee Name / Reason of Leaving'
@@ -340,17 +440,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
-                </div>
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={handleSearch}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
@@ -397,9 +501,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {separationItems?.length}</p>
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>

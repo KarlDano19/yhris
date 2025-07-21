@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
+import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import useTagTo from '@/components/hooks/useTagTo';
@@ -33,7 +34,7 @@ export default function CreateMemoModal({
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [inputTo, setInputTo] = useState('');
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, trigger } = useForm<DirectiveData>();
+  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
 
   const onSubmit = handleSubmit((data) => {
@@ -106,6 +107,21 @@ export default function CreateMemoModal({
     }
   };
 
+  // Clear errors when title changes
+  useEffect(() => {
+    const titleValue = watch('title');
+    if (titleValue && titleValue !== "") {
+      clearErrors('title');
+    }
+  }, [watch('title'), clearErrors]);
+
+  // Clear errors when tagsTo changes
+  useEffect(() => {
+    if (tagsTo.length > 0) {
+      clearErrors('to');
+    }
+  }, [tagsTo, clearErrors]);
+
   useEffect(() => {
     if (signatureUrl) {
       setValue('signature', signatureUrl as never);
@@ -155,25 +171,15 @@ export default function CreateMemoModal({
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
-                    <div
-                      className={`
-                         hidden rounded-md bg-red-50 p-4 mb-3`}
-                    >
-                      <div className='flex'>
-                        <div className='flex-shrink-0'>
-                          <XCircleIcon className='h-5 w-5 text-red-400' aria-hidden='true' />
-                        </div>
-                        <div className='ml-3'>
-                          <h3 className='text-sm font-medium text-red-800'>
-                            You cannot proceed due to incomplete fields. Please review.
-                          </h3>
-                        </div>
-                      </div>
-                    </div>
                     <div className='sm:col-span-4'>
                       <label htmlFor='title' className='block text-sm font-medium leading-6 text-gray-900'>
                         Title<span className='text-red-600'>*</span>
                       </label>
+                      {errors.title && (
+                        <p className='text-xs text-red-600 mt-1'>
+                          {errors.title.message || 'Title is required.'}
+                        </p>
+                      )}
                       <div className='mt-2'>
                         <input
                           id='title'
@@ -187,9 +193,18 @@ export default function CreateMemoModal({
                       <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                         To<span className='text-red-600'>*</span>
                       </label>
+                      {errors.to && (
+                        <p className='text-xs text-red-600 mt-1'>
+                          {errors.to.message || 'To field is required.'}
+                        </p>
+                      )}
                       <div className='mt-2 flex rounded-md shadow-sm'>
                         <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                          <div className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'>
+                          <div 
+                            className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'
+                            data-tooltip-id='to-section-tooltip'
+                            data-tooltip-place='bottom'
+                          >
                             {tagsTo.map((tagTo: string) => (
                               <div
                                 key={tagTo}
@@ -208,6 +223,13 @@ export default function CreateMemoModal({
                               onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
                               className='focus:none outline-none px-2 py-1 grow rounded-md'
                             />
+                            <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                              <div className='px-1'>
+                                <h2 className='text-[12px] font-medium'>
+                                  Add multiple recipients by pressing Tab or Enter.
+                                </h2>
+                              </div>
+                            </Tooltip>
                           </div>
                         </div>
                       </div>
@@ -364,26 +386,53 @@ export default function CreateMemoModal({
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                     <button
                       onClick={async (e) => {
-                        const title = await trigger('title');
-                        // Check if tagsTo array exists and validate all emails
+                        const titleValue = watch('title');
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        const toFieldValid = tagsTo.length > 0 && tagsTo.every(email => emailRegex.test(email));
-                        const results = [title, toFieldValid];
-                        const incomplete = results.some((item: boolean) => !item);
-                        if (incomplete) {
-                          e.preventDefault(); // Prevent form submission
-                          let message = '';
-                          if (tagsTo.length === 0) {
-                            message = 'Email address is required';
-                          } else if (tagsTo.some(email => !emailRegex.test(email))) {
-                            message = 'Please enter valid email addresses';
-                          } else {
-                            message = 'You cannot proceed due to incomplete fields. Please review.';
-                          }
-                          toast.custom(() => <CustomToast message={message} type='error' />, {
-                            duration: 5000,
+                        let hasErrors = false;
+                        
+                        // Clear any existing errors first
+                        clearErrors(['title', 'to']);
+                        
+                        // Validate title field
+                        if (!titleValue || titleValue === "") {
+                          setError("title", {
+                            type: "manual",
+                            message: "Title is required."
                           });
-                          return false;
+                          hasErrors = true;
+                        }
+                        
+                        // Validate To field
+                        if (tagsTo.length === 0) {
+                          setError("to", {
+                            type: "manual",
+                            message: "To field is required."
+                          });
+                          hasErrors = true;
+                        } else {
+                          // Validate email format only if there are emails
+                          const invalidEmails = tagsTo.filter(email => !emailRegex.test(email));
+                          if (invalidEmails.length > 0) {
+                            setError("to", {
+                              type: "manual",
+                              message: "Please enter valid email addresses."
+                            });
+                            hasErrors = true;
+                          }
+                        }
+
+                        // If there are errors, focus on the first invalid field and return
+                        if (hasErrors) {
+                          e.preventDefault(); // Prevent form submission
+                          if (!titleValue || titleValue === "") {
+                            const el = document.getElementById("title");
+                            if (el) el.focus();
+                          } else if (tagsTo.length === 0) {
+                            // Focus on the email input field
+                            const emailInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+                            if (emailInput) emailInput.focus();
+                          }
+                          return;
                         }
                       }}
                       type='submit'
