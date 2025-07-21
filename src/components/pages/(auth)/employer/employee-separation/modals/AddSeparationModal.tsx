@@ -38,6 +38,9 @@ export default function AddSeparationModal({
   const resetForm = () => {
     reset({
       date: new Date().toISOString(),
+      position: '',
+      department: '',
+      reason: '',
     });
     setEmployeeSearch('');
     setEmployeeSelected(false);
@@ -49,9 +52,9 @@ export default function AddSeparationModal({
         toast.custom(() => <CustomToast message={'Create separation successfully'} type='success' />, {
           duration: 5000,
         });
+        resetForm();
         setIsOpen(false);
         refetch();
-        resetForm();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
