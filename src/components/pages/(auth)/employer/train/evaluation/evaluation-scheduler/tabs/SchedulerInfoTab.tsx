@@ -70,9 +70,7 @@ function SchedulerInfoTab({
 
   useEffect(() => {
     if (dataEvaluation) {
-      // Ensure we always have an array
-      const items = Array.isArray(dataEvaluation) ? dataEvaluation : [];
-      setEvaluationItems(items);
+      setEvaluationItems(dataEvaluation);
     }
   }, [dataEvaluation]);
 
@@ -201,7 +199,7 @@ function SchedulerInfoTab({
               <option value='' disabled>
                 Select...
               </option>
-              {Array.isArray(evaluationItems) && evaluationItems.map((item: any, index: number) => {
+              {evaluationItems.map((item: any, index: number) => {
                 return (
                   <option key={item.id} value={item.id}>
                     {item.name}

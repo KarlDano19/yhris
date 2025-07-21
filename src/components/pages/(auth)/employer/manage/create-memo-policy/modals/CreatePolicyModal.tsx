@@ -2,7 +2,6 @@ import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -31,7 +30,7 @@ export default function CreatePolicyModal({
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [inputTo, setInputTo] = useState('');
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control, watch, formState: { errors }, setError } =
+  const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control } =
     useForm<DirectiveData>({
       defaultValues: {
         custom_policy_fields: [
@@ -91,56 +90,39 @@ export default function CreatePolicyModal({
   const handleNextClick = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent any potential form submission
     
-    const titleValue = watch('title');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    let hasErrors = false;
+    const title = await trigger('title');
+    const email = await trigger('to');
+    let results = null;
     
-    // Clear any existing errors first
-    clearErrors(['title', 'to']);
-    
-    // Validate title field
-    if (!titleValue || titleValue === "") {
-      setError("title", {
-        type: "manual",
-        message: "Title is required."
-      });
-      hasErrors = true;
-    }
-    
-    // Validate To field
+    // Check if tagsTo array exists and all emails are valid
     if (tagsTo.length === 0) {
-      setError("to", {
-        type: "manual",
-        message: "To field is required."
-      });
-      hasErrors = true;
+      results = [title, false];
     } else {
-      // Validate email format only if there are emails
-      const invalidEmails = tagsTo.filter(email => !emailRegex.test(email));
+      // Check if any email is invalid
+      const invalidEmails = tagsTo.filter(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'));
       if (invalidEmails.length > 0) {
-        setError("to", {
-          type: "manual",
-          message: "Please enter valid email addresses."
-        });
-        hasErrors = true;
+        results = [title, false];
+      } else {
+        results = [title, email];
       }
     }
 
-    // If there are errors, focus on the first invalid field and return
-    if (hasErrors) {
-      if (!titleValue || titleValue === "") {
-        const el = document.getElementById("title");
-        if (el) el.focus();
-      } else if (tagsTo.length === 0) {
-        // Focus on the email input field
-        const emailInput = document.querySelector('input[type="text"]') as HTMLInputElement;
-        if (emailInput) emailInput.focus();
+    const incomplete = results?.some((item: boolean) => !item);
+    if (!incomplete) {
+      setIsNextForm(true);
+    } else {
+      let message = '';
+      if (tagsTo.length === 0) {
+        message = 'Email address is required';
+      } else if (tagsTo.some(email => !email.includes('@') || !email.toLowerCase().endsWith('.com'))) {
+        message = 'Only valid email addresses with format example@domain.com are allowed';
+      } else {
+        message = 'You cannot proceed due to incomplete fields. Please review.';
       }
-      return;
+      toast.custom(() => <CustomToast message={message} type='error' />, {
+        duration: 5000,
+      });
     }
-    
-    // If validation passes, proceed to next form
-    setIsNextForm(true);
   };
 
   const increaseWidth = (text: HTMLInputElement) => {
@@ -165,21 +147,6 @@ export default function CreatePolicyModal({
       });
     }
   };
-
-  // Clear errors when title changes
-  useEffect(() => {
-    const titleValue = watch('title');
-    if (titleValue && titleValue !== "") {
-      clearErrors('title');
-    }
-  }, [watch('title'), clearErrors]);
-
-  // Clear errors when tagsTo changes
-  useEffect(() => {
-    if (tagsTo.length > 0) {
-      clearErrors('to');
-    }
-  }, [tagsTo, clearErrors]);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -228,11 +195,6 @@ export default function CreatePolicyModal({
                         <label htmlFor='title' className='block text-sm font-medium leading-6 text-gray-900'>
                           Title<span className='text-red-600'>*</span>
                         </label>
-                        {errors.title && (
-                          <p className='text-xs text-red-600 mt-1'>
-                            {errors.title.message || 'Title is required.'}
-                          </p>
-                        )}
                         <div className='mt-2'>
                           <input
                             id='title'
@@ -246,18 +208,9 @@ export default function CreatePolicyModal({
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           To<span className='text-red-600'>*</span>
                         </label>
-                        {errors.to && (
-                          <p className='text-xs text-red-600 mt-1'>
-                            {errors.to.message || 'To field is required.'}
-                          </p>
-                        )}
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div 
-                              className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'
-                              data-tooltip-id='to-section-tooltip'
-                              data-tooltip-place='bottom'
-                            >
+                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'>
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
@@ -276,13 +229,6 @@ export default function CreatePolicyModal({
                                 onChange={(e) => setInputTo(e.target.value)}
                                 className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
-                              <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                <div className='px-1'>
-                                  <h2 className='text-[12px] font-medium'>
-                                    Add multiple recipients by pressing Tab or Enter.
-                                  </h2>
-                                </div>
-                              </Tooltip>
                             </div>
                           </div>
                         </div>

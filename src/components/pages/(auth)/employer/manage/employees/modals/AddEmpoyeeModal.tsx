@@ -39,8 +39,8 @@ export default function AddEmployeeModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
-        reset(); // Only reset after successful save
         setIsOpen(false);
+        reset();
         refetch();
       },
       onError: (err: any) => {

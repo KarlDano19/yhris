@@ -49,16 +49,17 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
   }, [isMenuShow]);
 
   return (
-    <div className='fixed z-10 md:z-50 bottom-2 md:bottom-4 right-3 md:right-6 cursor-pointer'>
+    <div className='fixed z-10 md:z-50 bottom-4 right-6 cursor-pointer'>
       <div
+        onClick={() => setShowMenu(!isMenuShow)}
         className={`${
           !isMenuShow ? 'flex' : 'hidden'
-        } bg-[#2c3e56fb] w-9 h-9 md:w-12 md:h-12 justify-center items-center rounded-full relative`}
+        } bg-[#2c3e56fb] w-12 h-12 justify-center items-center rounded-full relative`}
       >
         <div
-          className={`absolute -top-16 md:-top-20 left-1/2 transform -translate-x-1/2 w-24 h-16 md:w-32 md:h-24 ${
+          className={`absolute -top-20 left-1/2 transform -translate-x-1/2 w-32 h-24 ${
             showHelpText && !isMenuShow ? 'opacity-100' : 'opacity-0'
-          } transition-opacity duration-1000 pointer-events-none`}
+          } transition-opacity duration-1000`}
         >
           <svg viewBox="0 -62 100 100" className="w-full h-full">
             <path
@@ -73,44 +74,44 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
             </text>
           </svg>
         </div>
-        <span className="z-10" onClick={() => setShowMenu(!isMenuShow)}>
-          <ChatBubbleIcon />
-        </span>
+        <ChatBubbleIcon />
       </div>
 
       {isMenuShow && (
         <div ref={menuRef} className="static py-3">
-          <div className='mb-2 md:mb-4 bottom-11 md:bottom-12 right-0 md:right-2 bg-white border-t-[1px] px-3 md:px-6 py-2 md:py-4 border-t-gray-300 drop-shadow-lg shadow-lg w-60 md:w-80 h-64 md:h-72 absolute rounded-2xl md:rounded-3xl'>
+          <div className='mb-4 bottom-12 right-2 bg-white border-t-[1px] px-6 py-4 border-t-gray-300 drop-shadow-lg shadow-lg  w-80 h-72 absolute rounded-3xl'>
             <h2 className='h2 font-bold'>Hey, {companyName || 'there'}! &#128075;</h2>
-            <p className='text-sm mt-1'>Need assistance with YAHSHUA HRIS? We&apos;re here to help!</p>
+            <p className='text-sm mt-1'>Need assistance with YAHSHUA HRIS? We're here to help!</p>
             <p className='text-xs text-gray-600 mt-2'>Choose an option below to get support or share your thoughts.</p>
-            <div className='w-full h-[6rem] md:h-[9rem] overflow-hidden hover:pr-0 mt-3'>
-              <button
-                className='my-2 border shadow-sm bg-[#FFC107] font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-3 w-full rounded-md hover:bg-[#e0b532]'
-                onClick={() => {
-                  window.open(
-                    'https://yahshua.notion.site/173c8ec44231803a94e5ec947a3546e2?pvs=105',
-                    '_blank'
-                  );
-                }}
-              >
-                Report a bug
-              </button>
-              <button
-                className='my-2 border shadow-sm bg-[#FFC107] font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-3 w-full rounded-md hover:bg-[#e0b532]'
-                onClick={() => {
-                  window.open(
-                    'https://docs.google.com/forms/d/e/1FAIpQLSfshLBcafYQvTgAjcmYu_0AyC8IuuoyXrA5LJtME_kD1oDLww/viewform',
-                    '_blank'
-                  );
-                }}
-              >
-                Give us feedback
-              </button>
+            <div className='w-70 h-[9rem] overflow-hidden hover:overflow-auto hover:pr-0'>
+              <div className='mt-3'>
+                <button
+                  className='my-2 border shadow-sm bg-[#FFC107] font-bold text-sm px-4 py-3 w-full rounded-md hover:bg-[#e0b532]'
+                  onClick={() => {
+                    window.open(
+                      'https://yahshua.notion.site/173c8ec44231803a94e5ec947a3546e2?pvs=105',
+                      '_blank'
+                    );
+                  }}
+                >
+                  Report a bug
+                </button>
+                <button
+                  className='my-2 border shadow-sm bg-[#FFC107] font-bold text-sm px-4 py-3 w-full rounded-md hover:bg-[#e0b532]'
+                  onClick={() => {
+                    window.open(
+                      'https://docs.google.com/forms/d/e/1FAIpQLSfshLBcafYQvTgAjcmYu_0AyC8IuuoyXrA5LJtME_kD1oDLww/viewform',
+                      '_blank'
+                    );
+                  }}
+                >
+                  Give us feedback
+                </button>
+              </div>
             </div>
           </div>
-          <div className={`flex bottom-0 right-0 absolute text-white bg-[#2c3e56fb] w-9 h-9 md:w-12 md:h-12 items-center rounded-full`} onClick={() => setShowMenu(false)}>
-            <XMarkIcon className='w-[22px] h-[22px] md:w-[30px] md:h-[30px] m-auto' />
+          <div className={`flex bottom-0 right-0 absolute text-white bg-[#2c3e56fb] w-12 h-12 items-center rounded-full`} onClick={() => setShowMenu(false)}>
+            <XMarkIcon className='w-[30px] h-[30px] m-auto' />
           </div>
         </div>
       )}

@@ -6,7 +6,6 @@ import Link from 'next/link';
 
 import { Tooltip } from 'react-tooltip';
 
-import Pagination from '@/components/Pagination';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal';
@@ -21,19 +20,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
-  const [appliedFilter, setAppliedFilter] = useState<any>({
-    search: '',
-  });
-  const [searchText, setSearchText] = useState('');
-  const [pageSize, setPageSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState<{
-    totalRecords: number;
-    totalPages: number;
-  }>({
-    totalPages: 1,
-    totalRecords: 0,
-  });
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
@@ -45,31 +31,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     data: dataEmailTemplate,
     isLoading: isGetEmailTemplateLoading,
     refetch: refetchEmailTemplate,
-  } = useGetEmailTemplateItems({
-    ...appliedFilter,
-    pageSize: pageSize,
-    currentPage: currentPage,
-  });
+  } = useGetEmailTemplateItems(itemsFilter);
 
   const handleCreateTemplateSuccess = () => {
     setIsSuccessModalOpen(true);
-  };
-
-  const paginationChange = (event: any) => {
-    const newCurrentPage = event.selected + 1;
-    setCurrentPage(newCurrentPage);
-  };
-
-  const pageSizeChange = (value: number) => {
-    setCurrentPage(1);
-    setPageSize(value);
-  };
-
-  const handleSearch = () => {
-    setAppliedFilter({
-      ...itemsFilter,
-      search: searchText
-    });
   };
 
   useEffect(() => {
@@ -78,44 +43,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataEmailTemplate && !isGetEmailTemplateLoading) {
-      let items = [];
-      let totalPages = 1;
-      let totalRecords = 0;
-
-      // Handle paginated response structure
-      if (dataEmailTemplate.records) {
-        items = dataEmailTemplate.records.map((item: any) => ({
+      setEmailTemplatesItems(
+        dataEmailTemplate.map((item: any) => ({
           ...item,
           created_at: (() => {
             const d = new Date(item.created_at);
             return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString('en-US');
           })(),
-        }));
-        totalPages = dataEmailTemplate.total_pages || 1;
-        totalRecords = dataEmailTemplate.total_records || items.length;
-      } 
-      // Handle array response structure (no pagination from backend)
-      else if (Array.isArray(dataEmailTemplate)) {
-        items = dataEmailTemplate.map((item: any) => ({
-          ...item,
-          created_at: (() => {
-            const d = new Date(item.created_at);
-            return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString('en-US');
-          })(),
-        }));
-        
-        // Calculate pagination locally if backend doesn't support it
-        totalRecords = items.length;
-        totalPages = Math.ceil(totalRecords / pageSize);
-      }
-
-      setEmailTemplatesItems(items);
-      setPagination({
-        totalPages,
-        totalRecords
-      });
+        }))
+      );
     }
-  }, [dataEmailTemplate, isGetEmailTemplateLoading, pageSize]);
+  }, [dataEmailTemplate, isGetEmailTemplateLoading]);
 
   useEffect(() => {
     if (selectedEmailTemplateId) {
@@ -218,8 +156,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
-              <div className='flex-none w-11/12 lg:w-full'>
+            <div className='flex gap-2 lg:w-1/3'>
+              <div className='flex-none w-11/12 lg:w-1/3'>
                 <div className='relative flex items-center'>
                   <input
                   type='text'
@@ -229,19 +167,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Subject'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSearch();
-                    }
-                  }}
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
               </div>
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={handleSearch}
+              onClick={() => refetchEmailTemplate()}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -285,15 +218,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {emailTemplatesItems?.length}</p>
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
         </div>
       </div>
