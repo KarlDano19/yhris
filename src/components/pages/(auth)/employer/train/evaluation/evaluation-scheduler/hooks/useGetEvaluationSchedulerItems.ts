@@ -35,7 +35,7 @@ function useGetEvaluationSchedulerItems(filters: any) {
     () => getEvaluationSchedulerItems(filters),
     {
       // enabled: false,
-      keepPreviousData: true,
+    keepPreviousData: true,
     }
   );
 

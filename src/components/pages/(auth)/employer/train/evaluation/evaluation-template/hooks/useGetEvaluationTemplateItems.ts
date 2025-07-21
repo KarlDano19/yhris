@@ -40,7 +40,7 @@ function useGetEvaluationTemplateItems(filters: any) {
     () => getEvaluationTemplateItems(filters),
     {
       // enabled: false,
-      keepPreviousData: true,
+    keepPreviousData: true,
     }
   );
 

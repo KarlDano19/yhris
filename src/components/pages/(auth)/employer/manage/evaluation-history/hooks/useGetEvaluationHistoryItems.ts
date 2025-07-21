@@ -38,7 +38,7 @@ function useGetEvaluationHistoryItems(filters: any) {
     () => getEvaluationHistoryItems(filters),
     {
       // enabled: false,
-      keepPreviousData: true,
+    keepPreviousData: true,
     }
   );
 

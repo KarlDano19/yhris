@@ -30,10 +30,13 @@ async function getEmailTemplate(filters: any) {
 }
 
 function useGetEmailTemplateItems(filters: any) {
-  const query = useQuery(['emailTemplateItemsCache'], () => getEmailTemplate(filters), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    ['emailTemplateItemsCache', filters.currentPage, filters.pageSize, filters.search],
+    () => getEmailTemplate(filters),
+    {
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }
