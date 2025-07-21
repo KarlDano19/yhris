@@ -10,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import useGetBenefitItems from './hooks/useGetBenefitItems';
 import DesignBenefitsModal from './modals/DesignBenefitsModal';
 
@@ -23,7 +24,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
-  const { data: dataBenefits, isLoading: isGetBenefitsLoading, refetch } = useGetBenefitItems(itemsFilter);
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const { data: dataBenefits, isLoading: isGetBenefitsLoading, refetch } = useGetBenefitItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
   const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
@@ -33,18 +53,49 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    refetch();
-  }, []);
-
-  useEffect(() => {
     if (dataBenefits) {
-      dataBenefits.map((benefit: any) => {
-        benefit.date = Intl.DateTimeFormat('en-US').format(new Date(benefit.created_at));
-        return benefit;
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataBenefits.records) {
+        items = dataBenefits.records.map((benefit: any) => {
+          benefit.date = Intl.DateTimeFormat('en-US').format(new Date(benefit.created_at));
+          return benefit;
+        });
+        totalPages = dataBenefits.total_pages || 1;
+        totalRecords = dataBenefits.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataBenefits)) {
+        items = dataBenefits.map((benefit: any) => {
+          benefit.date = Intl.DateTimeFormat('en-US').format(new Date(benefit.created_at));
+          return benefit;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setDesignBenefitsItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setDesignBenefitsItems(dataBenefits);
     }
-  }, [dataBenefits]);
+  }, [dataBenefits, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -62,7 +113,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    refetch();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
   };
 
   useEffect(() => {
@@ -113,7 +167,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <tr>
           <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add benefit.</h4>
           </td>
         </tr>
       );
@@ -175,10 +229,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 />
               </div>
             </div>
-              <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+            <div className='flex gap-2 lg:w-1/3'>
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   name='search'
                   id='search'
@@ -186,17 +239,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Title/Purpose/Eligibility'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
-                </div>
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={handleSearch}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
@@ -231,9 +288,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {designBenefitsItems.length}</p>
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
