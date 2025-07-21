@@ -71,7 +71,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
   const isRejected = applicant.status === 'rejected';
   const isWithdrawn = applicant.status === 'withdrawn';
-  
+
   const capitalizeFirstLetter = (text: any) => {
     return text.replace(/(?:^|\s)\S/, function (match: any) {
       return match.toUpperCase();
@@ -120,59 +120,59 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
 
       {isOpenMenu && (
         <div ref={menuRef}>
-          <ul className='absolute left-0 top-6 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md'>
-            {menuList.map((list) => {
-              const { id, icon, name, whichModal, modalTitle } = list;
-              return (
-                <>
-                  {isPassedFinalInterview && name !== 'Checklist' && (
-                    <li key={id}>
-                      <button
-                        onClick={() =>
-                          setActionState({
-                            ...initialActionState,
-                            email: applicant.email,
-                            applicantId: applicant.id,
-                            stageId: stage.id,
-                            modal: { whichModal, isOpen: true, title: modalTitle },
-                          })
+        <ul className='absolute left-0 top-6 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md'>
+          {menuList.map((list) => {
+            const { id, icon, name, whichModal, modalTitle } = list;
+            return (
+              <>
+                {isPassedFinalInterview && name !== 'Checklist' && (
+                  <li key={id}>
+                    <button
+                      onClick={() =>
+                        setActionState({
+                          ...initialActionState,
+                          email: applicant.email,
+                          applicantId: applicant.id,
+                          stageId: stage.id,
+                          modal: { whichModal, isOpen: true, title: modalTitle },
+                        })
+                      }
+                      className='flex items-center gap-3 w-full'
+                    >
+                      <span>{icon}</span>
+                      <p>{name}</p>
+                    </button>
+                  </li>
+                )}
+                {!isPassedFinalInterview && (
+                  <li key={id}>
+                    <button
+                      onClick={() => {
+                        let lastElement = state[state.length - 1]
+                        let isFinalStage = false;
+                        if (lastElement.id == stage.id) {
+                          isFinalStage = true;
                         }
-                        className='flex items-center gap-3 w-full'
-                      >
-                        <span>{icon}</span>
-                        <p>{name}</p>
-                      </button>
-                    </li>
-                  )}
-                  {!isPassedFinalInterview && (
-                    <li key={id}>
-                      <button
-                        onClick={() => {
-                          let lastElement = state[state.length - 1]
-                          let isFinalStage = false;
-                          if (lastElement.id == stage.id) {
-                            isFinalStage = true;
-                          }
-                          setActionState({
-                            ...initialActionState,
-                            email: applicant.email,
-                            applicantId: applicant.id,
-                            stageId: stage.id,
-                            modal: { whichModal, isOpen: true, title: modalTitle },
-                            isFinalStage: isFinalStage
-                          });
-                        }}
-                        className='flex items-center gap-3 w-full'
-                      >
-                        <span>{icon}</span>
-                        <p>{name}</p>
-                      </button>
-                    </li>
-                  )}
-                </>
-              );
-            })}
-          </ul>
+                        setActionState({
+                          ...initialActionState,
+                          email: applicant.email,
+                          applicantId: applicant.id,
+                          stageId: stage.id,
+                          modal: { whichModal, isOpen: true, title: modalTitle },
+                          isFinalStage: isFinalStage
+                        });
+                      }}
+                      className='flex items-center gap-3 w-full'
+                    >
+                      <span>{icon}</span>
+                      <p>{name}</p>
+                    </button>
+                  </li>
+                )}
+              </>
+            );
+          })}
+        </ul>
         </div>
       )}
     </div>
