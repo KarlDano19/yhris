@@ -5,6 +5,8 @@ import { useRef } from 'react';
 
 import Link from 'next/link';
 
+import { Tooltip } from 'react-tooltip';
+
 import Pagination from '@/components/Pagination';
 import useGetHiredApplicants from './hooks/useGetHiredApplicants';
 
@@ -83,6 +85,9 @@ const Content = () => {
                   type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Job Title'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   value={inputValue}
                   onChange={(e) => {
@@ -133,6 +138,7 @@ const Content = () => {
         onPageChange={paginationChange}
         pageType='hiredApplicant'
       />
+      <Tooltip id='search-tooltip'/>
     </div>
   );
 };

@@ -277,8 +277,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Scheduler</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
+            <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
+              <div className='flex-none w-11/12 lg:w-full'>
                 <div className='relative flex items-center'>
                   <input
                   type='text'
