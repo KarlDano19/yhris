@@ -508,13 +508,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeListRefetch}
         />
       )}
-      {isAddEmployeeModalOpen && (
-        <AddEmployeeModal
-          refetch={employeeListRefetch}
-          isOpen={isAddEmployeeModalOpen}
-          setIsOpen={setIsAddEmployeeModalOpen}
-        />
-      )}
+      <AddEmployeeModal
+        refetch={employeeListRefetch}
+        isOpen={isAddEmployeeModalOpen}
+        setIsOpen={setIsAddEmployeeModalOpen}
+      />
     </>
   );
 };
