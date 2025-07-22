@@ -81,6 +81,8 @@ const Content = () => {
               handleSubmit={firstForm.handleSubmit}
               firstSubmit={firstSubmit}
               setCurrentTab={setCurrentTab}
+              setValue={firstForm.setValue}
+              watch={firstForm.watch}
             />
           </div>
           <div style={{ display: currentTab === 2 ? 'block' : 'none' }}>

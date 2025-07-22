@@ -4,34 +4,36 @@ import { getCookie } from 'cookies-next';
 
 async function saveApplicantProfile(data: any) {
   try {
+    // Bundle all fields into a single object, including work_experience
+    const finalData = {
+      firstname: data.firstname,
+      middlename: data.middlename,
+      lastname: data.lastname,
+      email: data.email,
+      about: data.about,
+      birth_date: data.birthDay ? data.birthDay.toLocaleDateString('en-CA') : undefined,
+      age: data.age,
+      gender: data.gender,
+      religion: data.religion,
+      nationality: data.nationality,
+      civil_status: data.civilStatus,
+      address: data.address,
+      mobile: data.mobile,
+      landline: data.landLineNo,
+      contact_person_name: data.contactPersonName,
+      contact_person_address: data.contactPersonAddress,
+      contact_person_mobile: data.contactPersonContactNo,
+      contact_person_relationship: data.contactPersonRelationship,
+      contact_person_age: data.contactPersonAge,
+      education: data.education,
+      expected_salary: data.expected_salary,
+      skills: data.skills,
+      work_experience: data.exp || data.experiences || [],
+    };
     const formData = new FormData();
-    formData.append('firstname', data.firstname);
-    formData.append('lastname', data.lastname);
-    formData.append('gender', data.gender);
-    formData.append('religion', data.religion);
-    formData.append('nationality', data.nationality);
-    formData.append('civil_status', data.civilStatus);
-    formData.append('address', data.address);
-    formData.append('mobile', data.mobile);
-    formData.append('contact_person_name', data.contactPersonName);
-    formData.append('contact_person_address', data.contactPersonAddress);
-    formData.append('contact_person_mobile', data.contactPersonContactNo);
-    formData.append('contact_person_relationship', data.contactPersonRelationship);
-    formData.append('contact_person_age', data.contactPersonAge);
-    if (data.profilePicture.length !== 0) {
+    formData.append('profile_form', JSON.stringify(finalData));
+    if (data.profilePicture && data.profilePicture.length !== 0) {
       formData.append('photo', data.profilePicture[0]);
-    }
-    if (data.about) {
-      formData.append('about', data.about);
-    }
-    if (data.middlename) {
-      formData.append('middlename', data.middlename);
-    }
-    if (data.birthDay) {
-      formData.append('birth_date', data.birthDay.toLocaleDateString('en-CA'));
-    }
-    if (data.landLineNo) {
-      formData.append('landline', data.landLineNo);
     }
     const token = getCookie('token');
     const config = {

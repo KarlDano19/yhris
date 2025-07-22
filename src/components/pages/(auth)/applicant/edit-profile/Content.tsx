@@ -13,6 +13,7 @@ import classNames from '@/helpers/classNames';
 import ProfileTab from './profile/Tab';
 import ContactsTab from './contacts/Tab';
 import useSaveApplicantProfile from './hooks/useSaveApplicantProfile';
+import WorkExperienceTab from './work-experience/Tab';
 
 import { T_ApplicantProfile } from '@/types/globals';
 
@@ -21,6 +22,7 @@ const Content = () => {
   const [tabs, setTabs] = useState([
     { name: 'Profile', current: true },
     { name: 'Contacts', current: false },
+    { name: 'Experience', current: false },
   ]);
   const { register, setValue, watch, handleSubmit, control } = useForm<T_ApplicantProfile>();
   const { data: applicantProfileData, isLoading: isApplicantProfileLoading } = useGetApplicantProfile();
@@ -33,7 +35,7 @@ const Content = () => {
       setValue('middlename', applicantProfileData.middlename);
       setValue('lastname', applicantProfileData.lastname);
       setValue('email', applicantProfileData.email);
-      setValue('birthDay', new Date(applicantProfileData.birth_date));
+      setValue('birthDay', applicantProfileData.birth_date ? new Date(applicantProfileData.birth_date) : null);
       setValue('age', applicantProfileData.age);
       setValue('gender', applicantProfileData.gender);
       setValue('religion', applicantProfileData.religion);
@@ -47,6 +49,20 @@ const Content = () => {
       setValue('contactPersonContactNo', applicantProfileData.contact_person_mobile);
       setValue('contactPersonRelationship', applicantProfileData.contact_person_relationship);
       setValue('contactPersonAge', applicantProfileData.contact_person_age);
+      setValue('education', applicantProfileData.education);
+      setValue('expected_salary', applicantProfileData.expected_salary);
+      setValue('skills', applicantProfileData.skills);
+      // Convert work_experience date strings to Date objects
+      if (applicantProfileData.work_experience) {
+        const experiences = applicantProfileData.work_experience.map((exp: any) => ({
+          ...exp,
+          dateFrom: exp.dateFrom ? new Date(exp.dateFrom) : null,
+          dateTo: exp.dateTo ? new Date(exp.dateTo) : null,
+        }));
+        setValue('experiences', experiences);
+      } else {
+        setValue('experiences', []);
+      }
     }
   }, [applicantProfileData]);
 
@@ -80,7 +96,7 @@ const Content = () => {
     return classes.filter(Boolean).join(' ');
   };
 
-  const currentTab = tabs.find((tab) => tab.current);
+  const currentTab = tabs.find((tab) => tab.current) || { name: 'Profile' };
 
   return (
     <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
@@ -116,7 +132,7 @@ const Content = () => {
                       tab.current
                         ? 'border-savoy-blue text-savoy-blue'
                         : 'text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                      'w-1/2 border-b-4 py-4 px-1 text-center text-sm font-semibold list-none cursor-pointer'
+                      'w-1/3 border-b-4 py-4 px-1 text-center text-sm font-semibold list-none cursor-pointer'
                     )}
                     aria-current={tab.current ? 'page' : undefined}
                     onClick={() => handleTabChange(tab.name)}
@@ -129,13 +145,28 @@ const Content = () => {
           </div>
           <div>
             {
-              // @ts-expect-error
               currentTab.name === 'Contacts' ? (
                 <ContactsTab
                   {...{
                     register,
                     onSubmit,
                     isLoading,
+                  }}
+                />
+              ) : currentTab.name === 'Experience' ? (
+                <WorkExperienceTab
+                  {...{
+                    register,
+                    watch,
+                    setValue,
+                    handleSubmit,
+                    control,
+                    isLoading,
+                    setCurrentTab: (tabIndex: number) => {
+                      // Set tab by index (0: Profile, 1: Contacts, 2: Experience)
+                      setTabs(tabs => tabs.map((tab, idx) => ({ ...tab, current: idx === tabIndex })));
+                    },
+                    submitToSave: onSubmit,
                   }}
                 />
               ) : (

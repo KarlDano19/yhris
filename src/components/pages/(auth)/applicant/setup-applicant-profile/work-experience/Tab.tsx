@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
 
-import { PlusIcon, CheckIcon } from '@heroicons/react/24/solid';
+import { PlusIcon } from '@heroicons/react/24/solid';
 
-function PreferencesTab({
+function WorkExperienceTab({
   control,
   register,
   watch,
@@ -28,37 +27,23 @@ function PreferencesTab({
   setCurrentTab: any;
   submitToSave: any;
 }) {
-  const [isWFH, setCheckWFH] = useState(false);
-  const [isWOS, setCheckWOS] = useState(false);
+
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: 'experiences',
   });
 
-  // Autofill work experience from profile
-  const { data: applicantProfileData } = useGetApplicantProfile();
-  useEffect(() => {
-    const currentExperiences = watch('experiences');
-    if (
-      applicantProfileData &&
-      applicantProfileData.work_experience &&
-      Array.isArray(applicantProfileData.work_experience) &&
-      (!currentExperiences || currentExperiences.length === 0)
-    ) {
-      const experiences = applicantProfileData.work_experience.map((exp: any) => ({
-        ...exp,
-        dateFrom: exp.dateFrom ? new Date(exp.dateFrom) : null,
-        dateTo: exp.dateTo ? new Date(exp.dateTo) : null,
-      }));
-      setValue('experiences', experiences);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applicantProfileData, setValue]);
-
   const onSubmit = handleSubmit((data: any) => {
+    console.log('WorkExperienceTab - Full form data:', data);
+    console.log('WorkExperienceTab - Experiences field:', data.experiences);
+    console.log('WorkExperienceTab - Fields from useFieldArray:', fields);
+    console.log('WorkExperienceTab - Current watch data:', watch());
+    
     let hasError = false;
+    
+    // Check if there are any experiences and validate them
     if (fields.length !== 0) {
-      data.experiences.map((experience: any) => {
+      data.experiences.map((experience: any, index: number) => {
         if (
           !(
             experience.position &&
@@ -72,26 +57,43 @@ function PreferencesTab({
             duration: 7000,
           });
           hasError = true;
+        } else {
+          // Convert dates to ISO strings for API
+          if (experience.dateFrom instanceof Date) {
+            data.experiences[index].dateFrom = experience.dateFrom.toISOString().split('T')[0];
+          }
+          if (experience.dateTo instanceof Date) {
+            data.experiences[index].dateTo = experience.dateTo.toISOString().split('T')[0];
+          }
         }
       });
     }
+    
     if (hasError) return;
+    
+    // Always set the exp field, even if empty
     data['exp'] = data.experiences;
-    data['setupPreference'] = [];
-    if (isWFH) {
-      data['setupPreference'].push('Work From Home');
-    }
-    if (isWOS) {
-      data['setupPreference'].push('Work on Site');
-    }
-    if (!data['setupPreference'].length) {
-      toast.custom(() => <CustomToast message='Please select at least one work set-up preference' type='error' />, {
-        duration: 7000,
-      });
-      return;
-    }
+    
+    console.log('Submitting work experience data:', data.exp);
     submitToSave(data);
   });
+
+  const handleAddExperience = () => {
+    const newExperience = {
+      position: '',
+      majorRole: '',
+      companyOrg: '',
+      dateFrom: '',
+      dateTo: '',
+    };
+    append(newExperience);
+    console.log('Added new experience, current fields:', fields);
+    console.log('Current form data after adding:', watch());
+  };
+
+  const handleRemoveExperience = (index: number) => {
+    remove(index);
+  };
 
   const renderExpInputs = () => {
     return fields.map((item, index) => {
@@ -167,7 +169,7 @@ function PreferencesTab({
               </label>
               <div className='relative mt-2'>
                 <CustomDatePicker
-                  id={`from-datepicker-${index}`}
+                  id={`to-datepicker-${index}`}
                   placeholder={'mm/dd/yyyy'}
                   className='appearance-none block w-full rounded-md py-[3.2px] px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-7'
                   selected={watch(`experiences.${index}.dateTo`)}
@@ -184,7 +186,7 @@ function PreferencesTab({
           <button
             type='button'
             className='lg:mt-5 w-full md:w-1/2 rounded-md flex justify-center items-center bg-red-600 lg:px-[110px] px-10 py-2.5 text-sm font-semibold text-white shadow-sm mb-4'
-            onClick={() => remove(index)}
+            onClick={() => handleRemoveExperience(index)}
           >
             REMOVE
           </button>
@@ -200,72 +202,11 @@ function PreferencesTab({
       <button
         type='button'
         className='lg:mt-5 w-full md:w-auto rounded-md flex justify-center items-center bg-[#65C979] px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#90d69e]'
-        onClick={() =>
-          append({
-            position: '',
-            majorRole: '',
-            companyOrg: '',
-            dateFrom: '',
-            dateTo: '',
-          })
-        }
+        onClick={handleAddExperience}
       >
         <PlusIcon className='h-5 w-5 mr-3' />
         ADD EXPERIENCE
       </button>
-      <h6 className='text-sm font-semibold mt-16'>Work Set-up Preference</h6>
-      <div className='flex items-center mt-3'>
-        <label
-          className={`h-3.5 w-3.5 flex justify-center items-center cursor-pointer ${
-            isWFH ? 'border-2 border-savoy-blue' : 'border border-gray-400'
-          }`}
-        >
-          {isWFH ? (
-            <div className='h-3.5 w-3.5 bg-savoy-blue'>
-              <CheckIcon className='h-3.5 w-3.5 text-white' />
-            </div>
-          ) : (
-            ''
-          )}
-          <input
-            type='checkbox'
-            id='wfh'
-            className='hidden'
-            checked={isWFH}
-            onChange={() => setCheckWFH((isWFH) => !isWFH)}
-          />
-        </label>
-
-        <label htmlFor='wfh' className='ml-3 text-sm'>
-          Open to Work From Home
-        </label>
-      </div>
-      <div className='flex items-center mt-2.5'>
-        <label
-          className={`h-3.5 w-3.5 flex justify-center items-center cursor-pointer ${
-            isWOS ? 'border-2 border-savoy-blue' : 'border border-gray-400'
-          }`}
-        >
-          {isWOS ? (
-            <div className='h-3.5 w-3.5 bg-savoy-blue'>
-              <CheckIcon className='h-3.5 w-3.5 text-white' />
-            </div>
-          ) : (
-            ''
-          )}
-          <input
-            type='checkbox'
-            id='wos'
-            className='hidden'
-            checked={isWOS}
-            onChange={() => setCheckWOS((isWOS) => !isWOS)}
-          />
-        </label>
-
-        <label htmlFor='wos' className='ml-3 text-sm'>
-          Open to Work on Site
-        </label>
-      </div>
       <div className='md:flex justify-between mt-10 md:mt-16 lg:mt-28 md:mb-5'>
         <button
           type='button'
@@ -276,23 +217,13 @@ function PreferencesTab({
         </button>
         <button
           type='submit'
-          className='rounded-md w-full my-4 md:my-0 md:w-auto bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50'
-          disabled={isLoading}
+          className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+          tabIndex={18}
         >
-          {isLoading ? (
-            <div
-              className='animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-white rounded-full my-1 mx-2'
-              role='status'
-              aria-label='loading'
-            >
-              <span className='sr-only'>Loading...</span>
-            </div>
-          ) : (
-            'SUBMIT'
-          )}
+          Next
         </button>
       </div>
     </form>
   );
 }
-export default PreferencesTab;
+export default WorkExperienceTab;

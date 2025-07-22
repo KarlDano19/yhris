@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 
@@ -7,6 +8,7 @@ import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
 import DropDownArrow from '@/svg/DropDownArrow';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 function ProfileTab({
   register,
@@ -25,6 +27,67 @@ function ProfileTab({
   control: any;
   Controller: any;
 }) {
+  const [educationInput, setEducationInput] = useState("");
+  const [skillsInput, setSkillsInput] = useState("");
+  const [tagsSkill, setTagsSkill] = useState<string[]>([]);
+  const isSkillsInitialized = useRef(false);
+  
+  // Get applicantProfileData from the form context (watch all values)
+  const applicantProfileData = watch();
+
+  // Initialize skills tags only once when applicantProfileData.skills is available
+  useEffect(() => {
+    if (!isSkillsInitialized.current && applicantProfileData && Array.isArray(applicantProfileData.skills)) {
+      setTagsSkill(applicantProfileData.skills);
+      setValue('skills', applicantProfileData.skills);
+      isSkillsInitialized.current = true;
+    }
+  }, [applicantProfileData, setValue]);
+
+  // Handle skills input key down
+  const handleKeyDownSkill = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' || event.key === 'Tab' || event.key === ',') {
+      event.preventDefault();
+      const newTag = skillsInput.trim();
+      if (
+        newTag !== '' &&
+        !tagsSkill.some((tag) => tag.toLowerCase() === newTag.toLowerCase())
+      ) {
+        const newTags = [...tagsSkill, newTag];
+        setTagsSkill(newTags);
+        setValue('skills', newTags);
+        setSkillsInput('');
+      }
+    }
+  };
+
+  const handleRemoveTagSkill = (tag: string) => {
+    const newTags = tagsSkill.filter((t) => t !== tag);
+    setTagsSkill(newTags);
+    setValue('skills', newTags);
+  };
+
+  // Handle education input
+  const handleEducationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEducationInput(e.target.value);
+    // Store as JSON string in the form
+    setValue("education", e.target.value);
+  };
+
+  // Handle expected salary input
+  const handleExpectedSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
+    setValue("expected_salary", value ? parseInt(value) : null);
+  };
+
+  // Get display value for expected salary
+  const getExpectedSalaryDisplayValue = () => {
+    if (applicantProfileData.expected_salary) {
+      return applicantProfileData.expected_salary.toString();
+    }
+    return "";
+  };
+
   const onSubmit = handleSubmit(() => {
     setCurrentTab(2);
   });
@@ -250,88 +313,67 @@ function ProfileTab({
             />
           </div>
         </div>
-      </div>
-      {/* <h6 className='text-indigo-dye text-sm font-semibold mt-6'>Address</h6> */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4 md:gap-x-11 gap-y-5'>
-        {/* <div className='grid-item'>
-          <label
-            htmlFor='house-no'
-            className='block whitespace-nowrap truncate text-sm font-medium leading-6 text-gray-900'
-          >
-            House No./Bldg./Apartment/Suite, etc.
+        <div className='grid-item'>
+          <label htmlFor='education' className='block text-sm font-medium leading-6 text-gray-900'>
+            Course/Degree
           </label>
           <div className='mt-2'>
             <input
               type='text'
-              {...register('houseNo')}
-              id='house-no'
-              className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-              tabIndex={12}
-            />
-          </div>
-        </div> */}
-        {/* <div className='grid-item'>
-          <label htmlFor='town' className='block text-sm font-medium leading-6 text-gray-900'>
-            Town/Brgy.<span className='text-red-500'>*</span>
-          </label>
-          <div className='mt-2'>
-            <input
-              type='text'
-              {...register('town', { required: true })}
-              id='town'
+              value={educationInput}
+              onChange={handleEducationChange}
+              id='education'
+              placeholder='Enter your course/degree'
               className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
               tabIndex={14}
             />
           </div>
         </div>
         <div className='grid-item'>
-          <label htmlFor='city' className='block text-sm font-medium leading-6 text-gray-900'>
-            City<span className='text-red-500'>*</span>
+          <label htmlFor='expected_salary' className='block text-sm font-medium leading-6 text-gray-900'>
+            Expected Salary (PHP)
           </label>
           <div className='mt-2'>
             <input
               type='text'
-              {...register('city', { required: true })}
-              id='city'
+              value={getExpectedSalaryDisplayValue()}
+              onChange={handleExpectedSalaryChange}
+              id='expected_salary'
+              placeholder='Enter expected salary'
               className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
               tabIndex={15}
             />
           </div>
         </div>
         <div className='grid-item'>
-          <label htmlFor='zip' className='block text-sm font-medium leading-6 text-gray-900'>
-            Zip Code<span className='text-red-500'>*</span>
+          <label htmlFor='skills' className='text-sm font-medium leading-6 text-gray-900'>
+            Skills
           </label>
-          <div className='mt-2'>
-            <input
-              type='number'
-              {...register('zipCode', { required: true })}
-              id='zip'
-              className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-              tabIndex={16}
-            />
-          </div>
-        </div>
-        <div className='grid-item'>
-          <label htmlFor='country' className='block text-sm font-medium leading-6 text-gray-900'>
-            Country<span className='text-red-500'>*</span>
-          </label>
-          <div className='relative mt-2'>
-            <select
-              id='country'
-              {...register('country', { required: true })}
-              className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-              defaultValue='Philippines'
-              tabIndex={17}
-            >
-              <option value={'Philippines'}>Philippines</option>
-              <option value={'Singapore'}>Singapore</option>
-            </select>
-            <div className='absolute right-3 top-[14px]'>
-              <DropDownArrow />
+          <div className='mt-2 flex rounded-md shadow-sm'>
+            <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+              <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                {tagsSkill.map((tagSkill: string) => (
+                  <div
+                    key={tagSkill}
+                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                  >
+                    <button type='button' onClick={() => handleRemoveTagSkill(tagSkill)}>
+                      <XMarkIcon className='w-4 h-4' />
+                    </button>
+                    <p>{tagSkill}</p>
+                  </div>
+                ))}
+                <input
+                  type='text'
+                  value={skillsInput}
+                  onKeyDown={handleKeyDownSkill}
+                  onChange={(e) => setSkillsInput(e.target.value)} // Add this line to update input state
+                  className='focus:none outline-none px-2 py-1 grow'
+                />
+              </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
       <div className='flex justify-end py-10'>
         <button

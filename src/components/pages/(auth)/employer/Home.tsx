@@ -17,6 +17,7 @@ import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
+import TalentSearchIcon from '@/svg/TalentSearchIcon';
 
 const Home = ({ loginType }: { loginType: string }) => {
   const menus = [
@@ -24,6 +25,12 @@ const Home = ({ loginType }: { loginType: string }) => {
       icon: <AddPostLogo />,
       text: 'Post a Job',
       link: '/post-job',
+      isAvailable: true,
+    },
+    {
+      icon: <TalentSearchIcon />,
+      text: 'Talent Search',
+      link: '/talent-search',
       isAvailable: true,
     },
     {
