@@ -190,6 +190,7 @@ export default function Content() {
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="Successfully set-up stage requirements." type="success" />, { duration: 4000 });
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -208,6 +209,7 @@ export default function Content() {
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="Successfully updated the checklist." type="success" />, { duration: 4000 });
             jobPostDetailsRefetch();
             appliedApplicantRefetch();
           },

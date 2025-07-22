@@ -6,15 +6,6 @@ export default function checklist(state: any, action: any) {
   const isNotLastStage = state.length - 1 !== stageIndex;
   const isApplicantPassed = formData.status === "passed" && isNotLastStage
 
-  const successModal = {
-  ...actionState,
-  modal: {
-    whichModal: "SUCCESS",
-    isOpen: true,
-    title: "You have successfully updated the checklist.",
-  },
-  };
-
   const moveToNextStage = () => {
     let applicant: ApplicantType
     const removedApplicant = state.map((stage: StageType) => {
@@ -40,7 +31,6 @@ export default function checklist(state: any, action: any) {
       }
     })
     
-    setActionState(successModal);
     return addedApplicant
   }
 
@@ -61,7 +51,6 @@ export default function checklist(state: any, action: any) {
       }
     })
     
-    setActionState(successModal);
     return newState;
   }
 
