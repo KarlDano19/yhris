@@ -6,6 +6,8 @@ import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
+import { v4 as uuidv4 } from 'uuid';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -56,6 +58,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
   const [isSearching, setIsSearching] = useState(false);
+
+  // Persisted form state for CreateEvaluationTemplateModal
+  const formMethods = useForm({
+    defaultValues: {
+      criteria_rating_view_type: 'default',
+      total_score: 1,
+      passing_score: 1,
+      is_show_remarks: false,
+      is_show_criteria_comment: false,
+      rating_type: 'none',
+      evaluation_criterion: [
+        {
+          id: uuidv4(),
+          criterion: [
+            {
+              id: uuidv4(),
+              title: '',
+              max_score: 1,
+              is_disable_comment: true,
+            },
+          ],
+        },
+      ],
+    },
+  });
 
   useEffect(() => {
     if (dataEvaluation) {
@@ -354,7 +381,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       {isSelectionModalOpen && (
-        <SelectionModal refetch={refetchEvaluation} isOpen={isSelectionModalOpen} setIsOpen={setIsSelectionModalOpen} />
+        <SelectionModal
+          refetch={refetchEvaluation}
+          isOpen={isSelectionModalOpen}
+          setIsOpen={setIsSelectionModalOpen}
+          formMethods={formMethods}
+        />
       )}
       {isEditEvaluationModalOpen && selectedEvaluationTemplateId && (
         <EditEvaluationModal
