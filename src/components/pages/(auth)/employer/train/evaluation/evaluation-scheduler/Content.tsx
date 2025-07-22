@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
+import Pagination from '@/components/Pagination';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
 import DeleteEvaluationSchedulerModal from './modals/DeleteEvaluationSchedulerModal';
 import EditEvaluationSchedulerModal from './modals/EditEvaluationSchedulerModal';
@@ -35,25 +36,71 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const {
     data: dataEvaluationScheduler,
     isLoading: isGetEvaluationSchedulerLoading,
     refetch: refetchEvaluationScheduler,
-  } = useGetEvaluationSchedulerItems(itemsFilter);
+  } = useGetEvaluationSchedulerItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
 
   const [isSearching, setIsSearching] = useState(false);
   const formMethods = useForm();
   const editFormMethods = useForm();
 
   useEffect(() => {
-    refetchEvaluationScheduler();
-  }, []);
-
-  useEffect(() => {
     if (dataEvaluationScheduler) {
-      setEvaluationSchedulerItems(dataEvaluationScheduler);
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataEvaluationScheduler.records) {
+        items = dataEvaluationScheduler.records;
+        totalPages = dataEvaluationScheduler.total_pages || 1;
+        totalRecords = dataEvaluationScheduler.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataEvaluationScheduler)) {
+        items = dataEvaluationScheduler;
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setEvaluationSchedulerItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
+      });
     }
-  }, [dataEvaluationScheduler]);
+  }, [dataEvaluationScheduler, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   useEffect(() => {
     if (selectedEvaluationSchedulerId) {
@@ -121,7 +168,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handleSearch = () => {
     setIsSearching(true);
-    refetchEvaluationScheduler();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
   };
 
   useEffect(() => {
@@ -227,8 +277,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Scheduler</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
+            <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
+              <div className='flex-none w-11/12 lg:w-full'>
                 <div className='relative flex items-center'>
                   <input
                   type='text'
@@ -238,7 +288,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for Schedule: Name / Evaluation Template'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
               </div>
@@ -289,9 +344,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {evaluationSchedulerItems.length}</p>
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>

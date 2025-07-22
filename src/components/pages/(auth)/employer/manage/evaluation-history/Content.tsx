@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip';
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import Pagination from '@/components/Pagination';
 import useGetEvaluationHistoryItems from './hooks/useGetEvaluationHistoryItems';
 import EvaluationDetailsModal from './modals/EvaluationDetailsModal';
 
@@ -27,26 +28,77 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const [isSearching, setIsSearching] = useState(false);
 
   const {
     data: dataEvaluationHistoryItems,
     isLoading: isLoadingEvaluationHistoryItems,
     refetch: refetchEvaluationHistoryItems,
-  } = useGetEvaluationHistoryItems(itemsFilter);
+  } = useGetEvaluationHistoryItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
 
   useEffect(() => {
     if (dataEvaluationHistoryItems) {
-      dataEvaluationHistoryItems.map((item: any) => {
-        item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
-      });
-      setEvaluationHistoryItems(dataEvaluationHistoryItems);
-    }
-  }, [dataEvaluationHistoryItems]);
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
 
-  useEffect(() => {
-    refetchEvaluationHistoryItems();
-  }, []);
+      // Handle paginated response structure
+      if (dataEvaluationHistoryItems.records) {
+        items = dataEvaluationHistoryItems.records.map((item: any) => {
+          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
+          return item;
+        });
+        totalPages = dataEvaluationHistoryItems.total_pages || 1;
+        totalRecords = dataEvaluationHistoryItems.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataEvaluationHistoryItems)) {
+        items = dataEvaluationHistoryItems.map((item: any) => {
+          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
+          return item;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setEvaluationHistoryItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
+      });
+    }
+  }, [dataEvaluationHistoryItems, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -64,7 +116,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    refetchEvaluationHistoryItems();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
   };
 
   useEffect(() => {
@@ -201,9 +256,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   name='search'
                   id='search'
@@ -211,17 +265,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for Employee Name'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
-                </div>
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={handleSearch}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
           </div>
           <div className='mt-8 flow-root'>
@@ -257,9 +315,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {evaluationHistoryItems.length}</p>
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
