@@ -148,10 +148,10 @@ export default function IntroduceModal({
       orientItemCopy[itemIndex].introduceTeam.to = tagsTo;
       orientItemCopy[itemIndex].introduceTeam.message = data.message;
       if (tagsCc) {
-        orientItemCopy[itemIndex].sendContract.cc = tagsCc;
+        orientItemCopy[itemIndex].introduceTeam.cc = tagsCc;
       }
       if (tagsBcc) {
-        orientItemCopy[itemIndex].sendContract.bcc = tagsBcc;
+        orientItemCopy[itemIndex].introduceTeam.bcc = tagsBcc;
       }
       orientItemCopy[itemIndex].actionType = 'sending';
       orientItemCopy[itemIndex].emailType = 'introduce';
