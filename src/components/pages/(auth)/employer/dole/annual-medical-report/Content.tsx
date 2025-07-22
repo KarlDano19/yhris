@@ -259,6 +259,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                className="opacity-50"
+                disabled={true}
+                data-tooltip-id='print-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
+              >
+                <PrintIcon />
+              </button>
+              <button
                 onClick={() =>
                   setIsDeleteAnnualMedicalReportModalOpen({
                     id: item.id,
@@ -269,15 +278,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <DeleteIcon />
               </button>
-              <button
-                className="opacity-50"
-                disabled={true}
-                data-tooltip-id='print-tooltip'
-                data-tooltip-content='Not available'
-                data-tooltip-place='bottom'
-              >
-                <PrintIcon />
-              </button>
+              
             </div>
           </td>
         </tr>

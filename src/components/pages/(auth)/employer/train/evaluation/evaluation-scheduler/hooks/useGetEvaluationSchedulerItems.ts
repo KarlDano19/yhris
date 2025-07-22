@@ -30,10 +30,14 @@ async function getEvaluationSchedulerItems(filters: any) {
 }
 
 function useGetEvaluationSchedulerItems(filters: any) {
-  const query = useQuery(['evaluationSchedulerListItemsCache'], () => getEvaluationSchedulerItems(filters), {
-    enabled: false,
+  const query = useQuery(
+    ['evaluationSchedulerListItemsCache', filters.currentPage, filters.pageSize, filters.search],
+    () => getEvaluationSchedulerItems(filters),
+    {
+      // enabled: false,
     keepPreviousData: true,
-  });
+    }
+  );
 
   return query;
 }

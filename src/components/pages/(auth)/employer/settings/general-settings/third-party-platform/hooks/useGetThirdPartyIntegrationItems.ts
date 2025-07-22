@@ -30,10 +30,13 @@ async function getThirdPartyIntegration(filters: any) {
 }
 
 function useGetThirdPartyIntegrationItems(filters: any) {
-  const query = useQuery(['ThirdPartyIntegrationItemsCache'], () => getThirdPartyIntegration(filters), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    ['ThirdPartyIntegrationItemsCache', filters.currentPage, filters.pageSize, filters.search],
+    () => getThirdPartyIntegration(filters),
+    {
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }

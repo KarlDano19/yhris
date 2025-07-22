@@ -1,8 +1,8 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -21,38 +21,18 @@ export default function CreateEvaluationModal({
   isOpen,
   setIsOpen,
   mainSetIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   mainSetIsOpen: Dispatch<boolean>;
+  formMethods: UseFormReturn<any>;
 }) {
   const [selectedTab, setSelectedTab] = useState(1);
   const [isPreview, setIsPreview] = useState(false);
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, setValue, getValues, watch, control, reset } = useForm<any>({
-    defaultValues: {
-      criteria_rating_view_type: 'default',
-      total_score: 1,
-      passing_score: 1,
-      is_show_remarks: false,
-      is_show_criteria_comment: false,
-      rating_type: 'none',
-      evaluation_criterion: [
-        {
-          id: uuidv4(),
-          criterion: [
-            {
-              id: uuidv4(),
-              title: '',
-              max_score: 1,
-              is_disable_comment: true,
-            },
-          ],
-        },
-      ],
-    },
-  });
+  const { register, handleSubmit, setValue, getValues, watch, control, reset } = formMethods;
   const { mutate, isLoading } = useAddEvaluationTemplate();
 
   const onSubmit = handleSubmit((data) => {

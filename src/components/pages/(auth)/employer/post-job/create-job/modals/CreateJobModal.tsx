@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -18,49 +18,57 @@ import useAddJobPostItems from '../hooks/useAddJobPostItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
-
 export default function CreateJobModal({
   isOpen,
   setIsOpen,
   openConfirmSocialShareModal,
+  pageNumber,
+  setPageNumber,
+  isSalaryRangeModalOpen,
+  setIsSalaryRangeModalOpen,
+  isRangeBenefitsAdded,
+  setIsRangeBenefitsAdded,
+  combinedFormData,
+  setCombinedFormData,
+  fileProps,
+  setFileProps,
+  firstForm,
+  secondForm,
+  thirdForm,
+  fourthForm,
+  fifthForm,
+  sixthForm,
+  seventhForm,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   openConfirmSocialShareModal: (social: string, og_url: string) => void;
+  pageNumber: number;
+  setPageNumber: Dispatch<number>;
+  isSalaryRangeModalOpen: boolean;
+  setIsSalaryRangeModalOpen: Dispatch<boolean>;
+  isRangeBenefitsAdded: boolean;
+  setIsRangeBenefitsAdded: Dispatch<boolean>;
+  combinedFormData: any;
+  setCombinedFormData: Dispatch<any>;
+  fileProps: { fileName?: string; fileSize?: number; file?: File };
+  setFileProps: Dispatch<{ fileName?: string; fileSize?: number; file?: File }>;
+  firstForm: ReturnType<typeof useForm>;
+  secondForm: ReturnType<typeof useForm>;
+  thirdForm: ReturnType<typeof useForm>;
+  fourthForm: ReturnType<typeof useForm>;
+  fifthForm: ReturnType<typeof useForm>;
+  sixthForm: ReturnType<typeof useForm>;
+  seventhForm: ReturnType<typeof useForm>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
-  const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
-  const [combinedFormData, setCombinedFormData] = useState<any>({});
-  const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
-  const firstForm = useForm<any>({
-    defaultValues: {
-      country: 'Philippines',
-      language: 'English',
-    },
-  });
-  const secondForm = useForm();
-  const thirdForm = useForm<any>({
-    defaultValues: {
-      salary: {
-        salaryType: 'Range',
-      },
-    },
-  });
-  const fourthForm = useForm<any>({
-    defaultValues: {
-      jobDescription: CREATEJOB_TEMPLATE[0],
-      qualifications: QUALIFICATION_TEMPLATE[0],
-    },
-  });
-  const fifthForm = useForm();
-  const sixthForm = useForm();
-  const seventhForm = useForm();
   const { mutate, isLoading } = useAddJobPostItems();
 
   const customCloseModal = () => {
+    setIsOpen(false);
+  };
+
+  const resetForm = () => {
     firstForm.reset();
     secondForm.reset();
     thirdForm.reset();
@@ -68,6 +76,7 @@ export default function CreateJobModal({
     fifthForm.reset();
     sixthForm.reset();
     seventhForm.reset();
+    setPageNumber(1);
     setIsOpen(false);
   };
 
@@ -122,7 +131,7 @@ export default function CreateJobModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-        customCloseModal();
+        resetForm();
         setIsSalaryRangeModalOpen(false);
         openConfirmSocialShareModal(data.job_post.shared_to, data.job_post.og_url);
       },

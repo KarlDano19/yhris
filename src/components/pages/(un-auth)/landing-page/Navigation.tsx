@@ -66,7 +66,7 @@ const Navigation = () => {
           
           <div className="hidden md:block">
             <div className="ml-8 lg:ml-10 flex items-baseline space-x-5 lg:space-x-7 safari-nav-container">
-              <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+              <Link href="/features" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Features
               </Link>
               <div className="relative" ref={useCasesDropdownRef}>
@@ -181,7 +181,7 @@ const Navigation = () => {
         <div className="md:hidden mt-2">
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 max-w-7xl mx-auto">
             <div className="px-4 py-4 space-y-1">
-              <Link href={getNavLink("features")} className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
+              <Link href="/features" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
                 Features
               </Link>
               <div className="space-y-1">

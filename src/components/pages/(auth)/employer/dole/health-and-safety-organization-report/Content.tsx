@@ -248,17 +248,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
-                className='opacity-50'
+                // className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={true}
-                data-tooltip-id='email-tooltip'
-                data-tooltip-content='Not available'
-                data-tooltip-place='bottom'
+                // disabled={true}
+                // data-tooltip-id='email-tooltip'
+                // data-tooltip-content='Not available'
+                // data-tooltip-place='bottom'
+                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <EmailLogo />
               </button>

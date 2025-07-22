@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
+import Pagination from '@/components/Pagination';
 import CreateThirdPartyIntegrationModal from './modals/CreateThirdPartyIntegrationModal';
 import useGetThirdPartyIntegrationItems from './hooks/useGetThirdPartyIntegrationItems';
 
@@ -14,13 +15,47 @@ function Content() {
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const [thirdPartyIntegrationItems, setThirdPartyIntegrationItems] = useState<any>([]);
   const [isCreateThirdPartyIntegrationModalOpen, setIsCreateThirdPartyIntegrationModalOpen] = useState(false);
   const {
     data: dataThirdPartyIntegration,
     isLoading: isGetThirdPartyIntegrationLoading,
     refetch: refetchThirdPartyIntegration,
-  } = useGetThirdPartyIntegrationItems(itemsFilter);
+  } = useGetThirdPartyIntegrationItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
+  const handleSearch = () => {
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
+  };
 
   useEffect(() => {
     refetchThirdPartyIntegration();
@@ -28,13 +63,38 @@ function Content() {
 
   useEffect(() => {
     if (dataThirdPartyIntegration) {
-      dataThirdPartyIntegration.map((item: any) => {
-        item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
-        return item;
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataThirdPartyIntegration.records) {
+        items = dataThirdPartyIntegration.records.map((item: any) => {
+          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          return item;
+        });
+        totalPages = dataThirdPartyIntegration.total_pages || 1;
+        totalRecords = dataThirdPartyIntegration.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataThirdPartyIntegration)) {
+        items = dataThirdPartyIntegration.map((item: any) => {
+          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          return item;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setThirdPartyIntegrationItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setThirdPartyIntegrationItems(dataThirdPartyIntegration);
     }
-  }, [dataThirdPartyIntegration]);
+  }, [dataThirdPartyIntegration, pageSize]);
 
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
@@ -107,22 +167,27 @@ function Content() {
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Third Party Platform</h2>
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
+            <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
+              <div className='flex-none w-11/12 lg:w-full'>
                 <div className='relative flex items-center'>
                   <input
                   type='text'
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
               </div>
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={() => refetchThirdPartyIntegration()}
+              onClick={handleSearch}
             >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
@@ -157,9 +222,15 @@ function Content() {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {thirdPartyIntegrationItems?.length}</p>
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>

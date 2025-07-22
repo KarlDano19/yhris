@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Fragment, useRef } from 'react';
+import React, { useEffect, useState, Fragment, useRef, forwardRef } from 'react';
 
 import Link from 'next/link';
 
@@ -37,13 +37,14 @@ type T_ModalData = {
   open: boolean;
 };
 
-function PortalMenuItems({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+// Update PortalMenuItems to forward ref
+const PortalMenuItems = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(function PortalMenuItems({ children, ...props }, ref) {
   if (typeof window === 'undefined') return null;
   return createPortal(
-    <div {...props}>{children}</div>,
+    <div {...props} ref={ref}>{children}</div>,
     document.body
   );
-}
+});
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const queryClient = useQueryClient();
@@ -83,8 +84,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -115,6 +118,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     annualAccidentIllnessReportRefetch();
   }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (openMenuId !== null) {
+        const buttonRef = menuButtonRefs.current[openMenuId];
+        const menuRef = menuRefs.current[openMenuId];
+        if (
+          (buttonRef && buttonRef.contains(event.target as Node)) ||
+          (menuRef && menuRef.contains(event.target as Node))
+        ) {
+          return; // Clicked inside the button or menu, do nothing
+        }
+        setOpenMenuId(null);
+      }
+    }
+    if (openMenuId !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
 
   const handlePrintWithBranch = () => {
     if (selectedBranch) {
@@ -211,6 +238,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     },
   ];
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.right - 138 + window.scrollX, // 138px = 8.6rem
+    });
+    setOpenMenuId(id);
+  };
+
   const renderRows = () => {
     if (isAnnualAccidentIllnessReportLoading) {
       return (
@@ -263,7 +299,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
-                className='opacity-50'
+                // className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
@@ -271,104 +307,85 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   })
                 }
                 // disabled={!cachedRigths?.state?.data?.edit_dole_awair}
-                disabled={true}
-                data-tooltip-id='email-tooltip'
-                data-tooltip-content='Not available'
-                data-tooltip-place='bottom'
+                // disabled={true}
+                // data-tooltip-id='email-tooltip'
+                // data-tooltip-content='Not available'
+                // data-tooltip-place='bottom'
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <EmailLogo />
               </button>
               <div className='flex-1 flex justify-end'>
-                <div style={{ position: 'relative', overflow: 'visible' }}>
-                  <Menu as='div' className='relative'>
-                    <Menu.Button
-                      ref={menuButtonRef}
-                      onClick={() => {
-                        if (menuButtonRef.current) {
-                          const rect = menuButtonRef.current.getBoundingClientRect();
-                          setMenuPosition({
-                            top: rect.bottom + window.scrollY,
-                            left: rect.right - 138 + window.scrollX, // adjust 138 to your menu width
-                          });
-                        }
+                <Menu as='div' className='relative'>
+                  <Menu.Button
+                    className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                    ref={el => (menuButtonRefs.current[item.id] = el)}
+                    onClick={e => handleMenuOpen(e, item.id)}
+                  >
+                    <span className='sr-only'>Open options</span>
+                    <div className='flex gap-4'>
+                      <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
+                    </div>
+                  </Menu.Button>
+                  {openMenuId === item.id && (
+                    <PortalMenuItems
+                      ref={el => (menuRefs.current[item.id] = el)}
+                      style={{
+                        position: 'fixed',
+                        top: menuPosition.top,
+                        left: menuPosition.left,
+                        zIndex: 9999,
+                        width: '8.6rem',
                       }}
-                      className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                      className='origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
                     >
-                      <span className='sr-only'>Open options</span>
-                      <div className='flex gap-4'>
-                        <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
-                      </div>
-                    </Menu.Button>
-                    <Transition
-                      as={Fragment}
-                      enter='transition ease-out duration-100'
-                      enterFrom='transform opacity-0 scale-95'
-                      enterTo='transform opacity-100 scale-100'
-                      leave='transition ease-in duration-75'
-                      leaveFrom='transform opacity-100 scale-100'
-                      leaveTo='transform opacity-0 scale-95'
-                    >
-                      <Menu.Items>
-                        {() => (
-                          <PortalMenuItems
-                            className="z-50 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                            style={{
-                              position: 'fixed',
-                              top: menuPosition.top,
-                              left: menuPosition.left,
-                            }}
+                      <div className='py-1'>
+                        {[
+                          {
+                            name: 'Download',
+                            action: () => {
+                              setIsExportProgressModalOpen(true);
+                              setOpenMenuId(null);
+                            },
+                          },
+                          // {
+                          //   name: 'Print',
+                          //   action: () => {
+                          //     handlePrint();
+                          //   },
+                          // },
+                          // {
+                          //   name: 'Edit',
+                          //   action: () => {
+                          //     setIsExportProgressModalOpen(true);
+                          //   },
+                          // },
+                          {
+                            name: 'Delete',
+                            action: () => {
+                              setIsDeleteAnnualAccidentIllnessReportModalOpen({
+                                id: item.id,
+                                open: true,
+                              });
+                              setOpenMenuId(null);
+                            },
+                          },
+                        ].map((menuItem) => (
+                          <span
+                            key={menuItem.name}
+                            className={classNames(
+                              'block px-4 py-2 text-sm cursor-pointer text-center',
+                              'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                            )}
+                            onClick={menuItem.action}
                           >
-                            <div className='py-1'>
-                              {[
-                                {
-                                  name: 'Download',
-                                  action: () => {
-                                    setIsExportProgressModalOpen(true);
-                                  },
-                                },
-                                // {
-                                //   name: 'Print',
-                                //   action: () => {
-                                //     handlePrint();
-                                //   },
-                                // },
-                                // {
-                                //   name: 'Edit',
-                                //   action: () => {
-                                //     setIsExportProgressModalOpen(true);
-                                //   },
-                                // },
-                                {
-                                  name: 'Delete',
-                                  action: () => {
-                                    setIsDeleteAnnualAccidentIllnessReportModalOpen({
-                                      id: item.id,
-                                      open: true,
-                                    });
-                                  },
-                                },
-                              ].map((menuItem) => (
-                                <Menu.Item key={menuItem.name}>
-                                  {({ active }) => (
-                                    <span
-                                      className={classNames(
-                                        'block px-4 py-2 text-sm cursor-pointer text-center',
-                                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                                      )}
-                                      onClick={menuItem.action}
-                                    >
-                                      {menuItem.name}
-                                    </span>
-                                  )}
-                                </Menu.Item>
-                              ))}
-                            </div>
-                          </PortalMenuItems>
-                        )}
-                      </Menu.Items>
-                    </Transition>
-                  </Menu>
-                </div>
+                            {menuItem.name}
+                          </span>
+                        ))}
+                      </div>
+                    </PortalMenuItems>
+                  )}
+                </Menu>
               </div>
             </div>
           </td>

@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRef } from 'react';
 
 import Link from 'next/link';
+
+import { Tooltip } from 'react-tooltip';
 
 import PostJobCard from './PostJobCard';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
@@ -66,6 +69,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataJobPost]);
 
+  const lastSearchedValue = useRef('');
+
   return (
     <div className='min-h-screen'>
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
@@ -78,17 +83,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='p-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Screen Applicants</h2>
           <div className='mt-6 mb-10 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
+            <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
+              <div className='flex-none w-11/12 lg:w-full'>
                 <div className='relative flex items-center'>
                   <input
                   type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Job Title'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={itemsFilter.search}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setItemsFilter({ ...itemsFilter, search: newValue });
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      refetchJobPost();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
+                <Tooltip id='search-tooltip' />
               </div>
             </div>
             <button
@@ -134,6 +152,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           pageType='screenApplicant'
         />
       </div>
+      <Tooltip id='search-tooltip'/>
     </div>
   );
 };

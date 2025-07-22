@@ -35,15 +35,26 @@ export default function AddSeparationModal({
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
 
+  const resetForm = () => {
+    reset({
+      date: new Date().toISOString(),
+      position: '',
+      department: '',
+      reason: '',
+    });
+    setEmployeeSearch('');
+    setEmployeeSelected(false);
+  };
+
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: () => {
         toast.custom(() => <CustomToast message={'Create separation successfully'} type='success' />, {
           duration: 5000,
         });
+        resetForm();
         setIsOpen(false);
         refetch();
-        reset();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {

@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+// Controller is now passed as a prop
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -12,20 +12,34 @@ import useUpdateEvaluationScheduler from '../hooks/useUpdateEvaluationScheduler'
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-function CreateEvaluationSchedulerModal({
-  refetch,
-  isOpen,
-  setIsOpen,
-  selectedEvaluationSchedulerId,
-}: {
+interface EditEvaluationSchedulerModalProps {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   selectedEvaluationSchedulerId: number | null;
-}) {
+  register: any;
+  setValue: any;
+  watch: any;
+  handleSubmit: any;
+  control: any;
+  reset: any;
+  Controller: any;
+}
+
+function EditEvaluationSchedulerModal({
+  refetch,
+  isOpen,
+  setIsOpen,
+  selectedEvaluationSchedulerId,
+  register,
+  setValue,
+  watch,
+  handleSubmit,
+  control,
+  Controller,
+}: EditEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
-  const { register, setValue, watch, handleSubmit, control } = useForm();
   const {
     data: dataEvaluationSchedulerDetails,
     refetch: refetchEvaluationSchedulerDetails,
@@ -51,7 +65,7 @@ function CreateEvaluationSchedulerModal({
       setValue('message', dataEvaluationSchedulerDetails.message);
       setValue('attachment', dataEvaluationSchedulerDetails.attachment);
     }
-  }, [dataEvaluationSchedulerDetails]);
+  }, [dataEvaluationSchedulerDetails, setValue]);
 
   const customCloseModal = () => {
     evaluationSchedulerDetailRemove();
@@ -99,13 +113,19 @@ function CreateEvaluationSchedulerModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl'>
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Evaluation Scheduler</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   {selectedTab === 1 && (
-                    <SchedulerInfoTab register={register} handleSubmit={handleSubmit} setSelectedTab={setSelectedTab} />
+                    <SchedulerInfoTab 
+                      register={register} 
+                      handleSubmit={handleSubmit} 
+                      setSelectedTab={setSelectedTab} 
+                      watch={watch}
+                      setValue={setValue}
+                    />
                   )}
                   {selectedTab === 2 && (
                     <EmployeeAssigneeTab
@@ -128,4 +148,4 @@ function CreateEvaluationSchedulerModal({
   );
 }
 
-export default CreateEvaluationSchedulerModal;
+export default EditEvaluationSchedulerModal;
