@@ -320,7 +320,7 @@ function CustomFrequencyModal({
             <>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Months to Trigger
+                  Months Covered
                 </label>
                 <Select
                   className="basic-multi-select"
