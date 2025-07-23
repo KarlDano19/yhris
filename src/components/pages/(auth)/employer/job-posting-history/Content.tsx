@@ -252,6 +252,30 @@ const Content = () => {
     refetch();
   }, [currentPage, pageSize]);
 
+  // Add click outside handler to close menus
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (Object.keys(moreMenuOpen).some(id => moreMenuOpen[parseInt(id)])) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.more-menu-container')) {
+          setMoreMenuOpen({});
+          setShowShareOptions({});
+        }
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [moreMenuOpen]);
+
+  // Close all menus when changing pages
+  useEffect(() => {
+    setMoreMenuOpen({});
+    setShowShareOptions({});
+  }, [currentPage]);
+
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
@@ -411,62 +435,64 @@ const Content = () => {
                 >
                   <DeleteIcon />
                 </button>
-                <button onClick={() => setMoreMenuOpen((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}>
-                  <MoreIconWithBorder />
-                </button>
-              </div>
-              {moreMenuOpen[jobPost.id] && (
-                <div className='absolute bg-white border rounded shadow-lg mt-2'>
-                  <ul className='py-1 text-left'>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}
-                    >
-                      Share Post To <ChevronRightIcon className='inline h-4 w-4' />
-                    </li>
-                    {showShareOptions[jobPost.id] && (
-                      <div className='pl-4'>
-                        {jobPost.postIn.map((social: any) => {
-                          const DynamicComponent = componentMap[social];
-                          return (
-                            <span
-                              key={social}
-                              className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
-                              onClick={() => socialMediaShare(social, jobPost.og_url)}
-                            >
-                              <DynamicComponent />
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
-                    >
-                      {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
-                    </li>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
-                    >
-                      {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
-                    </li>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
-                    >
-                      {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
-                    </li>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
-                      onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
-                    >
-                      {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
-                    </li>
-                  </ul>
+                <div className="relative more-menu-container">
+                  <button onClick={() => handleMoreMenuClick(jobPost.id)}>
+                    <MoreIconWithBorder />
+                  </button>
+                  {moreMenuOpen[jobPost.id] && (
+                    <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
+                      <ul className='py-1 text-left'>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}
+                        >
+                          Share Post To <ChevronRightIcon className='inline h-4 w-4' />
+                        </li>
+                        {showShareOptions[jobPost.id] && (
+                          <div className='pl-4'>
+                            {jobPost.postIn.map((social: any) => {
+                              const DynamicComponent = componentMap[social];
+                              return (
+                                <span
+                                  key={social}
+                                  className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
+                                  onClick={() => socialMediaShare(social, jobPost.og_url)}
+                                >
+                                  <DynamicComponent />
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
+                        >
+                          {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
+                        >
+                          {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
+                        >
+                          {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                          onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
+                        >
+                          {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </td>
         </tr>
@@ -480,6 +506,24 @@ const Content = () => {
         </tr>
       );
     }
+  };
+
+  const handleMoreMenuClick = (jobId: number) => {
+    // Close all other menus first
+    const newMoreMenuOpen: { [key: number]: boolean } = {};
+    
+    // Toggle the clicked menu
+    newMoreMenuOpen[jobId] = !moreMenuOpen[jobId];
+    
+    // Also reset share options when closing menus
+    if (!newMoreMenuOpen[jobId]) {
+      setShowShareOptions((prev) => ({
+        ...prev,
+        [jobId]: false
+      }));
+    }
+    
+    setMoreMenuOpen(newMoreMenuOpen);
   };
 
   return (
@@ -597,16 +641,17 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
+                
+              </div>
+            </div>
+          </div>
+          <Pagination
                   pagination={pagination}
                   currentPage={currentPage}
                   pageSize={pageSize}
                   onPageSizeChange={pageSizeChange}
                   onPageChange={paginationChange}
                 />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <JobPreviewModal
