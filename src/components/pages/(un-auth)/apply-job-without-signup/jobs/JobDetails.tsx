@@ -86,18 +86,8 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
             {!isLoading ? jobDetailData.advertise_to : 'Loading location...'}
           </p>
-          {/* qualifications */}
-          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
-            <CheckCircleIcon className='h-5 w-5 mr-1' />
-            Qualifications
-          </h6>
-          <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
-            {!isLoading
-              ? renderQualificationsDescription(jobDetailData?.qualifications)
-              : 'Loading qualifications...'}
-          </div>
           {/* job type */}
-          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
             <BriefcaseIcon className='h-5 w-5 mr-1' />
             Job Type
           </h6>
@@ -105,7 +95,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             {!isLoading ? jobDetailData?.job_type : 'Loading job type...'}
           </p>
           {/* schedule */}
-          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
             <ClockIcon className='h-5 w-5 mr-1' />
             Schedule
           </h6>
@@ -115,7 +105,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           {/* salary range */}
           {jobDetailData.rate && (
             <>
-              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                 <BanknotesIcon className='h-5 w-5 mr-1' />
                 Salary Range
               </h6>
@@ -144,17 +134,29 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               </ul>
             </>
           )}
+          {/* qualifications */}
+          <div className='border-t mt-4'>
+            <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+              <CheckCircleIcon className='h-5 w-5 mr-1' />
+              Qualifications
+            </h6>
+            <div className='text-[13px] text-indigo-dye mt-1 pl-6 overflow-y-auto max-h-[280px]'>
+              {!isLoading
+                ? renderQualificationsDescription(jobDetailData?.qualifications)
+                : 'Loading qualifications...'}
+            </div>
+          </div>  
           {/* notes/remarks */}
           {jobDetailData.job_remark && (
-            <>
-              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+            <div className='border-t border-b mt-4 pb-4'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                 <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
                 Notes/Remarks
               </h6>
-              <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
+              <p className='text-[13px] text-indigo-dye mt-1 pl-6 overflow-y-auto max-h-[65px]'>
                 {!isLoading ? renderNotesRemarks(jobDetailData?.job_remark) : 'Loading remarks...'}
               </p>
-            </>
+            </div>
           )}
           {/* job url */}
           {jobDetailData.job_url && (
