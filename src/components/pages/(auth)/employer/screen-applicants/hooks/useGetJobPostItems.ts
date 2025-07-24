@@ -4,6 +4,8 @@ import { getCookie } from 'cookies-next';
 async function getJobPostItems(filters: any) {
   try {
     let newFilters = { ...filters };
+    // Always set view_type to 'screen-applicants' for this hook
+    newFilters.view_type = 'screen-applicants';
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
     const searchParams = new URLSearchParams(newFilters);

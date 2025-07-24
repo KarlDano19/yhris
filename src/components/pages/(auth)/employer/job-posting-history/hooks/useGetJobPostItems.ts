@@ -4,6 +4,8 @@ import { getCookie } from 'cookies-next';
 async function getJobPostItems(filters: any) {
   try {
     let newFilters = { ...filters };
+    // Always set view_type to 'table' for this hook
+    newFilters.view_type = 'job-posting-history';
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
