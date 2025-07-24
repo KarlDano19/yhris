@@ -94,7 +94,6 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
       
       // Convert to JSON string for backend
       formData.append('screening_questions', JSON.stringify(formattedQuestions));
-      console.log('Sending screening questions to backend:', formattedQuestions);
     } else {
       // Send empty array if no questions
       formData.append('screening_questions', JSON.stringify([]));

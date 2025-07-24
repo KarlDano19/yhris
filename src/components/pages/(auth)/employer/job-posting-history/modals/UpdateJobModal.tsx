@@ -85,6 +85,7 @@ export default function UpdateJobModal({
       });
       secondForm.reset({
         jobType: jobPostDataDetails.job_type.split(','),
+        workSetup: jobPostDataDetails.work_setup.split(','),
         schedule: jobPostDataDetails.job_schedule.split(','),
         hireDate: new Date(jobPostDataDetails.date_required),
         hireCount: jobPostDataDetails.required_slot,
@@ -125,7 +126,6 @@ export default function UpdateJobModal({
           degree: q.degree,
           presetId: q.presetId || q.preset_id,
         }));
-        console.log('Normalized questions:', normalizedQuestions);
         setScreeningQuestions(normalizedQuestions);
         setAutoRejectEnabled(
           jobPostDataDetails.auto_reject_enabled !== undefined
@@ -203,8 +203,6 @@ export default function UpdateJobModal({
     if (finalData.autoRejectEnabled === undefined) {
       finalData.autoRejectEnabled = autoRejectEnabled;
     }
-    
-    console.log('Submitting job post with screening questions:', finalData.screeningQuestions);
     
     const callbackReq = {
       onSuccess: (data: any) => {

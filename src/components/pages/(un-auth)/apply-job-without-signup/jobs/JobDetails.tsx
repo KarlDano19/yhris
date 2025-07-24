@@ -99,7 +99,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           {/* work setup */}
           {jobDetailData?.work_setup && (
             <>
-              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                 <HomeIcon className='h-5 w-5 mr-1' />
                 Work Setup
               </h6>
@@ -139,13 +139,25 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           {/* benefits */}
           {jobDetailData?.is_show_benefits && jobDetailData.offered_benefits && (
             <>
-              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                 <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
                 Benefits
               </h6>
               <ul className='text-[13px] text-indigo-dye mt-1 ml-6'>
                 {!isLoading ? jobDetailData.offered_benefits : 'Loading benefits...'}
               </ul>
+            </>
+          )}
+          {/* Role section - only show if is_show_roles is true */}
+          {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Role
+              </h6>
+              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {renderRoleDescription(jobDetailData?.job_description)}
+              </div>
             </>
           )}
           {/* qualifications */}
@@ -161,7 +173,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             </div>
           </div>  
           {/* notes/remarks */}
-          {jobDetailData.job_remark && (
+          {jobDetailData?.is_show_remarks && jobDetailData?.job_remark && (
             <div className='border-t border-b mt-4 pb-4'>
               <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                 <ClipboardDocumentIcon className='h-5 w-5 mr-1' />

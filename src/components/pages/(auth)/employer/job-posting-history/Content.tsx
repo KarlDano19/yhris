@@ -21,6 +21,9 @@ import UpdateJobModal from './modals/UpdateJobModal';
 import DeleteJobModal from './modals/DeleteModal';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
+import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
+import useUpdateJobRolesStatus from './hooks/useUpdateJobRolesStatus';
+import useUpdateJobRemarkStatus from './hooks/useUpdateJobRemarkStatus';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
@@ -89,7 +92,10 @@ const Content = () => {
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const { mutate } = useUpdateJobPostStatus();
+  const { mutate: mutateStatus } = useUpdateJobPostStatus();
+  const { mutate: mutateSalary } = useUpdateJobSalaryStatus();
+  const { mutate: mutateRoles } = useUpdateJobRolesStatus();
+  const { mutate: mutateRemark } = useUpdateJobRemarkStatus();
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
   const queryClient = useQueryClient();
@@ -126,7 +132,7 @@ const Content = () => {
           });
         },
       };
-      mutate(data, callbackReq);
+      mutateStatus(data, callbackReq);
     };
 
     setContextMenuOptions([menuOptions]);
@@ -155,14 +161,14 @@ const Content = () => {
       },
     };
 
-    mutate(data, callbackReq);
+    mutateStatus(data, callbackReq);
   };
 
   const handleShowRoles = (jobId: any, isShowRoles: boolean) => {
     let data: any = {};
     data['jobId'] = jobId;
     data['is_show_roles'] = !isShowRoles;
-    const successMessage = isShowRoles ? 'Successfully hide roles.' : 'Successfully show roles.';
+    const successMessage = isShowRoles ? 'Successfully HIDE ROLES.' : 'Successfully SHOW ROLES.';
     const callbackReq = {
       onSuccess: () => {
         refetch();
@@ -176,14 +182,14 @@ const Content = () => {
         });
       },
     };
-    mutate(data, callbackReq);
+    mutateRoles(data, callbackReq);
   };
 
   const handleShowSalary = (jobId: any, isShowSalary: boolean) => {
     let data: any = {};
     data['jobId'] = jobId;
     data['is_show_salary'] = !isShowSalary;
-    const successMessage = isShowSalary ? 'Successfully hide salary.' : 'Successfully show salary.';
+    const successMessage = isShowSalary ? 'Successfully HIDE SALARY.' : 'Successfully SHOW SALARY.';
     const callbackReq = {
       onSuccess: () => {
         refetch();
@@ -197,14 +203,14 @@ const Content = () => {
         });
       },
     };
-    mutate(data, callbackReq);
+    mutateSalary(data, callbackReq);
   };
 
   const handleShowNotes = (jobId: any, isShowNotes: boolean) => {
     let data: any = {};
     data['jobId'] = jobId;
     data['is_show_remarks'] = !isShowNotes;
-    const successMessage = isShowNotes ? 'Successfully hide notes.' : 'Successfully show notes.';
+    const successMessage = isShowNotes ? 'Successfully HIDE NOTES & REMARKS.' : 'Successfully SHOW NOTES & REMARKS.';
     const callbackReq = {
       onSuccess: () => {
         refetch();
@@ -213,7 +219,7 @@ const Content = () => {
         });
       },
     };
-    mutate(data, callbackReq);
+    mutateRemark(data, callbackReq);
   };
 
   const handleCloseContextMenu = () => {
@@ -235,9 +241,11 @@ const Content = () => {
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['isActive'] = jobPost['is_active'];
-        jobPost['isShowSalary'] = jobPost['is_show_salary'];
-        jobPost['isShowNotes'] = jobPost['is_show_remarks'];
-        jobPost['isShowRoles'] = jobPost['is_show_roles'];
+        // Use the exact same property names as in the API response
+        // This ensures the toggle works correctly
+        jobPost['is_show_salary'] = jobPost['is_show_salary'];
+        jobPost['is_show_remarks'] = jobPost['is_show_remarks'];
+        jobPost['is_show_roles'] = jobPost['is_show_roles'];
         jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
       });
       setJobPostHistoryItems(dataJobPost.records);
@@ -468,25 +476,34 @@ const Content = () => {
                           className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
                           onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
                         >
+                          <span className={!jobPost.is_active ? 'text-red-500' : ''}>
                           {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
+                          </span>
+
                         </li>
                         <li
                           className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
                           onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
                         >
-                          {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                          <span className={!jobPost.is_show_roles ? 'text-red-500' : ''}>
+                            {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                          </span>
                         </li>
                         <li
                           className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
                           onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
                         >
-                          {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                          <span className={!jobPost.is_show_salary ? 'text-red-500' : ''}>
+                            {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                          </span>
                         </li>
                         <li
                           className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
                           onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
                         >
-                          {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                          <span className={!jobPost.is_show_remarks ? 'text-red-500' : ''}>
+                            {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                          </span>
                         </li>
                       </ul>
                     </div>
