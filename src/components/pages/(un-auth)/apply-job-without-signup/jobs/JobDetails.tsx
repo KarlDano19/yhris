@@ -78,7 +78,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
       </div>
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
-        <div className='details mx-5 mt-2'>
+        <div className='details mx-5 mt-2 overflow-y-auto max-h-[580px]'>
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
             <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
             Location
@@ -140,7 +140,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               <CheckCircleIcon className='h-5 w-5 mr-1' />
               Qualifications
             </h6>
-            <div className='text-[13px] text-indigo-dye mt-1 pl-6 overflow-y-auto max-h-[280px]'>
+            <div className='text-[13px] text-indigo-dye mt-1 pl-6'>
               {!isLoading
                 ? renderQualificationsDescription(jobDetailData?.qualifications)
                 : 'Loading qualifications...'}
@@ -153,7 +153,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
                 <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
                 Notes/Remarks
               </h6>
-              <p className='text-[13px] text-indigo-dye mt-1 pl-6 overflow-y-auto max-h-[65px]'>
+              <p className='text-[13px] text-indigo-dye mt-1 pl-6'>
                 {!isLoading ? renderNotesRemarks(jobDetailData?.job_remark) : 'Loading remarks...'}
               </p>
             </div>
