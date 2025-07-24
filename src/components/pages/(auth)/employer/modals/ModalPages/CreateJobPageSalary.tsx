@@ -238,7 +238,12 @@ export default function CreateJobPageSalary({
           </div>
         </div>
         <div className='relative mt-2 flex gap-2'>
-          <input type='checkbox' {...register('is_show_salary', { required: true })} id='is_show_salary' value='true' />
+          <input 
+            type='checkbox' 
+            {...register('is_show_salary')} 
+            id='is_show_salary' 
+            onChange={(e) => setValue('is_show_salary', e.target.checked)}
+          />
           <label htmlFor='is_show_salary' className='ml-2'>
             Show Salary
           </label>
@@ -322,9 +327,9 @@ export default function CreateJobPageSalary({
         <div className='relative flex gap-2 mt-4'>
           <input
             type='checkbox'
-            {...register('is_show_benefits', { required: true })}
+            {...register('is_show_benefits')}
             id='is_show_benefits'
-            value='true'
+            onChange={(e) => setValue('is_show_benefits', e.target.checked)}
           />
           <label htmlFor='is_show_benefits' className='ml-2'>
             Show Benefits
