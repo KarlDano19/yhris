@@ -241,7 +241,7 @@ function CustomFrequencyModal({
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
       <div className="relative w-96 shadow-lg rounded-md bg-white">
-        {/* Blue Header Bar - matching CreateEvaluationSchedulerModal style */}
+        {/* Blue Header Bar */}
         <div className="flex bg-savoy-blue p-2 items-center rounded-t-md">
           <h3 className="flex-1 text-white ml-2 font-semibold">Custom Frequency Schedule</h3>
           <XCircleIcon className="w-8 h-8 text-white cursor-pointer" onClick={onClose} />
