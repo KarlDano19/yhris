@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import SchedulerInfoTab from '../tabs/SchedulerInfoTab';
+import CustomFrequencyModal from './CustomFrequencyModal';
 import EmployeeAssigneeTab from '../tabs/EmployeeAssigneeTab';
 import useAddEvaluationScheduler from '../hooks/useAddEvaluationScheduler';
 
@@ -37,6 +38,7 @@ function CreateEvaluationSchedulerModal({
 }: CreateEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const { mutate, isLoading } = useAddEvaluationScheduler();
 
   const onSubmit = handleSubmit((data: any) => {
@@ -54,6 +56,19 @@ function CreateEvaluationSchedulerModal({
     };
     mutate(data, callbackReq);
   });
+
+  const handleCustomFrequencySelectFromTab = (frequency: string, months?: number[], day?: number) => {
+    // This handler is called from SchedulerInfoTab when custom frequency is selected
+    const freqValue = JSON.stringify({
+      months: months || [1],
+      day: day || 1
+    });
+    setValue('frequency_unit', frequency); // quarterly, semi-annually, or annually
+    setValue('frequency_value', freqValue);
+    
+    // Close the modal after saving
+    setIsCustomModalOpen(false);
+  };
 
   return (
     <>
@@ -94,6 +109,8 @@ function CreateEvaluationSchedulerModal({
                       setSelectedTab={setSelectedTab} 
                       watch={watch}
                       setValue={setValue}
+                      setIsCustomModalOpen={setIsCustomModalOpen}
+                      onCustomFrequencySelect={handleCustomFrequencySelectFromTab}
                     />
                   )}
                   {selectedTab === 2 && (
@@ -113,6 +130,14 @@ function CreateEvaluationSchedulerModal({
           </div>
         </Dialog>
       </Transition.Root>
+
+      <CustomFrequencyModal
+        isOpen={isCustomModalOpen}
+        onClose={() => setIsCustomModalOpen(false)}
+        onSave={handleCustomFrequencySelectFromTab}
+        selectedCustomFrequency={watch('frequency_unit') || ''}
+        selectedCustomFrequencyValue={watch('frequency_value')}
+      />
     </>
   );
 }
