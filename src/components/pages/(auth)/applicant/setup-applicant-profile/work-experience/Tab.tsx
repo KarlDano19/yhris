@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
+import dynamic from 'next/dynamic';
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -8,11 +9,16 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { PlusIcon } from '@heroicons/react/24/solid';
 
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
+
 function WorkExperienceTab({
   control,
   register,
   watch,
   setValue,
+  getValues,
   handleSubmit,
   isLoading,
   setCurrentTab,
@@ -22,6 +28,7 @@ function WorkExperienceTab({
   register: any;
   watch: any;
   setValue: any;
+  getValues: any;
   handleSubmit: any;
   isLoading: any;
   setCurrentTab: any;
@@ -32,6 +39,7 @@ function WorkExperienceTab({
     control: control,
     name: 'experiences',
   });
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
 
   const onSubmit = handleSubmit((data: any) => {
     console.log('WorkExperienceTab - Full form data:', data);
@@ -50,7 +58,8 @@ function WorkExperienceTab({
             experience.majorRole &&
             experience.companyOrg &&
             experience.dateFrom &&
-            experience.dateTo
+            experience.dateTo &&
+            experience.responsibilities
           )
         ) {
           toast.custom(() => <CustomToast message='Please fill in all experience fields' type='error' />, {
@@ -85,6 +94,7 @@ function WorkExperienceTab({
       companyOrg: '',
       dateFrom: '',
       dateTo: '',
+      responsibilities: '',
     };
     append(newExperience);
     console.log('Added new experience, current fields:', fields);
@@ -181,6 +191,20 @@ function WorkExperienceTab({
                   }}
                 />
               </div>
+            </div>
+          </div>
+          <div className='grid-item col-span-6'>
+            <label htmlFor='responsibilities' className='text-sm font-medium leading-6 text-gray-900'>
+              Responsibilities
+            </label>
+            <div className='mt-2 h-72 mb-12'>
+              <ReactQuill
+                onChange={(value) => setValue(`experiences.${index}.responsibilities`, value)}
+                formats={QUILL_FORMATS}
+                modules={QUILL_MODULES}
+                style={{ height: '100%', padding: '5px 8px !important' }}
+                value={watch(`experiences.${index}.responsibilities`) || ''}
+              />
             </div>
           </div>
           <button

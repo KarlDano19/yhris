@@ -28,11 +28,10 @@ const Tab = ({
   onSubmit: any;
   isLoading: any;
 }) => {
-  const [educationInput, setEducationInput] = useState("");
-  const [skillsInput, setSkillsInput] = useState("");
+  const [skillsInput, setSkillsInput] = useState('');
   const [tagsSkill, setTagsSkill] = useState<string[]>([]);
   const isSkillsInitialized = useRef(false);
-  
+
   // Get applicantProfileData from the form context (watch all values)
   const applicantProfileData = watch();
 
@@ -59,10 +58,7 @@ const Tab = ({
     if (event.key === 'Enter' || event.key === 'Tab' || event.key === ',') {
       event.preventDefault();
       const newTag = skillsInput.trim();
-      if (
-        newTag !== '' &&
-        !tagsSkill.some((tag) => tag.toLowerCase() === newTag.toLowerCase())
-      ) {
+      if (newTag !== '' && !tagsSkill.some((tag) => tag.toLowerCase() === newTag.toLowerCase())) {
         const newTags = [...tagsSkill, newTag];
         setTagsSkill(newTags);
         setValue('skills', newTags);
@@ -77,17 +73,10 @@ const Tab = ({
     setValue('skills', newTags);
   };
 
-  // Handle education input
-  const handleEducationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEducationInput(e.target.value);
-    // Store as JSON string in the form
-    setValue("education", e.target.value);
-  };
-
   // Handle expected salary input
   const handleExpectedSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
-    setValue("expected_salary", value ? parseInt(value) : null);
+    setValue('expected_salary', value ? parseInt(value) : null);
   };
 
   // Get display value for expected salary
@@ -95,7 +84,7 @@ const Tab = ({
     if (applicantProfileData.expected_salary) {
       return applicantProfileData.expected_salary.toString();
     }
-    return "";
+    return '';
   };
 
   const uploadImgOnChange = ({ target }: { target: any }) => {
@@ -118,7 +107,7 @@ const Tab = ({
 
   return (
     <>
-      <form onSubmit={(onSubmit)}>
+      <form onSubmit={onSubmit}>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 mt-10 md:gap-x-10 lg:gap-x-14'>
           <div className='col-1 md:col-span-2 lg:col-span-4 flex'>
             <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-8 lg:gap-x-5 md:w-full lg:w-auto'>
@@ -327,10 +316,23 @@ const Tab = ({
             <div className='mt-2'>
               <input
                 type='text'
-                value={educationInput}
-                onChange={handleEducationChange}
+                {...register('education')}
                 id='education'
                 placeholder='Enter your course/degree'
+                className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                tabIndex={13}
+              />
+            </div>
+          </div>
+          <div className='grid-item'>
+            <label htmlFor='street' className='block text-sm font-medium leading-6 text-gray-900'>
+              College
+            </label>
+            <div className='mt-2'>
+              <input
+                type='text'
+                {...register('college')}
+                id='college'
                 className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
                 tabIndex={14}
               />
@@ -353,34 +355,46 @@ const Tab = ({
             </div>
           </div>
           <div className='grid-item'>
-          <label htmlFor='skills' className='text-sm font-medium leading-6 text-gray-900'>
-            Skills
-          </label>
-          <div className='mt-2 flex rounded-md shadow-sm'>
-            <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-              <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
-                {tagsSkill.map((tagSkill: string) => (
-                  <div
-                    key={tagSkill}
-                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                  >
-                    <button type='button' onClick={() => handleRemoveTagSkill(tagSkill)}>
-                      <XMarkIcon className='w-4 h-4' />
-                    </button>
-                    <p>{tagSkill}</p>
-                  </div>
-                ))}
+            <label htmlFor='skills' className='text-sm font-medium leading-6 text-gray-900'>
+              Skills
+            </label>
+            <div className='mt-2'>
+              <div className='relative flex items-center'>
                 <input
                   type='text'
                   value={skillsInput}
+                  onChange={(e) => setSkillsInput(e.target.value)}
                   onKeyDown={handleKeyDownSkill}
-                  onChange={(e) => setSkillsInput(e.target.value)} // Add this line to update input state
-                  className='focus:none outline-none px-2 py-1 grow'
+                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                  placeholder='Enter skills and press Enter, Tab, or comma to add...'
+                  tabIndex={16}
                 />
               </div>
             </div>
           </div>
-        </div>
+          <div className='grid-item'>
+            {/* Skills Tags Display */}
+            {tagsSkill.length > 0 && (
+              <div className='mt-3 flex flex-wrap gap-2'>
+                {tagsSkill.map((tagSkill: string) => (
+                  <div
+                    key={tagSkill}
+                    className='flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm'
+                  >
+                    <span>{tagSkill}</span>
+                    <button
+                      type='button'
+                      onClick={() => handleRemoveTagSkill(tagSkill)}
+                      className='text-blue-600 hover:text-blue-800 font-bold text-lg leading-none'
+                      title='Remove skill'
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         {/* <h6 className='text-indigo-dye text-sm font-semibold mt-6'>Address</h6> */}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4 md:gap-x-11 gap-y-5'>

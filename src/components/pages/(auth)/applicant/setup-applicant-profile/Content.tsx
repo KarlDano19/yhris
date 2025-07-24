@@ -30,7 +30,7 @@ const Content = () => {
   const [setupDocuments, setDocuments] = useState(false);
   const [profileData, setProfileData] = useState<T_ApplicantProfile | null>(null);
   const [currentTab, setCurrentTab] = useState(1);
-  const { register, setValue, watch, handleSubmit, control } = useForm<T_ApplicantProfile>({
+  const { register, setValue, watch, handleSubmit, control, getValues } = useForm<T_ApplicantProfile>({
     defaultValues: {
       experiences: []
     }
@@ -191,6 +191,7 @@ const Content = () => {
                   register,
                   watch,
                   setValue,
+                  getValues,
                   handleSubmit,
                   setCurrentTab,
                   control,

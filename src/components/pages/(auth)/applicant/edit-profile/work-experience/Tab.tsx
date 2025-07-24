@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+
+import dynamic from 'next/dynamic';
 
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -8,11 +10,16 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { PlusIcon } from '@heroicons/react/24/solid';
 
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
+
 function WorkExperienceTab({
   control,
   register,
   watch,
   setValue,
+  getValues,
   handleSubmit,
   isLoading,
   setCurrentTab,
@@ -22,16 +29,17 @@ function WorkExperienceTab({
   register: any;
   watch: any;
   setValue: any;
+  getValues: any;
   handleSubmit: any;
   isLoading: any;
   setCurrentTab: any;
   submitToSave: any;
 }) {
-
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: 'experiences',
   });
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
 
   const onSubmit = handleSubmit((data: any) => {
     let hasError = false;
@@ -44,7 +52,8 @@ function WorkExperienceTab({
             experience.majorRole &&
             experience.companyOrg &&
             experience.dateFrom &&
-            experience.dateTo
+            experience.dateTo &&
+            experience.responsibilities
           )
         ) {
           toast.custom(() => <CustomToast message='Please fill in all experience fields' type='error' />, {
@@ -75,6 +84,7 @@ function WorkExperienceTab({
       companyOrg: '',
       dateFrom: '',
       dateTo: '',
+      responsibilities: '',
     };
     append(newExperience);
   };
@@ -171,6 +181,20 @@ function WorkExperienceTab({
               </div>
             </div>
           </div>
+          <div className='grid-item col-span-6'>
+            <label htmlFor='responsibilities' className='text-sm font-medium leading-6 text-gray-900'>
+              Responsibilities
+            </label>
+            <div className='mt-2 h-72 mb-12'>
+              <ReactQuill
+                onChange={(value) => setValue(`experiences.${index}.responsibilities`, value)}
+                formats={QUILL_FORMATS}
+                modules={QUILL_MODULES}
+                style={{ height: '100%', padding: '5px 8px !important' }}
+                value={watch(`experiences.${index}.responsibilities`) || ''}
+              />
+            </div>
+          </div>
           <button
             type='button'
             className='lg:mt-5 w-full md:w-1/2 rounded-md flex justify-center items-center bg-red-600 lg:px-[110px] px-10 py-2.5 text-sm font-semibold text-white shadow-sm mb-4'
@@ -195,20 +219,13 @@ function WorkExperienceTab({
         <PlusIcon className='h-5 w-5 mr-3' />
         ADD EXPERIENCE
       </button>
-      <div className='md:flex justify-between mt-10 md:mt-16 lg:mt-28 md:mb-5'>
-        <button
-          type='button'
-          className='rounded-md w-full md:w-auto bg-white px-14 py-2.5 text-sm font-semibold text-savoy-blue border border-savoy-blue shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setCurrentTab(1)}
-        >
-          BACK
-        </button>
+      <div className='md:flex justify-end mt-10 md:mt-16 lg:mt-28 md:mb-5'>
         <button
           type='submit'
           className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
           tabIndex={18}
         >
-          Next
+          Save
         </button>
       </div>
     </form>

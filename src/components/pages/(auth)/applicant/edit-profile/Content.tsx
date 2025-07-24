@@ -24,7 +24,7 @@ const Content = () => {
     { name: 'Contacts', current: false },
     { name: 'Experience', current: false },
   ]);
-  const { register, setValue, watch, handleSubmit, control } = useForm<T_ApplicantProfile>();
+  const { register, setValue, watch, handleSubmit, control, getValues } = useForm<T_ApplicantProfile>();
   const { data: applicantProfileData, isLoading: isApplicantProfileLoading } = useGetApplicantProfile();
   const { mutate, isLoading } = useSaveApplicantProfile();
 
@@ -159,6 +159,7 @@ const Content = () => {
                     register,
                     watch,
                     setValue,
+                    getValues,
                     handleSubmit,
                     control,
                     isLoading,
