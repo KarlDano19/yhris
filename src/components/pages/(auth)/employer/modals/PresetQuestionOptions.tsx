@@ -38,11 +38,6 @@ export const PRESET_QUESTIONS = {
     idealAnswer: 'Yes',
     responseType: 'Yes / No',
   },
-  'hybrid-work': {
-    question: 'Are you comfortable with a hybrid work arrangement (some days in office, some remote)?',
-    idealAnswer: 'Yes',
-    responseType: 'Yes / No',
-  },
   'industry': {
     question: 'Do you have prior experience in this industry?',
     idealAnswer: 'Yes',
@@ -58,16 +53,21 @@ export const PRESET_QUESTIONS = {
     idealAnswer: 'Yes',
     responseType: 'Yes / No',
   },
-  'onsite-work': {
-    question: 'Are you able to work onsite full-time at our office location?',
-    idealAnswer: 'Yes',
-    responseType: 'Yes / No',
-  },
-  'remote-work': {
-    question: 'Do you have a suitable remote work setup with reliable internet connection?',
-    idealAnswer: 'Yes',
-    responseType: 'Yes / No',
-  },
+    // 'hybrid-work': {
+  //   question: 'Are you comfortable with a hybrid work arrangement (some days in office, some remote)?',
+  //   idealAnswer: 'Yes',
+  //   responseType: 'Yes / No',
+  // },
+  // 'onsite-work': {
+  //   question: 'Are you able to work onsite full-time at our office location?',
+  //   idealAnswer: 'Yes',
+  //   responseType: 'Yes / No',
+  // },
+  // 'remote-work': {
+  //   question: 'Do you have a suitable remote work setup with reliable internet connection?',
+  //   idealAnswer: 'Yes',
+  //   responseType: 'Yes / No',
+  // },
   'urgent-hiring': {
     question: 'Are you available to start within the next two weeks if selected?',
     idealAnswer: 'Yes',
@@ -88,12 +88,12 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
     { id: 'drug-test', label: 'Drug Test' },
     { id: 'education', label: 'Education' },
     { id: 'expertise', label: 'Expertise with Skill' },
-    { id: 'hybrid-work', label: 'Hybrid Work' },
     { id: 'industry', label: 'Industry Experience' },
     { id: 'language', label: 'Language' },
     { id: 'location', label: 'Location' },
-    { id: 'onsite-work', label: 'Onsite Work' },
-    { id: 'remote-work', label: 'Remote Work' },
+    // { id: 'hybrid-work', label: 'Hybrid Work' },
+    // { id: 'onsite-work', label: 'Onsite Work' },
+    // { id: 'remote-work', label: 'Remote Work' },
     { id: 'urgent-hiring', label: 'Urgent Hiring Need' },
     { id: 'visa-status', label: 'Visa Status' },
 

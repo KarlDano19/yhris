@@ -212,7 +212,7 @@ function PreferencesTab({
         <PlusIcon className='h-5 w-5 mr-3' />
         ADD EXPERIENCE
       </button>
-      <h6 className='text-sm font-semibold mt-16'>Work Set-up Preference</h6>
+      {/* <h6 className='text-sm font-semibold mt-16'>Work Set-up Preference</h6>
       <div className='flex items-center mt-3'>
         <label
           className={`h-3.5 w-3.5 flex justify-center items-center cursor-pointer ${
@@ -264,7 +264,7 @@ function PreferencesTab({
         <label htmlFor='wos' className='ml-3 text-sm'>
           Open to Work on Site
         </label>
-      </div>
+      </div> */}
       <div className='md:flex justify-between mt-10 md:mt-16 lg:mt-28 md:mb-5'>
         <button
           type='button'
