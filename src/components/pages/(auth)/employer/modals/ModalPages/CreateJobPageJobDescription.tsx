@@ -126,7 +126,12 @@ export default function CreateJobPageJobDescription({
           </div>
         </div>
         <div className='relative mt-2 flex gap-2'>
-          <input type='checkbox' {...register('is_show_roles', { required: true })} id='is_show_roles' value='true' />
+          <input 
+            type='checkbox' 
+            {...register('is_show_roles')} 
+            id='is_show_roles' 
+            onChange={(e) => setValue('is_show_roles', e.target.checked)} 
+          />
           <label htmlFor='is_show_roles' className='ml-2'>
             Show Roles
           </label>
@@ -162,9 +167,9 @@ export default function CreateJobPageJobDescription({
         <div className='relative mt-2 flex gap-2'>
           <input
             type='checkbox'
-            {...register('is_show_remarks', { required: true })}
+            {...register('is_show_remarks')}
             id='is_show_remarks'
-            value='true'
+            onChange={(e) => setValue('is_show_remarks', e.target.checked)}
           />
           <label htmlFor='is_show_remarks' className='ml-2'>
             Show Notes/Remarks

@@ -21,6 +21,10 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     formData.append('job_url', jobPost.jobUrl);
     formData.append('poster_type', jobPost.postAs);
     
+    // Show/hide flags
+    formData.append('is_show_roles', jobPost.is_show_roles === true ? 'true' : 'false');
+    formData.append('is_show_remarks', jobPost.is_show_remarks === true ? 'true' : 'false');
+    
     // Handle both postIn and shared_to properties for platform sharing
     if (jobPost.postIn && Array.isArray(jobPost.postIn)) {
       formData.append('shared_to', jobPost.postIn.join());

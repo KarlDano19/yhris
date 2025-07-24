@@ -25,6 +25,10 @@ async function addJobPost(jobPost: any) {
     formData.append('og_description', `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`);
     formData.append('og_image_width', '300');
     formData.append('og_image_height', '300');
+    
+    // Add is_show_roles and is_show_remarks fields
+    formData.append('is_show_roles', jobPost.is_show_roles === true ? 'true' : 'false');
+    formData.append('is_show_remarks', jobPost.is_show_remarks === true ? 'true' : 'false');
 
     // Add screening questions and auto-reject settings
     if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {
