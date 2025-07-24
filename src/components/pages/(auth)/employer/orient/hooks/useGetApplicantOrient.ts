@@ -6,6 +6,8 @@ async function getApplicantOrient(job_id: number, filters: any) {
     let newFilters = { ...filters };
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    if (!newFilters.from) delete newFilters.from;
+    if (!newFilters.to) delete newFilters.to;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -36,10 +38,22 @@ async function getApplicantOrient(job_id: number, filters: any) {
 }
 
 function useGetApplicantOrient(job_id: number, filters: any) {
-  const query = useQuery(['hiredApplicantCache', {}], () => getApplicantOrient(job_id, filters), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    [
+      'hiredApplicantCache',
+      job_id,
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to
+    ],
+    () => getApplicantOrient(job_id, filters),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }

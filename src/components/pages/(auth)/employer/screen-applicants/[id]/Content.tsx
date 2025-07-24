@@ -23,7 +23,7 @@ import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
 import DragAndDrop from './DragAndDrop';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
-import usetGetJobPostDetails from '../hooks/usetGetJobPostDetails';
+import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
 import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
@@ -50,7 +50,7 @@ export default function Content() {
     data: dataJobPostDetails,
     isLoading: isGetJobPostDetailsLoading,
     refetch: jobPostDetailsRefetch,
-  } = usetGetJobPostDetails(params.id);
+  } = useGetJobPostDetails(params.id);
   const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(params.id);
   const {
     CLEAR_STAGE,

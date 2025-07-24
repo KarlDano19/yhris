@@ -28,7 +28,7 @@ async function getJobPostDetails(jobId: any) {
   }
 }
 
-function usetGetJobPostDetails(jobId: any) {
+function useGetJobPostDetails(jobId: any) {
   const query = useQuery(['jobPostDetailsCache', {}], () => getJobPostDetails(jobId), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
@@ -36,4 +36,4 @@ function usetGetJobPostDetails(jobId: any) {
   return query;
 }
 
-export default usetGetJobPostDetails;
+export default useGetJobPostDetails;
