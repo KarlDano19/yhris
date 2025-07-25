@@ -1,12 +1,11 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useAddEmployeeCompensationLogbook from '../hooks/useAddEmployeeCompensationLogbook';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -16,18 +15,20 @@ export default function CreateEmployeeCompensationLogModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
+  employeeItems,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
+  employeeItems: any[];
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, control } = formMethods;
   const { mutate: addEmployeeCompensationLogbook, isLoading: isLoadingAddEmployeeCompensationLogbook } = useAddEmployeeCompensationLogbook();
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -46,15 +47,9 @@ export default function CreateEmployeeCompensationLogModal({
     addEmployeeCompensationLogbook(data, callbackReq);
   });
 
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
-
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {}}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {setIsOpen(false)}}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'

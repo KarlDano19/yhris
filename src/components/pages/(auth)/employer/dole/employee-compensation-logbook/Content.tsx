@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -19,12 +20,12 @@ import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensat
 import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
 import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
 import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import SelectBranchModal from './modals/SelectBranchModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
@@ -73,6 +74,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
+  // Add useForm for create modal at the parent level
+  const createFormMethods = useForm();
 
   const menuOptions = [
     {
@@ -451,6 +455,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookCreateModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookCreateModalOpen}
+          formMethods={createFormMethods}
+          employeeItems={employeeItems || []}
         />
       )}
       {isEmployeesCompensationLogbookEditModalOpen && (
