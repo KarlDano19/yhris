@@ -1,14 +1,22 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
+import EmailProfileModal from '../modal/EmailProfile';
+
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
 
 function ApplicantProfile({ applicant }: { applicant: any }) {
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState<T_ModalData | null>(null);
   // Add null check for applicant
   if (!applicant) {
     return (
       <div className='flex flex-col h-full'>
         <div className='flex-1'>
-          <div className='text-center text-gray-500'>Loading applicant profile...</div>
+          <div className='text-center text-gray-500'>Loading profile/s...</div>
         </div>
       </div>
     );
@@ -77,6 +85,7 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
           <div>
             <div className='font-bold '>Education</div>
             <div>{applicant.education}</div>
+            <div className='text-gray-500'>{applicant.college}</div>
           </div>
           <div>
             {applicant.skills && (
@@ -91,7 +100,25 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
             <div>{applicant.expected_salary}</div>
           </div>
         </div>
+        <div className='mt-4'>
+          <button
+            onClick={() => setIsEmailModalOpen({ id: applicant.id, open: true })}
+            className='w-full bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors'
+          >
+            Send Email
+          </button>
+        </div>
       </div>
+      
+      {/* Email Profile Modal */}
+      {isEmailModalOpen && (
+        <EmailProfileModal
+          isOpen={isEmailModalOpen}
+          setIsOpen={setIsEmailModalOpen}
+          refetch={() => {}}
+          applicantEmail={applicant.email}
+        />
+      )}
     </>
   );
 }

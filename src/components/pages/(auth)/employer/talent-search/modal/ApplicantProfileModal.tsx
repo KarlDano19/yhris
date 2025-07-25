@@ -75,7 +75,7 @@ function ApplicantProfileModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-7xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Applicant Profile
+                    Profile Details
                   </h3>
                   <div className="flex items-center gap-2">
                     <button
@@ -99,7 +99,7 @@ function ApplicantProfileModal({
                   {isLoading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                      <p className="mt-2 text-gray-600">Loading applicant profile...</p>
+                      <p className="mt-2 text-gray-600">Loading profile/s...</p>
                     </div>
                   ) : (
                     <div className="flex gap-6">

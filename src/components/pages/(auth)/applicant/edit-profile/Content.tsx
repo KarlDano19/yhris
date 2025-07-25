@@ -50,6 +50,7 @@ const Content = () => {
       setValue('contactPersonRelationship', applicantProfileData.contact_person_relationship);
       setValue('contactPersonAge', applicantProfileData.contact_person_age);
       setValue('education', applicantProfileData.education);
+      setValue('college', applicantProfileData.college);
       setValue('expected_salary', applicantProfileData.expected_salary);
       setValue('skills', applicantProfileData.skills);
       // Convert work_experience date strings to Date objects

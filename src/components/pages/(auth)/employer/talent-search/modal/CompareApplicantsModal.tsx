@@ -251,7 +251,7 @@ function CompareApplicantsModal({
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-6xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Compare Applicants
+                    Compare Profiles
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
@@ -271,9 +271,6 @@ function CompareApplicantsModal({
                       
                       return (
                         <div key={applicantId} className="border rounded-lg p-4">
-                          <h4 className={`font-semibold text-lg mb-4 ${colors[index % colors.length]}`}>
-                            Applicant {index + 1}
-                          </h4>
                           {renderProfileSection(applicant, isLoading, 'left')}
                         </div>
                       );

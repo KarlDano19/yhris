@@ -356,6 +356,7 @@ export type T_ApplicantProfile = {
   contactPersonRelationship: string;
   contactPersonAge: number;
   education?: string;
+  college?: string;
   expected_salary?: number;
   skills?: string[];
   experiences?: {
