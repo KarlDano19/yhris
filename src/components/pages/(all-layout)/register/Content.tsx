@@ -351,16 +351,12 @@ const Content = () => {
                       <div className='ml-3 text-sm leading-6'>
                         <p id='checkbox-agree'>
                           I have read and agree with{' '}
-                          <Link href='#' className='text-savoy-blue underline'>
+                          <Link href='/terms-of-service' className='text-savoy-blue underline'>
                             Terms of Service
                           </Link>
-                          ,{' '}
-                          <Link href='#' className='text-savoy-blue underline'>
+                          ,and{' '}
+                          <Link href='/privacy-notice' className='text-savoy-blue underline'>
                             Privacy Notice
-                          </Link>
-                          , and{' '}
-                          <Link href='#' className='text-savoy-blue underline'>
-                            Personal Data Collection and Disclosure Policy
                           </Link>
                           .
                         </p>
