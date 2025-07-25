@@ -22,7 +22,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <h4>General Settings</h4>
           </Link>
         </div>
-        <div className='flex pl-10 mb-5 gap-2'>
+        <div className='flex pl-4 md:pl-10 mb-5 gap-2'>
           <div
             onClick={() => setActiveTab('location')}
             className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
