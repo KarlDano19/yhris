@@ -1,16 +1,13 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import useAddWorkAccidentIllnessReport from "../hooks/useAddWorkAccidentIllnessReports";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import PersonalInformation from "./tabs/PersonalInformation";
 import EmploymentDetails from "./tabs/EmploymentDetails";
 import IllnessDetails from "./tabs/IllnessDetails";

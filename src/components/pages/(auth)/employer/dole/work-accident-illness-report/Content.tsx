@@ -53,8 +53,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
-  // Form methods
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  // Create Form Methods
+  const createFormMethods = useForm();
+  
+  // Edit Form Methods
+  const editFormMethods = useForm();
   
   // Employee Search
   const [employeeSearch, setEmployeeSearch] = useState('');
@@ -504,7 +507,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isCreateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateWorkAccidentIllnessReportModalOpen}
-          formMethods={{ register, handleSubmit, reset, control, setValue }}
+          formMethods={createFormMethods}
           employeeSearch={employeeSearch}
           setEmployeeSearch={setEmployeeSearch}
           employeeSelected={employeeSelected}
@@ -523,6 +526,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isUpdateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsUpdateWorkAccidentIllnessReportModalOpen}
+          formMethods={editFormMethods}
+          employeeSearch={employeeSearch}
+          setEmployeeSearch={setEmployeeSearch}
+          employeeSelected={employeeSelected}
+          setEmployeeSelected={setEmployeeSelected}
         />
       )}
       {isExportProgressModalOpen && (

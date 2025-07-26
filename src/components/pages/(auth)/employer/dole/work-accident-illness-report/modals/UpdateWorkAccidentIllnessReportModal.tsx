@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller, set } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -24,10 +23,20 @@ export default function UpdateWorkAccidentIllnessReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
+  employeeSearch,
+  setEmployeeSearch,
+  employeeSelected,
+  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
+  employeeSearch: string;
+  setEmployeeSearch: (value: string) => void;
+  employeeSelected: boolean;
+  setEmployeeSelected: (value: boolean) => void;
 }) {
     const cancelButtonRef = useRef(null);
     const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -37,13 +46,9 @@ export default function UpdateWorkAccidentIllnessReportModal({
         refetch: refetchWorkAccidentIllnessReport,
         remove: removeWorkAccidentIllnessReport,
   } = useGetWorkAccidentIllnessReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
-
-  // Employee Search
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
 
   useEffect(() => {
     if (employeeData) {
@@ -102,9 +107,9 @@ export default function UpdateWorkAccidentIllnessReportModal({
 
   const customCloseModal = () => {
     reset();
-    removeWorkAccidentIllnessReport();
     setEmployeeSearch('');
     setEmployeeSelected(false);
+    removeWorkAccidentIllnessReport();
     setIsOpen(null);
   }
 
