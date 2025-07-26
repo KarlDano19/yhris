@@ -75,8 +75,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
-  // Add useForm for create modal at the parent level
+  // Create Form Methods
   const createFormMethods = useForm();
+  
+  // Employee Search
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
 
   const menuOptions = [
     {
@@ -457,6 +461,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsEmployeesCompensationLogbookCreateModalOpen}
           formMethods={createFormMethods}
           employeeItems={employeeItems || []}
+          employeeSearch={employeeSearch}
+          setEmployeeSearch={setEmployeeSearch}
+          employeeSelected={employeeSelected}
+          setEmployeeSelected={setEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookEditModalOpen && (
