@@ -29,6 +29,8 @@ export default function EditEmployeeCompensationLogModal({
 }) {
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
   const { data: employeeData } = useGetEmployeeItems();
   const {
     data: employeeCompensationLogbookData,
@@ -60,8 +62,15 @@ export default function EditEmployeeCompensationLogModal({
       setValue('nature_of_contingency', employeeCompensationLogbookData.nature_of_contingency);
       setValue('days_of_employee_absence', employeeCompensationLogbookData.days_of_employee_absence);
       setValue('remarks', employeeCompensationLogbookData.remarks);
+      
+      // Set employee search to show selected employee name
+      const selectedEmployee = employeeItems.find((emp: any) => emp.id === employeeCompensationLogbookData.employee);
+      if (selectedEmployee) {
+        setEmployeeSearch(`${selectedEmployee.firstname} ${selectedEmployee.lastname}`);
+        setEmployeeSelected(true);
+      }
     }
-  }, [employeeCompensationLogbookData]);
+  }, [employeeCompensationLogbookData, employeeItems]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -190,20 +199,70 @@ export default function EditEmployeeCompensationLogModal({
                           Employee Name<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                          <select
-                            id='position'
-                            {...register('employee', { required: true })}
-                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          <input
+                            id='name'
+                            type='text'
+                            placeholder='Select...'
+                            value={employeeSearch}
+                            onChange={e => setEmployeeSearch(e.target.value)}
+                            className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                            onClick={() => {
+                              if (!employeeSelected) {
+                                const dropdown = document.getElementById('employee-dropdown');
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden');
+                                }
+                              }
+                            }}
+                            readOnly={employeeSelected}
+                          />
+                          <div
+                            className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
+                            onClick={() => {
+                              if (!employeeSelected) {
+                                const dropdown = document.getElementById('employee-dropdown');
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden');
+                                }
+                              }
+                            }}
                           >
-                            <option value=''>Select...</option>
-                            {employeeItems.map((item: any) => {
-                              return (
-                                <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
-                              );
-                            })}
-                          </select>
-                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                            <SelectChevronDown />
+                            {!employeeSelected ? (
+                              <span>
+                                <SelectChevronDown />
+                              </span>
+                            ) : (
+                              <button
+                                type='button'
+                                className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
+                                onClick={() => {
+                                  setValue('employee', '');
+                                  setEmployeeSearch('');
+                                  setEmployeeSelected(false);
+                                }}
+                                tabIndex={-1}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                          <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+                            {(employeeItems || [])
+                              .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
+                              .map((item: any) => (
+                                <div
+                                  key={item.id}
+                                  className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
+                                  onClick={() => {
+                                    setValue('employee', item.id);
+                                    setEmployeeSearch(`${item.firstname} ${item.lastname}`);
+                                    setEmployeeSelected(true);
+                                    document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                  }}
+                                >
+                                  {`${item.firstname} ${item.lastname}`}
+                                </div>
+                              ))}
                           </div>
                         </div>
                       </div>
