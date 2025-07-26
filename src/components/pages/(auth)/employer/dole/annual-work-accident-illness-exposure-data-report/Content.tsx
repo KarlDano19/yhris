@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from './modals/SendEmailModal';
@@ -88,6 +89,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
   const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+
+  // Form Methods
+  const formMethods = useForm();
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -581,6 +585,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualAccidentIllnessReportRefetch}
           isOpen={isCreateAnnualAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateAnnualAccidentIllnessReportModalOpen}
+          formMethods={formMethods}
         />
       )}
       {isDeleteAnnualAccidentIllnessReportModalOpen && (
@@ -595,6 +600,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualAccidentIllnessReportRefetch}
           isOpen={isEditAnnualAccidentIllnessReportModalOpen}
           setIsOpen={setIsEditAnnualAccidentIllnessReportModalOpen}
+          formMethods={formMethods}
         />
       )}
       {isExportProgressModalOpen && (
