@@ -73,7 +73,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
 
   // Form Methods
-  const formMethods = useForm();
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   const menuOptions = [ 
     {
@@ -466,7 +467,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isCreateShcMeetingMinutesModalOpen}
           setIsOpen={setIsCreateShcMeetingMinutesModalOpen}
-          formMethods={formMethods}
+          formMethods={createFormMethods}
         />
       )}
       {isUpdateShcMinutesMeetingModalOpen && (
@@ -474,7 +475,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isUpdateShcMinutesMeetingModalOpen}
           setIsOpen={setIsUpdateShcMinutesMeetingModalOpen}
-          formMethods={formMethods}
+          formMethods={editFormMethods}
         />
       )}
       {isShcMinutesMeetingDeleteModalOpen && (

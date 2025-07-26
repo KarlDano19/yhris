@@ -77,7 +77,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   // Form Methods
-  const formMethods = useForm();
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   const menuOptions = [
     {
@@ -478,7 +479,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isCreateHealthAndSafetyReportModalOpen}
           setIsOpen={setIsCreateHealthAndSafetyReportModalOpen}
-          formMethods={formMethods}
+          formMethods={createFormMethods}
         />
       )}
       {isDeleteHealthAndSafetyReportModalOpen && (
@@ -493,7 +494,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isEditHealthAndSafetyReportModalOpen}
           setIsOpen={setIsEditHealthAndSafetyReportModalOpen}
-          formMethods={formMethods}
+          formMethods={editFormMethods}
         />
       )}
       {isSendEmailModalOpen && (

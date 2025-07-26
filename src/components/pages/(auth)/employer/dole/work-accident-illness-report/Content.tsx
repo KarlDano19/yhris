@@ -54,11 +54,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   // Form Methods
-  const formMethods = useForm();
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
   
   // Employee Search
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
+    // For create modal
+    const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
+    const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
+
+    // For edit modal
+    const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
+    const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -504,11 +510,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isCreateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateWorkAccidentIllnessReportModalOpen}
-          formMethods={formMethods}
-          employeeSearch={employeeSearch}
-          setEmployeeSearch={setEmployeeSearch}
-          employeeSelected={employeeSelected}
-          setEmployeeSelected={setEmployeeSelected}
+          formMethods={createFormMethods}
+          employeeSearch={createEmployeeSearch}
+          setEmployeeSearch={setCreateEmployeeSearch}
+          employeeSelected={createEmployeeSelected}
+          setEmployeeSelected={setCreateEmployeeSelected}
         />
       )}
       {isWorkAccidentIllnessReportDeleteModalOpen && (
@@ -523,11 +529,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isUpdateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsUpdateWorkAccidentIllnessReportModalOpen}
-          formMethods={formMethods}
-          employeeSearch={employeeSearch}
-          setEmployeeSearch={setEmployeeSearch}
-          employeeSelected={employeeSelected}
-          setEmployeeSelected={setEmployeeSelected}
+          formMethods={editFormMethods}
+          employeeSearch={editEmployeeSearch}
+          setEmployeeSearch={setEditEmployeeSearch}
+          employeeSelected={editEmployeeSelected}
+          setEmployeeSelected={setEditEmployeeSelected}
         />
       )}
       {isExportProgressModalOpen && (

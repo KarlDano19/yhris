@@ -91,7 +91,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   // Form Methods
-  const formMethods = useForm();
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -585,7 +586,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualAccidentIllnessReportRefetch}
           isOpen={isCreateAnnualAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateAnnualAccidentIllnessReportModalOpen}
-          formMethods={formMethods}
+          formMethods={createFormMethods}
         />
       )}
       {isDeleteAnnualAccidentIllnessReportModalOpen && (
@@ -600,7 +601,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualAccidentIllnessReportRefetch}
           isOpen={isEditAnnualAccidentIllnessReportModalOpen}
           setIsOpen={setIsEditAnnualAccidentIllnessReportModalOpen}
-          formMethods={formMethods}
+          formMethods={editFormMethods}
         />
       )}
       {isExportProgressModalOpen && (

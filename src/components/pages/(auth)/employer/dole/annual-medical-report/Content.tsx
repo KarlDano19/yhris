@@ -78,7 +78,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
 
   // Form Methods
-  const formMethods = useForm();
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
@@ -485,7 +486,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isCreateAnnualMedicalReportModalOpen}
           setIsOpen={setIsCreateAnnualMedicalReportModalOpen}
-          formMethods={formMethods}
+          formMethods={createFormMethods}
         />
       )}
       {isEditAnnualMedicalReportModalOpen && (
@@ -493,7 +494,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isEditAnnualMedicalReportModalOpen}
           setIsOpen={setIsEditAnnualMedicalReportModalOpen}
-          formMethods={formMethods}
+          formMethods={editFormMethods}
         />
       )}
       {isDeleteAnnualMedicalReportModalOpen && (

@@ -54,7 +54,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   // Form Methods
-  const formMethods = useForm();
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -479,7 +480,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workEnvironmentRequestItemsRefetch}
           isOpen={isCreateWorkEnvironmentRequestModalOpen}
           setIsOpen={setIsCreateWorkEnvironmentRequestModalOpen}
-          formMethods={formMethods}
+          formMethods={createFormMethods}
         />
       )}
       {isWorkEnvironmentRequestDeleteModalOpen && (
@@ -494,7 +495,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workEnvironmentRequestItemsRefetch}
           isOpen={isUpdateWorkEnvironmentRequestModalOpen}
           setIsOpen={setIsUpdateWorkEnvironmentRequestModalOpen}
-          formMethods={formMethods}
+          formMethods={editFormMethods}
         />
       )}
       {isExportProgressModalOpen && (

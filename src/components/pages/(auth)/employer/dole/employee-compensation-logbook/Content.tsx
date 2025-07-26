@@ -76,11 +76,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   // Form Methods
-  const formMethods = useForm();
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
   
   // Employee Search
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
+    // For create modal
+    const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
+    const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
+
+    // For edit modal
+    const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
+    const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
 
   const menuOptions = [
     {
@@ -459,12 +465,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookCreateModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookCreateModalOpen}
-          formMethods={formMethods}
+          formMethods={createFormMethods}
           employeeItems={employeeItems || []}
-          employeeSearch={employeeSearch}
-          setEmployeeSearch={setEmployeeSearch}
-          employeeSelected={employeeSelected}
-          setEmployeeSelected={setEmployeeSelected}
+          employeeSearch={createEmployeeSearch}
+          setEmployeeSearch={setCreateEmployeeSearch}
+          employeeSelected={createEmployeeSelected}
+          setEmployeeSelected={setCreateEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookEditModalOpen && (
@@ -472,12 +478,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookEditModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookEditModalOpen}
-          formMethods={formMethods}
+          formMethods={editFormMethods}
           employeeItems={employeeItems || []}
-          employeeSearch={employeeSearch}
-          setEmployeeSearch={setEmployeeSearch}
-          employeeSelected={employeeSelected}
-          setEmployeeSelected={setEmployeeSelected}
+          employeeSearch={editEmployeeSearch}
+          setEmployeeSearch={setEditEmployeeSearch}
+          employeeSelected={editEmployeeSelected}
+          setEmployeeSelected={setEditEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookDeleteModalOpen && (
