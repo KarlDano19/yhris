@@ -75,11 +75,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
-  // Create Form Methods
-  const createFormMethods = useForm();
-  
-  // Edit Form Methods
-  const editFormMethods = useForm();
+  // Form Methods
+  const formMethods = useForm();
   
   // Employee Search
   const [employeeSearch, setEmployeeSearch] = useState('');
@@ -462,7 +459,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookCreateModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookCreateModalOpen}
-          formMethods={createFormMethods}
+          formMethods={formMethods}
           employeeItems={employeeItems || []}
           employeeSearch={employeeSearch}
           setEmployeeSearch={setEmployeeSearch}
@@ -475,7 +472,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookEditModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookEditModalOpen}
-          formMethods={editFormMethods}
+          formMethods={formMethods}
           employeeItems={employeeItems || []}
           employeeSearch={employeeSearch}
           setEmployeeSearch={setEmployeeSearch}
