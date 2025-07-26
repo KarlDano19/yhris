@@ -41,6 +41,10 @@ export default function UpdateWorkAccidentIllnessReportModal({
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
+  // Employee Search
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
+
   useEffect(() => {
     if (employeeData) {
       setEmployeeItems(employeeData);
@@ -84,12 +88,23 @@ export default function UpdateWorkAccidentIllnessReportModal({
       setValue('days_chargeable_illness', workAccidentIllnessReportData.days_chargeable_illness);
       setValue('date_returned_to_work_illness', workAccidentIllnessReportData.date_returned_to_work_illness);
       setValue('disabling_injury', workAccidentIllnessReportData.disabling_injury ? 'yes' : 'no');
+
+      // Set employee search state if employee data is available
+      if (workAccidentIllnessReportData.employee && employeeData) {
+        const employee = employeeData.find((emp: any) => emp.id === workAccidentIllnessReportData.employee);
+        if (employee) {
+          setEmployeeSearch(`${employee.firstname} ${employee.lastname}`);
+          setEmployeeSelected(true);
+        }
+      }
     }
-  }, [workAccidentIllnessReportData]);
+  }, [workAccidentIllnessReportData, employeeData]);
 
   const customCloseModal = () => {
     reset();
     removeWorkAccidentIllnessReport();
+    setEmployeeSearch('');
+    setEmployeeSelected(false);
     setIsOpen(null);
   }
 
@@ -118,7 +133,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => {customCloseModal()}}
       >
         <Transition.Child
           as={Fragment}
@@ -159,6 +174,12 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    setValue={setValue}
+                    employeeItems={employeeItems || []}
+                    employeeSearch={employeeSearch}
+                    setEmployeeSearch={setEmployeeSearch}
+                    employeeSelected={employeeSelected}
+                    setEmployeeSelected={setEmployeeSelected}
                   />
                 )}
                 {selectedTab === 2 && (

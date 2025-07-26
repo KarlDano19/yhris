@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -51,6 +52,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
+  // Form methods
+  const { register, handleSubmit, reset, control, setValue } = useForm();
+  
+  // Employee Search
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -496,6 +504,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isCreateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateWorkAccidentIllnessReportModalOpen}
+          formMethods={{ register, handleSubmit, reset, control, setValue }}
+          employeeSearch={employeeSearch}
+          setEmployeeSearch={setEmployeeSearch}
+          employeeSelected={employeeSelected}
+          setEmployeeSelected={setEmployeeSelected}
         />
       )}
       {isWorkAccidentIllnessReportDeleteModalOpen && (

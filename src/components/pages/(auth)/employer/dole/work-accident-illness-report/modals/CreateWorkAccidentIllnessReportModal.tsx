@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -20,24 +20,34 @@ function CreateWorkAccidentIllnessReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
+  employeeSearch,
+  setEmployeeSearch,
+  employeeSelected,
+  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
+  employeeSearch: string;
+  setEmployeeSearch: (value: string) => void;
+  employeeSelected: boolean;
+  setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = formMethods;
   const {
     mutate: addWorkAccidentIllnessReport,
     isLoading: isLoadingAddWorkAccidentIllnessReport,
   } = useAddWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
+      onSuccess: (data: any) => { 
         toast.custom(
           () => <CustomToast message={data.message} type="success" />,
           {
@@ -46,6 +56,8 @@ function CreateWorkAccidentIllnessReportModal({
         );
         setIsOpen(false);
         reset();
+        setEmployeeSearch('');
+        setEmployeeSelected(false);
         refetch();
       },
       onError: (err: any) => {
@@ -70,7 +82,7 @@ function CreateWorkAccidentIllnessReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => {setIsOpen(false)}}
       >
         <Transition.Child
           as={Fragment}
@@ -111,6 +123,12 @@ function CreateWorkAccidentIllnessReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    setValue={setValue}
+                    employeeItems={employeeItems || []}
+                    employeeSearch={employeeSearch}
+                    setEmployeeSearch={setEmployeeSearch}
+                    employeeSelected={employeeSelected}
+                    setEmployeeSelected={setEmployeeSelected}
                   />
                 )}
                 {selectedTab === 2 && (
