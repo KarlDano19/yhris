@@ -24,6 +24,14 @@ function EmergencyOccupational({
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
 
+  // Add this useEffect to check if "Other" option is selected on load
+  useEffect(() => {
+    const value = watch("provided_treatment_room_medical_clinic");
+    if (value === "Other" || value === "other") {
+      setIsOtherCheckedA(true);
+    }
+  }, [watch("provided_treatment_room_medical_clinic")]);
+
   // Helper to check if a checkbox group is filled
   const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
 
@@ -178,13 +186,18 @@ function EmergencyOccupational({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pl-0 md:pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("provided_treatment_room_medical_clinic")}
-                id="provided_treatment_room_medical_clinic"
+                id="provided_treatment_room_medical_clinic_yes"
                 value="yes"
+                onChange={() => {
+                  setIsOtherCheckedA(false);
+                  // Clear the other specification field
+                  setValue("provided_treatment_room_medical_clinic_other_specification", "");
+                }}
               />
               <label
-                htmlFor="provided_treatment_room_medical_clinic"
+                htmlFor="provided_treatment_room_medical_clinic_yes"
                 className="ml-1"
               >
                 yes
@@ -192,13 +205,18 @@ function EmergencyOccupational({
             </div>
             <div className="relative mt-2 flex items-center gap-2">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("provided_treatment_room_medical_clinic")}
-                id="provided_treatment_room_medical_clinic"
+                id="provided_treatment_room_medical_clinic_no"
                 value="no"
+                onChange={() => {
+                  setIsOtherCheckedA(false);
+                  // Clear the other specification field
+                  setValue("provided_treatment_room_medical_clinic_other_specification", "");
+                }}
               />
               <label
-                htmlFor="provided_treatment_room_medical_clinic"
+                htmlFor="provided_treatment_room_medical_clinic_no"
                 className="ml-2"
               >
                 no
@@ -207,14 +225,14 @@ function EmergencyOccupational({
             </div>
             <div className="relative mt-2 flex items-center gap-1">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("provided_treatment_room_medical_clinic")}
-                id="provided_treatment_room_medical_clinic"
+                id="provided_treatment_room_medical_clinic_other"
                 value="Other"
                 onChange={(e) => setIsOtherCheckedA(e.target.checked)}
               />
               <label
-                htmlFor="provided_treatment_room_medical_clinic"
+                htmlFor="provided_treatment_room_medical_clinic_other"
                 className="ml-2"
               >
                 others, please specify

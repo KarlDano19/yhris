@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from "react";
 import Link from "next/link";
 
 import { Menu, Transition } from "@headlessui/react";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
 import { Tooltip } from "react-tooltip";
@@ -75,6 +76,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+
+  // Form Methods
+  const formMethods = useForm();
 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
@@ -481,6 +485,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isCreateAnnualMedicalReportModalOpen}
           setIsOpen={setIsCreateAnnualMedicalReportModalOpen}
+          formMethods={formMethods}
         />
       )}
       {isEditAnnualMedicalReportModalOpen && (
@@ -488,6 +493,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isEditAnnualMedicalReportModalOpen}
           setIsOpen={setIsEditAnnualMedicalReportModalOpen}
+          formMethods={formMethods}
         />
       )}
       {isDeleteAnnualMedicalReportModalOpen && (
