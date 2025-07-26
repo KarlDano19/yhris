@@ -1,12 +1,11 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetEmployeeCompensationLogbookDetails from '../hooks/useGetEmployeeCompensationLogbookDetails';
 import useUpdateEmployeeCompensationLogbook from '../hooks/useUpdateEmployeeCompensationLogbook';
 
@@ -22,29 +21,31 @@ export default function EditEmployeeCompensationLogModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
+  employeeItems,
+  employeeSearch,
+  setEmployeeSearch,
+  employeeSelected,
+  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
+  employeeItems: any[];
+  employeeSearch: string;
+  setEmployeeSearch: (value: string) => void;
+  employeeSelected: boolean;
+  setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
-  const { data: employeeData } = useGetEmployeeItems();
   const {
     data: employeeCompensationLogbookData,
     refetch: refetchEmployeeCompensationLogbook,
     remove: removeEmployeeCompensationLogbook,
   } = useGetEmployeeCompensationLogbookDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate, isLoading: isLoadingEditEmployeeCompensationLogbook } = useUpdateEmployeeCompensationLogbook();
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   useEffect(() => {
     if (isOpen) {
@@ -72,7 +73,7 @@ export default function EditEmployeeCompensationLogModal({
     }
   }, [employeeCompensationLogbookData, employeeItems]);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -92,6 +93,8 @@ export default function EditEmployeeCompensationLogModal({
 
   const customCloseModal = () => {
     reset();
+    setEmployeeSearch('');
+    setEmployeeSelected(false);
     removeEmployeeCompensationLogbook();
     setIsOpen(null);
   };

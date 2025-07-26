@@ -78,6 +78,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Create Form Methods
   const createFormMethods = useForm();
   
+  // Edit Form Methods
+  const editFormMethods = useForm();
+  
   // Employee Search
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
@@ -472,6 +475,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookEditModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookEditModalOpen}
+          formMethods={editFormMethods}
+          employeeItems={employeeItems || []}
+          employeeSearch={employeeSearch}
+          setEmployeeSearch={setEmployeeSearch}
+          employeeSelected={employeeSelected}
+          setEmployeeSelected={setEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookDeleteModalOpen && (
