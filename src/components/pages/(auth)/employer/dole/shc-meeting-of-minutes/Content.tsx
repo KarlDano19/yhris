@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
@@ -70,7 +71,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const menuOptions = [
+
+  // Form Methods
+  const formMethods = useForm();
+
+  const menuOptions = [ 
     {
       name: 'Export',
       action: () => {
@@ -461,6 +466,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isCreateShcMeetingMinutesModalOpen}
           setIsOpen={setIsCreateShcMeetingMinutesModalOpen}
+          formMethods={formMethods}
         />
       )}
       {isUpdateShcMinutesMeetingModalOpen && (
@@ -468,6 +474,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isUpdateShcMinutesMeetingModalOpen}
           setIsOpen={setIsUpdateShcMinutesMeetingModalOpen}
+          formMethods={formMethods}
         />
       )}
       {isShcMinutesMeetingDeleteModalOpen && (

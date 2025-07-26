@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import { Controller } from "react-hook-form";
 import Select from 'react-select';
@@ -19,6 +19,7 @@ export default function MeetingInfo({
   errors,
   setError,
   clearErrors,
+  watch,
 }: {
   control: any;
   register: any;
@@ -27,11 +28,14 @@ export default function MeetingInfo({
   errors: any;
   setError: any;
   clearErrors: any;
+  watch: any;
 }) {
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const [attendeeOptions, setAttendeeOptions] = useState<any>([]);
-  const [absenteeOptions, setAbsenteeOptions] = useState<any>([]);
+  
+  // Watch the form values for attendees and absentees
+  const selectedAttendees = watch("attendees") || [];
+  const selectedAbsentees = watch("absentees") || [];
 
   useEffect(() => {
     if (employeeData) {
@@ -40,46 +44,40 @@ export default function MeetingInfo({
         label: `${item.firstname} ${item.lastname}`,
       }));
       setEmployeeItems(formattedEmployees);
-      setAttendeeOptions(formattedEmployees);
-      setAbsenteeOptions(formattedEmployees);
     }
   }, [employeeData]);
 
-  // Update available options when attendees change
-  useEffect(() => {
+  // Memoize the filtered options
+  const attendeeOptions = useMemo(() => {
     if (employeeItems.length > 0) {
-      const selectedAttendees = control._formValues?.attendees || [];
-      const selectedAbsentees = control._formValues?.absentees || [];
-      
-      // Filter out attendees from absentee options
-      setAbsenteeOptions(
-        employeeItems.filter((item: any) => !selectedAttendees.includes(item.value))
-      );
-      
-      // Filter out absentees from attendee options
-      setAttendeeOptions(
-        employeeItems.filter((item: any) => !selectedAbsentees.includes(item.value))
-      );
+      return employeeItems.filter((item: any) => !selectedAbsentees.includes(item.value));
     }
-  }, [control._formValues?.attendees, control._formValues?.absentees, employeeItems]);
+    return [];
+  }, [employeeItems, selectedAbsentees]);
+
+  const absenteeOptions = useMemo(() => {
+    if (employeeItems.length > 0) {
+      return employeeItems.filter((item: any) => !selectedAttendees.includes(item.value));
+    }
+    return [];
+  }, [employeeItems, selectedAttendees]);
 
   useEffect(() => {
-    if (control._formValues?.attendees && Array.isArray(control._formValues.attendees) && control._formValues.attendees.length > 0) {
+    if (selectedAttendees && Array.isArray(selectedAttendees) && selectedAttendees.length > 0) {
       clearErrors("attendees");
     }
-  }, [control._formValues?.attendees, clearErrors]);
+  }, [selectedAttendees, clearErrors]);
 
   useEffect(() => {
-    if (control._formValues?.absentees && Array.isArray(control._formValues.absentees) && control._formValues.absentees.length > 0) {
+    if (selectedAbsentees && Array.isArray(selectedAbsentees) && selectedAbsentees.length > 0) {
       clearErrors("absentees");
     }
-  }, [control._formValues?.absentees, clearErrors]);
+  }, [selectedAbsentees, clearErrors]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const timeOfMeeting = control._formValues?.time_of_meeting;
-    const venue = control._formValues?.venue;
-    const attendees = control._formValues?.attendees;
+    const timeOfMeeting = watch("time_of_meeting");
+    const venue = watch("venue");
 
     if (!timeOfMeeting) {
       const el = document.getElementById("time_of_meeting");
@@ -93,7 +91,7 @@ export default function MeetingInfo({
     }
 
     let hasError = false;
-    if (!attendees || !Array.isArray(attendees) || attendees.length === 0) {
+    if (!selectedAttendees || !Array.isArray(selectedAttendees) || selectedAttendees.length === 0) {
       setError("attendees", {
         type: "manual",
         message: "Please select at least one Attendee."
