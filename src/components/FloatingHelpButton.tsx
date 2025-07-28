@@ -1,10 +1,29 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Commented out old chat widget imports
 // import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon';
 // import ChatBubbleIcon from '@/svg/ChatBubbleIcon';
 
 const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
+  const [userEmail, setUserEmail] = useState<string>('');
+
+  useEffect(() => {
+    // Fetch user session data to get email
+    const fetchUserSession = async () => {
+      try {
+        const response = await fetch('/api/get-session');
+        if (response.ok) {
+          const sessionData = await response.json();
+          setUserEmail(sessionData.email);
+        }
+      } catch (error) {
+        console.error('Failed to fetch session data:', error);
+      }
+    };
+
+    fetchUserSession();
+  }, []);
+
   useEffect(() => {
     // Tawk.to chat widget script
     const script = document.createElement('script');
@@ -19,6 +38,21 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
     // Initialize Tawk_API
     (window as any).Tawk_API = (window as any).Tawk_API || {};
     (window as any).Tawk_LoadStart = new Date();
+
+    // Set up callback to capture user attributes when widget is ready
+    (window as any).Tawk_API.onLoad = function() {
+      // Set user attributes including email and company name
+      if (userEmail || companyName) {
+        (window as any).Tawk_API.setAttributes({
+          'email': userEmail,
+          'company': companyName || 'Unknown'
+        }, function(error: any) {
+          if (error) {
+            console.error('Failed to set tawk.to attributes:', error);
+          }
+        });
+      }
+    };
     
     // Cleanup function to remove script when component unmounts
     return () => {
@@ -27,7 +61,7 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
         document.head.removeChild(existingScript);
       }
     };
-  }, []);
+  }, [userEmail, companyName]);
 
   // Return null since Tawk.to will render its own widget
   return null;
