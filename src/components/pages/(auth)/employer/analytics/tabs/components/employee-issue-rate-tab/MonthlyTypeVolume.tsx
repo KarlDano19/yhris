@@ -14,9 +14,6 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
-import FilterLogo from '@/svg/FilterLogo';
-import AverageLegendIcon from '@/svg/AverageLegendIcon';
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -28,19 +25,13 @@ ChartJS.register(
   Filler
 );
 
-const ITPerformanceTrend: React.FC = () => {
-  const itTrendData = [
-    { month: 'January', score: 70 },
-    { month: 'February', score: 72 },
-    { month: 'March', score: 74 },
-  ];
-
+const MonthlyTypeVolume: React.FC = () => {
   const data = {
-    labels: itTrendData.map(item => item.month),
+    labels: ['Jan', 'Feb', 'Mar'],
     datasets: [
       {
-        label: 'Average Score',
-        data: itTrendData.map(item => item.score),
+        label: 'Issue Volume',
+        data: [5, 7, 8],
         borderColor: '#8B5CF6',
         backgroundColor: 'rgba(139, 92, 246, 0.3)',
         borderWidth: 2,
@@ -69,17 +60,18 @@ const ITPerformanceTrend: React.FC = () => {
     scales: {
       y: {
         beginAtZero: true,
-        max: 100,
-        grid: {
-          color: '#f0f0f0',
-          drawBorder: false,
-          borderDash: [3, 3],
-        },
+        max: 8,
         ticks: {
+          stepSize: 2,
           color: '#6b7280',
           font: {
             size: 12,
           },
+        },
+        grid: {
+          color: '#f0f0f0',
+          drawBorder: false,
+          borderDash: [3, 3],
         },
       },
       x: {
@@ -97,28 +89,16 @@ const ITPerformanceTrend: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
-      <div className="flex justify-between items-center mb-4">
-        <button className="p-2 hover:bg-gray-100 rounded border-2 border-gray-200">
-          <FilterLogo className="w-5 h-5" />
-        </button>
-        <h3 className="text-lg font-semibold text-gray-900">IT Performance Trend (Jan - Mar 2025)</h3>
-        <div className="w-10"></div>
+    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+      <div className="flex items-center justify-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Monthly Issue Volume (Jan - Mar 2025)</h3>
       </div>
       
-      <div className="h-96">
+      <div className="h-64">
         <Line data={data} options={options} />
-      </div>
-
-      {/* Legend */}
-      <div className="flex justify-center mt-4">
-        <div className="flex items-center space-x-2">
-          <AverageLegendIcon />
-          <span className="text-lg text-gray-600">Average Score</span>
-        </div>
       </div>
     </div>
   );
 };
 
-export default ITPerformanceTrend; 
+export default MonthlyTypeVolume;

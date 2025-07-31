@@ -84,7 +84,7 @@ const PerformanceRate: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
+    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
       <h3 className="text-lg font-semibold text-gray-900 mb-8 text-center">
         Performance Rate by Department (Jan - Mar 2025)
       </h3>

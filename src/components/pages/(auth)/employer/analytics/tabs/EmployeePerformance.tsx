@@ -5,9 +5,12 @@ import React, { useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import Card from '../Card';
-import PerformanceRate from './components/PerformanceRate';
-import ITPerformanceTrend from './components/ITPerformanceTrend';
-import EmployeePerformanceTable from './components/EmployeePerformanceTable';
+import PerformanceRate from './components/performance-rate-tab/PerformanceRate';
+import ITPerformanceTrend from './components/performance-rate-tab/ITPerformanceTrend';
+import EmployeePerformanceTable from './components/performance-rate-tab/EmployeePerformanceTable';
+import IssueType from './components/employee-issue-rate-tab/IssueType';
+import MonthlyTypeVolume from './components/employee-issue-rate-tab/MonthlyTypeVolume';
+import EmployeeIssuesTable from './components/employee-issue-rate-tab/EmployeeIssuesTable';
 
 interface EmployeePerformanceData {
   averageScore: number;
@@ -55,8 +58,63 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
   const subTabs = [
     { id: 1, name: 'Performance Rate & Action Recommendations', isAvailable: true },
     { id: 2, name: 'Training Analysis', isAvailable: false },
-    { id: 3, name: 'Employee Issue Rate', isAvailable: false },
+    { id: 3, name: 'Employee Issue Rate', isAvailable: true },
   ];
+
+  const renderTabContent = () => {
+    switch (activeSubTab) {
+      case 1: // Performance Rate & Action Recommendations
+        return (
+          <>
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Performance Rate by Department - Bar Chart */}
+              <PerformanceRate />
+
+              {/* IT Performance Trend - Line Chart */}
+              <ITPerformanceTrend />
+            </div>
+
+            {/* Employee Performance Table */}
+            <div className="pb-8">
+              <EmployeePerformanceTable />
+            </div>
+          </>
+        );
+      
+      case 2: // Training Analysis
+        return (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="text-2xl font-semibold text-gray-600 mb-2">Coming Soon</div>
+              <div className="text-gray-500">Training Analysis features are under development</div>
+            </div>
+          </div>
+        );
+      
+      case 3: // Employee Issue Rate
+        return (
+          <>
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Issue Type - Pie Chart */}
+              <IssueType />
+
+              {/* Monthly Issue Volume - Line Chart */}
+              <MonthlyTypeVolume />
+            </div>
+
+            {/* Employee Issues Table */}
+            <div className="pb-8">
+              <EmployeeIssuesTable />
+            </div>
+          </>
+        );
+      
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -135,17 +193,8 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
         <Tooltip id='subtab-tooltip' />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Performance Rate by Department - Bar Chart */}
-        <PerformanceRate />
-
-        {/* IT Performance Trend - Line Chart */}
-        <ITPerformanceTrend />
-      </div>
-
-      {/* Employee Performance Table */}
-      <EmployeePerformanceTable />
+      {/* Tab Content */}
+      {renderTabContent()}
     </div>
   );
 };
