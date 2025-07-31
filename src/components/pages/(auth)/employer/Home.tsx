@@ -16,6 +16,7 @@ import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
 import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
+import AnalyticsLogo from '@/svg/AnalyticsLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 
 const Home = ({ loginType }: { loginType: string }) => {
@@ -72,6 +73,12 @@ const Home = ({ loginType }: { loginType: string }) => {
       icon: <DoleLogo />,
       text: 'DOLE',
       link: '/dole',
+      isAvailable: true,
+    },
+    {
+      icon: <AnalyticsLogo />,
+      text: 'Analytics',
+      link: '/analytics',
       isAvailable: true,
     },
     {

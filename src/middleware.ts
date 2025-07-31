@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
     'train',
     'settings',
     'dole',
+    'analytics',
     'audit-logs',
   ];
   const applicantRoutes: any = [
@@ -77,6 +78,7 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'train' ||
           firstRoute === 'settings' ||
           firstRoute === 'dole' ||
+          firstRoute === 'analytics' ||
           firstRoute === 'audit-logs'
         ) {
           if (hasProfile) {
