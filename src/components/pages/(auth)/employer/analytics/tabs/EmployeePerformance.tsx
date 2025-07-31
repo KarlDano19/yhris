@@ -57,8 +57,9 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
     }
   ];
 
+  // Real Name: Performance Rate & Action Recommendations
   const subTabs = [
-    { id: 1, name: 'Performance Rate & Action Recommendations', isAvailable: true },
+    { id: 1, name: 'Performance Rate', isAvailable: true },
     { id: 2, name: 'Training Analysis', isAvailable: false },
     { id: 3, name: 'Employee Issue Rate', isAvailable: true },
   ];
@@ -82,7 +83,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
 
             {/* Action Recommendations */}
             <div className="pb-8">
-              <ActionRecommendations />
+              {/* <ActionRecommendations /> */}
             </div>
           </>
         );
@@ -114,7 +115,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
 
             {/* Intervention Recommendations */}
             <div className="pb-8">
-              <InterventionRecommendations />
+              {/* <InterventionRecommendations /> */}
             </div>
           </>
         );
