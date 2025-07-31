@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import PersonSearchLogo from '@/svg/PersonSearchLogo';
 import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
+import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 const menus = [
   {
@@ -45,6 +46,7 @@ const Content = () => {
           </div>
         </div>        
       </div>
+      <FloatingHelpButton />
     </>
   );
 };

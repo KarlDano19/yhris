@@ -94,6 +94,20 @@ function EmployeeProfile({
     }
   }, [employeeItems, isEdit, watchedEmployeeId, setEmployeeSearch, setEmployeeSelected]);
 
+  useEffect(() => {
+    if (isEdit) {
+      const currentPositionValue = watch('current_position');
+      const newPositionValue = watch('new_position');
+      
+      if (currentPositionValue) {
+        setCurrentPosition(String(currentPositionValue));
+      }
+      if (newPositionValue) {
+        setNewPosition(String(newPositionValue));
+      }
+    }
+  }, [isEdit, watch('current_position'), watch('new_position'), setCurrentPosition, setNewPosition]);
+
   const onSubmit = (data: any) => {
     if (isEdit) {
       setSelectedTab(2);
