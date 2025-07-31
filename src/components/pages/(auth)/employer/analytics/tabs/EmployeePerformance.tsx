@@ -8,9 +8,11 @@ import Card from '../Card';
 import PerformanceRate from './components/performance-rate-tab/PerformanceRate';
 import ITPerformanceTrend from './components/performance-rate-tab/ITPerformanceTrend';
 import EmployeePerformanceTable from './components/performance-rate-tab/EmployeePerformanceTable';
+import ActionRecommendations from './components/performance-rate-tab/ActionRecommendations';
 import IssueType from './components/employee-issue-rate-tab/IssueType';
 import MonthlyTypeVolume from './components/employee-issue-rate-tab/MonthlyTypeVolume';
 import EmployeeIssuesTable from './components/employee-issue-rate-tab/EmployeeIssuesTable';
+import InterventionRecommendations from './components/employee-issue-rate-tab/InterventionRecommendations';
 
 interface EmployeePerformanceData {
   averageScore: number;
@@ -76,8 +78,11 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
             </div>
 
             {/* Employee Performance Table */}
+            <EmployeePerformanceTable />
+
+            {/* Action Recommendations */}
             <div className="pb-8">
-              <EmployeePerformanceTable />
+              <ActionRecommendations />
             </div>
           </>
         );
@@ -105,8 +110,11 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
             </div>
 
             {/* Employee Issues Table */}
-            <div className="pb-8">
               <EmployeeIssuesTable />
+
+            {/* Intervention Recommendations */}
+            <div className="pb-8">
+              <InterventionRecommendations />
             </div>
           </>
         );
