@@ -11,8 +11,6 @@ import useEditEmployeeDetails from '../hooks/useEditEmployeeDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import DropDownArrow from '@/svg/DropDownArrow';
-import useGetLocationItems from '@/components/hooks/useGetLocationItems';
-import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 
 type T_ModalData = {
   id: number;
@@ -23,10 +21,16 @@ export default function EditEmployeeDetailsModal({
   refetch,
   isOpen,
   setIsOpen,
+  locationItems,
+  departmentItems,
+  positionItems,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  locationItems: any[];
+  departmentItems: any[];
+  positionItems: any[];
 }) {
   const cancelButtonRef = useRef(null);
   const {
@@ -35,8 +39,6 @@ export default function EditEmployeeDetailsModal({
     remove: removeEmployeeDetails,
   } = useGetEmployeeDetails(isOpen.id);
   const { register, handleSubmit, reset, control, setValue } = useForm();
-  const { data: locationItems } = useGetLocationItems();
-  const { data: departmentItems } = useGetDepartmentItems();
   const { mutate, isLoading: isLoadingEditEmployeeDetails } = useEditEmployeeDetails();
 
   useEffect(() => {
@@ -65,8 +67,16 @@ export default function EditEmployeeDetailsModal({
       } else {
         setValue('department', '');
       }
+
+      // Find position ID from position name
+      if (employeeDetailsData.position && positionItems) {
+        const positionItem = positionItems.find((item: any) => item.name === employeeDetailsData.position);
+        setValue('position', positionItem ? positionItem.id : '');
+      } else {
+        setValue('position', '');
+      }
     }
-  }, [employeeDetailsData, departmentItems]);
+  }, [employeeDetailsData, departmentItems, positionItems]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -308,6 +318,26 @@ export default function EditEmployeeDetailsModal({
                             </div>
                           </div>
                           <div>
+                            <label htmlFor='position' className='text-sm font-medium leading-6 text-gray-900'>
+                              Position<span className='text-red-500'>*</span>
+                            </label>
+                            <div className='relative mt-2'>
+                              <select
+                                id='position'
+                                {...register('position', { required: true })}
+                                className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
+                              >
+                                <option value="">Select Position</option>
+                                {positionItems && positionItems.map((item: any) => (
+                                  <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                              </select>
+                              <div className='absolute right-3 top-[14px]'>
+                                <DropDownArrow />
+                              </div>
+                            </div>
+                          </div>
+                          <div>
                             <label htmlFor='department' className='text-sm font-medium leading-6 text-gray-900'>
                               Department<span className='text-red-500'>*</span>
                             </label>
@@ -326,9 +356,6 @@ export default function EditEmployeeDetailsModal({
                                 <DropDownArrow />
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            {/* Empty space below religion */}
                           </div>
                         </div>
                       </div>

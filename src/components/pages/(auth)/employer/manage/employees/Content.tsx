@@ -18,6 +18,9 @@ import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItemsList from './hooks/useGetEmployeeItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import useGetLocationItems from '@/components/hooks/useGetLocationItems';
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
+import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
@@ -74,6 +77,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: employeeListRefetch,
   } = useGetEmployeeItemsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
   const { data: employeeItemsAll } = useGetEmployeeItems();
+  const { data: locationItems } = useGetLocationItems();
+  const { data: departmentItems } = useGetDepartmentItems();
+  const { data: positionItems } = useGetPositionItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
 
@@ -212,6 +218,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position || 'N/A'}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
@@ -438,6 +445,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           Location
                         </th>
                         <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Position
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Department
                         </th>
                         <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -510,12 +520,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEmployeesEditModalOpen}
           setIsOpen={setIsEmployeesEditModalOpen}
           refetch={employeeListRefetch}
+          locationItems={locationItems}
+          departmentItems={departmentItems}
+          positionItems={positionItems}
         />
       )}
       <AddEmployeeModal
         refetch={employeeListRefetch}
         isOpen={isAddEmployeeModalOpen}
         setIsOpen={setIsAddEmployeeModalOpen}
+        locationItems={locationItems}
+        departmentItems={departmentItems}
+        positionItems={positionItems}
       />
     </>
   );

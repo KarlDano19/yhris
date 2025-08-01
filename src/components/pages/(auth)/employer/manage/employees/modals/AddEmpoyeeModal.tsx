@@ -10,22 +10,24 @@ import useAddEmployee from '../hooks/useAddEmployee';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
-import useGetLocationItems from '@/components/hooks/useGetLocationItems';
-import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 
 export default function AddEmployeeModal({
   refetch,
   isOpen,
   setIsOpen,
+  locationItems,
+  departmentItems,
+  positionItems,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  locationItems: any[];
+  departmentItems: any[];
+  positionItems: any[];
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm();
-  const { data: locationItems } = useGetLocationItems();
-  const { data: departmentItems } = useGetDepartmentItems();
   const { mutate, isLoading: isLoadingAddEmployee } = useAddEmployee();
 
   const onSubmit = handleSubmit((data) => {
@@ -38,6 +40,13 @@ export default function AddEmployeeModal({
 
     if (!data.department) {
       toast.custom(() => <CustomToast message="Please select a department" type='error' />, {
+        duration: 5000,
+      });
+      return;
+    }
+
+    if (!data.position) {
+      toast.custom(() => <CustomToast message="Please select a position" type='error' />, {
         duration: 5000,
       });
       return;
@@ -289,6 +298,26 @@ export default function AddEmployeeModal({
                             </div>
                           </div>
                           <div>
+                            <label htmlFor='position' className='text-sm font-medium leading-6 text-gray-900'>
+                              Position<span className='text-red-500'>*</span>
+                            </label>
+                            <div className='relative mt-2'>
+                              <select
+                                id='position'
+                                {...register('position')}
+                                className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
+                              >
+                                <option value="">Select Position</option>
+                                {positionItems && positionItems.map((item: any) => (
+                                  <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                              </select>
+                              <div className='absolute right-3 top-[14px]'>
+                                <SelectChevronDown />
+                              </div>
+                            </div>
+                          </div>
+                          <div>
                             <label htmlFor='department' className='text-sm font-medium leading-6 text-gray-900'>
                               Department<span className='text-red-500'>*</span>
                             </label>
@@ -307,9 +336,6 @@ export default function AddEmployeeModal({
                                 <SelectChevronDown />
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            {/* Empty space below religion */}
                           </div>
                         </div>
                       </div>
