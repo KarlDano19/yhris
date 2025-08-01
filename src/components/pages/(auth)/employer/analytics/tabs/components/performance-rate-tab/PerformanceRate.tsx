@@ -21,12 +21,50 @@ ChartJS.register(
   Legend
 );
 
-const PerformanceRate: React.FC = () => {
-  const departmentPerformanceData = [
-    { name: 'Sales', score: 88, color: '#3B82F6' },
-    { name: 'IT', score: 74, color: '#374151' },
-    { name: 'HR', score: 92, color: '#EAB308' },
-  ];
+interface PerformanceRateProps {
+  evaluationData?: any;
+}
+
+const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => {
+  // Calculate department performance rates from evaluation data
+  const calculateDepartmentPerformance = () => {
+    if (!evaluationData?.records) return [];
+
+    // Group evaluations by department
+    const departmentGroups: { [key: string]: any[] } = {};
+    
+    evaluationData.records.forEach((item: any) => {
+      const department = item.department || 'Unknown';
+      if (!departmentGroups[department]) {
+        departmentGroups[department] = [];
+      }
+      departmentGroups[department].push(item);
+    });
+
+    // Calculate performance rate for each department
+    const departmentPerformanceData = Object.entries(departmentGroups).map(([department, evaluations]) => {
+      const totalScore = evaluations.reduce((sum: number, evaluation: any) => {
+        return sum + (parseFloat(evaluation.score) || 0);
+      }, 0);
+      
+      const averageScore = evaluations.length > 0 ? totalScore / evaluations.length : 0;
+      
+      // Assign colors based on department
+      const colors = ['#3B82F6', '#374151', '#EAB308', '#10B981', '#F59E0B', '#EF4444'];
+      const colorIndex = Object.keys(departmentGroups).indexOf(department) % colors.length;
+      
+      return {
+        name: department,
+        score: Math.round(averageScore * 100) / 100,
+        color: colors[colorIndex],
+        count: evaluations.length
+      };
+    });
+
+    return departmentPerformanceData.sort((a, b) => b.score - a.score); // Sort by score descending
+  };
+
+  const departmentPerformanceData = calculateDepartmentPerformance();
 
   const data = {
     labels: departmentPerformanceData.map(dept => dept.name),
@@ -83,10 +121,27 @@ const PerformanceRate: React.FC = () => {
     },
   };
 
+  // Show fallback if no data
+  if (departmentPerformanceData.length === 0) {
+    return (
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <h3 className="text-lg font-semibold text-gray-900 mb-8 text-center">
+          Performance Rate by Department
+        </h3>
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-lg text-gray-600 mb-2">No Data Available</div>
+            <div className="text-sm text-gray-500">No evaluation data found for departments</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
       <h3 className="text-lg font-semibold text-gray-900 mb-8 text-center">
-        Performance Rate by Department (Jan - Mar 2025)
+        Performance Rate by Department
       </h3>
       <div className="h-96">
         <Bar data={data} options={options} />

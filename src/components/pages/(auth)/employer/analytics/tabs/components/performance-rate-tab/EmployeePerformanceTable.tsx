@@ -4,48 +4,40 @@ import React, { useState } from 'react';
 
 import Pagination from '@/components/Pagination';
 
-const EmployeePerformanceTable: React.FC = () => {
-  const [pageSize, setPageSize] = useState(5);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState<{
-    totalRecords: number;
-    totalPages: number;
-  }>({
-    totalPages: 1,
-    totalRecords: 4,
-  });
+interface EmployeeData {
+  name: string;
+  department: string;
+  score: string;
+  lastEvaluation: string;
+  status: string;
+}
 
-  const employeeData = [
-    {
-      name: 'John Santos',
-      department: 'Sales',
-      score: '91',
-      lastEvaluation: 'Apr 10, 2025',
-      status: 'Passed'
-    },
-    {
-      name: 'Mia Reyes',
-      department: 'IT',
-      score: '68',
-      lastEvaluation: 'Mar 20, 2025',
-      status: 'Did not Pass'
-    },
-    {
-      name: 'Carlo Dela Cruz',
-      department: 'HR',
-      score: '94',
-      lastEvaluation: 'Apr 18, 2025',
-      status: 'Passed'
-    },
-    {
-      name: 'Anna Lim',
-      department: 'IT',
-      score: '71',
-      lastEvaluation: 'Mar 28, 2025',
-      status: 'Passed'
-    }
-  ];
+interface PaginationData {
+  totalRecords: number;
+  totalPages: number;
+}
 
+interface EmployeePerformanceTableProps {
+  data?: EmployeeData[];
+  pagination?: PaginationData;
+  isLoading?: boolean;
+  error?: any;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (event: any) => void;
+  onPageSizeChange: (value: number) => void;
+}
+
+const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
+  data = [],
+  pagination,
+  isLoading = false,
+  error,
+  currentPage,
+  pageSize,
+  onPageChange,
+  onPageSizeChange
+}) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Passed':
@@ -57,15 +49,35 @@ const EmployeePerformanceTable: React.FC = () => {
     }
   };
 
-  const paginationChange = (event: any) => {
-    const newCurrentPage = event.selected + 1;
-    setCurrentPage(newCurrentPage);
-  };
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+        <div className="px-6 py-4 border-[#A8B5C7]">
+          <h3 className="text-lg font-semibold text-gray-900">Employee Performance</h3>
+        </div>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-32">
+            <div className="text-gray-500">Loading...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const pageSizeChange = (value: number) => {
-    setCurrentPage(1);
-    setPageSize(value);
-  };
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
+        <div className="px-6 py-4 border-[#A8B5C7]">
+          <h3 className="text-lg font-semibold text-gray-900">Employee Performance</h3>
+        </div>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-32">
+            <div className="text-red-500">Error loading data: {error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
@@ -77,53 +89,63 @@ const EmployeePerformanceTable: React.FC = () => {
           <table className="min-w-full">
             <thead>
               <tr className="border-b-2 border-[#ACB9CB]">
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Name
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Department
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Score
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Last Evaluation
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Status
                 </th>
               </tr>
             </thead>
             <tbody>
-              {employeeData.map((employee, index) => (
-                <tr key={index} className="border-b border-[#CCD8EA] hover:bg-gray-50">
-                  <td className="py-4 text-sm text-gray-900">
-                    {employee.name}
-                  </td>
-                  <td className="py-4 text-sm text-gray-900">
-                    {employee.department}
-                  </td>
-                  <td className="py-4 text-sm text-gray-900">
-                    {employee.score}
-                  </td>
-                  <td className="py-4 text-sm text-gray-900">
-                    {employee.lastEvaluation}
-                  </td>
-                  <td className={`py-4 text-sm ${getStatusColor(employee.status)}`}>
-                    {employee.status}
+              {data.length > 0 ? (
+                data.map((employee, index) => (
+                  <tr key={index} className="border-b border-[#CCD8EA] hover:bg-gray-50">
+                    <td className="py-4 text-center text-sm text-gray-900">
+                      {employee.name}
+                    </td>
+                    <td className="py-4 text-center text-sm text-gray-900">
+                      {employee.department}
+                    </td>
+                    <td className="py-4 text-center text-sm text-gray-900">
+                      {employee.score}
+                    </td>
+                    <td className="py-4 text-center text-sm text-gray-900">
+                      {employee.lastEvaluation}
+                    </td>
+                    <td className={`py-4 text-center text-sm ${getStatusColor(employee.status)}`}>
+                      {employee.status}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                    No data available
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
-        <Pagination
-          pagination={pagination}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          onPageSizeChange={pageSizeChange}
-          onPageChange={paginationChange}
-        />
+        {pagination && (
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={onPageSizeChange}
+            onPageChange={onPageChange}
+          />
+        )}
       </div>
     </div>
   );

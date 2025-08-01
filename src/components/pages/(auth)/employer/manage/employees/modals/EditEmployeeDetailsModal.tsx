@@ -12,6 +12,7 @@ import useEditEmployeeDetails from '../hooks/useEditEmployeeDetails';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import DropDownArrow from '@/svg/DropDownArrow';
 import useGetLocationItems from '@/components/hooks/useGetLocationItems';
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 
 type T_ModalData = {
   id: number;
@@ -35,6 +36,7 @@ export default function EditEmployeeDetailsModal({
   } = useGetEmployeeDetails(isOpen.id);
   const { register, handleSubmit, reset, control, setValue } = useForm();
   const { data: locationItems } = useGetLocationItems();
+  const { data: departmentItems } = useGetDepartmentItems();
   const { mutate, isLoading: isLoadingEditEmployeeDetails } = useEditEmployeeDetails();
 
   useEffect(() => {
@@ -55,8 +57,16 @@ export default function EditEmployeeDetailsModal({
       setValue('religion', employeeDetailsData.religion);
       setValue('gender', employeeDetailsData.gender);
       setValue('location', employeeDetailsData.location);
+      
+      // Find department ID from department name
+      if (employeeDetailsData.department && departmentItems) {
+        const departmentItem = departmentItems.find((item: any) => item.name === employeeDetailsData.department);
+        setValue('department', departmentItem ? departmentItem.id : '');
+      } else {
+        setValue('department', '');
+      }
     }
-  }, [employeeDetailsData]);
+  }, [employeeDetailsData, departmentItems]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -278,7 +288,6 @@ export default function EditEmployeeDetailsModal({
                           </div>
                         </div>
                         <div className='grid grid-cols-3 gap-6 mt-4'>
-                          
                           <div>
                             <label htmlFor='location' className='text-sm font-medium leading-6 text-gray-900'>
                               Location<span className='text-red-500'>*</span>
@@ -288,7 +297,6 @@ export default function EditEmployeeDetailsModal({
                                 id='location'
                                 {...register('location', { required: true })}
                                 className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
-                                defaultValue='Male'
                               >
                                 {locationItems && locationItems.map((item: any) => (
                                   <option key={item.id} value={item.name}>{item.name}</option>
@@ -299,7 +307,29 @@ export default function EditEmployeeDetailsModal({
                               </div>
                             </div>
                           </div>
-                          
+                          <div>
+                            <label htmlFor='department' className='text-sm font-medium leading-6 text-gray-900'>
+                              Department<span className='text-red-500'>*</span>
+                            </label>
+                            <div className='relative mt-2'>
+                              <select
+                                id='department'
+                                {...register('department')}
+                                className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
+                              >
+                                <option value="">Select Department</option>
+                                {departmentItems && departmentItems.map((item: any) => (
+                                  <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                              </select>
+                              <div className='absolute right-3 top-[14px]'>
+                                <DropDownArrow />
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            {/* Empty space below religion */}
+                          </div>
                         </div>
                       </div>
                       <hr />

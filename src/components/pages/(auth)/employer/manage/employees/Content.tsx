@@ -212,6 +212,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
@@ -435,6 +436,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         </th>
                         <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Location
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Department
                         </th>
                         <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Email

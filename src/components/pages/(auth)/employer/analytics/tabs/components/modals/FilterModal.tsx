@@ -9,19 +9,14 @@ type FilterModalProps = {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   onDepartmentSelect: (department: string) => void;
+  departmentItems?: any[];
 };
 
-export default function FilterModal({ isOpen, setIsOpen, onDepartmentSelect }: FilterModalProps) {
+export default function FilterModal({ isOpen, setIsOpen, onDepartmentSelect, departmentItems }: FilterModalProps) {
   const [selectedDepartment, setSelectedDepartment] = useState('');
 
-  // Sample department data - replace with actual data from your API
-  const departments = [
-    { id: 1, name: 'IT' },
-    { id: 2, name: 'HR' },
-    { id: 3, name: 'Sales' },
-    { id: 4, name: 'Marketing' },
-    { id: 5, name: 'Finance' },
-  ];
+  // Use provided department items from the hook
+  const departments = departmentItems || [];
 
   const handleSave = () => {
     if (selectedDepartment) {

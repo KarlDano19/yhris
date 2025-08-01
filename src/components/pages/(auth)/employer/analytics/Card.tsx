@@ -16,7 +16,7 @@ const Card: React.FC<CardProps> = ({ value, trend, isPositive = true }) => {
     <div className="bg-white rounded-2xl p-6 mt-2 border border-[#A8B5C7] shadow-lg shadow-gray-300">
       <div className="relative flex justify-center items-start mb-2">
         <span className="text-4xl font-bold text-gray-900">{value}</span>
-        <div className="absolute right-4 top-0 flex flex-col -mt-1">
+        <div className="absolute right-0 top-0 flex flex-col -mt-1">
           {isPositive ? (
             <UpIcon />
           ) : (

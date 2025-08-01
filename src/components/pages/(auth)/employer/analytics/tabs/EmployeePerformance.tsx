@@ -13,6 +13,7 @@ import IssueType from './components/employee-issue-rate-tab/IssueType';
 import MonthlyTypeVolume from './components/employee-issue-rate-tab/MonthlyTypeVolume';
 import EmployeeIssuesTable from './components/employee-issue-rate-tab/EmployeeIssuesTable';
 import InterventionRecommendations from './components/employee-issue-rate-tab/InterventionRecommendations';
+import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 
 interface EmployeePerformanceData {
   averageScore: number;
@@ -33,12 +34,56 @@ interface EmployeePerformanceProps {
 
 const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Filters for the evaluation history API
+  const filters = {
+    currentPage,
+    pageSize,
+    search: '',
+  };
+
+  // Use the hook to fetch evaluation history data
+  const {
+    data: evaluationData,
+    isLoading,
+    error,
+  } = useGetEvaluationHistoryItems(filters);
+
+  // Calculate average performance score from evaluation data
+  const calculateAveragePerformanceScore = () => {
+    if (!evaluationData?.records || evaluationData.records.length === 0) {
+      return { averageScore: 0, totalEmployees: 0, maxScore: 0 };
+    }
+
+    const totalScore = evaluationData.records.reduce((sum: number, item: any) => {
+      return sum + (parseFloat(item.score) || 0);
+    }, 0);
+
+    const totalEmployees = evaluationData.records.length;
+    const averageScore = totalEmployees > 0 ? totalScore / totalEmployees : 0;
+
+    // Get the maximum score from form_total_score (assuming all evaluations use the same template)
+    const maxScore = evaluationData.records[0]?.form_total_score || 
+                     evaluationData.records[0]?.max_score || 
+                     evaluationData.records[0]?.evaluation_template?.max_score || 
+                     100; // Final fallback
+
+    return {
+      averageScore: Math.round(averageScore * 100) / 100,
+      totalEmployees,
+      maxScore: Math.round(maxScore * 100) / 100
+    };
+  };
+
+  const { averageScore, totalEmployees, maxScore } = calculateAveragePerformanceScore();
 
   const Data = [
     {
       title: <>Average Employee<br />Performance Score</>,
-      value: `${data.averageScore}/5`,
-      trend: `Increased ${data.trends.averageScore} score from Q1`,
+      value: `${averageScore}/${maxScore}`,
+      trend: `Based on ${totalEmployees} employee evaluations`,
     },
     // {
     //   title: <>% of Employees<br />Completed Training</>,
@@ -64,6 +109,33 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
     { id: 3, name: 'Employee Issue Rate', isAvailable: true },
   ];
 
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
+  // Transform API data to match table format
+  const transformEvaluationData = (apiData: any) => {
+    if (!apiData || !apiData.records) return [];
+    
+    return apiData.records.map((item: any) => ({
+      name: item.employee_name || 'N/A',
+      department: item.department || 'N/A',
+      score: item.score?.toString() || 'N/A',
+      lastEvaluation: item.date_of_evaluation ? new Date(item.date_of_evaluation).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      status: item.status || 'N/A'
+    }));
+  };
+
   const renderTabContent = () => {
     switch (activeSubTab) {
       case 1: // Performance Rate & Action Recommendations
@@ -72,14 +144,26 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Performance Rate by Department - Bar Chart */}
-              <PerformanceRate />
+              <PerformanceRate evaluationData={evaluationData} />
 
               {/* IT Performance Trend - Line Chart */}
-              <ITPerformanceTrend />
+              <ITPerformanceTrend evaluationData={evaluationData} />
             </div>
 
             {/* Employee Performance Table */}
-            <EmployeePerformanceTable />
+            <EmployeePerformanceTable
+              data={transformEvaluationData(evaluationData)}
+              pagination={evaluationData ? {
+                totalRecords: evaluationData.total_records,
+                totalPages: evaluationData.total_pages
+              } : undefined}
+              isLoading={isLoading}
+              error={error}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageChange={paginationChange}
+              onPageSizeChange={pageSizeChange}
+            />
 
             {/* Action Recommendations */}
             <div className="pb-8">
