@@ -81,7 +81,19 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
         <div className='details mx-5 mt-2 overflow-y-auto max-h-[580px]'>
-          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium'>
+        {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Role
+              </h6>
+              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {renderRoleDescription(jobDetailData?.job_description)}
+              </div>
+            </>
+          )}
+          
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
             <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
             Location
           </h6>
@@ -149,17 +161,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             </>
           )}
           {/* Role section - only show if is_show_roles is true */}
-          {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
-            <>
-              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
-                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
-                Role
-              </h6>
-              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
-                {renderRoleDescription(jobDetailData?.job_description)}
-              </div>
-            </>
-          )}
+
           {/* qualifications */}
           <div className='border-t mt-4'>
             <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
