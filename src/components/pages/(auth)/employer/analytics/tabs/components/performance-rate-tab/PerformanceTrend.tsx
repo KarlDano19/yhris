@@ -36,11 +36,15 @@ interface PerformanceTrendProps {
     from: string;
     to: string;
   };
+  currentPage?: number;
+  pageSize?: number;
 }
 
-const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter }) => {
+const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter, currentPage, pageSize }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [lastPage, setLastPage] = useState(currentPage);
+  const [chartKey, setChartKey] = useState(0);
   const { data: departmentItems } = useGetDepartmentItems();
 
   // Set default selected department to the latest department with data
@@ -64,15 +68,31 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
           }
         });
         
-        // Only set initial department if none is selected
-        if (!selectedDepartment) {
+        // Only update if no department is currently selected OR if the page has changed
+        if (!selectedDepartment || currentPage !== lastPage) {
           setSelectedDepartment(latestDepartment);
+          setLastPage(currentPage);
         }
-        // Don't change the selected department on pagination changes
-        // This ensures the chart stays consistent with the user's selection
+        
+        // Force chart re-render when page size changes (layout change)
+        if (pageSize) {
+          setChartKey(prev => prev + 1);
+        }
       }
     }
-  }, [evaluationData]);
+  }, [evaluationData, currentPage, lastPage, selectedDepartment]);
+
+    // Handle layout changes when page size changes
+  useEffect(() => {
+    if (pageSize) {
+      // Small delay to ensure layout has changed before re-rendering chart
+      const timer = setTimeout(() => {
+        setChartKey(prev => prev + 1);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [pageSize]);
 
   // Calculate Performance Trend using real data
   const performanceTrendData = useMemo(() => {
@@ -225,9 +245,11 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
           <div className="w-10 flex-shrink-0"></div>
         </div>
         
-        <div className="h-96">
+        <div className="h-96 transition-all duration-300 ease-in-out">
           {displayData.length > 0 ? (
-            <Line data={data} options={options} />
+            <div className="w-full h-full">
+              <Line key={chartKey} data={data} options={options} />
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-gray-500">

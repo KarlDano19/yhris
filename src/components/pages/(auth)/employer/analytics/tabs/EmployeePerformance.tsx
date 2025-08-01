@@ -153,7 +153,12 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
               <PerformanceRate evaluationData={evaluationData} />
 
               {/* Performance Trend - Line Chart */}
-              <PerformanceTrend evaluationData={evaluationData} dateFilter={dateFilter} />
+              <PerformanceTrend 
+                evaluationData={evaluationData} 
+                dateFilter={dateFilter} 
+                currentPage={currentPage}
+                pageSize={pageSize}
+              />
             </div>
 
             {/* Employee Performance Table */}
