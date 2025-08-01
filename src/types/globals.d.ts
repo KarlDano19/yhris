@@ -197,6 +197,7 @@ export type T_IncidentReport = {
   incidentDate: string;
   incidentPlace: string;
   briefBackground: string;
+  issueType: string;
 };
 
 export type T_NTEForm = {
