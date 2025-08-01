@@ -131,34 +131,88 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
       }
     });
 
-    // Group evaluations by month
-    const monthlyData = months.map(month => {
-      const monthEvaluations = departmentEvaluations.filter((item: any) => {
-        const evaluationDate = new Date(item.date_of_evaluation);
-        return evaluationDate.getMonth() === month.value;
+    // If date range is selected, show all months in the range
+    if (dateFilter?.from && dateFilter?.to) {
+      const fromDate = new Date(dateFilter.from);
+      const toDate = new Date(dateFilter.to);
+      const fromMonth = fromDate.getMonth();
+      const toMonth = toDate.getMonth();
+      const fromYear = fromDate.getFullYear();
+      const toYear = toDate.getFullYear();
+      
+      // Create array of months in the selected range
+      const rangeMonths = [];
+      let currentDate = new Date(fromYear, fromMonth, 1);
+      const endDate = new Date(toYear, toMonth + 1, 0); // Last day of toMonth
+      
+      while (currentDate <= endDate) {
+        const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
+        const monthValue = currentDate.getMonth();
+        
+        // Get evaluations for this month
+        const monthEvaluations = departmentEvaluations.filter((item: any) => {
+          const evaluationDate = new Date(item.date_of_evaluation);
+          return evaluationDate.getMonth() === monthValue && 
+                 evaluationDate.getFullYear() === currentDate.getFullYear();
+        });
+
+        if (monthEvaluations.length === 0) {
+          rangeMonths.push({
+            month: monthName,
+            score: 0,
+            count: 0
+          });
+        } else {
+          // Calculate monthly performance rate using the formula:
+          // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
+          const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
+            return sum + (parseFloat(item.score) || 0);
+          }, 0);
+
+          const averageScore = totalScore / monthEvaluations.length;
+
+          rangeMonths.push({
+            month: monthName,
+            score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
+            count: monthEvaluations.length
+          });
+        }
+        
+        // Move to next month
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+      
+      return rangeMonths;
+    } else {
+      // For current year, only show months with data
+      const monthlyData = months.map(month => {
+        const monthEvaluations = departmentEvaluations.filter((item: any) => {
+          const evaluationDate = new Date(item.date_of_evaluation);
+          return evaluationDate.getMonth() === month.value;
+        });
+
+        if (monthEvaluations.length === 0) {
+          return { month: month.name, score: 0, count: 0 };
+        }
+
+        // Calculate monthly performance rate using the formula:
+        // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
+        const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
+          return sum + (parseFloat(item.score) || 0);
+        }, 0);
+
+        const averageScore = totalScore / monthEvaluations.length;
+
+        return {
+          month: month.name,
+          score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
+          count: monthEvaluations.length
+        };
       });
 
-      if (monthEvaluations.length === 0) {
-        return { month: month.name, score: 0, count: 0 };
-      }
-
-      // Calculate monthly performance rate using the formula:
-      // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
-      const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
-        return sum + (parseFloat(item.score) || 0);
-      }, 0);
-
-      const averageScore = totalScore / monthEvaluations.length;
-
-      return {
-        month: month.name,
-        score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
-        count: monthEvaluations.length
-      };
-    });
-
-    // Filter out months with no data (score = 0)
-    return monthlyData.filter(item => item.score > 0);
+      // Filter out months with no data (score = 0)
+      return monthlyData.filter(item => item.score > 0);
+    }
   }, [evaluationData, selectedDepartment, dateFilter]);
 
   // Get the months with data for display

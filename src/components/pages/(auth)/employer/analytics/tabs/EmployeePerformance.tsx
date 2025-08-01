@@ -308,7 +308,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
               <IssueType employeeIssueData={employeeIssueData} />
 
               {/* Monthly Issue Volume - Line Chart */}
-              <MonthlyTypeVolume employeeIssueData={employeeIssueData} />
+              <MonthlyTypeVolume employeeIssueData={employeeIssueData} dateFilter={dateFilter} />
             </div>
 
             {/* Employee Issues Table */}
