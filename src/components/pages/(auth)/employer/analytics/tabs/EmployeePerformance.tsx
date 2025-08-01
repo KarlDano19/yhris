@@ -6,7 +6,7 @@ import { Tooltip } from 'react-tooltip';
 
 import Card from '../Card';
 import PerformanceRate from './components/performance-rate-tab/PerformanceRate';
-import ITPerformanceTrend from './components/performance-rate-tab/ITPerformanceTrend';
+import PerformanceTrend from './components/performance-rate-tab/PerformanceTrend';
 import EmployeePerformanceTable from './components/performance-rate-tab/EmployeePerformanceTable';
 import ActionRecommendations from './components/performance-rate-tab/ActionRecommendations';
 import IssueType from './components/employee-issue-rate-tab/IssueType';
@@ -152,8 +152,8 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
               {/* Performance Rate by Department - Bar Chart */}
               <PerformanceRate evaluationData={evaluationData} />
 
-              {/* IT Performance Trend - Line Chart */}
-              <ITPerformanceTrend evaluationData={evaluationData} dateFilter={dateFilter} />
+              {/* Performance Trend - Line Chart */}
+              <PerformanceTrend evaluationData={evaluationData} dateFilter={dateFilter} />
             </div>
 
             {/* Employee Performance Table */}

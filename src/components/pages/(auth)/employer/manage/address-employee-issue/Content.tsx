@@ -10,9 +10,7 @@ import { Tooltip } from 'react-tooltip';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
-import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
-import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
 import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
@@ -44,9 +42,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
-  const [departmentItems, setDepartmentItems] = useState<any>([]);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [positionItems, setPositionItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -90,9 +86,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const { data: dataDepartment } = useGetDepartmentItems();
   const { data: dataEmployee } = useGetEmployeeItems();
-  const { data: dataPosition } = useGetPositionItems();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
@@ -154,14 +148,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   useEffect(() => {
-    if (dataDepartment) {
-      setDepartmentItems(dataDepartment);
-    }
     if (dataEmployee) {
       setEmployeeItems(dataEmployee);
-    }
-    if (dataPosition) {
-      setPositionItems(dataPosition);
     }
     if (dataEmployeeIssues) {
       let items = [];
@@ -296,7 +284,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
 
     }
-  }, [dataEmployeeIssues, dataDepartment, dataEmployee, dataPosition, pageSize]);
+  }, [dataEmployeeIssues, dataEmployee, pageSize]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -594,9 +582,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
       <IncidentReportModal
         employeeIssueItems={employeeIssueItems}
-        departmentItems={departmentItems}
         employeeItems={employeeItems}
-        positionItems={positionItems}
         setEmployeeIssueItems={setEmployeeIssueItems}
         isOpen={isIncidentReportModalOpen}
         setIsOpen={setIsIncidentReportModalOpen}

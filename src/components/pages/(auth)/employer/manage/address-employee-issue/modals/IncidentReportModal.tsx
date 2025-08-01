@@ -17,18 +17,14 @@ import { T_IncidentReport } from '@/types/globals';
 
 export default function IncidentReportModal({
   employeeIssueItems,
-  departmentItems,
   employeeItems,
-  positionItems,
   setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
   employeeIssueItems: any;
-  departmentItems: any;
   employeeItems: any;
-  positionItems: any;
   setEmployeeIssueItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
@@ -66,6 +62,7 @@ export default function IncidentReportModal({
           briefBackground: ''
         });
         setValue('department', ''); // Ensure department is cleared
+        setValue('position', ''); // Ensure position is cleared
         setEmployeeSearch('');
         setEmployeeSelected(false);
         refetch();
@@ -190,6 +187,7 @@ export default function IncidentReportModal({
                                   setEmployeeSearch('');
                                   setEmployeeSelected(false);
                                   setValue('department', ''); // Clear department when employee is cleared
+                                  setValue('position', ''); // Clear position when employee is cleared
                                 }}
                                 tabIndex={-1}
                               >
@@ -212,6 +210,10 @@ export default function IncidentReportModal({
                                     if (item.department) {
                                       setValue('department', item.department);
                                     }
+                                    // Auto-fill position from employee data
+                                    if (item.position) {
+                                      setValue('position', item.position);
+                                    }
                                     document.getElementById('employee-dropdown')?.classList.add('hidden');
                                   }}
                                 >
@@ -230,7 +232,8 @@ export default function IncidentReportModal({
                             id='position'
                             {...register('position', { required: true })}
                             type='text'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                            readOnly
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
                           />
                         </div>
                       </div>

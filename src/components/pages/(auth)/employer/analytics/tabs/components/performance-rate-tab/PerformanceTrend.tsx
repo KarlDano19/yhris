@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -30,7 +30,7 @@ ChartJS.register(
   Filler
 );
 
-interface ITPerformanceTrendProps {
+interface PerformanceTrendProps {
   evaluationData?: any;
   dateFilter?: {
     from: string;
@@ -38,13 +38,44 @@ interface ITPerformanceTrendProps {
   };
 }
 
-const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData, dateFilter }) => {
+const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] = useState('IT');
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const { data: departmentItems } = useGetDepartmentItems();
 
-  // Calculate IT Performance Trend using real data
-  const itTrendData = useMemo(() => {
+  // Set default selected department to the latest department with data
+  useEffect(() => {
+    if (evaluationData?.records && evaluationData.records.length > 0) {
+      // Get all unique departments from evaluation data
+      const departmentsWithData = Array.from(new Set(evaluationData.records.map((item: any) => item.department)));
+      
+      if (departmentsWithData.length > 0) {
+        // Find the department with the most recent evaluation from current page data
+        let latestDepartment: string = departmentsWithData[0] as string;
+        let latestDate = new Date(0);
+        
+        evaluationData.records.forEach((item: any) => {
+          if (item.date_of_evaluation) {
+            const evaluationDate = new Date(item.date_of_evaluation);
+            if (evaluationDate > latestDate) {
+              latestDate = evaluationDate;
+              latestDepartment = item.department as string;
+            }
+          }
+        });
+        
+        // Only set initial department if none is selected
+        if (!selectedDepartment) {
+          setSelectedDepartment(latestDepartment);
+        }
+        // Don't change the selected department on pagination changes
+        // This ensures the chart stays consistent with the user's selection
+      }
+    }
+  }, [evaluationData]);
+
+  // Calculate Performance Trend using real data
+  const performanceTrendData = useMemo(() => {
     if (!evaluationData?.records) return [];
 
     const months = [
@@ -110,8 +141,8 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData,
     return monthlyData.filter(item => item.score > 0);
   }, [evaluationData, selectedDepartment, dateFilter]);
 
-  // Get the last 3 months with data for display
-  const displayData = itTrendData.slice(-3);
+  // Get the months with data for display
+  const displayData = performanceTrendData;
 
   const data = {
     labels: displayData.map(item => item.month),
@@ -181,17 +212,17 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData,
   return (
     <>
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-start mb-4">
           <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB]"
+            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 mt-1"
             onClick={() => setIsFilterModalOpen(true)}
           >
             <FilterLogo className="w-5 h-5" />
           </button>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 text-center flex-1 px-4">
             {selectedDepartment} Performance Trend {dateFilter?.from && dateFilter?.to ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` : `(${displayData.length > 0 ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` : 'No Data'})`}
           </h3>
-          <div className="w-10"></div>
+          <div className="w-10 flex-shrink-0"></div>
         </div>
         
         <div className="h-96">
@@ -208,7 +239,7 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData,
         </div>
 
         {/* Legend */}
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-2">
           <div className="flex items-center space-x-2">
             <AverageLegendIcon />
             <span className="text-lg text-gray-600">Average Score</span>
@@ -226,4 +257,4 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData,
   );
 };
 
-export default ITPerformanceTrend; 
+export default PerformanceTrend; 
