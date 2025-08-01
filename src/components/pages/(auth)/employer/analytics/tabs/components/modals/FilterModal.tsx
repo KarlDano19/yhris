@@ -1,8 +1,8 @@
-import { Dispatch, Fragment, useState } from 'react';
+import { Dispatch, Fragment, useState, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type FilterModalProps = {
@@ -14,9 +14,25 @@ type FilterModalProps = {
 
 export default function FilterModal({ isOpen, setIsOpen, onDepartmentSelect, departmentItems }: FilterModalProps) {
   const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Use provided department items from the hook
   const departments = departmentItems || [];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleSave = () => {
     if (selectedDepartment) {
@@ -29,6 +45,11 @@ export default function FilterModal({ isOpen, setIsOpen, onDepartmentSelect, dep
   const handleClose = () => {
     setIsOpen(false);
     setSelectedDepartment('');
+  };
+
+  const handleDepartmentSelect = (department: string) => {
+    setSelectedDepartment(department);
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -57,33 +78,46 @@ export default function FilterModal({ isOpen, setIsOpen, onDepartmentSelect, dep
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
+              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Select Department</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={handleClose} />
                 </div>
                 
-                <div className='px-4 pt-4 pb-6'>
+                <div className='px-4 pt-4 pb-6 relative'>
                   <label htmlFor='department' className='block text-sm font-medium leading-6 text-gray-900'>
                     Department
                   </label>
-                  <div className='relative mt-2'>
-                    <select
-                      id='department'
-                      value={selectedDepartment}
-                      onChange={(e) => setSelectedDepartment(e.target.value)}
-                      className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 appearance-none'
+                  <div className='relative mt-2' ref={dropdownRef}>
+                    <button
+                      type='button'
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className='w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 appearance-none text-left flex items-center justify-between'
                     >
-                      <option value=''>Select...</option>
-                      {departments.map((dept) => (
-                        <option key={dept.id} value={dept.name}>
-                          {dept.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className='absolute right-3 top-[14px]'>
-                      <SelectChevronDown />
-                    </div>
+                      <span className={selectedDepartment ? 'text-gray-900' : 'text-gray-400'}>
+                        {selectedDepartment || 'Select...'}
+                      </span>
+                      <ChevronDownIcon 
+                        className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                      />
+                    </button>
+                    
+                    {isDropdownOpen && (
+                      <div className='absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg h-80 overflow-y-auto'>
+                        {departments.map((dept) => (
+                          <button
+                            key={dept.id}
+                            type='button'
+                            onClick={() => handleDepartmentSelect(dept.name)}
+                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
+                              selectedDepartment === dept.name ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
+                            }`}
+                          >
+                            {dept.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
