@@ -108,6 +108,48 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
 
   const { averageScore, totalEmployees, maxScore } = calculateAveragePerformanceScore();
 
+  // Calculate resolved vs ongoing issues percentages
+  const calculateIssueResolutionRate = () => {
+    if (!employeeIssueData?.records || employeeIssueData.records.length === 0) {
+      return {
+        resolvedPercentage: 0,
+        ongoingPercentage: 0,
+        totalIssues: 0,
+        resolvedIssues: 0,
+        ongoingIssues: 0
+      };
+    }
+
+    const totalIssues = employeeIssueData.records.length;
+    let resolvedIssues = 0;
+    let ongoingIssues = 0;
+
+    employeeIssueData.records.forEach((issue: any) => {
+      // Resolved: decision has been sent AND received (employee signed)
+      if (issue.is_decision_sent && issue.is_decision_received) {
+        resolvedIssues++;
+      } 
+      // Ongoing: decision has not been sent yet (company hasn't reached decision)
+      else if (!issue.is_decision_sent) {
+        ongoingIssues++;
+      }
+      // Note: Issues where decision is sent but not received are not counted in either category
+    });
+
+    const resolvedPercentage = totalIssues > 0 ? ((resolvedIssues / totalIssues) * 100) : 0;
+    const ongoingPercentage = totalIssues > 0 ? ((ongoingIssues / totalIssues) * 100) : 0;
+
+    return {
+      resolvedPercentage: Math.round(resolvedPercentage * 10) / 10, // Round to 1 decimal
+      ongoingPercentage: Math.round(ongoingPercentage * 10) / 10, // Round to 1 decimal
+      totalIssues,
+      resolvedIssues,
+      ongoingIssues
+    };
+  };
+
+  const { resolvedPercentage, ongoingPercentage, totalIssues, resolvedIssues, ongoingIssues } = calculateIssueResolutionRate();
+
   const Data = [
     {
       title: <>Average Employee<br />Performance Score</>,
@@ -126,8 +168,8 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     // },
     {
       title: <>% of Resolved Employee<br />Issues vs. Ongoing Issues</>,
-      value: `${data.issueResolution}%`,
-      trend: `Increased ${data.trends.issueResolution}% rate from Q1`,
+      value: `${resolvedPercentage}%`,
+      trend: `${resolvedIssues} resolved, ${ongoingIssues} ongoing out of ${totalIssues} total issues`,
     }
   ];
 
@@ -197,9 +239,9 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
   const getIssueStatus = (item: any) => {
     if (item.is_decision_sent && item.is_decision_received) {
       return 'Resolved';
-    } else if (item.is_nte_sent && item.is_nte_received) {
+    } else if (item.investigate && item.investigate.id) {
       return 'Under Hearing';
-    } else if (item.is_nte_sent) {
+    } else if (item.is_nte_sent && item.is_nte_received) {
       return 'NTE Issued';
     } else {
       return 'Pending';
@@ -263,10 +305,10 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Issue Type - Pie Chart */}
-              <IssueType />
+              <IssueType employeeIssueData={employeeIssueData} />
 
               {/* Monthly Issue Volume - Line Chart */}
-              <MonthlyTypeVolume />
+              <MonthlyTypeVolume employeeIssueData={employeeIssueData} />
             </div>
 
             {/* Employee Issues Table */}
