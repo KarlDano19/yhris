@@ -14,6 +14,7 @@ import MonthlyTypeVolume from './components/employee-issue-rate-tab/MonthlyTypeV
 import EmployeeIssuesTable from './components/employee-issue-rate-tab/EmployeeIssuesTable';
 import InterventionRecommendations from './components/employee-issue-rate-tab/InterventionRecommendations';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
+import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
 
 interface EmployeePerformanceData {
   averageScore: number;
@@ -38,13 +39,19 @@ interface EmployeePerformanceProps {
 
 const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFilter }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-  const [currentPage, setCurrentPage] = useState(1);
+
+  // Pagination State for Employee Performance
+  const [employeePerformancePageSize, setEmployeePerformancePageSize] = useState(5);
+  const [employeePerformanceCurrentPage, setEmployeePerformanceCurrentPage] = useState(1);
+  
+  // Pagination State for Employee Issues
+  const [employeeIssuePageSize, setEmployeeIssuePageSize] = useState(5);
+  const [employeeIssueCurrentPage, setEmployeeIssueCurrentPage] = useState(1);
 
   // Filters for the evaluation history API
   const filters = {
-    currentPage,
-    pageSize,
+    currentPage: employeePerformanceCurrentPage,
+    pageSize: employeePerformancePageSize,
     search: '',
     ...(dateFilter?.from && { from: dateFilter.from }),
     ...(dateFilter?.to && { to: dateFilter.to }),
@@ -56,6 +63,22 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     isLoading,
     error,
   } = useGetEvaluationHistoryItems(filters);
+
+  // Filters for the employee issues API
+  const employeeIssueFilters = {
+    currentPage: employeeIssueCurrentPage,
+    pageSize: employeeIssuePageSize,
+    search: '',
+    ...(dateFilter?.from && { from: dateFilter.from }),
+    ...(dateFilter?.to && { to: dateFilter.to }),
+  };
+
+  // Use the hook to fetch employee issues data
+  const {
+    data: employeeIssueData,
+    isLoading: employeeIssueLoading,
+    error: employeeIssueError,
+  } = useGetEmployeeIssueItems(employeeIssueFilters);
 
   // Calculate average performance score from evaluation data
   const calculateAveragePerformanceScore = () => {
@@ -117,12 +140,23 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
-    setCurrentPage(newCurrentPage);
+    setEmployeePerformanceCurrentPage(newCurrentPage);
   };
 
   const pageSizeChange = (value: number) => {
-    setCurrentPage(1);
-    setPageSize(value);
+    setEmployeePerformanceCurrentPage(1);
+    setEmployeePerformancePageSize(value);
+  };
+
+  // Separate pagination handlers for employee issues
+  const employeeIssuePaginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setEmployeeIssueCurrentPage(newCurrentPage);
+  };
+
+  const employeeIssuePageSizeChange = (value: number) => {
+    setEmployeeIssueCurrentPage(1);
+    setEmployeeIssuePageSize(value);
   };
 
   // Transform API data to match table format
@@ -142,13 +176,43 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     }));
   };
 
+  // Transform employee issues API data to match table format
+  const transformEmployeeIssueData = (apiData: any) => {
+    if (!apiData || !apiData.records) return [];
+    
+    return apiData.records.map((item: any) => ({
+      name: item.name || 'N/A',
+      department: item.department || 'N/A',
+      issueType: item.issue_type || 'N/A',
+      dateReported: item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      status: getIssueStatus(item)
+    }));
+  };
+
+  // Helper function to determine issue status
+  const getIssueStatus = (item: any) => {
+    if (item.is_decision_sent && item.is_decision_received) {
+      return 'Resolved';
+    } else if (item.is_nte_sent && item.is_nte_received) {
+      return 'Under Hearing';
+    } else if (item.is_nte_sent) {
+      return 'NTE Issued';
+    } else {
+      return 'Pending';
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeSubTab) {
       case 1: // Performance Rate & Action Recommendations
         return (
           <>
             {/* Charts Section */}
-            <div className={`grid gap-6 ${pageSize >= 10 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+            <div className={`grid gap-6 ${employeePerformancePageSize >= 10 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
               {/* Performance Rate by Department - Bar Chart */}
               <PerformanceRate evaluationData={evaluationData} />
 
@@ -156,8 +220,8 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
               <PerformanceTrend 
                 evaluationData={evaluationData} 
                 dateFilter={dateFilter} 
-                currentPage={currentPage}
-                pageSize={pageSize}
+                currentPage={employeePerformanceCurrentPage}
+                pageSize={employeePerformancePageSize}
               />
             </div>
 
@@ -170,8 +234,8 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
               } : undefined}
               isLoading={isLoading}
               error={error}
-              currentPage={currentPage}
-              pageSize={pageSize}
+              currentPage={employeePerformanceCurrentPage}
+              pageSize={employeePerformancePageSize}
               onPageChange={paginationChange}
               onPageSizeChange={pageSizeChange}
             />
@@ -206,7 +270,19 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
             </div>
 
             {/* Employee Issues Table */}
-              <EmployeeIssuesTable />
+            <EmployeeIssuesTable
+              data={transformEmployeeIssueData(employeeIssueData)}
+              pagination={employeeIssueData ? {
+                totalRecords: employeeIssueData.total_records,
+                totalPages: employeeIssueData.total_pages
+              } : undefined}
+              isLoading={employeeIssueLoading}
+              error={employeeIssueError}
+              currentPage={employeeIssueCurrentPage}
+              pageSize={employeeIssuePageSize}
+              onPageChange={employeeIssuePaginationChange}
+              onPageSizeChange={employeeIssuePageSizeChange}
+            />
 
             {/* Intervention Recommendations */}
             <div className="pb-8">
