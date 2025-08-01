@@ -482,7 +482,7 @@ export default function CreateJobPageTitleInfo({
               Where would you like to advertise this job?
               <span className='text-red-600'>*</span>
             </label>
-            {errors && errors.placeAdvertise && (
+            {errors.placeAdvertise && (
               <p className='text-xs text-red-600 mt-1'>
                 {errors.placeAdvertise.message || "Please select at least one location to advertise the job."}
               </p>
@@ -493,6 +493,7 @@ export default function CreateJobPageTitleInfo({
                 control={control}
                 rules={{
                   required: "Please select at least one location to advertise the job",
+                  validate: (value: any) => (Array.isArray(value) && value.length > 0) || "Please select at least one location",
                 }}
                 render={({ field: { onChange, value } }: { field: Field }) => (
                   <Select

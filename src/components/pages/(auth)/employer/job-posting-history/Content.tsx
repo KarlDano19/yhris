@@ -24,6 +24,7 @@ import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
 import useUpdateJobRolesStatus from './hooks/useUpdateJobRolesStatus';
 import useUpdateJobRemarkStatus from './hooks/useUpdateJobRemarkStatus';
+import useUpdateJobBenefitStatus from './hooks/useUpdateJobBenefitStatus';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
@@ -96,6 +97,7 @@ const Content = () => {
   const { mutate: mutateSalary } = useUpdateJobSalaryStatus();
   const { mutate: mutateRoles } = useUpdateJobRolesStatus();
   const { mutate: mutateRemark } = useUpdateJobRemarkStatus();
+  const { mutate: mutateBenefit } = useUpdateJobBenefitStatus();
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
   const queryClient = useQueryClient();
@@ -222,6 +224,27 @@ const Content = () => {
     mutateRemark(data, callbackReq);
   };
 
+  const handleShowBenefits = (jobId: any, isShowBenefits: boolean) => {
+    let data: any = {};
+    data['jobId'] = jobId;
+    data['is_show_benefits'] = !isShowBenefits;
+    const successMessage = isShowBenefits ? 'Successfully HIDE BENEFITS.' : 'Successfully SHOW BENEFITS.';
+    const callbackReq = {
+      onSuccess: () => {
+        refetch();
+        toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+          duration: 5000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 5000,
+        });
+      },
+    };
+    mutateBenefit(data, callbackReq);
+  };
+
   const handleCloseContextMenu = () => {
     setShowContextMenu(false);
   };
@@ -245,6 +268,7 @@ const Content = () => {
         // This ensures the toggle works correctly
         jobPost['is_show_salary'] = jobPost['is_show_salary'];
         jobPost['is_show_remarks'] = jobPost['is_show_remarks'];
+        jobPost['is_show_benefits'] = jobPost['is_show_benefits'];
         jobPost['is_show_roles'] = jobPost['is_show_roles'];
         jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
       });
@@ -495,6 +519,14 @@ const Content = () => {
                         >
                           <span className={!jobPost.is_show_salary ? 'text-red-500' : ''}>
                             {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                          </span>
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
+                        >
+                          <span className={!jobPost.is_show_benefits ? 'text-red-500' : ''}>
+                            {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
                           </span>
                         </li>
                         <li

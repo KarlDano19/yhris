@@ -184,6 +184,7 @@ export default function CreateJobModal({
                       handleSubmit={firstForm.handleSubmit}
                       setPageNumber={setPageNumber}
                       onSubmit={firstFormSubmit}
+                      errors={firstForm.formState.errors}
                     />
                   </div>
                   <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
