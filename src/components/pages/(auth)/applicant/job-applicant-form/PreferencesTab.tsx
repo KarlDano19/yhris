@@ -27,8 +27,6 @@ function PreferencesTab({
   setCurrentTab: any;
   submitToSave: any;
 }) {
-  const [isWFH, setCheckWFH] = useState(false);
-  const [isWOS, setCheckWOS] = useState(false);
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: 'experiences',
@@ -56,19 +54,6 @@ function PreferencesTab({
     }
     if (hasError) return;
     data['exp'] = data.experiences;
-    data['setupPreference'] = [];
-    if (isWFH) {
-      data['setupPreference'].push('Work From Home');
-    }
-    if (isWOS) {
-      data['setupPreference'].push('Work on Site');
-    }
-    if (!data['setupPreference'].length) {
-      toast.custom(() => <CustomToast message='Please select at least one work set-up preference' type='error' />, {
-        duration: 7000,
-      });
-      return;
-    }
     submitToSave(data);
   });
 
