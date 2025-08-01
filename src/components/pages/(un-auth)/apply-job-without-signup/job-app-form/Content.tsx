@@ -59,6 +59,9 @@ const Content = () => {
         finalData['screeningAnswers'] = screeningForm.getValues().screeningAnswers;
       }
       
+      // Set an empty array for setupPreference since it's no longer collected
+      finalData['setupPreference'] = [];
+      
       const callBackReq = {
         onSuccess: () => {
           setOpenSubmitModal(true);

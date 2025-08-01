@@ -28,8 +28,6 @@ function PreferencesTab({
   setCurrentTab: any;
   submitToSave: any;
 }) {
-  const [isWFH, setCheckWFH] = useState(false);
-  const [isWOS, setCheckWOS] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState<'add' | 'remove' | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -60,19 +58,8 @@ function PreferencesTab({
     }
     if (hasError) return;
     data['exp'] = data.experiences;
+    // Set empty array for setupPreference since it's no longer collected
     data['setupPreference'] = [];
-    if (isWFH) {
-      data['setupPreference'].push('Work From Home');
-    }
-    if (isWOS) {
-      data['setupPreference'].push('Work on Site');
-    }
-    if (!data['setupPreference'].length) {
-      toast.custom(() => <CustomToast message='Please select at least one work set-up preference' type='error' />, {
-        duration: 7000,
-      });
-      return;
-    }
     submitToSave(data);
   });
 
