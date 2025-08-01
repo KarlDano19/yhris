@@ -12,6 +12,7 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReport) {
       department: employeeIssue.department,
       incident_date: employeeIssue.incidentDate,
       place_of_incident: employeeIssue.incidentPlace,
+      issue_type: employeeIssue.issueType,
       brief_background: employeeIssue.briefBackground,
     };
     const config = {
