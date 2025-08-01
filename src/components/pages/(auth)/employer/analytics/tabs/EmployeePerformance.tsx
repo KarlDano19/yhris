@@ -30,9 +30,13 @@ interface EmployeePerformanceData {
 
 interface EmployeePerformanceProps {
   data: EmployeePerformanceData;
+  dateFilter?: {
+    from: string;
+    to: string;
+  };
 }
 
-const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
+const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFilter }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,6 +46,8 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
     currentPage,
     pageSize,
     search: '',
+    ...(dateFilter?.from && { from: dateFilter.from }),
+    ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
   // Use the hook to fetch evaluation history data
@@ -142,12 +148,12 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data }) => {
         return (
           <>
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={`grid gap-6 ${pageSize >= 10 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
               {/* Performance Rate by Department - Bar Chart */}
               <PerformanceRate evaluationData={evaluationData} />
 
               {/* IT Performance Trend - Line Chart */}
-              <ITPerformanceTrend evaluationData={evaluationData} />
+              <ITPerformanceTrend evaluationData={evaluationData} dateFilter={dateFilter} />
             </div>
 
             {/* Employee Performance Table */}

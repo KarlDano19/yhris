@@ -32,9 +32,13 @@ ChartJS.register(
 
 interface ITPerformanceTrendProps {
   evaluationData?: any;
+  dateFilter?: {
+    from: string;
+    to: string;
+  };
 }
 
-const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData }) => {
+const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData, dateFilter }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState('IT');
   const { data: departmentItems } = useGetDepartmentItems();
@@ -43,7 +47,6 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData 
   const itTrendData = useMemo(() => {
     if (!evaluationData?.records) return [];
 
-    const currentYear = new Date().getFullYear();
     const months = [
       { name: 'January', value: 0 },
       { name: 'February', value: 1 },
@@ -59,12 +62,22 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData 
       { name: 'December', value: 11 },
     ];
 
-    // Filter selected department evaluations for current year
+    // Filter selected department evaluations based on date range or current year
     const departmentEvaluations = evaluationData.records.filter((item: any) => {
       const evaluationDate = new Date(item.date_of_evaluation);
-      const isCurrentYear = evaluationDate.getFullYear() === currentYear;
       const isSelectedDepartment = item.department === selectedDepartment;
-      return isCurrentYear && isSelectedDepartment;
+      
+      if (dateFilter?.from && dateFilter?.to) {
+        const fromDate = new Date(dateFilter.from);
+        const toDate = new Date(dateFilter.to);
+        const isInDateRange = evaluationDate >= fromDate && evaluationDate <= toDate;
+        return isInDateRange && isSelectedDepartment;
+      } else {
+        // Fallback to current year if no date range is selected
+        const currentYear = new Date().getFullYear();
+        const isCurrentYear = evaluationDate.getFullYear() === currentYear;
+        return isCurrentYear && isSelectedDepartment;
+      }
     });
 
     // Group evaluations by month
@@ -95,7 +108,7 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData 
 
     // Filter out months with no data (score = 0)
     return monthlyData.filter(item => item.score > 0);
-  }, [evaluationData, selectedDepartment]);
+  }, [evaluationData, selectedDepartment, dateFilter]);
 
   // Get the last 3 months with data for display
   const displayData = itTrendData.slice(-3);
@@ -176,7 +189,7 @@ const ITPerformanceTrend: React.FC<ITPerformanceTrendProps> = ({ evaluationData 
             <FilterLogo className="w-5 h-5" />
           </button>
           <h3 className="text-lg font-semibold text-gray-900">
-            {selectedDepartment} Performance Trend ({displayData.length > 0 ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` : 'No Data'})
+            {selectedDepartment} Performance Trend {dateFilter?.from && dateFilter?.to ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` : `(${displayData.length > 0 ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` : 'No Data'})`}
           </h3>
           <div className="w-10"></div>
         </div>

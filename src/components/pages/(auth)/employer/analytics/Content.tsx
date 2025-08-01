@@ -18,12 +18,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     from: '',
     to: '',
   });
+  const [appliedDateFilter, setAppliedDateFilter] = useState({
+    from: '',
+    to: '',
+  });
 
   const {
     data: analyticsData,
     isLoading,
     error
-  } = useGetAnalyticsData({ from: dateFilter.from, to: dateFilter.to });
+  } = useGetAnalyticsData(appliedDateFilter);
 
   const tabs = [
     { id: 1, name: 'Workforce Overview', shortName: 'Workforce' },
@@ -69,7 +73,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       case 1:
         return <WorkforceOverview  />;
       case 2:
-        return <EmployeePerformance data={analyticsData.employeePerformance} />;
+        return <EmployeePerformance data={analyticsData.employeePerformance} dateFilter={appliedDateFilter} />;
       case 3:
         return <CompliancePolicy />;
       case 4:
@@ -143,7 +147,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
                 onClick={() => {
-                  // Handle search/filter logic here
+                  setAppliedDateFilter(dateFilter);
                   console.log('Search with date range:', dateFilter);
                 }}
               >
