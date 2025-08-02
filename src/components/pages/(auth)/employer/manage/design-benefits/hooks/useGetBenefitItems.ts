@@ -39,10 +39,10 @@ async function getBenefitItems(filters: any) {
 
 function useGetBenefitItems(filters: any) {
   const query = useQuery(
-    ['benefitsItemCache'],
+    ['benefitsItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
     () => getBenefitItems(filters),
     {
-      enabled: false,
+      // enabled: false,
       keepPreviousData: true,
     }
   );

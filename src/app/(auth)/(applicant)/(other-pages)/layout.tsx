@@ -1,3 +1,5 @@
+import FloatingHelpButton from "@/components/FloatingHelpButton";
+
 export const metadata = {
   title: "Home - Yahshua HRIS",
   description: "HRIS",
@@ -13,6 +15,7 @@ export default function RootLayout({
       <div>
         {children}
       </div>
+      <FloatingHelpButton />
     </>
   );
 }

@@ -4,13 +4,17 @@ import { useRef, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
+import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+
 import CreateJobModal from './create-job/modals/CreateJobModal';
 import ConfirmSocialShareModal from '../modals/ConfirmSocialShareModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import JobPostingHistory from '@/svg/JobPostingHistory';
 import CreateJob from '@/svg/CreateJob';
-import { useQueryClient } from '@tanstack/react-query';
+
+import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
 
 const menus = [
   {
@@ -21,6 +25,35 @@ const menus = [
 ];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  // Persisted state for CreateJobModal
+  const [pageNumber, setPageNumber] = useState(1);
+  const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
+  const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
+  const [combinedFormData, setCombinedFormData] = useState<any>({});
+  const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
+  const firstForm = useForm<any>({
+    defaultValues: {
+      country: 'Philippines',
+      language: 'English',
+    },
+  });
+  const secondForm = useForm();
+  const thirdForm = useForm<any>({
+    defaultValues: {
+      salary: {
+        salaryType: 'Range',
+      },
+    },
+  });
+  const fourthForm = useForm<any>({
+    defaultValues: {
+      jobDescription: CREATEJOB_TEMPLATE[0],
+      qualifications: QUALIFICATION_TEMPLATE[0],
+    },
+  });
+  const fifthForm = useForm();
+  const sixthForm = useForm();
+  const seventhForm = useForm();
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [socialType, setSocialType] = useState<string | null>(null);
   const [socialOgUrl, setOgUrl] = useState<string>('');
@@ -125,6 +158,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             isOpen={isCreateJobModalOpen}
             setIsOpen={setIsCreateJobModalOpen}
             openConfirmSocialShareModal={openConfirmSocialShareModal}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
+            isSalaryRangeModalOpen={isSalaryRangeModalOpen}
+            setIsSalaryRangeModalOpen={setIsSalaryRangeModalOpen}
+            isRangeBenefitsAdded={isRangeBenefitsAdded}
+            setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
+            combinedFormData={combinedFormData}
+            setCombinedFormData={setCombinedFormData}
+            fileProps={fileProps}
+            setFileProps={setFileProps}
+            firstForm={firstForm}
+            secondForm={secondForm}
+            thirdForm={thirdForm}
+            fourthForm={fourthForm}
+            fifthForm={fifthForm}
+            sixthForm={sixthForm}
+            seventhForm={seventhForm}
           />
         )}
         {isSocialShareModalOpen && (
