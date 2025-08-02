@@ -8,6 +8,8 @@ import Card from '../Card';
 import OverallApplicantsSummary from './components/workforce-overview-tab/applicant-vs-hired-tab/OverallApplicantsSummary';
 import DemographicBreakdown from './components/workforce-overview-tab/applicant-vs-hired-tab/DemographicBreakdown';
 import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
+import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
+import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
 
 const WorkforceOverview = () => {
   const [activeSubTab, setActiveSubTab] = useState(1);
@@ -90,7 +92,7 @@ const WorkforceOverview = () => {
   const subTabs = [
     { id: 1, name: 'Applicant vs Hired', isAvailable: true },
     { id: 2, name: 'Role Turnaround and Pipeline Analysis', isAvailable: true },
-    { id: 3, name: 'Attrition Rate', isAvailable: false },
+    { id: 3, name: 'Attrition Rate', isAvailable: true },
   ];
 
   // Pagination Handlers for Role Pipeline
@@ -139,11 +141,12 @@ const WorkforceOverview = () => {
       
       case 3: // Attrition Rate
         return (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="text-2xl font-semibold text-gray-600 mb-2">Coming Soon</div>
-              <div className="text-gray-500">Attrition Rate analysis features are under development</div>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
+            {/* Attrition Rate */}
+            <AttritionRate />
+
+            {/* Exit Reasons */}
+            <ExitReasons />
           </div>
         );
       
