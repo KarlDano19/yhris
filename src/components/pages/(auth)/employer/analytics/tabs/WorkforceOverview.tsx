@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
@@ -11,16 +11,86 @@ import RolePipelineTable from './components/workforce-overview-tab/role-pipeline
 import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
+import useGetJobPostItems from '../hooks/useGetJobPostItems';
 
 const WorkforceOverview = () => {
   const [activeSubTab, setActiveSubTab] = useState(1);
 
   // Pagination State for Role Pipeline
-  const [rolePipelinePageSize, setRolePipelinePageSize] = useState(10);
+  const [rolePipelinePageSize, setRolePipelinePageSize] = useState(5);
   const [rolePipelineCurrentPage, setRolePipelineCurrentPage] = useState(1);
 
   // Fetch overall applicants data across all job postings
   const { data: appliedApplicantsData, isLoading: applicantsLoading, error: applicantsError } = useGetOverallApplicants();
+
+  // Fetch job postings data for role pipeline analysis
+  const jobPostFilters = {
+    currentPage: rolePipelineCurrentPage,
+    pageSize: rolePipelinePageSize,
+    search: '',
+  };
+
+  const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
+
+  // Refetch job postings when pagination changes or when tab is activated
+  useEffect(() => {
+    if (activeSubTab === 2) { // Role Turnaround and Pipeline Analysis tab
+      refetchJobPost();
+    }
+  }, [rolePipelineCurrentPage, rolePipelinePageSize, activeSubTab]);
+
+  // Transform job postings data for role pipeline table
+  const rolePipelineData = useMemo(() => {
+    if (!jobPostData?.records || !Array.isArray(jobPostData.records)) {
+      return [];
+    }
+
+    return jobPostData.records.map((job: any) => {
+      // Calculate turnaround time (days since job opened)
+      const jobOpenedDate = new Date(job.created_at);
+      const currentDate = new Date();
+      const turnaroundTime = Math.ceil((currentDate.getTime() - jobOpenedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Format date
+      const formattedDate = jobOpenedDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+      // Determine status based on job data
+      const status = job.is_active ? 'Ongoing' : 'Closed';
+
+      // Generate pipeline information (this would need to be enhanced with actual applicant data)
+      const currentPipeline = job.total_applicants > 0 
+        ? `${job.total_applicants} applicants` 
+        : 'No applicants yet';
+
+      return {
+        role: job.job_title || 'Unknown Role',
+        numberOfApplicants: job.total_applicants || 0,
+        status: status,
+        dateJobOpened: formattedDate,
+        turnaroundTime: turnaroundTime,
+        currentPipeline: currentPipeline
+      };
+    });
+  }, [jobPostData]);
+
+  // Create pagination object for the table
+  const paginationData = useMemo(() => {
+    if (!jobPostData) {
+      return {
+        totalRecords: 0,
+        totalPages: 1
+      };
+    }
+    
+    return {
+      totalRecords: jobPostData.total_records || jobPostData.totalRecords || 0,
+      totalPages: jobPostData.total_pages || jobPostData.totalPages || 1
+    };
+  }, [jobPostData]);
 
   // Dummy data for workforce metrics
   const workforceData = [
@@ -56,42 +126,6 @@ const WorkforceOverview = () => {
     },
   ];
 
-  // Dummy data for role pipeline analysis
-  const rolePipelineData = [
-    {
-      role: 'UI Designer',
-      numberOfApplicants: 42,
-      status: 'Ongoing',
-      dateJobOpened: 'Jan 28, 2025',
-      turnaroundTime: 14,
-      currentPipeline: 'Final Interview: 3, Rejected: 28, Withdrawn: 11'
-    },
-    {
-      role: 'HR Officer',
-      numberOfApplicants: 29,
-      status: 'Closed',
-      dateJobOpened: 'Feb 7, 2025',
-      turnaroundTime: 18,
-      currentPipeline: '2 hired'
-    },
-    {
-      role: 'Sales Associate',
-      numberOfApplicants: 17,
-      status: 'Ongoing',
-      dateJobOpened: 'Mar 17, 2025',
-      turnaroundTime: 7,
-      currentPipeline: 'Final Interview: 5, Rejected: 10, Withdrawn: 2'
-    },
-    {
-      role: 'Backend Developer',
-      numberOfApplicants: 34,
-      status: 'Closed',
-      dateJobOpened: 'Mar 18, 2025',
-      turnaroundTime: 11,
-      currentPipeline: '1 hired'
-    }
-  ];
-
   // Sub Tab Navigation
   const subTabs = [
     { id: 1, name: 'Applicant vs Hired', isAvailable: true },
@@ -124,7 +158,11 @@ const WorkforceOverview = () => {
             />
 
             {/* Demographic Breakdown */}
-            <DemographicBreakdown />
+            <DemographicBreakdown 
+              appliedApplicantsData={appliedApplicantsData}
+              isLoading={applicantsLoading}
+              error={applicantsError}
+            />
           </div>
         );
       
@@ -133,10 +171,7 @@ const WorkforceOverview = () => {
           <div className="pb-8">
             <RolePipelineTable
               data={rolePipelineData}
-              pagination={{
-                totalRecords: rolePipelineData.length,
-                totalPages: Math.ceil(rolePipelineData.length / rolePipelinePageSize)
-              }}
+              pagination={paginationData}
               isLoading={false}
               error={null}
               currentPage={rolePipelineCurrentPage}

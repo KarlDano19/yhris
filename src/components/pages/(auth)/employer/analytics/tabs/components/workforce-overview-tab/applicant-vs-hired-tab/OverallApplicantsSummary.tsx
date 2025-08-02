@@ -28,41 +28,38 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
       return acc;
     }, {});
 
-    // Calculate percentages and format data
-    const statusMapping = {
+    // Define all possible statuses with their display names and colors
+    const allStatuses = {
       'applied': { label: 'Applied', color: 'text-blue-600' },
       'ongoing': { label: 'Ongoing', color: 'text-blue-600' },
       'hired': { label: 'Hired', color: 'text-green-600' },
       'rejected': { label: 'Rejected', color: 'text-red-600' },
       'withdrawn': { label: 'Withdrawn', color: 'text-red-600' },
-      'passed': { label: 'Passed', color: 'text-green-600' },
-      'failed': { label: 'Failed', color: 'text-red-600' }
     };
 
     const result = [];
 
-    // Add total applied count
-    result.push({
-      status: 'Applied',
-      count: totalApplied.toString(),
-      percentage: '100%',
-      label: 'initial total applicants',
-      color: 'text-blue-600'
+    // Add counts for each status (including zero counts)
+    Object.entries(allStatuses).forEach(([status, config]) => {
+      const count = statusCounts[status] || 0;
+      const percentage = totalApplied > 0 ? (count / totalApplied * 100).toFixed(0) : '0';
+      
+      result.push({
+        status: config.label,
+        count: count.toString(),
+        percentage: `${percentage}%`,
+        label: 'of total applied',
+        color: config.color
+      });
     });
 
-    // Add counts for each status
-    Object.entries(statusCounts).forEach(([status, count]) => {
-      if (statusMapping[status as keyof typeof statusMapping]) {
-        const countNumber = count as number;
-        const percentage = totalApplied > 0 ? (countNumber / totalApplied * 100).toFixed(0) : '0';
-        result.push({
-          status: statusMapping[status as keyof typeof statusMapping].label,
-          count: countNumber.toString(),
-          percentage: `${percentage}%`,
-          label: 'of total applied',
-          color: statusMapping[status as keyof typeof statusMapping].color
-        });
-      }
+    // Add total applied count as a summary row at the bottom
+    result.push({
+      status: 'Total Applicants',
+      count: totalApplied.toString(),
+      percentage: '100%',
+      label: 'total applicants',
+      color: 'text-gray-800 font-bold'
     });
 
     return result;
@@ -119,7 +116,7 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
           </thead>
           <tbody>
             {applicantData.map((item, index) => (
-              <tr key={index} className="border-b border-gray-100">
+              <tr key={index} className={`border-b border-gray-100 ${index === applicantData.length - 1 ? 'bg-gray-50 font-semibold' : ''}`}>
                 <td className="py-3 px-2 text-gray-900 font-medium">{item.status}</td>
                 <td className="py-3 px-2 text-gray-700">{item.count}</td>
                 <td className="py-3 px-2">
