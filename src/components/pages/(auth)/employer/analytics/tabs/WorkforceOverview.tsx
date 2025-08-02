@@ -10,6 +10,7 @@ import DemographicBreakdown from './components/workforce-overview-tab/applicant-
 import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
 import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
+import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 
 const WorkforceOverview = () => {
   const [activeSubTab, setActiveSubTab] = useState(1);
@@ -17,6 +18,9 @@ const WorkforceOverview = () => {
   // Pagination State for Role Pipeline
   const [rolePipelinePageSize, setRolePipelinePageSize] = useState(10);
   const [rolePipelineCurrentPage, setRolePipelineCurrentPage] = useState(1);
+
+  // Fetch overall applicants data across all job postings
+  const { data: appliedApplicantsData, isLoading: applicantsLoading, error: applicantsError } = useGetOverallApplicants();
 
   // Dummy data for workforce metrics
   const workforceData = [
@@ -113,7 +117,11 @@ const WorkforceOverview = () => {
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
             {/* Overall Applicants Status Summary */}
-            <OverallApplicantsSummary />
+            <OverallApplicantsSummary 
+              appliedApplicantsData={appliedApplicantsData}
+              isLoading={applicantsLoading}
+              error={applicantsError}
+            />
 
             {/* Demographic Breakdown */}
             <DemographicBreakdown />

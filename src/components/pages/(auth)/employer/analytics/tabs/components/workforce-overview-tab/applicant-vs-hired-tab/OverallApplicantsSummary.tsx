@@ -1,46 +1,108 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
-const OverallApplicantsSummary = () => {
-  // Dummy data for applicant status summary
-  const applicantData = [
-    {
+interface OverallApplicantsSummaryProps {
+  appliedApplicantsData?: any[];
+  isLoading?: boolean;
+  error?: any;
+}
+
+const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({ 
+  appliedApplicantsData, 
+  isLoading = false, 
+  error = null 
+}) => {
+  // Calculate applicant status summary from real data
+  const applicantData = useMemo(() => {
+    if (!appliedApplicantsData || !Array.isArray(appliedApplicantsData)) {
+      return [];
+    }
+
+    const totalApplied = appliedApplicantsData.length;
+    
+    // Count applicants by status
+    const statusCounts = appliedApplicantsData.reduce((acc: any, applicant: any) => {
+      const status = applicant.status || 'unknown';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Calculate percentages and format data
+    const statusMapping = {
+      'applied': { label: 'Applied', color: 'text-blue-600' },
+      'ongoing': { label: 'Ongoing', color: 'text-blue-600' },
+      'hired': { label: 'Hired', color: 'text-green-600' },
+      'rejected': { label: 'Rejected', color: 'text-red-600' },
+      'withdrawn': { label: 'Withdrawn', color: 'text-red-600' },
+      'passed': { label: 'Passed', color: 'text-green-600' },
+      'failed': { label: 'Failed', color: 'text-red-600' }
+    };
+
+    const result = [];
+
+    // Add total applied count
+    result.push({
       status: 'Applied',
-      count: '250',
+      count: totalApplied.toString(),
       percentage: '100%',
       label: 'initial total applicants',
       color: 'text-blue-600'
-    },
-    {
-      status: 'Ongoing',
-      count: '132',
-      percentage: '30%',
-      label: 'of total applied',
-      color: 'text-blue-600'
-    },
-    {
-      status: 'Hired',
-      count: 'HR', // Placeholder as shown in image
-      percentage: '12%',
-      label: 'of total applied',
-      color: 'text-green-600'
-    },
-    {
-      status: 'Rejected',
-      count: 'IT', // Placeholder as shown in image
-      percentage: '40%',
-      label: 'of total applied',
-      color: 'text-red-600'
-    },
-    {
-      status: 'Withdrawn',
-      count: 'IT', // Placeholder as shown in image
-      percentage: '18%',
-      label: 'of total applied',
-      color: 'text-red-600'
-    }
-  ];
+    });
+
+    // Add counts for each status
+    Object.entries(statusCounts).forEach(([status, count]) => {
+      if (statusMapping[status as keyof typeof statusMapping]) {
+        const countNumber = count as number;
+        const percentage = totalApplied > 0 ? (countNumber / totalApplied * 100).toFixed(0) : '0';
+        result.push({
+          status: statusMapping[status as keyof typeof statusMapping].label,
+          count: countNumber.toString(),
+          percentage: `${percentage}%`,
+          label: 'of total applied',
+          color: statusMapping[status as keyof typeof statusMapping].color
+        });
+      }
+    });
+
+    return result;
+  }, [appliedApplicantsData]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-gray-500">Loading applicant data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-red-500">Error loading applicant data</div>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!applicantData || applicantData.length === 0) {
+    return (
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-gray-500">No applicant data available</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
