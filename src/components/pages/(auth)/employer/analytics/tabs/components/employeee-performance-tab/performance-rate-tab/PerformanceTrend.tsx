@@ -16,7 +16,7 @@ import { Line } from 'react-chartjs-2';
 
 import FilterLogo from '@/svg/FilterLogo';
 import AverageLegendIcon from '@/svg/AverageLegendIcon';
-import FilterModal from '../modals/FilterModal';
+import PerformanceTrendFilterModal from '../../modals/PerformanceTrendFilterModal';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 
 ChartJS.register(
@@ -323,7 +323,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
         </div>
       </div>
 
-      <FilterModal
+      <PerformanceTrendFilterModal
         isOpen={isFilterModalOpen}
         setIsOpen={setIsFilterModalOpen}
         onDepartmentSelect={handleDepartmentSelect}

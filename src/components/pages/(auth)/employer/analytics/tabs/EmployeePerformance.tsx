@@ -5,14 +5,14 @@ import React, { useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import Card from '../Card';
-import PerformanceRate from './components/performance-rate-tab/PerformanceRate';
-import PerformanceTrend from './components/performance-rate-tab/PerformanceTrend';
-import EmployeePerformanceTable from './components/performance-rate-tab/EmployeePerformanceTable';
-import ActionRecommendations from './components/performance-rate-tab/ActionRecommendations';
-import IssueType from './components/employee-issue-rate-tab/IssueType';
-import MonthlyTypeVolume from './components/employee-issue-rate-tab/MonthlyTypeVolume';
-import EmployeeIssuesTable from './components/employee-issue-rate-tab/EmployeeIssuesTable';
-import InterventionRecommendations from './components/employee-issue-rate-tab/InterventionRecommendations';
+import PerformanceRate from './components/employeee-performance-tab/performance-rate-tab/PerformanceRate';
+import PerformanceTrend from './components/employeee-performance-tab/performance-rate-tab/PerformanceTrend';
+import EmployeePerformanceTable from './components/employeee-performance-tab/performance-rate-tab/EmployeePerformanceTable';
+import ActionRecommendations from './components/employeee-performance-tab/performance-rate-tab/ActionRecommendations';
+import IssueType from './components/employeee-performance-tab/employee-issue-rate-tab/IssueType';
+import MonthlyTypeVolume from './components/employeee-performance-tab/employee-issue-rate-tab/MonthlyTypeVolume';
+import EmployeeIssuesTable from './components/employeee-performance-tab/employee-issue-rate-tab/EmployeeIssuesTable';
+import InterventionRecommendations from './components/employeee-performance-tab/employee-issue-rate-tab/InterventionRecommendations';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
 
@@ -359,7 +359,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
       {/* Sub Tab Navigation */}
       <div className="mt-8">
         {/* Desktop tabs */}
-        <div className="hidden md:flex flex-row justify-between space-x-2">
+        <div className="hidden md:flex flex-row justify-between space-x-2 w-3/4">
           {subTabs.map((tab) => (
             <div key={tab.id} className="cursor-pointer">
               {tab.isAvailable ? (

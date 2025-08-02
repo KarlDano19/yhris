@@ -2,17 +2,17 @@ import { Dispatch, Fragment, useState, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
-import { XCircleIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
-type FilterModalProps = {
+type PerformanceTrendFilterModalProps = {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   onDepartmentSelect: (department: string) => void;
   departmentItems?: any[];
 };
 
-export default function FilterModal({ isOpen, setIsOpen, onDepartmentSelect, departmentItems }: FilterModalProps) {
+export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepartmentSelect, departmentItems }: PerformanceTrendFilterModalProps) {
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -97,9 +97,7 @@ export default function FilterModal({ isOpen, setIsOpen, onDepartmentSelect, dep
                       <span className={selectedDepartment ? 'text-gray-900' : 'text-gray-400'}>
                         {selectedDepartment || 'Select...'}
                       </span>
-                      <ChevronDownIcon 
-                        className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
-                      />
+                      <SelectChevronDown />
                     </button>
                     
                     {isDropdownOpen && (
