@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from "next/link";
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import WorkforceOverview from './tabs/WorkforceOverview';
@@ -30,10 +31,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   } = useGetAnalyticsData(appliedDateFilter);
 
   const tabs = [
-    { id: 1, name: 'Workforce Overview', shortName: 'Workforce' },
-    { id: 2, name: 'Employee Performance & Development', shortName: 'Performance' },
-    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance' },
-    { id: 4, name: 'Compensation & Benefits', shortName: 'Compensation' },
+    { id: 1, name: 'Workforce Overview', shortName: 'Workforce', isAvailable: true },
+    { id: 2, name: 'Employee Performance & Development', shortName: 'Performance', isAvailable: true },
+    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: false },
+    { id: 4, name: 'Compensation & Benefits', shortName: 'Compensation', isAvailable: false },
   ];
 
   const renderActiveTab = () => {
@@ -161,14 +162,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             {/* Desktop tabs */}
             <div className="hidden md:flex flex-row justify-between space-x-2">
               {tabs.map((tab) => (
-                <div 
-                  key={tab.id} 
-                  onClick={() => handleTabChange(tab.id)} 
-                  className="cursor-pointer"
-                >
-                  <h1 className={`text-lg font-bold pb-2 text-center ${activeTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
-                    {tab.name}
-                  </h1>
+                <div key={tab.id} className="cursor-pointer">
+                  {tab.isAvailable ? (
+                    <h1 
+                      onClick={() => handleTabChange(tab.id)}
+                      className={`text-lg font-bold pb-2 text-center ${activeTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
+                    >
+                      {tab.name}
+                    </h1>
+                  ) : (
+                    <div
+                      data-tooltip-id='content-tab-tooltip'
+                      data-tooltip-content='Coming soon.'
+                      data-tooltip-place='bottom'
+                      className="cursor-not-allowed"
+                    >
+                      <h1 className="text-lg font-bold pb-2 text-center text-gray-400 opacity-50">
+                        {tab.name}
+                      </h1>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -179,12 +192,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 {tabs.map((tab) => (
                   <div 
                     key={tab.id} 
-                    onClick={() => handleTabChange(tab.id)} 
-                    className="cursor-pointer flex-shrink-0"
+                    className={tab.isAvailable ? "cursor-pointer flex-shrink-0" : "cursor-not-allowed flex-shrink-0"}
                   >
-                    <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${activeTab === tab.id ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>
-                      {tab.shortName}
-                    </h1>
+                    {tab.isAvailable ? (
+                      <h1 
+                        onClick={() => handleTabChange(tab.id)}
+                        className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${activeTab === tab.id ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}
+                      >
+                        {tab.shortName}
+                      </h1>
+                    ) : (
+                      <div
+                        data-tooltip-id='content-tab-tooltip'
+                        data-tooltip-content='Coming soon.'
+                        data-tooltip-place='bottom'
+                      >
+                        <h1 className="text-sm font-bold pb-2 text-center whitespace-nowrap text-gray-400 opacity-50">
+                          {tab.shortName}
+                        </h1>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -197,6 +224,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      <Tooltip id='content-tab-tooltip' />
     </>
   );
 };

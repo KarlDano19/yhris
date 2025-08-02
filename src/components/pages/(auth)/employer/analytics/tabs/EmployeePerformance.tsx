@@ -49,7 +49,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
   const [employeeIssueCurrentPage, setEmployeeIssueCurrentPage] = useState(1);
 
   // Filters for the evaluation history API
-  const filters = {
+  const employeePerformanceFilters = {
     currentPage: employeePerformanceCurrentPage,
     pageSize: employeePerformancePageSize,
     search: '',
@@ -57,12 +57,12 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
-  // Use the hook to fetch evaluation history data
+  // Use the hook to fetch evaluation history data (Performance Rate)
   const {
     data: evaluationData,
     isLoading,
     error,
-  } = useGetEvaluationHistoryItems(filters);
+  } = useGetEvaluationHistoryItems(employeePerformanceFilters);
 
   // Filters for the employee issues API
   const employeeIssueFilters = {
@@ -73,14 +73,14 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
-  // Use the hook to fetch employee issues data
+  // Use the hook to fetch employee issues data (Employee Issue Rate)
   const {
     data: employeeIssueData,
     isLoading: employeeIssueLoading,
     error: employeeIssueError,
   } = useGetEmployeeIssueItems(employeeIssueFilters);
 
-  // Calculate average performance score from evaluation data
+  // Calculate average performance score from evaluation data (for KPI Cards)
   const calculateAveragePerformanceScore = () => {
     if (!evaluationData?.records || evaluationData.records.length === 0) {
       return { averageScore: 0, totalEmployees: 0, maxScore: 0 };
@@ -108,7 +108,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
 
   const { averageScore, totalEmployees, maxScore } = calculateAveragePerformanceScore();
 
-  // Calculate resolved vs ongoing issues percentages
+  // Calculate resolved vs ongoing issues percentages (for KPI Cards)
   const calculateIssueResolutionRate = () => {
     if (!employeeIssueData?.records || employeeIssueData.records.length === 0) {
       return {
@@ -150,6 +150,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
 
   const { resolvedPercentage, ongoingPercentage, totalIssues, resolvedIssues, ongoingIssues } = calculateIssueResolutionRate();
 
+  // KPI Cards Data
   const Data = [
     {
       title: <>Average Employee<br />Performance Score</>,
@@ -173,13 +174,14 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     }
   ];
 
-  // Real Name: Performance Rate & Action Recommendations
+  // Sub Tab Navigation
   const subTabs = [
-    { id: 1, name: 'Performance Rate', isAvailable: true },
+    { id: 1, name: 'Performance Rate', isAvailable: true }, // Real Name: Performance Rate & Action Recommendations
     { id: 2, name: 'Training Analysis', isAvailable: false },
     { id: 3, name: 'Employee Issue Rate', isAvailable: true },
   ];
 
+  // Pagination Handlers for Employee Performance
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setEmployeePerformanceCurrentPage(newCurrentPage);
@@ -190,7 +192,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     setEmployeePerformancePageSize(value);
   };
 
-  // Separate pagination handlers for employee issues
+  // Pagination Handlers for Employee Issues
   const employeeIssuePaginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setEmployeeIssueCurrentPage(newCurrentPage);
@@ -201,7 +203,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     setEmployeeIssuePageSize(value);
   };
 
-  // Transform API data to match table format
+  // Transform API data to match table format (Employee Performance)
   const transformEvaluationData = (apiData: any) => {
     if (!apiData || !apiData.records) return [];
     
@@ -218,7 +220,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     }));
   };
 
-  // Transform employee issues API data to match table format
+  // Transform employee issues API data to match table format (Employee Issue Rate)
   const transformEmployeeIssueData = (apiData: any) => {
     if (!apiData || !apiData.records) return [];
     
@@ -235,7 +237,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     }));
   };
 
-  // Helper function to determine issue status
+  // Helper function to determine issue status (Employee Issue Rate)
   const getIssueStatus = (item: any) => {
     if (item.is_decision_sent && item.is_decision_received) {
       return 'Resolved';
@@ -248,6 +250,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     }
   };
 
+  // Render Tab Content
   const renderTabContent = () => {
     switch (activeSubTab) {
       case 1: // Performance Rate & Action Recommendations
