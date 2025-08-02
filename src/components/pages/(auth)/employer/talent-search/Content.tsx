@@ -3,24 +3,25 @@
 import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
+import Image from 'next/image';
+
+import toast from 'react-hot-toast';
+
+import useGetApplicantItemsList, { buildSearchQuery } from './hook/useGetApplicantItems';
+import CustomToast from '@/components/CustomToast';
+import useTagSearch from '@/components/hooks/useTagSearch';
+import ImageBackground from '@/assets/talent-search-bg.png';
+import useGetApplicantFavorites from './hook/favorites/useGetApplicantFavorites';
+import useAddApplicantFavorite from './hook/favorites/useAddApplicantFavorite';
+import useRemoveApplicantFavorite from './hook/favorites/useRemoveApplicantFavorite';
+import ApplicantProfileModal from './modal/ApplicantProfileModal';
+import CompareApplicantsModal from './modal/CompareApplicantsModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-
-import Image from 'next/image';
-import ImageBackground from '@/assets/talent-search-bg.png';
 import StarIcon from '@heroicons/react/24/outline/StarIcon';
 import StarFilledIcon from '@heroicons/react/24/solid/StarIcon';
 import BookmarkIcon from '@heroicons/react/24/outline/BookmarkIcon';
 import BookmarkFilledIcon from '@heroicons/react/24/solid/BookmarkIcon';
-import useTagSearch from '@/components/hooks/useTagSearch';
-import useGetApplicantItemsList, { buildSearchQuery } from './hook/useGetApplicantItems';
-import useGetApplicantFavorites from './hook/favorites/useGetApplicantFavorites';
-import useAddApplicantFavorite from './hook/favorites/useAddApplicantFavorite';
-import useRemoveApplicantFavorite from './hook/favorites/useRemoveApplicantFavorite';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
-import ApplicantProfileModal from './modal/ApplicantProfileModal';
-import CompareApplicantsModal from './modal/CompareApplicantsModal';
 
 type T_ModalData = {
   id: number;
@@ -149,15 +150,32 @@ const Content = () => {
 
   return (
     <div>
-      {/* Floating Favorites Button */}
-      <button
-        onClick={() => setShowFavoritesPanel((prev) => !prev)}
-        className='fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-4 flex items-center gap-2 transition-all'
-        style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
-      >
-        <BookmarkFilledIcon className='h-6 w-6' />
-        <span className='hidden sm:inline'>Favorites</span>
-      </button>
+      {/* Floating Action Buttons */}
+      <div className='fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden'>
+        <div className='flex'>
+          <button
+            onClick={() => setShowFavoritesPanel((prev) => !prev)}
+            className='px-4 py-3 flex items-center gap-2 transition-all hover:bg-gray-50'
+          >
+            <BookmarkFilledIcon className='h-5 w-5 text-blue-600' />
+            <span className='hidden sm:inline text-gray-700 font-medium'>Saved Profiles</span>
+          </button>
+          <div className='w-px bg-gray-300'></div>
+          <Link href='/talent-search/email-history'>
+            <button className='px-4 py-3 flex items-center gap-2 transition-all hover:bg-gray-50'>
+              <svg className='h-5 w-5 text-blue-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+                />
+              </svg>
+              <span className='hidden sm:inline text-gray-700 font-medium'>Email History</span>
+            </button>
+          </Link>
+        </div>
+      </div>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
           <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>

@@ -31,10 +31,10 @@ interface ApplicantResponse {
 // Helper function to build search query from tags
 const buildSearchQuery = (tags: string[], starredTags: Set<string>): string => {
   if (tags.length === 0) return '';
-  
+
   const searchTerms: string[] = [];
-  
-  tags.forEach(tag => {
+
+  tags.forEach((tag) => {
     // Check if tag contains field specification (e.g., "skills:Python")
     if (tag.includes(':')) {
       // If tag is starred, make it a required term (prefixed with +)
@@ -53,7 +53,7 @@ const buildSearchQuery = (tags: string[], starredTags: Set<string>): string => {
       }
     }
   });
-  
+
   // Join with spaces to match backend parsing logic
   return searchTerms.join(' ');
 };
@@ -61,17 +61,17 @@ const buildSearchQuery = (tags: string[], starredTags: Set<string>): string => {
 async function getApplicantItems(filters: any) {
   try {
     let newFilters: ApplicantFilters = {};
-    
+
     if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
-    
+
     const searchParams = new URLSearchParams(
       Object.entries(newFilters)
         .filter(([_, value]) => value !== undefined && value !== '')
         .map(([key, value]) => [key, String(value)])
     );
-    
+
     const token = getCookie('token');
     const config = {
       method: 'GET',
@@ -80,20 +80,20 @@ async function getApplicantItems(filters: any) {
         Authorization: `Token ${token}`,
       },
     };
-    
+
     if (token) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/talent-search/?${searchParams}`, 
+        `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/talent-search/?${searchParams}`,
         config
       );
-      
+
       if (!res.ok) {
         throw res.json();
       }
-      
+
       return res.json();
     }
-    
+
     return { data: [] };
   } catch (err: any) {
     let errStringify = await err;
@@ -105,14 +105,10 @@ async function getApplicantItems(filters: any) {
 }
 
 function useGetApplicantItemsList(filters: any) {
-  const query = useQuery(
-    ['applicantListItemsCache', filters], 
-    () => getApplicantItems(filters), 
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    }
-  );
+  const query = useQuery(['applicantListItemsCache', filters], () => getApplicantItems(filters), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
 
   return query;
 }

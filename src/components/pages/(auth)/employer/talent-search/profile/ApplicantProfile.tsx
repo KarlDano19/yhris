@@ -117,6 +117,7 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
           setIsOpen={setIsEmailModalOpen}
           refetch={() => {}}
           applicantEmail={applicant.email}
+          applicantId={applicant.id}
         />
       )}
     </>
