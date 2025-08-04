@@ -12,6 +12,7 @@ import { ModalTypes, StageType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
 import CustomToast from '@/components/CustomToast';
+import AddApplicantModal from '../modals/AddApplicantModal';
 import StageRequirements from '../modals/StageRequirements';
 import Checklist from '../modals/Checklist';
 import ScheduleInterview from '../modals/ScheduleInterview';
@@ -71,6 +72,7 @@ export default function Content() {
     return item.id === actionState.stageId;
   })?.requirements;
   const { mutate: emailMutate } = useSendEmail();
+  const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
 
   useEffect(() => {
     if (dataJobPostDetails) {
@@ -101,6 +103,7 @@ export default function Content() {
           checklists: [],
           status: item.status,
           stagePosition: item.job_stages,
+          stage_notes: item.stage_notes || [],
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });
@@ -255,11 +258,21 @@ export default function Content() {
                 </Link>
               </div>
               <div className='p-2 md:px-8 lg:px-4'>
-                <h2 className='text-xl font-bold text-indigo-dye'>Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications</h2>
+                <h2 className='text-xl font-bold text-indigo-dye'>
+                  Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
+                </h2>
                 {whichModal && modals[whichModal].component}
 
                 <div className='flex justify-end'>
-                  <AddStageBtn handleAddStage={handleAddStage} />
+                  <div className='flex-1 flex justify-start lg:justify-between gap-2'>
+                    <button
+                      onClick={() => setIsAddApplicantModalOpen(true)}
+                      className='rounded-lg bg-[#65c979] hover:bg-[#5cb86f] text-white py-2 px-6 font-bold text-[15px] my-6'
+                    >
+                      ADD APPLICANT
+                    </button>
+                    <AddStageBtn handleAddStage={handleAddStage} />
+                  </div>
                 </div>
 
                 <DragAndDrop
@@ -273,6 +286,12 @@ export default function Content() {
           </div>
         </StateContext.Provider>
       )}
+      <AddApplicantModal
+        refetch={appliedApplicantRefetch}
+        isOpen={isAddApplicantModalOpen}
+        setIsOpen={setIsAddApplicantModalOpen}
+        jobPostingId={params.id as string}
+      />
     </>
   );
 }

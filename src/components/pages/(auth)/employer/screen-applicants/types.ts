@@ -60,6 +60,15 @@ export type ChecklistPropTypes = {
   handleFormSubmit: any;
 };
 
+export interface StageNoteType {
+  id?: number;
+  job_stage: number;
+  stage_title: string;
+  stage_order: number;
+  notes: string;
+  created_at?: string;
+}
+
 export type ApplicantType = {
   id: number;
   email: string | null;
@@ -69,6 +78,7 @@ export type ApplicantType = {
   checklists: string[];
   status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | null | undefined;
   stagePosition: number;
+  stage_notes?: StageNoteType[];
 };
 
 export type ApplicantsType = [] | ApplicantType[];

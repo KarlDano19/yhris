@@ -80,15 +80,35 @@ export default function ApplicantForm({ title }: PropTypes) {
             </div>
           </div>
         </div>
+        {applicant?.stage_notes && applicant.stage_notes.length > 0 && (
+          <div className='mt-4 p-4 bg-blue-50 rounded-lg'>
+            <h4 className='font-semibold text-gray-700 mb-3'>Stage Notes</h4>
+            <div className='space-y-4'>
+              {applicant.stage_notes.map((stageNote, index) => (
+                <div key={index} className='border-l-4 border-blue-400 pl-4'>
+                  <div className='mb-2'>
+                    <h5 className='font-medium text-gray-800'>{stageNote.stage_title}</h5>
+                  </div>
+                  <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
+                  {stageNote.created_at && (
+                    <p className='text-xs text-gray-400 mt-2'>
+                      Added: {new Date(stageNote.created_at).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className='mt-4'>
           <button
             type='button'
             className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
             onClick={() => setViewCV(true)}
-            disabled={!!!applicantProfile.cv}
-            title={!!!applicantProfile.cv ? 'No CV/Resume Attached' : ''}
+            disabled={!!!applicantProfile.cv_url}
+            title={!!!applicantProfile.cv_url ? 'No CV/Resume Attached' : ''}
           >
-            {!!!applicantProfile.cv ? 'No CV/Resume Attached' : 'View Attached CV/Resume'}
+            {!!!applicantProfile.cv_url ? 'No CV/Resume Attached' : 'View Attached CV/Resume'}
           </button>
         </div>
       </>
@@ -128,7 +148,7 @@ export default function ApplicantForm({ title }: PropTypes) {
   const renderResumeView = () => {
     return (
       <>
-        <iframe className='w-full h-[43rem]' src={`${applicantProfile.cv}#toolbar=0`}></iframe>
+        <iframe className='w-full h-[43rem]' src={`${applicantProfile.cv_url}#toolbar=0`}></iframe>
       </>
     );
   };
