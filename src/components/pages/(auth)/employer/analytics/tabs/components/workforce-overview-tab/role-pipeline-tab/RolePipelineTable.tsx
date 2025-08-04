@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import FilterLogo from '@/svg/FilterLogo';
 import Pagination from '@/components/Pagination';
 import RolePipelineFilterModal from '../../modals/RolePipelineFilterModal';
+import { Tooltip } from 'react-tooltip';
 
 interface RolePipelineData {
   role: string;
@@ -81,8 +82,11 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
         <div className="px-6 py-4">
           <div className="flex items-center">
             <button 
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              onClick={() => setIsFilterModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-not-allowed opacity-50"
+              data-tooltip-id="role-pipeline-filter-tooltip"
+              data-tooltip-content="Filter functionality coming soon"
+              data-tooltip-place="bottom"
+              disabled
             >
               <FilterLogo className="w-4 h-4 text-blue-600" />
               <span className="text-gray-700 font-medium">Filter</span>
@@ -104,8 +108,11 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
         <div className="px-6 py-4">
           <div className="flex items-center">
             <button 
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              onClick={() => setIsFilterModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-not-allowed opacity-50"
+              data-tooltip-id="role-pipeline-filter-tooltip"
+              data-tooltip-content="Filter functionality coming soon"
+              data-tooltip-place="bottom"
+              disabled
             >
               <FilterLogo className="w-4 h-4 text-blue-600" />
               <span className="text-gray-700 font-medium">Filter</span>
@@ -128,8 +135,11 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button 
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                onClick={() => setIsFilterModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-not-allowed opacity-50"
+                data-tooltip-id="role-pipeline-filter-tooltip"
+                data-tooltip-content="Filter functionality coming soon"
+                data-tooltip-place="bottom"
+                disabled
               >
                 <FilterLogo className="w-4 h-4 text-blue-600" />
                 <span className="text-gray-700 font-medium">Filter</span>
@@ -227,6 +237,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
         setIsOpen={setIsFilterModalOpen}
         onFilterApply={handleFilterApply}
       />
+      <Tooltip id="role-pipeline-filter-tooltip" />
     </>
   );
 };

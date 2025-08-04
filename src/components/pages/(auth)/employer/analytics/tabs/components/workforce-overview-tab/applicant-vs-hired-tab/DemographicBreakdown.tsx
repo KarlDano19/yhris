@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 
 import FilterLogo from '@/svg/FilterLogo';
 import DemographicBreakdownFilterModal from '../../modals/DemographicBreakdownFilterModal';
+import { Tooltip } from 'react-tooltip';
 
 interface DemographicBreakdownProps {
   appliedApplicantsData?: any[];
@@ -110,8 +111,11 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Demographic Breakdown</h3>
           <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
-            onClick={() => setIsFilterModalOpen(true)}
+            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
+            data-tooltip-id="demographic-filter-tooltip"
+            data-tooltip-content="Filter functionality coming soon"
+            data-tooltip-place="bottom"
+            disabled
           >
             <FilterLogo className="w-5 h-5" />
           </button>
@@ -130,8 +134,11 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Demographic Breakdown</h3>
           <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
-            onClick={() => setIsFilterModalOpen(true)}
+            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
+            data-tooltip-id="demographic-filter-tooltip"
+            data-tooltip-content="Filter functionality coming soon"
+            data-tooltip-place="bottom"
+            disabled
           >
             <FilterLogo className="w-5 h-5" />
           </button>
@@ -150,8 +157,11 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Demographic Breakdown</h3>
           <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
-            onClick={() => setIsFilterModalOpen(true)}
+            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
+            data-tooltip-id="demographic-filter-tooltip"
+            data-tooltip-content="Filter functionality coming soon"
+            data-tooltip-place="bottom"
+            disabled
           >
             <FilterLogo className="w-5 h-5" />
           </button>
@@ -169,8 +179,11 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Demographic Breakdown</h3>
           <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
-            onClick={() => setIsFilterModalOpen(true)}
+            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
+            data-tooltip-id="demographic-filter-tooltip"
+            data-tooltip-content="Filter functionality coming soon"
+            data-tooltip-place="bottom"
+            disabled
           >
             <FilterLogo className="w-5 h-5" />
           </button>
@@ -201,6 +214,7 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         setIsOpen={setIsFilterModalOpen}
         onFilterApply={handleFilterApply}
       />
+      <Tooltip id="demographic-filter-tooltip" />
     </>
   );
 };
