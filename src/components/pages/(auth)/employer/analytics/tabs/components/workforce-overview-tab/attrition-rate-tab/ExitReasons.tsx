@@ -1,92 +1,165 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import FilterLogo from '@/svg/FilterLogo';
 import ExitReasonsFilterModal from '../../modals/ExitReasonsFilterModal';
 
-const ExitReasons = () => {
+interface ExitReasonsProps {
+  separationData?: any;
+  isLoading?: boolean;
+  error?: any;
+}
+
+const ExitReasons: React.FC<ExitReasonsProps> = ({
+  separationData,
+  isLoading = false,
+  error = null
+}) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  // Dummy data for exit reasons
-  const exitReasonsData = [
-    {
-      reason: 'Voluntary Resignation',
-      count: 1
-    },
-    {
-      reason: 'Absence Without Leave (AWOL)',
-      count: 0
-    },
-    {
-      reason: 'Layoff',
-      count: 0
-    },
-    {
-      reason: 'Termination',
-      count: 0
+  // Calculate exit reasons data from separation data
+  const exitReasonsData = useMemo(() => {
+    if (!separationData?.records || !Array.isArray(separationData.records)) {
+      return [];
     }
-  ];
+
+    // Count separations by reason
+    const reasonCounts: { [key: string]: number } = {};
+
+    separationData.records.forEach((separation: any) => {
+      const reason = separation.reason_of_leaving || 'Unknown';
+      reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+    });
+
+    // Convert to array format
+    return Object.entries(reasonCounts)
+      .map(([reason, count]) => ({
+        reason,
+        count
+      }))
+      .sort((a, b) => b.count - a.count); // Sort by count descending
+  }, [separationData]);
+
+  // Get the date range for the title
+  const dateRange = useMemo(() => {
+    if (!separationData?.records || !Array.isArray(separationData.records)) {
+      return 'No data available';
+    }
+
+    const dates = separationData.records
+      .map((separation: any) => separation.date_of_separation)
+      .filter(Boolean)
+      .map((date: string) => new Date(date))
+      .sort((a: Date, b: Date) => a.getTime() - b.getTime());
+
+    if (dates.length === 0) {
+      return 'No data available';
+    }
+
+    const firstDate = dates[0];
+    const lastDate = dates[dates.length - 1];
+
+    if (firstDate.getFullYear() === lastDate.getFullYear() &&
+      firstDate.getMonth() === lastDate.getMonth()) {
+      return `${firstDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+    } else {
+      return `${firstDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} to ${lastDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+    }
+  }, [separationData]);
 
   const handleFilterApply = (filters: any) => {
     // Placeholder for filter application logic
     console.log('Applied filters:', filters);
   };
 
+  if (isLoading) {
+    return (
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Exit Reasons</h3>
+        <div className="flex items-center justify-center h-32">
+          <div className="text-gray-500">Loading exit reasons data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Exit Reasons</h3>
+        <div className="flex items-center justify-center h-32">
+          <div className="text-red-500">Error loading exit reasons data</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Exit Reasons for January 2025</h3>
-          <button 
+          <h3 className="text-lg font-semibold text-gray-900">Exit Reasons for {dateRange}</h3>
+          <button
             className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
             onClick={() => setIsFilterModalOpen(true)}
           >
             <FilterLogo className="w-5 h-5" />
           </button>
         </div>
-        
-        <div className="overflow-x-auto mb-6">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-2 font-semibold text-gray-700">Exit Reason</th>
-                <th className="text-left py-3 px-2 font-semibold text-gray-700">Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {exitReasonsData.map((item, index) => (
-                <tr key={index} className="border-b border-gray-100">
-                  <td className="py-3 px-2 text-gray-900 font-medium">{item.reason}</td>
-                  <td className="py-3 px-2 text-gray-700">{item.count}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
 
-        {/* Guidelines Section */}
-        <div className="bg-yellow-50 border-2 border-dashed border-yellow-400 rounded-lg p-4">
-          <h4 className="text-md font-semibold text-yellow-800 mb-3">Exit Reason Guidelines</h4>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-start">
-              <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">Voluntary Resignation</span> (0-1 per month):</span>
-              <span className="text-gray-700">This is usually normal, but more than 1 may suggest employees are unhappy or looking for better opportunities.</span>
+        {exitReasonsData.length > 0 ? (
+          <>
+            <div className="overflow-x-auto mb-6">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-2 font-semibold text-gray-700">Exit Reason</th>
+                    <th className="text-left py-3 px-2 font-semibold text-gray-700">Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exitReasonsData.map((item, index) => (
+                    <tr key={index} className="border-b border-gray-100">
+                      <td className="py-3 px-2 text-gray-900 font-medium">{item.reason}</td>
+                      <td className="py-3 px-2 text-gray-700">{item.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="flex items-start">
-              <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">AWOL</span> (0 per month):</span>
-              <span className="text-gray-700">This should not happen; even one case could point to deeper issues like poor onboarding or unmet expectations.</span>
+
+            {/* Guidelines Section */}
+            <div className="bg-yellow-50 border-2 border-dashed border-yellow-400 rounded-lg p-4">
+              <h4 className="text-md font-semibold text-yellow-800 mb-3">Exit Reason Guidelines</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start">
+                  <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">Voluntary Resignation</span> (0-1 per month):</span>
+                  <span className="text-gray-700">This is usually normal, but more than 1 may suggest employees are unhappy or looking for better opportunities.</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">AWOL</span> (0 per month):</span>
+                  <span className="text-gray-700">This should not happen; even one case could point to deeper issues like poor onboarding or unmet expectations.</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">Layoff</span> (0 per month):</span>
+                  <span className="text-gray-700">Layoffs should be rare and usually signal changes in company structure or budget.</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">Termination</span> (0-1 per month):</span>
+                  <span className="text-gray-700">Some terminations are expected, but frequent cases may indicate hiring or training problems.</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-start">
-              <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">Layoff</span> (0 per month):</span>
-              <span className="text-gray-700">Layoffs should be rare and usually signal changes in company structure or budget.</span>
-            </div>
-            <div className="flex items-start">
-              <span className="text-gray-800 font-medium w-48 flex-shrink-0"><span className="font-bold">Termination</span> (0-1 per month):</span>
-              <span className="text-gray-700">Some terminations are expected, but frequent cases may indicate hiring or training problems.</span>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-32">
+            <div className="text-center">
+              <div className="text-gray-400 text-lg mb-2">No exit reasons data available</div>
+              <div className="text-gray-500 text-sm">Separation records will appear here when available</div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <ExitReasonsFilterModal

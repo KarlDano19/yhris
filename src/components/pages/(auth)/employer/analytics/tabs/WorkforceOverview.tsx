@@ -12,6 +12,7 @@ import AttritionRate from './components/workforce-overview-tab/attrition-rate-ta
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
+import useGetSeparationItems from '../hooks/useGetSeparationItems';
 
 const WorkforceOverview = () => {
   const [activeSubTab, setActiveSubTab] = useState(1);
@@ -31,6 +32,15 @@ const WorkforceOverview = () => {
   };
 
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
+
+  // Fetch separation data for attrition rate analysis
+  const separationFilters = {
+    currentPage: 1,
+    pageSize: 100, // Get more records for better analysis
+    search: '',
+  };
+
+  const { data: separationData, isLoading: separationLoading, error: separationError } = useGetSeparationItems(separationFilters);
 
   // Refetch job postings when pagination changes or when tab is activated
   useEffect(() => {
@@ -186,10 +196,18 @@ const WorkforceOverview = () => {
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
             {/* Attrition Rate */}
-            <AttritionRate />
+            <AttritionRate 
+              separationData={separationData}
+              isLoading={separationLoading}
+              error={separationError}
+            />
 
             {/* Exit Reasons */}
-            <ExitReasons />
+            <ExitReasons 
+              separationData={separationData}
+              isLoading={separationLoading}
+              error={separationError}
+            />
           </div>
         );
       
