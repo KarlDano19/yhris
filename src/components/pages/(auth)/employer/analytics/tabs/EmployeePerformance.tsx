@@ -15,6 +15,8 @@ import EmployeeIssuesTable from './components/employeee-performance-tab/employee
 import InterventionRecommendations from './components/employeee-performance-tab/employee-issue-rate-tab/InterventionRecommendations';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
+import AveragePerformanceCard from './components/calculations/AveragePerformanceCard';
+import ResolvedVSOngoingCard from './components/calculations/ResolvedVSOngoingCard';
 
 interface EmployeePerformanceData {
   averageScore: number;
@@ -79,100 +81,6 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     isLoading: employeeIssueLoading,
     error: employeeIssueError,
   } = useGetEmployeeIssueItems(employeeIssueFilters);
-
-  // Calculate average performance score from evaluation data (for KPI Cards)
-  const calculateAveragePerformanceScore = () => {
-    if (!evaluationData?.records || evaluationData.records.length === 0) {
-      return { averageScore: 0, totalEmployees: 0, maxScore: 0 };
-    }
-
-    const totalScore = evaluationData.records.reduce((sum: number, item: any) => {
-      return sum + (parseFloat(item.score) || 0);
-    }, 0);
-
-    const totalEmployees = evaluationData.records.length;
-    const averageScore = totalEmployees > 0 ? totalScore / totalEmployees : 0;
-
-    // Get the maximum score from form_total_score (assuming all evaluations use the same template)
-    const maxScore = evaluationData.records[0]?.form_total_score || 
-                     evaluationData.records[0]?.max_score || 
-                     evaluationData.records[0]?.evaluation_template?.max_score || 
-                     100; // Final fallback
-
-    return {
-      averageScore: Math.round(averageScore * 100) / 100,
-      totalEmployees,
-      maxScore: Math.round(maxScore * 100) / 100
-    };
-  };
-
-  const { averageScore, totalEmployees, maxScore } = calculateAveragePerformanceScore();
-
-  // Calculate resolved vs ongoing issues percentages (for KPI Cards)
-  const calculateIssueResolutionRate = () => {
-    if (!employeeIssueData?.records || employeeIssueData.records.length === 0) {
-      return {
-        resolvedPercentage: 0,
-        ongoingPercentage: 0,
-        totalIssues: 0,
-        resolvedIssues: 0,
-        ongoingIssues: 0
-      };
-    }
-
-    const totalIssues = employeeIssueData.records.length;
-    let resolvedIssues = 0;
-    let ongoingIssues = 0;
-
-    employeeIssueData.records.forEach((issue: any) => {
-      // Resolved: decision has been sent AND received (employee signed)
-      if (issue.is_decision_sent && issue.is_decision_received) {
-        resolvedIssues++;
-      } 
-      // Ongoing: decision has not been sent yet (company hasn't reached decision)
-      else if (!issue.is_decision_sent) {
-        ongoingIssues++;
-      }
-      // Note: Issues where decision is sent but not received are not counted in either category
-    });
-
-    const resolvedPercentage = totalIssues > 0 ? ((resolvedIssues / totalIssues) * 100) : 0;
-    const ongoingPercentage = totalIssues > 0 ? ((ongoingIssues / totalIssues) * 100) : 0;
-
-    return {
-      resolvedPercentage: Math.round(resolvedPercentage * 10) / 10, // Round to 1 decimal
-      ongoingPercentage: Math.round(ongoingPercentage * 10) / 10, // Round to 1 decimal
-      totalIssues,
-      resolvedIssues,
-      ongoingIssues
-    };
-  };
-
-  const { resolvedPercentage, ongoingPercentage, totalIssues, resolvedIssues, ongoingIssues } = calculateIssueResolutionRate();
-
-  // KPI Cards Data
-  const Data = [
-    {
-      title: <>Average Employee<br />Performance Score</>,
-      value: `${averageScore}/${maxScore}`,
-      trend: `Based on ${totalEmployees} employee evaluations`,
-    },
-    // {
-    //   title: <>% of Employees<br />Completed Training</>,
-    //   value: `${data.trainingCompletion}%`,
-    //   trend: `Increased ${data.trends.trainingCompletion}% rate from Q1`,
-    // },
-    // {
-    //   title: <>% of Improvement<br />Post-training</>,
-    //   value: `${data.improvementRate}%`,
-    //   trend: `Increased ${data.trends.improvementRate}% rate from Q1`,
-    // },
-    {
-      title: <>% of Resolved Employee<br />Issues vs. Ongoing Issues</>,
-      value: `${resolvedPercentage}%`,
-      trend: `${resolvedIssues} resolved, ${ongoingIssues} ongoing out of ${totalIssues} total issues`,
-    }
-  ];
 
   // Sub Tab Navigation
   const subTabs = [
@@ -345,15 +253,19 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     <div className="space-y-8">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {Data.map((data, index) => (
-          <div key={index} className="flex flex-col pl-5 pr-5">
-            <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">{data.title}</h3>
-            <Card
-              value={data.value}
-              trend={data.trend}
-            />
-          </div>
-        ))}
+        {/* Average Performance Card */}
+        <AveragePerformanceCard
+          evaluationData={evaluationData}
+          isLoading={isLoading}
+          error={error}
+        />
+        
+        {/* Resolved vs Ongoing Issues Card */}
+        <ResolvedVSOngoingCard
+          employeeIssueData={employeeIssueData}
+          isLoading={employeeIssueLoading}
+          error={employeeIssueError}
+        />
       </div>
 
       {/* Sub Tab Navigation */}

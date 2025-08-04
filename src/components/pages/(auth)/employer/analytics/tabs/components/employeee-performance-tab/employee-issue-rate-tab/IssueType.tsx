@@ -155,7 +155,7 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData }) => {
       <div className="h-64 relative">
         <Doughnut data={chartData} options={options} />
         {/* Center text overlay */}
-        <div className="absolute top-1/2 left-20 md:left-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
+        <div className="absolute top-1/2 left-20 md:left-40 -translate-x-1/2 -translate-y-1/2 text-center">
           <div className="text-4xl font-bold text-gray-900">{totalIssues}</div>
         </div>
       </div>

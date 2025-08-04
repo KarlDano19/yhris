@@ -10,9 +10,12 @@ import DemographicBreakdown from './components/workforce-overview-tab/applicant-
 import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
 import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
+import AttritionRateCard from './components/calculations/AttritionRateCard';
+import AverageTenureCard from './components/calculations/AverageTenureCard';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetSeparationItems from '../hooks/useGetSeparationItems';
+import useGetEmployeeItems from '../hooks/useGetEmployeeItems';
 
 const WorkforceOverview = () => {
   const [activeSubTab, setActiveSubTab] = useState(1);
@@ -41,6 +44,15 @@ const WorkforceOverview = () => {
   };
 
   const { data: separationData, isLoading: separationLoading, error: separationError } = useGetSeparationItems(separationFilters);
+
+  // Fetch employee data for headcount calculation
+  const employeeFilters = {
+    currentPage: 1,
+    pageSize: 1000, // Get all employees for headcount
+    search: '',
+  };
+
+  const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems(employeeFilters);
 
   // Refetch job postings when pagination changes or when tab is activated
   useEffect(() => {
@@ -122,18 +134,7 @@ const WorkforceOverview = () => {
       trend: 'Decreased by -2 from last Q4 of 2025 (33%)',
       isPositive: true, // Positive because decrease in separations is good
     },
-    {
-      title: <>Attrition Rate</>,
-      value: '2.8%',
-      trend: 'Decreased by -1.4% from last Q4 of 2025 (4.2%)',
-      isPositive: true, // Positive because decrease in attrition is good
-    },
-    {
-      title: <>Average Tenure (Years)</>,
-      value: '2.3',
-      trend: 'No significant change',
-      isPositive: true,
-    },
+    // Attrition Rate and Average Tenure cards are now handled by separate components
   ];
 
   // Sub Tab Navigation
@@ -230,6 +231,22 @@ const WorkforceOverview = () => {
             />
           </div>
         ))}
+        
+        {/* Attrition Rate Card */}
+        <AttritionRateCard
+          separationData={separationData}
+          employeeData={employeeData}
+          isLoading={separationLoading || employeeLoading}
+          error={separationError || employeeError}
+        />
+        
+        {/* Average Tenure Card */}
+        <AverageTenureCard
+          employeeData={employeeData}
+          separationData={separationData}
+          isLoading={employeeLoading}
+          error={employeeError}
+        />
       </div>
 
       {/* Sub Tab Navigation */}
