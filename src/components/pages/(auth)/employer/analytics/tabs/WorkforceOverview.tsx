@@ -19,6 +19,8 @@ import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetSeparationItems from '../hooks/useGetSeparationItems';
 import useGetEmployeeItems from '../hooks/useGetEmployeeItems';
+import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
+import { getValidRegions } from '../utils/advertiseOptions';
 
 interface WorkforceOverviewProps {
   dateFilter?: {
@@ -34,6 +36,9 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   const [rolePipelinePageSize, setRolePipelinePageSize] = useState(5);
   const [rolePipelineCurrentPage, setRolePipelineCurrentPage] = useState(1);
 
+  // State for demographic breakdown job filter
+  const [selectedJobFilter, setSelectedJobFilter] = useState<string>('All Jobs');
+
   // Fetch overall applicants data across all job postings
   const { data: appliedApplicantsData, isLoading: applicantsLoading, error: applicantsError } = useGetOverallApplicants();
 
@@ -47,6 +52,34 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   };
 
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
+
+  // Fetch all job posts data for demographic analysis
+  const allJobPostFilters = {
+    currentPage: 1,
+    pageSize: 1000, // Get all job posts
+    search: '',
+    ...(dateFilter?.from && { from: dateFilter.from }),
+    ...(dateFilter?.to && { to: dateFilter.to }),
+  };
+
+  const { data: allJobPostData, refetch: refetchAllJobPost } = useGetJobPostItems(allJobPostFilters);
+
+  // Get selected job when filtering
+  const selectedJob = useMemo(() => {
+    if (selectedJobFilter === 'All Jobs' || !allJobPostData?.records) {
+      return null;
+    }
+    return allJobPostData.records.find((job: any) => job.job_title === selectedJobFilter);
+  }, [selectedJobFilter, allJobPostData]);
+
+  // Fetch applicants for specific job when selected
+  const { data: specificJobApplicants, isLoading: specificJobLoading } = useGetAppliedApplicants(selectedJob?.id);
+
+  // Initial fetch when component mounts
+  useEffect(() => {
+    refetchJobPost();
+    refetchAllJobPost();
+  }, []);
 
   // Fetch separation data for attrition rate analysis
   const separationFilters = {
@@ -70,17 +103,24 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
 
   const { data: employeeData, isLoading: employeeLoading, error: employeeError, refetch: refetchEmployee } = useGetEmployeeItems(employeeFilters);
 
-  // Refetch job postings when pagination changes or when tab is activated
+  // Fetch job postings when component loads and when pagination changes
+  useEffect(() => {
+    refetchJobPost();
+    refetchAllJobPost();
+  }, [rolePipelineCurrentPage, rolePipelinePageSize]);
+
+  // Refetch job postings when tab is activated
   useEffect(() => {
     if (activeSubTab === 2) { // Role Turnaround and Pipeline Analysis tab
       refetchJobPost();
     }
-  }, [rolePipelineCurrentPage, rolePipelinePageSize, activeSubTab]);
+  }, [activeSubTab]);
 
   // Refetch data when dateFilter changes
   useEffect(() => {
     if (dateFilter?.from || dateFilter?.to) {
       refetchJobPost();
+      refetchAllJobPost();
       refetchSeparation();
       refetchEmployee();
     }
@@ -174,9 +214,13 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
 
             {/* Demographic Breakdown */}
             <DemographicBreakdown 
-              appliedApplicantsData={appliedApplicantsData}
-              isLoading={applicantsLoading}
+              appliedApplicantsData={selectedJobFilter === 'All Jobs' ? appliedApplicantsData : specificJobApplicants}
+              jobPostData={allJobPostData}
+              validRegions={getValidRegions().filter((region): region is string => region !== null)}
+              isLoading={selectedJobFilter === 'All Jobs' ? applicantsLoading : specificJobLoading}
               error={applicantsError}
+              selectedJobFilter={selectedJobFilter}
+              onJobFilterChange={setSelectedJobFilter}
             />
           </div>
         );

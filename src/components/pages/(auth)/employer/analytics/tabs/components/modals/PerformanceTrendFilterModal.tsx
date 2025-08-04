@@ -101,7 +101,7 @@ export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepar
                     </button>
                     
                     {isDropdownOpen && (
-                      <div className='absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg h-80 overflow-y-auto'>
+                      <div className='absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto'>
                         {departments.map((dept) => (
                           <button
                             key={dept.id}

@@ -7,18 +7,27 @@ import { Tooltip } from 'react-tooltip';
 import DemographicBreakdownFilterModal from '../../modals/DemographicBreakdownFilterModal';
 
 import FilterLogo from '@/svg/FilterLogo';
+import { getRegionGroup } from '../../../../utils/advertiseOptions';
 
 
 interface DemographicBreakdownProps {
   appliedApplicantsData?: any[];
+  jobPostData?: any;
+  validRegions?: string[];
   isLoading?: boolean;
   error?: any;
+  selectedJobFilter?: string;
+  onJobFilterChange?: (jobFilter: string) => void;
 }
 
 const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({ 
   appliedApplicantsData, 
+  jobPostData,
+  validRegions = [],
   isLoading = false, 
-  error = null 
+  error = null,
+  selectedJobFilter = 'All Jobs',
+  onJobFilterChange
 }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -28,11 +37,14 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
       return [];
     }
 
-    const totalApplicants = appliedApplicantsData.length;
+    // Use applicants data passed from parent
+    const filteredApplicants = appliedApplicantsData;
+
+    const totalApplicants = filteredApplicants.length;
     if (totalApplicants === 0) return [];
 
     // Calculate gender distribution
-    const genderCounts = appliedApplicantsData.reduce((acc: any, applicant: any) => {
+    const genderCounts = filteredApplicants.reduce((acc: any, applicant: any) => {
       const gender = applicant.applicant?.gender || 'Unknown';
       acc[gender] = (acc[gender] || 0) + 1;
       return acc;
@@ -44,24 +56,128 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
     const malePercentage = totalApplicants > 0 ? ((maleCount / totalApplicants) * 100).toFixed(0) : '0';
 
     // Calculate most common regions
-    const regionCounts = appliedApplicantsData.reduce((acc: any, applicant: any) => {
-      const region = applicant.applicant?.address?.split(',')[1]?.trim() || 'Unknown';
-      acc[region] = (acc[region] || 0) + 1;
-      return acc;
-    }, {});
+    const regionGroupCounts: { [key: string]: number } = {};
+    
+    // Debug logging to understand data structure
+    console.log('DemographicBreakdown Debug:', {
+      selectedJobFilter,
+      totalApplicants: filteredApplicants.length,
+      jobPostDataRecords: jobPostData?.records?.length || 0,
+      validRegions: validRegions.length,
+      sampleApplicant: filteredApplicants[0],
+      applicantStructure: filteredApplicants[0] ? Object.keys(filteredApplicants[0]) : []
+    });
+    
+    if (selectedJobFilter === 'All Jobs') {
+      // For "All Jobs", consider both job posting regions and applicant addresses
+      if (jobPostData?.records && Array.isArray(jobPostData.records)) {
+        jobPostData.records.forEach((job: any) => {
+          // Check advertise_to field (single region)
+          if (job.advertise_to && validRegions.includes(job.advertise_to)) {
+            const regionGroup = getRegionGroup(job.advertise_to);
+            if (regionGroup) {
+              regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+            }
+          }
+          // Also check advertise_options field (multiple regions) if it exists
+          if (job.advertise_options && Array.isArray(job.advertise_options)) {
+            job.advertise_options.forEach((region: string) => {
+              if (validRegions.includes(region)) {
+                const regionGroup = getRegionGroup(region);
+                if (regionGroup) {
+                  regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+                }
+              }
+            });
+          }
+        });
+      }
+    } else {
+      // For specific jobs, use the job data from applicant records
+      filteredApplicants.forEach((applicant: any) => {
+        if (applicant.job_posting) {
+          // Check advertise_to field (single region)
+          if (applicant.job_posting.advertise_to && validRegions.includes(applicant.job_posting.advertise_to)) {
+            const regionGroup = getRegionGroup(applicant.job_posting.advertise_to);
+            if (regionGroup) {
+              regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+            }
+          }
+          // Also check advertise_options field (multiple regions) if it exists
+          if (applicant.job_posting.advertise_options && Array.isArray(applicant.job_posting.advertise_options)) {
+            applicant.job_posting.advertise_options.forEach((region: string) => {
+              if (validRegions.includes(region)) {
+                const regionGroup = getRegionGroup(region);
+                if (regionGroup) {
+                  regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+                }
+              }
+            });
+          }
+        }
+      });
+    }
+    
+    // Always consider applicant addresses for region analysis
+    filteredApplicants.forEach((applicant: any) => {
+      // Handle different data structures - check both possible paths
+      let address = '';
+      
+      // Try different possible paths for address
+      if (applicant.applicant?.address) {
+        address = applicant.applicant.address;
+      } else if (applicant.address) {
+        address = applicant.address;
+      } else if (applicant.applicant_application_form?.address) {
+        address = applicant.applicant_application_form.address;
+      }
+      
+      console.log('Processing applicant address:', {
+        applicantId: applicant.id,
+        address,
+        applicantKeys: Object.keys(applicant),
+        applicantNestedKeys: applicant.applicant ? Object.keys(applicant.applicant) : []
+      });
+      
+      if (address) {
+        // Try to match address with valid regions
+        const matchedRegion = validRegions.find(region => 
+          address.toLowerCase().includes(region.toLowerCase())
+        );
+        if (matchedRegion) {
+          const regionGroup = getRegionGroup(matchedRegion);
+          if (regionGroup) {
+            regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+          }
+        }
+      }
+    });
 
-    const maxRegionCount = Math.max(...Object.values(regionCounts).map(count => count as number));
-    const mostCommonRegions = Object.entries(regionCounts)
-      .filter(([_, count]) => (count as number) === maxRegionCount)
-      .map(([region]) => region)
-      .filter(region => region !== 'Unknown')
-      .slice(0, 3); // Limit to top 3 regions
+    // Debug logging for region calculation
+    console.log('Region calculation debug:', {
+      regionGroupCounts,
+      totalRegionGroups: Object.keys(regionGroupCounts).length
+    });
 
-    // Calculate age distribution
-    const ageGroups = appliedApplicantsData.reduce((acc: any, applicant: any) => {
-      const birthDate = applicant.applicant?.birth_date;
-      if (birthDate) {
-        const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
+    // Get top 3 most common region groups
+    const sortedRegionGroups = Object.entries(regionGroupCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([regionGroup]) => regionGroup);
+
+    const mostCommonRegions = sortedRegionGroups.length > 0 ? sortedRegionGroups : ['N/A'];
+
+    // Calculate age distribution using age field from applicants
+    const ageGroups = filteredApplicants.reduce((acc: any, applicant: any) => {
+      // First try to use the age field directly
+      let age = applicant.applicant?.age;
+      
+      // If age is not available, calculate from birth_date
+      if (!age && applicant.applicant?.birth_date) {
+        age = new Date().getFullYear() - new Date(applicant.applicant.birth_date).getFullYear();
+      }
+      
+      if (age && age > 0) {
         let ageGroup;
         if (age >= 18 && age <= 25) ageGroup = '18-25';
         else if (age >= 26 && age <= 35) ageGroup = '26-35';
@@ -100,11 +216,12 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         details: mostCommonAgeGroup
       }
     ];
-  }, [appliedApplicantsData]);
+  }, [appliedApplicantsData, jobPostData, validRegions, selectedJobFilter]);
 
   const handleFilterApply = (filters: any) => {
-    // Placeholder for filter application logic
-    console.log('Applied filters:', filters);
+    if (filters.selectedJob && onJobFilterChange) {
+      onJobFilterChange(filters.selectedJob);
+    }
   };
 
   // Loading state
@@ -153,69 +270,55 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
     );
   }
 
-  // No data state
-  if (!demographicData || demographicData.length === 0) {
-    return (
-      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Demographic Breakdown</h3>
-          <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
-            data-tooltip-id="demographic-filter-tooltip"
-            data-tooltip-content="Filter functionality coming soon"
-            data-tooltip-place="bottom"
-            disabled
-          >
-            <FilterLogo className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="flex items-center justify-center py-8">
-          <div className="text-gray-500">No demographic data available</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Demographic Breakdown</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {selectedJobFilter !== 'All Jobs' ? `Demographic Breakdown for ${selectedJobFilter}` : 'Demographic Breakdown'}
+          </h3>
           <button 
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
-            data-tooltip-id="demographic-filter-tooltip"
-            data-tooltip-content="Filter functionality coming soon"
-            data-tooltip-place="bottom"
-            disabled
+            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
+            onClick={() => setIsFilterModalOpen(true)}
           >
             <FilterLogo className="w-5 h-5" />
           </button>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-2 font-semibold text-gray-700">Demographic</th>
-                <th className="text-left py-3 px-2 font-semibold text-gray-700">Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {demographicData.map((item, index) => (
-                <tr key={index} className="border-b border-gray-100">
-                  <td className="py-3 px-2 text-gray-900 font-medium">{item.demographic}</td>
-                  <td className="py-3 px-2 text-gray-700">{item.details}</td>
+        {demographicData && demographicData.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Demographic</th>
+                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Details</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {demographicData.map((item, index) => (
+                  <tr key={index} className="border-b border-gray-100">
+                    <td className="py-3 px-2 text-gray-900 font-medium">{item.demographic}</td>
+                    <td className="py-3 px-2 text-gray-700">{item.details}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center text-gray-500">
+              <div className="text-lg font-semibold mb-2">No Data Available</div>
+              <div className="text-sm">No demographic data found for the selected criteria</div>
+            </div>
+          </div>
+        )}
       </div>
 
       <DemographicBreakdownFilterModal
         isOpen={isFilterModalOpen}
         setIsOpen={setIsFilterModalOpen}
         onFilterApply={handleFilterApply}
+        jobItems={jobPostData?.records || []}
       />
       <Tooltip id="demographic-filter-tooltip" />
     </>
