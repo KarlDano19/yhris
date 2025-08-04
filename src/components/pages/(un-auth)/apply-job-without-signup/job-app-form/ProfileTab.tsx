@@ -123,12 +123,8 @@ const ProfileTab = ({
   };
 
   const profileSubmit = handleSubmit((data: any) => {
-    // Handle gender field - if "Other" is selected, use the custom input value
-    const genderValue = data.gender === "Other" ? data.otherGender : data.gender;
-    
     const formData = {
       ...data,
-      gender: genderValue,
       profilePicture: profilePhotoList ? profilePhotoList : [],
     };
     firstSubmit(formData);
@@ -220,24 +216,11 @@ const ProfileTab = ({
                 <option value="">Select gender...</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
-                <option value="Other">Other</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <SelectChevronDown />
               </div>
             </div>
-            {selectedGender === "Other" && (
-              <div className="mt-2">
-                <input
-                  type="text"
-                  {...register("otherGender", { 
-                    required: selectedGender === "Other"
-                  })}
-                  placeholder="Please specify your gender"
-                  className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                />
-              </div>
-            )}
           </div>
           <div className="grid-item">
             <label

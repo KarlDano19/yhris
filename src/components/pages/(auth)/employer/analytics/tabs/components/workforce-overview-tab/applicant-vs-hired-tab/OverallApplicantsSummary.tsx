@@ -30,7 +30,6 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
 
     // Define all possible statuses with their display names and colors
     const allStatuses = {
-      'applied': { label: 'Applied', color: 'text-blue-600' },
       'ongoing': { label: 'Ongoing', color: 'text-blue-600' },
       'hired': { label: 'Hired', color: 'text-green-600' },
       'rejected': { label: 'Rejected', color: 'text-red-600' },
@@ -38,6 +37,15 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
     };
 
     const result = [];
+
+    // Add total applied count as the first row (replacing "Applied")
+    result.push({
+      status: 'Applied',
+      count: totalApplied.toString(),
+      percentage: '100%',
+      label: '(initial total applicants)',
+      color: 'text-gray-800 font-bold'
+    });
 
     // Add counts for each status (including zero counts)
     Object.entries(allStatuses).forEach(([status, config]) => {
@@ -51,15 +59,6 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
         label: 'of total applied',
         color: config.color
       });
-    });
-
-    // Add total applied count as a summary row at the bottom
-    result.push({
-      status: 'Total Applicants',
-      count: totalApplied.toString(),
-      percentage: '100%',
-      label: 'total applicants',
-      color: 'text-gray-800 font-bold'
     });
 
     return result;
@@ -134,7 +133,7 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
           </thead>
           <tbody>
             {applicantData.map((item, index) => (
-              <tr key={index} className={`border-b border-[#CCD8EA] ${index === applicantData.length - 1 ? 'bg-gray-50 font-semibold' : ''}`}>
+              <tr key={index} className="border-b border-[#CCD8EA]">
                 <td className="text-center  py-3 px-2 text-gray-900 font-medium">{item.status}</td>
                 <td className="text-center py-3 px-2 text-gray-700">{item.count}</td>
                 <td className="text-center py-3 px-2">
