@@ -110,7 +110,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
                 onClick={() => {
                   setAppliedDateFilter(dateFilter);
-                  console.log('Search with date range:', dateFilter);
                 }}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />

@@ -73,11 +73,6 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
     return pipeline;
   };
 
-  const handleFilterApply = (filters: any) => {
-    // Placeholder for filter application logic
-    console.log('Applied filters:', filters);
-  };
-
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
@@ -232,8 +227,8 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
       <RolePipelineFilterModal
         isOpen={isFilterModalOpen}
         setIsOpen={setIsFilterModalOpen}
-        onFilterApply={handleFilterApply}
       />
+      
       <Tooltip id="role-pipeline-filter-tooltip" />
     </>
   );

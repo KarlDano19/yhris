@@ -7,7 +7,7 @@ import { Tooltip } from 'react-tooltip';
 import DemographicBreakdownFilterModal from '../../modals/DemographicBreakdownFilterModal';
 
 import FilterLogo from '@/svg/FilterLogo';
-import { getRegionGroup } from '../../../../utils/advertiseOptions';
+import { getRegionGroup, advertiseOptions } from '../../../../utils/advertiseOptions';
 
 
 interface DemographicBreakdownProps {
@@ -57,16 +57,6 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
 
     // Calculate most common regions
     const regionGroupCounts: { [key: string]: number } = {};
-    
-    // Debug logging to understand data structure
-    console.log('DemographicBreakdown Debug:', {
-      selectedJobFilter,
-      totalApplicants: filteredApplicants.length,
-      jobPostDataRecords: jobPostData?.records?.length || 0,
-      validRegions: validRegions.length,
-      sampleApplicant: filteredApplicants[0],
-      applicantStructure: filteredApplicants[0] ? Object.keys(filteredApplicants[0]) : []
-    });
     
     if (selectedJobFilter === 'All Jobs') {
       // For "All Jobs", consider both job posting regions and applicant addresses
@@ -132,13 +122,6 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         address = applicant.applicant_application_form.address;
       }
       
-      console.log('Processing applicant address:', {
-        applicantId: applicant.id,
-        address,
-        applicantKeys: Object.keys(applicant),
-        applicantNestedKeys: applicant.applicant ? Object.keys(applicant.applicant) : []
-      });
-      
       if (address) {
         // Try to match address with valid regions
         const matchedRegion = validRegions.find(region => 
@@ -153,19 +136,20 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
       }
     });
 
-    // Debug logging for region calculation
-    console.log('Region calculation debug:', {
-      regionGroupCounts,
-      totalRegionGroups: Object.keys(regionGroupCounts).length
-    });
-
-    // Get top 3 most common region groups
+    // Get top 3 most common region groups and sort by advertiseOptions order
     const sortedRegionGroups = Object.entries(regionGroupCounts)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 3)
       .map(([regionGroup]) => regionGroup);
 
-    const mostCommonRegions = sortedRegionGroups.length > 0 ? sortedRegionGroups : ['N/A'];
+    // Sort regions by their order in advertiseOptions
+    const sortedByAdvertiseOrder = sortedRegionGroups.sort((a, b) => {
+      const aIndex = advertiseOptions.findIndex(option => option.label === a);
+      const bIndex = advertiseOptions.findIndex(option => option.label === b);
+      return aIndex - bIndex;
+    });
+
+    const mostCommonRegions = sortedByAdvertiseOrder.length > 0 ? sortedByAdvertiseOrder.map(region => region.replace(/^- | -$/g, '')) : ['N/A'];
 
     // Calculate age distribution using age field from applicants
     const ageGroups = filteredApplicants.reduce((acc: any, applicant: any) => {

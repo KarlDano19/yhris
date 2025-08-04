@@ -69,11 +69,6 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
     }
   }, [separationData]);
 
-  const handleFilterApply = (filters: any) => {
-    // Placeholder for filter application logic
-    console.log('Applied filters:', filters);
-  };
-
   if (isLoading) {
     return (
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
@@ -169,8 +164,8 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
       <ExitReasonsFilterModal
         isOpen={isFilterModalOpen}
         setIsOpen={setIsFilterModalOpen}
-        onFilterApply={handleFilterApply}
       />
+      
       <Tooltip id="exit-reasons-filter-tooltip" />
     </>
   );
