@@ -121,7 +121,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             {jobPostHistoryItems.map((item: any) => {
               return (
                 <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
-                  <h2 className='font-semibold text-xl'>{item.jobTitle}</h2>
+                  <h2 className='font-semibold text-xl break-words '>{item.jobTitle}</h2>
                   <p className='text-[15px] mb-12'>{item.placeAdvertise}</p>
                   <Link
                     href={`screen-applicants/${item.id}`}

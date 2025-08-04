@@ -109,10 +109,19 @@ export default function EditEmployeeCompensationLogModal({
                           {auditLogDetails.old_data &&
                             Object.entries(auditLogDetails.old_data).map(
                               ([key, value]) =>
-                                key !== 'id' && ( // Exclude the 'id' field
-                                  <h3 key={key} className='text-sm font-medium'>
-                                    {`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value !== null ? value : 'N/A'}`}
-                                  </h3>
+                                key !== 'id' && (
+                                  key === 'qualifications' || key === 'job_description' ? (
+                                    <div key={key} className='text-sm font-medium break-words whitespace-pre-line'>
+                                      <span>{key.charAt(0).toUpperCase() + key.slice(1)}: </span>
+                                      <span
+                                        dangerouslySetInnerHTML={{ __html: value != null ? String(value) : 'N/A' }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <h3 key={key} className='text-sm font-medium break-words whitespace-pre-line'>
+                                      {`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value !== null ? value : 'N/A'}`}
+                                    </h3>
+                                  )
                                 )
                             )}
                         </div>
@@ -130,10 +139,19 @@ export default function EditEmployeeCompensationLogModal({
                           {auditLogDetails.new_data &&
                             Object.entries(auditLogDetails.new_data).map(
                               ([key, value]) =>
-                                key !== 'id' && ( // Exclude the 'id' field
-                                  <h3 key={key} className='text-sm font-medium'>
-                                    {`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value !== null ? value : 'N/A'}`}
-                                  </h3>
+                                key !== 'id' && (
+                                  key === 'qualifications' || key === 'job_description' ? (
+                                    <div key={key} className='text-sm font-medium break-words whitespace-pre-line'>
+                                      <span>{key.charAt(0).toUpperCase() + key.slice(1)}: </span>
+                                      <span
+                                        dangerouslySetInnerHTML={{ __html: value != null ? String(value) : 'N/A' }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <h3 key={key} className='text-sm font-medium break-words whitespace-pre-line'>
+                                      {`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value !== null ? value : 'N/A'}`}
+                                    </h3>
+                                  )
                                 )
                             )}
                         </div>

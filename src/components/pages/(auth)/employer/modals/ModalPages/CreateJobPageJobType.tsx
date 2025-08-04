@@ -362,8 +362,8 @@ export default function CreateJobPageJobType({
                 {...register('hireCount')}
                 onChange={e => {
                   const value = parseInt(e.target.value);
-                  if (value < 0) {
-                    setValue('hireCount', 0);
+                  if (value < 1) {
+                    setValue('hireCount', 1);
                   } else {
                     setValue('hireCount', value);
                   }
