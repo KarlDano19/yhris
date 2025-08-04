@@ -15,7 +15,10 @@ import EmployeeIssuesTable from './components/employeee-performance-tab/employee
 import InterventionRecommendations from './components/employeee-performance-tab/employee-issue-rate-tab/InterventionRecommendations';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
+import useGetEmployeeItems from '../hooks/useGetEmployeeItems';
 import AveragePerformanceCard from './components/calculations/AveragePerformanceCard';
+import TrainingCompletionCard from './components/calculations/TrainingCompletionCard';
+import ImprovementPostTrainingCard from './components/calculations/ImprovementPostTrainingCard';
 import ResolvedVSOngoingCard from './components/calculations/ResolvedVSOngoingCard';
 
 interface EmployeePerformanceData {
@@ -32,7 +35,7 @@ interface EmployeePerformanceData {
 }
 
 interface EmployeePerformanceProps {
-  data: EmployeePerformanceData;
+  data?: EmployeePerformanceData;
   dateFilter?: {
     from: string;
     to: string;
@@ -81,6 +84,17 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     isLoading: employeeIssueLoading,
     error: employeeIssueError,
   } = useGetEmployeeIssueItems(employeeIssueFilters);
+
+  // Fetch employee data for training calculations
+  const employeeFilters = {
+    currentPage: 1,
+    pageSize: 1000, // Get all employees
+    search: '',
+    ...(dateFilter?.from && { from: dateFilter.from }),
+    ...(dateFilter?.to && { to: dateFilter.to }),
+  };
+
+  const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems(employeeFilters);
 
   // Sub Tab Navigation
   const subTabs = [
@@ -259,6 +273,20 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
           isLoading={isLoading}
           error={error}
         />
+        
+        {/* Training Completion Card */}
+        {/* <TrainingCompletionCard
+          employeeData={employeeData}
+          isLoading={employeeLoading}
+          error={employeeError}
+        /> */}
+        
+        {/* Improvement Post Training Card */}
+        {/* <ImprovementPostTrainingCard
+          evaluationData={evaluationData}
+          isLoading={isLoading}
+          error={error}
+        /> */}
         
         {/* Resolved vs Ongoing Issues Card */}
         <ResolvedVSOngoingCard

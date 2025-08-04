@@ -17,7 +17,14 @@ import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetSeparationItems from '../hooks/useGetSeparationItems';
 import useGetEmployeeItems from '../hooks/useGetEmployeeItems';
 
-const WorkforceOverview = () => {
+interface WorkforceOverviewProps {
+  dateFilter?: {
+    from: string;
+    to: string;
+  };
+}
+
+const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
 
   // Pagination State for Role Pipeline
@@ -32,6 +39,8 @@ const WorkforceOverview = () => {
     currentPage: rolePipelineCurrentPage,
     pageSize: rolePipelinePageSize,
     search: '',
+    ...(dateFilter?.from && { from: dateFilter.from }),
+    ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
@@ -41,18 +50,22 @@ const WorkforceOverview = () => {
     currentPage: 1,
     pageSize: 100, // Get more records for better analysis
     search: '',
+    ...(dateFilter?.from && { from: dateFilter.from }),
+    ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
-  const { data: separationData, isLoading: separationLoading, error: separationError } = useGetSeparationItems(separationFilters);
+  const { data: separationData, isLoading: separationLoading, error: separationError, refetch: refetchSeparation } = useGetSeparationItems(separationFilters);
 
   // Fetch employee data for headcount calculation
   const employeeFilters = {
     currentPage: 1,
     pageSize: 1000, // Get all employees for headcount
     search: '',
+    ...(dateFilter?.from && { from: dateFilter.from }),
+    ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
-  const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems(employeeFilters);
+  const { data: employeeData, isLoading: employeeLoading, error: employeeError, refetch: refetchEmployee } = useGetEmployeeItems(employeeFilters);
 
   // Refetch job postings when pagination changes or when tab is activated
   useEffect(() => {
@@ -60,6 +73,15 @@ const WorkforceOverview = () => {
       refetchJobPost();
     }
   }, [rolePipelineCurrentPage, rolePipelinePageSize, activeSubTab]);
+
+  // Refetch data when dateFilter changes
+  useEffect(() => {
+    if (dateFilter?.from || dateFilter?.to) {
+      refetchJobPost();
+      refetchSeparation();
+      refetchEmployee();
+    }
+  }, [dateFilter?.from, dateFilter?.to]);
 
   // Transform job postings data for role pipeline table
   const rolePipelineData = useMemo(() => {
@@ -134,7 +156,6 @@ const WorkforceOverview = () => {
       trend: 'Decreased by -2 from last Q4 of 2025 (33%)',
       isPositive: true, // Positive because decrease in separations is good
     },
-    // Attrition Rate and Average Tenure cards are now handled by separate components
   ];
 
   // Sub Tab Navigation
