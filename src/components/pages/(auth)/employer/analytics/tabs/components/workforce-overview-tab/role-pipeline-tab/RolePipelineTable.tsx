@@ -16,6 +16,11 @@ interface RolePipelineData {
   dateJobOpened: string;
   turnaroundTime: number;
   currentPipeline: string;
+  jobId?: number;
+}
+
+interface PipelineData {
+  [jobId: number]: { [stageTitle: string]: number };
 }
 
 interface PaginationData {
@@ -32,6 +37,7 @@ interface RolePipelineTableProps {
   pageSize: number;
   onPageChange: (event: any) => void;
   onPageSizeChange: (value: number) => void;
+  pipelineData?: PipelineData;
 }
 
 const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
@@ -42,7 +48,8 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
   currentPage,
   pageSize,
   onPageChange,
-  onPageSizeChange
+  onPageSizeChange,
+  pipelineData = {}
 }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -67,9 +74,17 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
     return `${days} days`;
   };
 
-  const formatPipelineInfo = (pipeline: string, applicants: number) => {
+  const formatPipelineInfo = (pipeline: string, applicants: number, jobId?: number) => {
     if (applicants === 0) return 'No applicants yet';
-    if (applicants === 1) return '1 applicant';
+    
+    if (jobId && pipelineData[jobId]) {
+      const stageBreakdown = Object.entries(pipelineData[jobId])
+        .map(([stage, count]) => `${stage}: ${count}${count > 1 ? 's' : ''}`)
+        .join(', ');
+      return stageBreakdown;
+    }
+    
+    if (applicants === 1) return '1';
     return pipeline;
   };
 
@@ -178,10 +193,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                         {role.role}
                       </td>
                       <td className="py-4 text-sm text-gray-900 text-center">
-                        <span className="font-medium">{role.numberOfApplicants}</span>
-                        {role.numberOfApplicants > 0 && (
-                          <span className="text-xs text-gray-500 ml-1">applicants</span>
-                        )}
+                        {role.numberOfApplicants}
                       </td>
                       <td className="py-4 text-sm text-center">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(role.status)}`}>
@@ -195,7 +207,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                         <span className="font-medium">{formatTurnaroundTime(role.turnaroundTime)}</span>
                       </td>
                       <td className="py-4 text-sm text-gray-900 text-center">
-                        {formatPipelineInfo(role.currentPipeline, role.numberOfApplicants)}
+                        {formatPipelineInfo(role.currentPipeline, role.numberOfApplicants, role.jobId)}
                       </td>
                     </tr>
                   ))

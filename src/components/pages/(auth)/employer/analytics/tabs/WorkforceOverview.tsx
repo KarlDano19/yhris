@@ -159,10 +159,34 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
         status: status,
         dateJobOpened: formattedDate,
         turnaroundTime: turnaroundTime,
-        currentPipeline: currentPipeline
+        currentPipeline: currentPipeline,
+        jobId: job.id
       };
     });
   }, [jobPostData]);
+
+  // Get pipeline data for all jobs
+  const pipelineData = useMemo(() => {
+    if (!appliedApplicantsData || !Array.isArray(appliedApplicantsData)) {
+      return {};
+    }
+
+    const pipeline: { [jobId: number]: { [stageTitle: string]: number } } = {};
+
+    appliedApplicantsData.forEach((applicant: any) => {
+      const jobId = applicant.job_posting?.id;
+      const stageTitle = applicant.job_stages_title || 'Unknown Stage';
+      
+      if (jobId) {
+        if (!pipeline[jobId]) {
+          pipeline[jobId] = {};
+        }
+        pipeline[jobId][stageTitle] = (pipeline[jobId][stageTitle] || 0) + 1;
+      }
+    });
+
+    return pipeline;
+  }, [appliedApplicantsData]);
 
   // Create pagination object for the table
   const paginationData = useMemo(() => {
@@ -237,6 +261,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
               pageSize={rolePipelinePageSize}
               onPageChange={rolePipelinePaginationChange}
               onPageSizeChange={rolePipelinePageSizeChange}
+              pipelineData={pipelineData}
             />
           </div>
         );
