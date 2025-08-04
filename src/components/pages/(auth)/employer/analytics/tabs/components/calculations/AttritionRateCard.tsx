@@ -54,11 +54,11 @@ const AttritionRateCard: React.FC<AttritionRateCardProps> = ({
     // Calculate attrition rate using the formula: (Leavers / Average Headcount) × 100
     const attritionRate = averageHeadcount > 0 ? (currentPeriodLeavers / averageHeadcount) * 100 : 0;
 
-    // Determine the period name
+    // Determine the period name dynamically
     const currentDate = new Date();
-    const quarter = Math.ceil((currentDate.getMonth() + 1) / 3);
-    const year = currentDate.getFullYear();
-    const period = `Q${quarter} ${year}`;
+    const currentQuarter = Math.ceil((currentDate.getMonth() + 1) / 3);
+    const currentYear = currentDate.getFullYear();
+    const period = `Q${currentQuarter} ${currentYear}`;
 
     return {
       attritionRate: Math.round(attritionRate * 10) / 10, // Round to 1 decimal place

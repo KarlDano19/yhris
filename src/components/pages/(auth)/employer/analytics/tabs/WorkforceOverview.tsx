@@ -10,6 +10,9 @@ import DemographicBreakdown from './components/workforce-overview-tab/applicant-
 import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
 import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
+import TotalActiveEmployeesCard from './components/calculations/TotalActiveEmployeesCard';
+import NewHiresCard from './components/calculations/NewHiresCard';
+import SeparatedEmployeesCard from './components/calculations/SeparatedEmployeesCard';
 import AttritionRateCard from './components/calculations/AttritionRateCard';
 import AverageTenureCard from './components/calculations/AverageTenureCard';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
@@ -136,27 +139,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
     };
   }, [jobPostData]);
 
-  // Dummy data for workforce metrics
-  const workforceData = [
-    {
-      title: <>Total Active Employees</>,
-      value: '143',
-      trend: 'Increased by +5 from last Q4 of 2025 (3.6%)',
-      isPositive: true,
-    },
-    {
-      title: <>New Hires</>,
-      value: '12',
-      trend: 'Increased by +3 from last Q4 of 2025 (33%)',
-      isPositive: true,
-    },
-    {
-      title: <>Separated Employees</>,
-      value: '4',
-      trend: 'Decreased by -2 from last Q4 of 2025 (33%)',
-      isPositive: true, // Positive because decrease in separations is good
-    },
-  ];
+  // Workforce metrics are now handled by separate calculation components
 
   // Sub Tab Navigation
   const subTabs = [
@@ -242,16 +225,26 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
     <div className="space-y-8">
       {/* Workforce KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        {workforceData.map((data, index) => (
-          <div key={index} className="flex flex-col pl-2 pr-2">
-            <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">{data.title}</h3>
-            <Card
-              value={data.value}
-              trend={data.trend}
-              isPositive={data.isPositive}
-            />
-          </div>
-        ))}
+        {/* Total Active Employees Card */}
+        <TotalActiveEmployeesCard
+          employeeData={employeeData}
+          isLoading={employeeLoading}
+          error={employeeError}
+        />
+        
+        {/* New Hires Card */}
+        <NewHiresCard
+          appliedApplicantsData={appliedApplicantsData}
+          isLoading={applicantsLoading}
+          error={applicantsError}
+        />
+        
+        {/* Separated Employees Card */}
+        <SeparatedEmployeesCard
+          separationData={separationData}
+          isLoading={separationLoading}
+          error={separationError}
+        />
         
         {/* Attrition Rate Card */}
         <AttritionRateCard
