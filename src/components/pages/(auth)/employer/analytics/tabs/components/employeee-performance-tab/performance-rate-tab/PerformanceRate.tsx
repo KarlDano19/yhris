@@ -141,7 +141,26 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
         display: false,
       },
       tooltip: {
-        enabled: false,
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        callbacks: {
+          title: (context: any) => {
+            return context[0].label;
+          },
+          label: (context: any) => {
+            const index = context.dataIndex;
+            const score = context.parsed.y;
+            const dept = departmentPerformanceData[index];
+            return [
+              `Score: ${score}%`,
+              `Employees: ${dept.count}`
+            ];
+          }
+        }
       },
     },
     scales: {

@@ -248,7 +248,26 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
         display: false,
       },
       tooltip: {
-        enabled: false,
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        borderColor: '#8B5CF6',
+        borderWidth: 1,
+        callbacks: {
+          title: (context: any) => {
+            return context[0].label;
+          },
+          label: (context: any) => {
+            const index = context.dataIndex;
+            const score = context.parsed.y;
+            const monthData = displayData[index];
+            return [
+              `Score: ${score}%`,
+              `Employees: ${monthData.count}`
+            ];
+          }
+        }
       },
     },
     scales: {
