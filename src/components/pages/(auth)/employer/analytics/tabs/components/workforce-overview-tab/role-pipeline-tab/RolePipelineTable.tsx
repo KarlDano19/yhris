@@ -145,11 +145,6 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                 <span className="text-gray-700 font-medium">Filter</span>
               </button>
             </div>
-            {data.length > 0 && (
-              <div className="text-sm text-gray-600">
-                Showing {data.length} of {pagination?.totalRecords || 0} roles
-              </div>
-            )}
           </div>
         </div>
         
