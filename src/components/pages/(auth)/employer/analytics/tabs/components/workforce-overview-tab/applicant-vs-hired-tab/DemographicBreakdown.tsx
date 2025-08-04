@@ -2,9 +2,12 @@
 
 import React, { useState, useMemo } from 'react';
 
-import FilterLogo from '@/svg/FilterLogo';
-import DemographicBreakdownFilterModal from '../../modals/DemographicBreakdownFilterModal';
 import { Tooltip } from 'react-tooltip';
+
+import DemographicBreakdownFilterModal from '../../modals/DemographicBreakdownFilterModal';
+
+import FilterLogo from '@/svg/FilterLogo';
+
 
 interface DemographicBreakdownProps {
   appliedApplicantsData?: any[];

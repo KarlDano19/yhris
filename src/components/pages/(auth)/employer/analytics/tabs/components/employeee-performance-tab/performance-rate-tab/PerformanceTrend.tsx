@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,10 +15,11 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
+import PerformanceTrendFilterModal from '../../modals/PerformanceTrendFilterModal';
+
 import FilterLogo from '@/svg/FilterLogo';
 import AverageLegendIcon from '@/svg/AverageLegendIcon';
-import PerformanceTrendFilterModal from '../../modals/PerformanceTrendFilterModal';
-import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 
 ChartJS.register(
   CategoryScale,

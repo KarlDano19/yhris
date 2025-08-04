@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+
 import Card from '../../../Card';
 
 interface AverageTenureCardProps {

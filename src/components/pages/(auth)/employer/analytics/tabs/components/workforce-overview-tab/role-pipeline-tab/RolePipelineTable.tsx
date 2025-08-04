@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 
-import FilterLogo from '@/svg/FilterLogo';
+import { Tooltip } from 'react-tooltip';
+
 import Pagination from '@/components/Pagination';
 import RolePipelineFilterModal from '../../modals/RolePipelineFilterModal';
-import { Tooltip } from 'react-tooltip';
+
+import FilterLogo from '@/svg/FilterLogo';
 
 interface RolePipelineData {
   role: string;
