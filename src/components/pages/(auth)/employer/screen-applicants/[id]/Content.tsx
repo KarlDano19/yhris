@@ -80,6 +80,7 @@ export default function Content() {
   
   // Get screening questions and ideal answers from the job posting
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
+  const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
 
   useEffect(() => {
     if (dataJobPostDetails?.screening_questions) {
@@ -92,48 +93,51 @@ export default function Content() {
     if (!screeningQuestions.length || !applicants?.length) return applicants;
     
     return applicants.map(applicant => {
-      // Check if the applicant has already been processed
-      if (applicant?.screeningFit) return applicant;
+      // Skip already processed applicants
+      if (applicant.screeningFit) return applicant;
       
       // Get the applicant's screening answers
       const answers = applicant.applicant?.screening_answers || [];
-      if (!answers.length) {
-        // If no answers, treat as not a good fit by default
-        return { ...applicant, screeningFit: 'bad' };
-      }
       
       // Only check if mustHave questions match their ideal answers
       let isGoodFit = true;
       
-      // Process each answer and check if it matches the ideal answer for mustHave questions
-      answers.forEach((answer: { question: string; answer: string }) => {
-        const question = screeningQuestions.find(q => q.question === answer.question);
-        if (question && question.mustHave) {
-          const isMatch = answer.answer.toLowerCase() === question.idealAnswer.toLowerCase();
-          
-          // If it's a must-have and doesn't match, applicant is not a good fit
-          if (!isMatch) {
-            isGoodFit = false;
+      if (!answers.length) {
+        // If no answers, treat as not a good fit by default
+        isGoodFit = false;
+      } else {
+        // Process each answer and check if it matches the ideal answer for mustHave questions
+        answers.forEach((answer: { question: string; answer: string }) => {
+          const question = screeningQuestions.find(q => q.question === answer.question);
+          if (question && question.mustHave) {
+            const isMatch = answer.answer.toLowerCase() === question.idealAnswer.toLowerCase();
+            
+            // If it's a must-have and doesn't match, applicant is not a good fit
+            if (!isMatch) {
+              isGoodFit = false;
+            }
           }
-        }
-      });
+        });
+        
+        // Check if any mustHave questions were not answered
+        screeningQuestions.forEach(question => {
+          if (question.mustHave) {
+            const wasAnswered = answers.some(
+              (answer: { question: string }) => answer.question === question.question
+            );
+            
+            if (!wasAnswered) {
+              isGoodFit = false;
+            }
+          }
+        });
+      }
       
-      // Check if any mustHave questions were not answered
-      screeningQuestions.forEach(question => {
-        if (question.mustHave) {
-          const wasAnswered = answers.some(
-            (answer: { question: string }) => answer.question === question.question
-          );
-          
-          if (!wasAnswered) {
-            isGoodFit = false;
-          }
-        }
-      });
+      const screeningFit = isGoodFit ? 'good' : 'bad';
       
       return { 
         ...applicant, 
-        screeningFit: isGoodFit ? 'good' : 'bad',
+        screeningFit,
         screeningAnswers: answers
       };
     });
@@ -159,9 +163,10 @@ export default function Content() {
 
     if (dataJobPostDetails && dataAppliedApplicants) {
       // Process the applicants to determine if they are good fits
-      const processedApplicants = processApplicants(dataAppliedApplicants);
+      const processed = processApplicants(dataAppliedApplicants);
+      setProcessedApplicants(processed);
       
-      processedApplicants.forEach((item: any) => {
+      processed.forEach((item: any) => {
         let newData = {
           id: item.applicant.id,
           email: item.applicant.email,
