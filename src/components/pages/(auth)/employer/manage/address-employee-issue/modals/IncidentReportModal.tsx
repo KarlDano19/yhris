@@ -298,13 +298,22 @@ export default function IncidentReportModal({
                         <label htmlFor='issueType' className='block text-sm font-medium leading-6 text-gray-900'>
                           Issue Type<span className='text-red-600'>*</span>
                         </label>
-                        <div className='mt-2'>
-                          <input
+                        <div className='relative mt-2'>
+                          <select
                             id='issueType'
                             {...register('issueType', { required: true })}
-                            type='text'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                          />
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none bg-white'
+                          >
+                            <option value=''>Select issue type...</option>
+                            <option value='Tardiness'>Tardiness</option>
+                            <option value='Insubordination'>Insubordination</option>
+                            <option value='Misconduct'>Misconduct</option>
+                            <option value='Poor Performance'>Poor Performance</option>
+                            <option value='Absenteeism'>Absenteeism</option>
+                          </select>
+                          <div className='absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none'>
+                            <SelectChevronDown />
+                          </div>
                         </div>
                       </div>
                     </div>
