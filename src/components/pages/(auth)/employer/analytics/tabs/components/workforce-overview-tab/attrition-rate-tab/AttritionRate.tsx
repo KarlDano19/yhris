@@ -102,19 +102,19 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Month</th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Attrition Rate</th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Total Exits</th>
+                  <th className="text-center py-3 px-2 font-semibold text-gray-700">Month</th>
+                  <th className="text-center py-3 px-2 font-semibold text-gray-700">Attrition Rate</th>
+                  <th className="text-center py-3 px-2 font-semibold text-gray-700">Total Exits</th>
                 </tr>
               </thead>
               <tbody>
                 {attritionData.map((item, index) => (
                   <tr key={index} className="border-b border-gray-100">
-                    <td className="py-3 px-2 text-gray-900 font-medium">{item.month}</td>
-                    <td className={`py-3 px-2 ${getAttritionRateColor(item.attritionRate)}`}>
+                    <td className="text-center py-3 px-2 text-gray-900 font-medium">{item.month}</td>
+                    <td className={`text-center py-3 px-2 ${getAttritionRateColor(item.attritionRate)}`}>
                       {item.attritionRate}
                     </td>
-                    <td className="py-3 px-2 text-gray-700">{item.totalExits}</td>
+                    <td className="text-center py-3 px-2 text-gray-700">{item.totalExits}</td>
                   </tr>
                 ))}
               </tbody>

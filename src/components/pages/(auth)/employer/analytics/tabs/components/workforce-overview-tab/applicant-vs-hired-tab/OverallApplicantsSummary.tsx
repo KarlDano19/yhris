@@ -108,18 +108,18 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-2 font-semibold text-gray-700">Status</th>
-              <th className="text-left py-3 px-2 font-semibold text-gray-700">Count</th>
-              <th className="text-left py-3 px-2 font-semibold text-gray-700">Percentage</th>
+            <tr className="border-b-2 border-[#ACB9CB]">
+              <th className="text-center py-3 px-2 font-semibold text-gray-700">Status</th>
+              <th className="text-center py-3 px-2 font-semibold text-gray-700">Count</th>
+              <th className="text-center py-3 px-2 font-semibold text-gray-700">Percentage</th>
             </tr>
           </thead>
           <tbody>
             {applicantData.map((item, index) => (
-              <tr key={index} className={`border-b border-gray-100 ${index === applicantData.length - 1 ? 'bg-gray-50 font-semibold' : ''}`}>
-                <td className="py-3 px-2 text-gray-900 font-medium">{item.status}</td>
-                <td className="py-3 px-2 text-gray-700">{item.count}</td>
-                <td className="py-3 px-2">
+              <tr key={index} className={`border-b border-[#CCD8EA] ${index === applicantData.length - 1 ? 'bg-gray-50 font-semibold' : ''}`}>
+                <td className="text-center  py-3 px-2 text-gray-900 font-medium">{item.status}</td>
+                <td className="text-center py-3 px-2 text-gray-700">{item.count}</td>
+                <td className="text-center py-3 px-2">
                   <div className="flex flex-col">
                     <span className={`font-semibold ${item.color}`}>{item.percentage}</span>
                     <span className="text-xs text-gray-500">{item.label}</span>

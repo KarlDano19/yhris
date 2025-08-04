@@ -148,14 +148,14 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
       // Determine status based on job data
       const status = job.is_active ? 'Ongoing' : 'Closed';
 
-      // Generate pipeline information (this would need to be enhanced with actual applicant data)
-      const currentPipeline = job.total_applicants > 0 
-        ? `${job.total_applicants} applicants` 
+      // Generate pipeline information using applicant_applied_no
+      const currentPipeline = job.applicant_applied_no > 0 
+        ? `${job.applicant_applied_no} applicants` 
         : 'No applicants yet';
 
       return {
         role: job.job_title || 'Unknown Role',
-        numberOfApplicants: job.total_applicants || 0,
+        numberOfApplicants: job.applicant_applied_no || 0,
         status: status,
         dateJobOpened: formattedDate,
         turnaroundTime: turnaroundTime,

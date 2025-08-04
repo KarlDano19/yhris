@@ -273,7 +273,7 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
   return (
     <>
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold text-gray-900">
             {selectedJobFilter !== 'All Jobs' ? `Demographic Breakdown for ${selectedJobFilter}` : 'Demographic Breakdown'}
           </h3>
@@ -289,16 +289,16 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Demographic</th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Details</th>
+                <tr className="border-b-2 border-[#ACB9CB]">
+                  <th className="text-center py-3 px-2 font-semibold text-gray-700">Demographic</th>
+                  <th className="text-center py-3 px-2 font-semibold text-gray-700">Details</th>
                 </tr>
               </thead>
               <tbody>
                 {demographicData.map((item, index) => (
-                  <tr key={index} className="border-b border-gray-100">
-                    <td className="py-3 px-2 text-gray-900 font-medium">{item.demographic}</td>
-                    <td className="py-3 px-2 text-gray-700">{item.details}</td>
+                  <tr key={index} className="border-b border-[#CCD8EA]">
+                    <td className="text-center py-5 px-2 text-gray-900 font-medium">{item.demographic}</td>
+                    <td className="text-center py-5 px-2 text-gray-700">{item.details}</td>
                   </tr>
                 ))}
               </tbody>

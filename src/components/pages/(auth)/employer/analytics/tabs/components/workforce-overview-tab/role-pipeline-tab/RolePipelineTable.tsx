@@ -155,22 +155,22 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
             <table className="min-w-full">
               <thead>
                 <tr className="border-b-2 border-[#ACB9CB]">
-                  <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                     Role
                   </th>
-                  <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                     No. of Applicants
                   </th>
-                  <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                     Status
                   </th>
-                  <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                     Date Job Opened
                   </th>
-                  <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                     Turnaround Time
                   </th>
-                  <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                     Current Pipeline
                   </th>
                 </tr>
@@ -179,27 +179,27 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                 {data.length > 0 ? (
                   data.map((role, index) => (
                     <tr key={index} className="border-b border-[#CCD8EA] hover:bg-gray-50 transition-colors">
-                      <td className="py-4 text-sm text-gray-900 font-medium">
+                      <td className="py-4 text-sm text-gray-900 font-medium text-center">
                         {role.role}
                       </td>
-                      <td className="py-4 text-sm text-gray-900">
+                      <td className="py-4 text-sm text-gray-900 text-center">
                         <span className="font-medium">{role.numberOfApplicants}</span>
                         {role.numberOfApplicants > 0 && (
                           <span className="text-xs text-gray-500 ml-1">applicants</span>
                         )}
                       </td>
-                      <td className="py-4 text-sm">
+                      <td className="py-4 text-sm text-center">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(role.status)}`}>
                           {role.status}
                         </span>
                       </td>
-                      <td className="py-4 text-sm text-gray-900">
+                      <td className="py-4 text-sm text-gray-900 text-center">
                         {role.dateJobOpened}
                       </td>
-                      <td className="py-4 text-sm text-gray-900">
+                      <td className="py-4 text-sm text-gray-900 text-center">
                         <span className="font-medium">{formatTurnaroundTime(role.turnaroundTime)}</span>
                       </td>
-                      <td className="py-4 text-sm text-gray-900">
+                      <td className="py-4 text-sm text-gray-900 text-center">
                         {formatPipelineInfo(role.currentPipeline, role.numberOfApplicants)}
                       </td>
                     </tr>

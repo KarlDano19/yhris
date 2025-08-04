@@ -94,19 +94,19 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
           <table className="min-w-full">
             <thead>
               <tr className="border-b-2 border-[#ACB9CB]">
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Name
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Department
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Issue Type
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Date Reported
                 </th>
-                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Status
                 </th>
               </tr>
@@ -115,19 +115,19 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
               {data.length > 0 ? (
                 data.map((issue, index) => (
                   <tr key={index} className="border-b border-[#CCD8EA] hover:bg-gray-50">
-                    <td className="py-4 text-sm text-gray-900">
+                    <td className="text-center py-4 text-sm text-gray-900">
                       {issue.name}
                     </td>
-                    <td className="py-4 text-sm text-gray-900">
+                    <td className="text-center py-4 text-sm text-gray-900">
                       {issue.department}
                     </td>
-                    <td className="py-4 text-sm text-gray-900">
+                    <td className="text-center py-4 text-sm text-gray-900">
                       {issue.issueType}
                     </td>
-                    <td className="py-4 text-sm text-gray-900">
+                    <td className="text-center py-4 text-sm text-gray-900">
                       {issue.dateReported}
                     </td>
-                    <td className={`py-4 text-sm ${getStatusColor(issue.status)}`}>
+                    <td className={`text-center py-4 text-sm ${getStatusColor(issue.status)}`}>
                       {issue.status}
                     </td>
                   </tr>
