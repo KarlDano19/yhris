@@ -119,7 +119,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
           <div className="overflow-x-auto mb-6">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b-2 border-[#ACB9CB]">
                   <th className="text-center py-3 px-2 font-semibold text-gray-700">Month</th>
                   <th className="text-center py-3 px-2 font-semibold text-gray-700">Attrition Rate</th>
                   <th className="text-center py-3 px-2 font-semibold text-gray-700">Total Exits</th>
@@ -127,7 +127,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
               </thead>
               <tbody>
                 {attritionData.map((item, index) => (
-                  <tr key={index} className="border-b border-gray-100">
+                  <tr key={index} className="border-b border-[#CCD8EA]">
                     <td className="text-center py-3 px-2 text-gray-900 font-medium">{item.month}</td>
                     <td className={`text-center py-3 px-2 ${getAttritionRateColor(item.attritionRate)}`}>
                       {item.attritionRate}

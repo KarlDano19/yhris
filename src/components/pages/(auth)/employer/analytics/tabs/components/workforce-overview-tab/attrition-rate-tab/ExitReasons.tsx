@@ -130,14 +130,14 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
             <div className="overflow-x-auto mb-6">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="border-b-2 border-[#ACB9CB]">
                     <th className="text-center py-3 px-2 font-semibold text-gray-700">Exit Reason</th>
                     <th className="text-center py-3 px-2 font-semibold text-gray-700">Count</th>
                   </tr>
                 </thead>
                 <tbody>
                   {exitReasonsData.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-100">
+                    <tr key={index} className="border-b border-[#CCD8EA]">
                       <td className="text-center py-3 px-2 text-gray-900 font-medium">{item.reason}</td>
                       <td className="text-center py-3 px-2 text-gray-700">{item.count}</td>
                     </tr>
