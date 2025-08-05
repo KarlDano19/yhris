@@ -44,42 +44,25 @@ interface PerformanceTrendProps {
 
 const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter, currentPage, pageSize }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
   const [lastPage, setLastPage] = useState(currentPage);
   const [chartKey, setChartKey] = useState(0);
+  const [userManuallySelected, setUserManuallySelected] = useState(false);
   const { data: departmentItems } = useGetDepartmentItems();
 
-  // Set default selected department to the latest department with data
+  // Set default selected department to "All Departments" by default
   useEffect(() => {
     if (evaluationData?.records && evaluationData.records.length > 0) {
-      // Get all unique departments from evaluation data
-      const departmentsWithData = Array.from(new Set(evaluationData.records.map((item: any) => item.department)));
+      // Only update if user hasn't manually selected a department OR if the page has changed
+      if (!userManuallySelected || currentPage !== lastPage) {
+        setSelectedDepartment('All Departments');
+        setLastPage(currentPage);
+        setUserManuallySelected(false); // Reset for next auto-selection
+      }
       
-      if (departmentsWithData.length > 0) {
-        // Find the department with the most recent evaluation from current page data
-        let latestDepartment: string = departmentsWithData[0] as string;
-        let latestDate = new Date(0);
-        
-        evaluationData.records.forEach((item: any) => {
-          if (item.date_of_evaluation) {
-            const evaluationDate = new Date(item.date_of_evaluation);
-            if (evaluationDate > latestDate) {
-              latestDate = evaluationDate;
-              latestDepartment = item.department as string;
-            }
-          }
-        });
-        
-        // Only update if no department is currently selected OR if the page has changed
-        if (!selectedDepartment || currentPage !== lastPage) {
-          setSelectedDepartment(latestDepartment);
-          setLastPage(currentPage);
-        }
-        
-        // Force chart re-render when page size changes (layout change)
-        if (pageSize) {
-          setChartKey(prev => prev + 1);
-        }
+      // Force chart re-render when page size changes (layout change)
+      if (pageSize) {
+        setChartKey(prev => prev + 1);
       }
     }
   }, [evaluationData, currentPage, lastPage, selectedDepartment]);
@@ -118,7 +101,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
     // Filter selected department evaluations based on date range or current year
     const departmentEvaluations = evaluationData.records.filter((item: any) => {
       const evaluationDate = new Date(item.date_of_evaluation);
-      const isSelectedDepartment = item.department === selectedDepartment;
+      const isSelectedDepartment = selectedDepartment === 'All Departments' || item.department === selectedDepartment;
       
       if (dateFilter?.from && dateFilter?.to) {
         const fromDate = new Date(dateFilter.from);
@@ -302,6 +285,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
 
   const handleDepartmentSelect = (department: string) => {
     setSelectedDepartment(department);
+    setUserManuallySelected(true); // Mark that user has manually selected
   };
 
   return (
@@ -315,7 +299,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             <FilterLogo className="w-5 h-5" />
           </button>
           <h3 className="text-lg font-semibold text-gray-900 text-center flex-1 px-4">
-            {selectedDepartment} Performance Trend {dateFilter?.from && dateFilter?.to ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` : `(${displayData.length > 0 ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` : 'No Data'})`}
+            {selectedDepartment !== 'All Departments' ? `${selectedDepartment} Performance Trend` : 'All Departments Performance Trend'} {dateFilter?.from && dateFilter?.to ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` : `(${displayData.length > 0 ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` : 'No Data'})`}
           </h3>
           <div className="w-10 flex-shrink-0"></div>
         </div>
@@ -329,7 +313,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-gray-500">
                 <div className="text-lg font-semibold mb-2">No Data Available</div>
-                <div className="text-sm">No {selectedDepartment} evaluations found for the current year</div>
+                <div className="text-sm">No {selectedDepartment !== 'All Departments' ? selectedDepartment : 'department'} evaluations found for the current year</div>
               </div>
             </div>
           )}

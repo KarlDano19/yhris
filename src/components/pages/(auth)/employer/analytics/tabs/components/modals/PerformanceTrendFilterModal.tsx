@@ -102,6 +102,16 @@ export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepar
                     
                     {isDropdownOpen && (
                       <div className='absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto'>
+                        {/* All Departments Option */}
+                        <button
+                          type='button'
+                          onClick={() => handleDepartmentSelect('All Departments')}
+                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-200 ${
+                            selectedDepartment === 'All Departments' ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
+                          }`}
+                        >
+                          All Departments
+                        </button>
                         {departments.map((dept) => (
                           <button
                             key={dept.id}
