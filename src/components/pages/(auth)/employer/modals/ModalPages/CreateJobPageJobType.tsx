@@ -6,7 +6,7 @@ import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
-export default function CreateJobPageTwo({
+export default function CreateJobPageJobType({
   control,
   register,
   setValue,
@@ -29,12 +29,15 @@ export default function CreateJobPageTwo({
 }) {
   const [otherJobType, setOtherJobType] = useState(false);
   const [otherSchedule, setOtherSchedule] = useState(false);
+  const [otherWorkSetup, setOtherWorkSetup] = useState(false);
   const [manualInputFocus, setManualInputFocus] = useState({
     jobType: false,
+    workSetup: false,
     schedule: false,
     hireDate: false,
   });
   const JobType = ['Full Time', 'Part Time', 'Internship/OJT', 'Project-based'];
+  const WorkSetup = ['On-site', 'Work from Home', 'Hybrid'];
   const Schedule = ['Flexible', '8 Hours', '12 Hours', 'Night Shift'];
   const handleData = (action: string, option: string, type: string) => {
     let data = getValues(type);
@@ -54,11 +57,17 @@ export default function CreateJobPageTwo({
     const hireDate = getValues('hireDate');
     const hireCount = getValues('hireCount');
     let jobType = getValues('jobType');
+    let workSetup = getValues('workSetup');
     let schedule = getValues('schedule');
     const otherJobTypeData = getValues('otherJobType');
     if (otherJobType && otherJobTypeData) {
       jobType = getValues('jobType') || [];
       jobType = jobType.concat(otherJobTypeData);
+    }
+    const otherWorkSetupData = getValues('otherWorkSetup');
+    if (otherWorkSetup && otherWorkSetupData) {
+      workSetup = getValues('workSetup') || [];
+      workSetup = workSetup.concat(otherWorkSetupData);
     }
     const otherScheduleData = getValues('otherSchedule');
     if (otherSchedule && otherScheduleData) {
@@ -68,6 +77,7 @@ export default function CreateJobPageTwo({
     let manualInputFocusData = {
       hireDate: !!!hireDate,
       jobType: !!!jobType,
+      workSetup: !!!workSetup,
       schedule: !!!schedule,
     };
     setManualInputFocus(manualInputFocusData);
@@ -77,7 +87,7 @@ export default function CreateJobPageTwo({
       });
       return;
     }
-    const results = [!!hireDate, !!jobType, !!schedule];
+    const results = [!!hireDate, !!jobType, !!workSetup, !!schedule];
     const incomplete = results.some((item: boolean) => !item);
     if (!incomplete) {
       if (!hasSalaryRange) {
@@ -87,6 +97,7 @@ export default function CreateJobPageTwo({
         secondFormSubmit?.();
       }
       setValue('jobType', jobType);
+      setValue('workSetup', workSetup);
       setValue('schedule', schedule);
     }
   });
@@ -122,6 +133,7 @@ export default function CreateJobPageTwo({
                     }
                     setManualInputFocus({
                       jobType: false,
+                      workSetup: false,
                       schedule: false,
                       hireDate: false,
                     });
@@ -145,6 +157,7 @@ export default function CreateJobPageTwo({
                 setOtherJobType(!otherJobType);
                 setManualInputFocus({
                   jobType: false,
+                  workSetup: false,
                   schedule: false,
                   hireDate: false,
                 });
@@ -174,6 +187,90 @@ export default function CreateJobPageTwo({
             </div>
           </div>
         )}
+        
+        <div className='sm:col-span-4 mt-4'>
+          <label htmlFor='workSetup' className='block text-sm font-medium leading-6 text-gray-900'>
+            What is the work set-up for this job?
+            <span className='text-red-600'>*</span>
+          </label>
+          <div
+            className={`flex flex-wrap mt-2 space-x-2 md:space-y-0 md:space-x-6 ${
+              manualInputFocus.workSetup ? 'border-2 border-blue-700' : ''
+            }`}
+          >
+            {WorkSetup.map((setup, index) => {
+              const workSetups = getValues('workSetup');
+              return (
+                <button
+                  key={index}
+                  id={`workSetupBtn${index}`}
+                  type='button'
+                  className={`mt-2 md:mt-0 flex-grow text-sm font-medium leading-6 text-gray-900 shadow-sm ring-1 border-0 ring-inset ring-gray-300 py-3 px-6 rounded-md transition-all ${
+                    workSetups?.includes(setup) ? 'bg-slate-400' : ''
+                  }`}
+                  onClick={() => {
+                    if (workSetups?.includes(setup)) {
+                      handleData('remove', setup, 'workSetup');
+                    } else {
+                      handleData('add', setup, 'workSetup');
+                    }
+                    setManualInputFocus({
+                      jobType: false,
+                      workSetup: false,
+                      schedule: false,
+                      hireDate: false,
+                    });
+                  }}
+                >
+                  {workSetups?.includes(setup) ? '✓' : '+'} {setup}
+                </button>
+              );
+            })}
+            {/* Other */}
+            {/* <button
+              id='otherWorkSetupBtn'
+              type='button'
+              className={`mt-2 md:mt-0 flex-grow text-sm font-medium leading-6 text-gray-900 shadow-sm ring-1 border-0 ring-inset ring-gray-300 py-3 px-6 rounded-md transition-all ${
+                otherWorkSetup ? 'bg-slate-400' : ''
+              }`}
+              onClick={() => {
+                if (!otherWorkSetup) {
+                  setValue('otherWorkSetup', '');
+                }
+                setOtherWorkSetup(!otherWorkSetup);
+                setManualInputFocus({
+                  jobType: false,
+                  workSetup: false,
+                  schedule: false,
+                  hireDate: false,
+                });
+              }}
+            >
+              {otherWorkSetup ? '✓' : '+'}
+              Other
+            </button> */}
+          </div>
+        </div>
+        {otherWorkSetup && (
+          <div className='sm:col-span-4 mt-4'>
+            <div>
+              <label htmlFor='otherWorkSetup' className='block text-sm font-medium leading-6 text-gray-900'>
+                If you selected other, please input the work set-up and add comma if it&#39;s more than one.
+              </label>
+              <div className='mt-2'>
+                <input
+                  id='otherWorkSetup'
+                  {...register('otherWorkSetup', {
+                    required: true,
+                  })}
+                  type='text'
+                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className='sm:col-span-4 mt-4'>
           <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>
             What is the schedule for this job?
@@ -202,6 +299,7 @@ export default function CreateJobPageTwo({
                     }
                     setManualInputFocus({
                       jobType: false,
+                      workSetup: false,
                       schedule: false,
                       hireDate: false,
                     });
@@ -222,6 +320,7 @@ export default function CreateJobPageTwo({
                 setOtherSchedule(!otherSchedule);
                 setManualInputFocus({
                   jobType: false,
+                  workSetup: false,
                   schedule: false,
                   hireDate: false,
                 });
@@ -263,8 +362,8 @@ export default function CreateJobPageTwo({
                 {...register('hireCount')}
                 onChange={e => {
                   const value = parseInt(e.target.value);
-                  if (value < 0) {
-                    setValue('hireCount', 0);
+                  if (value < 1) {
+                    setValue('hireCount', 1);
                   } else {
                     setValue('hireCount', value);
                   }
@@ -309,14 +408,14 @@ export default function CreateJobPageTwo({
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
         <button
-          id='pageTwoNextBtn'
+          id='pageJobTypeNextBtn'
           type='submit'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
         >
           Next
         </button>
         <button
-          id='pageTwoBackBtn'
+          id='pageJobTypeBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
           onClick={() => setPageNumber(1)}

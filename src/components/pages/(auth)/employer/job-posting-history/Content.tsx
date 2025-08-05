@@ -21,6 +21,10 @@ import UpdateJobModal from './modals/UpdateJobModal';
 import DeleteJobModal from './modals/DeleteModal';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
+import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
+import useUpdateJobRolesStatus from './hooks/useUpdateJobRolesStatus';
+import useUpdateJobRemarkStatus from './hooks/useUpdateJobRemarkStatus';
+import useUpdateJobBenefitStatus from './hooks/useUpdateJobBenefitStatus';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
@@ -89,7 +93,11 @@ const Content = () => {
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const { mutate } = useUpdateJobPostStatus();
+  const { mutate: mutateStatus } = useUpdateJobPostStatus();
+  const { mutate: mutateSalary } = useUpdateJobSalaryStatus();
+  const { mutate: mutateRoles } = useUpdateJobRolesStatus();
+  const { mutate: mutateRemark } = useUpdateJobRemarkStatus();
+  const { mutate: mutateBenefit } = useUpdateJobBenefitStatus();
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
   const queryClient = useQueryClient();
@@ -126,7 +134,7 @@ const Content = () => {
           });
         },
       };
-      mutate(data, callbackReq);
+      mutateStatus(data, callbackReq);
     };
 
     setContextMenuOptions([menuOptions]);
@@ -155,14 +163,14 @@ const Content = () => {
       },
     };
 
-    mutate(data, callbackReq);
+    mutateStatus(data, callbackReq);
   };
 
   const handleShowRoles = (jobId: any, isShowRoles: boolean) => {
     let data: any = {};
     data['jobId'] = jobId;
     data['is_show_roles'] = !isShowRoles;
-    const successMessage = isShowRoles ? 'Successfully hide roles.' : 'Successfully show roles.';
+    const successMessage = isShowRoles ? 'Successfully HIDE ROLES.' : 'Successfully SHOW ROLES.';
     const callbackReq = {
       onSuccess: () => {
         refetch();
@@ -176,14 +184,14 @@ const Content = () => {
         });
       },
     };
-    mutate(data, callbackReq);
+    mutateRoles(data, callbackReq);
   };
 
   const handleShowSalary = (jobId: any, isShowSalary: boolean) => {
     let data: any = {};
     data['jobId'] = jobId;
     data['is_show_salary'] = !isShowSalary;
-    const successMessage = isShowSalary ? 'Successfully hide salary.' : 'Successfully show salary.';
+    const successMessage = isShowSalary ? 'Successfully HIDE SALARY.' : 'Successfully SHOW SALARY.';
     const callbackReq = {
       onSuccess: () => {
         refetch();
@@ -197,14 +205,14 @@ const Content = () => {
         });
       },
     };
-    mutate(data, callbackReq);
+    mutateSalary(data, callbackReq);
   };
 
   const handleShowNotes = (jobId: any, isShowNotes: boolean) => {
     let data: any = {};
     data['jobId'] = jobId;
     data['is_show_remarks'] = !isShowNotes;
-    const successMessage = isShowNotes ? 'Successfully hide notes.' : 'Successfully show notes.';
+    const successMessage = isShowNotes ? 'Successfully HIDE NOTES & REMARKS.' : 'Successfully SHOW NOTES & REMARKS.';
     const callbackReq = {
       onSuccess: () => {
         refetch();
@@ -213,7 +221,28 @@ const Content = () => {
         });
       },
     };
-    mutate(data, callbackReq);
+    mutateRemark(data, callbackReq);
+  };
+
+  const handleShowBenefits = (jobId: any, isShowBenefits: boolean) => {
+    let data: any = {};
+    data['jobId'] = jobId;
+    data['is_show_benefits'] = !isShowBenefits;
+    const successMessage = isShowBenefits ? 'Successfully HIDE BENEFITS.' : 'Successfully SHOW BENEFITS.';
+    const callbackReq = {
+      onSuccess: () => {
+        refetch();
+        toast.custom(() => <CustomToast message={successMessage} type='success' />, {
+          duration: 5000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 5000,
+        });
+      },
+    };
+    mutateBenefit(data, callbackReq);
   };
 
   const handleCloseContextMenu = () => {
@@ -235,9 +264,12 @@ const Content = () => {
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['isActive'] = jobPost['is_active'];
-        jobPost['isShowSalary'] = jobPost['is_show_salary'];
-        jobPost['isShowNotes'] = jobPost['is_show_remarks'];
-        jobPost['isShowRoles'] = jobPost['is_show_roles'];
+        // Use the exact same property names as in the API response
+        // This ensures the toggle works correctly
+        jobPost['is_show_salary'] = jobPost['is_show_salary'];
+        jobPost['is_show_remarks'] = jobPost['is_show_remarks'];
+        jobPost['is_show_benefits'] = jobPost['is_show_benefits'];
+        jobPost['is_show_roles'] = jobPost['is_show_roles'];
         jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
       });
       setJobPostHistoryItems(dataJobPost.records);
@@ -251,6 +283,30 @@ const Content = () => {
   useEffect(() => {
     refetch();
   }, [currentPage, pageSize]);
+
+  // Add click outside handler to close menus
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (Object.keys(moreMenuOpen).some(id => moreMenuOpen[parseInt(id)])) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.more-menu-container')) {
+          setMoreMenuOpen({});
+          setShowShareOptions({});
+        }
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [moreMenuOpen]);
+
+  // Close all menus when changing pages
+  useEffect(() => {
+    setMoreMenuOpen({});
+    setShowShareOptions({});
+  }, [currentPage]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -411,62 +467,81 @@ const Content = () => {
                 >
                   <DeleteIcon />
                 </button>
-                <button onClick={() => setMoreMenuOpen((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}>
-                  <MoreIconWithBorder />
-                </button>
-              </div>
-              {moreMenuOpen[jobPost.id] && (
-                <div className='absolute bg-white border rounded shadow-lg mt-2'>
-                  <ul className='py-1 text-left'>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}
-                    >
-                      Share Post To <ChevronRightIcon className='inline h-4 w-4' />
-                    </li>
-                    {showShareOptions[jobPost.id] && (
-                      <div className='pl-4'>
-                        {jobPost.postIn.map((social: any) => {
-                          const DynamicComponent = componentMap[social];
-                          return (
-                            <span
-                              key={social}
-                              className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
-                              onClick={() => socialMediaShare(social, jobPost.og_url)}
-                            >
-                              <DynamicComponent />
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
-                    >
-                      {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
-                    </li>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
-                    >
-                      {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
-                    </li>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                      onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
-                    >
-                      {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
-                    </li>
-                    <li
-                      className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
-                      onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
-                    >
-                      {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
-                    </li>
-                  </ul>
+                <div className="relative more-menu-container">
+                  <button onClick={() => handleMoreMenuClick(jobPost.id)}>
+                    <MoreIconWithBorder />
+                  </button>
+                  {moreMenuOpen[jobPost.id] && (
+                    <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
+                      <ul className='py-1 text-left'>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}
+                        >
+                          Share Post To <ChevronRightIcon className='inline h-4 w-4' />
+                        </li>
+                        {showShareOptions[jobPost.id] && (
+                          <div className='pl-4'>
+                            {jobPost.postIn.map((social: any) => {
+                              const DynamicComponent = componentMap[social];
+                              return (
+                                <span
+                                  key={social}
+                                  className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
+                                  onClick={() => socialMediaShare(social, jobPost.og_url)}
+                                >
+                                  <DynamicComponent />
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
+                        >
+                          <span className={!jobPost.is_active ? 'text-red-500' : ''}>
+                          {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
+                          </span>
+
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
+                        >
+                          <span className={!jobPost.is_show_roles ? 'text-red-500' : ''}>
+                            {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                          </span>
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
+                        >
+                          <span className={!jobPost.is_show_salary ? 'text-red-500' : ''}>
+                            {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                          </span>
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
+                        >
+                          <span className={!jobPost.is_show_benefits ? 'text-red-500' : ''}>
+                            {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
+                          </span>
+                        </li>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                          onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
+                        >
+                          <span className={!jobPost.is_show_remarks ? 'text-red-500' : ''}>
+                            {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </td>
         </tr>
@@ -480,6 +555,24 @@ const Content = () => {
         </tr>
       );
     }
+  };
+
+  const handleMoreMenuClick = (jobId: number) => {
+    // Close all other menus first
+    const newMoreMenuOpen: { [key: number]: boolean } = {};
+    
+    // Toggle the clicked menu
+    newMoreMenuOpen[jobId] = !moreMenuOpen[jobId];
+    
+    // Also reset share options when closing menus
+    if (!newMoreMenuOpen[jobId]) {
+      setShowShareOptions((prev) => ({
+        ...prev,
+        [jobId]: false
+      }));
+    }
+    
+    setMoreMenuOpen(newMoreMenuOpen);
   };
 
   return (
@@ -597,16 +690,17 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
+                
+              </div>
+            </div>
+          </div>
+          <Pagination
                   pagination={pagination}
                   currentPage={currentPage}
                   pageSize={pageSize}
                   onPageSizeChange={pageSizeChange}
                   onPageChange={paginationChange}
                 />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <JobPreviewModal

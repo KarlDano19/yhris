@@ -15,11 +15,13 @@ import SubmittedModal from './modals/SubmittedModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
 import useGetJobDetails from './hooks/useGetJobDetails';
 import ProfileTab from './ProfileTab';
+import ScreeningQuestionTab from './ScreeningQuestionTab';
 import PreferencesTab from './PreferencesTab';
 
 const Content = () => {
   const params = useParams();
   const firstForm = useForm();
+  const screeningForm = useForm();
   const secondForm = useForm();
   const [isSuggestModal, setSuggestModal] = useState(false);
   const [jobDetailData, setJobDetailData] = useState<any>({});
@@ -54,11 +56,25 @@ const Content = () => {
     setCurrentTab(2);
   };
 
+  const screeningSubmit = (data: any) => {
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setCurrentTab(3);
+  };
+
   const handleConfirmation = (isConfirmed: boolean) => {
     setConfirmModal(false);
     if (isConfirmed) {
       const finalData = { ...combinedFormData, ...secondForm.getValues() };
       finalData['jobPosting'] = params.id;
+      
+      // Add screening question answers if they exist
+      if (screeningForm.getValues().screeningAnswers) {
+        finalData['screeningAnswers'] = screeningForm.getValues().screeningAnswers;
+      }
+      
+      // Set an empty array for setupPreference since it's no longer collected
+      finalData['setupPreference'] = [];
+      
       const callBackReq = {
         onSuccess: () => {
           setOpenSubmitModal(true);
@@ -83,7 +99,7 @@ const Content = () => {
 
   return (
     <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
-      <div className='px-4 pt-8'>
+      <div className='px-4 pt-24'>
         <h4 className='text-lg md:text-2xl font-bold md:font-semibold'>
           Jobs - {jobDetailData?.job_title} | Application Form
         </h4>
@@ -98,6 +114,17 @@ const Content = () => {
             />
           </div>
           <div style={{ display: currentTab === 2 ? 'block' : 'none' }}>
+            <ScreeningQuestionTab
+              register={screeningForm.register}
+              watch={screeningForm.watch}
+              setValue={screeningForm.setValue}
+              handleSubmit={screeningForm.handleSubmit}
+              setCurrentTab={setCurrentTab}
+              jobPostingData={jobDetailData}
+              nextTab={3}
+            />
+          </div>
+          <div style={{ display: currentTab === 3 ? 'block' : 'none' }}>
             <PreferencesTab
               control={secondForm.control}
               register={secondForm.register}

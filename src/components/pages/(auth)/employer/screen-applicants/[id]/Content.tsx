@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 import { INITIAL_STATE, stageReducer } from '../reducers/stageReducer';
 import { initialActionState } from '../lib/initialActionState';
-import { ModalTypes, StageType } from '../types';
+import { ModalTypes, StageType, ApplicantType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
 import CustomToast from '@/components/CustomToast';
@@ -21,6 +21,7 @@ import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
+import Filter, { FilterOptions } from './Filter';
 import DragAndDrop from './DragAndDrop';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
 import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
@@ -28,6 +29,7 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
+import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -71,6 +73,75 @@ export default function Content() {
     return item.id === actionState.stageId;
   })?.requirements;
   const { mutate: emailMutate } = useSendEmail();
+  const [filters, setFilters] = useState<FilterOptions>({
+    rating: ['Good Fit', 'Not Fit'],
+    status: ['Ongoing', 'Passed'],
+  });
+  
+  // Get screening questions and ideal answers from the job posting
+  const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
+  const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (dataJobPostDetails?.screening_questions) {
+      setScreeningQuestions(dataJobPostDetails.screening_questions || []);
+    }
+  }, [dataJobPostDetails]);
+
+  // Process applicants and evaluate their screening answers
+  const processApplicants = (applicants: any[]) => {
+    if (!screeningQuestions.length || !applicants?.length) return applicants;
+    
+    return applicants.map(applicant => {
+      // Skip already processed applicants
+      if (applicant.screeningFit) return applicant;
+      
+      // Get the applicant's screening answers
+      const answers = applicant.applicant?.screening_answers || [];
+      
+      // Only check if mustHave questions match their ideal answers
+      let isGoodFit = true;
+      
+      if (!answers.length) {
+        // If no answers, treat as not a good fit by default
+        isGoodFit = false;
+      } else {
+        // Process each answer and check if it matches the ideal answer for mustHave questions
+        answers.forEach((answer: { question: string; answer: string }) => {
+          const question = screeningQuestions.find(q => q.question === answer.question);
+          if (question && question.mustHave) {
+            const isMatch = answer.answer.toLowerCase() === question.idealAnswer.toLowerCase();
+            
+            // If it's a must-have and doesn't match, applicant is not a good fit
+            if (!isMatch) {
+              isGoodFit = false;
+            }
+          }
+        });
+        
+        // Check if any mustHave questions were not answered
+        screeningQuestions.forEach(question => {
+          if (question.mustHave) {
+            const wasAnswered = answers.some(
+              (answer: { question: string }) => answer.question === question.question
+            );
+            
+            if (!wasAnswered) {
+              isGoodFit = false;
+            }
+          }
+        });
+      }
+      
+      const screeningFit = isGoodFit ? 'good' : 'bad';
+      
+      return { 
+        ...applicant, 
+        screeningFit,
+        screeningAnswers: answers
+      };
+    });
+  };
 
   useEffect(() => {
     if (dataJobPostDetails) {
@@ -91,7 +162,11 @@ export default function Content() {
     }
 
     if (dataJobPostDetails && dataAppliedApplicants) {
-      dataAppliedApplicants.forEach((item: any) => {
+      // Process the applicants to determine if they are good fits
+      const processed = processApplicants(dataAppliedApplicants);
+      setProcessedApplicants(processed);
+      
+      processed.forEach((item: any) => {
         let newData = {
           id: item.applicant.id,
           email: item.applicant.email,
@@ -101,11 +176,13 @@ export default function Content() {
           checklists: [],
           status: item.status,
           stagePosition: item.job_stages,
+          screeningFit: item.screeningFit,
+          screeningAnswers: item.screeningAnswers || []
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });
     }
-  }, [dataJobPostDetails, dataAppliedApplicants]);
+  }, [dataJobPostDetails, dataAppliedApplicants, screeningQuestions]);
 
   const handleFormSubmit = (data: any, isOpen?: any) => {
     if (whichModal) {
@@ -118,6 +195,7 @@ export default function Content() {
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="Successfully set-up stage requirements." type="success" />, { duration: 4000 });
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -136,6 +214,7 @@ export default function Content() {
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="Successfully updated the checklist." type="success" />, { duration: 4000 });
             jobPostDetailsRefetch();
             appliedApplicantRefetch();
           },
@@ -242,6 +321,10 @@ export default function Content() {
     }
   };
 
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  };
+
   return (
     <>
       {!isGetJobPostDetailsLoading && (
@@ -258,7 +341,8 @@ export default function Content() {
                 <h2 className='text-xl font-bold text-indigo-dye'>Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications</h2>
                 {whichModal && modals[whichModal].component}
 
-                <div className='flex justify-end'>
+                <div className='flex justify-end items-center gap-4 my-6'>
+                  <Filter onFilterChange={handleFilterChange} />
                   <AddStageBtn handleAddStage={handleAddStage} />
                 </div>
 
@@ -267,6 +351,7 @@ export default function Content() {
                   gridCols={gridCols}
                   jobPostDetailsRefetch={jobPostDetailsRefetch}
                   appliedApplicantRefetch={appliedApplicantRefetch}
+                  filters={filters}
                 />
               </div>
             </div>

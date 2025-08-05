@@ -13,8 +13,8 @@ import SelectChevronDown from "@/svg/SelectChevronDown";
 
 export default function MeetingInfo({
   control,
-  register,
-  handleSubmit,
+  register, 
+  handleSubmit, // not used
   setSelectedTab,
   errors,
   setError,
