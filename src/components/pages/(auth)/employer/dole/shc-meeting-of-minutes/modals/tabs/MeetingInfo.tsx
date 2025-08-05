@@ -9,6 +9,7 @@ import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+import { ClockIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 export default function MeetingInfo({
@@ -163,8 +164,18 @@ export default function MeetingInfo({
                 type="time"
                 {...register("time_of_meeting", { required: true })}
                 id="time_of_meeting"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden"
+                style={{ WebkitAppearance: 'none' }}
               />
+              <div 
+                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                onClick={() => {
+                  const timeInput = document.getElementById('time_of_meeting') as HTMLInputElement;
+                  timeInput?.showPicker();
+                }}
+              >
+                <ClockIcon className="h-6 w-6 text-savoy-blue hover:text-indigo-300" />
+              </div>
             </div>
           </div>
           <div>
