@@ -69,10 +69,17 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
         };
       })
       .sort((a, b) => {
-        // Sort by date (assuming format like "January 2025")
-        const dateA = new Date(a.month);
-        const dateB = new Date(b.month);
-        return dateA.getTime() - dateB.getTime();
+        // Sort by month order (January to December)
+        const monthOrder = {
+          'January': 1, 'February': 2, 'March': 3, 'April': 4,
+          'May': 5, 'June': 6, 'July': 7, 'August': 8,
+          'September': 9, 'October': 10, 'November': 11, 'December': 12
+        };
+        
+        const monthA = monthOrder[a.month as keyof typeof monthOrder] || 0;
+        const monthB = monthOrder[b.month as keyof typeof monthOrder] || 0;
+        
+        return monthA - monthB;
       });
   }, [separationData]);
 
