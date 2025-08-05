@@ -17,6 +17,7 @@ import AttritionRateCard from './components/calculations/AttritionRateCard';
 import AverageTenureCard from './components/calculations/AverageTenureCard';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
+import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
 import useGetSeparationItems from '../hooks/useGetSeparationItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
@@ -53,23 +54,15 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
 
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
 
-  // Fetch all job posts data for demographic analysis
-  const allJobPostFilters = {
-    currentPage: 1,
-    pageSize: 1000, // Get all job posts
-    search: '',
-    ...(dateFilter?.from && { from: dateFilter.from }),
-    ...(dateFilter?.to && { to: dateFilter.to }),
-  };
-
-  const { data: allJobPostData, refetch: refetchAllJobPost } = useGetJobPostItems(allJobPostFilters);
+  // Fetch all job posts data for demographic analysis (without pagination)
+  const { data: allJobPostData } = useGetAllJobPostItems();
 
   // Get selected job when filtering
   const selectedJob = useMemo(() => {
-    if (selectedJobFilter === 'All Jobs' || !allJobPostData?.records) {
+    if (selectedJobFilter === 'All Jobs' || !allJobPostData) {
       return null;
     }
-    return allJobPostData.records.find((job: any) => job.job_title === selectedJobFilter);
+    return allJobPostData.find((job: any) => job.job_title === selectedJobFilter);
   }, [selectedJobFilter, allJobPostData]);
 
   // Fetch applicants for specific job when selected
@@ -78,7 +71,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   // Initial fetch when component mounts
   useEffect(() => {
     refetchJobPost();
-    refetchAllJobPost();
   }, []);
 
   // Fetch separation data for attrition rate analysis
@@ -98,7 +90,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   // Fetch job postings when component loads and when pagination changes
   useEffect(() => {
     refetchJobPost();
-    refetchAllJobPost();
   }, [rolePipelineCurrentPage, rolePipelinePageSize]);
 
   // Refetch job postings when tab is activated
@@ -112,7 +103,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   useEffect(() => {
     if (dateFilter?.from || dateFilter?.to) {
       refetchJobPost();
-      refetchAllJobPost();
       refetchSeparation();
     }
   }, [dateFilter?.from, dateFilter?.to]);
@@ -230,7 +220,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
             {/* Demographic Breakdown */}
             <DemographicBreakdown 
               appliedApplicantsData={selectedJobFilter === 'All Jobs' ? appliedApplicantsData : specificJobApplicants}
-              jobPostData={allJobPostData}
+              jobPostData={{ records: allJobPostData }}
               validRegions={getValidRegions().filter((region): region is string => region !== null)}
               isLoading={selectedJobFilter === 'All Jobs' ? applicantsLoading : specificJobLoading}
               error={applicantsError}

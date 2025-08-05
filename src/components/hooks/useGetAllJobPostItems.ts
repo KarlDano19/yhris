@@ -1,12 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getJobPostItems(filters: any) {
+async function getAllJobPostItems() {
   try {
-    let newFilters = { ...filters };
-    newFilters.view_type = 'job-posting-history';
-    if (filters.currentPage) newFilters.current_page = filters.currentPage;
-    if (filters.pageSize) newFilters.page_size = filters.pageSize;
+    let newFilters = { view_type: 'select' };
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -33,13 +30,13 @@ async function getJobPostItems(filters: any) {
   }
 }
 
-function useGetJobPostItems(filters: any) {
-  const query = useQuery(['jobPostItemCache', {}], () => getJobPostItems(filters), {
-    enabled: false,
+function useGetAllJobPostItems() {
+  const query = useQuery(['allJobPostItemsCache'], () => getAllJobPostItems(), {
+    refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 
   return query;
 }
 
-export default useGetJobPostItems;
+export default useGetAllJobPostItems; 
