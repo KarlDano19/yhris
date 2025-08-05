@@ -55,7 +55,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['jobType'] = jobPost['job_type'];
         jobPost['jobDescription'] = jobPost['job_description'];
         jobPost['applicantApplied'] = jobPost['applicant_applied_no'];
-        jobPost['placeAdvertise'] = jobPost['advertise_to'];
+        jobPost['placeAdvertise'] = jobPost['advertise_to'].split(',').join(', ');
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
@@ -122,7 +122,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               return (
                 <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
                   <h2 className='font-semibold text-xl break-words '>{item.jobTitle}</h2>
-                  <p className='text-[15px] mb-12'>{item.placeAdvertise}</p>
+                  <p className='text-[15px] mb-12 break-words text-pretty'>{item.placeAdvertise}</p>
                   <Link
                     href={`screen-applicants/${item.id}`}
                     className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'

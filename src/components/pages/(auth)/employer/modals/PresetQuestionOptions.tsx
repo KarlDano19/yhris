@@ -53,21 +53,7 @@ export const PRESET_QUESTIONS = {
     idealAnswer: 'Yes',
     responseType: 'Yes / No',
   },
-    // 'hybrid-work': {
-  //   question: 'Are you comfortable with a hybrid work arrangement (some days in office, some remote)?',
-  //   idealAnswer: 'Yes',
-  //   responseType: 'Yes / No',
-  // },
-  // 'onsite-work': {
-  //   question: 'Are you able to work onsite full-time at our office location?',
-  //   idealAnswer: 'Yes',
-  //   responseType: 'Yes / No',
-  // },
-  // 'remote-work': {
-  //   question: 'Do you have a suitable remote work setup with reliable internet connection?',
-  //   idealAnswer: 'Yes',
-  //   responseType: 'Yes / No',
-  // },
+
   'urgent-hiring': {
     question: 'Are you available to start within the next two weeks if selected?',
     idealAnswer: 'Yes',
@@ -82,7 +68,6 @@ export const PRESET_QUESTIONS = {
 
 const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectOption, selectedOptions }) => {
   const presetOptions: PresetOption[] = [
-    { id: 'custom-question', label: 'Custom Question' },
     { id: 'background-check', label: 'Background Check' },
     { id: 'drivers-license', label: 'Driver\'s License' },
     { id: 'drug-test', label: 'Drug Test' },
@@ -91,11 +76,9 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
     { id: 'industry', label: 'Industry Experience' },
     { id: 'language', label: 'Language' },
     { id: 'location', label: 'Location' },
-    // { id: 'hybrid-work', label: 'Hybrid Work' },
-    // { id: 'onsite-work', label: 'Onsite Work' },
-    // { id: 'remote-work', label: 'Remote Work' },
     { id: 'urgent-hiring', label: 'Urgent Hiring Need' },
     { id: 'visa-status', label: 'Visa Status' },
+    { id: 'custom-question', label: 'Custom Question' },
 
   ];
 
@@ -112,8 +95,10 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
               onClick={() => onSelectOption(option.id)}
               className={`flex items-center px-3 py-2 text-sm border rounded-full ${
                 isSelected 
-                  ? 'bg-gray-100 border-gray-400 text-gray-800' 
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-savoy-blue text-white border-blue-600 font-semibold' 
+                  : option.id === 'custom-question'
+                    ? 'bg-gray-100 text-gray-600 border-dashed border-gray-600 font-semibold'
+                    : 'bg-blue-100 text-blue-600 border border-transparent font-semibold'
               }`}
             >
               {isSelected && (

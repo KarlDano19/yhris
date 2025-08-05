@@ -505,7 +505,12 @@ export default function CreateJobPageTitleInfo({
                         ? value.includes(item.value) 
                         : item.value === value
                     )}
-                    onChange={(val) => onChange(val ? val.map((item: any) => item.value) : [])}
+                    onChange={(val) => {
+                      const selectedValues = val ? val.map((item: any) => item.value) : [];
+                      if (selectedValues.length <= 10) {
+                        onChange(selectedValues);
+                      }
+                    }}
                     components={{
                       DropdownIndicator: () => (
                         <div className='pointer-events-none px-2'>
@@ -517,7 +522,11 @@ export default function CreateJobPageTitleInfo({
                     isClearable={false}
                     isMulti
                     noOptionsMessage={() => null}
-                    placeholder="Select locations..."
+                    placeholder='Select locations... (max 10)'
+                    isOptionDisabled={() => {
+                      const currentSelections = Array.isArray(value) ? value.length : 0;
+                      return currentSelections >= 10;
+                    }}
                   />
                 )}
               />

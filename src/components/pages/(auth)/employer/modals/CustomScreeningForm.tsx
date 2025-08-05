@@ -77,10 +77,15 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
       
       <div className="mb-4 text-sm text-gray-600 flex items-start">
         <span className="text-blue-500 mr-2">ⓘ</span>
-        Help keep LinkedIn respectful and professional. Learn about our
-        <button type="button" className="text-blue-600 ml-1 hover:underline">
-          custom question guidelines
-        </button>.
+        Help keep Yahshua HRIS respectful and professional. 
+        <a
+          href="/screening-question-guideline"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 ml-1 hover:underline"
+        >
+          Read our custom question guidelines
+        </a>.
       </div>
       
       <div className="mb-4">
