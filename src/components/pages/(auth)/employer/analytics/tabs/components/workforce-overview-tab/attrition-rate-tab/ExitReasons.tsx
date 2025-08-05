@@ -18,6 +18,7 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
   error = null
 }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [selectedPositionFilter, setSelectedPositionFilter] = useState<string>('All Positions');
 
   // Calculate exit reasons data from separation data
   const exitReasonsData = useMemo(() => {
@@ -25,10 +26,18 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
       return [];
     }
 
+    // Filter by position if selected
+    let filteredData = separationData;
+    if (selectedPositionFilter !== 'All Positions') {
+      filteredData = separationData.filter((separation: any) => 
+        separation.position === selectedPositionFilter
+      );
+    }
+
     // Count separations by reason
     const reasonCounts: { [key: string]: number } = {};
 
-    separationData.forEach((separation: any) => {
+    filteredData.forEach((separation: any) => {
       const reason = separation.reason_of_leaving || 'Unknown';
       reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
     });
@@ -40,15 +49,31 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
         count
       }))
       .sort((a, b) => b.count - a.count); // Sort by count descending
+  }, [separationData, selectedPositionFilter]);
+
+  // Get unique positions from separation data
+  const uniquePositions = useMemo(() => {
+    if (!separationData || !Array.isArray(separationData)) {
+      return [];
+    }
+    
+    const positions = new Set<string>();
+    separationData.forEach((separation: any) => {
+      if (separation.position) {
+        positions.add(separation.position);
+      }
+    });
+    
+    return Array.from(positions).sort();
   }, [separationData]);
 
-  // Get the title text for exit reasons (all-time data)
+  // Get the title text for exit reasons
   const titleText = useMemo(() => {
     if (!separationData || !Array.isArray(separationData) || separationData.length === 0) {
       return 'No data available';
     }
-    return 'All Time';
-  }, [separationData]);
+    return selectedPositionFilter !== 'All Positions' ? selectedPositionFilter : '';
+  }, [separationData, selectedPositionFilter]);
 
   if (isLoading) {
     return (
@@ -94,13 +119,12 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
     <>
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Exit Reasons for {titleText}</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {titleText ? `Exit Reasons for ${titleText}` : 'Exit Reasons'}
+          </h3>
           <button
-            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
-            data-tooltip-id="exit-reasons-filter-tooltip"
-            data-tooltip-content="Filter functionality coming soon"
-            data-tooltip-place="bottom"
-            disabled
+            className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0"
+            onClick={() => setIsFilterModalOpen(true)}
           >
             <FilterLogo className="w-5 h-5" />
           </button>
@@ -163,9 +187,14 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
       <ExitReasonsFilterModal
         isOpen={isFilterModalOpen}
         setIsOpen={setIsFilterModalOpen}
+        onFilterApply={(filters) => {
+          if (filters.selectedPosition) {
+            setSelectedPositionFilter(filters.selectedPosition);
+          }
+        }}
+        positionItems={uniquePositions}
+        currentSelectedPosition={selectedPositionFilter}
       />
-      
-      <Tooltip id="exit-reasons-filter-tooltip" />
     </>
   );
 };

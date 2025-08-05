@@ -1,26 +1,60 @@
-import { Dispatch, Fragment } from 'react';
+import { Dispatch, Fragment, useState, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type ExitReasonsFilterModalProps = {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   onFilterApply?: (filters: any) => void;
+  positionItems?: string[];
+  currentSelectedPosition?: string;
 };
 
-export default function ExitReasonsFilterModal({ isOpen, setIsOpen, onFilterApply }: ExitReasonsFilterModalProps) {
+export default function ExitReasonsFilterModal({ isOpen, setIsOpen, onFilterApply, positionItems, currentSelectedPosition }: ExitReasonsFilterModalProps) {
+  const [selectedPosition, setSelectedPosition] = useState(currentSelectedPosition || 'All Positions');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Use provided position items
+  const positions = positionItems || [];
+
+  // Update selectedPosition when currentSelectedPosition prop changes
+  useEffect(() => {
+    setSelectedPosition(currentSelectedPosition || 'All Positions');
+  }, [currentSelectedPosition]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleSave = () => {
-    // Placeholder for filter application logic
     if (onFilterApply) {
-      onFilterApply({});
+      onFilterApply({ selectedPosition });
     }
     setIsOpen(false);
   };
 
   const handleClose = () => {
     setIsOpen(false);
+    setSelectedPosition(currentSelectedPosition || 'All Positions');
+  };
+
+  const handlePositionSelect = (position: string) => {
+    setSelectedPosition(position);
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -51,16 +85,51 @@ export default function ExitReasonsFilterModal({ isOpen, setIsOpen, onFilterAppl
             >
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Filter Exit Reasons</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Filter Exit Reasons by Position</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={handleClose} />
                 </div>
                 
                 <div className='px-4 pt-4 pb-6 relative'>
-                  {/* Placeholder content - to be defined later */}
-                  <div className='text-center py-12'>
-                    <div className='text-gray-600 mb-2'>Filter Options</div>
-                    <div className='text-sm text-gray-500'>Coming soon...</div>
-                    <div className='text-xs text-gray-400 mt-2'>Filter functionality will be implemented based on requirements</div>
+                  <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
+                    Position
+                  </label>
+                  <div className='relative mt-2' ref={dropdownRef}>
+                    <button
+                      type='button'
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className='w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 appearance-none text-left flex items-center justify-between'
+                    >
+                      <span className={selectedPosition ? 'text-gray-900' : 'text-gray-400'}>
+                        {selectedPosition || 'Select a position...'}
+                      </span>
+                      <SelectChevronDown className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {isDropdownOpen && (
+                      <div className='absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto'>
+                        <button
+                          type='button'
+                          onClick={() => handlePositionSelect('All Positions')}
+                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-savoy-blue hover:text-white focus:bg-savoy-blue focus:text-white focus:outline-none transition-colors duration-150 ${
+                            selectedPosition === 'All Positions' ? 'bg-savoy-blue text-white' : 'text-gray-900'
+                          }`}
+                        >
+                          All Positions
+                        </button>
+                        {positions.map((position) => (
+                          <button
+                            key={position}
+                            type='button'
+                            onClick={() => handlePositionSelect(position)}
+                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-savoy-blue hover:text-white focus:bg-savoy-blue focus:text-white focus:outline-none transition-colors duration-150 ${
+                              selectedPosition === position ? 'bg-savoy-blue text-white' : 'text-gray-900'
+                            }`}
+                          >
+                            {position}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
