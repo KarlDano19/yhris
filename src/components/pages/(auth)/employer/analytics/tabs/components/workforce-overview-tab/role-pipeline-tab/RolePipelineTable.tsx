@@ -79,7 +79,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
     
     if (jobId && pipelineData[jobId]) {
       const stageBreakdown = Object.entries(pipelineData[jobId])
-        .map(([stage, count]) => `${stage}: ${count}${count > 1 ? 's' : ''}`)
+        .map(([stage, count]) => `${stage}: ${count}`)
         .join(', ');
       return stageBreakdown;
     }
