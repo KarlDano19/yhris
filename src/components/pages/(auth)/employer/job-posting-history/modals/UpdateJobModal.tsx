@@ -84,9 +84,9 @@ export default function UpdateJobModal({
         language: jobPostDataDetails.language,
       });
       secondForm.reset({
-        jobType: jobPostDataDetails.job_type.split(','),
-        workSetup: jobPostDataDetails.work_setup.split(','),
-        schedule: jobPostDataDetails.job_schedule.split(','),
+        jobType: jobPostDataDetails.job_type ? jobPostDataDetails.job_type.split(',') : [],
+        workSetup: jobPostDataDetails.work_setup ? jobPostDataDetails.work_setup.split(',') : [],
+        schedule: jobPostDataDetails.job_schedule ? jobPostDataDetails.job_schedule.split(',') : [],
         hireDate: new Date(jobPostDataDetails.date_required),
         hireCount: jobPostDataDetails.required_slot,
       });
