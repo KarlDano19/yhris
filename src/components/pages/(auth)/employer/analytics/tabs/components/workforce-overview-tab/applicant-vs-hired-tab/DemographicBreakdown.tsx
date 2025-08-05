@@ -7,7 +7,7 @@ import { Tooltip } from 'react-tooltip';
 import DemographicBreakdownFilterModal from '../../modals/DemographicBreakdownFilterModal';
 
 import FilterLogo from '@/svg/FilterLogo';
-import { getRegionGroup, advertiseOptions } from '../../../../utils/advertiseOptions';
+import { getRegionGroup, advertiseOptions } from '@/helpers/advertiseOptions';
 
 
 interface DemographicBreakdownProps {

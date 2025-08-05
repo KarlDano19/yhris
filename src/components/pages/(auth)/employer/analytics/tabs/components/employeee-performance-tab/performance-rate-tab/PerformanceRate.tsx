@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,6 +11,11 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+
+import ColorPaletteModal from '../../modals/ColorPaletteModal';
+import { generateDistinctColors } from '@/helpers/colorGenerator';
+
+import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
 ChartJS.register(
   CategoryScale,
@@ -28,6 +32,11 @@ interface PerformanceRateProps {
 
 const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => {
   const [showAllDepartments, setShowAllDepartments] = useState(false);
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const [customColors, setCustomColors] = useState<string[]>([]);
+
+  // Generate default colors dynamically (unlimited)
+  const defaultColors = generateDistinctColors(20);
 
   // Calculate department performance rates from evaluation data
   const calculateDepartmentPerformance = () => {
@@ -44,26 +53,38 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
       departmentGroups[department].push(item);
     });
 
-    // Generate random colors for each department
-    const generateRandomColor = (departmentName: string) => {
-      // Use department name as seed for consistent colors
-      let hash = 0;
-      for (let i = 0; i < departmentName.length; i++) {
-        const char = departmentName.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
+    // Use custom colors or generate consistent colors based on department name
+    const getColorForDepartment = (departmentName: string, index: number) => {
+      // First, try to get saved department-specific color mapping
+      const savedMapping = localStorage.getItem('departmentColorMapping');
+      if (savedMapping) {
+        try {
+          const departmentColorMap = JSON.parse(savedMapping);
+          if (departmentColorMap[departmentName]) {
+            return departmentColorMap[departmentName];
+          }
+        } catch (error) {
+          console.error('Error loading department color mapping:', error);
+        }
       }
       
-      // Generate colors with good contrast and saturation
-      const hue = Math.abs(hash) % 360;
-      const saturation = 60 + (Math.abs(hash) % 30); // 60-90% saturation
-      const lightness = 30 + (Math.abs(hash) % 20); // 30-50% lightness
+      // If no saved mapping, use custom colors by index
+      if (customColors.length > 0 && customColors[index]) {
+        return customColors[index];
+      }
       
-      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      // Otherwise, use default colors or generate consistent colors
+      if (defaultColors[index]) {
+        return defaultColors[index];
+      }
+      
+      // Fallback to unlimited color generation
+      const generatedColors = generateDistinctColors(Math.max(index + 1, 20));
+      return generatedColors[index];
     };
 
     // Calculate performance rate for each department
-    const departmentPerformanceData = Object.entries(departmentGroups).map(([department, evaluations]) => {
+    const departmentPerformanceData = Object.entries(departmentGroups).map(([department, evaluations], index) => {
       const totalScore = evaluations.reduce((sum: number, evaluation: any) => {
         return sum + (parseFloat(evaluation.score) || 0);
       }, 0);
@@ -73,18 +94,47 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
       return {
         name: department,
         score: Math.round(averageScore * 100) / 100,
-        color: generateRandomColor(department),
+        color: getColorForDepartment(department, index),
         count: evaluations.length
       };
     });
 
-    const sortedData = departmentPerformanceData.sort((a, b) => b.score - a.score); // Sort by score descending
+    const sortedData = departmentPerformanceData.sort((a, b) => b.score - a.score);
     
-    // Show top 10 by default, or all if showAllDepartments is true
     return showAllDepartments ? sortedData : sortedData.slice(0, 10);
   };
 
   const departmentPerformanceData = calculateDepartmentPerformance();
+
+
+
+  // Handle color palette save
+  const handleColorPaletteSave = (colors: string[]) => {
+    // Create a mapping of department names to their new colors
+    const departmentColorMap: { [key: string]: string } = {};
+    departmentPerformanceData.forEach((dept, index) => {
+      departmentColorMap[dept.name] = colors[index] || defaultColors[index] || '#3B82F6';
+    });
+    
+    // Save the department-to-color mapping
+    localStorage.setItem('departmentColorMapping', JSON.stringify(departmentColorMap));
+    
+    // Update custom colors for immediate use
+    setCustomColors(colors);
+  };
+
+  // Load saved color palette on component mount
+  useEffect(() => {
+    // Load legacy color palette format for backward compatibility
+    const savedColors = localStorage.getItem('departmentColorPalette');
+    if (savedColors) {
+      try {
+        setCustomColors(JSON.parse(savedColors));
+      } catch (error) {
+        console.error('Error loading saved color palette:', error);
+      }
+    }
+  }, []);
 
   // Calculate total number of departments (before filtering)
   const getTotalDepartments = () => {
@@ -106,9 +156,9 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
 
   // Calculate dynamic height based on number of departments
   const getChartHeight = () => {
-    const baseHeight = 400; // 24rem = 384px
-    const minHeight = 300; // 18rem = 288px
-    const maxHeight = 600; // 36rem = 576px
+    const baseHeight = 400;
+    const minHeight = 300;
+    const maxHeight = 600;
     
     if (departmentPerformanceData.length <= 8) {
       return baseHeight;
@@ -208,39 +258,60 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-      <div className="flex justify-between items-center mb-8">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Performance Rate by Department
-        </h3>
-        {totalDepartments > 10 && (
-          <button
-            onClick={() => setShowAllDepartments(!showAllDepartments)}
-            className="px-3 py-1 text-sm bg-savoy-blue text-white rounded hover:bg-opacity-90 transition-colors"
-          >
-            {showAllDepartments ? 'Show Top 10' : 'Show All'}
-          </button>
-        )}
-      </div>
-      <div style={{ height: `${getChartHeight()}px` }}>
-        <Bar data={data} options={options} />
-      </div>
+    <>
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Performance Rate by Department
+          </h3>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsColorModalOpen(true)}
+              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+              title="Customize colors"
+            >
+              <Squares2X2Icon className="w-4 h-4" />
+              Colors
+            </button>
+            {totalDepartments > 10 && (
+              <button
+                onClick={() => setShowAllDepartments(!showAllDepartments)}
+                className="px-3 py-1 text-sm bg-savoy-blue text-white rounded hover:bg-opacity-90 transition-colors"
+              >
+                {showAllDepartments ? 'Show Top 10' : 'Show All'}
+              </button>
+            )}
+          </div>
+        </div>
+        <div style={{ height: `${getChartHeight()}px` }}>
+          <Bar data={data} options={options} />
+        </div>
 
-      {/* Title at bottom */}
-      <div className="mt-4">
-        <h3 className="text-lg text-gray-600 text-center mb-3">Average Score</h3>
-        <div className="overflow-x-auto">
-          <div className="flex justify-start space-x-6 min-w-max pb-2 px-2">
-            {departmentPerformanceData.map((dept, index) => (
-              <div key={index} className="flex items-center space-x-2 flex-shrink-0">
-                <div className="w-4 h-4 rounded" style={{ backgroundColor: dept.color }}></div>
-                <span className="text-sm text-gray-600 whitespace-nowrap">{dept.name}</span>
-              </div>
-            ))}
+        {/* Title at bottom */}
+        <div className="mt-4">
+          <h3 className="text-lg text-gray-600 text-center mb-3">Average Score</h3>
+          <div className="overflow-x-auto">
+            <div className="flex justify-start space-x-6 min-w-max pb-2 px-2">
+              {departmentPerformanceData.map((dept, index) => (
+                <div key={index} className="flex items-center space-x-2 flex-shrink-0">
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: dept.color }}></div>
+                  <span className="text-sm text-gray-600 whitespace-nowrap">{dept.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Color Palette Modal */}
+      <ColorPaletteModal
+        isOpen={isColorModalOpen}
+        onClose={() => setIsColorModalOpen(false)}
+        onSave={handleColorPaletteSave}
+        currentColors={departmentPerformanceData.map(dept => dept.color)}
+        departmentNames={departmentPerformanceData.map(dept => dept.name)}
+      />
+    </>
   );
 };
 

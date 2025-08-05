@@ -1,6 +1,8 @@
+import React from 'react';
+
 export const advertiseOptions = [
   {
-    label: '- NATIONAL CAPITAL REGION -',
+    label: <strong>- NATIONAL CAPITAL REGION -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -9,7 +11,7 @@ export const advertiseOptions = [
     label: 'Metro Manila',
   },
   {
-    label: '- REGION I -',
+    label: <strong>- REGION I -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -38,7 +40,7 @@ export const advertiseOptions = [
     label: 'Mountain Province',
   },
   {
-    label: '- REGION II -',
+    label: <strong>- REGION II -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -59,7 +61,7 @@ export const advertiseOptions = [
     label: 'Pangasinan',
   },
   {
-    label: '- REGION III -',
+    label: <strong>- REGION III -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -92,7 +94,7 @@ export const advertiseOptions = [
     label: 'Zambales',
   },
   {
-    label: '- REGION IV-A -',
+    label: <strong>- REGION IV-A -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -117,7 +119,7 @@ export const advertiseOptions = [
     label: 'Rizal',
   },
   {
-    label: '- REGION IV-B -',
+    label: <strong>- REGION IV-B -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -142,7 +144,7 @@ export const advertiseOptions = [
     label: 'Romblon',
   },
   {
-    label: '- REGION V -',
+    label: <strong>- REGION V -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -171,7 +173,7 @@ export const advertiseOptions = [
     label: 'Sorsogon',
   },
   {
-    label: '- REGION VI -',
+    label: <strong>- REGION VI -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -200,7 +202,7 @@ export const advertiseOptions = [
     label: 'Negros Occidental',
   },
   {
-    label: '- REGION VII -',
+    label: <strong>- REGION VII -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -221,7 +223,7 @@ export const advertiseOptions = [
     label: 'Siquijor',
   },
   {
-    label: '- REGION VIII -',
+    label: <strong>- REGION VIII -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -250,7 +252,7 @@ export const advertiseOptions = [
     label: 'Southern Leyte',
   },
   {
-    label: '- REGION IX -',
+    label: <strong>- REGION IX -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -267,7 +269,7 @@ export const advertiseOptions = [
     label: 'Zamboanga Sibugay',
   },
   {
-    label: '- REGION X -',
+    label: <strong>- REGION X -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -292,7 +294,7 @@ export const advertiseOptions = [
     label: 'Misamis Oriental',
   },
   {
-    label: '- REGION XI -',
+    label: <strong>- REGION XI -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -317,7 +319,7 @@ export const advertiseOptions = [
     label: 'Davao Oriental',
   },
   {
-    label: '- REGION XII -',
+    label: <strong>- REGION XII -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -338,7 +340,7 @@ export const advertiseOptions = [
     label: 'Sultan Kudarat',
   },
   {
-    label: '- REGION XIII -',
+    label: <strong>- REGION XIII -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -363,7 +365,7 @@ export const advertiseOptions = [
     label: 'Surigao del Sur',
   },
   {
-    label: '- AUTONOMOUS REGION OF MUSLIM MINDANAO -',
+    label: <strong>- AUTONOMOUS REGION OF MUSLIM MINDANAO -</strong>,
     value: null,
     isDisabled: true,
   },
@@ -409,7 +411,13 @@ export const getRegionGroup = (regionValue: string) => {
   // Find the most recent header before this region
   for (let i = regionIndex - 1; i >= 0; i--) {
     if (advertiseOptions[i].isDisabled && advertiseOptions[i].label) {
-      return advertiseOptions[i].label;
+      // Extract text content from JSX element
+      const label = advertiseOptions[i].label;
+      if (typeof label === 'string') {
+        return label;
+      } else if (label && typeof label === 'object' && 'props' in label) {
+        return label.props.children;
+      }
     }
   }
   return null;

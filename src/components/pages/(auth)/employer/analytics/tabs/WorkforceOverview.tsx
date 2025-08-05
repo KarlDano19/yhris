@@ -20,7 +20,7 @@ import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetSeparationItems from '../hooks/useGetSeparationItems';
 import useGetEmployeeItems from '../hooks/useGetEmployeeItems';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
-import { getValidRegions } from '../utils/advertiseOptions';
+import { getValidRegions } from '@/helpers/advertiseOptions';
 
 interface WorkforceOverviewProps {
   dateFilter?: {
