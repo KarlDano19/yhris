@@ -38,9 +38,10 @@ interface PerformanceTrendProps {
     from: string;
     to: string;
   };
+  showAllDepartments?: boolean;
 }
 
-const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter }) => {
+const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter, showAllDepartments = false }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
   const [chartKey, setChartKey] = useState(0);
@@ -242,7 +243,13 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
   const displayData = performanceTrendData;
 
   const data = {
-    labels: displayData.map(item => item.month),
+    labels: displayData.map(item => {
+      // Use abbreviated month names when showAllDepartments is false
+      if (!showAllDepartments) {
+        return item.month.substring(0, 3);
+      }
+      return item.month;
+    }),
     datasets: [
       {
         label: 'Average Score',

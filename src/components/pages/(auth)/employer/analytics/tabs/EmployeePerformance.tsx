@@ -188,6 +188,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
               <PerformanceTrend 
                 evaluationData={allEvaluationData} 
                 dateFilter={dateFilter} 
+                showAllDepartments={showAllDepartments}
               />
             </div>
 
