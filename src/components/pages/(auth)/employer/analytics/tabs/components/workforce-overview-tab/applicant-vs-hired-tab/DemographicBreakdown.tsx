@@ -321,6 +321,7 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         setIsOpen={setIsFilterModalOpen}
         onFilterApply={handleFilterApply}
         jobItems={jobPostData?.records || []}
+        currentSelectedJob={selectedJobFilter}
       />
       <Tooltip id="demographic-filter-tooltip" />
     </>

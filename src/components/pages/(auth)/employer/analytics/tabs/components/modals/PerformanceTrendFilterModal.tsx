@@ -10,15 +10,21 @@ type PerformanceTrendFilterModalProps = {
   setIsOpen: Dispatch<boolean>;
   onDepartmentSelect: (department: string) => void;
   departmentItems?: any[];
+  currentSelectedDepartment?: string;
 };
 
-export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepartmentSelect, departmentItems }: PerformanceTrendFilterModalProps) {
-  const [selectedDepartment, setSelectedDepartment] = useState('');
+export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepartmentSelect, departmentItems, currentSelectedDepartment }: PerformanceTrendFilterModalProps) {
+  const [selectedDepartment, setSelectedDepartment] = useState(currentSelectedDepartment || '');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Use provided department items from the hook
   const departments = departmentItems || [];
+
+  // Update selectedDepartment when currentSelectedDepartment prop changes
+  useEffect(() => {
+    setSelectedDepartment(currentSelectedDepartment || '');
+  }, [currentSelectedDepartment]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -39,12 +45,11 @@ export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepar
       onDepartmentSelect(selectedDepartment);
     }
     setIsOpen(false);
-    setSelectedDepartment('');
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    setSelectedDepartment('');
+    setSelectedDepartment(currentSelectedDepartment || '');
   };
 
   const handleDepartmentSelect = (department: string) => {
@@ -106,8 +111,8 @@ export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepar
                         <button
                           type='button'
                           onClick={() => handleDepartmentSelect('All Departments')}
-                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-200 ${
-                            selectedDepartment === 'All Departments' ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
+                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-savoy-blue hover:text-white focus:bg-savoy-blue focus:text-white focus:outline-none border-b border-gray-200 transition-colors duration-150 ${
+                            selectedDepartment === 'All Departments' ? 'bg-savoy-blue text-white' : 'text-gray-900'
                           }`}
                         >
                           All Departments
@@ -117,8 +122,8 @@ export default function PerformanceTrendFilterModal({ isOpen, setIsOpen, onDepar
                             key={dept.id}
                             type='button'
                             onClick={() => handleDepartmentSelect(dept.name)}
-                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
-                              selectedDepartment === dept.name ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
+                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-savoy-blue hover:text-white focus:bg-savoy-blue focus:text-white focus:outline-none transition-colors duration-150 ${
+                              selectedDepartment === dept.name ? 'bg-savoy-blue text-white' : 'text-gray-900'
                             }`}
                           >
                             {dept.name}

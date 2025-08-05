@@ -10,15 +10,21 @@ type DemographicBreakdownFilterModalProps = {
   setIsOpen: Dispatch<boolean>;
   onFilterApply?: (filters: any) => void;
   jobItems?: any[];
+  currentSelectedJob?: string;
 };
 
-export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onFilterApply, jobItems }: DemographicBreakdownFilterModalProps) {
-  const [selectedJob, setSelectedJob] = useState('');
+export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onFilterApply, jobItems, currentSelectedJob }: DemographicBreakdownFilterModalProps) {
+  const [selectedJob, setSelectedJob] = useState(currentSelectedJob || '');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Use provided job items
   const jobs = jobItems || [];
+
+  // Update selectedJob when currentSelectedJob prop changes
+  useEffect(() => {
+    setSelectedJob(currentSelectedJob || '');
+  }, [currentSelectedJob]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -39,12 +45,11 @@ export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onF
       onFilterApply({ selectedJob });
     }
     setIsOpen(false);
-    setSelectedJob('');
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    setSelectedJob('');
+    setSelectedJob(currentSelectedJob || '');
   };
 
   const handleJobSelect = (job: string) => {
@@ -80,7 +85,7 @@ export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onF
             >
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Job for Demographic Breakdown</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Job Position for Demographic Breakdown</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={handleClose} />
                 </div>
                 
@@ -105,8 +110,8 @@ export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onF
                         <button
                           type='button'
                           onClick={() => handleJobSelect('All Jobs')}
-                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
-                            selectedJob === 'All Jobs' ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
+                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-savoy-blue hover:text-white focus:bg-savoy-blue focus:text-white focus:outline-none transition-colors duration-150 ${
+                            selectedJob === 'All Jobs' ? 'bg-savoy-blue text-white' : 'text-gray-900'
                           }`}
                         >
                           All Jobs
@@ -116,8 +121,8 @@ export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onF
                             key={job.id}
                             type='button'
                             onClick={() => handleJobSelect(job.job_title)}
-                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
-                              selectedJob === job.job_title ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
+                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-savoy-blue hover:text-white focus:bg-savoy-blue focus:text-white focus:outline-none transition-colors duration-150 ${
+                              selectedJob === job.job_title ? 'bg-savoy-blue text-white' : 'text-gray-900'
                             }`}
                           >
                             {job.job_title}

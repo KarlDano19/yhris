@@ -408,6 +408,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
         setIsOpen={setIsFilterModalOpen}
         onDepartmentSelect={handleDepartmentSelect}
         departmentItems={departmentItems}
+        currentSelectedDepartment={selectedDepartment}
       />
     </>
   );
