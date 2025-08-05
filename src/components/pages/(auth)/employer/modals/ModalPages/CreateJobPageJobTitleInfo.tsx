@@ -523,7 +523,11 @@ export default function CreateJobPageTitleInfo({
                     isMulti
                     noOptionsMessage={() => null}
                     placeholder='Select locations... (max 10)'
-                    isOptionDisabled={() => {
+                    isOptionDisabled={(option) => {
+                      // First check if it's a region header (these should always be disabled)
+                      if (option.isDisabled) return true;
+                      
+                      // Then check if we've reached the selection limit
                       const currentSelections = Array.isArray(value) ? value.length : 0;
                       return currentSelections >= 10;
                     }}
