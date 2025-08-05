@@ -4,9 +4,7 @@ import React, { useMemo } from 'react';
 import Card from '../../../Card';
 
 interface TotalActiveEmployeesCardProps {
-  employeeData?: {
-    records?: any[];
-  };
+  employeeData?: any[];
   isLoading?: boolean;
   error?: any;
 }
@@ -18,14 +16,14 @@ const TotalActiveEmployeesCard: React.FC<TotalActiveEmployeesCardProps> = ({
 }) => {
   // Calculate total active employees
   const calculateTotalActiveEmployees = useMemo(() => {
-    if (!employeeData?.records || employeeData.records.length === 0) {
+    if (!employeeData || employeeData.length === 0) {
       return {
         totalEmployees: 0,
         trend: 'No data available'
       };
     }
 
-    const totalEmployees = employeeData.records.length;
+    const totalEmployees = employeeData.length;
     
     // Calculate trend (simulated comparison with previous quarter)
     // In a real system, you'd compare with historical data

@@ -19,7 +19,6 @@ import ImprovementPostTrainingCard from './components/calculations/ImprovementPo
 import ResolvedVSOngoingCard from './components/calculations/ResolvedVSOngoingCard';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
-import useGetEmployeeItems from '../hooks/useGetEmployeeItems';
 
 
 interface EmployeePerformanceData {
@@ -85,17 +84,6 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     isLoading: employeeIssueLoading,
     error: employeeIssueError,
   } = useGetEmployeeIssueItems(employeeIssueFilters);
-
-  // Fetch employee data for training calculations
-  const employeeFilters = {
-    currentPage: 1,
-    pageSize: 1000, // Get all employees
-    search: '',
-    ...(dateFilter?.from && { from: dateFilter.from }),
-    ...(dateFilter?.to && { to: dateFilter.to }),
-  };
-
-  const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems(employeeFilters);
 
   // Sub Tab Navigation
   const subTabs = [

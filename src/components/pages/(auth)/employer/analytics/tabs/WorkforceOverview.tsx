@@ -18,7 +18,7 @@ import AverageTenureCard from './components/calculations/AverageTenureCard';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetSeparationItems from '../hooks/useGetSeparationItems';
-import useGetEmployeeItems from '../hooks/useGetEmployeeItems';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
 import { getValidRegions } from '@/helpers/advertiseOptions';
 
@@ -93,15 +93,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   const { data: separationData, isLoading: separationLoading, error: separationError, refetch: refetchSeparation } = useGetSeparationItems(separationFilters);
 
   // Fetch employee data for headcount calculation
-  const employeeFilters = {
-    currentPage: 1,
-    pageSize: 1000, // Get all employees for headcount
-    search: '',
-    ...(dateFilter?.from && { from: dateFilter.from }),
-    ...(dateFilter?.to && { to: dateFilter.to }),
-  };
-
-  const { data: employeeData, isLoading: employeeLoading, error: employeeError, refetch: refetchEmployee } = useGetEmployeeItems(employeeFilters);
+  const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems();
 
   // Fetch job postings when component loads and when pagination changes
   useEffect(() => {
@@ -122,7 +114,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
       refetchJobPost();
       refetchAllJobPost();
       refetchSeparation();
-      refetchEmployee();
     }
   }, [dateFilter?.from, dateFilter?.to]);
 
