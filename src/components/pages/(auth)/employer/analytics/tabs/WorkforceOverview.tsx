@@ -18,7 +18,6 @@ import AverageTenureCard from './components/calculations/AverageTenureCard';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
-import useGetSeparationItems from '../hooks/useGetSeparationItems';
 import useGetAllSeparationItems from '@/components/hooks/useGetAllSeparationItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
@@ -72,18 +71,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
     refetchJobPost();
   }, []);
 
-  // Fetch separation data for attrition rate analysis (with date filter)
-  const separationFilters = {
-    currentPage: 1,
-    pageSize: 100, // Get more records for better analysis
-    search: '',
-    ...(dateFilter?.from && { from: dateFilter.from }),
-    ...(dateFilter?.to && { to: dateFilter.to }),
-  };
-
-  const { data: separationData, isLoading: separationLoading, error: separationError, refetch: refetchSeparation } = useGetSeparationItems(separationFilters);
-
-  // Fetch all separation data for exit reasons (without pagination)
+  // Fetch all separation data for attrition rate analysis and exit reasons (without pagination)
   const { data: allSeparationData, isLoading: allSeparationLoading, error: allSeparationError } = useGetAllSeparationItems();
 
   // Fetch employee data for headcount calculation
@@ -101,12 +89,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
     }
   }, [activeSubTab]);
 
-  // Refetch data when dateFilter changes
-  useEffect(() => {
-    if (dateFilter?.from || dateFilter?.to) {
-      refetchSeparation();
-    }
-  }, [dateFilter?.from, dateFilter?.to]);
+
 
   // Transform job postings data for role pipeline table
   const rolePipelineData = useMemo(() => {
@@ -253,9 +236,10 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
             {/* Attrition Rate */}
             <AttritionRate 
-              separationData={separationData}
-              isLoading={separationLoading}
-              error={separationError}
+              separationData={allSeparationData}
+              isLoading={allSeparationLoading}
+              error={allSeparationError}
+              dateFilter={dateFilter}
             />
 
             {/* Exit Reasons */}
@@ -292,23 +276,23 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
         
         {/* Separated Employees Card */}
         <SeparatedEmployeesCard
-          separationData={separationData}
-          isLoading={separationLoading}
-          error={separationError}
+          separationData={allSeparationData}
+          isLoading={allSeparationLoading}
+          error={allSeparationError}
         />
         
         {/* Attrition Rate Card */}
         <AttritionRateCard
-          separationData={separationData}
+          separationData={allSeparationData}
           employeeData={employeeData}
-          isLoading={separationLoading || employeeLoading}
-          error={separationError || employeeError}
+          isLoading={allSeparationLoading || employeeLoading}
+          error={allSeparationError || employeeError}
         />
         
         {/* Average Tenure Card */}
         <AverageTenureCard
           employeeData={employeeData}
-          separationData={separationData}
+          separationData={allSeparationData}
           isLoading={employeeLoading}
           error={employeeError}
         />

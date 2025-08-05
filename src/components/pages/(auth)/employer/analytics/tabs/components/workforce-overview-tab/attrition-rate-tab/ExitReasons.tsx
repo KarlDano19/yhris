@@ -56,7 +56,7 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
     if (!separationData || !Array.isArray(separationData)) {
       return [];
     }
-    
+
     const positions = new Set<string>();
     separationData.forEach((separation: any) => {
       if (separation.position) {

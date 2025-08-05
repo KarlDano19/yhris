@@ -18,14 +18,16 @@ const SeparatedEmployeesCard: React.FC<SeparatedEmployeesCardProps> = ({
 }) => {
   // Calculate separated employees
   const calculateSeparatedEmployees = useMemo(() => {
-    if (!separationData?.records || separationData.records.length === 0) {
+    // Handle both paginated structure (records) and flat array structure
+    const dataArray = separationData?.records || separationData;
+    if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
       return {
         separatedEmployees: 0,
         trend: 'No data available'
       };
     }
 
-    const separatedEmployees = separationData.records.length;
+    const separatedEmployees = dataArray.length;
     
     // Calculate trend (simulated comparison with previous quarter)
     // In a real system, you'd compare with historical data

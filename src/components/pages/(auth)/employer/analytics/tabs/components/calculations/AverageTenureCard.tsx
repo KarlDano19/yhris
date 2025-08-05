@@ -23,7 +23,11 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
 }) => {
   // Calculate average tenure
   const calculateAverageTenure = useMemo(() => {
-    if (!employeeData?.records || employeeData.records.length === 0) {
+    // Handle both paginated structure (records) and flat array structure
+    const employeeDataArray = employeeData?.records || employeeData;
+    const separationDataArray = separationData?.records || separationData;
+    
+    if (!employeeDataArray || !Array.isArray(employeeDataArray) || employeeDataArray.length === 0) {
       return {
         averageTenure: 0,
         totalEmployees: 0,
@@ -35,14 +39,14 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
     let totalTenure = 0;
     let validEmployees = 0;
 
-    employeeData.records.forEach((employee: any) => {
+    employeeDataArray.forEach((employee: any) => {
       // Get start date from employee data
       const startDate = new Date(employee.start_date || employee.created_at || employee.hire_date);
       
       // Check if employee has left (has separation date)
-      const separationRecord = separationData?.records?.find((separation: any) => 
+      const separationRecord = Array.isArray(separationDataArray) ? separationDataArray.find((separation: any) => 
         separation.employee_id === employee.id || separation.employee_name === `${employee.firstname} ${employee.lastname}`
-      );
+      ) : undefined;
       
       let endDate = currentDate; // Default to current date (still employed)
       if (separationRecord) {

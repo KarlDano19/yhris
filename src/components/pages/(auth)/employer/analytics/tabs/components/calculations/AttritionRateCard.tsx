@@ -23,7 +23,11 @@ const AttritionRateCard: React.FC<AttritionRateCardProps> = ({
 }) => {
   // Calculate attrition rate
   const calculateAttritionRate = useMemo(() => {
-    if (!separationData?.records || !employeeData?.records) {
+    // Handle both paginated structure (records) and flat array structure
+    const separationDataArray = separationData?.records || separationData;
+    const employeeDataArray = employeeData?.records || employeeData;
+    
+    if (!separationDataArray || !employeeDataArray || !Array.isArray(separationDataArray) || !Array.isArray(employeeDataArray)) {
       return {
         attritionRate: 0,
         totalLeavers: 0,
@@ -37,13 +41,13 @@ const AttritionRateCard: React.FC<AttritionRateCardProps> = ({
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     
-    const currentPeriodLeavers = separationData.records.filter((separation: any) => {
+    const currentPeriodLeavers = separationDataArray.filter((separation: any) => {
       const separationDate = new Date(separation.separation_date || separation.created_at);
       return separationDate >= threeMonthsAgo;
     }).length;
 
     // Calculate current headcount from employee data
-    const currentHeadcount = employeeData.records.length;
+    const currentHeadcount = employeeDataArray.length;
     
     // Estimate starting headcount (current + leavers in the period)
     // This is a simplified approach - in a real system you'd track historical headcount

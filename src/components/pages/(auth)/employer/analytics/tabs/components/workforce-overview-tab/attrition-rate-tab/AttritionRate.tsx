@@ -6,20 +6,40 @@ interface AttritionRateProps {
   separationData?: any;
   isLoading?: boolean;
   error?: any;
+  dateFilter?: {
+    from: string;
+    to: string;
+  };
 }
 
 const AttritionRate: React.FC<AttritionRateProps> = ({ 
   separationData, 
   isLoading = false, 
-  error = null 
+  error = null,
+  dateFilter
 }) => {
   // Get the date range for the title
   const dateRange = useMemo(() => {
-    if (!separationData?.records || !Array.isArray(separationData.records)) {
+    // Handle both paginated structure (records) and flat array structure
+    const dataArray = separationData?.records || separationData;
+    if (!dataArray || !Array.isArray(dataArray)) {
       return 'No data available';
     }
 
-    const dates = separationData.records
+    // Filter separations based on date range if provided
+    let filteredSeparations = dataArray;
+    if (dateFilter?.from && dateFilter?.to) {
+      const fromDate = new Date(dateFilter.from);
+      const toDate = new Date(dateFilter.to);
+      
+      filteredSeparations = dataArray.filter((separation: any) => {
+        if (!separation.date_of_separation) return false;
+        const separationDate = new Date(separation.date_of_separation);
+        return separationDate >= fromDate && separationDate <= toDate;
+      });
+    }
+
+    const dates = filteredSeparations
       .map((separation: any) => separation.date_of_separation)
       .filter(Boolean)
       .map((date: string) => new Date(date))
@@ -38,19 +58,34 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
     } else {
       return `${firstDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} to ${lastDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
     }
-  }, [separationData]);
+  }, [separationData, dateFilter]);
 
   // Calculate attrition rate data from separation data
   const attritionData = useMemo(() => {
-    if (!separationData?.records || !Array.isArray(separationData.records)) {
+    // Handle both paginated structure (records) and flat array structure
+    const dataArray = separationData?.records || separationData;
+    if (!dataArray || !Array.isArray(dataArray)) {
       return [];
+    }
+
+    // Filter separations based on date range if provided
+    let filteredSeparations = dataArray;
+    if (dateFilter?.from && dateFilter?.to) {
+      const fromDate = new Date(dateFilter.from);
+      const toDate = new Date(dateFilter.to);
+      
+      filteredSeparations = dataArray.filter((separation: any) => {
+        if (!separation.date_of_separation) return false;
+        const separationDate = new Date(separation.date_of_separation);
+        return separationDate >= fromDate && separationDate <= toDate;
+      });
     }
 
     // Group separations by month
     const monthlySeparations: { [key: string]: number } = {};
     const totalEmployees = 143; // This should come from actual employee count API
 
-    separationData.records.forEach((separation: any) => {
+    filteredSeparations.forEach((separation: any) => {
       if (separation.date_of_separation) {
         const date = new Date(separation.date_of_separation);
         const monthKey = date.toLocaleDateString('en-US', { month: 'long' });
@@ -81,7 +116,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
         
         return monthA - monthB;
       });
-  }, [separationData]);
+  }, [separationData, dateFilter]);
 
   // Function to determine color based on attrition rate
   const getAttritionRateColor = (rateString: string) => {
