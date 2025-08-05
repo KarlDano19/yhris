@@ -85,13 +85,13 @@ export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onF
             >
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Job Position for Demographic Breakdown</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Job</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={handleClose} />
                 </div>
                 
                 <div className='px-4 pt-4 pb-6 relative'>
                   <label htmlFor='job' className='block text-sm font-medium leading-6 text-gray-900'>
-                    Job Position
+                    Job
                   </label>
                   <div className='relative mt-2' ref={dropdownRef}>
                     <button

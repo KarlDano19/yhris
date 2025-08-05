@@ -85,7 +85,7 @@ export default function ExitReasonsFilterModal({ isOpen, setIsOpen, onFilterAppl
             >
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Filter Exit Reasons by Position</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Position</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={handleClose} />
                 </div>
                 
