@@ -26,6 +26,7 @@ export async function middleware(request: NextRequest) {
     'dashboard',
     'post-job',
     'screen-applicants',
+    'screening-question-guideline',
     'orient',
     'manage',
     'employee-separation',
