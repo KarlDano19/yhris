@@ -1,10 +1,6 @@
 import React from "react";
 
-interface SelectChevronDownProps {
-  className?: string;
-}
-
-const SelectChevronDown: React.FC<SelectChevronDownProps> = ({ className = '' }) => {
+const SelectChevronDown = () => {
   return (
     <svg
       width="21"
@@ -12,7 +8,6 @@ const SelectChevronDown: React.FC<SelectChevronDownProps> = ({ className = '' })
       viewBox="0 0 21 11"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <path
         d="M1.49217 0C0.590508 0 0.149368 1.0994 0.800944 1.72264L9.80878 10.3388C10.1954 10.7086 10.8046 10.7086 11.1912 10.3388L20.1991 1.72264C20.8506 1.0994 20.4095 0 19.5078 0H1.49217Z"

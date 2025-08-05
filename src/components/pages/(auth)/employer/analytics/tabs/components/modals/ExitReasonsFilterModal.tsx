@@ -102,7 +102,7 @@ export default function ExitReasonsFilterModal({ isOpen, setIsOpen, onFilterAppl
                       <span className={selectedPosition ? 'text-gray-900' : 'text-gray-400'}>
                         {selectedPosition || 'Select a position...'}
                       </span>
-                      <SelectChevronDown className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      <SelectChevronDown />
                     </button>
                     
                     {isDropdownOpen && (
