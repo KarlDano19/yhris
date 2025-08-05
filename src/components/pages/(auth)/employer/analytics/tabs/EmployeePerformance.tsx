@@ -19,6 +19,7 @@ import ImprovementPostTrainingCard from './components/calculations/ImprovementPo
 import ResolvedVSOngoingCard from './components/calculations/ResolvedVSOngoingCard';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
+import useGetAllEvaluationHistoryItems from '@/components/hooks/useGetEvaluationHistoryItems';
 
 
 interface EmployeePerformanceData {
@@ -44,6 +45,7 @@ interface EmployeePerformanceProps {
 
 const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFilter }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
+  const [showAllDepartments, setShowAllDepartments] = useState(false);
 
   // Pagination State for Employee Performance
   const [employeePerformancePageSize, setEmployeePerformancePageSize] = useState(5);
@@ -62,12 +64,19 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
-  // Use the hook to fetch evaluation history data (Performance Rate)
+  // Use the hook to fetch evaluation history data (Performance Rate) - Paginated for table
   const {
     data: evaluationData,
     isLoading,
     error,
   } = useGetEvaluationHistoryItems(employeePerformanceFilters);
+
+  // Use the global hook to fetch all evaluation history data for charts
+  const {
+    data: allEvaluationData,
+    isLoading: allEvaluationLoading,
+    error: allEvaluationError,
+  } = useGetAllEvaluationHistoryItems();
 
   // Filters for the employee issues API
   const employeeIssueFilters = {
@@ -168,16 +177,17 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
         return (
           <>
             {/* Charts Section */}
-            <div className={`grid gap-6 ${employeePerformancePageSize >= 10 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+            <div className={`grid gap-6 ${showAllDepartments ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
               {/* Performance Rate by Department - Bar Chart */}
-              <PerformanceRate evaluationData={evaluationData} />
+              <PerformanceRate 
+                evaluationData={allEvaluationData} 
+                onShowAllChange={setShowAllDepartments}
+              />
 
               {/* Performance Trend - Line Chart */}
               <PerformanceTrend 
-                evaluationData={evaluationData} 
+                evaluationData={allEvaluationData} 
                 dateFilter={dateFilter} 
-                currentPage={employeePerformanceCurrentPage}
-                pageSize={employeePerformancePageSize}
               />
             </div>
 
@@ -258,9 +268,9 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Average Performance Card */}
         <AveragePerformanceCard
-          evaluationData={evaluationData}
-          isLoading={isLoading}
-          error={error}
+          evaluationData={allEvaluationData}
+          isLoading={allEvaluationLoading}
+          error={allEvaluationError}
         />
         
         {/* Training Completion Card */}

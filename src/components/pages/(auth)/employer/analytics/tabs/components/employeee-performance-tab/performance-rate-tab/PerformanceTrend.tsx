@@ -38,50 +38,34 @@ interface PerformanceTrendProps {
     from: string;
     to: string;
   };
-  currentPage?: number;
-  pageSize?: number;
 }
 
-const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter, currentPage, pageSize }) => {
+const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
-  const [lastPage, setLastPage] = useState(currentPage);
   const [chartKey, setChartKey] = useState(0);
   const [userManuallySelected, setUserManuallySelected] = useState(false);
   const { data: departmentItems } = useGetDepartmentItems();
 
   // Set default selected department to "All Departments" by default
   useEffect(() => {
-    if (evaluationData?.records && evaluationData.records.length > 0) {
-      // Only update if user hasn't manually selected a department OR if the page has changed
-      if (!userManuallySelected || currentPage !== lastPage) {
+    const dataArray = evaluationData?.records || evaluationData;
+    if (dataArray && dataArray.length > 0) {
+      // Only update if user hasn't manually selected a department
+      if (!userManuallySelected) {
         setSelectedDepartment('All Departments');
-        setLastPage(currentPage);
         setUserManuallySelected(false); // Reset for next auto-selection
       }
-      
-      // Force chart re-render when page size changes (layout change)
-      if (pageSize) {
-        setChartKey(prev => prev + 1);
-      }
     }
-  }, [evaluationData, currentPage, lastPage, selectedDepartment]);
-
-    // Handle layout changes when page size changes
-  useEffect(() => {
-    if (pageSize) {
-      // Small delay to ensure layout has changed before re-rendering chart
-      const timer = setTimeout(() => {
-        setChartKey(prev => prev + 1);
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [pageSize]);
+  }, [evaluationData, selectedDepartment]);
 
   // Calculate Performance Trend using real data
   const performanceTrendData = useMemo(() => {
-    if (!evaluationData?.records) return [];
+    if (!evaluationData) return [];
+
+    // Handle both paginated structure (records) and flat array structure
+    const dataArray = evaluationData.records || evaluationData;
+    if (!dataArray || dataArray.length === 0) return [];
 
     const months = [
       { name: 'January', value: 0 },
@@ -99,7 +83,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
     ];
 
     // Filter evaluations based on date range or current year
-    const allEvaluations = evaluationData.records.filter((item: any) => {
+    const allEvaluations = dataArray.filter((item: any) => {
       const evaluationDate = new Date(item.date_of_evaluation);
       
       if (dateFilter?.from && dateFilter?.to) {

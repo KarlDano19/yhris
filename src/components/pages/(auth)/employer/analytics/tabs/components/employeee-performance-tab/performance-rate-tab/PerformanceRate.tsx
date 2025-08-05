@@ -28,9 +28,10 @@ ChartJS.register(
 
 interface PerformanceRateProps {
   evaluationData?: any;
+  onShowAllChange?: (showAll: boolean) => void;
 }
 
-const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => {
+const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onShowAllChange }) => {
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
@@ -40,12 +41,26 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
 
   // Calculate department performance rates from evaluation data
   const calculateDepartmentPerformance = () => {
-    if (!evaluationData?.records) return [];
+    if (!evaluationData) return [];
+
+    // Handle both paginated structure (records) and flat array structure
+    const dataArray = evaluationData.records || evaluationData;
+    if (!dataArray || dataArray.length === 0) return [];
+
+    // Sort data by ID in descending order to get the latest evaluations first
+    const sortedDataArray = [...dataArray].sort((a: any, b: any) => {
+      const idA = parseInt(a.id) || 0;
+      const idB = parseInt(b.id) || 0;
+      return idB - idA;
+    });
+
+    // Take only the first 10 latest evaluations if not showing all
+    const limitedDataArray = showAllDepartments ? sortedDataArray : sortedDataArray.slice(0, 10);
 
     // Group evaluations by department
     const departmentGroups: { [key: string]: any[] } = {};
     
-    evaluationData.records.forEach((item: any) => {
+    limitedDataArray.forEach((item: any) => {
       const department = item.department || 'Unknown';
       if (!departmentGroups[department]) {
         departmentGroups[department] = [];
@@ -91,17 +106,20 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
       
       const averageScore = evaluations.length > 0 ? totalScore / evaluations.length : 0;
       
+      // Get the highest ID from evaluations in this department
+      const highestId = Math.max(...evaluations.map((evaluation: any) => parseInt(evaluation.id) || 0));
+      
       return {
         name: department,
         score: Math.round(averageScore * 100) / 100,
         color: getColorForDepartment(department, index),
-        count: evaluations.length
+        count: evaluations.length,
+        highestId: highestId
       };
     });
 
-    const sortedData = departmentPerformanceData.sort((a, b) => b.score - a.score);
-    
-    return showAllDepartments ? sortedData : sortedData.slice(0, 10);
+    // Sort by highest ID in descending order for display order
+    return departmentPerformanceData.sort((a, b) => b.highestId - a.highestId);
   };
 
   const departmentPerformanceData = calculateDepartmentPerformance();
@@ -138,10 +156,14 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
 
   // Calculate total number of departments (before filtering)
   const getTotalDepartments = () => {
-    if (!evaluationData?.records) return 0;
+    if (!evaluationData) return 0;
+    
+    // Handle both paginated structure (records) and flat array structure
+    const dataArray = evaluationData.records || evaluationData;
+    if (!dataArray || dataArray.length === 0) return 0;
     
     const departmentGroups: { [key: string]: any[] } = {};
-    evaluationData.records.forEach((item: any) => {
+    dataArray.forEach((item: any) => {
       const department = item.department || 'Unknown';
       if (!departmentGroups[department]) {
         departmentGroups[department] = [];
@@ -280,10 +302,14 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
             </button>
             {totalDepartments > 10 && (
               <button
-                onClick={() => setShowAllDepartments(!showAllDepartments)}
+                onClick={() => {
+                  const newShowAll = !showAllDepartments;
+                  setShowAllDepartments(newShowAll);
+                  onShowAllChange?.(newShowAll);
+                }}
                 className="px-3 py-1 text-sm bg-savoy-blue text-white rounded hover:bg-opacity-90 transition-colors"
               >
-                {showAllDepartments ? 'Show Top 10' : 'Show All'}
+                {showAllDepartments ? 'Show Less' : 'Show All'}
               </button>
             )}
           </div>
