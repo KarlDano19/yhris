@@ -217,6 +217,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
       y: {
         beginAtZero: true,
         max: 100,
+        min: 0,
         grid: {
           color: '#f0f0f0',
           drawBorder: false,
@@ -227,6 +228,10 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData }) => 
           font: {
             size: 12,
           },
+          stepSize: 20,
+          callback: function(value: any) {
+            return value;
+          }
         },
       },
       x: {

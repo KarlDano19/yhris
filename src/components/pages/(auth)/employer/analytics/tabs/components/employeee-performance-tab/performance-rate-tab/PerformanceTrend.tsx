@@ -98,21 +98,18 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
       { name: 'December', value: 11 },
     ];
 
-    // Filter selected department evaluations based on date range or current year
-    const departmentEvaluations = evaluationData.records.filter((item: any) => {
+    // Filter evaluations based on date range or current year
+    const allEvaluations = evaluationData.records.filter((item: any) => {
       const evaluationDate = new Date(item.date_of_evaluation);
-      const isSelectedDepartment = selectedDepartment === 'All Departments' || item.department === selectedDepartment;
       
       if (dateFilter?.from && dateFilter?.to) {
         const fromDate = new Date(dateFilter.from);
         const toDate = new Date(dateFilter.to);
-        const isInDateRange = evaluationDate >= fromDate && evaluationDate <= toDate;
-        return isInDateRange && isSelectedDepartment;
+        return evaluationDate >= fromDate && evaluationDate <= toDate;
       } else {
         // Fallback to current year if no date range is selected
         const currentYear = new Date().getFullYear();
-        const isCurrentYear = evaluationDate.getFullYear() === currentYear;
-        return isCurrentYear && isSelectedDepartment;
+        return evaluationDate.getFullYear() === currentYear;
       }
     });
 
@@ -133,34 +130,65 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
       while (currentDate <= endDate) {
         const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
         const monthValue = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
         
-        // Get evaluations for this month
-        const monthEvaluations = departmentEvaluations.filter((item: any) => {
-          const evaluationDate = new Date(item.date_of_evaluation);
-          return evaluationDate.getMonth() === monthValue && 
-                 evaluationDate.getFullYear() === currentDate.getFullYear();
-        });
-
-        if (monthEvaluations.length === 0) {
-          rangeMonths.push({
-            month: monthName,
-            score: 0,
-            count: 0
+        if (selectedDepartment === 'All Departments') {
+          // Calculate average across ALL departments for this month
+          const monthEvaluations = allEvaluations.filter((item: any) => {
+            const evaluationDate = new Date(item.date_of_evaluation);
+            return evaluationDate.getMonth() === monthValue && 
+                   evaluationDate.getFullYear() === currentYear;
           });
+
+          if (monthEvaluations.length === 0) {
+            rangeMonths.push({
+              month: monthName,
+              score: 0,
+              count: 0
+            });
+          } else {
+            // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
+            const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
+              return sum + (parseFloat(item.score) || 0);
+            }, 0);
+
+            const averageScore = totalScore / monthEvaluations.length;
+
+            rangeMonths.push({
+              month: monthName,
+              score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
+              count: monthEvaluations.length
+            });
+          }
         } else {
-          // Calculate monthly performance rate using the formula:
-          // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
-          const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
-            return sum + (parseFloat(item.score) || 0);
-          }, 0);
-
-          const averageScore = totalScore / monthEvaluations.length;
-
-          rangeMonths.push({
-            month: monthName,
-            score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
-            count: monthEvaluations.length
+          // Calculate for specific department
+          const departmentMonthEvaluations = allEvaluations.filter((item: any) => {
+            const evaluationDate = new Date(item.date_of_evaluation);
+            return evaluationDate.getMonth() === monthValue && 
+                   evaluationDate.getFullYear() === currentYear &&
+                   item.department === selectedDepartment;
           });
+
+          if (departmentMonthEvaluations.length === 0) {
+            rangeMonths.push({
+              month: monthName,
+              score: 0,
+              count: 0
+            });
+          } else {
+            // Monthly Performance Rate = Sum of Scores in Month of the Department / Specific Employees Evaluated in a Department in a Month
+            const totalScore = departmentMonthEvaluations.reduce((sum: number, item: any) => {
+              return sum + (parseFloat(item.score) || 0);
+            }, 0);
+
+            const averageScore = totalScore / departmentMonthEvaluations.length;
+
+            rangeMonths.push({
+              month: monthName,
+              score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
+              count: departmentMonthEvaluations.length
+            });
+          }
         }
         
         // Move to next month
@@ -171,28 +199,54 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
     } else {
       // For current year, only show months with data
       const monthlyData = months.map(month => {
-        const monthEvaluations = departmentEvaluations.filter((item: any) => {
-          const evaluationDate = new Date(item.date_of_evaluation);
-          return evaluationDate.getMonth() === month.value;
-        });
+        if (selectedDepartment === 'All Departments') {
+          // Calculate average across ALL departments for this month
+          const monthEvaluations = allEvaluations.filter((item: any) => {
+            const evaluationDate = new Date(item.date_of_evaluation);
+            return evaluationDate.getMonth() === month.value;
+          });
 
-        if (monthEvaluations.length === 0) {
-          return { month: month.name, score: 0, count: 0 };
+          if (monthEvaluations.length === 0) {
+            return { month: month.name, score: 0, count: 0 };
+          }
+
+          // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
+          const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
+            return sum + (parseFloat(item.score) || 0);
+          }, 0);
+
+          const averageScore = totalScore / monthEvaluations.length;
+
+          return {
+            month: month.name,
+            score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
+            count: monthEvaluations.length
+          };
+        } else {
+          // Calculate for specific department
+          const departmentMonthEvaluations = allEvaluations.filter((item: any) => {
+            const evaluationDate = new Date(item.date_of_evaluation);
+            return evaluationDate.getMonth() === month.value && 
+                   item.department === selectedDepartment;
+          });
+
+          if (departmentMonthEvaluations.length === 0) {
+            return { month: month.name, score: 0, count: 0 };
+          }
+
+          // Monthly Performance Rate = Sum of Scores in Month of the Department / Specific Employees Evaluated in a Department in a Month
+          const totalScore = departmentMonthEvaluations.reduce((sum: number, item: any) => {
+            return sum + (parseFloat(item.score) || 0);
+          }, 0);
+
+          const averageScore = totalScore / departmentMonthEvaluations.length;
+
+          return {
+            month: month.name,
+            score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
+            count: departmentMonthEvaluations.length
+          };
         }
-
-        // Calculate monthly performance rate using the formula:
-        // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
-        const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
-          return sum + (parseFloat(item.score) || 0);
-        }, 0);
-
-        const averageScore = totalScore / monthEvaluations.length;
-
-        return {
-          month: month.name,
-          score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
-          count: monthEvaluations.length
-        };
       });
 
       // Filter out months with no data (score = 0)
@@ -257,6 +311,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
       y: {
         beginAtZero: true,
         max: 100,
+        min: 0,
         grid: {
           color: '#f0f0f0',
           drawBorder: false,
@@ -267,6 +322,10 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
           font: {
             size: 12,
           },
+          stepSize: 20,
+          callback: function(value: any) {
+            return value;
+          }
         },
       },
       x: {
@@ -288,6 +347,22 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
     setUserManuallySelected(true); // Mark that user has manually selected
   };
 
+  // Calculate dynamic height to match PerformanceRate chart
+  const getChartHeight = () => {
+    const baseHeight = 400;
+    const minHeight = 300;
+    const maxHeight = 600;
+    
+    // Use the same logic as PerformanceRate for consistency
+    if (displayData.length <= 8) {
+      return baseHeight;
+    } else if (displayData.length <= 15) {
+      return Math.min(baseHeight + (displayData.length - 8) * 20, maxHeight);
+    } else {
+      return maxHeight;
+    }
+  };
+
   return (
     <>
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
@@ -304,7 +379,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
           <div className="w-10 flex-shrink-0"></div>
         </div>
         
-        <div className="h-96 transition-all duration-300 ease-in-out">
+        <div style={{ height: `${getChartHeight()}px` }} className="transition-all duration-300 ease-in-out">
           {displayData.length > 0 ? (
             <div className="w-full h-full">
               <Line key={chartKey} data={data} options={options} />
