@@ -21,14 +21,14 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
 
   // Calculate exit reasons data from separation data
   const exitReasonsData = useMemo(() => {
-    if (!separationData?.records || !Array.isArray(separationData.records)) {
+    if (!separationData || !Array.isArray(separationData)) {
       return [];
     }
 
     // Count separations by reason
     const reasonCounts: { [key: string]: number } = {};
 
-    separationData.records.forEach((separation: any) => {
+    separationData.forEach((separation: any) => {
       const reason = separation.reason_of_leaving || 'Unknown';
       reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
     });
@@ -42,31 +42,12 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
       .sort((a, b) => b.count - a.count); // Sort by count descending
   }, [separationData]);
 
-  // Get the date range for the title
-  const dateRange = useMemo(() => {
-    if (!separationData?.records || !Array.isArray(separationData.records)) {
+  // Get the title text for exit reasons (all-time data)
+  const titleText = useMemo(() => {
+    if (!separationData || !Array.isArray(separationData) || separationData.length === 0) {
       return 'No data available';
     }
-
-    const dates = separationData.records
-      .map((separation: any) => separation.date_of_separation)
-      .filter(Boolean)
-      .map((date: string) => new Date(date))
-      .sort((a: Date, b: Date) => a.getTime() - b.getTime());
-
-    if (dates.length === 0) {
-      return 'No data available';
-    }
-
-    const firstDate = dates[0];
-    const lastDate = dates[dates.length - 1];
-
-    if (firstDate.getFullYear() === lastDate.getFullYear() &&
-      firstDate.getMonth() === lastDate.getMonth()) {
-      return `${firstDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
-    } else {
-      return `${firstDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} to ${lastDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
-    }
+    return 'All Time';
   }, [separationData]);
 
   if (isLoading) {
@@ -113,7 +94,7 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
     <>
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Exit Reasons for {dateRange}</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Exit Reasons for {titleText}</h3>
           <button
             className="p-2 hover:bg-gray-100 rounded border-2 border-[#ACB9CB] flex-shrink-0 cursor-not-allowed opacity-50"
             data-tooltip-id="exit-reasons-filter-tooltip"

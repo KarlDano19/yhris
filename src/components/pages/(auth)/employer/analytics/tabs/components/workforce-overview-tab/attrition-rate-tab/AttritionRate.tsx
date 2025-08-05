@@ -13,6 +13,33 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
   isLoading = false, 
   error = null 
 }) => {
+  // Get the date range for the title
+  const dateRange = useMemo(() => {
+    if (!separationData?.records || !Array.isArray(separationData.records)) {
+      return 'No data available';
+    }
+
+    const dates = separationData.records
+      .map((separation: any) => separation.date_of_separation)
+      .filter(Boolean)
+      .map((date: string) => new Date(date))
+      .sort((a: Date, b: Date) => a.getTime() - b.getTime());
+
+    if (dates.length === 0) {
+      return 'No data available';
+    }
+
+    const firstDate = dates[0];
+    const lastDate = dates[dates.length - 1];
+
+    if (firstDate.getFullYear() === lastDate.getFullYear() &&
+      firstDate.getMonth() === lastDate.getMonth()) {
+      return `${firstDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+    } else {
+      return `${firstDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} to ${lastDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+    }
+  }, [separationData]);
+
   // Calculate attrition rate data from separation data
   const attritionData = useMemo(() => {
     if (!separationData?.records || !Array.isArray(separationData.records)) {
@@ -26,7 +53,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
     separationData.records.forEach((separation: any) => {
       if (separation.date_of_separation) {
         const date = new Date(separation.date_of_separation);
-        const monthKey = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const monthKey = date.toLocaleDateString('en-US', { month: 'long' });
         monthlySeparations[monthKey] = (monthlySeparations[monthKey] || 0) + 1;
       }
     });
@@ -107,7 +134,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
   }
 
   const title = attritionData.length > 0 
-    ? `Attrition Rate from ${attritionData[0]?.month} to ${attritionData[attritionData.length - 1]?.month}`
+    ? `Attrition Rate for ${dateRange}`
     : 'Attrition Rate';
 
   return (

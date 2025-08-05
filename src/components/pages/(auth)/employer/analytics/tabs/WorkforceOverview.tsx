@@ -19,6 +19,7 @@ import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
 import useGetSeparationItems from '../hooks/useGetSeparationItems';
+import useGetAllSeparationItems from '@/components/hooks/useGetAllSeparationItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
 import { getValidRegions } from '@/helpers/advertiseOptions';
@@ -43,13 +44,11 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   // Fetch overall applicants data across all job postings
   const { data: appliedApplicantsData, isLoading: applicantsLoading, error: applicantsError } = useGetOverallApplicants();
 
-  // Fetch job postings data for role pipeline analysis
+  // Fetch job postings data for role pipeline analysis (without date filter)
   const jobPostFilters = {
     currentPage: rolePipelineCurrentPage,
     pageSize: rolePipelinePageSize,
     search: '',
-    ...(dateFilter?.from && { from: dateFilter.from }),
-    ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
@@ -73,7 +72,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
     refetchJobPost();
   }, []);
 
-  // Fetch separation data for attrition rate analysis
+  // Fetch separation data for attrition rate analysis (with date filter)
   const separationFilters = {
     currentPage: 1,
     pageSize: 100, // Get more records for better analysis
@@ -83,6 +82,9 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   };
 
   const { data: separationData, isLoading: separationLoading, error: separationError, refetch: refetchSeparation } = useGetSeparationItems(separationFilters);
+
+  // Fetch all separation data for exit reasons (without pagination)
+  const { data: allSeparationData, isLoading: allSeparationLoading, error: allSeparationError } = useGetAllSeparationItems();
 
   // Fetch employee data for headcount calculation
   const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems();
@@ -102,7 +104,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   // Refetch data when dateFilter changes
   useEffect(() => {
     if (dateFilter?.from || dateFilter?.to) {
-      refetchJobPost();
       refetchSeparation();
     }
   }, [dateFilter?.from, dateFilter?.to]);
@@ -259,9 +260,9 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
 
             {/* Exit Reasons */}
             <ExitReasons 
-              separationData={separationData}
-              isLoading={separationLoading}
-              error={separationError}
+              separationData={allSeparationData}
+              isLoading={allSeparationLoading}
+              error={allSeparationError}
             />
           </div>
         );
