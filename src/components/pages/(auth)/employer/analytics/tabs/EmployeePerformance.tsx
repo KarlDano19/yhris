@@ -20,6 +20,7 @@ import ResolvedVSOngoingCard from './components/calculations/ResolvedVSOngoingCa
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
 import useGetAllEvaluationHistoryItems from '@/components/hooks/useGetEvaluationHistoryItems';
+import useGetAllEmployeeIssueItems from '@/components/hooks/useGetAllEmployeeIssueItems';
 
 
 interface EmployeePerformanceData {
@@ -87,12 +88,19 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     ...(dateFilter?.to && { to: dateFilter.to }),
   };
 
-  // Use the hook to fetch employee issues data (Employee Issue Rate)
+  // Use the hook to fetch employee issues data (Employee Issue Rate) - Paginated for table
   const {
     data: employeeIssueData,
     isLoading: employeeIssueLoading,
     error: employeeIssueError,
   } = useGetEmployeeIssueItems(employeeIssueFilters);
+
+  // Use the global hook to fetch all employee issues data for charts
+  const {
+    data: allEmployeeIssueData,
+    isLoading: allEmployeeIssueLoading,
+    error: allEmployeeIssueError,
+  } = useGetAllEmployeeIssueItems();
 
   // Sub Tab Navigation
   const subTabs = [
@@ -230,10 +238,19 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Issue Type - Pie Chart */}
-              <IssueType employeeIssueData={employeeIssueData} />
+              <IssueType 
+                employeeIssueData={allEmployeeIssueData}
+                isLoading={allEmployeeIssueLoading}
+                error={allEmployeeIssueError}
+              />
 
               {/* Monthly Issue Volume - Line Chart */}
-              <MonthlyTypeVolume employeeIssueData={employeeIssueData} dateFilter={dateFilter} />
+              <MonthlyTypeVolume 
+                employeeIssueData={allEmployeeIssueData} 
+                dateFilter={dateFilter}
+                isLoading={allEmployeeIssueLoading}
+                error={allEmployeeIssueError}
+              />
             </div>
 
             {/* Employee Issues Table */}
