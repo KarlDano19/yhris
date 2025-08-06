@@ -10,11 +10,11 @@ import DemographicBreakdown from './components/workforce-overview-tab/applicant-
 import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
 import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
-import TotalActiveEmployeesCard from './components/calculations/TotalActiveEmployeesCard';
-import NewHiresCard from './components/calculations/NewHiresCard';
-import SeparatedEmployeesCard from './components/calculations/SeparatedEmployeesCard';
-import AttritionRateCard from './components/calculations/AttritionRateCard';
-import AverageTenureCard from './components/calculations/AverageTenureCard';
+import TotalActiveEmployeesCard from './components/card-calculations/TotalActiveEmployeesCard';
+import NewHiresCard from './components/card-calculations/NewHiresCard';
+import SeparatedEmployeesCard from './components/card-calculations/SeparatedEmployeesCard';
+import AttritionRateCard from './components/card-calculations/AttritionRateCard';
+import AverageTenureCard from './components/card-calculations/AverageTenureCard';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
