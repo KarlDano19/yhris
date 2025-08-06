@@ -531,11 +531,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("schedule_of_attendance_of_full_time_first_aider")}
-                id="schedule_of_attendance_of_full_time_first_aider"
+                id="schedule_attendance_1st_shift"
                 value="1st shift"
               />
               <label
-                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                htmlFor="schedule_attendance_1st_shift"
                 className="ml-1"
               >
                 1st shift
@@ -545,11 +545,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("schedule_of_attendance_of_full_time_first_aider")}
-                id="schedule_of_attendance_of_full_time_first_aider"
+                id="schedule_attendance_2nd_shift"
                 value="2nd shift"
               />
               <label
-                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                htmlFor="schedule_attendance_2nd_shift"
                 className="ml-2"
               >
                 2nd shift
@@ -560,11 +560,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("schedule_of_attendance_of_full_time_first_aider")}
-                id="schedule_of_attendance_of_full_time_first_aider"
+                id="schedule_attendance_3rd_shift"
                 value="3rd shift"
               />
               <label
-                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                htmlFor="schedule_attendance_3rd_shift"
                 className="ml-2"
               >
                 3rd shift
@@ -594,11 +594,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_physician"
                 value="occupational health physician"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_physician"
                 className="ml-1"
               >
                 occupational health physician
@@ -608,11 +608,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_dentist"
                 value="occupational health dentist"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_dentist"
                 className="ml-2"
               >
                 occupational health dentist
@@ -623,11 +623,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_nurse"
                 value="occupational health nurse"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_nurse"
                 className="ml-1"
               >
                 occupational health nurse
@@ -637,11 +637,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_first_aider"
                 value="first aider"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_first_aider"
                 className="ml-2"
               >
                 first aider
@@ -652,12 +652,12 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_other"
                 value="Other"
                 onChange={(e) => setIsOtherCheckedD(e.target.checked)}
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_other"
                 className="ml-2"
               >
                 others, please specify
