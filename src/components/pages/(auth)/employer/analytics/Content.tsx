@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import Link from "next/link";
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -10,7 +13,6 @@ import EmployeePerformance from './tabs/EmployeePerformance';
 import CompliancePolicy from './tabs/CompliancePolicy';
 import CompensationBenefits from './tabs/CompensationBenefits';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState(1);
@@ -26,7 +28,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const tabs = [
     { id: 1, name: 'Workforce Overview', shortName: 'Workforce', isAvailable: true },
     { id: 2, name: 'Employee Performance & Development', shortName: 'Performance', isAvailable: true },
-    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: false },
+    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: true },
     { id: 4, name: 'Compensation & Benefits', shortName: 'Compensation', isAvailable: false },
   ];
 
