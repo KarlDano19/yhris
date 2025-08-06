@@ -450,10 +450,14 @@ const Content = () => {
                                         year: 'numeric',
                                       })}{' '}
                                       -{' '}
-                                      {new Date(applicant.work_experience[0].dateTo).toLocaleDateString('en-US', {
-                                        month: 'short',
-                                        year: 'numeric',
-                                      })}
+                                      {applicant.work_experience[0].dateTo === 'Present' ||
+                                      applicant.work_experience[0].dateTo === 'present' ||
+                                      applicant.work_experience[0].dateTo === ''
+                                        ? 'Present'
+                                        : new Date(applicant.work_experience[0].dateTo).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            year: 'numeric',
+                                          })}
                                     </h1>
                                   )}
                                 </div>

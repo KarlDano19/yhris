@@ -53,6 +53,7 @@ const Content = () => {
       setValue('college', applicantProfileData.college);
       setValue('expected_salary', applicantProfileData.expected_salary);
       setValue('skills', applicantProfileData.skills);
+      setValue('educationalAttainment', applicantProfileData.educational_attainment);
       // Convert work_experience date strings to Date objects
       if (applicantProfileData.work_experience) {
         const experiences = applicantProfileData.work_experience.map((exp: any) => ({
@@ -65,7 +66,7 @@ const Content = () => {
         setValue('experiences', []);
       }
     }
-  }, [applicantProfileData]);
+  }, [applicantProfileData, setValue]);
 
 
   const onSubmit = handleSubmit((data) => {
@@ -150,6 +151,8 @@ const Content = () => {
                 <ContactsTab
                   {...{
                     register,
+                    watch,
+                    setValue,
                     onSubmit,
                     isLoading,
                   }}

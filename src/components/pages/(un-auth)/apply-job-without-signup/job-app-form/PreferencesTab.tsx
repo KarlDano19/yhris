@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
+import dynamic from 'next/dynamic';
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -8,6 +9,11 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { PlusIcon, CheckIcon } from '@heroicons/react/24/solid';
 import ConfirmationModal from './modals/ConfirmationModal';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
+
 
 function PreferencesTab({
   control,
@@ -37,24 +43,46 @@ function PreferencesTab({
     control: control,
     name: 'experiences',
   });
-
+  const [currentlyEmployed, setCurrentlyEmployed] = useState<boolean[]>([]);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const onSubmit = handleSubmit((data: any) => {
     let hasError = false;
     if (fields.length !== 0) {
-      data.experiences.map((experience: any) => {
-        if (
-          !(
-            experience.position &&
-            experience.majorRole &&
-            experience.companyOrg &&
-            experience.dateFrom &&
-            experience.dateTo
-          )
-        ) {
+      data.experiences.map((experience: any, index: number) => {
+        const isCurrentlyEmployed = currentlyEmployed[index];
+        const requiredFields = [
+          experience.position,
+          experience.companyOrg,
+          experience.dateFrom,
+          experience.responsibilities
+        ];
+        
+        if (requiredFields.some(field => !field)) {
           toast.custom(() => <CustomToast message='Please fill in all experience fields' type='error' />, {
             duration: 7000,
           });
           hasError = true;
+        }
+
+        if (!isCurrentlyEmployed) {
+          requiredFields.push(experience.dateTo);
+        }
+
+        if (requiredFields.some(field => !field)) {
+          toast.custom(() => <CustomToast message='Please fill in all experience fields' type='error' />, {
+            duration: 7000,
+          });
+          hasError = true;
+        } else {
+          if (experience.dateFrom instanceof Date) {
+            data.experiences[index].dateFrom = experience.dateFrom.toISOString().split('T')[0];
+          }
+          if (experience.dateTo instanceof Date) {
+            data.experiences[index].dateTo = experience.dateTo.toISOString().split('T')[0];
+          }
+          if (isCurrentlyEmployed) {
+            data.experiences[index].dateTo = '';
+          }
         }
       });
     }
@@ -79,7 +107,6 @@ function PreferencesTab({
   const handleAddExperience = () => {
     append({
       position: '',
-      majorRole: '',
       companyOrg: '',
       dateFrom: '',
       dateTo: '',
@@ -92,6 +119,19 @@ function PreferencesTab({
       remove(currentIndex);
     }
     setShowModal(false);
+  };
+
+  const handleCurrentlyEmployedChange = (index: number, checked: boolean) => {
+    setCurrentlyEmployed(prev => {
+      const newState = [...prev];
+      newState[index] = checked;
+      return newState;
+    });
+    
+    // If checked, clear the dateTo field
+    if (checked) {
+      setValue(`experiences.${index}.dateTo`, '');
+    }
   };
 
   const confirmAction = (type: 'add' | 'remove', index?: number) => {
@@ -107,7 +147,7 @@ function PreferencesTab({
           key={index}
           className='relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 lg:gap-x-5 gap-y-4 mt-7 pt-6'
         >
-          <div className='grid grid-cols-1 md:grid-cols-3 md:col-span-2 lg:col-span-4 gap-x-5 gap-y-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 md:col-span-2 lg:col-span-4 gap-x-5 gap-y-4'>
             <div className='grid-item'>
               <label htmlFor='position' className='text-sm font-medium leading-6 text-gray-900'>
                 Position
@@ -117,19 +157,6 @@ function PreferencesTab({
                   type='text'
                   {...register(`experiences.${index}.position`)}
                   id='position'
-                  className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-                />
-              </div>
-            </div>
-            <div className='grid-item'>
-              <label htmlFor='major-roles' className='text-sm font-medium leading-6 text-gray-900'>
-                Major Roles
-              </label>
-              <div className='mt-2'>
-                <input
-                  type='text'
-                  {...register(`experiences.${index}.majorRole`)}
-                  id='major-roles'
                   className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
                 />
               </div>
@@ -184,14 +211,41 @@ function PreferencesTab({
                   inputOnChange={(value: any) => {
                     setValue(`experiences.${index}.dateTo`, new Date(value));
                   }}
+                  disabled={currentlyEmployed[index]}
                 />
               </div>
+              <div className='flex items-center mt-2'>
+                <input
+                  type='checkbox'
+                  id={`currently-employed-${index}`}
+                  checked={currentlyEmployed[index] || false}
+                  onChange={(e) => handleCurrentlyEmployedChange(index, e.target.checked)}
+                  className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded'
+                />
+                <label htmlFor={`currently-employed-${index}`} className='ml-2 text-sm text-gray-600'>
+                  Currently Employed
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className='grid-item col-span-6'>
+            <label htmlFor='responsibilities' className='text-sm font-medium leading-6 text-gray-900'>
+              Description/Responsibilities
+            </label>
+            <div className='mt-2 h-40 mb-12'>
+              <ReactQuill
+                onChange={(value) => setValue(`experiences.${index}.responsibilities`, value)}
+                formats={QUILL_FORMATS}
+                modules={QUILL_MODULES}
+                style={{ height: '100%', padding: '5px 8px !important' }}
+                value={watch(`experiences.${index}.responsibilities`) || ''}
+              />
             </div>
           </div>
           <button
             type='button'
-            className='lg:mt-5 w-full md:w-1/2 rounded-md flex justify-center items-center bg-red-600 lg:px-[110px] px-10 py-2.5 text-sm font-semibold text-white shadow-sm mb-4'
-            onClick={() => confirmAction('remove', index)}
+              className='lg:mt-5 w-full md:w-1/2 rounded-md border border-red-600 flex justify-center items-center lg:px-[110px] px-10 py-2.5 text-sm font-semibold text-red-600 shadow-sm mb-4'
+              onClick={() => confirmAction('remove', index)}
           >
             REMOVE
           </button>

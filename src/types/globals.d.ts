@@ -358,6 +358,7 @@ export type T_ApplicantProfile = {
   education?: string;
   college?: string;
   expected_salary?: number;
+  educationalAttainment?: string;
   skills?: string[];
   experiences?: {
     position: string;

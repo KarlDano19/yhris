@@ -29,6 +29,7 @@ async function saveApplicantProfile(data: any) {
       college: data.college,
       expected_salary: data.expected_salary,
       skills: data.skills,
+      educational_attainment: data.educationalAttainment,
       work_experience: data.exp || data.experiences || [],
     };
     const formData = new FormData();

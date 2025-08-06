@@ -53,7 +53,7 @@ function WorkExperience({ workExperience }: WorkExperienceProps) {
                   year: 'numeric',
                 })}{' '}
                 -{' '}
-                {experience.dateTo === 'Present' || experience.dateTo === 'present'
+                {experience.dateTo === 'Present' || experience.dateTo === 'present' || experience.dateTo === ''
                   ? 'Present'
                   : new Date(experience.dateTo).toLocaleDateString('en-US', {
                       month: 'long',

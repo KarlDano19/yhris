@@ -128,15 +128,11 @@ export default function ApplicantForm({ title }: PropTypes) {
                 <p className='font-semibold'>{exp.position}</p>
                 <p>
                   {new Date(exp.dateFrom).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} -{' '}
-                  {new Date(exp.dateTo).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  {exp.dateTo ? new Date(exp.dateTo).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Present'}
                 </p>
                 <p>{exp.companyOrg}</p>
-                <p className='font-semibold mt-4'>Major Roles:</p>
-                <div className='pl-7'>
-                  <ul className='list-disc'>
-                    <li>{exp.majorRole}</li>
-                  </ul>
-                </div>
+                <p className='font-semibold mt-4'>Description/Responsibilities:</p>
+                <div className='pl-2' dangerouslySetInnerHTML={{ __html: exp.responsibilities }} />
               </div>
             </div>
           );

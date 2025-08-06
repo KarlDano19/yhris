@@ -26,6 +26,8 @@ async function saveApplicantProfile(data: any) {
       contact_person_relationship: data.contactPersonRelationship,
       contact_person_age: data.contactPersonAge,
       education: data.education,
+      college: data.college,
+      educational_attainment: data.educationalAttainment,
       expected_salary: data.expected_salary,
       skills: data.skills,
       work_experience: data.exp || data.experiences || [],

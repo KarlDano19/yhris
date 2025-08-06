@@ -13,9 +13,13 @@ async function submitApplication(data: any) {
       gender: data.gender,
       religion: data.religion,
       portfolio_url: data.portfolio,
-      work_experience: data.exp,
+      work_experience: data.exp || data.experiences || [],
       setup_preference: (data.setupPreference || '').join(),
       expected_salary: data.expected_salary,
+      educational_attainment: data.educationalAttainment,
+      college: data.college,
+      skills: data.skills,
+      education: data.education,
     };
     const formData = new FormData();
     if (data.skills && Array.isArray(data.skills) && data.skills.length > 0) {
