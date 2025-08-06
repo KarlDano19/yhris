@@ -21,10 +21,12 @@ export default function CreateMemoModal({
   isOpen,
   setIsOpen,
   refetch,
+  employeeData,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
+  employeeData?: any[];
 }) {
   const cancelButtonRef = useRef(null);
   const [signatureUrl, setSignatureUrl] = useState<string>('');
@@ -33,7 +35,9 @@ export default function CreateMemoModal({
   const [qrCodeExist, setQrCodeExist] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [inputTo, setInputTo] = useState('');
-  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
+  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
 
@@ -122,6 +126,34 @@ export default function CreateMemoModal({
     }
   }, [tagsTo, clearErrors]);
 
+  // Filter employees based on input
+  useEffect(() => {
+    if (employeeData && inputTo.trim()) {
+      const filtered = employeeData.filter((employee: any) => {
+        const searchTerm = inputTo.toLowerCase();
+        const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+        const email = employee.email?.toLowerCase() || '';
+        
+        return fullName.includes(searchTerm) || email.includes(searchTerm);
+      }).slice(0, 5); // Limit to 5 suggestions
+      
+      setFilteredEmployees(filtered);
+      setShowEmployeeSuggestions(filtered.length > 0);
+    } else {
+      setFilteredEmployees([]);
+      setShowEmployeeSuggestions(false);
+    }
+  }, [inputTo, employeeData]);
+
+  const handleEmployeeSelect = (employee: any) => {
+    if (employee.email && !tagsTo.includes(employee.email)) {
+      // Add the email directly to tagsTo using the setter
+      setTagsTo([...tagsTo, employee.email]);
+    }
+    setInputTo('');
+    setShowEmployeeSuggestions(false);
+  };
+
   useEffect(() => {
     if (signatureUrl) {
       setValue('signature', signatureUrl as never);
@@ -198,41 +230,62 @@ export default function CreateMemoModal({
                           {errors.to.message || 'To field is required.'}
                         </p>
                       )}
-                      <div className='mt-2 flex rounded-md shadow-sm'>
-                        <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                          <div 
-                            className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'
-                            data-tooltip-id='to-section-tooltip'
-                            data-tooltip-place='bottom'
-                          >
-                            {tagsTo.map((tagTo: string) => (
-                              <div
-                                key={tagTo}
-                                className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                              >
-                                <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
-                                  <XMarkIcon className='w-4 h-4' />
-                                </button>
-                                <p>{tagTo}</p>
+                                              <div className='mt-2 flex rounded-md shadow-sm'>
+                          <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                            <div 
+                              className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'
+                              data-tooltip-id='to-section-tooltip'
+                              data-tooltip-place='bottom'
+                            >
+                              {tagsTo.map((tagTo: string) => (
+                                <div
+                                  key={tagTo}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                >
+                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tagTo}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='text'
+                                value={inputTo}
+                                onKeyDown={handleKeyDownTo}
+                                onChange={(e) => setInputTo(e.target.value)}
+                                onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                              />
+                              <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter, or search for employees.
+                                  </h2>
+                                </div>
+                              </Tooltip>
+                            </div>
+                            
+                            {/* Employee Suggestions Dropdown */}
+                            {showEmployeeSuggestions && (
+                              <div className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+                                {filteredEmployees.map((employee: any) => (
+                                  <div
+                                    key={employee.id}
+                                    className='px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0'
+                                    onClick={() => handleEmployeeSelect(employee)}
+                                  >
+                                    <div className='text-sm font-medium text-gray-900'>
+                                      {employee.firstname} {employee.lastname}
+                                    </div>
+                                    <div className='text-xs text-gray-500'>
+                                      {employee.email}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                            <input
-                              type='text'
-                              value={inputTo}
-                              onKeyDown={handleKeyDownTo}
-                              onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
-                              className='focus:none outline-none px-2 py-1 grow rounded-md'
-                            />
-                            <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                              <div className='px-1'>
-                                <h2 className='text-[12px] font-medium'>
-                                  Add multiple recipients by pressing Tab or Enter.
-                                </h2>
-                              </div>
-                            </Tooltip>
+                            )}
                           </div>
                         </div>
-                      </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
                       <label htmlFor='body' className='block text-sm font-medium leading-6 text-gray-900'>

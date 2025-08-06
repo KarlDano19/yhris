@@ -15,6 +15,7 @@ import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
@@ -58,6 +59,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  
+  const { data: employeeData } = useGetEmployeeItems();
   
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
@@ -440,8 +443,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <CreateMemoModal isOpen={isCreateMemoModalOpen} setIsOpen={setIsCreateMemoModalOpen} refetch={refetch} />
-      <CreatePolicyModal isOpen={isCreatePolicyModalOpen} setIsOpen={setIsCreatePolicyModalOpen} refetch={refetch} />
+      <CreateMemoModal 
+        isOpen={isCreateMemoModalOpen} 
+        setIsOpen={setIsCreateMemoModalOpen} 
+        refetch={refetch} 
+        employeeData={employeeData} 
+      />
+      <CreatePolicyModal 
+        isOpen={isCreatePolicyModalOpen} 
+        setIsOpen={setIsCreatePolicyModalOpen} 
+        refetch={refetch} employeeData={employeeData} 
+      />
       <EmployeeResponsesModal 
         isOpen={isEmployeeResponsesModalOpen} 
         setIsOpen={setIsEmployeeResponsesModalOpen}

@@ -19,10 +19,12 @@ export default function CreatePolicyModal({
   isOpen,
   setIsOpen,
   refetch,
+  employeeData,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
+  employeeData?: any[];
 }) {
   const cancelButtonRef = useRef(null);
   const [isNextForm, setIsNextForm] = useState(false);
@@ -30,7 +32,9 @@ export default function CreatePolicyModal({
   const [fieldToRemove, setFieldToRemove] = useState<number | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [inputTo, setInputTo] = useState('');
-  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
+  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control, watch, formState: { errors }, setError } =
     useForm<DirectiveData>({
       defaultValues: {
@@ -181,6 +185,34 @@ export default function CreatePolicyModal({
     }
   }, [tagsTo, clearErrors]);
 
+  // Filter employees based on input
+  useEffect(() => {
+    if (employeeData && inputTo.trim()) {
+      const filtered = employeeData.filter((employee: any) => {
+        const searchTerm = inputTo.toLowerCase();
+        const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+        const email = employee.email?.toLowerCase() || '';
+        
+        return fullName.includes(searchTerm) || email.includes(searchTerm);
+      }).slice(0, 5); // Limit to 5 suggestions
+      
+      setFilteredEmployees(filtered);
+      setShowEmployeeSuggestions(filtered.length > 0);
+    } else {
+      setFilteredEmployees([]);
+      setShowEmployeeSuggestions(false);
+    }
+  }, [inputTo, employeeData]);
+
+  const handleEmployeeSelect = (employee: any) => {
+    if (employee.email && !tagsTo.includes(employee.email)) {
+      // Add the email directly to tagsTo using the setter
+      setTagsTo([...tagsTo, employee.email]);
+    }
+    setInputTo('');
+    setShowEmployeeSuggestions(false);
+  };
+
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -274,16 +306,37 @@ export default function CreatePolicyModal({
                                 value={inputTo}
                                 onKeyDown={handleKeyDownTo}
                                 onChange={(e) => setInputTo(e.target.value)}
+                                onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
                                 className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                               <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
                                 <div className='px-1'>
                                   <h2 className='text-[12px] font-medium'>
-                                    Add multiple recipients by pressing Tab or Enter.
+                                    Add multiple recipients by pressing Tab or Enter, or search for employees.
                                   </h2>
                                 </div>
                               </Tooltip>
                             </div>
+                            
+                            {/* Employee Suggestions Dropdown */}
+                            {showEmployeeSuggestions && (
+                              <div className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+                                {filteredEmployees.map((employee: any) => (
+                                  <div
+                                    key={employee.id}
+                                    className='px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0'
+                                    onClick={() => handleEmployeeSelect(employee)}
+                                  >
+                                    <div className='text-sm font-medium text-gray-900'>
+                                      {employee.firstname} {employee.lastname}
+                                    </div>
+                                    <div className='text-xs text-gray-500'>
+                                      {employee.email}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
