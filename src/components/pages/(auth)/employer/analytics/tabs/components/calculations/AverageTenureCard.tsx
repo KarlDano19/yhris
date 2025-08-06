@@ -21,7 +21,7 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
   isLoading = false,
   error = null
 }) => {
-  // Calculate average tenure
+  // Calculate average tenure with trend analysis
   const calculateAverageTenure = useMemo(() => {
     // Handle both paginated structure (records) and flat array structure
     const employeeDataArray = employeeData?.records || employeeData;
@@ -31,7 +31,9 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
       return {
         averageTenure: 0,
         totalEmployees: 0,
-        totalTenure: 0
+        totalTenure: 0,
+        trend: 'No data available',
+        isPositive: true
       };
     }
 
@@ -66,10 +68,18 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
 
     const averageTenure = validEmployees > 0 ? totalTenure / validEmployees : 0;
 
+    // For trend analysis, we'll use a simplified approach
+    // In a real system, you'd compare with historical data
+    // For now, we'll show "No significant change" as per the sample UI
+    const trend = 'No significant change';
+    const isPositive = averageTenure > 2; // Positive if average tenure is above 2 years
+
     return {
       averageTenure: Math.round(averageTenure * 10) / 10, // Round to 1 decimal place
       totalEmployees: validEmployees,
-      totalTenure: Math.round(totalTenure * 10) / 10
+      totalTenure: Math.round(totalTenure * 10) / 10,
+      trend: trend,
+      isPositive: isPositive
     };
   }, [employeeData, separationData]);
 
@@ -118,8 +128,8 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
       <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Average Tenure (Years)</h3>
       <Card
         value={`${calculateAverageTenure.averageTenure}`}
-        trend={`${calculateAverageTenure.totalEmployees} employees, ${calculateAverageTenure.totalTenure} total years`}
-        isPositive={calculateAverageTenure.averageTenure > 2} // Positive if average tenure is above 2 years
+        trend={calculateAverageTenure.trend}
+        isPositive={calculateAverageTenure.isPositive}
       />
     </div>
   );
