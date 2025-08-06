@@ -5,9 +5,7 @@ import React, { useMemo } from 'react';
 import Card from '../../../Card';
 
 interface ResolvedVSOngoingCardProps {
-  employeeIssueData?: {
-    records?: any[];
-  };
+  employeeIssueData?: any[];
   isLoading?: boolean;
   error?: any;
 }
@@ -19,7 +17,7 @@ const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
 }) => {
   // Calculate resolved vs ongoing issues percentages
   const calculateIssueResolutionRate = useMemo(() => {
-    if (!employeeIssueData?.records || employeeIssueData.records.length === 0) {
+    if (!employeeIssueData || !Array.isArray(employeeIssueData) || employeeIssueData.length === 0) {
       return {
         resolvedPercentage: 0,
         ongoingPercentage: 0,
@@ -29,11 +27,11 @@ const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
       };
     }
 
-    const totalIssues = employeeIssueData.records.length;
+    const totalIssues = employeeIssueData.length;
     let resolvedIssues = 0;
     let ongoingIssues = 0;
 
-    employeeIssueData.records.forEach((issue: any) => {
+    employeeIssueData.forEach((issue: any) => {
       // Resolved: decision has been sent AND received (employee signed)
       if (issue.is_decision_sent && issue.is_decision_received) {
         resolvedIssues++;

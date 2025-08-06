@@ -5,12 +5,8 @@ import React, { useMemo } from 'react';
 import Card from '../../../Card';
 
 interface AttritionRateCardProps {
-  separationData?: {
-    records?: any[];
-  };
-  employeeData?: {
-    records?: any[];
-  };
+  separationData?: any[];
+  employeeData?: any[];
   isLoading?: boolean;
   error?: any;
 }
@@ -23,11 +19,7 @@ const AttritionRateCard: React.FC<AttritionRateCardProps> = ({
 }) => {
   // Calculate attrition rate with trend comparison
   const calculateAttritionRate = useMemo(() => {
-    // Handle both paginated structure (records) and flat array structure
-    const separationDataArray = separationData?.records || separationData;
-    const employeeDataArray = employeeData?.records || employeeData;
-    
-    if (!separationDataArray || !employeeDataArray || !Array.isArray(separationDataArray) || !Array.isArray(employeeDataArray)) {
+    if (!separationData || !employeeData || !Array.isArray(separationData) || !Array.isArray(employeeData)) {
       return {
         attritionRate: 0,
         totalLeavers: 0,
@@ -62,19 +54,19 @@ const AttritionRateCard: React.FC<AttritionRateCardProps> = ({
     const previousQuarterEndDate = new Date(previousYear, previousQuarterStartMonth + 3, 0);
     
     // Count leavers in the current quarter period
-    const currentPeriodLeavers = separationDataArray.filter((separation: any) => {
+    const currentPeriodLeavers = separationData.filter((separation: any) => {
       const separationDate = new Date(separation.separation_date || separation.created_at);
       return separationDate >= quarterStartDate && separationDate <= quarterEndDate;
     }).length;
 
     // Count leavers in the previous quarter period
-    const previousPeriodLeavers = separationDataArray.filter((separation: any) => {
+    const previousPeriodLeavers = separationData.filter((separation: any) => {
       const separationDate = new Date(separation.separation_date || separation.created_at);
       return separationDate >= previousQuarterStartDate && separationDate <= previousQuarterEndDate;
     }).length;
 
     // Calculate current headcount (ending headcount)
-    const endingHeadcount = employeeDataArray.length;
+    const endingHeadcount = employeeData.length;
     
     // For starting headcount, we need to add back the leavers from this quarter
     const startingHeadcount = endingHeadcount + currentPeriodLeavers;

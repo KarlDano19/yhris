@@ -4,9 +4,7 @@ import React, { useMemo } from 'react';
 import Card from '../../../Card';
 
 interface SeparatedEmployeesCardProps {
-  separationData?: {
-    records?: any[];
-  };
+  separationData?: any[];
   isLoading?: boolean;
   error?: any;
 }
@@ -18,16 +16,14 @@ const SeparatedEmployeesCard: React.FC<SeparatedEmployeesCardProps> = ({
 }) => {
   // Calculate separated employees
   const calculateSeparatedEmployees = useMemo(() => {
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = separationData?.records || separationData;
-    if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
+    if (!separationData || !Array.isArray(separationData) || separationData.length === 0) {
       return {
         separatedEmployees: 0,
         trend: 'No data available'
       };
     }
 
-    const separatedEmployees = dataArray.length;
+    const separatedEmployees = separationData.length;
     
     // Calculate trend (simulated comparison with previous quarter)
     // In a real system, you'd compare with historical data

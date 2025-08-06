@@ -307,9 +307,9 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
         
         {/* Resolved vs Ongoing Issues Card */}
         <ResolvedVSOngoingCard
-          employeeIssueData={employeeIssueData}
-          isLoading={employeeIssueLoading}
-          error={employeeIssueError}
+          employeeIssueData={allEmployeeIssueData}
+          isLoading={allEmployeeIssueLoading}
+          error={allEmployeeIssueError}
         />
       </div>
 
