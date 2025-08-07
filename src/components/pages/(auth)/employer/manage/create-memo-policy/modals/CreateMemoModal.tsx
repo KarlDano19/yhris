@@ -240,7 +240,7 @@ export default function CreateMemoModal({
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm mr-1'
                                 >
                                   <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
                                     <XMarkIcon className='w-4 h-4' />
