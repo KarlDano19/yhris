@@ -6,7 +6,7 @@ import { Dialog, Transition } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-function GoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
+function ScreenApplicantGoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dispatch<boolean> }) {
   const cancelButtonRef = useRef(null);
 
   const customCloseModal = () => {
@@ -46,15 +46,17 @@ function GoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dis
                 <div className='flex justify-center items-center px-4 pb-4'>
                   <img src='/assets/nerd-face.png' alt='diamond' className='w-28 h-28 mr-8 ml-2' />
                   <div>
-                    <h3 className='text-xl font-bold text-gray-900 text-left'>
-                      Looks like you’ve tapped on one of our premium modules.
-                    </h3>
+                    <h3 className='text-xl font-bold text-gray-900 text-left'>Applicant Successfully Hired!</h3>
                     <p className='text-gray-600 text-left mt-4'>
-                      Unlock this (and a whole lot more) by{' '}
+                      Their information will now appear in the Onboarding Module — a premium feature designed to make
+                      orientation and deployment smoother and more automated.
+                    </p>
+                    <p className='text-gray-600 text-left mt-4'>
                       <span className='text-transparent bg-clip-text bg-gradient-to-r from-[#FA7417] to-[#FABE23]'>
-                        upgrading to YAHSHUA HRIS Premium
+                        Unlock onboarding (and other advanced HR tools)
                       </span>{' '}
-                      — so you can automate workflows, access advanced tools, and make HR easier than ever.
+                      by upgrading to YAHSHUA HRIS Premium so you can seamlessly continue the process from hired to
+                      fully onboarded.
                     </p>
                     <div className='flex justify-between gap-2 mt-8'>
                       <Link
@@ -91,4 +93,4 @@ function GoPremiumModal({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: Dis
   );
 }
 
-export default GoPremiumModal;
+export default ScreenApplicantGoPremiumModal;

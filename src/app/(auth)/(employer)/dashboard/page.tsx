@@ -19,7 +19,7 @@ const HomePage = async () => {
   const session = await getSession();
   const loginType = session.loginType;
   const hasActiveSubscription = session.hasActiveSubscription;
-  return <Home loginType={loginType} hasActiveSubscription={session.hasActiveSubscription} />;
+  return <Home loginType={loginType} hasActiveSubscription={hasActiveSubscription} />;
 };
 
 export default HomePage;
