@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import DemographicBreakdownFilterModal from '../../modals/DemographicBreakdownFilterModal';
+import DemographicBreakdownFilterModal from '../../../../modals/DemographicBreakdownFilterModal';
 
 import FilterLogo from '@/svg/FilterLogo';
 import { getRegionGroup, advertiseOptions } from '@/helpers/advertiseOptions';

@@ -2,37 +2,37 @@
 
 import React, { useMemo } from 'react';
 
-import Card from '../../../Card';
+import Card from '../../Card';
 
-interface PoliciesDueCardProps {
-  policiesData?: any[];
+interface PoliciesAcknowledgementCardProps {
+  acknowledgementData?: any[];
   isLoading?: boolean;
   error?: any;
 }
 
-const PoliciesDueCard: React.FC<PoliciesDueCardProps> = ({
-  policiesData,
+const PoliciesAcknowledgementCard: React.FC<PoliciesAcknowledgementCardProps> = ({
+  acknowledgementData,
   isLoading = false,
   error = null
 }) => {
-  // Calculate policies due for review with dummy data
-  const calculatePoliciesDue = useMemo(() => {
+  // Calculate policies acknowledgement rate with dummy data
+  const calculateAcknowledgementRate = useMemo(() => {
     // Dummy data for visualization
-    const currentPoliciesDue = 3;
-    const previousPoliciesDue = 4;
-    const decrease = previousPoliciesDue - currentPoliciesDue;
+    const currentAcknowledgementRate = 87;
+    const previousAcknowledgementRate = 83;
+    const increase = currentAcknowledgementRate - previousAcknowledgementRate;
 
     return {
-      policiesDue: currentPoliciesDue,
-      trend: `Decreased by -${decrease} (last December 2024 had ${previousPoliciesDue} policies approaching review)`,
-      isPositive: true // Decrease in policies due is positive
+      acknowledgementRate: currentAcknowledgementRate,
+      trend: `Increased by +${increase}% (was ${previousAcknowledgementRate}% last December 2024)`,
+      isPositive: true
     };
-  }, [policiesData]);
+  }, [acknowledgementData]);
 
   if (isLoading) {
     return (
       <div className="flex flex-col pl-2 pr-2">
-        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Policies Due for Review</h3>
+        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Policies Acknowledgement Rate</h3>
         <div className="flex items-center justify-center h-16">
           <div role='status' className='text-center'>
             <svg
@@ -61,9 +61,9 @@ const PoliciesDueCard: React.FC<PoliciesDueCardProps> = ({
   if (error) {
     return (
       <div className="flex flex-col pl-2 pr-2">
-        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Policies Due for Review</h3>
+        <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Policies Acknowledgement Rate</h3>
         <div className="bg-red-50 p-4 rounded-2xl">
-          <p className="text-red-600 text-sm">Failed to load policies data</p>
+          <p className="text-red-600 text-sm">Failed to load acknowledgement data</p>
         </div>
       </div>
     );
@@ -71,14 +71,14 @@ const PoliciesDueCard: React.FC<PoliciesDueCardProps> = ({
 
   return (
     <div className="flex flex-col pl-2 pr-2">
-      <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Policies Due for Review</h3>
+      <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">Policies Acknowledgement Rate</h3>
       <Card
-        value={calculatePoliciesDue.policiesDue.toString()}
-        trend={calculatePoliciesDue.trend}
-        isPositive={calculatePoliciesDue.isPositive}
+        value={`${calculateAcknowledgementRate.acknowledgementRate}%`}
+        trend={calculateAcknowledgementRate.trend}
+        isPositive={calculateAcknowledgementRate.isPositive}
       />
     </div>
   );
 };
 
-export default PoliciesDueCard;
+export default PoliciesAcknowledgementCard;

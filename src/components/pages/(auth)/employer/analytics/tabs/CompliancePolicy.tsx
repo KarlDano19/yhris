@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 
-import OverallComplianceRateCard from './components/card-calculations/OverallComplianceRateCard';
-import PoliciesDueCard from './components/card-calculations/PoliciesDueCard';
-import OverduePoliciesCard from './components/card-calculations/OverduePoliciesCard';
-import PoliciesAcknowledgementCard from './components/card-calculations/PoliciesAcknowledgementCard';
+import OverallComplianceRateCard from '../cards/compliance-policy/OverallComplianceRateCard';
+import PoliciesDueCard from '../cards/compliance-policy/PoliciesDueCard';
+import OverduePoliciesCard from '../cards/compliance-policy/OverduePoliciesCard';
+import PoliciesAcknowledgementCard from '../cards/compliance-policy/PoliciesAcknowledgementCard';
 import OverallComplianceTrend from './components/compliance-policy-tab/OverallComplianceTrend';
 import PoliciesAcknowledgementTrend from './components/compliance-policy-tab/PoliciesAcknowledgementTrend';
 import PolicyComplianceTable from './components/compliance-policy-tab/PolicyComplianceTable';

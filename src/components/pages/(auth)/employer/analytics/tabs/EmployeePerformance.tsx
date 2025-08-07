@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import AveragePerformanceCard from './components/card-calculations/AveragePerformanceCard';
-import TrainingCompletionCard from './components/card-calculations/TrainingCompletionCard';
-import ImprovementPostTrainingCard from './components/card-calculations/ImprovementPostTrainingCard';
-import ResolvedVSOngoingCard from './components/card-calculations/ResolvedVSOngoingCard';
+import AveragePerformanceCard from '../cards/employee-performance/AveragePerformanceCard';
+import TrainingCompletionCard from '../cards/employee-performance/TrainingCompletionCard';
+import ImprovementPostTrainingCard from '../cards/employee-performance/ImprovementPostTrainingCard';
+import ResolvedVSOngoingCard from '../cards/employee-performance/ResolvedVSOngoingCard';
 import PerformanceRate from './components/employeee-performance-tab/performance-rate-tab/PerformanceRate';
 import PerformanceTrend from './components/employeee-performance-tab/performance-rate-tab/PerformanceTrend';
 import EmployeePerformanceTable from './components/employeee-performance-tab/performance-rate-tab/EmployeePerformanceTable';

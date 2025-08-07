@@ -2,64 +2,54 @@
 
 import React, { useMemo } from 'react';
 
-import Card from '../../../Card';
+import Card from '../../Card';
 
-interface ResolvedVSOngoingCardProps {
-  employeeIssueData?: any[];
+interface AveragePerformanceCardProps {
+  evaluationData?: any[];
   isLoading?: boolean;
   error?: any;
 }
 
-const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
-  employeeIssueData,
+const AveragePerformanceCard: React.FC<AveragePerformanceCardProps> = ({
+  evaluationData,
   isLoading = false,
   error = null
 }) => {
-  // Calculate resolved vs ongoing issues percentages
-  const calculateIssueResolutionRate = useMemo(() => {
-    if (!employeeIssueData || !Array.isArray(employeeIssueData) || employeeIssueData.length === 0) {
-      return {
-        resolvedPercentage: 0,
-        ongoingPercentage: 0,
-        totalIssues: 0,
-        resolvedIssues: 0,
-        ongoingIssues: 0
+  // Calculate average performance score from evaluation data
+  const calculateAveragePerformanceScore = useMemo(() => {
+    if (!evaluationData || evaluationData.length === 0) {
+      return { 
+        averageScore: 0, 
+        totalEmployees: 0, 
+        maxScore: 0 
       };
     }
 
-    const totalIssues = employeeIssueData.length;
-    let resolvedIssues = 0;
-    let ongoingIssues = 0;
+    const totalScore = evaluationData.reduce((sum: number, item: any) => {
+      return sum + (parseFloat(item.score) || 0);
+    }, 0);
 
-    employeeIssueData.forEach((issue: any) => {
-      // Resolved: decision has been sent AND received (employee signed)
-      if (issue.is_decision_sent && issue.is_decision_received) {
-        resolvedIssues++;
-      } 
-      // Ongoing: decision has not been sent yet (company hasn't reached decision)
-      else if (!issue.is_decision_sent) {
-        ongoingIssues++;
-      }
-      // Note: Issues where decision is sent but not received are not counted in either category
-    });
+    const totalEmployees = evaluationData.length;
+    const averageScore = totalEmployees > 0 ? totalScore / totalEmployees : 0;
 
-    const resolvedPercentage = totalIssues > 0 ? ((resolvedIssues / totalIssues) * 100) : 0;
-    const ongoingPercentage = totalIssues > 0 ? ((ongoingIssues / totalIssues) * 100) : 0;
+    // Get the maximum score from form_total_score (assuming all evaluations use the same template)
+    const maxScore = evaluationData[0]?.form_total_score || 
+                     evaluationData[0]?.max_score || 
+                     evaluationData[0]?.evaluation_template?.max_score || 
+                     100; // Final fallback
 
     return {
-      resolvedPercentage: Math.round(resolvedPercentage * 10) / 10, // Round to 1 decimal
-      ongoingPercentage: Math.round(ongoingPercentage * 10) / 10, // Round to 1 decimal
-      totalIssues,
-      resolvedIssues,
-      ongoingIssues
+      averageScore: Math.round(averageScore * 100) / 100,
+      totalEmployees,
+      maxScore: Math.round(maxScore * 100) / 100
     };
-  }, [employeeIssueData]);
+  }, [evaluationData]);
 
   if (isLoading) {
     return (
       <div className="flex flex-col pl-5 pr-5">
         <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">
-          % of Resolved Employee<br />Issues vs. Ongoing Issues
+          Average Employee<br />Performance Score
         </h3>
         <div className="flex items-center justify-center h-16">
           <div role='status' className='text-center'>
@@ -90,10 +80,10 @@ const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
     return (
       <div className="flex flex-col pl-5 pr-5">
         <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">
-          % of Resolved Employee<br />Issues vs. Ongoing Issues
+          Average Employee<br />Performance Score
         </h3>
         <div className="bg-red-50 p-4 rounded-2xl">
-          <p className="text-red-600 text-sm">Failed to load issue data</p>
+          <p className="text-red-600 text-sm">Failed to load performance data</p>
         </div>
       </div>
     );
@@ -102,14 +92,14 @@ const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
   return (
     <div className="flex flex-col pl-5 pr-5">
       <h3 className="text-sm font-semibold text-gray-600 mb-2 text-center">
-        % of Resolved Employee<br />Issues vs. Ongoing Issues
+        Average Employee<br />Performance Score
       </h3>
       <Card
-        value={`${calculateIssueResolutionRate.resolvedPercentage}%`}
-        trend={`${calculateIssueResolutionRate.resolvedIssues} resolved, ${calculateIssueResolutionRate.ongoingIssues} ongoing out of ${calculateIssueResolutionRate.totalIssues} total issues`}
+        value={`${calculateAveragePerformanceScore.averageScore}/${calculateAveragePerformanceScore.maxScore}`}
+        trend={`Based on ${calculateAveragePerformanceScore.totalEmployees} employee evaluations`}
       />
     </div>
   );
 };
 
-export default ResolvedVSOngoingCard;
+export default AveragePerformanceCard;

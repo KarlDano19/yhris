@@ -16,7 +16,7 @@ import {
 import { Line } from 'react-chartjs-2';
 
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
-import PerformanceTrendFilterModal from '../../modals/PerformanceTrendFilterModal';
+import PerformanceTrendFilterModal from '../../../../modals/PerformanceTrendFilterModal';
 
 import FilterLogo from '@/svg/FilterLogo';
 import AverageLegendIcon from '@/svg/AverageLegendIcon';

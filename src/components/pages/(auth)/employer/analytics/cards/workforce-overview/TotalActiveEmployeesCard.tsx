@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import Card from '../../../Card';
+import Card from '../../Card';
 
 interface TotalActiveEmployeesCardProps {
   employeeData?: any[];

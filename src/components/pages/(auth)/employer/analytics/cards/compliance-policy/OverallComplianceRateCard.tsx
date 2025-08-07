@@ -4,7 +4,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import Card from '../../../Card';
+import Card from '../../Card';
 
 import InfoIcon from '@/svg/InfoIcon';
 

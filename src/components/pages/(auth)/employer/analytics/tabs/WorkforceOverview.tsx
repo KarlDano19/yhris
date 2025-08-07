@@ -4,11 +4,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import TotalActiveEmployeesCard from './components/card-calculations/TotalActiveEmployeesCard';
-import NewHiresCard from './components/card-calculations/NewHiresCard';
-import SeparatedEmployeesCard from './components/card-calculations/SeparatedEmployeesCard';
-import AttritionRateCard from './components/card-calculations/AttritionRateCard';
-import AverageTenureCard from './components/card-calculations/AverageTenureCard';
+import TotalActiveEmployeesCard from '../cards/workforce-overview/TotalActiveEmployeesCard';
+import NewHiresCard from '../cards/workforce-overview/NewHiresCard';
+import SeparatedEmployeesCard from '../cards/workforce-overview/SeparatedEmployeesCard';
+import AttritionRateCard from '../cards/workforce-overview/AttritionRateCard';
+import AverageTenureCard from '../cards/workforce-overview/AverageTenureCard';
 import OverallApplicantsSummary from './components/workforce-overview-tab/applicant-vs-hired-tab/OverallApplicantsSummary';
 import DemographicBreakdown from './components/workforce-overview-tab/applicant-vs-hired-tab/DemographicBreakdown';
 import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';

@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 
 import FilterLogo from '@/svg/FilterLogo';
-import ExitReasonsFilterModal from '../../modals/ExitReasonsFilterModal';
+import ExitReasonsFilterModal from '../../../../modals/ExitReasonsFilterModal';
 import { Tooltip } from 'react-tooltip';
 
 interface ExitReasonsProps {
