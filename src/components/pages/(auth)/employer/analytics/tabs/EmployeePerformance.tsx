@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import Card from '../Card';
+import AveragePerformanceCard from './components/card-calculations/AveragePerformanceCard';
+import TrainingCompletionCard from './components/card-calculations/TrainingCompletionCard';
+import ImprovementPostTrainingCard from './components/card-calculations/ImprovementPostTrainingCard';
+import ResolvedVSOngoingCard from './components/card-calculations/ResolvedVSOngoingCard';
 import PerformanceRate from './components/employeee-performance-tab/performance-rate-tab/PerformanceRate';
 import PerformanceTrend from './components/employeee-performance-tab/performance-rate-tab/PerformanceTrend';
 import EmployeePerformanceTable from './components/employeee-performance-tab/performance-rate-tab/EmployeePerformanceTable';
@@ -13,10 +16,6 @@ import IssueType from './components/employeee-performance-tab/employee-issue-rat
 import MonthlyTypeVolume from './components/employeee-performance-tab/employee-issue-rate-tab/MonthlyTypeVolume';
 import EmployeeIssuesTable from './components/employeee-performance-tab/employee-issue-rate-tab/EmployeeIssuesTable';
 import InterventionRecommendations from './components/employeee-performance-tab/employee-issue-rate-tab/InterventionRecommendations';
-import AveragePerformanceCard from './components/card-calculations/AveragePerformanceCard';
-import TrainingCompletionCard from './components/card-calculations/TrainingCompletionCard';
-import ImprovementPostTrainingCard from './components/card-calculations/ImprovementPostTrainingCard';
-import ResolvedVSOngoingCard from './components/card-calculations/ResolvedVSOngoingCard';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetAllEvaluationHistoryItems from '@/components/hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';

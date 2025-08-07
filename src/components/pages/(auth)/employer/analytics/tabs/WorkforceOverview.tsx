@@ -4,17 +4,16 @@ import React, { useState, useMemo, useEffect } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import Card from '../Card';
-import OverallApplicantsSummary from './components/workforce-overview-tab/applicant-vs-hired-tab/OverallApplicantsSummary';
-import DemographicBreakdown from './components/workforce-overview-tab/applicant-vs-hired-tab/DemographicBreakdown';
-import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
-import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
-import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
 import TotalActiveEmployeesCard from './components/card-calculations/TotalActiveEmployeesCard';
 import NewHiresCard from './components/card-calculations/NewHiresCard';
 import SeparatedEmployeesCard from './components/card-calculations/SeparatedEmployeesCard';
 import AttritionRateCard from './components/card-calculations/AttritionRateCard';
 import AverageTenureCard from './components/card-calculations/AverageTenureCard';
+import OverallApplicantsSummary from './components/workforce-overview-tab/applicant-vs-hired-tab/OverallApplicantsSummary';
+import DemographicBreakdown from './components/workforce-overview-tab/applicant-vs-hired-tab/DemographicBreakdown';
+import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
+import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
+import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
