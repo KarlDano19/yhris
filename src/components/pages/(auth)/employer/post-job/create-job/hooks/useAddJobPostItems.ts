@@ -36,7 +36,28 @@ async function addJobPost(jobPost: any) {
     // Add screening questions and auto-reject settings
     if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {
       console.log('Adding screening questions:', jobPost.screeningQuestions);
-      formData.append('screening_questions', JSON.stringify(jobPost.screeningQuestions));
+      
+      // Format questions to match backend expectations
+      const formattedQuestions = jobPost.screeningQuestions.map((q: any) => ({
+        id: q.id, // Preserve the ID
+        question: q.question,
+        idealAnswer: q.idealAnswer,
+        responseType: q.responseType,
+        mustHave: q.mustHave,
+        // Only include degree if it exists
+        ...(q.degree ? { degree: q.degree } : {}),
+        // Include presetId if it exists
+        ...(q.presetId ? { presetId: q.presetId } : {}),
+        // Include showToCandidates for all questions
+        ...(q.showToCandidates !== undefined ? { showToCandidates: q.showToCandidates } : {}),
+        // Include options for multiple choice questions
+        ...(q.options ? { options: q.options } : {})
+      }));
+      
+      formData.append('screening_questions', JSON.stringify(formattedQuestions));
+    } else {
+      // Send empty array if no questions
+      formData.append('screening_questions', JSON.stringify([]));
     }
     
     if (jobPost.autoRejectEnabled !== undefined) {

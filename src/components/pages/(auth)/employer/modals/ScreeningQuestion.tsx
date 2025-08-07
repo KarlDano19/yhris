@@ -119,6 +119,7 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
             className="w-4 h-4"
           />
           <label className="text-sm text-gray-700 font-medium">Must–have qualification</label>
+          
         </div>
         {recommended && (
           <div>

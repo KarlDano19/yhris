@@ -26,10 +26,16 @@ function ScreeningQuestionTab({
 
   useEffect(() => {
     if (jobPostingData?.screening_questions) {
-      setScreeningQuestions(jobPostingData.screening_questions);
+      // Filter questions to only show those that should be shown to candidates
+      const filteredQuestions = jobPostingData.screening_questions.filter((question: any) => {
+        // Show question if showToCandidates is explicitly true or undefined (default to true for backward compatibility)
+        return question.showToCandidates !== false;
+      });
       
-      // Initialize form values for each question
-      jobPostingData.screening_questions.forEach((question: any, index: number) => {
+      setScreeningQuestions(filteredQuestions);
+      
+      // Initialize form values for each filtered question
+      filteredQuestions.forEach((question: any, index: number) => {
         setValue(`screeningAnswers.${index}.questionId`, question.id);
         setValue(`screeningAnswers.${index}.question`, question.question);
         setValue(`screeningAnswers.${index}.responseType`, question.responseType);

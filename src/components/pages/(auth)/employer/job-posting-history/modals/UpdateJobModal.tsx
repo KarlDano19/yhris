@@ -121,6 +121,7 @@ export default function UpdateJobModal({
           idealAnswer: q.idealAnswer || q.ideal_answer || 'Yes',
           responseType: q.responseType || q.response_type || 'Yes / No',
           mustHave: q.mustHave !== undefined ? q.mustHave : (q.must_have !== undefined ? q.must_have : true),
+          showToCandidates: q.showToCandidates !== undefined ? q.showToCandidates : (q.show_to_candidates !== undefined ? q.show_to_candidates : true),
           recommended: q.recommended !== undefined ? q.recommended : false,
           editable: q.editable !== undefined ? q.editable : false,
           degree: q.degree,
@@ -323,9 +324,10 @@ export default function UpdateJobModal({
                       setPageNumber={setPageNumber}
                       onSubmit={fifthFormSubmit}
                       screeningQuestions={screeningQuestions}
-                      autoRejectEnabled={autoRejectEnabled}
                       setScreeningQuestions={setScreeningQuestions}
+                      autoRejectEnabled={autoRejectEnabled}
                       setAutoRejectEnabled={setAutoRejectEnabled}
+
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>

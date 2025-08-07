@@ -90,7 +90,11 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
         // Only include degree if it exists
         ...(q.degree ? { degree: q.degree } : {}),
         // Include presetId if it exists
-        ...(q.presetId ? { presetId: q.presetId } : {})
+        ...(q.presetId ? { presetId: q.presetId } : {}),
+        // Include showToCandidates for all questions
+        ...(q.showToCandidates !== undefined ? { showToCandidates: q.showToCandidates } : {}),
+        // Include options for multiple choice questions
+        ...(q.options ? { options: q.options } : {})
       }));
       
       // Convert to JSON string for backend

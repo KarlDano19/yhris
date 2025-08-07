@@ -107,9 +107,10 @@ export default function Content() {
         isGoodFit = false;
       } else {
         // Process each answer and check if it matches the ideal answer for mustHave questions
+        // Only check questions that should be shown to candidates
         answers.forEach((answer: { question: string; answer: string | string[] }) => {
           const question = screeningQuestions.find(q => q.question === answer.question);
-          if (question && question.mustHave) {
+          if (question && question.mustHave && question.showToCandidates !== false) {
             const responseType = question.responseType || 'Yes / No';
             let isMatch = false;
             
@@ -139,17 +140,20 @@ export default function Content() {
         });
         
         // Check if any mustHave questions were not answered
-        screeningQuestions.forEach(question => {
-          if (question.mustHave) {
-            const wasAnswered = answers.some(
-              (answer: { question: string }) => answer.question === question.question
-            );
-            
-            if (!wasAnswered) {
-              isGoodFit = false;
+        // Only check questions that should be shown to candidates
+        screeningQuestions
+          .filter(question => question.showToCandidates !== false)
+          .forEach(question => {
+            if (question.mustHave) {
+              const wasAnswered = answers.some(
+                (answer: { question: string }) => answer.question === question.question
+              );
+              
+              if (!wasAnswered) {
+                isGoodFit = false;
+              }
             }
-          }
-        });
+          });
       }
       
       const screeningFit = isGoodFit ? 'good' : 'bad';

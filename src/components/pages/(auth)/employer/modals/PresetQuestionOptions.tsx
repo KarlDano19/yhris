@@ -82,12 +82,17 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
 
   ];
 
+  // Check if any custom questions are selected
+  const hasCustomQuestions = selectedOptions.some(option => option.startsWith('custom-question'));
+
   return (
     <div className="mt-4">
       <p className="text-sm text-red-600 mb-3 font-medium">* At least 3 screening questions are required</p>
       <div className="flex flex-wrap gap-2">
         {presetOptions.map((option) => {
-          const isSelected = selectedOptions.includes(option.id);
+          const isSelected = option.id === 'custom-question' 
+            ? hasCustomQuestions 
+            : selectedOptions.includes(option.id);
           return (
             <button
               key={option.id}

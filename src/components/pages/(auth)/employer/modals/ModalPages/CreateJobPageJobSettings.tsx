@@ -2,6 +2,7 @@ import { useEffect, Dispatch, useState } from 'react';
 import ToggleSection from '../ToggleSection';
 import ScreeningQuestion from '../ScreeningQuestion';
 import CustomScreeningForm from '../CustomScreeningForm';
+import CustomQuestionsModal from '../CustomQuestionsModal';
 import PresetQuestionOptions, { PRESET_QUESTIONS } from '../PresetQuestionOptions';
 import EditIcon from '@/svg/EditIcon';
 
@@ -38,6 +39,7 @@ export default function CreateJobPageJobSettings({
       idealAnswer: 'Yes',
       responseType: 'Yes / No',
       mustHave: true,
+      showToCandidates: true,
       recommended: true,
       editable: false,
       degree: undefined,
@@ -49,6 +51,7 @@ export default function CreateJobPageJobSettings({
       idealAnswer: 'Yes',
       responseType: 'Yes / No',
       mustHave: true,
+      showToCandidates: true,
       recommended: true,
       editable: false,
       degree: "Bachelor's Degree",
@@ -61,6 +64,16 @@ export default function CreateJobPageJobSettings({
   useEffect(() => {
     if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
       setLocalScreeningQuestions(initialScreeningQuestions);
+      // Update custom questions state
+      const customQuestions = initialScreeningQuestions.filter(q => q.presetId && q.presetId.startsWith('custom-question'));
+      setCustomQuestions(customQuestions);
+      
+      // Update next custom question number
+      const customQuestionNumbers = customQuestions.map(q => {
+        const match = q.presetId.match(/custom-question-(\d+)/);
+        return match ? parseInt(match[1]) : 0;
+      });
+      setNextCustomQuestionNumber(Math.max(...customQuestionNumbers, 0) + 1);
     }
   }, [initialScreeningQuestions]);
 
@@ -117,6 +130,27 @@ export default function CreateJobPageJobSettings({
   const [editingQuestion, setEditingQuestion] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   
+  // Custom questions modal state
+  const [isCustomQuestionsModalOpen, setIsCustomQuestionsModalOpen] = useState(false);
+  const [customQuestions, setCustomQuestions] = useState<any[]>(() => {
+    if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
+      return initialScreeningQuestions.filter(q => q.presetId && q.presetId.startsWith('custom-question'));
+    }
+    return [];
+  });
+  const [nextCustomQuestionNumber, setNextCustomQuestionNumber] = useState(() => {
+    if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
+      const customQuestionNumbers = initialScreeningQuestions
+        .filter(q => q.presetId && q.presetId.startsWith('custom-question'))
+        .map(q => {
+          const match = q.presetId.match(/custom-question-(\d+)/);
+          return match ? parseInt(match[1]) : 0;
+        });
+      return Math.max(...customQuestionNumbers, 0) + 1;
+    }
+    return 1;
+  });
+  
   // Rejection settings state
   const [isRejectionSettingsOpen, setIsRejectionSettingsOpen] = useState(false);
   // Personalized feedback for rejections
@@ -129,7 +163,7 @@ export default function CreateJobPageJobSettings({
     if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
       // First add any explicit presetIds
       initialScreeningQuestions
-        .filter(q => q.presetId)
+        .filter(q => q.presetId && !q.presetId.startsWith('custom-question'))
         .forEach(q => presets.add(q.presetId));
       
       // Then check for matches by question content
@@ -152,6 +186,14 @@ export default function CreateJobPageJobSettings({
           presets.add('drug-test');
         }
       });
+      
+      // Add custom-question if any custom questions exist
+      const hasCustomQuestions = initialScreeningQuestions.some(q => 
+        q.presetId && q.presetId.startsWith('custom-question')
+      );
+      if (hasCustomQuestions) {
+        presets.add('custom-question');
+      }
       
       return Array.from(presets);
     }
@@ -166,7 +208,7 @@ export default function CreateJobPageJobSettings({
     if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
       // First add any explicit presetIds
       initialScreeningQuestions
-        .filter(q => q.presetId)
+        .filter(q => q.presetId && !q.presetId.startsWith('custom-question'))
         .forEach(q => presets.add(q.presetId));
       
       // Then check for matches by question content
@@ -189,6 +231,14 @@ export default function CreateJobPageJobSettings({
           presets.add('drug-test');
         }
       });
+      
+      // Add custom-question if any custom questions exist
+      const hasCustomQuestions = initialScreeningQuestions.some(q => 
+        q.presetId && q.presetId.startsWith('custom-question')
+      );
+      if (hasCustomQuestions) {
+        presets.add('custom-question');
+      }
       
       setSelectedPresets(Array.from(presets));
       console.log("Updated selected presets:", Array.from(presets));
@@ -206,13 +256,19 @@ export default function CreateJobPageJobSettings({
       setScreeningQuestions(updatedQuestions);
     }
     
+    // If it's a custom question, update custom questions state
+    if (question?.presetId && question.presetId.startsWith('custom-question')) {
+      setCustomQuestions(prev => prev.filter(q => q.id !== id));
+    }
+    
     // If it's a preset question, remove it from selected presets
-    if (question?.presetId) {
+    if (question?.presetId && !question.presetId.startsWith('custom-question')) {
       setSelectedPresets(prev => prev.filter(p => p !== question.presetId));
     }
   };
 
   const handleToggleMustHave = (id: number) => {
+    const question = screeningQuestions.find(q => q.id === id);
     const updatedQuestions = screeningQuestions.map((q) => 
       q.id === id ? { ...q, mustHave: !q.mustHave } : q
     );
@@ -221,6 +277,13 @@ export default function CreateJobPageJobSettings({
     // Update parent component state if available
     if (setScreeningQuestions) {
       setScreeningQuestions(updatedQuestions);
+    }
+    
+    // If it's a custom question, update custom questions state
+    if (question?.presetId && question.presetId.startsWith('custom-question')) {
+      setCustomQuestions(prev => 
+        prev.map(q => q.id === id ? { ...q, mustHave: !q.mustHave } : q)
+      );
     }
   };
 
@@ -250,10 +313,13 @@ export default function CreateJobPageJobSettings({
         id: newId,
         editable: false, 
         recommended: false,
-        presetId: 'custom-question'
+        presetId: `custom-question-${nextCustomQuestionNumber}`
       };
       const updatedQuestions = [...screeningQuestions, newQuestion];
       setLocalScreeningQuestions(updatedQuestions);
+      
+      // Update next custom question number
+      setNextCustomQuestionNumber(prev => prev + 1);
       
       // Update parent component state if available
       if (setScreeningQuestions) {
@@ -268,9 +334,51 @@ export default function CreateJobPageJobSettings({
     setShowAddForm(false);
   };
 
+  const handleSaveCustomQuestions = (questions: any[]) => {
+    // Generate unique preset IDs for new custom questions
+    const updatedQuestions = questions.map((question, index) => {
+      if (!question.presetId || !question.presetId.startsWith('custom-question')) {
+        // Generate new preset ID for questions that don't have one
+        const newPresetId = `custom-question-${nextCustomQuestionNumber + index}`;
+        return { ...question, presetId: newPresetId };
+      }
+      return question;
+    });
+    
+    // Update custom questions state
+    setCustomQuestions(updatedQuestions);
+    
+    // Update next custom question number
+    const maxNumber = Math.max(
+      ...updatedQuestions.map(q => {
+        const match = q.presetId.match(/custom-question-(\d+)/);
+        return match ? parseInt(match[1]) : 0;
+      }),
+      nextCustomQuestionNumber - 1
+    );
+    setNextCustomQuestionNumber(maxNumber + 1);
+    
+    // Filter out existing custom questions from screening questions
+    const nonCustomQuestions = screeningQuestions.filter(q => !q.presetId || !q.presetId.startsWith('custom-question'));
+    
+    // Add new custom questions to the main screening questions
+    const updatedScreeningQuestions = [...nonCustomQuestions, ...updatedQuestions];
+    setLocalScreeningQuestions(updatedScreeningQuestions);
+    
+    // Update parent component state if available
+    if (setScreeningQuestions) {
+      setScreeningQuestions(updatedScreeningQuestions);
+    }
+    
+    // Add to selected presets if not already there
+    if (!selectedPresets.includes('custom-question')) {
+      setSelectedPresets(prev => [...prev, 'custom-question']);
+    }
+  };
+
   const handleSelectPreset = (presetId: string) => {
     if (presetId === 'custom-question') {
-      setShowAddForm(true);
+      setIsCustomQuestionsModalOpen(true);
       return;
     }
     
@@ -348,6 +456,7 @@ export default function CreateJobPageJobSettings({
             idealAnswer: preset.idealAnswer,
             responseType: preset.responseType,
             mustHave: false,
+            showToCandidates: true,
             recommended: true,
             editable: false,
             degree: undefined,
@@ -526,35 +635,7 @@ export default function CreateJobPageJobSettings({
                 </div>
               ) : null}
               
-              {/* Custom question form */}
-              {showAddForm && !editingQuestion && (
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Write a custom question</h3>
-                  <CustomScreeningForm
-                    onCancel={() => {
-                      setShowAddForm(false);
-                      setEditingQuestion(null);
-                    }}
-                    onSave={handleSaveQuestion}
-                    editMode={false}
-                  />
-                </div>
-              )}
 
-              {/* Editing existing question */}
-              {showAddForm && editingQuestion !== null && (
-                <CustomScreeningForm
-                  onCancel={() => {
-                    setShowAddForm(false);
-                    setEditingQuestion(null);
-                  }}
-                  onSave={handleSaveQuestion}
-                  editMode={true}
-                  initialData={
-                    screeningQuestions.find((q) => q.id === editingQuestion)
-                  }
-                />
-              )}
 
               {/* Preset question options section */}
               <div className="mt-4">
@@ -651,6 +732,14 @@ export default function CreateJobPageJobSettings({
           Back
         </button>
       </div>
+      
+      {/* Custom Questions Modal */}
+      <CustomQuestionsModal
+        isOpen={isCustomQuestionsModalOpen}
+        setIsOpen={setIsCustomQuestionsModalOpen}
+        onSave={handleSaveCustomQuestions}
+        existingQuestions={customQuestions}
+      />
     </>
   );
 }
