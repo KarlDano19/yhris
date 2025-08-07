@@ -29,7 +29,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     { id: 1, name: 'Workforce Overview', shortName: 'Workforce', isAvailable: true },
     { id: 2, name: 'Employee Performance & Development', shortName: 'Performance', isAvailable: true },
     { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: true },
-    { id: 4, name: 'Compensation & Benefits', shortName: 'Compensation', isAvailable: false },
+    // { id: 4, name: 'Compensation & Benefits', shortName: 'Compensation', isAvailable: false },
   ];
 
   const renderActiveTab = () => {
@@ -40,8 +40,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         return <EmployeePerformance dateFilter={appliedDateFilter} />;
       case 3:
         return <CompliancePolicy />;
-      case 4:
-        return <CompensationBenefits />;
+      // case 4:
+      //   return <CompensationBenefits />;
       default:
         return <WorkforceOverview dateFilter={appliedDateFilter} />;
     }
