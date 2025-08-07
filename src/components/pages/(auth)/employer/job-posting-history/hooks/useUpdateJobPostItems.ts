@@ -12,6 +12,7 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     formData.append('job_title', jobPost.jobTitle);
     formData.append('advertise_to', Array.isArray(jobPost.placeAdvertise) ? jobPost.placeAdvertise.join() : jobPost.placeAdvertise || '');
     formData.append('job_type', jobPost.jobType.join());
+    formData.append('work_setup', jobPost.workSetup.join());
     formData.append('job_schedule', jobPost.schedule.join());
     formData.append('required_slot', jobPost.hireCount.toString());
     formData.append('date_required', new Date(jobPost.hireDate).toISOString());

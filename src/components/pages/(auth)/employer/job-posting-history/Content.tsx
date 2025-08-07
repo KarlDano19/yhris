@@ -260,6 +260,7 @@ const Content = () => {
         jobPost['jobType'] = jobPost['job_type'];
         jobPost['jobDescription'] = jobPost['job_description'];
         jobPost['placeAdvertise'] = jobPost['advertise_to'];
+        jobPost['workSetup'] = jobPost['work_setup'];
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
@@ -452,6 +453,13 @@ const Content = () => {
           >
             {jobPost.hireCount}
           </td>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+            }`}
+          >
+            {jobPost.workSetup}
+          </td>
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
               <div className='flex space-x-2'>
@@ -549,7 +557,7 @@ const Content = () => {
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
           </td>
         </tr>
@@ -681,6 +689,9 @@ const Content = () => {
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Hires Needed
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Work Setup
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions

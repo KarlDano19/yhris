@@ -10,6 +10,7 @@ declare global {
   interface Window {
     screeningQuestions: any[];
     autoRejectEnabled: boolean;
+    rejectionFeedback?: string;
   }
 }
 
@@ -17,16 +18,12 @@ export default function CreateJobPageJobSettings({
   setPageNumber,
   onSubmit,
   screeningQuestions: initialScreeningQuestions,
-  autoRejectEnabled: initialAutoRejectEnabled,
   setScreeningQuestions,
-  setAutoRejectEnabled,
 }: {
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   screeningQuestions?: any[];
-  autoRejectEnabled?: boolean;
   setScreeningQuestions?: (questions: any[]) => void;
-  setAutoRejectEnabled?: (enabled: boolean) => void;
 }) {
   // Only use default questions if no screeningQuestions are provided
   const [screeningQuestions, setLocalScreeningQuestions] = useState<any[]>(() => {
@@ -122,10 +119,8 @@ export default function CreateJobPageJobSettings({
   
   // Rejection settings state
   const [isRejectionSettingsOpen, setIsRejectionSettingsOpen] = useState(false);
-  // Initialize auto-reject settings
-  const [localAutoRejectEnabled, setLocalAutoRejectEnabled] = useState<boolean>(
-    initialAutoRejectEnabled !== undefined ? initialAutoRejectEnabled : true
-  );
+  // Personalized feedback for rejections
+  const [rejectionFeedback, setRejectionFeedback] = useState<string>('');
 
   // Selected preset options - initialize from existing questions
   const [selectedPresets, setSelectedPresets] = useState(() => {
@@ -409,16 +404,7 @@ export default function CreateJobPageJobSettings({
     setIsRejectionSettingsOpen(!isRejectionSettingsOpen);
   };
   
-  // Toggle auto-reject functionality
-  const toggleAutoReject = () => {
-    const newValue = !localAutoRejectEnabled;
-    setLocalAutoRejectEnabled(newValue);
-    
-    // Update parent component state if available
-    if (setAutoRejectEnabled) {
-      setAutoRejectEnabled(newValue);
-    }
-  };
+
 
   // Handle submission with validation
   const handleSubmit = () => {
@@ -434,13 +420,10 @@ export default function CreateJobPageJobSettings({
       setScreeningQuestions(screeningQuestions);
     }
     
-    if (setAutoRejectEnabled) {
-      setAutoRejectEnabled(localAutoRejectEnabled);
-    }
-    
     // For backward compatibility, also update window globals
     window.screeningQuestions = screeningQuestions;
-    window.autoRejectEnabled = localAutoRejectEnabled;
+    window.autoRejectEnabled = true; // Always enabled
+    window.rejectionFeedback = rejectionFeedback;
     
     onSubmit();
   };
@@ -461,7 +444,7 @@ export default function CreateJobPageJobSettings({
           <div className="flex items-start justify-between border-b border-gray-200 py-4">
             <div className="flex-grow">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-medium text-gray-900">Screening questions</div>
+                <div className="text-medium font-semibold text-gray-900">Screening questions</div>
                 <button 
                   type="button" 
                   className="ml-4 p-1 rounded hover:bg-gray-100"
@@ -481,7 +464,17 @@ export default function CreateJobPageJobSettings({
                       <li key={question.id} className={index > 0 ? 'mt-2' : ''}>
                         {question.question}
                         <div className="text-xs text-gray-500">
-                          Ideal answer: {question.idealAnswer}
+                          {question.responseType === 'Text' ? (
+                            'No ideal answer required'
+                          ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
+                            question.idealAnswer.length > 0 ? (
+                              `Ideal answers: ${question.idealAnswer.join(', ')}`
+                            ) : (
+                              'No ideal answers selected'
+                            )
+                          ) : (
+                            `Ideal answer: ${question.idealAnswer}`
+                          )}
                         </div>
                       </li>
                     ))}
@@ -521,6 +514,8 @@ export default function CreateJobPageJobSettings({
                   onToggleMustHave={() => handleToggleMustHave(q.id)}
                   editable={true}
                   onEdit={() => handleEdit(q.id)}
+                  responseType={q.responseType}
+                  options={q.options}
                 />
               ))}
 
@@ -595,11 +590,9 @@ export default function CreateJobPageJobSettings({
           {/* Rejection Settings */}
           <div className="flex items-start justify-between border-b border-gray-200 py-4">
             <div>
-              <div className="text-sm font-medium text-gray-900 mb-1">Rejection settings</div>
-              <div className="text-sm text-gray-900">{localAutoRejectEnabled ? 'Enabled' : 'Disabled'}</div>
+              <div className="text-medium font-semibold text-gray-900 mb-1">Rejection settings</div>
               <div className="text-xs text-gray-500 max-w-md">
-                Filter out and send rejections to applicants who don&apos;t provide ideal answers to must-have screening questions.
-              </div>
+              Applicants who don't provide ideal answers to must-have screening questions will be automatically rejected.              </div>
             </div>
             <button 
               type="button" 
@@ -615,28 +608,25 @@ export default function CreateJobPageJobSettings({
           {isRejectionSettingsOpen && (
             <div className="py-4 border-b border-gray-200">
               <div className="bg-white p-4 rounded-md border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-sm font-medium text-gray-900">Automatic rejection</div>
-                  <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                    <input 
-                      type="checkbox" 
-                      name="toggle" 
-                      id="autoReject" 
-                      checked={localAutoRejectEnabled}
-                      onChange={toggleAutoReject}
-                      className="checked:bg-savoy-blue outline-none focus:outline-none right-4 checked:right-0 duration-200 ease-in absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                    />
-                    <label 
-                      htmlFor="autoReject" 
-                      className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${localAutoRejectEnabled ? 'bg-savoy-blue/40' : ''}`}
-                    ></label>
-                  </div>
+
+                
+                {/* Personalized Feedback Section */}
+                <div className="mt-1">
+                  <label htmlFor="rejectionFeedback" className="block mb-2 text-sm font-medium text-gray-900">
+                    Personalized Rejection Feedback (Optional)
+                  </label>
+                  <textarea
+                    id="rejectionFeedback"
+                    value={rejectionFeedback}
+                    onChange={(e) => setRejectionFeedback(e.target.value)}
+                    rows={4}
+                    placeholder="Provide default feedback for rejected candidates (optional)"
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This feedback will be included in rejection emails sent to applicants who don't meet the screening criteria.
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600">
-                  {localAutoRejectEnabled 
-                    ? "Applicants who don't provide ideal answers to must-have screening questions will be automatically rejected."
-                    : "Applicants who don't provide ideal answers to must-have screening questions will still be considered."}
-                </p>
               </div>
             </div>
           )}

@@ -2,7 +2,7 @@ import React from 'react';
 
 interface ScreeningQuestionProps {
   question: string;
-  idealAnswer: string;
+  idealAnswer: string | string[];
   degree?: string;
   mustHave: boolean;
   recommended?: boolean;
@@ -10,6 +10,8 @@ interface ScreeningQuestionProps {
   onToggleMustHave: () => void;
   editable: boolean;
   onEdit: () => void;
+  responseType?: string;
+  options?: string[];
 }
 
 const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
@@ -22,13 +24,67 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
   onToggleMustHave,
   editable,
   onEdit,
+  responseType = 'Yes / No',
+  options,
 }) => {
+  const renderIdealAnswer = () => {
+    if (responseType === 'Text') {
+      return <span className="text-gray-500 text-sm italic">No ideal answer required</span>;
+    } else if (responseType === 'Multiple Choice' && Array.isArray(idealAnswer)) {
+      if (idealAnswer.length === 0) {
+        return <span className="text-gray-500 text-sm italic">No ideal answers selected</span>;
+      }
+      return (
+        <div className="flex flex-wrap gap-1">
+          {idealAnswer.map((answer, index) => (
+            <span
+              key={index}
+              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+            >
+              {answer}
+            </span>
+          ))}
+        </div>
+      );
+    } else {
+      return <span className="text-gray-900 text-sm font-medium">{idealAnswer as string}</span>;
+    }
+  };
+
+  const renderOptions = () => {
+    if (responseType === 'Multiple Choice' && options && options.length > 0) {
+      return (
+        <div className="mt-2">
+          <span className="text-gray-500 text-sm">Options: </span>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {options.map((option, index) => (
+              <span
+                key={index}
+                className={`text-xs px-2 py-1 rounded ${
+                  Array.isArray(idealAnswer) && idealAnswer.includes(option)
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                {option}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-white border rounded-md p-4 mb-4 relative">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="font-semibold text-gray-900 text-base">{question}</span>
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              {responseType}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -50,8 +106,9 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
         </div>
       )}
       <div className="mt-2 text-sm">
-        <span className="text-gray-500 text-sm">Ideal answer:</span> <span className="text-gray-900 text-sm font-medium">{idealAnswer}</span>
+        <span className="text-gray-500 text-sm">Ideal answer:</span> {renderIdealAnswer()}
       </div>
+      {renderOptions()}
       <div className="flex items-center mt-3 gap-2 justify-between">
         <div className="flex items-center gap-2">
           <input

@@ -5,17 +5,19 @@ interface CustomScreeningFormProps {
   onSave: (question: {
     question: string;
     responseType: string;
-    idealAnswer: string;
+    idealAnswer: string | string[];
     mustHave: boolean;
     id: number;
+    options?: string[]; // For multiple choice questions
   }) => void;
   editMode?: boolean;
   initialData?: {
     id: number;
     question: string;
     responseType: string;
-    idealAnswer: string;
+    idealAnswer: string | string[];
     mustHave: boolean;
+    options?: string[];
   };
 }
 
@@ -27,9 +29,11 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
 }) => {
   const [question, setQuestion] = useState('');
   const [responseType, setResponseType] = useState('Yes / No');
-  const [idealAnswer, setIdealAnswer] = useState('Yes');
+  const [idealAnswer, setIdealAnswer] = useState<string | string[]>('Yes');
   const [mustHave, setMustHave] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  const [options, setOptions] = useState<string[]>(['']);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const maxChars = 200;
 
   useEffect(() => {
@@ -39,6 +43,12 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
       setIdealAnswer(initialData.idealAnswer);
       setMustHave(initialData.mustHave);
       setCharCount(initialData.question.length);
+      if (initialData.options) {
+        setOptions(initialData.options);
+      }
+      if (Array.isArray(initialData.idealAnswer)) {
+        setSelectedOptions(initialData.idealAnswer);
+      }
     }
   }, [editMode, initialData]);
 
@@ -50,15 +60,72 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
     }
   };
 
+  const handleResponseTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newResponseType = e.target.value;
+    setResponseType(newResponseType);
+    
+    // Reset ideal answer based on response type
+    if (newResponseType === 'Text') {
+      setIdealAnswer('');
+    } else if (newResponseType === 'Multiple Choice') {
+      setIdealAnswer([]);
+      setSelectedOptions([]);
+    } else {
+      setIdealAnswer('Yes');
+    }
+  };
+
+  const handleOptionChange = (index: number, value: string) => {
+    const newOptions = [...options];
+    newOptions[index] = value;
+    setOptions(newOptions);
+  };
+
+  const addOption = () => {
+    setOptions([...options, '']);
+  };
+
+  const removeOption = (index: number) => {
+    if (options.length > 1) {
+      const newOptions = options.filter((_, i) => i !== index);
+      setOptions(newOptions);
+      
+      // Remove from selected options if it was selected
+      const removedOption = options[index];
+      setSelectedOptions(prev => prev.filter(option => option !== removedOption));
+    }
+  };
+
+  const handleOptionSelection = (option: string) => {
+    setSelectedOptions(prev => {
+      if (prev.includes(option)) {
+        return prev.filter(o => o !== option);
+      } else {
+        return [...prev, option];
+      }
+    });
+  };
+
   const handleSave = () => {
     if (!question.trim()) return;
+    
+    let finalIdealAnswer: string | string[];
+    
+    if (responseType === 'Text') {
+      finalIdealAnswer = '';
+    } else if (responseType === 'Multiple Choice') {
+      finalIdealAnswer = selectedOptions;
+    } else {
+      finalIdealAnswer = idealAnswer as string;
+    }
     
     onSave({
       question: question.trim(),
       responseType,
-      idealAnswer,
+      idealAnswer: finalIdealAnswer,
       mustHave,
       id: initialData?.id || Date.now(),
+      options: responseType === 'Multiple Choice' ? options.filter(opt => opt.trim()) : undefined,
     });
   };
 
@@ -113,7 +180,7 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
           <select
             id="responseType"
             value={responseType}
-            onChange={(e) => setResponseType(e.target.value)}
+            onChange={handleResponseTypeChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="Yes / No">Yes / No</option>
@@ -122,22 +189,82 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
           </select>
         </div>
         
-        <div>
-          <label htmlFor="idealAnswer" className="block text-sm font-medium text-gray-700 mb-1">
-            Ideal answer:
-          </label>
-          <select
-            id="idealAnswer"
-            value={idealAnswer}
-            onChange={(e) => setIdealAnswer(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={responseType !== 'Yes / No'}
-          >
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        </div>
+        {responseType === 'Yes / No' && (
+          <div>
+            <label htmlFor="idealAnswer" className="block text-sm font-medium text-gray-700 mb-1">
+              Ideal answer:
+            </label>
+            <select
+              id="idealAnswer"
+              value={idealAnswer as string}
+              onChange={(e) => setIdealAnswer(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        )}
       </div>
+
+      {/* Multiple Choice Options */}
+      {responseType === 'Multiple Choice' && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Options<span className="text-red-600">*</span>
+          </label>
+          {options.map((option, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={option}
+                onChange={(e) => handleOptionChange(index, e.target.value)}
+                placeholder={`Option ${index + 1}`}
+                className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="checkbox"
+                checked={selectedOptions.includes(option)}
+                onChange={() => handleOptionSelection(option)}
+                className="w-4 h-4 text-blue-600"
+              />
+              <button
+                type="button"
+                onClick={() => removeOption(index)}
+                disabled={options.length === 1}
+                className="text-red-500 hover:text-red-700 disabled:text-gray-300"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addOption}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            + Add Option
+          </button>
+          
+          {selectedOptions.length > 0 && (
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Selected ideal answers:
+              </label>
+              <div className="flex flex-wrap gap-1">
+                {selectedOptions.map((option, index) => (
+                  <span
+                    key={index}
+                    className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                  >
+                    {option}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       
       <div className="mb-4">
         <label className="inline-flex items-center">
@@ -163,7 +290,7 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
           type="button"
           onClick={handleSave}
           className="px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:opacity-90"
-          disabled={!question.trim()}
+          disabled={!question.trim() || (responseType === 'Multiple Choice' && options.filter(opt => opt.trim()).length < 2)}
         >
           Save
         </button>

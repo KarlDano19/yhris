@@ -107,10 +107,29 @@ export default function Content() {
         isGoodFit = false;
       } else {
         // Process each answer and check if it matches the ideal answer for mustHave questions
-        answers.forEach((answer: { question: string; answer: string }) => {
+        answers.forEach((answer: { question: string; answer: string | string[] }) => {
           const question = screeningQuestions.find(q => q.question === answer.question);
           if (question && question.mustHave) {
-            const isMatch = answer.answer.toLowerCase() === question.idealAnswer.toLowerCase();
+            const responseType = question.responseType || 'Yes / No';
+            let isMatch = false;
+            
+            if (responseType === 'Text') {
+              // For text questions, just check if they provided an answer
+              isMatch = String(answer.answer).trim() !== '';
+            } else if (responseType === 'Multiple Choice') {
+              // For multiple choice, check if any of the applicant's answers match any ideal answers
+              const idealAnswers = Array.isArray(question.idealAnswer) ? question.idealAnswer : [question.idealAnswer];
+              const applicantAnswers = Array.isArray(answer.answer) ? answer.answer : [answer.answer];
+              
+              isMatch = Boolean(idealAnswers.some((ideal: any) => 
+                applicantAnswers.some((app: any) => app.toLowerCase() === ideal.toLowerCase())
+              ));
+            } else {
+              // Default case: Yes/No or other types
+              const idealAnswer = Array.isArray(question.idealAnswer) ? question.idealAnswer[0] : question.idealAnswer;
+              const applicantAnswer = Array.isArray(answer.answer) ? answer.answer[0] : answer.answer;
+              isMatch = applicantAnswer.toLowerCase() === idealAnswer.toLowerCase();
+            }
             
             // If it's a must-have and doesn't match, applicant is not a good fit
             if (!isMatch) {

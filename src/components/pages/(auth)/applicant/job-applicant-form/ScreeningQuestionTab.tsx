@@ -97,6 +97,25 @@ function ScreeningQuestionTab({
             />
           </div>
         );
+      case 'Multiple Choice':
+        return (
+          <div className="mt-2 space-y-2">
+            {question.options && question.options.map((option: string, optionIndex: number) => (
+              <div key={optionIndex} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`option-${index}-${optionIndex}`}
+                  value={option}
+                  {...register(`screeningAnswers.${index}.answer`)}
+                  className="mr-2"
+                />
+                <label htmlFor={`option-${index}-${optionIndex}`} className="text-sm">
+                  {option}
+                </label>
+              </div>
+            ))}
+          </div>
+        );
       case 'Number':
         return (
           <div className="mt-2">
