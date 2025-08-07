@@ -79,37 +79,73 @@ const CompliancePolicy = () => {
   // Dummy data for DOLE Compliance Table (keeping as is for now)
   const doleComplianceData = [
     {
-      name: 'John Santos',
-      department: 'Sales',
-      score: '91',
-      lastEvaluation: 'Apr 10, 2025',
-      status: 'Passed'
+      doleRequirement: 'Work Accident & Illness Report (WAIR)',
+      frequency: 'Annual (Jan 31)',
+      lastSubmitted: 'Jan 28 2025',
+      nextDueDate: 'Jan 31 2026',
+      complianceStatus: 'Compliant',
+      action: 'View Report'
     },
     {
-      name: 'Mia Reyes',
-      department: 'IT',
-      score: '68',
-      lastEvaluation: 'Mar 20, 2025',
-      status: 'Did not Pass'
+      doleRequirement: 'Annual Medical Report',
+      frequency: 'Annual (Feb 15)',
+      lastSubmitted: 'Feb 14 2025',
+      nextDueDate: 'Feb 15 2026',
+      complianceStatus: 'Needs Review/Update',
+      action: 'Upload'
     },
     {
-      name: 'Carlo Dela Cruz',
-      department: 'HR',
-      score: '94',
-      lastEvaluation: 'Apr 18, 2025',
-      status: 'Passed'
+      doleRequirement: 'Health & Safety Org Report',
+      frequency: 'Annual (Dec 14)',
+      lastSubmitted: 'Dec 14 2023',
+      nextDueDate: 'Dec 14 2024',
+      complianceStatus: 'Overdue',
+      action: 'Upload'
     },
     {
-      name: 'Anna Lim',
-      department: 'IT',
-      score: '71',
-      lastEvaluation: 'Mar 28, 2025',
-      status: 'Passed'
+      doleRequirement: 'OSH Committee Minutes of Meeting',
+      frequency: 'Quarterly',
+      lastSubmitted: 'Q1 2025 Submitted',
+      nextDueDate: 'Q2 2025 Due',
+      complianceStatus: 'Compliant',
+      action: 'Upload Q2'
+    },
+    {
+      doleRequirement: 'Safety & Health Policy',
+      frequency: 'One-time + updates',
+      lastSubmitted: 'Apr 12 2024 (approved)',
+      nextDueDate: '—',
+      complianceStatus: 'Compliant',
+      action: 'View'
+    },
+    {
+      doleRequirement: 'OSH Program (DOLE Approved)',
+      frequency: 'One-time + updates',
+      lastSubmitted: 'Aug 06 2023 (approved)',
+      nextDueDate: '—',
+      complianceStatus: 'Compliant',
+      action: 'View'
+    },
+    {
+      doleRequirement: 'Work Environment Measurement (WEM)',
+      frequency: 'Every 2 years',
+      lastSubmitted: 'May 02 2023',
+      nextDueDate: 'May 02 2025',
+      complianceStatus: 'Compliant',
+      action: 'Schedule Renewal'
+    },
+    {
+      doleRequirement: 'Employee Compensation Logbook',
+      frequency: 'Continuous',
+      lastSubmitted: '— (Ongoing log)',
+      nextDueDate: 'Continuous',
+      complianceStatus: 'Compliant',
+      action: 'View Log'
     }
   ];
 
   const dolePagination = {
-    totalRecords: 4,
+    totalRecords: 8,
     totalPages: 1
   };
 

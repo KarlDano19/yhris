@@ -5,11 +5,12 @@ import React from 'react';
 import Pagination from '@/components/Pagination';
 
 interface DOLEEmployeeData {
-  name: string;
-  department: string;
-  score: string;
-  lastEvaluation: string;
-  status: string;
+  doleRequirement: string;
+  frequency: string;
+  lastSubmitted: string;
+  nextDueDate: string;
+  complianceStatus: string;
+  action: string;
 }
 
 interface PaginationData {
@@ -40,12 +41,49 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Passed':
-        return 'text-green-600 font-medium';
-      case 'Did not Pass':
-        return 'text-red-600 font-medium';
+      case 'Compliant':
+        return 'bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold';
+      case 'Needs Review/Update':
+        return 'bg-yellow-100 text-orange-600 px-4 py-2 rounded-lg text-sm font-bold';
+      case 'Overdue':
+        return 'bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-bold';
       default:
-        return 'text-gray-600';
+        return 'bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-bold';
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'Upload':
+      case 'Upload Q2':
+        return 'text-red-600 hover:text-red-800 underline font-bold';
+      default:
+        return 'text-blue-600 hover:text-blue-800 underline font-bold';
+    }
+  };
+
+  const handleActionClick = (action: string) => {
+    switch (action) {
+      case 'View Report':
+        console.log('Viewing DOLE report');
+        break;
+      case 'Upload':
+        console.log('Uploading DOLE document');
+        break;
+      case 'Upload Q2':
+        console.log('Uploading Q2 document');
+        break;
+      case 'View':
+        console.log('Viewing DOLE document');
+        break;
+      case 'Schedule Renewal':
+        console.log('Scheduling renewal');
+        break;
+      case 'View Log':
+        console.log('Viewing log');
+        break;
+      default:
+        break;
     }
   };
 
@@ -108,47 +146,57 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
           <table className="min-w-full">
             <thead>
               <tr className="border-b-2 border-[#ACB9CB]">
-                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
-                  Name
+                <th className="pb-4 text-left text-sm font-semibold text-gray-900">
+                  DOLE Requirements
                 </th>
                 <th className="pb-4 text-center text-sm font-semibold text-gray-900">
-                  Department
+                  Frequency
                 </th>
                 <th className="pb-4 text-center text-sm font-semibold text-gray-900">
-                  Score
+                  Last Submitted
                 </th>
                 <th className="pb-4 text-center text-sm font-semibold text-gray-900">
-                  Last Evaluation
+                  Next Due Date
                 </th>
                 <th className="pb-4 text-center text-sm font-semibold text-gray-900">
-                  Status
+                  Compliance Status
+                </th>
+                <th className="pb-4 text-center text-sm font-semibold text-gray-900">
+                  Action
                 </th>
               </tr>
             </thead>
             <tbody>
               {data.length > 0 ? (
-                data.map((employee, index) => (
+                data.map((item, index) => (
                   <tr key={index} className="border-b border-[#CCD8EA] hover:bg-gray-50">
-                    <td className="py-4 text-center text-sm text-gray-900">
-                      {employee.name}
+                    <td className="py-4 text-left text-sm text-gray-900">
+                      {item.doleRequirement}
                     </td>
                     <td className="py-4 text-center text-sm text-gray-900">
-                      {employee.department}
+                      {item.frequency}
                     </td>
                     <td className="py-4 text-center text-sm text-gray-900">
-                      {employee.score}
+                      {item.lastSubmitted}
                     </td>
                     <td className="py-4 text-center text-sm text-gray-900">
-                      {employee.lastEvaluation}
+                      {item.nextDueDate}
                     </td>
-                    <td className={`py-4 text-center text-sm ${getStatusColor(employee.status)}`}>
-                      {employee.status}
+                    <td className="py-4 text-center">
+                      <span className={getStatusColor(item.complianceStatus)}>
+                        {item.complianceStatus}
+                      </span>
+                    </td>
+                    <td className="py-4 text-center text-sm">
+                      <button className={getActionColor(item.action)} onClick={() => handleActionClick(item.action)}>
+                        {item.action}
+                      </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                  <td colSpan={6} className="py-8 text-center text-gray-500">
                     No data available
                   </td>
                 </tr>
