@@ -23,9 +23,10 @@ const NewHiresCard: React.FC<NewHiresCardProps> = ({
       };
     }
 
-    // Count applicants who were hired (assuming hired status is tracked)
-    // This is a placeholder calculation - in a real system, you'd check actual hiring status
-    const newHires = Math.round(appliedApplicantsData.length * 0.15); // Simulate 15% hire rate
+    // Count applicants who were actually hired
+    const newHires = appliedApplicantsData.filter((applicant: any) => 
+      applicant.status === 'hired'
+    ).length;
     
     // Calculate trend (simulated comparison with previous quarter)
     const currentDate = new Date();
