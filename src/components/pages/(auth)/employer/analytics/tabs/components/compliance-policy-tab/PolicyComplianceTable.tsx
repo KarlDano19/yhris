@@ -5,7 +5,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
-import useDirectiveReadStatus from '../../../hooks/useDirectiveReadStatus';
 
 import InfoIcon from '@/svg/InfoIcon';
 
@@ -16,7 +15,7 @@ interface PolicyData {
   complianceStatus: string;
   acknowledgedBy: string;
   action: string;
-  directiveId?: number; // Add directiveId for actions
+  directiveId?: number;
 }
 
 interface PaginationData {
@@ -31,7 +30,7 @@ interface PolicyComplianceTableProps {
   error?: any;
   currentPage: number;
   pageSize: number;
-  onPageChange: (event: any) => void;
+  onPageChange: (selectedItem: { selected: number }) => void;
   onPageSizeChange: (value: number) => void;
 }
 
@@ -39,7 +38,7 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
   data = [],
   pagination,
   isLoading = false,
-  error,
+  error = null,
   currentPage,
   pageSize,
   onPageChange,
@@ -85,22 +84,22 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
   const getStatusTag = (status: string) => {
     switch (status) {
       case 'Compliant':
-        return 'bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm font-medium';
+        return 'bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold';
       case 'Needs Review/Update':
-        return 'bg-yellow-100 text-orange-600 px-3 py-1 rounded-md text-sm font-medium';
+        return 'bg-yellow-100 text-orange-600 px-4 py-2 rounded-lg text-sm font-bold';
       case 'Overdue':
-        return 'bg-red-100 text-red-600 px-3 py-1 rounded-md text-sm font-medium';
+        return 'bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-bold';
       default:
-        return 'bg-gray-100 text-gray-600 px-3 py-1 rounded-md text-sm font-medium';
+        return 'bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-bold';
     }
   };
 
   const getActionColor = (action: string) => {
     switch (action) {
       case 'Review/Update Policy':
-        return 'text-red-600 hover:text-red-800 underline';
+        return 'text-red-600 hover:text-red-800 underline font-bold';
       default:
-        return 'text-blue-600 hover:text-blue-800 underline';
+        return 'text-blue-600 hover:text-blue-800 underline font-bold';
     }
   };
 
@@ -121,50 +120,6 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
       default:
         break;
     }
-  };
-
-  // Component to display acknowledgment data with real read status using the hook
-  const AcknowledgmentCell = ({ directiveId }: { directiveId?: number }) => {
-    const { data: readStatus, isLoading: isLoadingReadStatus } = useDirectiveReadStatus(
-      directiveId || 0,
-      {
-        enabled: !!directiveId,
-        refetchOnWindowFocus: false,
-      }
-    );
-
-    if (isLoadingReadStatus) {
-      return (
-        <div className="flex flex-col items-center">
-          <div className="animate-pulse bg-gray-200 h-4 w-8 rounded mb-1"></div>
-          <div className="animate-pulse bg-gray-200 h-3 w-16 rounded"></div>
-        </div>
-      );
-    }
-
-    if (!readStatus || !directiveId) {
-      return (
-        <div className="flex flex-col items-center">
-          <span className="text-lg font-semibold text-gray-400">0%</span>
-          <span className="text-xs text-gray-400">of Employees</span>
-        </div>
-      );
-    }
-
-    const totalRecipients = (readStatus.responded_count || 0) + (readStatus.unresponded_count || 0);
-    const respondedCount = readStatus.responded_count || 0;
-    const percentage = totalRecipients > 0 ? Math.round((respondedCount / totalRecipients) * 100) : 0;
-
-    return (
-      <div className="flex flex-col items-center">
-        <span className="text-lg font-semibold text-green-600">
-          {percentage}%
-        </span>
-        <span className="text-xs text-gray-500">
-          of Employees
-        </span>
-      </div>
-    );
   };
 
   if (isLoading) {
@@ -281,12 +236,40 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
                       {policy.nextReviewDate}
                     </td>
                     <td className="py-4 text-center text-sm">
-                      <span className={getStatusTag(policy.complianceStatus)}>
+                      <span 
+                        className={`${getStatusTag(policy.complianceStatus)} whitespace-pre-line text-center cursor-pointer`}
+                        data-tooltip-id={`status-tooltip-${index}`}
+                        data-tooltip-place="right"
+                      >
                         {policy.complianceStatus}
                       </span>
+                      <Tooltip 
+                        id={`status-tooltip-${index}`}
+                        opacity={1} 
+                        style={{ fontSize: '12px', maxWidth: '350px', whiteSpace: 'normal', lineHeight: '1.4' }}
+                      >
+                        <div>
+                          {policy.complianceStatus === 'Compliant' && (
+                            <p className='text-[12px] font-medium leading-relaxed'>This item is up-to-date and within its scheduled review or submission cycle.</p>
+                          )}
+                          {policy.complianceStatus === 'Needs Review/Update' && (
+                            <p className='text-[12px] font-medium leading-relaxed'>This item is approaching its next review or updating date and should be checked soon.</p>
+                          )}
+                          {policy.complianceStatus === 'Overdue' && (
+                            <p className='text-[12px] font-medium leading-relaxed'>This item has passed its review date and requires immediate attention.</p>
+                          )}
+                        </div>
+                      </Tooltip>
                     </td>
                     <td className="py-4 text-center">
-                      <AcknowledgmentCell directiveId={policy.directiveId} />
+                      <div className="flex flex-col items-center">
+                        <span className="text-lg font-semibold text-green-600">
+                          {policy.acknowledgedBy.split('%')[0]}%
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          of Employees
+                        </span>
+                      </div>
                     </td>
                     <td className="py-4 text-center text-sm">
                       <button className={getActionColor(policy.action)} onClick={() => handleActionClick(policy.action, policy.directiveId)}>
@@ -310,8 +293,8 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
             pagination={pagination}
             currentPage={currentPage}
             pageSize={pageSize}
-            onPageSizeChange={onPageSizeChange}
             onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
           />
         )}
       </div>

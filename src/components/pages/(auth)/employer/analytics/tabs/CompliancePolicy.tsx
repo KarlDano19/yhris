@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 
-import useGetDirectivesItems from '../hooks/useGetDirectivesItems';
-
 import OverallComplianceRateCard from './components/card-calculations/OverallComplianceRateCard';
 import PoliciesDueCard from './components/card-calculations/PoliciesDueCard';
 import OverduePoliciesCard from './components/card-calculations/OverduePoliciesCard';
@@ -22,67 +20,50 @@ const CompliancePolicy = () => {
   const [doleCurrentPage, setDoleCurrentPage] = useState(1);
   const [dolePageSize, setDolePageSize] = useState(10);
 
-  // Fetch directives data
-  const { data: directivesData, isLoading: isLoadingDirectives, error: directivesError } = useGetDirectivesItems({
-    currentPage: policyCurrentPage,
-    pageSize: policyPageSize
-  });
+  // Dummy data for Policy Compliance Table matching the image
+  const policyComplianceData = [
+    {
+      policyName: 'Anti-Sexual Harassment Policy',
+      lastUpdated: 'Dec 10, 2024',
+      nextReviewDate: 'Dec 10, 2025',
+      complianceStatus: 'Compliant',
+      acknowledgedBy: '92% of Employees',
+      action: 'View Report',
+      directiveId: 1
+    },
+    {
+      policyName: 'Code of Conduct',
+      lastUpdated: 'Aug 6, 2024',
+      nextReviewDate: 'Aug 6, 2025',
+      complianceStatus: 'Needs Review/Update',
+      acknowledgedBy: '84% of Employees',
+      action: 'Review/Update Policy',
+      directiveId: 2
+    },
+    {
+      policyName: 'Remote Work Policy',
+      lastUpdated: 'Apr 18, 2024',
+      nextReviewDate: 'Apr 18, 2025',
+      complianceStatus: 'Overdue',
+      acknowledgedBy: '78% of Employees',
+      action: 'Review/Update Policy',
+      directiveId: 3
+    },
+    {
+      policyName: 'Cyber Security Guidelines',
+      lastUpdated: 'Nov 14, 2024',
+      nextReviewDate: 'Nov 14, 2025',
+      complianceStatus: 'Compliant',
+      acknowledgedBy: '88% of Employees',
+      action: 'View Report',
+      directiveId: 4
+    }
+  ];
 
-  // Transform directives data for Policy Compliance Table
-  const transformDirectivesToPolicyData = (directives: any[]) => {
-    return directives.map((directive) => {
-      // Calculate compliance status based on directive data
-      const getComplianceStatus = () => {
-        const createdDate = new Date(directive.date);
-        const currentDate = new Date();
-        const daysSinceCreation = Math.floor((currentDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-        
-        if (daysSinceCreation > 365) {
-          return 'Overdue';
-        } else if (daysSinceCreation > 300) {
-          return 'Needs Review/Update';
-        } else {
-          return 'Compliant';
-        }
-      };
-
-      // Determine action based on compliance status
-      const getAction = (status: string) => {
-        switch (status) {
-          case 'Overdue':
-          case 'Needs Review/Update':
-            return 'Review/Update Policy';
-          default:
-            return 'View Report';
-        }
-      };
-
-      const complianceStatus = getComplianceStatus();
-      
-      return {
-        policyName: directive.title,
-        lastUpdated: new Date(directive.date).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        }),
-        nextReviewDate: new Date(new Date(directive.date).getTime() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        }),
-        complianceStatus,
-        acknowledgedBy: '0% of Employees', // Will be updated by ReadStatusCell component
-        action: getAction(complianceStatus),
-        directiveId: directive.id // Keep the directive ID for potential actions
-      };
-    });
+  const policyPagination = {
+    totalRecords: 4,
+    totalPages: 1
   };
-
-  // Transform data for the table
-  const policyComplianceData = directivesData?.records 
-    ? transformDirectivesToPolicyData(directivesData.records)
-    : [];
 
   // Dummy data for DOLE Compliance Table (keeping as is for now)
   const doleComplianceData = [
@@ -140,12 +121,9 @@ const CompliancePolicy = () => {
       {/* Policy Compliance Table */}
       <PolicyComplianceTable
         data={policyComplianceData}
-        pagination={directivesData ? {
-          totalRecords: directivesData.total_records || 0,
-          totalPages: directivesData.total_pages || 1
-        } : undefined}
-        isLoading={isLoadingDirectives}
-        error={directivesError}
+        pagination={policyPagination}
+        isLoading={false}
+        error={null}
         currentPage={policyCurrentPage}
         pageSize={policyPageSize}
         onPageChange={(event: any) => setPolicyCurrentPage(event.selected + 1)}
