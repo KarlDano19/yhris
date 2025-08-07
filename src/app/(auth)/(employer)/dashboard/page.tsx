@@ -18,7 +18,8 @@ async function getSession() {
 const HomePage = async () => {
   const session = await getSession();
   const loginType = session.loginType;
-  return <Home loginType={loginType} />;
+  const hasActiveSubscription = session.hasActiveSubscription;
+  return <Home loginType={loginType} hasActiveSubscription={session.hasActiveSubscription} />;
 };
 
 export default HomePage;

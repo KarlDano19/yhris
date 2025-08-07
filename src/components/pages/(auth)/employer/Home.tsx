@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import MenuItem from '../MenuItem';
@@ -17,8 +17,10 @@ import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
+import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
 
-const Home = ({ loginType }: { loginType: string }) => {
+const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
+  const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(true);
   const menus = [
     {
       icon: <AddPostLogo />,
@@ -36,19 +38,19 @@ const Home = ({ loginType }: { loginType: string }) => {
       icon: <OrientLogo />,
       text: 'Orient',
       link: '/orient',
-      isAvailable: true,
+      isAvailable: hasActiveSubscription,
     },
     {
       icon: <ManageLogo />,
       text: 'Manage',
       link: '/manage',
-      isAvailable: true,
+      isAvailable: hasActiveSubscription,
     },
     {
       icon: <TrainLogo />,
       text: 'Train',
       link: '/train',
-      isAvailable: true,
+      isAvailable: hasActiveSubscription,
     },
     {
       icon: <PayrollLogo />,
@@ -60,7 +62,7 @@ const Home = ({ loginType }: { loginType: string }) => {
       icon: <EmployeeSeparationLogo />,
       text: 'Employee Separation',
       link: '/employee-separation',
-      isAvailable: true,
+      isAvailable: hasActiveSubscription,
     },
     {
       icon: <EmployeeKitLogo />,
@@ -72,19 +74,19 @@ const Home = ({ loginType }: { loginType: string }) => {
       icon: <DoleLogo />,
       text: 'DOLE',
       link: '/dole',
-      isAvailable: true,
+      isAvailable: hasActiveSubscription,
     },
     {
       icon: <SettingsLogo />,
       text: 'Settings',
       link: '/settings',
-      isAvailable: true,
+      isAvailable: hasActiveSubscription,
     },
     {
       icon: <AuditLogsIcon />,
       text: 'Audit Logs',
       link: '/audit-logs',
-      isAvailable: true,
+      isAvailable: hasActiveSubscription,
     },
   ];
 
@@ -101,6 +103,7 @@ const Home = ({ loginType }: { loginType: string }) => {
           </div>
         </div>
       </div>
+      <GoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={setIsGoPremiumModalOpen} />
     </>
   );
 };
