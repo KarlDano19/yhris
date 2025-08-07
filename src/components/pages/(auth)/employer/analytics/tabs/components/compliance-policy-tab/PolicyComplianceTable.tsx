@@ -176,6 +176,8 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
                       className='inline-block ml-1 cursor-pointer'
                       data-tooltip-id='compliance-status-tooltip'
                       data-tooltip-place='top'
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
                     >
                       <InfoIcon />
                     </div>

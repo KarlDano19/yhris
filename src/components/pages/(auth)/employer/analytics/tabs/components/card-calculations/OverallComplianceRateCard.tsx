@@ -61,6 +61,8 @@ const OverallComplianceRateCard: React.FC<OverallComplianceRateCardProps> = ({
             className='inline-block ml-1 cursor-pointer'
             data-tooltip-id='overall-compliance-tooltip'
             data-tooltip-place='top'
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
           >
             <InfoIcon />
           </div>
@@ -109,6 +111,8 @@ const OverallComplianceRateCard: React.FC<OverallComplianceRateCardProps> = ({
             className='inline-block ml-1 cursor-pointer'
             data-tooltip-id='overall-compliance-tooltip'
             data-tooltip-place='top'
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
           >
             <InfoIcon />
           </div>
@@ -138,6 +142,8 @@ const OverallComplianceRateCard: React.FC<OverallComplianceRateCardProps> = ({
           className='inline-block ml-1 cursor-pointer'
           data-tooltip-id='overall-compliance-tooltip'
           data-tooltip-place='top'
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
         >
           <InfoIcon />
         </div>
