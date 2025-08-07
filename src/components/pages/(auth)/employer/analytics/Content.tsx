@@ -122,13 +122,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           {/* Tab Navigation */}
           <div className="mt-8">
             {/* Desktop tabs */}
-            <div className="hidden md:flex flex-row justify-between space-x-2">
+            <div className="hidden md:flex flex-row justify-between space-x-2 w-3/4">
               {tabs.map((tab) => (
                 <div key={tab.id} className="cursor-pointer">
                   {tab.isAvailable ? (
                     <h1 
                       onClick={() => handleTabChange(tab.id)}
-                      className={`text-lg font-bold pb-2 text-center ${activeTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
+                      className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue hover:border-b-4 hover:border-savoy-blue ${activeTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
                     >
                       {tab.name}
                     </h1>
