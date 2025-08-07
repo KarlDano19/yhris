@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 import { HexColorPicker } from 'react-colorful';
+
+import { generatePaletteColors, ensureContrast } from '@/helpers/colorGenerator';
+
 import { XCircleIcon, Squares2X2Icon } from '@heroicons/react/24/solid';
-import { generatePaletteColors, generateDistinctColors, ensureContrast } from '../../../../../../../../helpers/colorGenerator';
+
 
 interface ColorPaletteModalProps {
   isOpen: boolean;
