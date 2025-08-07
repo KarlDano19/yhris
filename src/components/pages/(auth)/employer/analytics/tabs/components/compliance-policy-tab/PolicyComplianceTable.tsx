@@ -126,7 +126,7 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
     return (
       <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
         <div className="px-6 py-4">
-          <h3 className="text-lg font-semibold text-gray-900">Policy Compliance Status</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Memo/Policy Compliance Status</h3>
         </div>
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
@@ -159,7 +159,7 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
     return (
       <div className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
         <div className="px-6 py-4">
-          <h3 className="text-lg font-semibold text-gray-900">Policy Compliance Status</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Memo/ Policy Compliance Status</h3>
         </div>
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
@@ -173,7 +173,7 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
   return (
     <div ref={tableRef} className="bg-white rounded-lg border border-[#A8B5C7] shadow-sm">
       <div className="px-6 py-4">
-        <h3 className="text-lg font-semibold text-gray-900">Policy Compliance Status</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Memo/ Policy Compliance Status</h3>
       </div>
       
       <div className="p-6 pb-8">
