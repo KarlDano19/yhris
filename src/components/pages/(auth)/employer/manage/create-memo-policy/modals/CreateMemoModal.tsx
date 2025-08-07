@@ -259,7 +259,7 @@ export default function CreateMemoModal({
                               <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
                                 <div className='px-1'>
                                   <h2 className='text-[12px] font-medium'>
-                                    Add multiple recipients by pressing Tab or Enter, or search for employees.
+                                    Add multiple recipients by pressing Tab or Enter, or search for employees (case-sensitive).
                                   </h2>
                                 </div>
                               </Tooltip>

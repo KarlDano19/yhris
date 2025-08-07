@@ -5,6 +5,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
+import useDirectiveReadStatus from '../../../hooks/useDirectiveReadStatus';
 
 import InfoIcon from '@/svg/InfoIcon';
 
@@ -15,6 +16,7 @@ interface PolicyData {
   complianceStatus: string;
   acknowledgedBy: string;
   action: string;
+  directiveId?: number; // Add directiveId for actions
 }
 
 interface PaginationData {
@@ -79,6 +81,7 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
       }
     };
   }, [hasShownTooltip]);
+
   const getStatusTag = (status: string) => {
     switch (status) {
       case 'Compliant':
@@ -99,6 +102,69 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
       default:
         return 'text-blue-600 hover:text-blue-800 underline';
     }
+  };
+
+  const handleActionClick = (action: string, directiveId?: number) => {
+    if (!directiveId) return;
+    
+    switch (action) {
+      case 'View Report':
+        // Navigate to employee responses modal or page
+        console.log(`Viewing report for directive ${directiveId}`);
+        // You can implement navigation here
+        break;
+      case 'Review/Update Policy':
+        // Navigate to edit policy page
+        console.log(`Reviewing/updating directive ${directiveId}`);
+        // You can implement navigation here
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Component to display acknowledgment data with real read status using the hook
+  const AcknowledgmentCell = ({ directiveId }: { directiveId?: number }) => {
+    const { data: readStatus, isLoading: isLoadingReadStatus } = useDirectiveReadStatus(
+      directiveId || 0,
+      {
+        enabled: !!directiveId,
+        refetchOnWindowFocus: false,
+      }
+    );
+
+    if (isLoadingReadStatus) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="animate-pulse bg-gray-200 h-4 w-8 rounded mb-1"></div>
+          <div className="animate-pulse bg-gray-200 h-3 w-16 rounded"></div>
+        </div>
+      );
+    }
+
+    if (!readStatus || !directiveId) {
+      return (
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-semibold text-gray-400">0%</span>
+          <span className="text-xs text-gray-400">of Employees</span>
+        </div>
+      );
+    }
+
+    const totalRecipients = (readStatus.responded_count || 0) + (readStatus.unresponded_count || 0);
+    const respondedCount = readStatus.responded_count || 0;
+    const percentage = totalRecipients > 0 ? Math.round((respondedCount / totalRecipients) * 100) : 0;
+
+    return (
+      <div className="flex flex-col items-center">
+        <span className="text-lg font-semibold text-green-600">
+          {percentage}%
+        </span>
+        <span className="text-xs text-gray-500">
+          of Employees
+        </span>
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -219,11 +285,11 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
                         {policy.complianceStatus}
                       </span>
                     </td>
-                    <td className="py-4 text-center text-sm text-green-600 font-medium">
-                      {policy.acknowledgedBy}
+                    <td className="py-4 text-center">
+                      <AcknowledgmentCell directiveId={policy.directiveId} />
                     </td>
                     <td className="py-4 text-center text-sm">
-                      <button className={getActionColor(policy.action)}>
+                      <button className={getActionColor(policy.action)} onClick={() => handleActionClick(policy.action, policy.directiveId)}>
                         {policy.action}
                       </button>
                     </td>
