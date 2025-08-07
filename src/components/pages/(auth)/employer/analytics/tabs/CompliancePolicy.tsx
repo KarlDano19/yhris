@@ -20,12 +20,23 @@ const CompliancePolicy = () => {
   const [doleCurrentPage, setDoleCurrentPage] = useState(1);
   const [dolePageSize, setDolePageSize] = useState(10);
 
+  // Helper function to calculate next review date (1 year from last updated)
+  const calculateNextReviewDate = (lastUpdated: string) => {
+    const date = new Date(lastUpdated);
+    const nextYear = new Date(date.getFullYear() + 1, date.getMonth(), date.getDate());
+    return nextYear.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   // Dummy data for Policy Compliance Table matching the image
   const policyComplianceData = [
     {
       policyName: 'Anti-Sexual Harassment Policy',
       lastUpdated: 'Dec 10, 2024',
-      nextReviewDate: 'Dec 10, 2025',
+      nextReviewDate: calculateNextReviewDate('Dec 10, 2024'),
       complianceStatus: 'Compliant',
       acknowledgedBy: '92% of Employees',
       action: 'View Report',
@@ -34,7 +45,7 @@ const CompliancePolicy = () => {
     {
       policyName: 'Code of Conduct',
       lastUpdated: 'Aug 6, 2024',
-      nextReviewDate: 'Aug 6, 2025',
+      nextReviewDate: calculateNextReviewDate('Aug 6, 2024'),
       complianceStatus: 'Needs Review/Update',
       acknowledgedBy: '84% of Employees',
       action: 'Review/Update Policy',
@@ -43,7 +54,7 @@ const CompliancePolicy = () => {
     {
       policyName: 'Remote Work Policy',
       lastUpdated: 'Apr 18, 2024',
-      nextReviewDate: 'Apr 18, 2025',
+      nextReviewDate: calculateNextReviewDate('Apr 18, 2024'),
       complianceStatus: 'Overdue',
       acknowledgedBy: '78% of Employees',
       action: 'Review/Update Policy',
@@ -52,7 +63,7 @@ const CompliancePolicy = () => {
     {
       policyName: 'Cyber Security Guidelines',
       lastUpdated: 'Nov 14, 2024',
-      nextReviewDate: 'Nov 14, 2025',
+      nextReviewDate: calculateNextReviewDate('Nov 14, 2024'),
       complianceStatus: 'Compliant',
       acknowledgedBy: '88% of Employees',
       action: 'View Report',
