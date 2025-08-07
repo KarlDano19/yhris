@@ -64,14 +64,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <h2 className='text-xl font-bold text-indigo-dye'>Analytics</h2>
           
           {/* Date Range Picker */}
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
+          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={dateFilter.from}
                   pickerOnChange={(date: any) => {
@@ -91,7 +91,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={dateFilter.to}
                   pickerOnChange={(date: any) => {
@@ -128,7 +128,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   {tab.isAvailable ? (
                     <h1 
                       onClick={() => handleTabChange(tab.id)}
-                      className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue hover:border-b-4 hover:border-savoy-blue ${activeTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
+                      className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
                     >
                       {tab.name}
                     </h1>

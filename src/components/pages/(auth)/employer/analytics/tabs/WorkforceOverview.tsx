@@ -306,7 +306,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
               {tab.isAvailable ? (
                 <h1 
                   onClick={() => setActiveSubTab(tab.id)}
-                  className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue hover:border-b-4 hover:border-savoy-blue ${activeSubTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
+                  className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeSubTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
                 >
                   {tab.name}
                 </h1>
@@ -337,7 +337,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
                 {tab.isAvailable ? (
                   <h1 
                     onClick={() => setActiveSubTab(tab.id)}
-                    className={`text-sm font-bold pb-2 text-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:text-savoy-blue hover:border-b-2 hover:border-savoy-blue ${activeSubTab === tab.id ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}
+                    className={`text-sm font-bold pb-2 text-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeSubTab === tab.id ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}
                   >
                     {tab.name}
                   </h1>
