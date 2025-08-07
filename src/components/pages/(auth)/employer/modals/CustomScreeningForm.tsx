@@ -79,7 +79,7 @@ const CustomScreeningForm: React.FC<CustomScreeningFormProps> = ({
         <span className="text-blue-500 mr-2">ⓘ</span>
         Help keep Yahshua HRIS respectful and professional. 
         <a
-          href="/screening-question-guideline"
+          href="/post-job/screening-question-guideline"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 ml-1 hover:underline"

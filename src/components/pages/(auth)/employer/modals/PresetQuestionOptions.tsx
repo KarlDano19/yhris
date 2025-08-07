@@ -102,7 +102,7 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
               }`}
             >
               {isSelected && (
-                <span className="mr-1 text-green-600">✓</span>
+                <span className="mr-1 text-white">✓</span>
               )}
               {!isSelected && (
                 <span className="mr-1">+</span>
