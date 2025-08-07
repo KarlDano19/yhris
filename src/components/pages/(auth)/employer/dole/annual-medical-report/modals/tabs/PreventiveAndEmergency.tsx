@@ -144,10 +144,10 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("occupational_health_services_by")}
-                id="occupational_health_services_by"
+                id="occupational_health_services_establishment"
                 value="establishment/undertaking"
               />
-              <label htmlFor="occupational_health_services_by" className="ml-1 text-sm md:text-base">
+              <label htmlFor="occupational_health_services_establishment" className="ml-1 text-sm md:text-base">
                 the establishment/undertaking
               </label>
             </div>
@@ -155,10 +155,10 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("occupational_health_services_by")}
-                id="occupational_health_services_by"
+                id="occupational_health_services_government"
                 value="government authority/institution"
               />
-              <label htmlFor="occupational_health_services_by" className="ml-2 text-sm md:text-base">
+              <label htmlFor="occupational_health_services_government" className="ml-2 text-sm md:text-base">
                 government authority/institution
                 <span className="text-gray-500"></span>
               </label>
@@ -167,11 +167,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("occupational_health_services_by")}
-                id="occupational_health_services_by"
+                id="occupational_health_services_other"
                 value="Other"
                 onChange={(e) => setIsOtherCheckedA(e.target.checked)}
               />
-              <label htmlFor="occupational_health_services_by" className="ml-2 text-sm md:text-base">
+              <label htmlFor="occupational_health_services_other" className="ml-2 text-sm md:text-base">
                 other bodies/groups/institution (specify)
                 <span className="text-gray-500"></span>
               </label>
@@ -219,11 +219,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("occupational_health_services_as_a_service")}
-                id="occupational_health_services_as_a_service"
+                id="occupational_health_services_solely"
                 value="solely for the workers of the establishment/undertaking"
               />
               <label
-                htmlFor="occupational_health_services_as_a_service"
+                htmlFor="occupational_health_services_solely"
                 className="ml-1 text-sm md:text-base"
               >
                 solely for the workers of the establishment/undertaking
@@ -233,11 +233,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("occupational_health_services_as_a_service")}
-                id="occupational_health_services_as_a_service"
+                id="occupational_health_services_common"
                 value="common to a number of establishments/undertakings"
               />
               <label
-                htmlFor="occupational_health_services_as_a_service"
+                htmlFor="occupational_health_services_common"
                 className="ml-2 text-sm md:text-base"
               >
                 common to a number of establishments/undertakings
@@ -266,11 +266,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("employer_engages_the_services_of")}
-                id="employer_engages_the_services_of"
+                id="employer_engages_osh_consultant"
                 value="Occupational Health Consultant (OSH Consultant)"
               />
               <label
-                htmlFor="employer_engages_the_services_of"
+                htmlFor="employer_engages_osh_consultant"
                 className="ml-1 text-sm md:text-base"
               >
                 Occupational Health Consultant (OSH Consultant)
@@ -280,11 +280,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("employer_engages_the_services_of")}
-                id="employer_engages_the_services_of"
+                id="employer_engages_physician"
                 value="Occupational health physician"
               />
               <label
-                htmlFor="employer_engages_the_services_of"
+                htmlFor="employer_engages_physician"
                 className="ml-2 text-sm md:text-base"
               >
                 Occupational health physician
@@ -295,11 +295,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("employer_engages_the_services_of")}
-                id="employer_engages_the_services_of"
+                id="employer_engages_dentist"
                 value="Occupational health dentist"
               />
               <label
-                htmlFor="employer_engages_the_services_of"
+                htmlFor="employer_engages_dentist"
                 className="ml-2 text-sm md:text-base"
               >
                 Occupational health dentist
@@ -310,11 +310,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("employer_engages_the_services_of")}
-                id="employer_engages_the_services_of"
+                id="employer_engages_nurse"
                 value="Occupational health nurse"
               />
               <label
-                htmlFor="employer_engages_the_services_of"
+                htmlFor="employer_engages_nurse"
                 className="ml-2 text-sm md:text-base"
               >
                 Occupational health nurse
@@ -344,10 +344,10 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_of_workplace"
+                id="conduct_inspection_establishment"
                 value="the establishment/undertaking"
               />
-              <label htmlFor="conduct_inspection_of_workplace" className="ml-1 text-sm md:text-base">
+              <label htmlFor="conduct_inspection_establishment" className="ml-1 text-sm md:text-base">
                 the establishment/undertaking
               </label>
             </div>
@@ -355,10 +355,10 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_of_workplace"
+                id="conduct_inspection_government"
                 value="government authority/institution"
               />
-              <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
+              <label htmlFor="conduct_inspection_government" className="ml-2 text-sm md:text-base">
                 government authority/institution
                 <span className="text-gray-500"></span>
               </label>
@@ -367,11 +367,11 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_of_workplace"
+                id="conduct_inspection_other"
                 value="Other"
                 onChange={(e) => setIsOtherCheckedD(e.target.checked)}
               />
-              <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
+              <label htmlFor="conduct_inspection_other" className="ml-2 text-sm md:text-base">
                 other bodies/groups/institution (specify)
                 <span className="text-gray-500"></span>
               </label>
