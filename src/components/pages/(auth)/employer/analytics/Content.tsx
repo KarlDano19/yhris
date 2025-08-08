@@ -16,14 +16,23 @@ import CompensationBenefits from './tabs/CompensationBenefits';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState(1);
-  const [dateFilter, setDateFilter] = useState({
-    from: '',
-    to: '',
+  
+  // Separate date filters for each tab
+  const [tabDateFilters, setTabDateFilters] = useState<{ [key: number]: { from: string; to: string } }>({
+    1: { from: '', to: '' },
+    2: { from: '', to: '' },
+    3: { from: '', to: '' },
   });
-  const [appliedDateFilter, setAppliedDateFilter] = useState({
-    from: '',
-    to: '',
+  
+  const [tabAppliedDateFilters, setTabAppliedDateFilters] = useState<{ [key: number]: { from: string; to: string } }>({
+    1: { from: '', to: '' },
+    2: { from: '', to: '' },
+    3: { from: '', to: '' },
   });
+
+  // Get current tab's date filter
+  const currentDateFilter = tabDateFilters[activeTab] || { from: '', to: '' };
+  const currentAppliedDateFilter = tabAppliedDateFilters[activeTab] || { from: '', to: '' };
 
   const tabs = [
     { id: 1, name: 'Workforce Overview', shortName: 'Workforce', isAvailable: true },
@@ -35,15 +44,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const renderActiveTab = () => {
     switch (activeTab) {
       case 1:
-        return <WorkforceOverview dateFilter={appliedDateFilter} />;
+        return <WorkforceOverview dateFilter={currentAppliedDateFilter} />;
       case 2:
-        return <EmployeePerformance dateFilter={appliedDateFilter} />;
+        return <EmployeePerformance dateFilter={currentAppliedDateFilter} />;
       case 3:
         return <CompliancePolicy />;
       // case 4:
       //   return <CompensationBenefits />;
       default:
-        return <WorkforceOverview dateFilter={appliedDateFilter} />;
+        return <WorkforceOverview dateFilter={currentAppliedDateFilter} />;
     }
   };
 
@@ -73,14 +82,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={dateFilter.from}
+                  selected={currentDateFilter.from}
                   pickerOnChange={(date: any) => {
-                    setDateFilter({ ...dateFilter, from: date });
+                    setTabDateFilters({
+                      ...tabDateFilters,
+                      [activeTab]: { ...currentDateFilter, from: date }
+                    });
                   }}
                   inputOnChange={(value: any) => {
-                    setDateFilter({
-                      ...dateFilter,
-                      from: value,
+                    setTabDateFilters({
+                      ...tabDateFilters,
+                      [activeTab]: { ...currentDateFilter, from: value }
                     });
                   }}
                 />
@@ -93,17 +105,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={dateFilter.to}
+                  selected={currentDateFilter.to}
                   pickerOnChange={(date: any) => {
-                    setDateFilter({ ...dateFilter, to: date });
-                  }}
-                  inputOnChange={(value: any) => {
-                    setDateFilter({
-                      ...dateFilter,
-                      to: value,
+                    setTabDateFilters({
+                      ...tabDateFilters,
+                      [activeTab]: { ...currentDateFilter, to: date }
                     });
                   }}
-                  minDate={dateFilter.from}
+                  inputOnChange={(value: any) => {
+                    setTabDateFilters({
+                      ...tabDateFilters,
+                      [activeTab]: { ...currentDateFilter, to: value }
+                    });
+                  }}
+                  minDate={currentDateFilter.from}
                 />
               </div>
             </div>
@@ -111,7 +126,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
                 onClick={() => {
-                  setAppliedDateFilter(dateFilter);
+                  setTabAppliedDateFilters({
+                    ...tabAppliedDateFilters,
+                    [activeTab]: currentDateFilter
+                  });
                 }}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
