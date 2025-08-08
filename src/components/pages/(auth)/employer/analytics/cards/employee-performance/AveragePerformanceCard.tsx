@@ -97,6 +97,7 @@ const AveragePerformanceCard: React.FC<AveragePerformanceCardProps> = ({
       <Card
         value={`${calculateAveragePerformanceScore.averageScore}/${calculateAveragePerformanceScore.maxScore}`}
         trend={`Based on ${calculateAveragePerformanceScore.totalEmployees} employee evaluations`}
+        showSeeMore={true}
       />
     </div>
   );

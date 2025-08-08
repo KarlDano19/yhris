@@ -85,6 +85,7 @@ const TrainingCompletionCard: React.FC<TrainingCompletionCardProps> = ({
         value={`${calculateTrainingCompletion.completionPercentage}%`}
         trend={calculateTrainingCompletion.trend}
         isPositive={calculateTrainingCompletion.completionPercentage >= 70} // Positive if 70% or higher
+        showSeeMore={true}
       />
     </div>
   );

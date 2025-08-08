@@ -10,9 +10,10 @@ interface CardProps {
   value: string;
   trend: string;
   isPositive?: boolean;
+  showSeeMore?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({ value, trend, isPositive = true }) => {
+const Card: React.FC<CardProps> = ({ value, trend, isPositive = true, showSeeMore = false }) => {
   return (
     <div className="bg-white rounded-2xl p-6 mt-2 border border-[#A8B5C7] shadow-lg shadow-gray-300">
       <div className="relative flex justify-center items-start mb-2">
@@ -26,17 +27,19 @@ const Card: React.FC<CardProps> = ({ value, trend, isPositive = true }) => {
         </div>
       </div>
       <p className="text-xs text-gray-400 text-center">{trend}</p>
-      <div className="text-center mt-2">
-        <button 
-          className="opacity-50 cursor-not-allowed text-xs text-blue-600 hover:text-blue-800 font-medium underline"
-          data-tooltip-id='see-more-tooltip'
-          data-tooltip-content='Coming soon.'
-          data-tooltip-place='bottom'
-        >
-          See more
-        </button>
-        <Tooltip id='see-more-tooltip' />
-      </div>
+      {showSeeMore && (
+        <div className="text-center mt-2">
+          <button 
+            className="opacity-50 cursor-not-allowed text-xs text-blue-600 hover:text-blue-800 font-medium underline"
+            data-tooltip-id='see-more-tooltip'
+            data-tooltip-content='Coming soon.'
+            data-tooltip-place='bottom'
+          >
+            See more
+          </button>
+          <Tooltip id='see-more-tooltip' />
+        </div>
+      )}
     </div>
   );
 };

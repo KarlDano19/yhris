@@ -107,6 +107,7 @@ const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
       <Card
         value={`${calculateIssueResolutionRate.resolvedPercentage}%`}
         trend={`${calculateIssueResolutionRate.resolvedIssues} resolved, ${calculateIssueResolutionRate.ongoingIssues} ongoing out of ${calculateIssueResolutionRate.totalIssues} total issues`}
+        showSeeMore={true}
       />
     </div>
   );

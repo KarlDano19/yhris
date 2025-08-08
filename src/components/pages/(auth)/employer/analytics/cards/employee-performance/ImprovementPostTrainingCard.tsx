@@ -85,6 +85,7 @@ const ImprovementPostTrainingCard: React.FC<ImprovementPostTrainingCardProps> = 
         value={`${calculateImprovementPostTraining.improvementPercentage}%`}
         trend={calculateImprovementPostTraining.trend}
         isPositive={calculateImprovementPostTraining.improvementPercentage >= 60} // Positive if 60% or higher
+        showSeeMore={true}
       />
     </div>
   );
