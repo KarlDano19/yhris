@@ -128,12 +128,68 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
         },
       },
       tooltip: {
-        enabled: true,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white',
-        borderColor: '#8B5CF6',
-        borderWidth: 1,
+        enabled: false,
+        mode: 'nearest' as const,
+        intersect: false,
+        external: function(context: any) {
+          // Tooltip Element
+          let tooltipEl = document.getElementById('chartjs-tooltip');
+
+          // Create element on first render
+          if (!tooltipEl) {
+            tooltipEl = document.createElement('div');
+            tooltipEl.id = 'chartjs-tooltip';
+            tooltipEl.style.position = 'absolute';
+            tooltipEl.style.zIndex = '10000';
+            tooltipEl.style.pointerEvents = 'none';
+            tooltipEl.style.transition = 'all .1s ease';
+            document.body.appendChild(tooltipEl);
+          }
+
+          const tooltipModel = context.tooltip;
+
+          // Hide if no tooltip
+          if (tooltipModel.opacity === 0) {
+            tooltipEl.style.opacity = '0';
+            return;
+          }
+
+          // Set Text
+          if (tooltipModel.body) {
+            const titleLines = tooltipModel.title || [];
+            const bodyLines = tooltipModel.body.map((bodyItem: any) => bodyItem.lines);
+
+            let innerHtml = '';
+
+            titleLines.forEach(function(title: string) {
+              innerHtml += '<div style="font-weight: 600; margin-bottom: 4px;">' + title + '</div>';
+            });
+
+            bodyLines.forEach(function(body: string[]) {
+              body.forEach(function(line: string) {
+                innerHtml += '<div>' + line + '</div>';
+              });
+            });
+
+            tooltipEl.innerHTML = innerHtml;
+          }
+
+          const position = context.chart.canvas.getBoundingClientRect();
+
+          // Display, position, and set styles to match original
+          tooltipEl.style.opacity = '1';
+          tooltipEl.style.position = 'absolute';
+          tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+          tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY - 80 + 'px';
+          tooltipEl.style.fontFamily = 'inherit';
+          tooltipEl.style.fontSize = '12px';
+          tooltipEl.style.color = 'white';
+          tooltipEl.style.padding = '12px';
+          tooltipEl.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+          tooltipEl.style.borderRadius = '8px';
+          tooltipEl.style.border = '1px solid #8B5CF6';
+          tooltipEl.style.pointerEvents = 'none';
+        },
         callbacks: {
           title: (context: any) => {
             return context[0].label;
