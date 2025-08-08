@@ -170,9 +170,11 @@ export default function UpdateJobModal({
   };
 
   const fifthFormSubmit = () => {
+    const data = fifthForm.getValues();
     // Include screening questions and auto-reject settings in the form data
     setCombinedFormData((prev: any) => ({
       ...prev,
+      ...data,
       screeningQuestions: screeningQuestions,
       autoRejectEnabled: autoRejectEnabled
     }));
@@ -332,9 +334,9 @@ export default function UpdateJobModal({
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
                     <CreateJobPagePostAs
-                      setValue={sixthForm.setValue}
-                      getValues={sixthForm.getValues}
-                      register={sixthForm.register}
+                      setValue={fifthForm.setValue}
+                      getValues={fifthForm.getValues}
+                      register={fifthForm.register}
                       setPageNumber={setPageNumber}
                       isRangeBenefitsAdded={isRangeBenefitsAdded}
                       onSubmit={sixthFormSubmit}

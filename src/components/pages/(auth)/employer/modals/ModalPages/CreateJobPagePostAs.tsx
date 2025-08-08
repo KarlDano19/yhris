@@ -43,6 +43,8 @@ export default function CreateJobPagePostAs({
   useEffect(() => {
     if (getValues('postAs') === 'upload') {
       setShowInput(true);
+    } else {
+      setShowInput(false);
     }
   }, [pageNumber]);
 
