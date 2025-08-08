@@ -20,11 +20,15 @@ export default function CreateJobPageJobSettings({
   onSubmit,
   screeningQuestions: initialScreeningQuestions,
   setScreeningQuestions,
+  autoRejectEnabled,
+  setAutoRejectEnabled,
 }: {
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   screeningQuestions?: any[];
   setScreeningQuestions?: (questions: any[]) => void;
+  autoRejectEnabled?: boolean;
+  setAutoRejectEnabled?: (enabled: boolean) => void;
 }) {
   // Only use default questions if no screeningQuestions are provided
   const [screeningQuestions, setLocalScreeningQuestions] = useState<any[]>(() => {

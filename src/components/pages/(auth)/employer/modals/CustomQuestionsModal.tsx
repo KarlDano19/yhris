@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useRef } from 'react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
+
 import CustomScreeningForm from './CustomScreeningForm';
+
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
