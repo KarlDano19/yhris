@@ -9,15 +9,17 @@ import { ContextTypes, StageType } from "../types"
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
 import useDragStage from '../hooks/useDragStage';
+import { FilterOptions } from "./Filter";
 
 type PropTypes = {
   containerRef: React.MutableRefObject<HTMLElement | null>
   gridCols: React.CSSProperties
   jobPostDetailsRefetch: any
   appliedApplicantRefetch: any
+  filters?: FilterOptions
 }
 
-export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefetch, appliedApplicantRefetch }: PropTypes) {
+export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefetch, appliedApplicantRefetch, filters }: PropTypes) {
   const params = useParams();
   const { mutate, isLoading } = useDragStage();
   const { state, dispatch }: ContextTypes = useContext(
@@ -78,6 +80,7 @@ export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefe
                       snapshot={snapshot}
                       jobPostDetailsRefetch={jobPostDetailsRefetch}
                       appliedApplicantRefetch={appliedApplicantRefetch}
+                      filters={filters}
                     />
                   )}
                 </Draggable>

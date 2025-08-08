@@ -28,8 +28,6 @@ function PreferencesTab({
   setCurrentTab: any;
   submitToSave: any;
 }) {
-  const [isWFH, setCheckWFH] = useState(false);
-  const [isWOS, setCheckWOS] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState<'add' | 'remove' | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -60,19 +58,8 @@ function PreferencesTab({
     }
     if (hasError) return;
     data['exp'] = data.experiences;
+    // Set empty array for setupPreference since it's no longer collected
     data['setupPreference'] = [];
-    if (isWFH) {
-      data['setupPreference'].push('Work From Home');
-    }
-    if (isWOS) {
-      data['setupPreference'].push('Work on Site');
-    }
-    if (!data['setupPreference'].length) {
-      toast.custom(() => <CustomToast message='Please select at least one work set-up preference' type='error' />, {
-        duration: 7000,
-      });
-      return;
-    }
     submitToSave(data);
   });
 
@@ -212,7 +199,7 @@ function PreferencesTab({
         <PlusIcon className='h-5 w-5 mr-3' />
         ADD EXPERIENCE
       </button>
-      <h6 className='text-sm font-semibold mt-16'>Work Set-up Preference</h6>
+      {/* <h6 className='text-sm font-semibold mt-16'>Work Set-up Preference</h6>
       <div className='flex items-center mt-3'>
         <label
           className={`h-3.5 w-3.5 flex justify-center items-center cursor-pointer ${
@@ -264,12 +251,12 @@ function PreferencesTab({
         <label htmlFor='wos' className='ml-3 text-sm'>
           Open to Work on Site
         </label>
-      </div>
+      </div> */}
       <div className='md:flex justify-between mt-10 md:mt-16 lg:mt-28 md:mb-5'>
         <button
           type='button'
           className='rounded-md w-full md:w-auto bg-white px-14 py-2.5 text-sm font-semibold text-savoy-blue border border-savoy-blue shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setCurrentTab(1)}
+          onClick={() => setCurrentTab(2)}
         >
           BACK
         </button>

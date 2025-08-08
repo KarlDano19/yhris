@@ -8,8 +8,9 @@ async function addJobPost(jobPost: any) {
     formData.append('country', jobPost.country);
     formData.append('language', jobPost.language);
     formData.append('job_title', jobPost.jobTitle);
-    formData.append('advertise_to', jobPost.placeAdvertise);
+    formData.append('advertise_to', Array.isArray(jobPost.placeAdvertise) ? jobPost.placeAdvertise.join() : jobPost.placeAdvertise);
     formData.append('job_type', jobPost.jobType.join());
+    formData.append('work_setup', jobPost.workSetup.join());
     formData.append('job_schedule', jobPost.schedule.join());
     formData.append('required_slot', jobPost.hireCount.toString());
     formData.append('date_required', new Date(jobPost.hireDate).toISOString());
@@ -25,6 +26,47 @@ async function addJobPost(jobPost: any) {
     formData.append('og_description', `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`);
     formData.append('og_image_width', '300');
     formData.append('og_image_height', '300');
+    
+    // Add is_show_roles and is_show_remarks fields
+    formData.append('is_show_roles', jobPost.is_show_roles === true ? 'true' : 'false');
+    formData.append('is_show_remarks', jobPost.is_show_remarks === true ? 'true' : 'false');
+    formData.append('is_show_salary', jobPost.is_show_salary === true ? 'true' : 'false');
+    formData.append('is_show_benefits', jobPost.is_show_benefits === true ? 'true' : 'false');
+
+    // Add screening questions and auto-reject settings
+    if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {
+      console.log('Adding screening questions:', jobPost.screeningQuestions);
+      
+      // Format questions to match backend expectations
+      const formattedQuestions = jobPost.screeningQuestions.map((q: any) => ({
+        id: q.id, // Preserve the ID
+        question: q.question,
+        idealAnswer: q.idealAnswer,
+        responseType: q.responseType,
+        mustHave: q.mustHave,
+        // Only include degree if it exists
+        ...(q.degree ? { degree: q.degree } : {}),
+        // Include presetId if it exists
+        ...(q.presetId ? { presetId: q.presetId } : {}),
+        // Include showToCandidates for all questions
+        ...(q.showToCandidates !== undefined ? { showToCandidates: q.showToCandidates } : {}),
+        // Include options for multiple choice questions
+        ...(q.options ? { options: q.options } : {})
+      }));
+      
+      formData.append('screening_questions', JSON.stringify(formattedQuestions));
+    } else {
+      // Send empty array if no questions
+      formData.append('screening_questions', JSON.stringify([]));
+    }
+    
+    if (jobPost.autoRejectEnabled !== undefined) {
+      console.log('Auto-reject enabled:', jobPost.autoRejectEnabled);
+      formData.append('auto_reject_enabled', jobPost.autoRejectEnabled.toString());
+    } else {
+      // Default to true if not specified
+      formData.append('auto_reject_enabled', 'true');
+    }
 
     if (jobPost.jobDescriptionFile.length) {
       formData.append('uploaded_job_description', jobPost.jobDescriptionFile);

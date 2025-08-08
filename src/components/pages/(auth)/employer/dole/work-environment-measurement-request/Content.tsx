@@ -8,6 +8,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -51,6 +52,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -475,6 +480,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workEnvironmentRequestItemsRefetch}
           isOpen={isCreateWorkEnvironmentRequestModalOpen}
           setIsOpen={setIsCreateWorkEnvironmentRequestModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isWorkEnvironmentRequestDeleteModalOpen && (
@@ -489,6 +495,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workEnvironmentRequestItemsRefetch}
           isOpen={isUpdateWorkEnvironmentRequestModalOpen}
           setIsOpen={setIsUpdateWorkEnvironmentRequestModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isExportProgressModalOpen && (

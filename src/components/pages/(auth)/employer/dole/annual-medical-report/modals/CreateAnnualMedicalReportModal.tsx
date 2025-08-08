@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -22,30 +21,37 @@ function CreateAnnualMedicalReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: addAnnualMedicalReport,
     isLoading: isLoadingAddAnnualMedicalReport,
   } = useAddAnnualMedicalReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const onSubmit = handleSubmit((data) => {
+  const resetForm = () => {
+    reset();
+    setIsOpen(false);
+    setSelectedTab(1);
+  };
+
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
-          { duration: 5000 }
-        );
-        setIsOpen(false);
-        reset();
-        refetch();
-      },
+              onSuccess: (data: any) => {
+          toast.custom(
+            () => <CustomToast message={data.message} type="success" />,
+            { duration: 5000 }
+          );
+          resetForm();
+          refetch();
+        },
       onError: (err: any) => {
         const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
         toast.custom(
@@ -64,7 +70,7 @@ function CreateAnnualMedicalReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => {setIsOpen(false)}}
       >
         <Transition.Child
           as={Fragment}

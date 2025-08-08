@@ -14,6 +14,7 @@ type DataTypes = {
   checklists: string[];
   status: string;
   id: any;
+  feedback?: string;
 };
 
 const statuses = [
@@ -41,7 +42,7 @@ const statuses = [
 
 export default function Checklist({ title, requirements, handleFormSubmit, hasActiveSubscription }: PropTypes & { hasActiveSubscription?: boolean }) {
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const { getValues, setValue } = useForm();
+  const { getValues, setValue, register, watch } = useForm();
   const [isOpen, setIsOpen] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
@@ -51,7 +52,22 @@ export default function Checklist({ title, requirements, handleFormSubmit, hasAc
       applicant = stage.applicants.find((applicant) => applicant.id === actionState.applicantId);
     }
   });
+  
   const [checks, setChecks] = useState<string[]>([]);
+  const currentStatus = watch('status');
+
+  // Set the initial status based on the applicant's screening fit
+  useEffect(() => {
+    if (applicant) {
+      // If the applicant is not fit, automatically select "rejected"
+      if (applicant.screeningFit === 'bad') {
+        setValue('status', 'rejected');
+      } else if (applicant.status) {
+        // Otherwise use their current status
+        setValue('status', applicant.status);
+      }
+    }
+  }, [applicant, setValue]);
 
   useEffect(() => {
     // determining if all checklists are checked in the form
@@ -80,6 +96,10 @@ export default function Checklist({ title, requirements, handleFormSubmit, hasAc
     
     // Check if applicant is being marked as "Hired" (passed status in final stage)
     const isBeingHired = data.status === 'passed' && actionState.isFinalStage;
+    // Include personalized feedback for rejections
+    if (data.status === 'rejected') {
+      data.feedback = getValues('feedback');
+    }
     
     setIsOpen(false);
     

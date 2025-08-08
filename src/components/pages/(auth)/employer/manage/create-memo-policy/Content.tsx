@@ -440,8 +440,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <CreateMemoModal isOpen={isCreateMemoModalOpen} setIsOpen={setIsCreateMemoModalOpen} refetch={refetch} />
-      <CreatePolicyModal isOpen={isCreatePolicyModalOpen} setIsOpen={setIsCreatePolicyModalOpen} refetch={refetch} />
+      <CreateMemoModal 
+        isOpen={isCreateMemoModalOpen} 
+        setIsOpen={setIsCreateMemoModalOpen} 
+        refetch={refetch} 
+      />
+      <CreatePolicyModal 
+        isOpen={isCreatePolicyModalOpen} 
+        setIsOpen={setIsCreatePolicyModalOpen} 
+        refetch={refetch}
+      />
       <EmployeeResponsesModal 
         isOpen={isEmployeeResponsesModalOpen} 
         setIsOpen={setIsEmployeeResponsesModalOpen}

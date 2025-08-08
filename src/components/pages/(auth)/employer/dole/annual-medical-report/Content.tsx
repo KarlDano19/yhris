@@ -76,6 +76,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
@@ -481,6 +485,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isCreateAnnualMedicalReportModalOpen}
           setIsOpen={setIsCreateAnnualMedicalReportModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isEditAnnualMedicalReportModalOpen && (
@@ -488,6 +493,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isEditAnnualMedicalReportModalOpen}
           setIsOpen={setIsEditAnnualMedicalReportModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isDeleteAnnualMedicalReportModalOpen && (

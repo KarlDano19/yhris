@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -51,6 +52,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+  
+  // Employee Search
+    // For create modal
+    const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
+    const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
+
+    // For edit modal
+    const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
+    const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -496,6 +510,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isCreateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateWorkAccidentIllnessReportModalOpen}
+          formMethods={createFormMethods}
+          employeeSearch={createEmployeeSearch}
+          setEmployeeSearch={setCreateEmployeeSearch}
+          employeeSelected={createEmployeeSelected}
+          setEmployeeSelected={setCreateEmployeeSelected}
         />
       )}
       {isWorkAccidentIllnessReportDeleteModalOpen && (
@@ -510,6 +529,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isUpdateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsUpdateWorkAccidentIllnessReportModalOpen}
+          formMethods={editFormMethods}
+          employeeSearch={editEmployeeSearch}
+          setEmployeeSearch={setEditEmployeeSearch}
+          employeeSelected={editEmployeeSelected}
+          setEmployeeSelected={setEditEmployeeSelected}
         />
       )}
       {isExportProgressModalOpen && (

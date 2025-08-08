@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -20,12 +21,12 @@ import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensat
 import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
 import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
 import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import SelectBranchModal from './modals/SelectBranchModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 
 type PaginationProps = {
   totalRecords: number;
@@ -73,6 +74,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+  
+  // Employee Search
+    // For create modal
+    const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
+    const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
+
+    // For edit modal
+    const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
+    const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
 
   const menuOptions = [
     {
@@ -451,6 +465,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookCreateModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookCreateModalOpen}
+          formMethods={createFormMethods}
+          employeeItems={employeeItems || []}
+          employeeSearch={createEmployeeSearch}
+          setEmployeeSearch={setCreateEmployeeSearch}
+          employeeSelected={createEmployeeSelected}
+          setEmployeeSelected={setCreateEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookEditModalOpen && (
@@ -458,6 +478,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={employeeCompensationLogbookListRefetch}
           isOpen={isEmployeesCompensationLogbookEditModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookEditModalOpen}
+          formMethods={editFormMethods}
+          employeeItems={employeeItems || []}
+          employeeSearch={editEmployeeSearch}
+          setEmployeeSearch={setEditEmployeeSearch}
+          employeeSelected={editEmployeeSelected}
+          setEmployeeSelected={setEditEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookDeleteModalOpen && (

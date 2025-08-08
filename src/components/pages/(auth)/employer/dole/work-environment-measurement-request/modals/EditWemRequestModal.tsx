@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -23,10 +22,12 @@ export default function EditWemRequestModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
   const {
@@ -34,7 +35,7 @@ export default function EditWemRequestModal({
     refetch: refetchWorkEnvironmentRequest,
     remove: removeWorkEnvironmentRequest,
   } = useGetWorkEnvironmentRequestDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkEnvironmentRequest } =
     useUpdateWorkEnvironmentRequest();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -115,7 +116,7 @@ export default function EditWemRequestModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => customCloseModal()}
       >
         <Transition.Child
           as={Fragment}

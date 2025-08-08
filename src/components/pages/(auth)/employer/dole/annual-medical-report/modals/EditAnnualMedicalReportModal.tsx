@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import classNames from "@/helpers/classNames";
@@ -28,10 +27,12 @@ function EditAnnualMedicalReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
   const {
@@ -39,7 +40,7 @@ function EditAnnualMedicalReportModal({
     refetch: refetchAnnualMedicalReport,
     remove: removeAnnualMedicalReport,
   } = useGetAnnualMedicalReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors }, setError, clearErrors } = useForm();
+  const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: updateAnnualMedicalReport,
     isLoading: isLoadingUpdateAnnualMedicalReport,
@@ -96,7 +97,10 @@ function EditAnnualMedicalReportModal({
       setValue("conduct_inspection_of_workplace_other_specification", annualMedicalReportData.conduct_inspection_of_workplace_other_specification);
 
       // Emergency Occupational
-      setValue("provided_treatment_room_medical_clinic", parseArrayField(annualMedicalReportData.provided_treatment_room_medical_clinic));
+      // Handle radio button input (needs to be a single string, not an array)
+      setValue("provided_treatment_room_medical_clinic", Array.isArray(annualMedicalReportData.provided_treatment_room_medical_clinic) 
+        ? annualMedicalReportData.provided_treatment_room_medical_clinic[0] 
+        : annualMedicalReportData.provided_treatment_room_medical_clinic?.split(',')[0] || "");
       setValue("provided_treatment_room_medical_clinic_other_specification", annualMedicalReportData.provided_treatment_room_medical_clinic_other_specification);
       setValue("occupational_health_physician_hours_per_day", annualMedicalReportData.occupational_health_physician_hours_per_day);
       setValue("occupational_health_physician_shift", annualMedicalReportData.occupational_health_physician_shift);
@@ -111,7 +115,10 @@ function EditAnnualMedicalReportModal({
       setValue("occupational_health_personnel_training_other_specification", annualMedicalReportData.occupational_health_personnel_training_other_specification);
 
       // Occupational Health Services
-      setValue("sanitation_system_appraisal", parseArrayField(annualMedicalReportData.sanitation_system_appraisal));
+      // Handle radio button input (needs to be a single string, not an array)
+      setValue("sanitation_system_appraisal", Array.isArray(annualMedicalReportData.sanitation_system_appraisal) 
+        ? annualMedicalReportData.sanitation_system_appraisal[0] 
+        : annualMedicalReportData.sanitation_system_appraisal?.split(',')[0] || "");
       setValue("workers_pre_placement_physical_exam", annualMedicalReportData.workers_pre_placement_physical_exam);
       setValue("workers_pre_placement_x_rays", annualMedicalReportData.workers_pre_placement_x_rays);
       setValue("workers_pre_placement_urinalysis", annualMedicalReportData.workers_pre_placement_urinalysis);
@@ -534,14 +541,20 @@ function EditAnnualMedicalReportModal({
         setValue("others_immunization_total", annualMedicalReportData.others_immunization_total);
 
       // Workplace Welfare
-      setValue("keeping_of_medical_records_of_workers", parseArrayField(annualMedicalReportData.keeping_of_medical_records_of_workers));
+      // Handle radio button input (needs to be a single string, not an array)
+      setValue("keeping_of_medical_records_of_workers", Array.isArray(annualMedicalReportData.keeping_of_medical_records_of_workers) 
+        ? annualMedicalReportData.keeping_of_medical_records_of_workers[0] 
+        : annualMedicalReportData.keeping_of_medical_records_of_workers?.split(',')[0] || "");
       setValue("health_education_and_counselling_by_health_and_safety_personnel", parseArrayField(annualMedicalReportData.health_education_and_counselling_by_health_and_safety_personnel));
       setValue("nutrition_program", parseArrayField(annualMedicalReportData.nutrition_program));
       setValue("maternal_and_child_care_program", parseArrayField(annualMedicalReportData.maternal_and_child_care_program));
       setValue("family_planning_program", parseArrayField(annualMedicalReportData.family_planning_program));
       setValue("mental_health_program", parseArrayField(annualMedicalReportData.mental_health_program));
       setValue("personal_health_maintenance", parseArrayField(annualMedicalReportData.personal_health_maintenance));
-      setValue("sports_activities", parseArrayField(annualMedicalReportData.sports_activities));
+      // Handle radio button input (needs to be a single string, not an array)
+      setValue("sports_activities", Array.isArray(annualMedicalReportData.sports_activities) 
+        ? annualMedicalReportData.sports_activities[0] 
+        : annualMedicalReportData.sports_activities?.split(',')[0] || "");
       setValue("physical_fitness_program_others", annualMedicalReportData.physical_fitness_program_others);
 
       // Workplace Hazards
@@ -596,7 +609,7 @@ function EditAnnualMedicalReportModal({
     }
   }, [annualMedicalReportData]);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -621,7 +634,7 @@ function EditAnnualMedicalReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => customCloseModal()}
       >
         <Transition.Child
           as={Fragment}

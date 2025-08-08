@@ -13,6 +13,8 @@ import {
   ClockIcon,
   BanknotesIcon,
   ExclamationTriangleIcon,
+  ClipboardDocumentIcon,
+  HomeIcon,
 } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -40,6 +42,11 @@ const Content = () => {
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
+  const renderNotesRemarks = (notesRemarks: any) => {
+    const markup = { __html: notesRemarks };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+
   return (
     <>
       {!!Object.keys(jobDetailData).length && (
@@ -61,10 +68,13 @@ const Content = () => {
                     {' '}
                     {!isLoading ? jobDetailData?.location : 'Loading location...'}
                   </h6>
-                  <div className='text-sm text-indigo-dye mt-4 lg:w-60 text-justify'>
-                    <p className='text-[1rem] font-semibold mb-1'>Role:</p>
-                    {!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
-                  </div>
+                  {/* Only show role description if is_show_roles is true */}
+                  {jobDetailData?.is_show_roles && (
+                    <div className='text-sm text-indigo-dye mt-4 lg:w-60 text-justify'>
+                      <p className='text-[1rem] font-semibold mb-1'>Role:</p>
+                      {!isLoading ? renderRoleDescription(jobDetailData?.job_description) : 'Loading role description...'}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className='col-span-1 px-1 rounded-md h-[10rem] w-[10rem] hidden sm:flex justify-center'>
@@ -100,6 +110,18 @@ const Content = () => {
                 <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
                   {!isLoading ? jobDetailData?.job_type : 'Loading job type...'}
                 </p>
+                {/* work setup */}
+                {jobDetailData?.work_setup && (
+                  <>
+                    <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                      <HomeIcon className='h-5 w-5 mr-1' />
+                      Work Setup
+                    </h6>
+                    <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
+                      {!isLoading ? jobDetailData?.work_setup : 'Loading work setup...'}
+                    </p>
+                  </>
+                )}
                 {/* schedule */}
                 <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
                   <ClockIcon className='h-5 w-5 mr-1' />
@@ -109,7 +131,7 @@ const Content = () => {
                   {!isLoading ? jobDetailData?.job_schedule : 'Loading schedule...'}
                 </p>
                 {/* salary range */}
-                {jobDetailData.rate && (
+                {jobDetailData?.is_show_salary && (
                   <>
                     <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
                       <BanknotesIcon className='h-5 w-5 mr-1' />
@@ -129,7 +151,7 @@ const Content = () => {
                   </>
                 )}
                 {/* benefits */}
-                {jobDetailData.offered_benefits && (
+                {jobDetailData?.is_show_benefits && jobDetailData.offered_benefits && (
                   <>
                     <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
                       <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
@@ -138,6 +160,19 @@ const Content = () => {
                     <ul className='text-[13px] text-indigo-dye mt-1 ml-6'>
                       {!isLoading ? jobDetailData.offered_benefits : 'Loading benefits...'}
                     </ul>
+                  </>
+                )}
+                
+                {/* notes/remarks - only show if is_show_remarks is true */}
+                {jobDetailData?.is_show_remarks && jobDetailData.job_remark && (
+                  <>
+                    <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                      <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                      Notes/Remarks
+                    </h6>
+                    <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
+                      {!isLoading ? renderNotesRemarks(jobDetailData?.job_remark) : 'Loading remarks...'}
+                    </p>
                   </>
                 )}
               </div>

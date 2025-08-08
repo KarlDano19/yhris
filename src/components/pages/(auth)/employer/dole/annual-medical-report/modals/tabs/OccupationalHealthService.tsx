@@ -114,23 +114,23 @@ function OccupationalHealthService({
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pl-0 md:pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("sanitation_system_appraisal")}
-                id="sanitation_system_appraisal"
+                id="sanitation_system_appraisal_yes"
                 value="yes"
               />
-              <label htmlFor="sanitation_system_appraisal" className="ml-1 text-sm md:text-base">
+              <label htmlFor="sanitation_system_appraisal_yes" className="ml-1 text-sm md:text-base">
                 yes
               </label>
             </div>
             <div className="relative mt-2 flex items-center gap-2">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("sanitation_system_appraisal")}
-                id="sanitation_system_appraisal"
+                id="sanitation_system_appraisal_no"
                 value="no"
               />
-              <label htmlFor="sanitation_system_appraisal" className="ml-2 text-sm md:text-base">
+              <label htmlFor="sanitation_system_appraisal_no" className="ml-2 text-sm md:text-base">
                 no
                 <span className="text-gray-500"></span>
               </label>
