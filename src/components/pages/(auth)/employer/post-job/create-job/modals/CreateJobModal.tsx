@@ -32,6 +32,10 @@ export default function CreateJobModal({
   setCombinedFormData,
   fileProps,
   setFileProps,
+  screeningQuestions,
+  setScreeningQuestions,
+  autoRejectEnabled,
+  setAutoRejectEnabled,
   firstForm,
   secondForm,
   thirdForm,
@@ -53,6 +57,10 @@ export default function CreateJobModal({
   setCombinedFormData: Dispatch<any>;
   fileProps: { fileName?: string; fileSize?: number; file?: File };
   setFileProps: Dispatch<{ fileName?: string; fileSize?: number; file?: File }>;
+  screeningQuestions: any[];
+  setScreeningQuestions: Dispatch<any[]>;
+  autoRejectEnabled: boolean;
+  setAutoRejectEnabled: Dispatch<boolean>;
   firstForm: ReturnType<typeof useForm>;
   secondForm: ReturnType<typeof useForm>;
   thirdForm: ReturnType<typeof useForm>;
@@ -224,6 +232,10 @@ export default function CreateJobModal({
                     <CreateJobPageJobSettings
                       setPageNumber={setPageNumber}
                       onSubmit={fifthFormSubmit}
+                      screeningQuestions={screeningQuestions}
+                      setScreeningQuestions={setScreeningQuestions}
+                      autoRejectEnabled={autoRejectEnabled}
+                      setAutoRejectEnabled={setAutoRejectEnabled}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>

@@ -31,6 +31,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
   const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
+  
+  // Screening questions and auto reject state
+  const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState(false);
+  
   const firstForm = useForm<any>({
     defaultValues: {
       country: 'Philippines',
@@ -167,6 +172,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             setCombinedFormData={setCombinedFormData}
             fileProps={fileProps}
             setFileProps={setFileProps}
+            screeningQuestions={screeningQuestions}
+            setScreeningQuestions={setScreeningQuestions}
+            autoRejectEnabled={autoRejectEnabled}
+            setAutoRejectEnabled={setAutoRejectEnabled}
             firstForm={firstForm}
             secondForm={secondForm}
             thirdForm={thirdForm}

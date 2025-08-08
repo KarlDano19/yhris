@@ -59,11 +59,15 @@ export default function Checklist({ title, requirements, handleFormSubmit, hasAc
   // Set the initial status based on the applicant's screening fit
   useEffect(() => {
     if (applicant) {
-      // If the applicant is not fit, automatically select "rejected"
-      if (applicant.screeningFit === 'bad') {
-        setValue('status', 'rejected');
-      } else if (applicant.status) {
-        // Otherwise use their current status
+      // Only set status if the applicant doesn't already have a status
+      // This prevents overriding manual status changes
+      if (!applicant.status) {
+        // If the applicant is not fit, suggest "rejected" but don't force it
+        if (applicant.screeningFit === 'bad') {
+          setValue('status', 'rejected');
+        }
+      } else {
+        // Use their current status
         setValue('status', applicant.status);
       }
     }

@@ -240,6 +240,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             toast.custom(() => <CustomToast message="Successfully updated the checklist." type="success" />, { duration: 4000 });
             jobPostDetailsRefetch();
             appliedApplicantRefetch();
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {

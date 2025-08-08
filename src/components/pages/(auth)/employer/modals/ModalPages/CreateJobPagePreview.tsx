@@ -33,7 +33,7 @@ export default function CreateJobPagePreview({
           <div className='relative flex flex-col space-y-2 mt-2 text-sm font-medium leading-6 text-gray-900 rounded-md border-2 border-text-gray-400 px-2 py-3'>
             <p className='font-bold'>{firstFormGetValues('jobTitle')}</p>
             <p>
-              {cachedData.name} - <span>{firstFormGetValues('placeAdvertise')}</span>
+              {cachedData?.name || 'Company Name'} - <span>{firstFormGetValues('placeAdvertise')}</span>
             </p>
             <span className='top-20 left-0 w-full border' />
             <div className='mt-[8rem]'>
