@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useMemo, useEffect } from 'react';
 
 import { Tooltip } from 'react-tooltip';
@@ -20,6 +18,7 @@ import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
 import useGetAllSeparationItems from '@/components/hooks/useGetAllSeparationItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
+
 import { getValidRegions } from '@/helpers/advertiseOptions';
 
 interface WorkforceOverviewProps {
