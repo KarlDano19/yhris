@@ -43,7 +43,7 @@ type ModalSelectedTypes = {
   };
 };
 
-export default function Content() {
+export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const params = useParams();
   const { mutate: updateMutate } = useUpdateStage();
   const { mutate: updateStatusMutate } = useUpdateStatus();
@@ -289,7 +289,7 @@ export default function Content() {
       },
     },
     CHECKLIST: {
-      component: <Checklist title={title} requirements={requirements} handleFormSubmit={handleFormSubmit} />,
+      component: <Checklist title={title} requirements={requirements} handleFormSubmit={handleFormSubmit} hasActiveSubscription={hasActiveSubscription} />,
       dispatch: {
         type: CHECKLIST,
         payload: { actionState, setActionState },

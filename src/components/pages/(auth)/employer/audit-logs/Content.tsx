@@ -5,20 +5,18 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
-import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import ViewAuditLogDetails from './modals/ViewAuditLogDetails';
 import useGetAuditLogsItems from './hooks/useGetAuditLogsItems';
-import classNames from '@/helpers/classNames';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from "@/svg/EditIcon";
-import DeleteIcon from "@/svg/DeleteIcon";
-import ViewAuditLogDetails from './modals/ViewAuditLogDetails';
+
+import classNames from '@/helpers/classNames';
 
 type PaginationProps = {
   totalRecords: number;
@@ -125,6 +123,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
+    if (!hasActiveSubscription) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>This feature is not available for your subscription.</h4>
+          </td>
+        </tr>
+      );
+    }
+
     if (isSearching || isAuditLogsLoading) {
       return (
         <tr>
@@ -185,8 +193,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Audit Logs</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-center gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+            <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'

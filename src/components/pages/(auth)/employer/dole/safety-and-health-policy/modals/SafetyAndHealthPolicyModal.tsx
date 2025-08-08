@@ -28,6 +28,8 @@ import EditIcon from "@/svg/EditIcon";
 import EmailLogo from "@/svg/EmailLogo";
 import PrintIcon from "@/svg/PrintIcon";
 
+import classNames from "@/helpers/classNames";
+
 interface cachedRigthsData {
   name: string;
   type_of_industry: string;
@@ -45,10 +47,12 @@ function SafetyAndHealthPolicyModal({
   companyName,
   isOpen,
   setIsOpen,
+  hasActiveSubscription,
 }: {
   companyName: string;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  hasActiveSubscription: boolean;
 }) {
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(
@@ -157,12 +161,13 @@ function SafetyAndHealthPolicyModal({
                   <div className="flex space-x-2 justify-end pr-6 pt-4">
                     <button
                       onClick={() => onEditClick()} // Pass the specific policy ID
-                      disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
+                      disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy || !hasActiveSubscription}
                       data-edit-button
+                      className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
                       <EditIcon />
                     </button>
-                    <button onClick={HandlePrint} data-print-button>
+                    <button onClick={HandlePrint} data-print-button disabled={!hasActiveSubscription} className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}>
                       <PrintIcon />
                     </button>
                     <button
@@ -171,7 +176,9 @@ function SafetyAndHealthPolicyModal({
                           open: true,
                         })
                       }
+                      disabled={!cachedRigths?.state?.data?.send_email_dole_safety_health_policy || !hasActiveSubscription}
                       data-email-button
+                      className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
                       <EmailLogo />
                     </button>

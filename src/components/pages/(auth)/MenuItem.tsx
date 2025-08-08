@@ -2,14 +2,28 @@ import Link from 'next/link';
 
 import { Tooltip } from 'react-tooltip';
 
-function MenuItem({ menu }: { menu: any }) {
+function MenuItem({ menu, onGrayedOutClick }: { menu: any; onGrayedOutClick?: (link: string) => void }) {
+  const isGrayedOut = menu.isGrayedOut || false;
+  
+  const handleGrayedOutClick = () => {
+    if (onGrayedOutClick && menu.link) {
+      onGrayedOutClick(menu.link);
+    }
+  };
+  
   return (
     <>
       {(menu.isAvailable && menu.link) && (
         <Link
           href={menu.link}
-          aria-disabled={true}
-          className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80'
+          aria-disabled={isGrayedOut}
+          className={`bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80 ${
+            isGrayedOut ? 'opacity-50 cursor-pointer' : ''
+          }`}
+          onClick={isGrayedOut ? (e) => {
+            e.preventDefault();
+            handleGrayedOutClick();
+          } : undefined}
         >
           {menu.icon}
           <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
@@ -17,8 +31,10 @@ function MenuItem({ menu }: { menu: any }) {
       )}
       {(menu.isAvailable && menu.onClickEvent) && (
         <div
-          className='cursor-pointer bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none'
-          onClick={menu.onClickEvent}
+          className={`cursor-pointer bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none ${
+            isGrayedOut ? 'opacity-50 cursor-pointer' : ''
+          }`}
+          onClick={isGrayedOut ? handleGrayedOutClick : menu.onClickEvent}
         >
           {menu.icon}
           <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>

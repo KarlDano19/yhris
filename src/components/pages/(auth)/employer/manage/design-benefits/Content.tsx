@@ -16,6 +16,8 @@ import DesignBenefitsModal from './modals/DesignBenefitsModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
+import classNames from '@/helpers/classNames';
+
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [designBenefitsItems, setDesignBenefitsItems] = useState<any>([]);
@@ -185,8 +187,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Design Benefits</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -265,7 +267,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
           </div>
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
