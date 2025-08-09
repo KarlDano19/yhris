@@ -219,6 +219,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
             toast.custom(() => <CustomToast message="Successfully set-up stage requirements." type="success" />, { duration: 4000 });
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -256,6 +258,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -270,6 +274,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
