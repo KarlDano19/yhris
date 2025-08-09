@@ -178,12 +178,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
-      <div className='flex p-4'>
-        <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-          <ArrowLeftIcon className='h-5 w-5' />
-          <h4>Dashboard</h4>
-        </Link>
-      </div>
+        <div className='flex p-4'>
+          <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+            <ArrowLeftIcon className='h-5 w-5' />
+            <h4>Dashboard</h4>
+          </Link>
+        </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Subscriptions</h2>
           <nav className='flex relative justify-start mx-auto my-6' aria-label='Tabs'>
@@ -250,59 +250,61 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                   <div className='mb-8'>
                     <h3 className='text-xl font-semibold text-gray-900 mb-4'>Plan Privileges</h3>
-                    <p className='text-gray-600 mb-6'>Your current plan includes the following features and capabilities:</p>
+                    <p className='text-gray-600 mb-6'>
+                      Your current plan includes the following features and capabilities:
+                    </p>
                   </div>
-                  
+
                   <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6'>
                     {(activePlans.plan_features || []).map((feature: any, index: any) => {
                       return (
-                        <div 
-                          key={index} 
+                        <div
+                          key={index}
                           className='group relative bg-white border-2 border-gray-200 rounded-2xl p-6 text-center hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1'
                         >
                           {/* Background gradient for visual appeal */}
                           <div className='absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-                          
+
                           {/* Icon container with better styling */}
                           <div className='relative mb-4 flex justify-center'>
                             <div className='w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300'>
-                              <svg 
-                                className='w-6 h-6 text-green-600' 
-                                fill='none' 
-                                stroke='currentColor' 
+                              <svg
+                                className='w-6 h-6 text-green-600'
+                                fill='none'
+                                stroke='currentColor'
                                 viewBox='0 0 24 24'
                                 aria-hidden='true'
                               >
-                                <path 
-                                  strokeLinecap='round' 
-                                  strokeLinejoin='round' 
-                                  strokeWidth='2' 
-                                  d='M5 13l4 4L19 7'
-                                />
+                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
                               </svg>
                             </div>
                           </div>
-                          
+
                           {/* Feature text with better typography */}
                           <div className='relative'>
                             <h4 className='text-sm font-semibold text-gray-900 leading-tight'>
                               {feature.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                             </h4>
                           </div>
-                          
+
                           {/* Optional: Add a subtle indicator */}
                           <div className='absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
                         </div>
                       );
                     })}
                   </div>
-                  
+
                   {/* Empty state when no features */}
                   {(!activePlans.plan_features || activePlans.plan_features.length === 0) && (
                     <div className='text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300'>
                       <div className='w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4'>
                         <svg className='w-8 h-8 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' />
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth='2'
+                            d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+                          />
                         </svg>
                       </div>
                       <h4 className='text-lg font-medium text-gray-900 mb-2'>No features available</h4>
@@ -313,127 +315,130 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               )}
               {!isLoading && Object.keys(activePlans).length === 0 && (
                 <div>
-                <h3 className='text-xl font-semibold text-gray-900 mb-4'>Current Plan</h3>
-                <div className='flex mb-10'>
-                  <div className='flex mr-10 w-[30rem] p-0.5 bg-gray-400 rounded-[30px]'>
-                    <div className='bg-white py-4 px-6 rounded-[29px] border-2 border-gray-200 w-full flex items-center'>
-                      <div>
-                        <img className='h-[70px] mr-2' src={`/assets/featured_seasonal_and_gifts.png`} alt='gift' />
+                  <h3 className='text-xl font-semibold text-gray-900 mb-4'>Current Plan</h3>
+                  <div className='flex mb-10'>
+                    <div className='flex mr-10 w-[30rem] p-0.5 bg-gray-400 rounded-[30px]'>
+                      <div className='bg-white py-4 px-6 rounded-[29px] border-2 border-gray-200 w-full flex items-center'>
+                        <div>
+                          <img className='h-[70px] mr-2' src={`/assets/featured_seasonal_and_gifts.png`} alt='gift' />
+                        </div>
+                        <div className='ml-4 mt-2'>
+                          <span className='mb-[0.5rem] font-bold text-2xl'>Free Plan</span>
+                          <p>Your plans is free forever</p>
+                        </div>
                       </div>
-                      <div className='ml-4 mt-2'>
-                        <span className='mb-[0.5rem] font-bold text-2xl'>Free Plan</span>
-                        <p>Your plans is free forever</p>
+                    </div>
+                    <div
+                      className='flex mr-10 w-[30rem] p-0.5 bg-gradient-to-r from-[#FA7417] to-[#FABE23] rounded-[30px] hover:cursor-pointer'
+                      onClick={() => {
+                        window.location.href = '/landing-page/pricing';
+                      }}
+                    >
+                      <div className='bg-white p-4 rounded-[29px] border-2 border-gray-200 w-full flex items-center'>
+                        <div>
+                          <img className='h-[70px] mr-2' src={`/assets/diamond_shine.png`} alt='gift' />
+                        </div>
+                        <div className='ml-4 mt-2'>
+                          <span className='mb-[0.5rem] font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-[#FA7417] to-[#FABE23]'>
+                            Premium Plan
+                          </span>
+                          <p>Enjoy your complete HR solution now.</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className='flex mr-10 w-[30rem] p-0.5 bg-gradient-to-r from-[#FA7417] to-[#FABE23] rounded-[30px] hover:cursor-pointer' 
-                    onClick={() => {
-                    window.location.href = '/landing-page/pricing';
-                    }}
-                  >
-                    <div className='bg-white p-4 rounded-[29px] border-2 border-gray-200 w-full flex items-center'>
-                      <div>
-                        <img className='h-[70px] mr-2' src={`/assets/diamond_shine.png`} alt='gift' />
-                      </div>
-                      <div className='ml-4 mt-2'>
-                        <span className='mb-[0.5rem] font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-[#FA7417] to-[#FABE23]'>
-                          Premium Plan
-                        </span>
-                        <p>Enjoy your complete HR solution now.</p>
-                      </div>
-                    </div>
+                  <div className='mb-8'>
+                    <h3 className='text-xl font-semibold text-gray-900 mb-4'>Plan Privileges</h3>
+                    <p className='text-gray-600 mb-6'>
+                      Your current plan includes the following features and capabilities:
+                    </p>
                   </div>
-                </div>
-                <div className='mb-8'>
-                  <h3 className='text-xl font-semibold text-gray-900 mb-4'>Plan Privileges</h3>
-                  <p className='text-gray-600 mb-6'>
-                    Your current plan includes the following features and capabilities:
-                  </p>
-                </div>
 
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6'>
-                  {(activePlans.plan_features || []).map((feature: any, index: any) => {
-                    return (
-                      <div
-                        key={index}
-                        className='group relative bg-white border-2 border-gray-200 rounded-2xl p-6 text-center hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1'
-                      >
-                        {/* Background gradient for visual appeal */}
-                        <div className='absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6'>
+                    {(activePlans.plan_features || []).map((feature: any, index: any) => {
+                      return (
+                        <div
+                          key={index}
+                          className='group relative bg-white border-2 border-gray-200 rounded-2xl p-6 text-center hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1'
+                        >
+                          {/* Background gradient for visual appeal */}
+                          <div className='absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
 
-                        {/* Icon container with better styling */}
-                        <div className='relative mb-4 flex justify-center'>
-                          <div className='w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300'>
-                            <svg
-                              className='w-6 h-6 text-green-600'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                              aria-hidden='true'
-                            >
-                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
-                            </svg>
+                          {/* Icon container with better styling */}
+                          <div className='relative mb-4 flex justify-center'>
+                            <div className='w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300'>
+                              <svg
+                                className='w-6 h-6 text-green-600'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                                aria-hidden='true'
+                              >
+                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
+                              </svg>
+                            </div>
+                          </div>
+
+                          {/* Feature text with better typography */}
+                          <div className='relative'>
+                            <h4 className='text-sm font-semibold text-gray-900 leading-tight'>
+                              {feature.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                            </h4>
+                          </div>
+
+                          {/* Optional: Add a subtle indicator */}
+                          <div className='absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Empty state when no features */}
+                  {(!activePlans.plan_features || activePlans.plan_features.length === 0) && (
+                    <>
+                      <div className='flex gap-4'>
+                        <div className='border-2 border-gray-200 rounded-2xl p-6 px-12 text-center w-52'>
+                          <div className='relative mb-4 flex justify-center'>
+                            <div className='w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300'>
+                              <svg
+                                className='w-6 h-6 text-green-600'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                                aria-hidden='true'
+                              >
+                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className='mt-2'>
+                            <h4 className='text-sm font-semibold text-gray-900 leading-tight'>Post a Job Module</h4>
                           </div>
                         </div>
-
-                        {/* Feature text with better typography */}
-                        <div className='relative'>
-                          <h4 className='text-sm font-semibold text-gray-900 leading-tight'>
-                            {feature.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                          </h4>
+                        <div className='border-2 border-gray-200 rounded-2xl p-6 px-12 text-center w-52'>
+                          <div className='relative mb-4 flex justify-center'>
+                            <div className='w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300'>
+                              <svg
+                                className='w-6 h-6 text-green-600'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                                aria-hidden='true'
+                              >
+                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className='mt-2'>
+                            <h4 className='text-sm font-semibold text-gray-900 leading-tight'>
+                              Screen Applicants Module
+                            </h4>
+                          </div>
                         </div>
-
-                        {/* Optional: Add a subtle indicator */}
-                        <div className='absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
                       </div>
-                    );
-                  })}
+                    </>
+                  )}
                 </div>
-
-                {/* Empty state when no features */}
-                {(!activePlans.plan_features || activePlans.plan_features.length === 0) && (
-                  <>
-                    <div className='flex gap-4'>
-                      <div className='border-2 border-gray-200 rounded-2xl p-6 px-12 text-center w-52'>
-                        <div className='relative mb-4 flex justify-center'>
-                          <div className='w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300'>
-                            <svg
-                              className='w-6 h-6 text-green-600'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                              aria-hidden='true'
-                            >
-                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
-                            </svg>
-                          </div>
-                        </div>
-                        <div className='mt-2'>
-                          <h4 className='text-sm font-semibold text-gray-900 leading-tight'>Post a Job Module</h4>
-                        </div>
-                      </div>
-                      <div className='border-2 border-gray-200 rounded-2xl p-6 px-12 text-center w-52'>
-                        <div className='relative mb-4 flex justify-center'>
-                          <div className='w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300'>
-                            <svg
-                              className='w-6 h-6 text-green-600'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                              aria-hidden='true'
-                            >
-                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
-                            </svg>
-                          </div>
-                        </div>
-                        <div className='mt-2'>
-                          <h4 className='text-sm font-semibold text-gray-900 leading-tight'>Screen Applicants Module</h4>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
               )}
             </>
           )}
