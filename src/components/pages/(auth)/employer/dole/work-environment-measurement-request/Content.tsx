@@ -4,6 +4,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -24,7 +25,9 @@ import DeleteWemRequestModal from './modals/DeleteWemRequestModal';
 import EditWemRequestModal from './modals/EditWemRequestModal';
 import EmailLogo from '@/svg/EmailLogo';
 import SendEmailModal from './modals/SendEmailModal';
-import { useQueryClient } from '@tanstack/react-query';
+import useUpdateWorkEnvironmentRequest from './hooks/useUpdateWorkEnvironmentRequest';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type PaginationProps = {
   totalRecords: number;
@@ -35,6 +38,13 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const statusOptions = [
+  { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+  { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+  { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [workEnvironmentRequestItems, setWorkEnvironmentRequestItems] = useState<any>([]);
@@ -51,6 +61,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -115,6 +126,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsSearching(false);
     }
   }, [isWorkEnvironmentRequestItemsLoading, isSearching]);
+
+  const handleStatusChange = async (itemId: number, newStatus: string) => {
+    try {
+      await updateWorkEnvironmentRequestStatus.mutateAsync({
+        work_environment_measurement_request_id: itemId,
+        data: { status: newStatus }
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      workEnvironmentRequestItemsRefetch();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    // Handle backward compatibility with old status values
+    const statusMapping: { [key: string]: string } = {
+      'on-schedule': 'on-schedule',
+      'for-submission': 'for-submission', 
+      'for-review': 'for-review',
+      'approved': 'approved',
+    };
+    
+    const mappedStatus = statusMapping[status] || status;
+    
+    switch (mappedStatus) {
+      case 'on-schedule':
+        return 'bg-purple-100 text-purple-700';
+      case 'for-submission':
+        return 'bg-blue-100 text-blue-700';
+      case 'for-review':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'approved':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  };
 
   const handlePrint = () => {
     // Create a new div element
@@ -239,6 +289,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             {item.name_of_safety_officer.map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ')}
           </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='relative inline-block'>
+              <select
+                value={item.status || 'on-schedule'}
+                onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
+                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+              >
+                {statusOptions.map((option) => (
+                  <option 
+                    key={option.value} 
+                    value={option.value}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#111827'
+                    }}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
               <button
@@ -286,7 +362,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>
               Please click create to add work environment measurement request.
@@ -449,6 +525,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Safety Officer(s)
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions

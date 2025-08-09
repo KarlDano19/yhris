@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import Pagination from '@/components/Pagination';
 
 interface DOLEEmployeeData {
@@ -8,7 +10,7 @@ interface DOLEEmployeeData {
   lastSubmitted: string;
   nextDueDate: string;
   complianceStatus: string;
-  action: string;
+  action?: string;
 }
 
 interface PaginationData {
@@ -37,49 +39,58 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
   onPageChange,
   onPageSizeChange
 }) => {
+  const router = useRouter();
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Compliant':
+      case 'On Schedule':
+        return 'bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-bold';
+      case 'For Submission':
+        return 'bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold';
+      case 'For Review':
+        return 'bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-sm font-bold';
+      case 'Approved':
         return 'bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold';
-      case 'Needs Review/Update':
-        return 'bg-yellow-100 text-orange-600 px-4 py-2 rounded-lg text-sm font-bold';
-      case 'Overdue':
-        return 'bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-bold';
       default:
         return 'bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-bold';
     }
   };
 
   const getActionColor = (action: string) => {
-    switch (action) {
-      case 'Upload':
-      case 'Upload Q2':
-        return 'text-red-600 hover:text-red-800 underline font-bold';
-      default:
-        return 'text-blue-600 hover:text-blue-800 underline font-bold';
-    }
+    return 'text-blue-600 hover:text-blue-800 underline font-bold';
   };
 
-  const handleActionClick = (action: string) => {
+  const handleActionClick = (action: string, requirement?: string) => {
     switch (action) {
-      case 'View Report':
-        console.log('Viewing DOLE report');
+      case 'View Report': {
+        if (requirement?.includes('Work Accident & Illness Report')) {
+          router.push('/dole/annual-work-accident-illness-exposure-data-report');
+        } else if (requirement?.includes('Annual Medical Report')) {
+          router.push('/dole/annual-medical-report');
+        } else if (requirement?.includes('Health & Safety Org Report') || requirement?.includes('Health and Safety Organization Report')) {
+          router.push('/dole/health-and-safety-organization-report');
+        } else if (requirement?.includes('SHC Minutes of Meeting')) {
+          router.push('/dole/shc-minutes-of-meetings');
+        } else if (requirement?.includes('Work Environment Measurement')) {
+          router.push('/dole/work-environment-measurement-request');
+        } else {
+          // Future: route to other report pages as needed
+        }
         break;
-      case 'Upload':
-        console.log('Uploading DOLE document');
+      }
+      case 'View': {
+        if (requirement?.includes('Safety & Health Policy')) {
+          router.push('/dole?modal=safety-and-health-policy&from=analytics');
+        } else if (requirement?.includes('OSH Program')) {
+          router.push('/dole/osh-program');
+        }
         break;
-      case 'Upload Q2':
-        console.log('Uploading Q2 document');
+      }
+      case 'View Log': {
+        if (requirement?.includes('Employee Compensation Logbook')) {
+          router.push('/dole/employee-compensation-logbook');
+        }
         break;
-      case 'View':
-        console.log('Viewing DOLE document');
-        break;
-      case 'Schedule Renewal':
-        console.log('Scheduling renewal');
-        break;
-      case 'View Log':
-        console.log('Viewing log');
-        break;
+      }
       default:
         break;
     }
@@ -157,7 +168,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
                   Next Due Date
                 </th>
                 <th className="pb-4 text-center text-sm font-semibold text-gray-900">
-                  Compliance Status
+                  Status
                 </th>
                 <th className="pb-4 text-center text-sm font-semibold text-gray-900">
                   Action
@@ -186,9 +197,32 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
                       </span>
                     </td>
                     <td className="py-4 text-center text-sm">
-                      <button className={getActionColor(item.action)} onClick={() => handleActionClick(item.action)}>
-                        {item.action}
-                      </button>
+                      {(() => {
+                        const isLogbook = item.doleRequirement.includes('Employee Compensation Logbook');
+                        const isSafetyPolicy = item.doleRequirement.includes('Safety & Health Policy');
+                        const isOshProgram = item.doleRequirement.includes('OSH Program');
+                        let displayAction = item.action;
+                        
+                        // Determine action based on requirement type if not provided
+                        if (!displayAction) {
+                          if (isLogbook) {
+                            displayAction = 'View Log';
+                          } else if (isSafetyPolicy || isOshProgram) {
+                            displayAction = 'View';
+                          } else {
+                            displayAction = 'View Report';
+                          }
+                        }
+                        
+                        return (
+                          <button
+                            className={getActionColor(displayAction)}
+                            onClick={() => handleActionClick(displayAction, item.doleRequirement)}
+                          >
+                            {displayAction}
+                          </button>
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))

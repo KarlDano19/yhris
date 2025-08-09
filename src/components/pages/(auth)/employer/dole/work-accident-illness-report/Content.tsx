@@ -5,11 +5,13 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 
+import SelectBranchModal from './modals/SelectBranchModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -23,8 +25,6 @@ import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIll
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import SelectBranchModal from './modals/SelectBranchModal';
-import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
   totalRecords: number;

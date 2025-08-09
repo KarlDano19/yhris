@@ -4,6 +4,8 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
+import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -14,18 +16,19 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
 import useGetHealthAndSafetyReportItems from './hooks/useGetHealthAndSafetyReportItems';
-import EmailLogo from '@/svg/EmailLogo';
 import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyReportModal';
 import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
-import { useQueryClient } from '@tanstack/react-query';
 import ExportProgressModal from './modals/ExportProgressModal';
+import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyReport';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+import EditIcon from '@/svg/EditIcon';
+import EmailLogo from '@/svg/EmailLogo';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 type PaginationProps = {
   totalRecords: number;
@@ -36,6 +39,13 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const statusOptions = [
+  { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+  { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+  { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [healthAndSafetyReportItems, setHealthAndSafetyReportItems] = useState<any>([]);
@@ -74,6 +84,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
 
   const menuOptions = [
     {
@@ -118,6 +129,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsSearching(false);
     }
   }, [isHealthAndSafetyReportItemsLoading, isSearching]);
+
+  const handleStatusChange = async (itemId: number, newStatus: string) => {
+    try {
+      await updateHealthAndSafetyReport.mutateAsync({
+        health_and_safety_report_id: itemId,
+        data: { status: newStatus }
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      healthAndSafetyReportItemsRefetch();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
 
   const handlePrintWithBranch = () => {
     if (selectedBranch) {
@@ -234,6 +264,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.comittee_type}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.chairman_name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='relative inline-block'>
+              <select
+                value={item.status || 'on-schedule'}
+                onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
+                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+              >
+                {statusOptions.map((option) => (
+                  <option 
+                    key={option.value} 
+                    value={option.value}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#111827'
+                    }}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
               <button
@@ -438,6 +494,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Chairman/ Officer in Charge
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
                         Actions

@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { createPortal } from 'react-dom';
 
 import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from './modals/SendEmailModal';
@@ -21,11 +22,14 @@ import ExportProgressModal from '../work-accident-illness-report/modals/ExportPr
 import CreateReportModal from './modals/CreateReportModal';
 import EditReportModal from './modals/EditReportModal';
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
+import useUpdateAnnualAccidentIllness from './hooks/useUpdateAnnualAccidentIllness';
+
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
-import { createPortal } from 'react-dom';
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
 
 type PaginationProps = {
   totalRecords: number;
@@ -36,6 +40,13 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const statusOptions = [
+  { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+  { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+  { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+];
 
 // Update PortalMenuItems to forward ref
 const PortalMenuItems = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(function PortalMenuItems({ children, ...props }, ref) {
@@ -88,6 +99,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
   const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -142,6 +154,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [openMenuId]);
+
+  const handleStatusChange = async (itemId: number, newStatus: string) => {
+    try {
+      await updateAnnualAccidentIllnessReport.mutateAsync({
+        annual_work_accident_illness_exposure_data_report_id: itemId,
+        data: { status: newStatus }
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      annualAccidentIllnessReportRefetch();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
 
   const handlePrintWithBranch = () => {
     if (selectedBranch) {
@@ -285,6 +316,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.total_non_disabling_injuries}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.frequency_rate}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.severity_rate}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='relative inline-block'>
+              <select
+                value={item.status || 'on-schedule'}
+                onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+              >
+                {statusOptions.map((option) => (
+                  <option 
+                    key={option.value} 
+                    value={option.value}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#111827'
+                    }}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
               <button
@@ -545,6 +602,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Severity Rate
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions

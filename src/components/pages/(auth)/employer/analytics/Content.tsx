@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Link from "next/link";
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from 'react-tooltip';
@@ -15,6 +16,8 @@ import CompensationBenefits from './tabs/CompensationBenefits';
 
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(1);
   
   // Separate date filters for each tab
@@ -33,6 +36,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Get current tab's date filter
   const currentDateFilter = tabDateFilters[activeTab] || { from: '', to: '' };
   const currentAppliedDateFilter = tabAppliedDateFilters[activeTab] || { from: '', to: '' };
+
+  // Handle tab parameter from URL
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam) {
+      const tabNumber = parseInt(tabParam);
+      if (tabNumber >= 1 && tabNumber <= 3) {
+        setActiveTab(tabNumber);
+      }
+    }
+  }, [searchParams]);
 
   const tabs = [
     { id: 1, name: 'Workforce Overview', shortName: 'Workforce', isAvailable: true },
@@ -58,6 +72,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handleTabChange = (tabId: number) => {
     setActiveTab(tabId);
+    // Update URL to reflect the current tab
+    if (tabId === 1) {
+      router.push('/analytics');
+    } else {
+      router.push(`/analytics?tab=${tabId}`);
+    }
   };
 
   return (

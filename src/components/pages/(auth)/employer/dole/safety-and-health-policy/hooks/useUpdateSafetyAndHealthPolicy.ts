@@ -6,9 +6,16 @@ async function updateSafetyAndHealthPolicy(data: any) {
         const token = getCookie("token");
         const formData = new FormData();
 
-        // Append all fields to formData
+        // Check if this is a status-only update
+        const isStatusOnlyUpdate = data.status !== undefined && Object.keys(data).length <= 2;
+
+        // Append all fields to formData, but skip attachment fields for status-only updates
         for (const key in data) {
             if (data[key] !== undefined && data[key] !== null) {
+                // Skip attachment fields for status-only updates
+                if (isStatusOnlyUpdate && (key === 'attachment' || key === 'attachments')) {
+                    continue;
+                }
                 formData.append(key, data[key]);
             }
         }

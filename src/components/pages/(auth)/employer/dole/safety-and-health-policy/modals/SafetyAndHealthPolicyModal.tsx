@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import dynamic from "next/dynamic";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, Transition } from "@headlessui/react";
@@ -27,6 +28,7 @@ import "../styles.css";
 import EditIcon from "@/svg/EditIcon";
 import EmailLogo from "@/svg/EmailLogo";
 import PrintIcon from "@/svg/PrintIcon";
+import SelectChevronDown from "@/svg/SelectChevronDown";
 
 interface cachedRigthsData {
   name: string;
@@ -51,6 +53,8 @@ function SafetyAndHealthPolicyModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
     [isOpen]
@@ -83,7 +87,35 @@ function SafetyAndHealthPolicyModal({
     refetch: refetchSafetyAndHealthPolicyDetails,
   } = useGetSafetyAndHealthPolicyDetails();
 
-  const { mutate: updateMutate, isLoading } = useUpdateSafetyAndHealthPolicy();
+  const { mutateAsync: updateMutate, isLoading } = useUpdateSafetyAndHealthPolicy();
+
+  const statusOptions = [
+    { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+    { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+    { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+    { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+  ];
+
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      await updateMutate({
+        data: { 
+          id: safetyAndHealthPolicyDetails?.id,
+          status: newStatus 
+        }
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      refetchSafetyAndHealthPolicyDetails();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
+  };
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -110,6 +142,15 @@ function SafetyAndHealthPolicyModal({
 
   const onEditClick = () => {
     setIsEdit(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+    // Check if we came from analytics page
+    const fromAnalytics = searchParams.get('from') === 'analytics';
+    if (fromAnalytics) {
+      router.push('/analytics?tab=3');
+    }
   };
 
   return (
@@ -151,10 +192,34 @@ function SafetyAndHealthPolicyModal({
                     </h3>
                     <XCircleIcon
                       className="w-8 h-8 text-white cursor-pointer"
-                      onClick={() => setIsOpen(false)}
+                      onClick={handleCloseModal}
                     />
                   </div>
                   <div className="flex space-x-2 justify-end pr-6 pt-4">
+                    <div className='relative inline-block'>
+                      <select
+                        value={safetyAndHealthPolicyDetails?.status || 'on-schedule'}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                        disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(safetyAndHealthPolicyDetails?.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+                      >
+                        {statusOptions.map((option) => (
+                          <option
+                            key={option.value}
+                            value={option.value}
+                            style={{
+                              backgroundColor: 'white',
+                              color: '#111827'
+                            }}
+                          >
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                        <SelectChevronDown />
+                      </div>
+                    </div>
                     <button
                       onClick={() => onEditClick()} // Pass the specific policy ID
                       disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
@@ -272,7 +337,7 @@ function SafetyAndHealthPolicyModal({
                       <button
                             type="button"
                             className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-6 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                            onClick={() => setIsOpen(false)}
+                            onClick={handleCloseModal}
                             ref={cancelButtonRef}
                           >
                             Close

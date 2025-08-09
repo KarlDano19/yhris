@@ -107,12 +107,10 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
     switch (action) {
       case 'View Report':
         // Navigate to employee responses modal or page
-        console.log(`Viewing report for directive ${directiveId}`);
         // You can implement navigation here
         break;
       case 'Review/Update Policy':
         // Navigate to edit policy page
-        console.log(`Reviewing/updating directive ${directiveId}`);
         // You can implement navigation here
         break;
       default:
