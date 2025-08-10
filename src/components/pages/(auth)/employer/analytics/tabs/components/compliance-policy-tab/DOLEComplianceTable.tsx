@@ -205,12 +205,12 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
                         
                         // Determine action based on requirement type if not provided
                         if (!displayAction) {
-                          if (isLogbook) {
+                        if (isLogbook) {
                             displayAction = 'View Log';
-                          } else if (isSafetyPolicy || isOshProgram) {
-                            displayAction = 'View';
-                          } else {
-                            displayAction = 'View Report';
+                        } else if (isSafetyPolicy || isOshProgram) {
+                          displayAction = 'View';
+                        } else {
+                          displayAction = 'View Report';
                           }
                         }
                         
