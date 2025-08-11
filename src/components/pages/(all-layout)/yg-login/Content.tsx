@@ -11,11 +11,11 @@ import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 
 function Content() {
 
-  const loginWithYahshuaPayroll = () => {
+  const loginWithYGPayroll = () => {
     const left = (window.innerWidth - 900) / 2;
     const top = (window.innerHeight - 700) / 2;
     const popup = window.open(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yahshua-payroll-oauth`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/yg-payroll-oauth`,
       'popup',
       `width=900, height=900, left=${left}, top=${top}`
     );
@@ -49,7 +49,7 @@ function Content() {
                   <div className='mb-5 relative'>
                     <button
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
-                      onClick={() => loginWithYahshuaPayroll()}
+                      onClick={() => loginWithYGPayroll()}
                     >
                       <YahshuaPayrollLogo className='w-4 h-4 mr-2' />
                       YAHSHUA YG Payroll
