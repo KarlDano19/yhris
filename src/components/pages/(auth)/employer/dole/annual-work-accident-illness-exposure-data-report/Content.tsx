@@ -25,6 +25,8 @@ import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
+import useFileforge from '@/components/hooks/useFileforge';
+import DocumentPageOne from './print/DocumentPageOne';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
@@ -103,6 +105,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
 
+  const { generatePDFLocally, isGenerating } = useFileforge({
+    onSuccess: () => {
+      toast.custom(() => <CustomToast message='PDF generated successfully!' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
+  });
+
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
       annualAccidentIllnessReportData.records?.map((item: any) => {
@@ -174,6 +185,47 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  const handlePrintPDF = async (item: any) => {
+    // Prepare data for Annual Work Accident/Illness Exposure Data Report
+    const annualWorkAccidentIllnessData = {
+      date: item.date_of_report || 'N/A',
+      establishmentName: item.establishment_name || 'N/A',
+      natureOfBusiness: item.nature_of_business || 'N/A',
+      address: item.address || 'N/A',
+      exposureData: item.exposure_data || 'JANUARY 1 TO DECEMBER 31, 20__',
+      numberOfEmployees: item.number_of_employees || 0,
+      totalHoursWorked: item.total_hours_worked || 0,
+      injurySummary: {
+        totalDisablingInjuries: item.total_disabling_injuries || 0,
+        totalNonDisablingInjuries: item.total_non_disabling_injuries || 0,
+        frequencyRate: item.frequency_rate || 0,
+        severityRate: item.severity_rate || 0,
+      },
+      submittedBy: {
+        name: item.submitted_by_name || 'N/A',
+        position: item.submitted_by_position || 'N/A',
+      },
+    };
+
+    // Create document component
+    const documentComponent = (
+      <div className="bg-white">
+        <style jsx>{`
+          .page-break {
+            page-break-after: always;
+            break-after: page;
+          }
+        `}</style>
+        <DocumentPageOne data={annualWorkAccidentIllnessData} />
+      </div>
+    );
+    
+    const filename = `annual-work-accident-illness-report-${item.id}-${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    // Generate PDF locally (opens print dialog)
+    await generatePDFLocally(documentComponent, filename);
   };
 
   const handlePrintWithBranch = () => {
@@ -375,7 +427,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <button
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                onClick={() => handlePrintPDF(item)}
+                disabled={isGenerating || !cachedRigths?.state?.data?.generate_dole_awair}
               >
                 <PrintIcon />
               </button>
