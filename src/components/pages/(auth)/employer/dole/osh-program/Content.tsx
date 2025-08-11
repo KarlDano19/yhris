@@ -78,7 +78,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
   };
 
-  const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
+  const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
     // Validate required fields
     const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
@@ -98,7 +98,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const processedData = processFormData(data);
 
     // Submit data to server
-    submitDataToServer(processedData);
+    await submitDataToServer(processedData);
   });
 
   // Validate all required fields for the current tab
@@ -275,18 +275,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   // Submit the processed data to the server
-  const submitDataToServer = (processedData: ExtendedOshProgram): void => {
+  const submitDataToServer = async (processedData: ExtendedOshProgram): Promise<void> => {
     setValidationMessage("");
-    const callbackReq = {
-      onSuccess: () => {
-        // Handle successful submission
-        handleSuccessfulSubmission();
-      },
-      onError: (error: any) => {
-        toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
-      }
-    };
-    // updateOshProgramDetails(processedData, callbackReq); // This line was removed as per the new_code
+    
+    try {
+      await updateOshProgramDetails(processedData);
+      handleSuccessfulSubmission();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
+    }
   };
 
   // Handle successful submission
