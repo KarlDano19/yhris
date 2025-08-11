@@ -15,6 +15,13 @@ import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
 import { Tooltip } from "react-tooltip";
 
+import DocumentPageOne from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageOne";
+import DocumentPageTwo from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageTwo";
+import DocumentPageThree from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageThree";
+import DocumentPageFour from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageFour";
+import DocumentPageFive from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageFive";
+import DocumentPageSix from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageSix";
+import useFileforge from "@/components/hooks/useFileforge";
 import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
@@ -31,14 +38,7 @@ import SelectChevronDown from "@/svg/SelectChevronDown";
 import EditIcon from "@/svg/EditIcon";
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
-import SelectChevronDown from "@/svg/SelectChevronDown";
-import DocumentPageOne from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageOne";
-import DocumentPageTwo from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageTwo";
-import DocumentPageThree from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageThree";
-import DocumentPageFour from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageFour";
-import DocumentPageFive from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageFive";
-import DocumentPageSix from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageSix";
-import useFileforge from "@/components/hooks/useFileforge";
+
 
 type PaginationProps = {
   totalRecords: number;
