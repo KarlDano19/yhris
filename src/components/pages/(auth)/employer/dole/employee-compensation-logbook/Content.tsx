@@ -19,13 +19,11 @@ import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensat
 import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
 import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
 import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
-import useUpdateEmployeeCompensationLogbook from './hooks/useUpdateEmployeeCompensationLogbook';
 import SelectBranchModal from './modals/SelectBranchModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import SelectChevronDown from '@/svg/SelectChevronDown';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -38,13 +36,6 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
-
-const statusOptions = [
-  { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
-  { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
-  { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
-  { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
-];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [employeeCompensationLogbookItems, setEmployeeCompensationLogbookItems] = useState<any>([]);
@@ -82,7 +73,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-  const updateEmployeeCompensationLogbook = useUpdateEmployeeCompensationLogbook();
 
   const menuOptions = [
     {
@@ -127,45 +117,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     employeeCompensationLogbookListRefetch();
   }, [currentPage, pageSize, employeeCompensationLogbookListRefetch]);
-
-  const handleStatusChange = async (itemId: number, newStatus: string) => {
-    try {
-      await updateEmployeeCompensationLogbook.mutateAsync({
-        employee_compensation_logbook_id: itemId.toString(),
-        data: { status: newStatus }
-      });
-      
-      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
-      employeeCompensationLogbookListRefetch();
-    } catch (error: any) {
-      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    // Handle backward compatibility with old status values
-    const statusMapping: { [key: string]: string } = {
-      'on-schedule': 'on-schedule',
-      'for-submission': 'for-submission', 
-      'for-review': 'for-review',
-      'approved': 'approved',
-    };
-    
-    const mappedStatus = statusMapping[status] || status;
-    
-    switch (mappedStatus) {
-      case 'on-schedule':
-        return 'bg-purple-100 text-purple-700';
-      case 'for-submission':
-        return 'bg-blue-100 text-blue-700';
-      case 'for-review':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'approved':
-        return 'bg-green-100 text-green-700';
-      default:
-        return 'bg-gray-100 text-gray-600';
-    }
-  };
 
   const handlePrint = (items: any) => {
     // Create a new div element
@@ -284,32 +235,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.nature_of_contingency}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.days_of_employee_absence}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.remarks}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='relative inline-block'>
-              <select
-                value={item.status || 'on-schedule'}
-                onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_employee_compensation}
-                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
-              >
-                {statusOptions.map((option) => (
-                  <option 
-                    key={option.value} 
-                    value={option.value}
-                    style={{
-                      backgroundColor: 'white',
-                      color: '#111827'
-                    }}
-                  >
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
-                <SelectChevronDown />
-              </div>
-            </div>
-          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
               <button
@@ -331,7 +256,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={9}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>
               Please click create to add employee compensation logbook.
@@ -500,9 +425,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Remarks
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
