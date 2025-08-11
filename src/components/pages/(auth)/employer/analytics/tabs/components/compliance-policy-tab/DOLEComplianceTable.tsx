@@ -2,8 +2,6 @@ import React from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import Pagination from '@/components/Pagination';
-
 interface DOLEEmployeeData {
   doleRequirement: string;
   frequency: string;
@@ -13,31 +11,16 @@ interface DOLEEmployeeData {
   action?: string;
 }
 
-interface PaginationData {
-  totalRecords: number;
-  totalPages: number;
-}
-
 interface DOLEComplianceTableProps {
   data?: DOLEEmployeeData[];
-  pagination?: PaginationData;
   isLoading?: boolean;
   error?: any;
-  currentPage: number;
-  pageSize: number;
-  onPageChange: (event: any) => void;
-  onPageSizeChange: (value: number) => void;
 }
 
 const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
   data = [],
-  pagination,
   isLoading = false,
-  error,
-  currentPage,
-  pageSize,
-  onPageChange,
-  onPageSizeChange
+  error
 }) => {
   const router = useRouter();
   const getStatusColor = (status: string) => {
@@ -82,12 +65,6 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
           router.push('/dole?modal=safety-and-health-policy&from=analytics');
         } else if (requirement?.includes('OSH Program')) {
           router.push('/dole/osh-program');
-        }
-        break;
-      }
-      case 'View Log': {
-        if (requirement?.includes('Employee Compensation Logbook')) {
-          router.push('/dole/employee-compensation-logbook');
         }
         break;
       }
@@ -150,7 +127,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
         <h3 className="text-lg font-semibold text-gray-900">DOLE Compliance Status</h3>
       </div>
       
-      <div className="p-6 pb-8">
+      <div className="p-6">
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead>
@@ -198,16 +175,13 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
                     </td>
                     <td className="py-4 text-center text-sm">
                       {(() => {
-                        const isLogbook = item.doleRequirement.includes('Employee Compensation Logbook');
                         const isSafetyPolicy = item.doleRequirement.includes('Safety & Health Policy');
                         const isOshProgram = item.doleRequirement.includes('OSH Program');
                         let displayAction = item.action;
                         
                         // Determine action based on requirement type if not provided
                         if (!displayAction) {
-                        if (isLogbook) {
-                            displayAction = 'View Log';
-                        } else if (isSafetyPolicy || isOshProgram) {
+                        if (isSafetyPolicy || isOshProgram) {
                           displayAction = 'View';
                         } else {
                           displayAction = 'View Report';
@@ -236,15 +210,6 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
             </tbody>
           </table>
         </div>
-        {pagination && (
-          <Pagination
-            pagination={pagination}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            onPageSizeChange={onPageSizeChange}
-            onPageChange={onPageChange}
-          />
-        )}
       </div>
     </div>
   );

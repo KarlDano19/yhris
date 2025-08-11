@@ -15,7 +15,6 @@ import useGetShcMinutesMeetingItems from '../hooks/useGetShcMinutesMettingItems'
 import useGetSafetyANdHealthPolicyDetails from '../hooks/useGetSafetyANdHealthPolicyDetails';
 import useGetOshProgramDetails from '../hooks/useGetOshProgramDetails';
 import useGetWorkEnvironmentRequestItems from '../hooks/useGetWorkEnvironmentRequestItems';
-import useGetEmployeeCompensationLogbookItems from '../hooks/useGetEmployeeCompensationLogbookItems';
 
 // Custom hook for analytics data fetching
 const useAnalyticsData = (hook: any, refetch: any) => {
@@ -136,10 +135,6 @@ const CompliancePolicy = () => {
   const [policyCurrentPage, setPolicyCurrentPage] = useState(1);
   const [policyPageSize, setPolicyPageSize] = useState(10);
 
-  // Pagination state for DOLE Compliance Table
-  const [doleCurrentPage, setDoleCurrentPage] = useState(1);
-  const [dolePageSize, setDolePageSize] = useState(10);
-
   // Helper function to calculate next review date (1 year from last updated)
   const calculateNextReviewDate = (lastUpdated: string) => {
     const date = new Date(lastUpdated);
@@ -159,7 +154,6 @@ const CompliancePolicy = () => {
   const { data: safetyHealthPolicy, refetch: refetchSafetyHealthPolicy } = useAnalyticsData(useGetSafetyANdHealthPolicyDetails, () => {});
   const { data: oshProgram, refetch: refetchOshProgram } = useAnalyticsData(useGetOshProgramDetails, () => {});
   const { data: wemRecords, refetch: refetchWemRecords } = useAnalyticsData(useGetWorkEnvironmentRequestItems, () => {});
-  const { data: employeeCompLogRecords, refetch: refetchEmployeeCompLog } = useAnalyticsData(useGetEmployeeCompensationLogbookItems, () => {});
 
   // Trigger all refetches on mount
   useEffect(() => {
@@ -171,7 +165,6 @@ const CompliancePolicy = () => {
     refetchSafetyHealthPolicy();
     refetchOshProgram();
     refetchWemRecords();
-    refetchEmployeeCompLog();
   }, [
     refetchAnnualWair,
     refetchAnnualMedical,
@@ -180,7 +173,6 @@ const CompliancePolicy = () => {
     refetchSafetyHealthPolicy,
     refetchOshProgram,
     refetchWemRecords,
-    refetchEmployeeCompLog,
   ]);
 
   // Process analytics data
@@ -232,13 +224,6 @@ const CompliancePolicy = () => {
   const wemLastSubmitted = useMemo(
     () => computeHiddenLastSubmitted(wemRecords, wemOverallStatus, 'updated_at'),
     [wemRecords, wemOverallStatus]
-  );
-
-  // Employee Compensation Logbook (ECL)
-  const eclOverallStatus = useMemo(() => computeStatus(employeeCompLogRecords), [employeeCompLogRecords]);
-  const eclLastSubmitted = useMemo(
-    () => computeHiddenLastSubmitted(employeeCompLogRecords, eclOverallStatus, 'updated_at', '— (Ongoing log)'), 
-    [employeeCompLogRecords, eclOverallStatus]
   );
 
   // Dummy data for Policy Compliance Table matching the image
@@ -337,19 +322,8 @@ const CompliancePolicy = () => {
       nextDueDate: computeHiddenNextDueDate(wemRecords, wemOverallStatus),
       complianceStatus: wemOverallStatus
     },
-    {
-      doleRequirement: 'Employee Compensation Logbook',
-      frequency: employeeCompLogRecords?.[0]?.frequency,
-      lastSubmitted: eclLastSubmitted,
-      nextDueDate: computeHiddenNextDueDate(employeeCompLogRecords, eclOverallStatus),
-      complianceStatus: eclOverallStatus
-    }
-  ];
 
-  const dolePagination = {
-    totalRecords: 8,
-    totalPages: 1
-  };
+  ];
 
   return (
     <div className="space-y-6">
@@ -383,11 +357,6 @@ const CompliancePolicy = () => {
       <div className="pb-8">
         <DOLEComplianceTable
           data={doleComplianceData}
-          pagination={dolePagination}
-          currentPage={doleCurrentPage}
-          pageSize={dolePageSize}
-          onPageChange={(event: any) => setDoleCurrentPage(event.selected + 1)}
-          onPageSizeChange={setDolePageSize}
         />
       </div>
     </div>
