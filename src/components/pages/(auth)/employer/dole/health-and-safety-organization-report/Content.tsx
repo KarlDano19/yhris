@@ -17,17 +17,18 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 import useGetHealthAndSafetyReportItems from './hooks/useGetHealthAndSafetyReportItems';
+import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyReport';
 import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyReportModal';
 import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
-import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyReport';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
+import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
 type PaginationProps = {
@@ -86,22 +87,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
 
-  const menuOptions = [
-    {
-      name: 'Export',
-      action: () => {
-        setIsExportProgressModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
-    },
-    {
-      name: 'Generate Report',
-      action: () => {
-        setIsSelectBranchModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
-    },
-  ];
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       setIsSelectBranchModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
+  //   },
+  // ];
 
   useEffect(() => {
     if (healthAndSafetyReportItemsData) {
@@ -320,6 +321,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <button
+                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
+              >
+                <PrintIcon />
+              </button>
+              <button
                 onClick={() =>
                   setIsDeleteHealthAndSafetyReportModalOpen({
                     id: item.id,
@@ -424,7 +430,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            {/* <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
@@ -474,6 +480,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div> */}
+            <div className='flex-1 flex justify-start lg:justify-end'>
+              <button
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_health_safety_organization}
+              >
+                CREATE
+              </button>
             </div>
           </div>
 

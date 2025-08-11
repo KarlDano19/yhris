@@ -6,24 +6,26 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 
-import SelectBranchModal from './modals/SelectBranchModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
-import ExportProgressModal from './modals/ExportProgressModal';
-import CreateWorkAccidentIllnessReportModal from './modals/CreateWorkAccidentIllnessReportModal';
-import useGetWorkAccidentIlnessReportsItems from './hooks/useGetWorkAccidentIlnessReportsItems';
-import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIllnessReportModal';
-import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIllnessReportModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import useGetWorkAccidentIlnessReportsItems from './hooks/useGetWorkAccidentIlnessReportsItems';
+import CreateWorkAccidentIllnessReportModal from './modals/CreateWorkAccidentIllnessReportModal';
+import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIllnessReportModal';
+import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIllnessReportModal';
+import SelectBranchModal from './modals/SelectBranchModal';
+import ExportProgressModal from './modals/ExportProgressModal';
+
 import EditIcon from '@/svg/EditIcon';
+import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
 type PaginationProps = {
@@ -71,22 +73,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isWorkAccidentIlnessReportsLoading,
     refetch: workAccidentIlnessReportsRefetch,
   } = useGetWorkAccidentIlnessReportsItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
-  const menuOptions = [
-    {
-      name: 'Export',
-      action: () => {
-        setIsExportProgressModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.export_dole_wair,
-    },
-    {
-      name: 'Generate Report',
-      action: () => {
-        setIsSelectBranchModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_wair,
-    },
-  ];
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_wair,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       setIsSelectBranchModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_wair,
+  //   },
+  // ];
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
@@ -279,6 +281,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                disabled={!cachedRigths?.state?.data?.edit_dole_wair}
+              >
+                <PrintIcon />
+              </button>
+              <button
                 onClick={() =>
                   setIsWorkAccidentIllnessReportDeleteModalOpen({
                     id: item.id,
@@ -381,7 +388,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            {/* <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkAccidentIllnessReportModalOpen(true)}
@@ -431,6 +438,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div> */}
+            <div className='flex-1 flex justify-start lg:justify-end'>
+              <button
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                onClick={() => setIsCreateWorkAccidentIllnessReportModalOpen(true)}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_wair}
+              >
+                CREATE
+              </button>
             </div>
           </div>
 

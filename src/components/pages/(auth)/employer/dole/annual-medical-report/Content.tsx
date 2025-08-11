@@ -19,6 +19,7 @@ import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import classNames from "@/helpers/classNames";
+
 import useGetAnnualMedicalReportItems from "./hooks/useGetAnnualMedicalReportItems";
 import useUpdateAnnualMedicalReport from "./hooks/useUpdateAnnualMedicalReport";
 import ExportProgressModal from "./modals/ExportProgressModal";
@@ -26,10 +27,10 @@ import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportMo
 import EditAnnualMedicalReportModal from "./modals/EditAnnualMedicalReportModal";
 import DeleteAnnualMedicalReportModal from "./modals/DeleteAnnualMedicalReportModal";
 
-import PrintIcon from "@/svg/PrintIcon";
-import EditIcon from "@/svg/EditIcon";
-import DeleteIcon from "@/svg/DeleteIcon";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import EditIcon from "@/svg/EditIcon";
+import PrintIcon from "@/svg/PrintIcon";
+import DeleteIcon from "@/svg/DeleteIcon";
 
 type PaginationProps = {
   totalRecords: number;

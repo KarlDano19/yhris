@@ -10,25 +10,27 @@ import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { createPortal } from 'react-dom';
+import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
-import DeleteReportModal from './modals/DeleteReportModal';
-import SendEmailModal from './modals/SendEmailModal';
-import SelectBranchModal from './modals/SelectBranchModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
-import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
-import CreateReportModal from './modals/CreateReportModal';
-import EditReportModal from './modals/EditReportModal';
+
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
 import useUpdateAnnualAccidentIllness from './hooks/useUpdateAnnualAccidentIllness';
+import CreateReportModal from './modals/CreateReportModal';
+import EditReportModal from './modals/EditReportModal';
+import DeleteReportModal from './modals/DeleteReportModal';
+import SendEmailModal from './modals/SendEmailModal';
+import SelectBranchModal from './modals/SelectBranchModal';
+import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
 
-
-import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
-import SelectChevronDown from '@/svg/SelectChevronDown';
+import PrintIcon from "@/svg/PrintIcon";
+import DeleteIcon from '@/svg/DeleteIcon';
 
 
 type PaginationProps = {
@@ -252,22 +254,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   // Menu options for Export and Generate Report
-  const menuOptions = [
-    // {
-    //   name: 'Export',
-    //   action: () => {
-    //     setIsExportProgressModalOpen(true);
-    //   },
-    //   disabled: !cachedRigths?.state?.data?.export_dole_awair,
-    // },
-    {
-      name: 'Generate Report',
-      action: () => {
-        setIsSelectBranchModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_awair,
-    },
-  ];
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_awair,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       setIsSelectBranchModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_awair,
+  //   },
+  // ];
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -372,7 +374,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EmailLogo />
               </button>
-              <div className='flex-1 flex justify-end'>
+              <button
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+              >
+                <PrintIcon />
+              </button>
+              <button
+                onClick={() =>
+                  setIsDeleteAnnualAccidentIllnessReportModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+              >
+                <DeleteIcon />
+              </button>
+              {/* <div className='flex-1 flex justify-end'>
                 <Menu as='div' className='relative'>
                   <Menu.Button
                     className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
@@ -443,7 +461,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </PortalMenuItems>
                   )}
                 </Menu>
-              </div>
+              </div> */}
             </div>
           </td>
         </tr>
@@ -523,7 +541,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            {/* <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateAnnualAccidentIllnessReportModalOpen(true)}
@@ -573,6 +591,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div> */}
+            <div className='flex-1 flex justify-start lg:justify-end'>
+              <button
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                onClick={() => setIsCreateAnnualAccidentIllnessReportModalOpen(true)}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_awair}
+              >
+                CREATE
+              </button>
             </div>
           </div>
 

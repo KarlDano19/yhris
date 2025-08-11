@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -15,19 +16,20 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
-import CreateWemRequestModal from './modals/CreateWemRequestModal';
-import ExportProgressModal from '../employee-compensation-logbook/modals/ExportProgressModal';
 import useGetWorkEnvironmentRequestItems from './hooks/useGetWorkEnvironmentRequestItems';
+import useUpdateWorkEnvironmentRequest from './hooks/useUpdateWorkEnvironmentRequest';
+import CreateWemRequestModal from './modals/CreateWemRequestModal';
 import DeleteWemRequestModal from './modals/DeleteWemRequestModal';
 import EditWemRequestModal from './modals/EditWemRequestModal';
-import EmailLogo from '@/svg/EmailLogo';
 import SendEmailModal from './modals/SendEmailModal';
-import useUpdateWorkEnvironmentRequest from './hooks/useUpdateWorkEnvironmentRequest';
+import ExportProgressModal from '../employee-compensation-logbook/modals/ExportProgressModal';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import EditIcon from '@/svg/EditIcon';
+import EmailLogo from '@/svg/EmailLogo';
+import PrintIcon from "@/svg/PrintIcon";
+import DeleteIcon from '@/svg/DeleteIcon';
+
 
 type PaginationProps = {
   totalRecords: number;
@@ -83,22 +85,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
-  const menuOptions = [
-    {
-      name: 'Export',
-      action: () => {
-        setIsExportProgressModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.export_dole_work_environment_request,
-    },
-    {
-      name: 'Generate Report',
-      action: () => {
-        handlePrint();
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_work_environment_request,
-    },
-  ];
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_work_environment_request,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       handlePrint();
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_work_environment_request,
+  //   },
+  // ];
 
   useEffect(() => {
     if (workEnvironmentRequestItemsData) {
@@ -345,6 +347,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <button
+                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
+              >
+                <PrintIcon />
+              </button>
+              <button
                 onClick={() =>
                   setIsWorkEnvironmentRequestDeleteModalOpen({
                     id: item.id,
@@ -449,7 +456,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
             </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            {/* <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
@@ -499,6 +506,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div> */}
+            <div className='flex-1 flex justify-start lg:justify-end'>
+              <button
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_work_environment_request}
+              >
+                CREATE
+              </button>
             </div>
           </div>
 
