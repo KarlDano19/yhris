@@ -40,11 +40,11 @@ interface AnnualMedicalReportData {
   };
 }
 
-interface AnnualMedicalReportDocumentProps {
+interface DocumentPageOneProps {
   data: AnnualMedicalReportData;
 }
 
-const AnnualMedicalReportDocument: React.FC<AnnualMedicalReportDocumentProps> = ({ data }) => {
+const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
   return (
     <div className="text-black bg-white font-sans text-xs leading-tight max-w-4xl mx-auto p-4">
       {/* Header */}
@@ -384,4 +384,4 @@ const AnnualMedicalReportDocument: React.FC<AnnualMedicalReportDocumentProps> = 
   );
 };
 
-export default AnnualMedicalReportDocument; 
+export default DocumentPageOne; 

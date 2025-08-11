@@ -571,7 +571,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 data-tooltip-content={isGenerating ? 'Generating PDF...' : 'Generate PDF'}
                 data-tooltip-place='bottom'
                 className={`${isGenerating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 p-1 rounded'}`}
-                title="Generate and Print PDF"
               >
                 <PrintIcon />
               </button>
@@ -586,7 +585,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <DeleteIcon />
               </button>
-              
             </div>
           </td>
         </tr>
