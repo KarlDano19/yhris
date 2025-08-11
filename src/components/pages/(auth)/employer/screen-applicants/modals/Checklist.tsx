@@ -63,8 +63,8 @@ export default function Checklist({ title, requirements, handleFormSubmit, hasAc
       // This prevents overriding manual status changes
       if (!applicant.status) {
         // If the applicant is not fit, suggest "rejected" but don't force it
-        if (applicant.screeningFit === 'bad') {
-          setValue('status', 'rejected');
+      if (applicant.screeningFit === 'bad') {
+        setValue('status', 'rejected');
         }
       } else {
         // Use their current status

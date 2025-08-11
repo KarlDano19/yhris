@@ -35,7 +35,6 @@ async function addJobPost(jobPost: any) {
 
     // Add screening questions and auto-reject settings
     if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {
-      console.log('Adding screening questions:', jobPost.screeningQuestions);
       
       // Format questions to match backend expectations
       const formattedQuestions = jobPost.screeningQuestions.map((q: any) => ({
@@ -61,11 +60,15 @@ async function addJobPost(jobPost: any) {
     }
     
     if (jobPost.autoRejectEnabled !== undefined) {
-      console.log('Auto-reject enabled:', jobPost.autoRejectEnabled);
       formData.append('auto_reject_enabled', jobPost.autoRejectEnabled.toString());
     } else {
       // Default to true if not specified
       formData.append('auto_reject_enabled', 'true');
+    }
+    
+    // Add rejection feedback if available
+    if (jobPost.rejectionFeedback) {
+      formData.append('rejection_feedback', jobPost.rejectionFeedback);
     }
 
     if (jobPost.jobDescriptionFile.length) {

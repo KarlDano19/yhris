@@ -111,6 +111,12 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
       formData.append('auto_reject_enabled', 'true');
     }
     
+    // Add rejection feedback if available
+    if (jobPost.rejectionFeedback) {
+      console.log('Adding rejection feedback:', jobPost.rejectionFeedback);
+      formData.append('rejection_feedback', jobPost.rejectionFeedback);
+    }
+    
     const config = {
       method: 'PATCH',
       headers: {

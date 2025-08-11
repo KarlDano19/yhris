@@ -25,6 +25,7 @@ declare global {
   interface Window {
     screeningQuestions: any[];
     autoRejectEnabled: boolean;
+    rejectionFeedback?: string;
   }
 }
 
@@ -133,6 +134,11 @@ export default function UpdateJobModal({
             ? jobPostDataDetails.auto_reject_enabled
             : true
         );
+        
+        // Load rejection feedback if available
+        if (jobPostDataDetails.rejection_feedback) {
+          window.rejectionFeedback = jobPostDataDetails.rejection_feedback;
+        }
       }
       fifthForm.reset({
         postAs: jobPostDataDetails.poster_type,
@@ -205,6 +211,11 @@ export default function UpdateJobModal({
     
     if (finalData.autoRejectEnabled === undefined) {
       finalData.autoRejectEnabled = autoRejectEnabled;
+    }
+    
+    // Ensure rejection feedback is included in the final data
+    if (!finalData.rejectionFeedback && window.rejectionFeedback) {
+      finalData.rejectionFeedback = window.rejectionFeedback;
     }
     
     const callbackReq = {
@@ -329,7 +340,7 @@ export default function UpdateJobModal({
                       setScreeningQuestions={setScreeningQuestions}
                       autoRejectEnabled={autoRejectEnabled}
                       setAutoRejectEnabled={setAutoRejectEnabled}
-
+                      initialRejectionFeedback={jobPostDataDetails?.rejection_feedback || ''}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>

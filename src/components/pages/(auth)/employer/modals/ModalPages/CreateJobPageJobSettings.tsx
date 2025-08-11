@@ -22,6 +22,7 @@ export default function CreateJobPageJobSettings({
   setScreeningQuestions,
   autoRejectEnabled,
   setAutoRejectEnabled,
+  initialRejectionFeedback,
 }: {
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
@@ -29,6 +30,7 @@ export default function CreateJobPageJobSettings({
   setScreeningQuestions?: (questions: any[]) => void;
   autoRejectEnabled?: boolean;
   setAutoRejectEnabled?: (enabled: boolean) => void;
+  initialRejectionFeedback?: string;
 }) {
   // Only use default questions if no screeningQuestions are provided
   const [screeningQuestions, setLocalScreeningQuestions] = useState<any[]>(() => {
@@ -117,7 +119,6 @@ export default function CreateJobPageJobSettings({
       
       // Only update if we found duplicates
       if (uniqueQuestions.length < initialScreeningQuestions.length) {
-        console.log('Deduplicating questions:', uniqueQuestions);
         setLocalScreeningQuestions(uniqueQuestions);
         
         // Update parent component state if available
@@ -158,7 +159,10 @@ export default function CreateJobPageJobSettings({
   // Rejection settings state
   const [isRejectionSettingsOpen, setIsRejectionSettingsOpen] = useState(false);
   // Personalized feedback for rejections
-  const [rejectionFeedback, setRejectionFeedback] = useState<string>('');
+  const [rejectionFeedback, setRejectionFeedback] = useState<string>(() => {
+    // Initialize from prop if available (for editing existing job postings)
+    return initialRejectionFeedback || window.rejectionFeedback || '';
+  });
 
   // Selected preset options - initialize from existing questions
   const [selectedPresets, setSelectedPresets] = useState(() => {
@@ -245,9 +249,15 @@ export default function CreateJobPageJobSettings({
       }
       
       setSelectedPresets(Array.from(presets));
-      console.log("Updated selected presets:", Array.from(presets));
     }
   }, [initialScreeningQuestions]);
+
+  // Update rejection feedback when prop changes (for editing existing job postings)
+  useEffect(() => {
+    if (initialRejectionFeedback && initialRejectionFeedback !== rejectionFeedback) {
+      setRejectionFeedback(initialRejectionFeedback);
+    }
+  }, [initialRejectionFeedback]);
 
   // Handlers for question actions
   const handleRemove = (id: number) => {
@@ -467,7 +477,6 @@ export default function CreateJobPageJobSettings({
             presetId: presetId
           };
           
-          console.log('Adding preset question:', newQuestion);
           const updatedQuestions = [...screeningQuestions, newQuestion];
           setLocalScreeningQuestions(updatedQuestions);
           
@@ -476,7 +485,6 @@ export default function CreateJobPageJobSettings({
             setScreeningQuestions(updatedQuestions);
           }
         } else {
-          console.log('Skipping duplicate preset question for:', presetId);
           // Just update the existing question's presetId
           const updatedQuestions = screeningQuestions.map(q => {
             if (presetId === 'drivers-license' && q.question.toLowerCase().includes("driver's license")) {

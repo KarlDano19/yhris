@@ -112,11 +112,12 @@ export default function CreateJobModal({
 
   const fifthFormSubmit = () => {
     const data = fifthForm.getValues();
-    // Include screening questions and auto-reject settings
+    // Include screening questions, auto-reject settings, and rejection feedback
     const jobSettings = {
       ...data,
       screeningQuestions: window.screeningQuestions || [],
-      autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true
+      autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true,
+      rejectionFeedback: window.rejectionFeedback || ''
     };
     setCombinedFormData((prev: any) => ({ ...prev, ...jobSettings }));
     setPageNumber(6);
