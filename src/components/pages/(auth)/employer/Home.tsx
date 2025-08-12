@@ -54,7 +54,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
     },
     {
       icon: <OrientLogo />,
-      text: 'Orient',
+      text: 'Onboarding',
       link: '/orient',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
