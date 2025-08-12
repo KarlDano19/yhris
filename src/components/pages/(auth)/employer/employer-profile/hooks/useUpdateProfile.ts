@@ -20,6 +20,7 @@ async function updateProfile(profile: T_EmployerProfile) {
     data.append('city', profile.city);
     data.append('zip_code', profile.zipCode);
     data.append('country', profile.country);
+    data.append('region', profile.region);
     data.append('language', profile.language);
     data.append('currency', profile.currency);
     if (profile.companyLogo) {
@@ -46,9 +47,9 @@ async function updateProfile(profile: T_EmployerProfile) {
   }
 }
 
-function useupdateProfile() {
+function useUpdateProfile() {
   const query = useMutation((profile: T_EmployerProfile) => updateProfile(profile));
   return query;
 }
 
-export default useupdateProfile;
+export default useUpdateProfile;

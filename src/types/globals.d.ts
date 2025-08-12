@@ -177,6 +177,7 @@ export type T_EmployerProfile = {
   city: string;
   zipCode: string;
   country: string;
+  region: string;
   language: string;
   currency: string;
   imagePath: any;

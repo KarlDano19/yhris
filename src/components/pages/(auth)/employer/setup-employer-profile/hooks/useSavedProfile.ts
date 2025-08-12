@@ -20,6 +20,7 @@ async function saveProfile(profile: T_EmployerProfile) {
     formData.append('city', profile.city);
     formData.append('zip_code', profile.zipCode);
     formData.append('country', profile.country);
+    formData.append('region', profile.region);
     formData.append('language', profile.language);
     formData.append('currency', profile.currency);
     if (profile.companyLogo) {

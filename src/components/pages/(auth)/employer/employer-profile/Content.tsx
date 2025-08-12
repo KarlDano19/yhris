@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import Details from './Details';
 import Settings from './Settings';
-import useSavedProfile from './hooks/useUpdateProfile';
+import useUpdateProfile from './hooks/useUpdateProfile';
 import classNames from '@/helpers/classNames';
 import ConfirmEditEmployerProfileModal from '../employer-profile/modal/ConfirmEditEmployerProfileModal'
 
@@ -26,7 +26,7 @@ function Content() {
   const { register, setValue, watch, handleSubmit } = useForm<T_EmployerProfile>();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [formData, setFormData] = useState<T_EmployerProfile | null>(null);
-  const { mutate, isLoading } = useSavedProfile();
+  const { mutate, isLoading } = useUpdateProfile();
 
   useEffect(() => {
     if (cachedProfile) {
@@ -46,6 +46,7 @@ function Content() {
           setValue('city', cachedData.city);
           setValue('zipCode', cachedData.zip_code);
           setValue('country', cachedData.country);
+          setValue('region', cachedData.region);
           setValue('language', cachedData.language);
           setValue('currency', cachedData.currency);
           setValue('imagePath', cachedData.logo);

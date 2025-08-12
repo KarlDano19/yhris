@@ -5,6 +5,7 @@ import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import regions from '@/utils/regions';
 
 const Details = ({
   register,
@@ -206,6 +207,23 @@ const Details = ({
             />
           </div>
           <div className='basis-1/3 mr-10'>
+            <label htmlFor='region' className='block mb-2 text-sm font-medium text-gray-900'>
+              Region<span className='text-red-500'>*</span>
+            </label>
+            <select
+              id='region'
+              {...register('region', { required: true })}
+              className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+            >
+              <option value=''>Select Region</option>
+              {regions.map((region) => (
+                <option key={region.value} value={region.value}>
+                  {region.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className='basis-1/3'>
             <label htmlFor='zipCode' className='block mb-2 text-sm font-medium text-gray-900'>
               Zip Code<span className='text-red-500'>*</span>
             </label>
@@ -216,6 +234,8 @@ const Details = ({
               className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
             />
           </div>
+        </div>
+        <div className='flex flex-row mt-5'>
           <div className='basis-1/3'>
             <label htmlFor='country' className='block mb-2 text-sm font-medium text-gray-900'>
               Country<span className='text-red-500'>*</span>
