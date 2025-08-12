@@ -13,6 +13,7 @@ interface AnnualWorkAccidentIllnessData {
     totalNonDisablingInjuries: number;
     frequencyRate: number;
     severityRate: number;
+    summary: string;
   };
   submittedBy: {
     name: string;
@@ -106,7 +107,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
         <div className="flex items-center">
           <span className="text-xs font-bold mr-4 w-48">INJURY SUMMARY:</span>
           <div className="border-b border-black flex-1 pb-1 text-xs">
-            {/* This field appears to be empty in the image */}
+            {data.injurySummary.summary}
           </div>
         </div>
         

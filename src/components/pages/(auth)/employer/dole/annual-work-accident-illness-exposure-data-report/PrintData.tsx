@@ -14,6 +14,7 @@ interface AnnualWorkAccidentIllnessData {
     totalNonDisablingInjuries: number;
     frequencyRate: number;
     severityRate: number;
+    summary: string;
   };
   submittedBy: {
     name: string;
@@ -38,6 +39,7 @@ export const prepareAnnualWorkAccidentIllnessData = (item: any): AnnualWorkAccid
       totalNonDisablingInjuries: item.total_non_disabling_injuries || 0,
       frequencyRate: item.frequency_rate || 0,
       severityRate: item.severity_rate || 0,
+      summary: item.injury_summary || '\u00A0',
     },
     submittedBy: {
       name: item.name_signature && item.name_signature !== 'Update' ? item.name_signature : '\u00A0',
