@@ -57,7 +57,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
         <div className="text-xs font-bold">DEPARTMENT OF LABOR AND EMPLOYMENT</div>
         <div className="text-xs">NCR, Pasig City</div>
         <div className="text-sm font-bold mt-2 mb-1">ANNUAL MEDICAL REPORT FORM</div>
-        <div className="text-xs">For Period {data.reportPeriod.from} to {data.reportPeriod.to}</div>
+        <div className="text-xs font-bold">For Period {data.reportPeriod.from} to {data.reportPeriod.to}</div>
       </div>
 
       {/* Basic Information */}
@@ -152,7 +152,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
       <div className="mb-2">
         <div className="text-xs font-bold">7. Preventive Occupational Health Services: (Check or Cross)</div>
         <div className="ml-4">
-          <div className="text-xs font-bold mb-1">a. Occupational health services is organized/provided by:</div>
+          <div className="text-xs mb-1">a. Occupational health services is organized/provided by:</div>
           <div className="ml-4 space-y-0.5">
             <div className="flex items-center">
               <span className="w-6 text-center">({data.healthService?.organizedBy === 'establishment' ? '✓' : ' '})</span>
@@ -172,7 +172,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
           </div>
 
           <div className="mt-2">
-            <div className="text-xs font-bold">b. Occupational health services as described under number 7a above, is organized/provided as a Service:</div>
+            <div className="text-xs">b. Occupational health services as described under number 7a above, is organized/provided as a Service:</div>
             <div className="ml-4 space-y-0.5 mt-1">
               <div className="flex items-center">
                 <span className="w-6 text-center">({data.healthService?.serviceType === 'solely' ? '✓' : ' '})</span>
@@ -188,7 +188,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
         </div>
 
         <div className="mt-2 ml-4">
-          <div className="text-xs font-bold">c. The employer engages the services of:</div>
+          <div className="text-xs">c. The employer engages the services of:</div>
           <div className="ml-4 space-y-1 mt-1">
             <div className="flex items-center">
               <span className="w-6 text-center">(✓)</span>
@@ -253,7 +253,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
             <div className="mt-1 text-xs">
               <span>The occupational health physician/practitioner/nurse/personnel conducts an inspection of the workplace:</span>
             </div>
-            <div className="ml-4 flex flex-wrap space-x-4">
+            <div className="flex flex-wrap space-x-4">
               <div className="flex items-center">
                 <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency === 'monthly' ? '✓' : ' '})</span>
                 <span>once every month</span>
@@ -263,7 +263,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                 <span>once every three (3) months</span>
               </div>
             </div>
-            <div className="ml-4 flex flex-wrap space-x-4">
+            <div className="flex flex-wrap space-x-4">
               <div className="flex items-center">
                 <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency === 'biannual' ? '✓' : ' '})</span>
                 <span>once every two (2) months</span>
@@ -273,7 +273,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                 <span>once every six (6) months</span>
               </div>
             </div>
-            <div className="ml-4">
+            <div>
               <div className="flex items-center">
                 <span className="w-6 text-center">( )</span>
                 <span>other details</span>
@@ -309,13 +309,13 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
             </div>
           </div>
             <div className="mt-2">
-              <div className="text-xs font-bold">b. Schedule of attendance in the workplace:</div>
+              <div className="text-xs">b. Schedule of attendance in the workplace:</div>
               <div className='ml-4'>
                 <div className="text-xs text-right font-bold mb-0.5 mr-3">Work shift</div>
                 <table className="w-full text-xs">
                   <tbody>
                     <tr>
-                      <td className="text-left w-1/2">Occupational health physician</td>
+                      <td className="text-left w-1/2 ml-2">Occupational health physician</td>
                       <td className="text-center">:</td>
                       <td className="text-center w-16">
                         <div className="border-b border-black">
@@ -330,7 +330,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="text-left w-1/2">Occupational health dentist</td>
+                      <td className="text-left w-1/2 ml-2">Occupational health dentist</td>
                       <td className="text-center">:</td>
                       <td className="text-center w-16">
                         <div className="border-b border-black">
@@ -345,7 +345,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="text-left w-1/2">Occupational health practitioner</td>
+                      <td className="text-left w-1/2 ml-2">Occupational health practitioner</td>
                       <td className="text-center">:</td>
                       <td className="text-center w-16">
                         <div className="border-b border-black">
@@ -360,7 +360,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="text-left w-1/2">Occupational health nurse</td>
+                      <td className="text-left w-1/2 ml-2">Occupational health nurse</td>
                       <td className="text-center">:</td>
                       <td className="text-center w-16">
                         <div className="border-b border-black">

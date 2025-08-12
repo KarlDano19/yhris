@@ -12,7 +12,7 @@ interface ImmunizationData {
   hepatitisB?: InjuryData;
   rabiesVaccine?: InjuryData;
   covid19Vaccine?: InjuryData;
-  others?: string;
+  others?: InjuryData;
 }
 
 interface HealthEducationData {
@@ -239,24 +239,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
           {renderImmunizationRow('Rabies Vaccine', immunizationProgram?.rabiesVaccine?.male, immunizationProgram?.rabiesVaccine?.female)}
           {renderImmunizationRow('COVID-19 Vaccine', immunizationProgram?.covid19Vaccine?.male, immunizationProgram?.covid19Vaccine?.female)}
           
-          {/* Others row with text field */}
-          <div className="flex items-center text-xs">
-            <div className="w-1/2 text-left ml-4">
-              Others (Please specify)
-              <div className="border-b border-black mt-1 min-h-4">
-                {immunizationProgram?.others || ''}
-              </div>
-            </div>
-            <div className="w-1/6 text-center">
-              <div className="border-b border-black mx-2 min-h-4"></div>
-            </div>
-            <div className="w-1/6 text-center">
-              <div className="border-b border-black mx-2 min-h-4"></div>
-            </div>
-            <div className="w-1/6 text-center">
-              <div className="border-b border-black mx-2 min-h-4"></div>
-            </div>
-          </div>
+          {renderImmunizationRow('Others (Please specify)', immunizationProgram?.others?.male, immunizationProgram?.others?.female)}
         </div>
       </div>
 

@@ -13,14 +13,9 @@ import {
 } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
-import { Tooltip } from "react-tooltip";
 
-import DocumentPageOne from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageOne";
-import DocumentPageTwo from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageTwo";
-import DocumentPageThree from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageThree";
-import DocumentPageFour from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageFour";
-import DocumentPageFive from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageFive";
-import DocumentPageSix from "@/components/pages/(auth)/employer/dole/annual-medical-report/print/DocumentPageSix";
+import { handlePrintPDF } from './PrintData';
+import { getPrintAnnualMedicalReportDetails } from './hooks/useGetPrintAnnualMedicalReportDetails';
 import useFileforge from "@/components/hooks/useFileforge";
 import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
@@ -127,233 +122,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
   };
 
-  const handlePrintPDF = async (item: any) => {
-    // Prepare data for Page 1
-    const pageOneData = {
-      establishmentName: "Sample Establishment Name", // Replace with actual data from your API
-      address: "Sample Address", // Replace with actual data
-      ownerManager: "Sample Owner/Manager", // Replace with actual data  
-      natureOfBusiness: "Sample Business Nature", // Replace with actual data
-      totalEmployees: item.total_number_of_employees,
-      numberOfShifts: item.number_of_shifts,
-      reportPeriod: {
-        from: "January 1, 2024",
-        to: "December 31, 2024"
-      },
-      shifts: {
-        first: { male: 50, female: 30, total: 80 },
-        second: { male: 45, female: 35, total: 80 },
-        third: { male: 25, female: 15, total: 40 }
-      },
-      healthService: {
-        organizedBy: 'establishment' as const,
-        otherSpecify: undefined,
-        serviceType: 'solely' as const
-      },
-      occupationalHealthStaff: {
-        consultant: { name: 'Dr. Juan Dela Cruz', address: '123 Health St., Manila' },
-        physician: { name: 'N/A', address: 'N/A' },
-        dentist: { name: 'N/A', address: 'N/A' },
-        nurse: { name: 'N/A', address: 'N/A' },
-        inspectionFrequency: 'monthly' as const
-      },
-      emergencyServices: {
-        hasTreatmentRoom: true,
-        otherDetails: undefined
-      },
-      workSchedule: {
-        physician: { hours: 8, shift: 'Day Shift' },
-        dentist: { hours: 4, shift: 'Morning' },
-        practitioner: { hours: 8, shift: 'Day Shift' },
-        nurse: { hours: 8, shift: 'Day Shift' }
-      }
-    };
+  const handlePrintPDFLocal = async (item: any) => {
+    try {
+      // Get company name from cached profile data
+      const cachedProfile = queryClient
+        .getQueryCache()
+        .find(["employerProfileCache"]) as {
+        state: { data: { name: string } } | undefined;
+      };
+      const companyName = cachedProfile?.state?.data?.name || '';
 
-    // Prepare data for Page 2 - Medical conditions
-    const pageTwoData = {
-      respiratory: {
-        laryngitis: { male: 2, female: 1 },
-        bronchitis: { male: 1, female: 0 },
-        bronchialAsthma: { male: 3, female: 2 },
-        pneumonia: { male: 0, female: 1 },
-        silicosis: { male: 0, female: 0 },
-        pneumoconiosis: { male: 0, female: 0 },
-        others: { male: 1, female: 0 }
-      },
-      heartAndBloodVessel: {
-        hypertension: { male: 5, female: 3 },
-        hypotension: { male: 2, female: 4 },
-        anginaPectoris: { male: 1, female: 0 },
-        myocardialInfarction: { male: 0, female: 0 },
-        vascularDisturbances: { male: 1, female: 1 },
-        others: { male: 0, female: 1 }
-      }
-      // Add more medical condition data as needed
-    };
+      // Get current year for fallback
+      const currentYear = new Date().getFullYear();
+      
+      // Use date range from filter or fallback to current year
+      const reportPeriodFrom = itemsFilter.from || `January 01, ${currentYear}`;
+      const reportPeriodTo = itemsFilter.to || `December 31, ${currentYear}`;
 
-    // Prepare data for Page 3 - Health services and diseases
-    const pageThreeData = {
-      attendanceSchedule: {
-        firstShift: 40,
-        secondShift: 8,
-        thirdShift: 0
-      },
-      occupationalHealthTraining: {
-        physician: true,
-        dentist: false,
-        nurse: true,
-        firstAider: true,
-        othersSpecify: "Safety Officer"
-      },
-      medicalExamination: {
-        prePlacement: 15,
-        periodic: 200,
-        returnToWork: 5,
-        transfer: 3,
-        special: 2,
-        separation: 8
-      }
-      // Add disease report data as needed
-    };
-
-    // Prepare data for Page 4 - Infectious diseases and physical environment
-    const pageFourData = {
-      infectiousDiseases: {
-        influenza: { male: 10, female: 8 },
-        typhoidParatyphoid: { male: 0, female: 1 },
-        cholera: { male: 0, female: 0 },
-        measles: { male: 1, female: 1 },
-        mumps: { male: 0, female: 0 },
-        malaria: { male: 2, female: 1 },
-        schistosomiasis: { male: 1, female: 0 },
-        herpesZoster: { male: 0, female: 1 },
-        chickenPox: { male: 2, female: 2 },
-        germanMeasles: { male: 0, female: 0 },
-        rabies: { male: 0, female: 0 },
-        others: { male: 1, female: 0 }
-      },
-      physicalEnvironmentDiseases: {
-        noiseVibration: {
-          deafnessNoiseInduced: { male: 1, female: 0 },
-          otosclerosis: { male: 0, female: 0 },
-          musculoSkeletalDisturbances: { male: 3, female: 2 },
-          fatigue: { male: 8, female: 6 }
-        }
-        // Add more physical environment data as needed
-      },
-      occupationalAccidents: {
-        contusionBruises: { male: 5, female: 2 },
-        abrasions: { male: 3, female: 1 },
-        cuts: { male: 7, female: 3 },
-        concussion: { male: 0, female: 0 },
-        avulsion: { male: 1, female: 0 }
-      }
-    };
-
-    // Prepare data for Page 5 - Additional sections
-    const pageFiveData = {
-      additionalInjuries: {
-        amputation: { male: 0, female: 0 },
-        crushingInjuries: { male: 1, female: 0 },
-        spinalInjuries: { male: 0, female: 1 },
-        cranialInjuries: { male: 1, female: 0 },
-        sprains: { male: 4, female: 3 },
-        dislocationFractures: { male: 2, female: 1 },
-        burns: { male: 3, female: 1 }
-      },
-      immunizationProgram: {
-        tetanusToxoid: { male: 50, female: 40 },
-        tetanusAntitoxin: { male: 5, female: 3 },
-        tetanusGlobulin: { male: 2, female: 1 },
-        hepatitisB: { male: 60, female: 50 },
-        rabiesVaccine: { male: 0, female: 0 },
-        others: "COVID-19 Vaccine"
-      },
-      medicalRecordsKeeping: {
-        done: true,
-        notDone: false
-      },
-      healthEducation: {
-        individual: true,
-        groupDiscussions: true,
-        visualDisplays: true
-      },
-      otherHealthPrograms: {
-        nutrition: { seminar: true, visualAids: true, counselling: false },
-        maternalChildCare: { seminar: false, visualAids: true, counselling: true },
-        familyPlanning: { seminar: true, visualAids: false, counselling: true },
-        mentalHealth: { seminar: false, visualAids: false, counselling: true },
-        personalHealthMaintenance: { seminar: true, visualAids: true, counselling: false }
-      },
-      physicalFitnessProgram: {
-        sportsActivities: { yes: true, no: false },
-        calisthenics: { yes: false, no: true }
-      },
-      chemicalHazards: {
-        dust: { substance: "Silica dust from construction", workers: 15 },
-        liquids: { substance: "Cleaning solvents", workers: 8 },
-        mistFumes: { substance: "Paint spray mist", workers: 5 },
-        gas: { substance: "CO from vehicles", workers: 12 },
-        others: { substance: "Adhesive fumes", workers: 3 }
-      },
-      physicalHazards: {
-        noise: 25,
-        temperatureHumidity: 30,
-        pressure: 0,
-        illumination: 45,
-        radiationUltraviolet: 2,
-        vibration: 8
-      }
-    };
-
-    // Prepare data for Page 6 - Final sections
-    const pageSixData = {
-      biologicalHazards: {
-        viral: { substance: "COVID-19, Influenza", workers: 10 },
-        bacterial: { substance: "E.coli from food handling", workers: 5 },
-        fungal: { substance: "Mold in storage areas", workers: 3 },
-        parasitic: { substance: "", workers: 0 },
-        others: { substance: "", workers: 0 }
-      },
-      ergonomicStress: {
-        exhaustingPhysicalWork: { substance: "Heavy lifting", workers: 20 },
-        prolongedStanding: { substance: "Assembly line work", workers: 35 },
-        excessiveMentalEffort: { substance: "Computer programming", workers: 15 },
-        unfavorableWorkPosture: { substance: "Prolonged sitting", workers: 40 },
-        staticMonotonousWork: { substance: "Data entry", workers: 25 },
-        othersSpecify: { substance: "Repetitive motions", workers: 18 }
-      },
-      submittedBy: {
-        name: "Dr. Maria Santos",
-        position: "Occupational Health Physician"
-      },
-      notedBy: {
-        employer: "John Doe, CEO",
-        date: new Date().toLocaleDateString()
-      }
-    };
-
-    // Create complete document with all pages
-    const documentComponent = (
-      <div className="bg-white">
-        <DocumentPageOne data={pageOneData} />
-        <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-        <DocumentPageTwo data={pageTwoData} />
-        <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-        <DocumentPageThree {...pageThreeData} />
-        <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-        <DocumentPageFour {...pageFourData} />
-        <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-        <DocumentPageFive {...pageFiveData} />
-        <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-        <DocumentPageSix {...pageSixData} />
-      </div>
-    );
-    
-    const filename = `annual-medical-report-${item.id}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    // Generate PDF locally (opens print dialog)
-    await generatePDFLocally(documentComponent, filename);
+      // Fetch detailed data using the print hook's function directly
+      const detailedData = await getPrintAnnualMedicalReportDetails(item.id);
+      
+      // Use detailed data for PDF generation
+      await handlePrintPDF(detailedData, generatePDFLocally, companyName, reportPeriodFrom, reportPeriodTo);
+    } catch (error) {
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
   };
 
 
@@ -565,12 +358,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
 
               <button
-                onClick={() => handlePrintPDF(item)}
+                onClick={() => handlePrintPDFLocal(item)}
                 disabled={isGenerating || !cachedRigths?.state?.data?.generate_dole_annual_medical_report}
-                data-tooltip-id='print-tooltip'
-                data-tooltip-content={isGenerating ? 'Generating PDF...' : 'Generate PDF'}
-                data-tooltip-place='bottom'
-                className={`${isGenerating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 p-1 rounded'}`}
               >
                 <PrintIcon />
               </button>
@@ -816,7 +605,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           itemsFilter={itemsFilter}
         />
       )}
-      <Tooltip id='print-tooltip' />
     </>
   );
 }

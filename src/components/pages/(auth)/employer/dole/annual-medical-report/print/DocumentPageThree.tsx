@@ -1,87 +1,73 @@
 import React from 'react';
 
-interface AttendanceSchedule {
-  firstShift?: number;
-  secondShift?: number;
-  thirdShift?: number;
-}
-
-interface OccupationalHealthTraining {
-  physician?: boolean;
-  dentist?: boolean;
-  nurse?: boolean;
-  firstAider?: boolean;
-  othersSpecify?: string;
-}
-
-interface MedicalExamination {
-  prePlacement?: number;
-  periodic?: number;
-  returnToWork?: number;
-  transfer?: number;
-  special?: number;
-  separation?: number;
-}
-
-interface DiseaseReportData {
-  skin?: {
-    allergy?: { male: number; female: number };
-    dermatoses?: { male: number; female: number };
-    infectionFolliculitis?: { male: number; female: number };
-    abscessParoNychia?: { male: number; female: number };
+interface MedicalReportData {
+  laryngitis?: { male: number; female: number };
+  others?: { male: number; female: number };
+  
+  respiratory?: {
+    bronchitis?: { male: number; female: number };
+    bronchialAsthma?: { male: number; female: number };
+    pneumonia?: { male: number; female: number };
+    tuberculosis?: { male: number; female: number };
+    pneumoconiosis?: { male: number; female: number };
     others?: { male: number; female: number };
   };
-  head?: {
-    tensionHeadache?: { male: number; female: number };
+  heartAndBloodVessel?: {
+    hypertension?: { male: number; female: number };
+    hypotension?: { male: number; female: number };
+    anginaPectoris?: { male: number; female: number };
+    myocardialInfarction?: { male: number; female: number };
+    vascularDisturbances?: { male: number; female: number };
     others?: { male: number; female: number };
   };
-  eyes?: {
-    errorOfRefraction?: { male: number; female: number };
-    bacterialViral?: { male: number; female: number };
-    conjunctivitis?: { male: number; female: number };
-    cataract?: { male: number; female: number };
+  gastrointestinal?: {
+    gastroenteritisDiarrhea?: { male: number; female: number };
+    amoebiasis?: { male: number; female: number };
+    gastritisHyperacidity?: { male: number; female: number };
+    appendicitis?: { male: number; female: number };
+    cholecystitis?: { male: number; female: number }; // not in the data
+    liverCirrhosis?: { male: number; female: number };
+    hepaticAbscess?: { male: number; female: number };
+    cancerHepaticGastric?: { male: number; female: number };
+    ulcer?: { male: number; female: number };
     others?: { male: number; female: number };
   };
-  mouthAndEnt?: {
-    gingivitis?: { male: number; female: number };
-    herpesLabialesStomatitis?: { male: number; female: number };
-    otitisMediaExterna?: { male: number; female: number };
-    deafness?: { male: number; female: number };
-    meniereSyndrome?: { male: number; female: number };
-    rhinitisAllergic?: { male: number; female: number };
-    nasalPolyps?: { male: number; female: number };
-    sinusitis?: { male: number; female: number };
-    tonsillopharyngitis?: { male: number; female: number };
+  genitoUrinary?: {
+    urinaryTractInfection?: { male: number; female: number };
+    stones?: { male: number; female: number };
+    cancer?: { male: number; female: number };
+    others?: { male: number; female: number };
+  };
+  reproductive?: {
+    dysmenorrhea?: { male: number; female: number };
+    infectionCervicitisVaginitis?: { male: number; female: number };
+    abortionSpontaneousThreatened?: { male: number; female: number };
+    hyperemesisGravidarium?: { male: number; female: number };
+    uterineTumors?: { male: number; female: number };
+    cervicalPolypCancer?: { male: number; female: number };
+    ovarianCystTumors?: { male: number; female: number };
+    sexuallyTransmittedDiseases?: { male: number; female: number };
+    herniaInguinalFemoral?: { male: number; female: number }; // wrong spelling in the backend
+    others?: { male: number; female: number };
+  };
+  neuromuscular?: {
+    peripheralNeuritis?: { male: number; female: number };
+    paralysis?: { male: number; female: number }; // not in the data
+    arthritis?: { male: number; female: number }; 
+    others?: { male: number; female: number };
+  };
+  lymphaticsAndCirculatory?: {
+    anemia?: { male: number; female: number };
+    leukemia?: { male: number; female: number };
+    cerebrovascularAccident?: { male: number; female: number };
   };
 }
 
 interface DocumentPageThreeProps {
-  attendanceSchedule?: AttendanceSchedule;
-  occupationalHealthTraining?: OccupationalHealthTraining;
-  hasRegularAppraisal?: boolean;
-  physicalExam?: MedicalExamination;
-  xRays?: MedicalExamination;
-  urinalysis?: MedicalExamination;
-  stoolExam?: MedicalExamination;
-  bloodTest?: MedicalExamination;
-  ecg?: MedicalExamination;
-  others?: MedicalExamination;
-  diseaseData?: DiseaseReportData;
+  data: MedicalReportData;
 }
 
-const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({
-  attendanceSchedule,
-  occupationalHealthTraining,
-  hasRegularAppraisal,
-  physicalExam,
-  xRays,
-  urinalysis,
-  stoolExam,
-  bloodTest,
-  ecg,
-  others,
-  diseaseData,
-}) => {
+const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
   const renderConditionRow = (conditionName: string, maleCount?: number, femaleCount?: number) => {
     const total = (maleCount || 0) + (femaleCount || 0);
     
@@ -115,235 +101,98 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({
     );
   };
 
-  const renderExamRow = (examType: string, physicalCount?: number, xRayCount?: number, urinalysisCount?: number) => {
-    const physicalDisplay = physicalCount ? physicalCount.toString() : '\u00A0';
-    const xRayDisplay = xRayCount ? xRayCount.toString() : '\u00A0';
-    const urinalysisDisplay = urinalysisCount ? urinalysisCount.toString() : '\u00A0';
-    
-    return (
-      <div key={examType} className="flex items-center text-xs">
-        <div className="w-1/4 text-left">{examType}</div>
-        <div className="w-1/4 text-center">
-          <div className="border-b border-black mx-2">{physicalDisplay}</div>
-        </div>
-        <div className="w-1/4 text-center">
-          <div className="border-b border-black mx-2">{xRayDisplay}</div>
-        </div>
-        <div className="w-1/4 text-center">
-          <div className="border-b border-black mx-2">{urinalysisDisplay}</div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderExamRow2 = (examType: string, stoolCount?: number, bloodCount?: number, ecgCount?: number, othersCount?: number) => {
-    const stoolDisplay = stoolCount ? stoolCount.toString() : '\u00A0';
-    const bloodDisplay = bloodCount ? bloodCount.toString() : '\u00A0';
-    const ecgDisplay = ecgCount ? ecgCount.toString() : '\u00A0';
-    const othersDisplay = othersCount ? othersCount.toString() : '\u00A0';
-    
-    return (
-      <div key={examType} className="flex items-center text-xs">
-        <div className="w-1/5 text-left">{examType}</div>
-        <div className="w-1/5 text-center">
-          <div className="border-b border-black mx-2">{stoolDisplay}</div>
-        </div>
-        <div className="w-1/5 text-center">
-          <div className="border-b border-black mx-2">{bloodDisplay}</div>
-        </div>
-        <div className="w-1/5 text-center">
-          <div className="border-b border-black mx-2">{ecgDisplay}</div>
-        </div>
-        <div className="w-1/5 text-center">
-          <div className="border-b border-black mx-2">{othersDisplay}</div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="text-black bg-white font-sans text-xs leading-tight max-w-4xl mx-auto p-4">
-      {/* Schedule of attendance of full time first aider */}
-      <div className="mb-2">
-        <div className="text-xs font-bold">c. Schedule of attendance of full time first aider:</div>
-        <div className="ml-4 space-y-0.5">
-          <div className="flex items-center">
-            <span className="w-6 text-center">( )</span>
-            <span>1st work shift</span>
-            <div className="border-b border-black ml-2 w-24 text-center">
-              {attendanceSchedule?.firstShift || '\u00A0'}
-            </div>
-          </div>
-          <div className="flex items-center">
-            <span className="w-6 text-center">( )</span>
-            <span>2nd work shift</span>
-            <div className="border-b border-black ml-2 w-24 text-center">
-              {attendanceSchedule?.secondShift || '\u00A0'}
-            </div>
-          </div>
-          <div className="flex items-center">
-            <span className="w-6 text-center">( )</span>
-            <span>3rd work shift</span>
-            <div className="border-b border-black ml-2 w-24 text-center">
-              {attendanceSchedule?.thirdShift || '\u00A0'}
-            </div>
-          </div>
-        </div>
+      {/* Column Headers */}
+      <div className="flex items-center text-xs font-bold mb-1 text-center">
+        <div className="w-1/2"></div>
+        <div className="w-1/6">Male</div>
+        <div className="w-1/6">Female</div>
+        <div className="w-1/6">Total Number<br/>Of Cases</div>
       </div>
 
-      {/* Occupational Health Training */}
-      <div className="mb-2">
-        <div className="text-xs font-bold">
-          d. The following occupational health personnel of the establishment have undergone training in occupational health and safety/first aid:
-        </div>
-        <div className="ml-4 space-y-0.5">
-          <div className="flex items-center">
-            <span className="w-6 text-center">({occupationalHealthTraining?.physician ? '✓' : ' '})</span>
-            <span>occupational health physician</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-6 text-center">({occupationalHealthTraining?.dentist ? '✓' : ' '})</span>
-            <span>occupational health dentist</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-6 text-center">({occupationalHealthTraining?.nurse ? '✓' : ' '})</span>
-            <span>occupational health nurse</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-6 text-center">({occupationalHealthTraining?.firstAider ? '✓' : ' '})</span>
-            <span>first aider</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-6 text-center">( )</span>
-            <span>others, please specify</span>
-            <div className="border-b border-black ml-2 flex-1">
-              {occupationalHealthTraining?.othersSpecify || '\u00A0'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Occupational Health Services */}
-      <div className="mb-2">
-        <div className="text-xs font-bold">9. Occupational Health Services:</div>
+      {/* Medical Conditions */}
+      <div>
         <div className="ml-4">
-          <div className="text-xs mb-1">
-            a. The occupational health personnel of this establishment conducts regular appraisal of the sanitation system in the workplace:
-          </div>
-          <div className="ml-4 flex space-x-6">
-            <div className="flex items-center">
-              <span className="w-6 text-center">({hasRegularAppraisal ? '✓' : ' '})</span>
-              <span>yes</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-6 text-center">({!hasRegularAppraisal ? '✓' : ' '})</span>
-              <span>no</span>
-            </div>
-          </div>
+          {renderConditionRow('Laryngitis', data.laryngitis?.male, data.laryngitis?.female)}
+          {renderConditionRow('Others', data.others?.male, data.others?.female)}
         </div>
-      </div>
-
-      {/* Medical Examination Numbers */}
-      <div className="mb-2">
-        <div className="text-xs font-bold mb-1">b. Number of workers who underwent the following medical examination:</div>
-        
-        {/* First table - Physical Exam, X-Rays, Urinalysis */}
-        <div className="mb-1">
-          {/* Headers */}
-          <div className="flex items-center text-xs font-bold">
-            <div className="w-1/4"></div>
-            <div className="w-1/4 text-center">Physical Exam</div>
-            <div className="w-1/4 text-center">X-Rays</div>
-            <div className="w-1/4 text-center">Urinalysis</div>
-          </div>
-          {/* Rows */}
-          <div className="space-y-0.5">
-            {renderExamRow('1. Pre-placement', physicalExam?.prePlacement, xRays?.prePlacement, urinalysis?.prePlacement)}
-            {renderExamRow('2. Periodic', physicalExam?.periodic, xRays?.periodic, urinalysis?.periodic)}
-            {renderExamRow('3. Return-to-work', physicalExam?.returnToWork, xRays?.returnToWork, urinalysis?.returnToWork)}
-            {renderExamRow('4. Transfer', physicalExam?.transfer, xRays?.transfer, urinalysis?.transfer)}
-            {renderExamRow('5. Special', physicalExam?.special, xRays?.special, urinalysis?.special)}
-            {renderExamRow('6. Separation', physicalExam?.separation, xRays?.separation, urinalysis?.separation)}
-          </div>
+        {/* Respiratory */}
+        {renderCategoryHeader('Respiratory:')}
+        <div className="ml-4">
+          {renderConditionRow('Bronchitis', data.respiratory?.bronchitis?.male, data.respiratory?.bronchitis?.female)}
+          {renderConditionRow('Bronchial asthma', data.respiratory?.bronchialAsthma?.male, data.respiratory?.bronchialAsthma?.female)}
+          {renderConditionRow('Pneumonia', data.respiratory?.pneumonia?.male, data.respiratory?.pneumonia?.female)}
+          {renderConditionRow('Tuberculosis', data.respiratory?.tuberculosis?.male, data.respiratory?.tuberculosis?.female)}
+          {renderConditionRow('Pneumoconiosis', data.respiratory?.pneumoconiosis?.male, data.respiratory?.pneumoconiosis?.female)}
+          {renderConditionRow('Others', data.respiratory?.others?.male, data.respiratory?.others?.female)}
         </div>
 
-        {/* Second table - Stool Exam, Blood Test, ECG, Others */}
-        <div className="mb-1">
-          {/* Headers */}
-          <div className="flex items-center text-xs font-bold">
-            <div className="w-1/5"></div>
-            <div className="w-1/5 text-center">Stool Exam</div>
-            <div className="w-1/5 text-center">Blood Test</div>
-            <div className="w-1/5 text-center">ECG</div>
-            <div className="w-1/5 text-center">Others</div>
-          </div>
-          {/* Rows */}
-          <div className="space-y-0.5">
-            {renderExamRow2('1. Pre-placement', stoolExam?.prePlacement, bloodTest?.prePlacement, ecg?.prePlacement, others?.prePlacement)}
-            {renderExamRow2('2. Periodic', stoolExam?.periodic, bloodTest?.periodic, ecg?.periodic, others?.periodic)}
-            {renderExamRow2('3. Return-to-work', stoolExam?.returnToWork, bloodTest?.returnToWork, ecg?.returnToWork, others?.returnToWork)}
-            {renderExamRow2('4. Transfer', stoolExam?.transfer, bloodTest?.transfer, ecg?.transfer, others?.transfer)}
-            {renderExamRow2('5. Special', stoolExam?.special, bloodTest?.special, ecg?.special, others?.special)}
-            {renderExamRow2('6. Separation', stoolExam?.separation, bloodTest?.separation, ecg?.separation, others?.separation)}
-          </div>
-        </div>
-      </div>
-
-      {/* Report of Diseases */}
-      <div className="mb-2">
-        <div className="text-xs font-bold">10. Report of Diseases:</div>
-        <div className="text-xs">a. Number of consultations/treatments for the following diseases:</div>
-        
-        {/* Column Headers */}
-        <div className="flex items-center text-xs font-bold text-center">
-          <div className="w-1/2"></div>
-          <div className="w-1/6">Male</div>
-          <div className="w-1/6">Female</div>
-          <div className="w-1/6">Total Number<br/>of Cases</div>
+        {/* Heart and Blood Vessel */}
+        {renderCategoryHeader('Heart and Blood Vessel:')}
+        <div className="ml-4">
+          {renderConditionRow('Hypertension', data.heartAndBloodVessel?.hypertension?.male, data.heartAndBloodVessel?.hypertension?.female)}
+          {renderConditionRow('Hypotension', data.heartAndBloodVessel?.hypotension?.male, data.heartAndBloodVessel?.hypotension?.female)}
+          {renderConditionRow('Angina Pectoris', data.heartAndBloodVessel?.anginaPectoris?.male, data.heartAndBloodVessel?.anginaPectoris?.female)}
+          {renderConditionRow('Myocardial Infarction', data.heartAndBloodVessel?.myocardialInfarction?.male, data.heartAndBloodVessel?.myocardialInfarction?.female)}
+          {renderConditionRow('Vascular disturbances in extremities due to continuous vibration', data.heartAndBloodVessel?.vascularDisturbances?.male, data.heartAndBloodVessel?.vascularDisturbances?.female)}
+          {renderConditionRow('Others', data.heartAndBloodVessel?.others?.male, data.heartAndBloodVessel?.others?.female)}
         </div>
 
-        {/* Medical Conditions */}
-        <div>
-            {/* Skin */}
-          {renderCategoryHeader('Skin:')}
-          <div className="ml-4">
-            {renderConditionRow('allergy', diseaseData?.skin?.allergy?.male, diseaseData?.skin?.allergy?.female)}
-            {renderConditionRow('dermatoses', diseaseData?.skin?.dermatoses?.male, diseaseData?.skin?.dermatoses?.female)}
-            {renderConditionRow('infection as folliculitis', diseaseData?.skin?.infectionFolliculitis?.male, diseaseData?.skin?.infectionFolliculitis?.female)}
-            {renderConditionRow('abscess/paro nychia', diseaseData?.skin?.abscessParoNychia?.male, diseaseData?.skin?.abscessParoNychia?.female)}
-            {renderConditionRow('Others', diseaseData?.skin?.others?.male, diseaseData?.skin?.others?.female)}
-          </div>
+        {/* Gastrointestinal */}
+        {renderCategoryHeader('Gastrointestinal:')}
+        <div className="ml-4">
+          {renderConditionRow('gastroenteritis/diarrhea', data.gastrointestinal?.gastroenteritisDiarrhea?.male, data.gastrointestinal?.gastroenteritisDiarrhea?.female)}
+          {renderConditionRow('amoebiasis', data.gastrointestinal?.amoebiasis?.male, data.gastrointestinal?.amoebiasis?.female)}
+          {renderConditionRow('gastritis/hyperacidity', data.gastrointestinal?.gastritisHyperacidity?.male, data.gastrointestinal?.gastritisHyperacidity?.female)}
+          {renderConditionRow('appendicitis', data.gastrointestinal?.appendicitis?.male, data.gastrointestinal?.appendicitis?.female)}
+          {renderConditionRow('infectious hepatitis', data.gastrointestinal?.cholecystitis?.male, data.gastrointestinal?.cholecystitis?.female)}
+          {renderConditionRow('liver cirrhosis', data.gastrointestinal?.liverCirrhosis?.male, data.gastrointestinal?.liverCirrhosis?.female)}
+          {renderConditionRow('hepatic abscess', data.gastrointestinal?.hepaticAbscess?.male, data.gastrointestinal?.hepaticAbscess?.female)}
+          {renderConditionRow('cancer (hepatic/gastric)', data.gastrointestinal?.cancerHepaticGastric?.male, data.gastrointestinal?.cancerHepaticGastric?.female)}
+          {renderConditionRow('ulcer', data.gastrointestinal?.ulcer?.male, data.gastrointestinal?.ulcer?.female)}
+          {renderConditionRow('Others', data.gastrointestinal?.others?.male, data.gastrointestinal?.others?.female)}
+        </div>
 
-            {/* Head */}
-          {renderCategoryHeader('Head:')}
-          <div className="ml-4">
-            {renderConditionRow('tension headache', diseaseData?.head?.tensionHeadache?.male, diseaseData?.head?.tensionHeadache?.female)}
-            {renderConditionRow('Others', diseaseData?.head?.others?.male, diseaseData?.head?.others?.female)}
-          </div>
+        {/* Genito Urinary */}
+        {renderCategoryHeader('Genito Urinary:')}
+        <div className="ml-4">
+          {renderConditionRow('Urinary tract infection', data.genitoUrinary?.urinaryTractInfection?.male, data.genitoUrinary?.urinaryTractInfection?.female)}
+          {renderConditionRow('Stones', data.genitoUrinary?.stones?.male, data.genitoUrinary?.stones?.female)}
+          {renderConditionRow('Cancer', data.genitoUrinary?.cancer?.male, data.genitoUrinary?.cancer?.female)}
+          {renderConditionRow('Others', data.genitoUrinary?.others?.male, data.genitoUrinary?.others?.female)}
+        </div>
 
-            {/* Eyes */}
-          {renderCategoryHeader('Eyes:')}
-          <div className="ml-4">
-            {renderConditionRow('error of refraction', diseaseData?.eyes?.errorOfRefraction?.male, diseaseData?.eyes?.errorOfRefraction?.female)}
-            {renderConditionRow('bacterial/viral', diseaseData?.eyes?.bacterialViral?.male, diseaseData?.eyes?.bacterialViral?.female)}
-            {renderConditionRow('conjunctivitis', diseaseData?.eyes?.conjunctivitis?.male, diseaseData?.eyes?.conjunctivitis?.female)}
-            {renderConditionRow('cataract', diseaseData?.eyes?.cataract?.male, diseaseData?.eyes?.cataract?.female)}
-            {renderConditionRow('Others', diseaseData?.eyes?.others?.male, diseaseData?.eyes?.others?.female)}
-          </div>
+        {/* Reproductive */}
+        {renderCategoryHeader('Reproductive:')}
+        <div className="ml-4">
+          {renderConditionRow('Dysmenorrhea', data.reproductive?.dysmenorrhea?.male, data.reproductive?.dysmenorrhea?.female)}
+          {renderConditionRow('Infection (Cervicitis) (Vaginitis)', data.reproductive?.infectionCervicitisVaginitis?.male, data.reproductive?.infectionCervicitisVaginitis?.female)}
+          {renderConditionRow('Abortion (Spontaneous) (Threatened)', data.reproductive?.abortionSpontaneousThreatened?.male, data.reproductive?.abortionSpontaneousThreatened?.female)}
+          {renderConditionRow('Hyperemesis Gravidarium', data.reproductive?.hyperemesisGravidarium?.male, data.reproductive?.hyperemesisGravidarium?.female)}
+          {renderConditionRow('Uterine Tumors', data.reproductive?.uterineTumors?.male, data.reproductive?.uterineTumors?.female)}
+          {renderConditionRow('Cervical Polyp/Cancer', data.reproductive?.cervicalPolypCancer?.male, data.reproductive?.cervicalPolypCancer?.female)}
+          {renderConditionRow('Ovarian Cyst/Tumors', data.reproductive?.ovarianCystTumors?.male, data.reproductive?.ovarianCystTumors?.female)}
+          {renderConditionRow('Sexually-Transmitted diseases', data.reproductive?.sexuallyTransmittedDiseases?.male, data.reproductive?.sexuallyTransmittedDiseases?.female)}
+          {renderConditionRow('Hernia (Inguinal) (Femoral)', data.reproductive?.herniaInguinalFemoral?.male, data.reproductive?.herniaInguinalFemoral?.female)}
+          {renderConditionRow('Others', data.reproductive?.others?.male, data.reproductive?.others?.female)}
+        </div>
 
-            {/* Mouth & ENT */}
-          {renderCategoryHeader('Mouth & ENT:')}
-          <div className="ml-4">
-            {renderConditionRow('Gingivitis', diseaseData?.mouthAndEnt?.gingivitis?.male, diseaseData?.mouthAndEnt?.gingivitis?.female)}
-            {renderConditionRow('Herpes labiales/stomatitis', diseaseData?.mouthAndEnt?.herpesLabialesStomatitis?.male, diseaseData?.mouthAndEnt?.herpesLabialesStomatitis?.female)}
-            {renderConditionRow('Otitis Media/Externa', diseaseData?.mouthAndEnt?.otitisMediaExterna?.male, diseaseData?.mouthAndEnt?.otitisMediaExterna?.female)}
-            {renderConditionRow('Deafness', diseaseData?.mouthAndEnt?.deafness?.male, diseaseData?.mouthAndEnt?.deafness?.female)}
-            {renderConditionRow('Meniere Syndrome/Vertigo', diseaseData?.mouthAndEnt?.meniereSyndrome?.male, diseaseData?.mouthAndEnt?.meniereSyndrome?.female)}
-            {renderConditionRow('Rhinitis/Allergic', diseaseData?.mouthAndEnt?.rhinitisAllergic?.male, diseaseData?.mouthAndEnt?.rhinitisAllergic?.female)}
-            {renderConditionRow('Nasal Polyps', diseaseData?.mouthAndEnt?.nasalPolyps?.male, diseaseData?.mouthAndEnt?.nasalPolyps?.female)}
-            {renderConditionRow('Sinusitis', diseaseData?.mouthAndEnt?.sinusitis?.male, diseaseData?.mouthAndEnt?.sinusitis?.female)}
-            {renderConditionRow('Tonsillopharyngitis', diseaseData?.mouthAndEnt?.tonsillopharyngitis?.male, diseaseData?.mouthAndEnt?.tonsillopharyngitis?.female)}
-          </div>
+        {/* Neuromuscular/Skeletal/Joints */}
+        {renderCategoryHeader('Neuromuscular/Skeletal/Joints:')}
+        <div className="ml-4">
+          {renderConditionRow('Peripheral Neuritis', data.neuromuscular?.peripheralNeuritis?.male, data.neuromuscular?.peripheralNeuritis?.female)}
+          {renderConditionRow('Torticollis', data.neuromuscular?.paralysis?.male, data.neuromuscular?.paralysis?.female)}
+          {renderConditionRow('Arthritis', data.neuromuscular?.arthritis?.male, data.neuromuscular?.arthritis?.female)}
+          {renderConditionRow('Others', data.neuromuscular?.others?.male, data.neuromuscular?.others?.female)}
+        </div>
+
+        {/* Lymphatics and Circulatory */}
+        {renderCategoryHeader('Lymphatics and Circulatory:')}
+        <div className="ml-4">
+          {renderConditionRow('Anemia', data.lymphaticsAndCirculatory?.anemia?.male, data.lymphaticsAndCirculatory?.anemia?.female)}
+          {renderConditionRow('Leukemia', data.lymphaticsAndCirculatory?.leukemia?.male, data.lymphaticsAndCirculatory?.leukemia?.female)}
+          {renderConditionRow('Cerebrovascular Accidents', data.lymphaticsAndCirculatory?.cerebrovascularAccident?.male, data.lymphaticsAndCirculatory?.cerebrovascularAccident?.female)}
         </div>
       </div>
     </div>
