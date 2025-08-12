@@ -100,10 +100,6 @@ export default function Checklist({ title, requirements, handleFormSubmit, hasAc
     
     // Check if applicant is being marked as "Hired" (passed status in final stage)
     const isBeingHired = data.status === 'passed' && actionState.isFinalStage;
-    // Include personalized feedback for rejections
-    if (data.status === 'rejected') {
-      data.feedback = getValues('feedback');
-    }
     
     setIsOpen(false);
     
