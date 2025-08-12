@@ -138,7 +138,7 @@ const UseCasesSection = () => {
               href="/register" 
               className="bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
             >
-              Start 30-Day Free Trial
+              Sign up now for free!
             </a>
             <a 
               href="/use-cases" 
