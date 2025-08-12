@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import regions from '@/utils/regions';
 
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
 const Details = ({
   register,
   handleSubmit,
@@ -210,18 +212,23 @@ const Details = ({
             <label htmlFor='region' className='block mb-2 text-sm font-medium text-gray-900'>
               Region<span className='text-red-500'>*</span>
             </label>
-            <select
-              id='region'
-              {...register('region', { required: true })}
-              className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-            >
-              <option value=''>Select Region</option>
-              {regions.map((region) => (
-                <option key={region.value} value={region.value}>
-                  {region.label}
-                </option>
-              ))}
-            </select>
+            <div className='relative mt-2'>
+              <select
+                id='region'
+                {...register('region', { required: true })}
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              >
+                <option value=''>Select Region</option>
+                {regions.map((region) => (
+                  <option key={region.value} value={region.value}>
+                    {region.label}
+                  </option>
+                ))}
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+            </div>
           </div>
           <div className='basis-1/3'>
             <label htmlFor='zipCode' className='block mb-2 text-sm font-medium text-gray-900'>
@@ -240,13 +247,18 @@ const Details = ({
             <label htmlFor='country' className='block mb-2 text-sm font-medium text-gray-900'>
               Country<span className='text-red-500'>*</span>
             </label>
-            <select
-              id='country'
-              {...register('country', { required: true })}
-              className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-            >
-              <option value='Philippines'>Philippines</option>
-            </select>
+            <div className='relative mt-2'>
+              <select
+                id='country'
+                {...register('country', { required: true })}
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              >
+                <option value='Philippines'>Philippines</option>
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+            </div>
           </div>
         </div>
       </div>
