@@ -188,15 +188,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         .find(['employerProfileCache']) as {
         state: { data: { 
           name: string;
+          user: {
+            email: string;
+          };
           // building: string;
           // street: string;
           // locality: string;
           city: string;
+          region: string;
         } } | undefined;
       };
       
+      const email = cachedProfile?.state?.data?.user?.email || '';
       const companyName = cachedProfile?.state?.data?.name || '';
-      
+      const region = cachedProfile?.state?.data?.region || '';
       // Combine address fields from cached profile
       const addressParts = [
         // cachedProfile?.state?.data?.building,
@@ -210,7 +215,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Create item with combined address
       const itemWithAddress = {
         ...item,
-        address: combinedAddress
+        email_address: email,
+        address: combinedAddress,
+        region: region,
       };
       
       await handlePrintPDF(itemWithAddress, generatePDFLocally);

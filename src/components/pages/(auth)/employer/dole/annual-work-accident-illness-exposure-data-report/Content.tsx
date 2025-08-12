@@ -188,7 +188,59 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handlePrintPDFLocal = async (item: any) => {
-    await handlePrintPDF(item, generatePDFLocally);
+    try {
+      // Get company name and address from cached profile data
+      const cachedProfile = queryClient
+        .getQueryCache()
+        .find(['employerProfileCache']) as {
+        state: { data: { 
+          name: string;
+          building: string;
+          street: string;
+          locality: string;
+          city: string;
+          country: string;
+          zip_code: string;
+          region: string;
+        } } | undefined;
+      };
+      
+      const companyName = cachedProfile?.state?.data?.name || '';
+      
+      // Combine address fields from cached profile
+      const addressParts = [
+        cachedProfile?.state?.data?.building,
+        cachedProfile?.state?.data?.street,
+        cachedProfile?.state?.data?.locality,
+        cachedProfile?.state?.data?.city,
+        cachedProfile?.state?.data?.country,
+        cachedProfile?.state?.data?.zip_code
+      ].filter(Boolean); // Remove empty/undefined values
+      
+      const combinedAddress = addressParts.join(', ') || '\u00A0';
+      
+      // Filter data by year and get the correct item
+      const year = item.year || new Date().getFullYear();
+      
+      // Find the report for the specific year (filter by year only)
+      const filteredItem = annualAccidentIllnessReportItems.find((reportItem: any) => 
+        reportItem.year === year
+      );
+      
+      // Create item with combined address and filtered data
+      const itemWithData = {
+        ...(filteredItem || item),
+        company_name: companyName,
+        address: combinedAddress,
+        exposure_data: `JANUARY 1 TO DECEMBER 31, ${year}`,
+        // Ensure we use the number of employees from the filtered year
+        number_of_employees: filteredItem ? filteredItem.number_of_employees : item.number_of_employees,
+      };
+      
+      await handlePrintPDF(itemWithData, generatePDFLocally);
+    } catch (error) {
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
   };
 
   const handlePrintWithBranch = () => {

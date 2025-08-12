@@ -159,13 +159,16 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
       <div className="mb-8">
         <div className="flex justify-between items-end">
           <div className="flex-1 mr-8">
-            <div className="border-b-2 border-black pb-1 mb-1 min-h-[2rem]">
+            <div className="text-center">
               {data.requestingPersonnel.signature}
+            </div>
+            <div className="text-center border-b-2 mb-1 border-black">
+              {data.requestingPersonnel.name}
             </div>
             <div className="text-xs text-center">Signature over Printed Name of Requesting Personnel</div>
           </div>
           <div className="w-1/3">
-            <div className="border-b-2 border-black pb-1 mb-1 min-h-[2rem]">
+            <div className="text-center border-b-2 border-black mb-1">
               {data.requestingPersonnel.position}
             </div>
             <div className="text-xs text-center">Position / Designation</div>

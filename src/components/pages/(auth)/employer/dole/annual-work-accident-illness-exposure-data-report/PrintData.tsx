@@ -22,12 +22,15 @@ interface AnnualWorkAccidentIllnessData {
 }
 
 export const prepareAnnualWorkAccidentIllnessData = (item: any): AnnualWorkAccidentIllnessData => {
+  // Get the year from the item or use current year as fallback
+  const year = item.year || new Date().getFullYear();
+  
   return {
     date: item.date_of_report || '\u00A0',
     establishmentName: item.company_name || '\u00A0',
     natureOfBusiness: item.type_of_industry || '\u00A0',
     address: item.address || '\u00A0',
-    exposureData: item.exposure_data || 'JANUARY 1 TO DECEMBER 31, 20__',
+    exposureData: item.exposure_data || `JANUARY 1 TO DECEMBER 31, ${year}`,
     numberOfEmployees: item.number_of_employees || 0,
     totalHoursWorked: item.total_hours_worked || 0,
     injurySummary: {
