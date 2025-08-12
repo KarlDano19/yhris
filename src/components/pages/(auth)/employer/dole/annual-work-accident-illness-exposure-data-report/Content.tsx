@@ -26,7 +26,7 @@ import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
 import useFileforge from '@/components/hooks/useFileforge';
-import DocumentPageOne from './print/DocumentPageOne';
+import { handlePrintPDF } from './PrintData';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
@@ -187,45 +187,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
   };
 
-  const handlePrintPDF = async (item: any) => {
-    // Prepare data for Annual Work Accident/Illness Exposure Data Report
-    const annualWorkAccidentIllnessData = {
-      date: item.date_of_report || 'N/A',
-      establishmentName: item.establishment_name || 'N/A',
-      natureOfBusiness: item.nature_of_business || 'N/A',
-      address: item.address || 'N/A',
-      exposureData: item.exposure_data || 'JANUARY 1 TO DECEMBER 31, 20__',
-      numberOfEmployees: item.number_of_employees || 0,
-      totalHoursWorked: item.total_hours_worked || 0,
-      injurySummary: {
-        totalDisablingInjuries: item.total_disabling_injuries || 0,
-        totalNonDisablingInjuries: item.total_non_disabling_injuries || 0,
-        frequencyRate: item.frequency_rate || 0,
-        severityRate: item.severity_rate || 0,
-      },
-      submittedBy: {
-        name: item.submitted_by_name || 'N/A',
-        position: item.submitted_by_position || 'N/A',
-      },
-    };
-
-    // Create document component
-    const documentComponent = (
-      <div className="bg-white">
-        <style jsx>{`
-          .page-break {
-            page-break-after: always;
-            break-after: page;
-          }
-        `}</style>
-        <DocumentPageOne data={annualWorkAccidentIllnessData} />
-      </div>
-    );
-    
-    const filename = `annual-work-accident-illness-report-${item.id}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    // Generate PDF locally (opens print dialog)
-    await generatePDFLocally(documentComponent, filename);
+  const handlePrintPDFLocal = async (item: any) => {
+    await handlePrintPDF(item, generatePDFLocally);
   };
 
   const handlePrintWithBranch = () => {
@@ -427,7 +390,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <button
-                onClick={() => handlePrintPDF(item)}
+                onClick={() => handlePrintPDFLocal(item)}
                 disabled={isGenerating || !cachedRigths?.state?.data?.generate_dole_awair}
               >
                 <PrintIcon />
