@@ -65,33 +65,24 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
     return (
       <div className="bg-white text-black font-sans text-xs leading-tight max-w-4xl mx-auto p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
         {/* Header Section */}
-        <div className="relative mb-4">
-          {/* Document info - positioned absolutely to the right */}
-          <div className="absolute right-0 top-7">
-            <div className="border border-black p-2 text-center">
-              <div className="text-xs font-bold">OSHC-QF-ECD-WEM-01</div>
-              <div className="text-xs">Revision No.: 07</div>
-              <div className="text-xs">Effective: September 29, 2021</div>
-            </div>
-          </div>
-  
-          {/* Centered header text */}
-          <div className="text-center mx-auto max-w-xs">
-            <div className="text-xs">Republic of the Philippines</div>
-            <div className="text-xs font-bold">DEPARTMENT OF LABOR AND EMPLOYMENT</div>
-            <div className="text-xs font-bold">OCCUPATIONAL SAFETY AND HEALTH CENTER</div>
-            <div className="text-xs mt-1">North Avenue corner Sen. Miriam P. Defensor Santiago Ave.</div>
-            <div className="text-xs">Diliman, Quezon City</div>
+        <div className="mb-1">
+          {/* WEM Banner Image */}
+          <div className="flex justify-center">
+            <img 
+              src="/assets/WEM-banner.png" 
+              alt="OSHC WEM Banner" 
+              className="max-w-xl"
+            />
           </div>
         </div>
   
         {/* Title */}
         <div className="text-center mb-1">
-          <div className="text-md font-bold">WORK ENVIRONMENT MEASUREMENT (WEM) REQUEST</div>
+          <div className="text-sm font-bold">WORK ENVIRONMENT MEASUREMENT (WEM) REQUEST</div>
         </div>
   
         {/* Instructions */}
-        <div className="mb-2 text-xs">
+        <div className="mb-1 text-xs">
           <ul className="list-disc list-inside space-y-0.5">
             <li>Print/write <strong>LEGIBLY</strong>.</li>
             <li>Mark appropriate boxes with <strong>&quot;✓&quot;.</strong></li>
@@ -106,19 +97,19 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
           <div className="border-b border-black">
             <div className="flex">
               <div className="w-1/3 border-r border-black p-3">
-                <div className="mb-2">
+                <div className="mb-1">
                   <div className="text-xs font-bold mb-1">Date of Application:</div>
                   <div className="border-b border-black pb-1">{data.dateOfApplication}</div>
                 </div>
               </div>
               <div className="w-1/3 border-r border-black p-3">
-                <div className="mb-2">
+                <div className="mb-1">
                   <div className="text-xs font-bold mb-1">Company Name:</div>
                   <div className="border-b border-black pb-1">{data.companyName}</div>
                 </div>
               </div>
               <div className="w-1/3 p-3">
-                <div className="mb-2">
+                <div className="mb-1">
                   <div className="text-xs font-bold mb-1">Address:</div>
                   <div className="border-b border-black pb-1">{data.address}</div>
                 </div>
@@ -148,7 +139,7 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
           <div className="border-b border-black">
             <div className="flex">
               <div className="w-1/2 border-r border-black p-3">
-                <div className="text-xs font-bold mb-2">Type of Industry/Nature of Business (Pls. specify)</div>
+                <div className="text-xs font-bold mb-1">Type of Industry/Nature of Business (Pls. specify)</div>
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
@@ -180,8 +171,8 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
                 </div>
               </div>
               <div className="w-1/2 p-3">
-                <div className="text-xs font-bold mb-2">Number of Workers (including outsource personnel):</div>
-                <div className="space-y-2 mb-4">
+                <div className="text-xs font-bold mb-1">Number of Workers (including outsource personnel):</div>
+                <div className="space-y-2 mb-1">
                   <div className="flex items-center">
                     <span className="mr-2 w-12">Male:</span>
                     <div className="border-b border-black w-16 pb-1">{data.numberOfWorkers.male}</div>
@@ -191,7 +182,7 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
                     <div className="border-b border-black w-16 pb-1">{data.numberOfWorkers.total}</div>
                   </div>
                 </div>
-                <div className="text-xs font-bold mb-2">Risk Classification:</div>
+                <div className="text-xs font-bold mb-1">Risk Classification:</div>
                 <div className="flex space-x-4">
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-1 flex items-center justify-center text-xs">
@@ -268,7 +259,7 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
           <div className="border-b border-black">
             <div className="flex">
               <div className="w-2/3 border-r border-black p-3">
-                <div className="text-xs font-bold mb-2">Purpose of WEM Request:</div>
+                <div className="text-xs font-bold mb-1">Purpose of WEM Request:</div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center">
@@ -339,8 +330,8 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
                 </div>
               </div>
               <div className="w-1/2 p-3">
-                <div className="text-xs font-bold mb-2">Conducting internal WEM?</div>
-                <div className="flex space-x-4 mb-2">
+                <div className="text-xs font-bold mb-1">Conducting internal WEM?</div>
+                <div className="flex space-x-4 mb-1">
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-1 flex items-center justify-center text-xs">
                       {data.wemMonitoringCapability.conductingInternalWem ? '✓' : ''}

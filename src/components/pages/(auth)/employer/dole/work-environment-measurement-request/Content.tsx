@@ -31,8 +31,7 @@ import EmailLogo from '@/svg/EmailLogo';
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
-import DocumentPageOne from './print/DocumentPageOne';
-import DocumentPageTwo from './print/DocumentPageTwo';
+import { handlePrintPDF } from './PrintData';
 
 
 type PaginationProps = {
@@ -181,114 +180,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const handlePrintPDF = async (item: any) => {
-    // Prepare data for WEM Request document (Page One)
-    const wemRequestData = {
-      dateOfApplication: item.date_of_application || 'N/A',
-      companyName: item.company_name || 'N/A',
-      address: item.address || 'N/A',
-      region: item.region || 'N/A',
-      emailAddress: item.email_address || 'N/A',
-      telFaxNo: item.tel_fax_no || 'N/A',
-      industryType: {
-        manufacturing: item.type_of_industry?.includes('manufacturing') || false,
-        manufacturingSpecify: item.type_of_industry || 'N/A',
-        services: item.type_of_industry?.includes('service') || false,
-        servicesSpecify: item.type_of_industry || 'N/A',
-        others: !item.type_of_industry?.includes('manufacturing') && !item.type_of_industry?.includes('service'),
-        othersSpecify: item.type_of_industry || 'N/A',
-      },
-      numberOfWorkers: {
-        male: item.number_of_workers_male || 0,
-        female: item.number_of_workers_female || 0,
-        total: item.number_of_workers_total || 0,
-      },
-      riskClassification: item.risk_classification || 'low',
-      safetyOfficers: {
-        names: Array.isArray(item.name_of_safety_officer) ? item.name_of_safety_officer : [item.name_of_safety_officer || 'N/A'],
-        levels: {
-          safetyOfficer1: item.safety_officer_levels?.includes('safety_officer_1') || false,
-          safetyOfficer2: item.safety_officer_levels?.includes('safety_officer_2') || false,
-          safetyOfficer3: item.safety_officer_levels?.includes('safety_officer_3') || false,
-          accreditedSafetyOfficer3: item.safety_officer_levels?.includes('accredited_safety_officer_3') || false,
-          safetyOfficer4: item.safety_officer_levels?.includes('safety_officer_4') || false,
-        },
-      },
-      purposeOfWemRequest: {
-        workplaceImprovement: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.includes('workplace_improvement') : false,
-        clientRequirement: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.includes('client_requirement') : false,
-        others: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.includes('others') : false,
-        othersSpecify: item.purpose_of_wem_request_others || 'N/A',
-        oshsCompliance: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.includes('oshs_compliance') : false,
-        isoCompliance: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.includes('iso_compliance') : false,
-        requiredByLaborInspector: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.includes('required_by_labor_inspector') : false,
-      },
-      wemMonitoringCapability: {
-        internalMonitoringCapability: item.wem_internal_monitoring_capability || 'N/A',
-        equipmentOwned: item.wem_equipment_owned_by_company || 'N/A',
-        conductingInternalWem: item.conducting_internal_wem || false,
-        dateOfInternalMonitoring: item.date_of_internal_monitoring || 'N/A',
-        personnelConductedWem: item.personnel_who_conducted_wem || 'N/A',
-      },
-      wemConductedBy: {
-        oshc: Array.isArray(item.wem_conducted_by) ? item.wem_conducted_by.includes('oshc') : false,
-        oshcDate: item.last_wem_date || 'N/A',
-        accreditedProvider: Array.isArray(item.wem_conducted_by) ? item.wem_conducted_by.includes('accredited_wem_provider') : false,
-        accreditedProviderDate: item.accredited_provider_date || 'N/A',
-        accreditedProviderName: item.accredited_provider_name || 'N/A',
-        none: Array.isArray(item.wem_conducted_by) ? item.wem_conducted_by.includes('none') : false,
-      },
-    };
-
-    // Prepare data for WEM Request document (Page Two)
-    const wemRequestDataPageTwo = {
-      parametersToBeMeasured: {
-        physicalHazards: {
-          noise: item.physical_hazards?.includes('noise') || false,
-          vibration: item.physical_hazards?.includes('vibration') || false,
-          illumination: item.physical_hazards?.includes('illumination') || false,
-          heat: item.physical_hazards?.includes('heat') || false,
-        },
-        chemicalHazards: {
-          dust: item.chemical_hazards?.includes('dust') || false,
-          heavyMetals: item.chemical_hazards?.includes('heavy_metals') || false,
-          organicSolvents: item.chemical_hazards?.includes('organic_solvents') || false,
-          acids: item.chemical_hazards?.includes('acids') || false,
-          gases: item.chemical_hazards?.includes('gases') || false,
-          others: item.chemical_hazards?.includes('others') || false,
-          othersSpecify: item.chemical_hazards_others || '',
-        },
-        ventilation: {
-          generalVentilation: item.ventilation?.includes('general_ventilation') || false,
-          localExhaustVentilation: item.ventilation?.includes('local_exhaust_ventilation') || false,
-        },
-      },
-      requestingPersonnel: {
-        signature: item.requesting_personnel_signature || '',
-        name: item.requesting_personnel_name || 'N/A',
-        position: item.requesting_personnel_position || 'N/A',
-      },
-    };
-
-    // Create document component with both pages
-    const documentComponent = (
-      <div className="bg-white">
-        <style jsx>{`
-          .page-break {
-            page-break-after: always;
-            break-after: page;
-          }
-        `}</style>
-        <DocumentPageOne data={wemRequestData} />
-        <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-        <DocumentPageTwo data={wemRequestDataPageTwo} />
-      </div>
-    );
-    
-    const filename = `wem-request-${item.id}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    // Generate PDF locally (opens print dialog)
-    await generatePDFLocally(documentComponent, filename);
+  const handlePrintPDFLocal = async (item: any) => {
+    await handlePrintPDF(item, generatePDFLocally);
   };
 
   const handlePrint = () => {
@@ -465,7 +358,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <button
-                onClick={() => handlePrintPDF(item)}
+                                    onClick={() => handlePrintPDFLocal(item)}
                 disabled={isGenerating || !cachedRigths?.state?.data?.generate_dole_work_environment_request}
               >
                 <PrintIcon />
