@@ -10,7 +10,6 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
-
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -18,6 +17,7 @@ import classNames from '@/helpers/classNames';
 import useFileforge from '@/components/hooks/useFileforge';
 
 import useGetHealthAndSafetyReportItems from './hooks/useGetHealthAndSafetyReportItems';
+import { getPrintHealthAndSafetyReportDetails } from './hooks/useGetPrintHealthandSafetyReportDetails';
 import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyReport';
 import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyReportModal';
 import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
@@ -32,8 +32,7 @@ import EmailLogo from '@/svg/EmailLogo';
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
-import DocumentPageOne from './print/DocumentPageOne';
-import DocumentPageTwo from './print/DocumentPageTwo';
+import { handlePrintPDF } from './PrintData';
 
 type PaginationProps = {
   totalRecords: number;
@@ -163,134 +162,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
   };
 
-  const handlePrintPDF = async (item: any) => {
-    // Prepare data for Health and Safety Report document (Page One)
-    const healthAndSafetyReportData = {
-      dateFiled: item.date_of_report || 'N/A',
-      regionalLaborOfficeNo: item.regional_labor_office_no || 'N/A',
-      fileNumber: item.file_number || 'N/A',
-      establishmentName: item.establishment_name || 'N/A',
-      address: item.address || 'N/A',
-      natureOfBusiness: item.nature_of_business || 'N/A',
-      personsEmployed: {
-        management: {
-          firstShift: {
-            male: item.first_shift_male || 0,
-            female: item.first_shift_female || 0,
-          },
-          secondShift: {
-            male: item.second_shift_male || 0,
-            female: item.second_shift_female || 0,
-          },
-          thirdShift: {
-            male: item.third_shift_male || 0,
-            female: item.third_shift_female || 0,
-          },
-        },
-        total: {
-          male: item.total_employees_male || 0,
-          female: item.total_employees_female || 0,
-        },
-      },
-      policyAndProgram: item.policy_and_program || 'N/A',
-      safetyCommittee: {
-        type: item.comittee_type || 'N/A',
-        members: {
-          chairman: {
-            name: item.chairman_name || 'N/A',
-            position: item.chairman_position || 'N/A',
-          },
-          members: Array.isArray(item.committee_members) ? item.committee_members.map((member: any) => ({
-            name: member.name || 'N/A',
-            position: member.position || 'N/A',
-          })) : [],
-          secretary: {
-            name: item.secretary_name || 'N/A',
-            position: item.secretary_position || 'N/A',
-          },
-        },
-      },
-      technicalInformation: {
-        processDescription: item.technical_information || 'N/A',
-      },
-      submittedBy: {
-        name: item.submitted_by_name || 'N/A',
-        position: item.submitted_by_position || 'N/A',
-      },
-    };
-
-    // Prepare data for Safety Committee document (Page Two)
-    const safetyCommitteeData = {
-      generalRequirement: "A safety committee must be organized within sixty (60) days after standards take effect for existing establishments, or within one (1) month from the business start date for new establishments. The Safety Committee shall reorganize every January of the following year.",
-      safetyCommitteeTypes: {
-        typeA: {
-          workerRange: "For workplaces having a total of over four hundred (400) workers",
-          chairman: "The Manager or authorized representative",
-          members: [
-            "Two workers (must be union workers)",
-            "The company physician"
-          ],
-          secretary: "The safety man"
-        },
-        typeB: {
-          workerRange: "For workplaces having 200 - 400 workers",
-          chairman: "The Manager or his authorized representative",
-          members: [
-            "One supervisor",
-            "One worker",
-            "The company physician or company nurse"
-          ],
-          secretary: "The safety man"
-        },
-        typeC: {
-          workerRange: "For workplaces having 100 - 200 workers",
-          chairman: "The Manager or his authorized representative",
-          members: [
-            "One foreman",
-            "One worker",
-            "The first aider"
-          ],
-          secretary: "Appointed by the chairman"
-        },
-        typeD: {
-          workerRange: "For workplaces with less than 100 workers",
-          chairman: "Manager",
-          members: [
-            "One foreman",
-            "One worker"
-          ],
-          secretary: "Appointed by the Chairman"
-        },
-        typeE: {
-          description: "When two or more establishments are housed under one building, their individual safety committees shall organize into a joint coordination committee to plan and implement activities.",
-          chairman: "The chairman of an established committee",
-          members: [
-            "Two supervisors from two different establishments"
-          ],
-          secretary: "Appointed by the Chairman (in high rise buildings, the secretary shall be the building administrator)"
-        }
-      }
-    };
-
-    // Create document component with both pages
-    const documentComponent = (
-      <div className="bg-white">
-        <style jsx>{`
-          .page-break {
-            page-break-after: always;
-            break-after: page;
-          }
-        `}</style>
-        <DocumentPageOne data={healthAndSafetyReportData} />
-        <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-        <DocumentPageTwo data={safetyCommitteeData} />
-      </div>
-    );
-    
-    const filename = `health-safety-report-${item.id}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    // Generate PDF locally (opens print dialog)
-    await generatePDFLocally(documentComponent, filename);
+  const handlePrintPDFLocal = async (item: any) => {
+    try {
+      // Fetch detailed data using the print hook's function directly
+      const detailedData = await getPrintHealthAndSafetyReportDetails(item.id);
+      
+      // Use detailed data for PDF generation
+      await handlePrintPDF(detailedData, generatePDFLocally);
+    } catch (error) {
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
   };
 
   const handlePrintWithBranch = () => {
@@ -459,7 +340,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <button
-                onClick={() => handlePrintPDF(item)}
+                onClick={() => handlePrintPDFLocal(item)}
                 disabled={isGenerating || !cachedRigths?.state?.data?.generate_dole_health_safety_organization}
               >
                 <PrintIcon />

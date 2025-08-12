@@ -9,18 +9,10 @@ interface HealthAndSafetyReportData {
   natureOfBusiness: string;
   personsEmployed: {
     management: {
-      firstShift: {
+      shifts: Array<{
         male: number;
         female: number;
-      };
-      secondShift: {
-        male: number;
-        female: number;
-      };
-      thirdShift: {
-        male: number;
-        female: number;
-      };
+      }>;
     };
     total: {
       male: number;
@@ -59,6 +51,17 @@ interface DocumentPageOneProps {
 }
 
 const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
+  // Helper function to get ordinal suffix
+  const getOrdinalSuffix = (num: number): string => {
+    if (num >= 11 && num <= 13) return 'th';
+    switch (num % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  };
+
   return (
     <div className="bg-white text-black font-sans text-sm leading-tight max-w-4xl mx-auto p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
       {/* Header Section */}
@@ -132,39 +135,19 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
         <div className="flex items-start mb-2">
           <span className="text-sm font-bold ml-8 mr-8">Management:</span>
           <div className="space-y-1">
-            <div className="flex items-center">
-              <div className="w-20 text-sm">1st Shift:</div>
-              <div className="w-16 text-sm">Male</div>
-              <div className="border-b border-black w-20 pb-1 text-sm text-center mr-8">
-                {data.personsEmployed.management.firstShift.male}
+            {data.personsEmployed.management.shifts.map((shift, index) => (
+              <div key={index} className="flex items-center">
+                <div className="w-20 text-sm">{index + 1}{getOrdinalSuffix(index + 1)} Shift:</div>
+                <div className="w-16 text-sm">Male</div>
+                <div className="border-b border-black w-20 pb-1 text-sm text-center mr-8">
+                  {shift.male}
+                </div>
+                <div className="w-16 text-sm">Female</div>
+                <div className="border-b border-black w-20 pb-1 text-sm text-center">
+                  {shift.female === 0 ? '-' : shift.female}
+                </div>
               </div>
-              <div className="w-16 text-sm">Female</div>
-              <div className="border-b border-black w-20 pb-1 text-sm text-center">
-                {data.personsEmployed.management.firstShift.female}
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div className="w-20 text-sm">2nd Shift:</div>
-              <div className="w-16 text-sm">Male</div>
-              <div className="border-b border-black w-20 pb-1 text-sm text-center mr-8">
-                {data.personsEmployed.management.secondShift.male}
-              </div>
-              <div className="w-16 text-sm">Female</div>
-              <div className="border-b border-black w-20 pb-1 text-sm text-center">
-                {data.personsEmployed.management.secondShift.female === 0 ? '-' : data.personsEmployed.management.secondShift.female}
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div className="w-20 text-sm">3rd Shift:</div>
-              <div className="w-16 text-sm">Male</div>
-              <div className="border-b border-black w-20 pb-1 text-sm text-center mr-8">
-                {data.personsEmployed.management.thirdShift.male}
-              </div>
-              <div className="w-16 text-sm">Female</div>
-              <div className="border-b border-black w-20 pb-1 text-sm text-center">
-                {data.personsEmployed.management.thirdShift.female === 0 ? '-' : data.personsEmployed.management.thirdShift.female}
-              </div>
-            </div>
+            ))}
             <div className="flex items-center font-bold">
               <div className="w-20 text-sm">TOTAL:</div>
               <div className="w-16 text-sm">Male:</div>
