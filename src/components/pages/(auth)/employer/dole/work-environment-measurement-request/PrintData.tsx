@@ -92,7 +92,7 @@ export const prepareWemRequestData = (item: any): WemRequestData => {
   return {
     dateOfApplication: item.date_of_application || '\u00A0',
     companyName: item.company_name || '\u00A0',
-    address: item.address || '\u00A0',
+    address: item.address || '\u00A0', // This will now be the combined address from cached profile
     region: item.region || '\u00A0',
     emailAddress: item.email_address || '\u00A0',
     telFaxNo: item.tel_fax_no || '\u00A0',

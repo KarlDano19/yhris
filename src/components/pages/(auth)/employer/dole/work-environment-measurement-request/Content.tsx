@@ -181,7 +181,42 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handlePrintPDFLocal = async (item: any) => {
-    await handlePrintPDF(item, generatePDFLocally);
+    try {
+      // Get company name and address from cached profile data
+      const cachedProfile = queryClient
+        .getQueryCache()
+        .find(['employerProfileCache']) as {
+        state: { data: { 
+          name: string;
+          // building: string;
+          // street: string;
+          // locality: string;
+          city: string;
+        } } | undefined;
+      };
+      
+      const companyName = cachedProfile?.state?.data?.name || '';
+      
+      // Combine address fields from cached profile
+      const addressParts = [
+        // cachedProfile?.state?.data?.building,
+        // cachedProfile?.state?.data?.street,
+        // cachedProfile?.state?.data?.locality,
+        cachedProfile?.state?.data?.city,
+      ].filter(Boolean); // Remove empty/undefined values
+      
+      const combinedAddress = addressParts.join(', ') || '\u00A0';
+      
+      // Create item with combined address
+      const itemWithAddress = {
+        ...item,
+        address: combinedAddress
+      };
+      
+      await handlePrintPDF(itemWithAddress, generatePDFLocally);
+    } catch (error) {
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
   };
 
   const handlePrint = () => {

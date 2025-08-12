@@ -111,7 +111,7 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
               <div className="w-1/3 p-3">
                 <div className="mb-1">
                   <div className="text-xs font-bold mb-1">Address:</div>
-                  <div className="border-b border-black pb-1">{data.address}</div>
+                  <div className="text-xs border-b border-black pb-1">{data.address}</div>
                 </div>
               </div>
             </div>
