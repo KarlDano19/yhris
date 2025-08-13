@@ -139,7 +139,7 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({
 
   const renderTotalRow = () => {
     return (
-      <div className="flex items-center text-xs font-bold mt-1">
+      <div className="flex items-center text-xs font-bold mt-1 ml-8">
         <div className="w-1/2">TOTAL NUMBER</div>
         <div className="w-1/6 text-center">
           <div className="border-b border-black mx-2">&nbsp;</div>
@@ -221,10 +221,8 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({
         <div className="ml-8">
           {/* Decompression Sickness subsection */}
           <div className="text-xs font-bold mb-0.5 mt-1">Decompression Sickness:</div>
-          <div className="ml-4">
-            {renderConditionRow('air embolism', physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.caissonsDisease?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.caissonsDisease?.female)}
-            {renderConditionRow('caissons disease', physicalEnvironmentDiseases?.pressureAbnormalities?.barotrauma?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.barotrauma?.female)}
-          </div>
+          {renderConditionRow('air embolism', physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.airEmbolism?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.airEmbolism?.female)}
+          {renderConditionRow('caissons disease', physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.caissonsDisease?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.caissonsDisease?.female)}
           {renderConditionRow('barotrauma', physicalEnvironmentDiseases?.pressureAbnormalities?.hypoxia?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.hypoxia?.female)}
           {renderConditionRow('hypoxia', physicalEnvironmentDiseases?.pressureAbnormalities?.altitudeSickness?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.altitudeSickness?.female)}
           {renderConditionRow('altitude sickness', physicalEnvironmentDiseases?.radiation?.cataracts?.male, physicalEnvironmentDiseases?.radiation?.cataracts?.female)}
@@ -243,10 +241,10 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({
       <div className="mb-2">
         {renderSubCategoryHeader('d)    Diseases due to radiation:')}
         <div className="ml-8">
-          {renderConditionRow('cataracts', physicalEnvironmentDiseases?.radiation?.keratitis?.male, physicalEnvironmentDiseases?.radiation?.keratitis?.female)}
-          {renderConditionRow('keratitis', physicalEnvironmentDiseases?.radiation?.burns?.male, physicalEnvironmentDiseases?.radiation?.burns?.female)}
-          {renderConditionRow('burns', physicalEnvironmentDiseases?.radiation?.radiationRelatedCancers?.male, physicalEnvironmentDiseases?.radiation?.radiationRelatedCancers?.female)}
-          {renderConditionRow('radiation-related cancers')}
+          {renderConditionRow('cataracts', physicalEnvironmentDiseases?.radiation?.cataracts?.male, physicalEnvironmentDiseases?.radiation?.cataracts?.female)}
+          {renderConditionRow('keratitis', physicalEnvironmentDiseases?.radiation?.keratitis?.male, physicalEnvironmentDiseases?.radiation?.keratitis?.female)}
+          {renderConditionRow('burns', physicalEnvironmentDiseases?.radiation?.burns?.male, physicalEnvironmentDiseases?.radiation?.burns?.female)}
+          {renderConditionRow('radiation-related cancers', physicalEnvironmentDiseases?.radiation?.radiationRelatedCancers?.male, physicalEnvironmentDiseases?.radiation?.radiationRelatedCancers?.female)}
         </div>
         {renderTotalRow()}
       </div>

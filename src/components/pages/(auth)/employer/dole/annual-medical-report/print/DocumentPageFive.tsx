@@ -70,12 +70,12 @@ interface ChemicalHazards {
 }
 
 interface PhysicalHazards {
-  noise?: number;
-  temperatureHumidity?: number;
-  pressure?: number;
-  illumination?: number;
-  radiationUltraviolet?: number;
-  vibration?: number;
+  noise?: { substance: string; workers: number };
+  temperatureHumidity?: { substance: string; workers: number };
+  pressure?: { substance: string; workers: number };
+  illumination?: { substance: string; workers: number };
+  radiationUltraviolet?: { substance: string; workers: number };
+  vibration?: { substance: string; workers: number };
 }
 
 interface DocumentPageFiveProps {
@@ -311,11 +311,10 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             <span>No</span>
           </div>
           <div className="flex items-center">
-            <span className="mr-4">Others (Please specify)</span>
-            <span className="w-6 text-center">({renderCheckbox(physicalFitnessProgram?.calisthenics?.yes)})</span>
-            <span className="mr-2">Yes Calisthenics</span>
-            <span className="w-6 text-center">({renderCheckbox(physicalFitnessProgram?.calisthenics?.no)})</span>
-            <span>No</span>
+            <span className="mr-4">Others (Please specify):</span>
+            <div className="border-b border-black min-h-[1rem] text-xs inline-block">
+              {physicalFitnessProgram?.others || ''}
+            </div>
           </div>
         </div>
       </div>
@@ -419,11 +418,13 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
               <div className="w-2/3 flex items-center">
                 <span className="w-6 text-center">( )</span>
                 <span className="ml-1 w-48">noise</span>
-                <div className="border-b border-black flex-1 min-h-[1rem] text-xs"></div>
+                <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
+                  {physicalHazards?.noise?.substance || ''}
+                </div>
               </div>
               <div className="w-1/3 text-center">
                 <div className="border-b border-black mx-4 min-h-[1rem] text-xs">
-                  {physicalHazards?.noise || ''}
+                  {physicalHazards?.noise?.workers || ''}
                 </div>
               </div>
             </div>
@@ -431,11 +432,13 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
               <div className="w-2/3 flex items-center">
                 <span className="w-6 text-center">( )</span>
                 <span className="ml-1 w-48">temperature/humidity</span>
-                <div className="border-b border-black flex-1 min-h-[1rem] text-xs"></div>
+                <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
+                  {physicalHazards?.temperatureHumidity?.substance || ''}
+                </div>
               </div>
               <div className="w-1/3 text-center">
                 <div className="border-b border-black mx-4 min-h-[1rem] text-xs">
-                  {physicalHazards?.temperatureHumidity || ''}
+                  {physicalHazards?.temperatureHumidity?.workers || ''}
                 </div>
               </div>
             </div>
@@ -443,11 +446,13 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
               <div className="w-2/3 flex items-center">
                 <span className="w-6 text-center">( )</span>
                 <span className="ml-1 w-48">pressure</span>
-                <div className="border-b border-black flex-1 min-h-[1rem] text-xs"></div>
+                <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
+                  {physicalHazards?.pressure?.substance || ''}
+                </div>
               </div>
               <div className="w-1/3 text-center">
                 <div className="border-b border-black mx-4 min-h-[1rem] text-xs">
-                  {physicalHazards?.pressure || ''}
+                  {physicalHazards?.pressure?.workers || ''}
                 </div>
               </div>
             </div>
@@ -455,11 +460,13 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
               <div className="w-2/3 flex items-center">
                 <span className="w-6 text-center">( )</span>
                 <span className="ml-1 w-48">illumination</span>
-                <div className="border-b border-black flex-1 min-h-[1rem] text-xs"></div>
+                <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
+                  {physicalHazards?.illumination?.substance || ''}
+                </div>
               </div>
               <div className="w-1/3 text-center">
                 <div className="border-b border-black mx-4 min-h-[1rem] text-xs">
-                  {physicalHazards?.illumination || ''}
+                  {physicalHazards?.illumination?.workers || ''}
                 </div>
               </div>
             </div>
@@ -467,11 +474,13 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
               <div className="w-2/3 flex items-center">
                 <span className="w-6 text-center">( )</span>
                 <span className="ml-1 w-48">radiation/ultraviolet/<br/>microwave</span>
-                <div className="border-b border-black flex-1 min-h-[1rem] text-xs"></div>
+                <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
+                  {physicalHazards?.radiationUltraviolet?.substance || ''}
+                </div>
               </div>
               <div className="w-1/3 text-center">
                 <div className="border-b border-black mx-4 min-h-[1rem] text-xs">
-                  {physicalHazards?.radiationUltraviolet || ''}
+                  {physicalHazards?.radiationUltraviolet?.workers || ''}
                 </div>
               </div>
             </div>
@@ -479,11 +488,13 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
               <div className="w-2/3 flex items-center">
                 <span className="w-6 text-center">( )</span>
                 <span className="ml-1 w-48">vibration</span>
-                <div className="border-b border-black flex-1 min-h-[1rem] text-xs"></div>
+                <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
+                  {physicalHazards?.vibration?.substance || ''}
+                </div>
               </div>
               <div className="w-1/3 text-center">
                 <div className="border-b border-black mx-4 min-h-[1rem] text-xs">
-                  {physicalHazards?.vibration || ''}
+                  {physicalHazards?.vibration?.workers || ''}
                 </div>
               </div>
             </div>

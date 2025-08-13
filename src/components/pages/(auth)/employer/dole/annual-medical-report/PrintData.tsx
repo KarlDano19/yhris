@@ -47,7 +47,7 @@ interface AnnualMedicalReportData {
   };
 }
 
-export const prepareAnnualMedicalReportData = (item: any, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string): AnnualMedicalReportData => {
+export const pageOne = (item: any, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string): AnnualMedicalReportData => {
   return {
     establishmentName: companyName || '\u00A0',
     address: item.address || '\u00A0',
@@ -128,7 +128,10 @@ export const prepareAnnualMedicalReportData = (item: any, companyName?: string, 
   };
 };
 
-export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalReportData, item: any, companyName?: string) => {
+export const createAnnualMedicalDocumentComponent = (item: any, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string) => {
+  // Prepare data for page one
+  const pageOneData = pageOne(item, companyName, reportPeriodFrom, reportPeriodTo);
+  
   // Use actual data from the API for page two (attendance, training, examinations, diseases)
   const pageTwoData = {
     attendanceSchedule: {
@@ -318,7 +321,9 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
       typhoidParatyphoid: { male: item.typhoid_fever_male || 0, female: item.typhoid_fever_female || 0 },
       cholera: { male: item.cholera_male || 0, female: item.cholera_female || 0 },
       measles: { male: item.measles_male || 0, female: item.measles_female || 0 },
+
       mumps: { male: 0, female: 0 }, // Not in data
+
       malaria: { male: item.malaria_male || 0, female: item.malaria_female || 0 },
       schistosomiasis: { male: item.schistosomiasis_male || 0, female: item.schistosomiasis_female || 0 },
       herpesZoster: { male: item.herpes_zoster_male || 0, female: item.herpes_zoster_female || 0 },
@@ -330,7 +335,9 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
     physicalEnvironmentDiseases: {
       noiseVibration: {
         deafnessNoiseInduced: { male: item.deafness_noise_induced_male || 0, female: item.deafness_noise_induced_female || 0 },
+        
         otosclerosis: { male: 0, female: 0 }, // Not in data
+       
         musculoSkeletalDisturbances: { male: item.musculo_skeletal_disturbances_male || 0, female: item.musculo_skeletal_disturbances_female || 0 },
         fatigue: { male: item.fatigue_male || 0, female: item.fatigue_female || 0 }
       },
@@ -340,6 +347,7 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
         dehydration: { male: item.dehydration_male || 0, female: item.dehydration_female || 0 },
         heatExhaustion: { male: item.heat_exhaustion_male || 0, female: item.heat_exhaustion_female || 0 },
         others: { male: item.others_heat_male || 0, female: item.others_heat_female || 0 },
+
         coldTemperature: {
           chilblain: { male: 0, female: 0 }, // Not in data
           frostBite: { male: 0, female: 0 }, // Not in data
@@ -368,7 +376,9 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
       contusionBruises: { male: item.contusion_bruises_hematoma_male || 0, female: item.contusion_bruises_hematoma_female || 0 },
       abrasions: { male: item.abrasions_male || 0, female: item.abrasions_female || 0 },
       cuts: { male: item.cuts_lacerations_punctures_male || 0, female: item.cuts_lacerations_punctures_female || 0 },
+      
       concussion: { male: 0, female: 0 }, // Not in data
+      
       avulsion: { male: item.avulsion_male || 0, female: item.avulsion_female || 0 }
     }
   };
@@ -389,7 +399,9 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
       tetanusGlobulin: { male: item.tetanus_globulin_injection_male || 0, female: item.tetanus_globulin_injection_female || 0 },
       hepatitisB: { male: item.hepatitis_b_vaccination_male || 0, female: item.hepatitis_b_vaccination_female || 0 },
       rabiesVaccine: { male: item.rabies_vaccination_male || 0, female: item.rabies_vaccination_female || 0 },
+      
       covid19Vaccine: { male: 0, female: 0 }, // Not in data
+      
       others: { male: item.others_immunization_male || 0, female: item.others_immunization_female || 0 }
     },
     medicalRecordsKeeping: {
@@ -397,9 +409,9 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
       notDone: !item.keeping_of_medical_records_of_workers?.includes('done') || false
     },
     healthEducation: {
-      individual: item.health_education_and_counselling_by_health_and_safety_personnel?.includes('done individually as each worker comes to the clinic for consultation') || false,
-      groupDiscussions: item.health_education_and_counselling_by_health_and_safety_personnel?.includes('done in organized group discussions/seminars') || false,
-      visualDisplays: item.health_education_and_counselling_by_health_and_safety_personnel?.includes('done with the use of visual displays and/or educational materials, leaflets, etc') || false
+      individual: item.health_education_and_counselling_by_health_and_safety_personnel?.includes('done_individually') || false,
+      groupDiscussions: item.health_education_and_counselling_by_health_and_safety_personnel?.includes('done ') || false,
+      visualDisplays: item.health_education_and_counselling_by_health_and_safety_personnel?.includes('done_visual_displays') || false
     },
     otherHealthPrograms: {
       nutrition: { 
@@ -430,32 +442,36 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
     },
     physicalFitnessProgram: {
       sportsActivities: { yes: item.sports_activities?.includes('yes') || false, no: item.sports_activities?.includes('no') || false },
-      calisthenics: { yes: item.physical_fitness_program_others?.includes('calisthenics') || false, no: !item.physical_fitness_program_others?.includes('calisthenics') || false }
+      others: item.physical_fitness_program_others || '\u00A0'
     },
     chemicalHazards: {
       dust: { substance: item.dust_sources || '\u00A0', workers: item.dust_workers_exposed || 0 },
       liquids: { substance: item.liquids_sources || '\u00A0', workers: item.liquids_workers_exposed || 0 },
       mistFumes: { substance: item.mist_fumes_vapors_sources || '\u00A0', workers: item.mist_fumes_vapors_workers_exposed || 0 },
       gas: { substance: item.gas_sources || '\u00A0', workers: item.gas_workers_exposed || 0 },
-      others: { substance: item.others_sources || '\u00A0', workers: item.others_workers_exposed || 0 }
+      others: { substance: item.others_chemical_hazards_sources || '\u00A0', workers: item.others_chemical_hazards_workers_exposed || 0 }
     },
     physicalHazards: {
-      noise: item.noise_workers_exposed || 0,
-      temperatureHumidity: item.temperature_humidity_workers_exposed || 0,
-      pressure: item.pressure_workers_exposed || 0,
-      illumination: item.illumination_workers_exposed || 0,
-      radiationUltraviolet: item.radiation_ultraviolet_microwave_workers_exposed || 0,
-      vibration: item.vibration_workers_exposed || 0
+      noise: { substance: item.noise_sources || '\u00A0', workers: item.noise_workers_exposed || 0 },
+      temperatureHumidity: { substance: item.temperature_humidity_sources || '\u00A0', workers: item.temperature_humidity_workers_exposed || 0 },
+      pressure: { substance: item.pressure_sources || '\u00A0', workers: item.pressure_workers_exposed || 0 },
+      illumination: { substance: item.illumination_sources || '\u00A0', workers: item.illumination_workers_exposed || 0 },
+      radiationUltraviolet: { substance: item.radiation_ultraviolet_microwave_sources || '\u00A0', workers: item.radiation_ultraviolet_microwave_workers_exposed || 0 },
+      vibration: { substance: item.vibration_sources || '\u00A0', workers: item.vibration_workers_exposed || 0 }
     }
   };
 
   const pageSixData = {
+    physicalHazardsOthers: {
+      substance: item.others_physical_hazards_sources || '\u00A0',
+      workers: item.others_physical_hazards_workers_exposed || 0
+    },
     biologicalHazards: {
       viral: { substance: item.viral_sources || '\u00A0', workers: item.viral_workers_exposed || 0 },
       bacterial: { substance: item.bacterial_sources || '\u00A0', workers: item.bacterial_workers_exposed || 0 },
       fungal: { substance: item.fungal_sources || '\u00A0', workers: item.fungal_workers_exposed || 0 },
       parasitic: { substance: item.parasitic_sources || '\u00A0', workers: item.parasitic_workers_exposed || 0 },
-      others: { substance: item.chemical_sources || '\u00A0', workers: 0 } // Using chemical_sources as others
+      others: { substance: item.others_biological_hazards_sources || '\u00A0', workers: item.others_biological_hazards_workers_exposed || 0 }
     },
     ergonomicStress: {
       exhaustingPhysicalWork: { substance: item.exhausting_physical_work_sources || '\u00A0', workers: item.exhausting_physical_work_workers_exposed || 0 },
@@ -463,14 +479,16 @@ export const createAnnualMedicalDocumentComponent = (pageOneData: AnnualMedicalR
       excessiveMentalEffort: { substance: item.excessive_mental_effort_sources || '\u00A0', workers: item.excessive_mental_effort_workers_exposed || 0 },
       unfavorableWorkPosture: { substance: item.unfavorable_work_posture_sources || '\u00A0', workers: item.unfavorable_work_posture_workers_exposed || 0 },
       staticMonotonousWork: { substance: item.static_monotonous_work_sources || '\u00A0', workers: item.static_monotonous_work_workers_exposed || 0 },
-      othersSpecify: { substance: '\u00A0', workers: 0 } // Not in data
+      othersSpecify: { substance: item.others_ergonomic_stress_sources || '\u00A0', workers: item.others_ergonomic_stress_workers_exposed || 0 }
     },
     submittedBy: {
       name: item.prepared_by || '\u00A0',
-      position: '\u00A0' // Not in data
+      signature: item.signature || '\u00A0',
+      date: item.date_of_report || '\u00A0'
     },
     notedBy: {
       employer: item.noted_by || '\u00A0',
+      signature: item.noted_signature || '\u00A0',
       date: item.date_of_report || '\u00A0'
     }
   };
@@ -503,11 +521,8 @@ export const generateAnnualMedicalFilename = (item: any) => {
 };
 
 export const handlePrintPDF = async (item: any, generatePDFLocally: (component: React.ReactElement, filename: string) => Promise<void>, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string) => {
-  // Prepare data for Annual Medical Report document
-  const pageOneData = prepareAnnualMedicalReportData(item, companyName, reportPeriodFrom, reportPeriodTo);
-
   // Create document component with all pages
-  const documentComponent = createAnnualMedicalDocumentComponent(pageOneData, item, companyName);
+  const documentComponent = createAnnualMedicalDocumentComponent(item, companyName, reportPeriodFrom, reportPeriodTo);
   
   const filename = generateAnnualMedicalFilename(item);
   

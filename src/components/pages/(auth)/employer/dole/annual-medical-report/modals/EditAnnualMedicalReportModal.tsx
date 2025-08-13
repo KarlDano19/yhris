@@ -545,6 +545,8 @@ function EditAnnualMedicalReportModal({
       setValue("physical_fitness_program_others", annualMedicalReportData.physical_fitness_program_others);
 
       // Workplace Hazards
+
+      // Chemical Hazards
       setValue("dust_sources", annualMedicalReportData.dust_sources);
       setValue("dust_workers_exposed", annualMedicalReportData.dust_workers_exposed);
       setValue("liquids_sources", annualMedicalReportData.liquids_sources);
@@ -553,6 +555,10 @@ function EditAnnualMedicalReportModal({
       setValue("mist_fumes_vapors_workers_exposed", annualMedicalReportData.mist_fumes_vapors_workers_exposed);
       setValue("gas_sources", annualMedicalReportData.gas_sources);
       setValue("gas_workers_exposed", annualMedicalReportData.gas_workers_exposed);
+      setValue("others_chemical_hazards_sources", annualMedicalReportData.others_chemical_hazards_sources);
+      setValue("others_chemical_hazards_workers_exposed", annualMedicalReportData.others_chemical_hazards_workers_exposed);
+
+      // Physical Hazards
       setValue("noise_sources", annualMedicalReportData.noise_sources);
       setValue("noise_workers_exposed", annualMedicalReportData.noise_workers_exposed);
       setValue("temperature_humidity_sources", annualMedicalReportData.temperature_humidity_sources);
@@ -565,8 +571,10 @@ function EditAnnualMedicalReportModal({
       setValue("radiation_ultraviolet_microwave_workers_exposed", annualMedicalReportData.radiation_ultraviolet_microwave_workers_exposed);
       setValue("vibration_sources", annualMedicalReportData.vibration_sources);
       setValue("vibration_workers_exposed", annualMedicalReportData.vibration_workers_exposed);
-      setValue("others_sources", annualMedicalReportData.others_sources);
-      setValue("others_workers_exposed", annualMedicalReportData.others_workers_exposed);
+      setValue("others_physical_hazards_sources", annualMedicalReportData.others_physical_hazards_sources);
+      setValue("others_physical_hazards_workers_exposed", annualMedicalReportData.others_physical_hazards_workers_exposed);
+
+      // Biological Hazards
       setValue("viral_sources", annualMedicalReportData.viral_sources);
       setValue("viral_workers_exposed", annualMedicalReportData.viral_workers_exposed);
       setValue("bacterial_sources", annualMedicalReportData.bacterial_sources);
@@ -575,7 +583,10 @@ function EditAnnualMedicalReportModal({
       setValue("fungal_workers_exposed", annualMedicalReportData.fungal_workers_exposed);
       setValue("parasitic_sources", annualMedicalReportData.parasitic_sources);
       setValue("parasitic_workers_exposed", annualMedicalReportData.parasitic_workers_exposed);
-      setValue("chemical_sources", annualMedicalReportData.chemical_sources);
+      setValue("others_biological_hazards_sources", annualMedicalReportData.others_biological_hazards_sources);
+      setValue("others_biological_hazards_workers_exposed", annualMedicalReportData.others_biological_hazards_workers_exposed);
+
+      // Ergonomic Stress
       setValue("exhausting_physical_work_sources", annualMedicalReportData.exhausting_physical_work_sources);
       setValue("exhausting_physical_work_workers_exposed", annualMedicalReportData.exhausting_physical_work_workers_exposed);
       setValue("prolonged_standing_sources", annualMedicalReportData.prolonged_standing_sources);
@@ -586,6 +597,8 @@ function EditAnnualMedicalReportModal({
       setValue("unfavorable_work_posture_workers_exposed", annualMedicalReportData.unfavorable_work_posture_workers_exposed);
       setValue("static_monotonous_work_sources", annualMedicalReportData.static_monotonous_work_sources);
       setValue("static_monotonous_work_workers_exposed", annualMedicalReportData.static_monotonous_work_workers_exposed);
+      setValue("others_ergonomic_stress_sources", annualMedicalReportData.others_ergonomic_stress_sources);
+      setValue("others_ergonomic_stress_workers_exposed", annualMedicalReportData.others_ergonomic_stress_workers_exposed);
 
       // Report Details
       setValue("prepared_by", annualMedicalReportData.prepared_by);

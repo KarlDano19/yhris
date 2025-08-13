@@ -17,20 +17,29 @@ interface ErgonomicStress {
   othersSpecify?: { substance: string; workers: number };
 }
 
+interface PhysicalHazardsOthers {
+  substance?: string;
+  workers?: number;
+}
+
 interface DocumentPageSixProps {
+  physicalHazardsOthers?: PhysicalHazardsOthers;
   biologicalHazards?: BiologicalHazards;
   ergonomicStress?: ErgonomicStress;
   submittedBy?: {
     name?: string;
-    position?: string;
+    signature?: string;
+    date?: string;
   };
   notedBy?: {
     employer?: string;
+    signature?: string;
     date?: string;
   };
 }
 
 const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
+  physicalHazardsOthers,
   biologicalHazards,
   ergonomicStress,
   submittedBy,
@@ -44,10 +53,14 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           <div className="w-2/3 flex items-center">
             <span className="w-6 text-center">( )</span>
             <span className="ml-1 w-48">Others (Please specify)</span>
-            <div className="border-b border-black flex-1 min-h-[1rem] text-xs"></div>
+            <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
+              {physicalHazardsOthers?.substance || ''}
+            </div>
           </div>
           <div className="w-1/3 text-center">
-            <div className="border-b border-black mx-4 min-h-[1rem] text-xs"></div>
+            <div className="border-b border-black mx-4 min-h-[1rem] text-xs">
+              {physicalHazardsOthers?.workers || ''}
+            </div>
           </div>
         </div>
       </div>
@@ -225,16 +238,34 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
         {/* Submitted by */}
         <div>
           <div className="text-xs font-bold mb-2">Submitted by:</div>
-          <div className="grid grid-cols-2 gap-8">
-            <div>
-              <div className="border-b border-black px-1 min-h-6 text-center">
-                {submittedBy?.name || ''}
+          <div className="flex justify-between items-end">
+            <div className="flex-1 mr-8">
+              <div className="text-center relative">
+                {submittedBy?.signature && (
+                  <div className="absolute w-full right-3 -top-7 z-10">
+                    <img 
+                      src={submittedBy.signature} 
+                      alt="Signature" 
+                      style={{ 
+                        height: '48px', 
+                        objectFit: 'contain',
+                        display: 'block',
+                        margin: '0 auto'
+                      }} 
+                    />
+                  </div>
+                )}
+                <div className="text-center border-b-2 mb-1 border-black">
+                  {submittedBy?.name || ''}
+                </div>
               </div>
+              <div className="text-xs text-center">Prepared by</div>
             </div>
-            <div>
-              <div className="border-b border-black px-1 min-h-6 text-center">
-                {submittedBy?.position || ''}
+            <div className="w-1/3">
+              <div className="text-center border-b-2 border-black mb-1">
+                {submittedBy?.date || ''}
               </div>
+              <div className="text-xs text-center">Date</div>
             </div>
           </div>
         </div>
@@ -242,18 +273,34 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
         {/* Noted by */}
         <div>
           <div className="text-xs font-bold mb-2">Noted by:</div>
-          <div className="grid grid-cols-2 gap-8">
-            <div>
-              <div className="border-b border-black px-1 min-h-6 text-center">
-                {notedBy?.employer || ''}
+          <div className="flex justify-between items-end">
+            <div className="flex-1 mr-8">
+              <div className="text-center relative">
+                {notedBy?.signature && (
+                  <div className="absolute w-full right-3 -top-7 z-10">
+                    <img 
+                      src={notedBy.signature} 
+                      alt="Signature" 
+                      style={{ 
+                        height: '48px', 
+                        objectFit: 'contain',
+                        display: 'block',
+                        margin: '0 auto'
+                      }} 
+                    />
+                  </div>
+                )}
+                <div className="text-center border-b-2 mb-1 border-black">
+                  {notedBy?.employer || ''}
+                </div>
               </div>
-              <div className="text-xs text-center mt-1">Employer</div>
+              <div className="text-xs text-center">Noted by</div>
             </div>
-            <div>
-              <div className="border-b border-black px-1 min-h-6 text-center">
+            <div className="w-1/3">
+              <div className="text-center border-b-2 border-black mb-1">
                 {notedBy?.date || ''}
               </div>
-              <div className="text-xs text-center mt-1">Date</div>
+              <div className="text-xs text-center">Date</div>
             </div>
           </div>
         </div>
