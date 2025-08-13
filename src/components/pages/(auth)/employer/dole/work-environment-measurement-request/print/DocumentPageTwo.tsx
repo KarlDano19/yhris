@@ -35,7 +35,7 @@ interface DocumentPageTwoProps {
 
 const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
   return (
-    <div className="bg-white text-black font-sans text-xs leading-tight max-w-4xl mx-auto p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
+    <div className="bg-white text-black font-sans text-xs leading-tight max-w-4xl mx-auto p-2" style={{ fontFamily: 'Arial, sans-serif' }}>
       {/* Parameters to be Measured Section */}
       <div className="mb-6">
         <div className="text-xs font-bold mb-3">
@@ -159,11 +159,24 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
       <div className="mb-8">
         <div className="flex justify-between items-end">
           <div className="flex-1 mr-8">
-            <div className="text-center">
-              {data.requestingPersonnel.signature}
-            </div>
-            <div className="text-center border-b-2 mb-1 border-black">
-              {data.requestingPersonnel.name}
+            <div className="text-center relative">
+              {data.requestingPersonnel.signature && (
+                <div className="absolute w-full right-3 -top-7 z-10">
+                  <img 
+                    src={data.requestingPersonnel.signature} 
+                    alt="Signature" 
+                    style={{ 
+                      height: '48px', 
+                      objectFit: 'contain',
+                      display: 'block',
+                      margin: '0 auto'
+                    }} 
+                  />
+                </div>
+              )}
+              <div className="text-center border-b-2 mb-1 border-black">
+                {data.requestingPersonnel.name}
+              </div>
             </div>
             <div className="text-xs text-center">Signature over Printed Name of Requesting Personnel</div>
           </div>

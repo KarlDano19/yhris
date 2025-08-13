@@ -18,6 +18,7 @@ import classNames from '@/helpers/classNames';
 import useFileforge from '@/components/hooks/useFileforge';
 
 import useGetWorkEnvironmentRequestItems from './hooks/useGetWorkEnvironmentRequestItems';
+import { getPrintWorkEnvironmentRequestDetails } from './hooks/useGetPrintWorkEnvironmentRequestDetails';
 import useUpdateWorkEnvironmentRequest from './hooks/useUpdateWorkEnvironmentRequest';
 import CreateWemRequestModal from './modals/CreateWemRequestModal';
 import DeleteWemRequestModal from './modals/DeleteWemRequestModal';
@@ -191,10 +192,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           user: {
             email: string;
           };
-          // building: string;
-          // street: string;
-          // locality: string;
+          building: string;
+          street: string;
+          locality: string;
           city: string;
+          country: string;
+          zip_code: string;
           region: string;
         } } | undefined;
       };
@@ -204,22 +207,28 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const region = cachedProfile?.state?.data?.region || '';
       // Combine address fields from cached profile
       const addressParts = [
-        // cachedProfile?.state?.data?.building,
-        // cachedProfile?.state?.data?.street,
-        // cachedProfile?.state?.data?.locality,
+        cachedProfile?.state?.data?.building,
+        cachedProfile?.state?.data?.street,
+        cachedProfile?.state?.data?.locality,
         cachedProfile?.state?.data?.city,
+        cachedProfile?.state?.data?.country,
+        cachedProfile?.state?.data?.zip_code
       ].filter(Boolean); // Remove empty/undefined values
       
       const combinedAddress = addressParts.join(', ') || '\u00A0';
       
-      // Create item with combined address
+      // Fetch detailed data using the print hook's function directly
+      const detailedData = await getPrintWorkEnvironmentRequestDetails(item.id);
+      
+      // Create item with combined address and cached profile data
       const itemWithAddress = {
-        ...item,
+        ...detailedData,
         email_address: email,
         address: combinedAddress,
         region: region,
       };
       
+      // Use detailed data for PDF generation
       await handlePrintPDF(itemWithAddress, generatePDFLocally);
     } catch (error) {
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });

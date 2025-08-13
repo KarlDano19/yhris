@@ -63,7 +63,7 @@ interface WemRequestDocumentProps {
 
 const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
     return (
-      <div className="bg-white text-black font-sans text-xs leading-tight max-w-4xl mx-auto p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
+      <div className="bg-white text-black font-sans text-xs leading-tight max-w-4xl mx-auto p-2" style={{ fontFamily: 'Arial, sans-serif' }}>
         {/* Header Section */}
         <div className="mb-1">
           {/* WEM Banner Image */}
