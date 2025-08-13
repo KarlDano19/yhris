@@ -46,6 +46,7 @@ interface HealthAndSafetyReportData {
   submittedBy: {
     name: string;
     position: string;
+    signature?: string;
   };
 }
 
@@ -153,6 +154,7 @@ export const prepareHealthAndSafetyReportData = (item: any): HealthAndSafetyRepo
     submittedBy: {
       name: item.submitted_by && item.submitted_by !== 'Update' ? item.submitted_by : '\u00A0',
       position: item.position && item.position !== 'Update' ? item.position : '\u00A0',
+      signature: item.signature || undefined,
     },
   };
 };

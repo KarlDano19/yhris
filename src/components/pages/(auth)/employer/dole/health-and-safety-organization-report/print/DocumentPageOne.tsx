@@ -43,6 +43,7 @@ interface HealthAndSafetyReportData {
   submittedBy: {
     name: string;
     position: string;
+    signature?: string;
   };
 }
 
@@ -230,11 +231,27 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
       {/* Submitted By Section */}
       <div className="mt-6 text-left">
         <div className="text-sm font-bold mb-1">Submitted by:</div>
-        <div className="text-sm underline mb-1">
-          {data.submittedBy.name}
-        </div>
-        <div className="text-sm">
-          {data.submittedBy.position}
+        <div className="text-sm mt-5 mb-1 ml-8 relative">
+          {data.submittedBy.signature && (
+            <div className="absolute -left-12 -top-5 z-10">
+              <img 
+                src={data.submittedBy.signature} 
+                alt="Signature" 
+                style={{ 
+                  height: '48px', 
+                  objectFit: 'contain',
+                  display: 'block'
+                }} 
+              />
+            </div>
+          )}
+          <div className="relative z-0 inline-block">
+            <span>{data.submittedBy.name}</span>
+            <div className="border-t border-black pt-1"></div>
+          </div>
+          <div className="text-sm">
+            {data.submittedBy.position}
+          </div>
         </div>
       </div>
     </div>
