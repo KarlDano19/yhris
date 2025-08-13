@@ -195,15 +195,21 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
               <div className="underline">{data.safetyCommittee.members.chairman.position}</div>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm ml-8">
-              <div>Members: <span className="underline">{data.safetyCommittee.members.members[0]?.name}</span></div>
-              <div className="underline">{data.safetyCommittee.members.members[0]?.position}</div>
-            </div>
-            {data.safetyCommittee.members.members.slice(1).map((member, index) => (
-              <div key={index} className="grid grid-cols-2 gap-4 text-sm ml-8">
-                <div className="ml-8 underline">{member.name}</div>
-                <div className="underline">{member.position}</div>
+              <div>
+                <div>Members: <span className="underline">{data.safetyCommittee.members.members[0]?.name}</span></div>
+                {data.safetyCommittee.members.members.slice(1).map((member, index) => (
+                  <div key={index} style={{ marginLeft: '65px' }}>
+                    <span className="underline">{member.name}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+              <div>
+                <div className="underline">{data.safetyCommittee.members.members[0]?.position}</div>
+                {data.safetyCommittee.members.members.slice(1).map((member, index) => (
+                  <div key={index} className="underline">{member.position}</div>
+                ))}
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4 text-sm ml-8">
               <div>Secretary: <span className="underline">{data.safetyCommittee.members.secretary.name}</span></div>
               <div className="underline">{data.safetyCommittee.members.secretary.position}</div>
