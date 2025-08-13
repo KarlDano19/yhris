@@ -127,20 +127,28 @@ export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProp
       'musculo_skeletal_disturbances',
       'fatigue',
 
-      // Diseases due to Temperature And Humidity abnormalities
+      // Diseases due to Temperature And Humidity abnormalities (HOT)
       'heat_stroke',
       'heat_cramps',
       'dehydration',
       'heat_exhaustion',
       'others_heat',
 
-      // Diseases due to Radiation
-      'decompression_sickness',
+      // Diseases due to Temperature and Humidity abnormalities (COLD)
+      'chilblain',
+      'frost_bite',
+      'immersion_foot',
+      'general_hypothermia',
+      'others_cold_temperature',
+
+      // Diseases due to Pressure Abnormalities
       'air_embolism',
       'bends_disease',
       'barotrauma',
       'hypoxia',
       'altitude_sickness',
+
+      // Diseases due to Radiation
       'cataract_radiation',
       'keratitis',
       'burns',

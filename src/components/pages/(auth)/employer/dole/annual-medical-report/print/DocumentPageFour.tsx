@@ -7,7 +7,7 @@ interface InfectiousDiseases {
   typhoidParatyphoid?: { male: number; female: number };
   cholera?: { male: number; female: number };
   measles?: { male: number; female: number };
-  mumps?: { male: number; female: number };
+  tetanus?: { male: number; female: number };
   malaria?: { male: number; female: number };
   schistosomiasis?: { male: number; female: number };
   herpesZoster?: { male: number; female: number };
@@ -25,6 +25,7 @@ interface PhysicalEnvironmentDiseases {
     fatigue?: { male: number; female: number };
   };
   temperatureHumidity?: {
+    hotTemperature?: { male: number; female: number };
     heatStrokes?: { male: number; female: number };
     heatCramps?: { male: number; female: number };
     dehydration?: { male: number; female: number };
@@ -39,10 +40,8 @@ interface PhysicalEnvironmentDiseases {
     };
   };
   pressureAbnormalities?: {
-    decompressionSickness?: {
       airEmbolism?: { male: number; female: number };
-      caissonsDisease?: { male: number; female: number };
-    };
+      bendsDisease?: { male: number; female: number };
     barotrauma?: { male: number; female: number };
     hypoxia?: { male: number; female: number };
     altitudeSickness?: { male: number; female: number };
@@ -171,7 +170,7 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({
           {renderConditionRow('Typhoid/paratyphoid fever', infectiousDiseases?.typhoidParatyphoid?.male, infectiousDiseases?.typhoidParatyphoid?.female)}
           {renderConditionRow('Cholera', infectiousDiseases?.cholera?.male, infectiousDiseases?.cholera?.female)}
           {renderConditionRow('Measles', infectiousDiseases?.measles?.male, infectiousDiseases?.measles?.female)}
-          {renderConditionRow('Mumps', infectiousDiseases?.mumps?.male, infectiousDiseases?.mumps?.female)}
+          {renderConditionRow('Tetanus', infectiousDiseases?.tetanus?.male, infectiousDiseases?.tetanus?.female)}
           {renderConditionRow('Malaria', infectiousDiseases?.malaria?.male, infectiousDiseases?.malaria?.female)}
           {renderConditionRow('Schistosomiasis', infectiousDiseases?.schistosomiasis?.male, infectiousDiseases?.schistosomiasis?.female)}
           {renderConditionRow('Herpes Zoster', infectiousDiseases?.herpesZoster?.male, infectiousDiseases?.herpesZoster?.female)}
@@ -188,31 +187,29 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({
         {renderSubCategoryHeader('a)    Diseases due to Noise and vibration')}
         <div className="ml-8">
           {renderConditionRow('Deafness (noise induced)', physicalEnvironmentDiseases?.noiseVibration?.deafnessNoiseInduced?.male, physicalEnvironmentDiseases?.noiseVibration?.deafnessNoiseInduced?.female)}
-          {renderConditionRow('Otosclerosis', physicalEnvironmentDiseases?.noiseVibration?.otosclerosis?.male, physicalEnvironmentDiseases?.noiseVibration?.otosclerosis?.female)}
-          {renderConditionRow('Musculo-skeletal', physicalEnvironmentDiseases?.noiseVibration?.musculoSkeletalDisturbances?.male, physicalEnvironmentDiseases?.noiseVibration?.musculoSkeletalDisturbances?.female)}
-          {renderConditionRow('disturbances', physicalEnvironmentDiseases?.noiseVibration?.fatigue?.male, physicalEnvironmentDiseases?.noiseVibration?.fatigue?.female)}
+          {renderConditionRow('White fingers disease', physicalEnvironmentDiseases?.noiseVibration?.deafnessNoiseInduced?.male, physicalEnvironmentDiseases?.noiseVibration?.deafnessNoiseInduced?.female)}
+          {renderConditionRow('Musculo-skeletal disturbances', physicalEnvironmentDiseases?.noiseVibration?.musculoSkeletalDisturbances?.male, physicalEnvironmentDiseases?.noiseVibration?.musculoSkeletalDisturbances?.female)}
+          {renderConditionRow('Fatigue', physicalEnvironmentDiseases?.noiseVibration?.fatigue?.male, physicalEnvironmentDiseases?.noiseVibration?.fatigue?.female)}
         </div>
 
         {/* b) Diseases due to Temperature And Humidity abnormalities */}
         {renderSubCategoryHeader('b)    Diseases due to Temperature')}
         <div className="ml-4 text-xs font-bold mb-0.5">And Humidity abnormalities:</div>
         <div className="ml-8">
-          {renderConditionRow('Hot Temperature:', physicalEnvironmentDiseases?.temperatureHumidity?.heatStrokes?.male, physicalEnvironmentDiseases?.temperatureHumidity?.heatStrokes?.female)}
-          {renderConditionRow('heat strokes', physicalEnvironmentDiseases?.temperatureHumidity?.heatCramps?.male, physicalEnvironmentDiseases?.temperatureHumidity?.heatCramps?.female)}
-          {renderConditionRow('heat cramps', physicalEnvironmentDiseases?.temperatureHumidity?.dehydration?.male, physicalEnvironmentDiseases?.temperatureHumidity?.dehydration?.female)}
-          {renderConditionRow('dehydration', physicalEnvironmentDiseases?.temperatureHumidity?.heatExhaustion?.male, physicalEnvironmentDiseases?.temperatureHumidity?.heatExhaustion?.female)}
-          {renderConditionRow('heat exhaustion', physicalEnvironmentDiseases?.temperatureHumidity?.others?.male, physicalEnvironmentDiseases?.temperatureHumidity?.others?.female)}
-          {renderConditionRow('others', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.chilblain?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.chilblain?.female)}
+          <div className="text-xs font-semibold mt-0.5">Hot Temperature:</div>
+          {renderConditionRow('heat strokes', physicalEnvironmentDiseases?.temperatureHumidity?.heatStrokes?.male, physicalEnvironmentDiseases?.temperatureHumidity?.heatStrokes?.female)}
+          {renderConditionRow('heat cramps', physicalEnvironmentDiseases?.temperatureHumidity?.heatCramps?.male, physicalEnvironmentDiseases?.temperatureHumidity?.heatCramps?.female)}
+          {renderConditionRow('dehydration', physicalEnvironmentDiseases?.temperatureHumidity?.dehydration?.male, physicalEnvironmentDiseases?.temperatureHumidity?.dehydration?.female)}
+          {renderConditionRow('heat exhaustion', physicalEnvironmentDiseases?.temperatureHumidity?.heatExhaustion?.male, physicalEnvironmentDiseases?.temperatureHumidity?.heatExhaustion?.female)}
+          {renderConditionRow('others', physicalEnvironmentDiseases?.temperatureHumidity?.others?.male, physicalEnvironmentDiseases?.temperatureHumidity?.others?.female)}
           
           {/* Cold Temperature subsection */}
           <div className="text-xs font-bold mb-0.5 mt-1">Cold Temperature:</div>
-          <div className="ml-4">
-            {renderConditionRow('Chilblain', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.frostBite?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.frostBite?.female)}
-            {renderConditionRow('frost bite', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.immersionFoot?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.immersionFoot?.female)}
-            {renderConditionRow('immersion foot', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.generalHypothermia?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.generalHypothermia?.female)}
-            {renderConditionRow('general hypothermia', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.others?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.others?.female)}
-            {renderConditionRow('others', physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.airEmbolism?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.airEmbolism?.female)}
-          </div>
+          {renderConditionRow('Chilblain', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.chilblain?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.chilblain?.female)}
+          {renderConditionRow('Frost bite', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.frostBite?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.frostBite?.female)}
+          {renderConditionRow('Immersion foot', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.immersionFoot?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.immersionFoot?.female)}
+          {renderConditionRow('General hypothermia', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.generalHypothermia?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.generalHypothermia?.female)}
+          {renderConditionRow('Others', physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.others?.male, physicalEnvironmentDiseases?.temperatureHumidity?.coldTemperature?.others?.female)}
         </div>
 
         {/* c) Diseases due to Pressure Abnormalities */}
@@ -220,9 +217,11 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({
         <div className="ml-4 text-xs font-bold mb-0.5">Abnormalities:</div>
         <div className="ml-8">
           {/* Decompression Sickness subsection */}
-          <div className="text-xs font-bold mb-0.5 mt-1">Decompression Sickness:</div>
-          {renderConditionRow('air embolism', physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.airEmbolism?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.airEmbolism?.female)}
-          {renderConditionRow('caissons disease', physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.caissonsDisease?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.decompressionSickness?.caissonsDisease?.female)}
+          <div className="text-xs mt-0.5 ml-2">Decompression Sickness:</div>
+          <div className="ml-4">
+            {renderConditionRow('air embolism', physicalEnvironmentDiseases?.pressureAbnormalities?.airEmbolism?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.airEmbolism?.female)}
+            {renderConditionRow('bends disease', physicalEnvironmentDiseases?.pressureAbnormalities?.bendsDisease?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.bendsDisease?.female)}
+          </div>
           {renderConditionRow('barotrauma', physicalEnvironmentDiseases?.pressureAbnormalities?.hypoxia?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.hypoxia?.female)}
           {renderConditionRow('hypoxia', physicalEnvironmentDiseases?.pressureAbnormalities?.altitudeSickness?.male, physicalEnvironmentDiseases?.pressureAbnormalities?.altitudeSickness?.female)}
           {renderConditionRow('altitude sickness', physicalEnvironmentDiseases?.radiation?.cataracts?.male, physicalEnvironmentDiseases?.radiation?.cataracts?.female)}

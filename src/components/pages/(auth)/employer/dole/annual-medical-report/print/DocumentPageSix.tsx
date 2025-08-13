@@ -1,5 +1,10 @@
 import React from 'react';
 
+interface PhysicalHazardsOthers {
+  substance?: string;
+  workers?: number;
+}
+
 interface BiologicalHazards {
   viral?: { substance: string; workers: number };
   bacterial?: { substance: string; workers: number };
@@ -15,11 +20,6 @@ interface ErgonomicStress {
   unfavorableWorkPosture?: { substance: string; workers: number };
   staticMonotonousWork?: { substance: string; workers: number };
   othersSpecify?: { substance: string; workers: number };
-}
-
-interface PhysicalHazardsOthers {
-  substance?: string;
-  workers?: number;
 }
 
 interface DocumentPageSixProps {

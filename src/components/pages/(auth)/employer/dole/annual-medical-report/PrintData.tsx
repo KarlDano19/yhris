@@ -7,48 +7,10 @@ import DocumentPageFour from './print/DocumentPageFour';
 import DocumentPageFive from './print/DocumentPageFive';
 import DocumentPageSix from './print/DocumentPageSix';
 
-interface AnnualMedicalReportData {
-  establishmentName: string;
-  address: string;
-  ownerManager: string;
-  natureOfBusiness: string;
-  totalEmployees: number;
-  numberOfShifts: number;
-  reportPeriod: {
-    from: string;
-    to: string;
-  };
-  shifts: {
-    first: { male: number; female: number; total: number };
-    second: { male: number; female: number; total: number };
-    third: { male: number; female: number; total: number };
-  };
-  healthService: {
-    organizedBy: 'establishment' | 'government' | 'other';
-    otherSpecify?: string;
-    serviceType: 'solely' | 'common';
-  };
-  occupationalHealthStaff: {
-    consultant: { name: string; address: string };
-    physician: { name: string; address: string };
-    dentist: { name: string; address: string };
-    nurse: { name: string; address: string };
-    inspectionFrequency: 'other' | 'monthly' | 'quarterly' | 'biannual';
-  };
-  emergencyServices: {
-    hasTreatmentRoom: boolean;
-    otherDetails?: string;
-  };
-  workSchedule: {
-    physician: { hours: number; shift: string };
-    dentist: { hours: number; shift: string };
-    practitioner: { hours: number; shift: string };
-    nurse: { hours: number; shift: string };
-  };
-}
-
-export const pageOne = (item: any, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string): AnnualMedicalReportData => {
-  return {
+export const createAnnualMedicalDocumentComponent = (item: any, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string) => {
+  
+  // Page One Data
+  const pageOneData = {
     establishmentName: companyName || '\u00A0',
     address: item.address || '\u00A0',
     ownerManager: item.name_of_owner_manager || '\u00A0',
@@ -77,34 +39,49 @@ export const pageOne = (item: any, companyName?: string, reportPeriodFrom?: stri
       },
     },
     healthService: {
-      organizedBy: item.occupational_health_services_by?.[0] === 'establishment/undertaking' ? 'establishment' : 
-                   item.occupational_health_services_by?.[0] === 'government authority/institution' ? 'government' :
-                   item.occupational_health_services_by?.[0] === 'other bodies/groups/institution' ? 'other' : 'establishment',
+      organizedBy: {
+        establishment: Array.isArray(item.occupational_health_services_by) && item.occupational_health_services_by.some((service: string) => service.includes('establishment/undertaking')),
+        government: Array.isArray(item.occupational_health_services_by) && item.occupational_health_services_by.some((service: string) => service.includes('government authority/institution')),
+        other: (Array.isArray(item.occupational_health_services_by) && item.occupational_health_services_by.some((service: string) => service.includes('Other'))) || 
+               (item.occupational_health_services_by_other_specification && item.occupational_health_services_by_other_specification.trim() !== '')
+      },
       otherSpecify: item.occupational_health_services_by_other_specification || '\u00A0',
-      serviceType: item.occupational_health_services_as_a_service?.[0] === 'solely for the workers of the establishment/undertaking' ? 'solely' :
-                   item.occupational_health_services_as_a_service?.[0] === 'common to a number of establishments/undertakings' ? 'common' : 'solely',
+      serviceType: {
+        solely: Array.isArray(item.occupational_health_services_as_a_service) && item.occupational_health_services_as_a_service.some((service: string) => service.includes('solely for the workers of the establishment/undertaking')),
+        common: Array.isArray(item.occupational_health_services_as_a_service) && item.occupational_health_services_as_a_service.some((service: string) => service.includes('common to a number of establishments/undertakings'))
+      }
     },
     occupationalHealthStaff: {
       consultant: { 
-        name: item.employer_engages_the_services_of?.[0] || '\u00A0', 
+        name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational Health Consultant (OSH Consultant)')) ? 'Occupational Health Consultant (OSH Consultant)' : '\u00A0', 
         address: '\u00A0' // Not available in the data
       },
       physician: { 
-        name: '\u00A0', // Not available in the data
+        name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational health physician')) ? 'Occupational health physician' : '\u00A0', 
         address: '\u00A0' // Not available in the data
       },
       dentist: { 
-        name: '\u00A0', // Not available in the data
+        name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational health dentist')) ? 'Occupational health dentist' : '\u00A0', 
         address: '\u00A0' // Not available in the data
       },
       nurse: { 
-        name: '\u00A0', // Not available in the data
+        name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational health nurse')) ? 'Occupational health nurse' : '\u00A0', 
         address: '\u00A0' // Not available in the data
       },
-      inspectionFrequency: item.conduct_inspection_of_workplace?.[0] || 'monthly',
+      inspectionFrequency: {
+        onceEveryMonth: Array.isArray(item.conduct_inspection_of_workplace) && item.conduct_inspection_of_workplace.some((inspection: string) => inspection.includes('once every month')),
+        onceEveryTwoMonths: Array.isArray(item.conduct_inspection_of_workplace) && item.conduct_inspection_of_workplace.some((inspection: string) => inspection.includes('once every two (2) months')),
+        onceEveryThreeMonths: Array.isArray(item.conduct_inspection_of_workplace) && item.conduct_inspection_of_workplace.some((inspection: string) => inspection.includes('once every three (3) months')),
+        onceEverySixMonths: Array.isArray(item.conduct_inspection_of_workplace) && item.conduct_inspection_of_workplace.some((inspection: string) => inspection.includes('once every six (6) months')),
+        other: (Array.isArray(item.conduct_inspection_of_workplace) && item.conduct_inspection_of_workplace.some((inspection: string) => inspection.includes('other details'))) ||
+               (item.conduct_inspection_of_workplace_other_specification && item.conduct_inspection_of_workplace_other_specification.trim() !== '')
+      },
+      inspectionFrequencyOtherDetails: item.conduct_inspection_of_workplace_other_specification || '\u00A0',
     },
     emergencyServices: {
-      hasTreatmentRoom: (Array.isArray(item.provided_treatment_room_medical_clinic) && item.provided_treatment_room_medical_clinic[0]?.includes('yes')) || (!Array.isArray(item.provided_treatment_room_medical_clinic) && item.provided_treatment_room_medical_clinic?.includes('yes')) || false,
+      hasTreatmentRoom: (Array.isArray(item.provided_treatment_room_medical_clinic) && item.provided_treatment_room_medical_clinic.some((service: string) => service.includes('yes'))) || (!Array.isArray(item.provided_treatment_room_medical_clinic) && item.provided_treatment_room_medical_clinic?.includes('yes')) || false,
+      hasOthers: (Array.isArray(item.provided_treatment_room_medical_clinic) && item.provided_treatment_room_medical_clinic.some((service: string) => service.includes('others'))) || 
+                 (item.provided_treatment_room_medical_clinic_other_specification && item.provided_treatment_room_medical_clinic_other_specification.trim() !== ''),
       otherDetails: item.provided_treatment_room_medical_clinic_other_specification || '\u00A0',
     },
     workSchedule: {
@@ -126,13 +103,8 @@ export const pageOne = (item: any, companyName?: string, reportPeriodFrom?: stri
       },
     },
   };
-};
 
-export const createAnnualMedicalDocumentComponent = (item: any, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string) => {
-  // Prepare data for page one
-  const pageOneData = pageOne(item, companyName, reportPeriodFrom, reportPeriodTo);
-  
-  // Use actual data from the API for page two (attendance, training, examinations, diseases)
+  // Page Two Data
   const pageTwoData = {
     attendanceSchedule: {
       firstShift: (Array.isArray(item.schedule_of_attendance_of_full_time_first_aider) && item.schedule_of_attendance_of_full_time_first_aider[0]?.includes('1st shift')) || (!Array.isArray(item.schedule_of_attendance_of_full_time_first_aider) && item.schedule_of_attendance_of_full_time_first_aider?.includes('1st shift')) ? 1 : 0,
@@ -140,10 +112,12 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
       thirdShift: (Array.isArray(item.schedule_of_attendance_of_full_time_first_aider) && item.schedule_of_attendance_of_full_time_first_aider[0]?.includes('3rd shift')) || (!Array.isArray(item.schedule_of_attendance_of_full_time_first_aider) && item.schedule_of_attendance_of_full_time_first_aider?.includes('3rd shift')) ? 1 : 0
     },
     occupationalHealthTraining: {
-      physician: item.occupational_health_personnel_training?.includes('occupational health physician') || false,
-      dentist: item.occupational_health_personnel_training?.includes('occupational health dentist') || false,
-      nurse: item.occupational_health_personnel_training?.includes('occupational health nurse') || false,
-      firstAider: item.occupational_health_personnel_training?.includes('first aider') || false,
+      physician: Array.isArray(item.occupational_health_personnel_training) && item.occupational_health_personnel_training.some((training: string) => training.includes('occupational health physician')) || false,
+      dentist: Array.isArray(item.occupational_health_personnel_training) && item.occupational_health_personnel_training.some((training: string) => training.includes('occupational health dentist')) || false,
+      nurse: Array.isArray(item.occupational_health_personnel_training) && item.occupational_health_personnel_training.some((training: string) => training.includes('occupational health nurse')) || false,
+      firstAider: Array.isArray(item.occupational_health_personnel_training) && item.occupational_health_personnel_training.some((training: string) => training.includes('first aider')) || false,
+      others: (Array.isArray(item.occupational_health_personnel_training) && item.occupational_health_personnel_training.some((training: string) => training.includes('Other'))) || 
+              (item.occupational_health_personnel_training_other_specification && item.occupational_health_personnel_training_other_specification.trim() !== ''),
       othersSpecify: item.occupational_health_personnel_training_other_specification || '\u00A0'
     },
     hasRegularAppraisal: item.sanitation_system_appraisal?.includes('yes') || false,
@@ -218,7 +192,6 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
       eyes: {
         errorOfRefraction: { male: item.error_of_refraction_male || 0, female: item.error_of_refraction_female || 0 },
         bacterialViral: { male: item.bacterial_viral_conjunctivities_male || 0, female: item.bacterial_viral_conjunctivities_female || 0 },
-        conjunctivitis: { male: item.bacterial_viral_conjunctivities_male || 0, female: item.bacterial_viral_conjunctivities_female || 0 },
         cataract: { male: item.cataract_male || 0, female: item.cataract_female || 0 },
         others: { male: item.others_eyes_male || 0, female: item.others_eyes_female || 0 }
       },
@@ -236,6 +209,7 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
     }
   };
 
+  // Page Three Data
   const pageThreeData = {
     // Basic conditions
     laryngitis: { male: item.laryngitis_male || 0, female: item.laryngitis_female || 0 },
@@ -313,6 +287,7 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
     }
   };
 
+  // Page Four Data
   const pageFourData = {
     infectiousDiseases: {
       lymphadenitis: { male: item.lymphadenitis_male || 0, female: item.lymphadenitis_female || 0 },
@@ -321,9 +296,7 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
       typhoidParatyphoid: { male: item.typhoid_fever_male || 0, female: item.typhoid_fever_female || 0 },
       cholera: { male: item.cholera_male || 0, female: item.cholera_female || 0 },
       measles: { male: item.measles_male || 0, female: item.measles_female || 0 },
-
-      mumps: { male: 0, female: 0 }, // Not in data
-
+      tetanus: { male: item.tetanus_male || 0, female: item.tetanus_female || 0 },
       malaria: { male: item.malaria_male || 0, female: item.malaria_female || 0 },
       schistosomiasis: { male: item.schistosomiasis_male || 0, female: item.schistosomiasis_female || 0 },
       herpesZoster: { male: item.herpes_zoster_male || 0, female: item.herpes_zoster_female || 0 },
@@ -349,18 +322,16 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
         others: { male: item.others_heat_male || 0, female: item.others_heat_female || 0 },
 
         coldTemperature: {
-          chilblain: { male: 0, female: 0 }, // Not in data
-          frostBite: { male: 0, female: 0 }, // Not in data
-          immersionFoot: { male: 0, female: 0 }, // Not in data
-          generalHypothermia: { male: 0, female: 0 }, // Not in data
-          others: { male: 0, female: 0 } // Not in data
+          chilblain: { male: item.chilblain_male || 0, female: item.chilblain_female || 0 },
+          frostBite: { male: item.frost_bite_male || 0, female: item.frost_bite_female || 0 },
+          immersionFoot: { male: item.immersion_foot_male || 0, female: item.immersion_foot_female || 0 },
+          generalHypothermia: { male: item.general_hypothermia_male || 0, female: item.general_hypothermia_female || 0 },
+          others: { male: item.others_cold_temperature_male || 0, female: item.others_cold_temperature_female || 0 }
         }
       },
       pressureAbnormalities: {
-        decompressionSickness: {
-          airEmbolism: { male: item.air_embolism_male || 0, female: item.air_embolism_female || 0 },
-          caissonsDisease: { male: item.bends_disease_male || 0, female: item.bends_disease_female || 0 }
-        },
+        airEmbolism: { male: item.air_embolism_male || 0, female: item.air_embolism_female || 0 },
+        bendsDisease: { male: item.bends_disease_male || 0, female: item.bends_disease_female || 0 },
         barotrauma: { male: item.barotrauma_male || 0, female: item.barotrauma_female || 0 },
         hypoxia: { male: item.hypoxia_male || 0, female: item.hypoxia_female || 0 },
         altitudeSickness: { male: item.altitude_sickness_male || 0, female: item.altitude_sickness_female || 0 }
@@ -376,13 +347,12 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
       contusionBruises: { male: item.contusion_bruises_hematoma_male || 0, female: item.contusion_bruises_hematoma_female || 0 },
       abrasions: { male: item.abrasions_male || 0, female: item.abrasions_female || 0 },
       cuts: { male: item.cuts_lacerations_punctures_male || 0, female: item.cuts_lacerations_punctures_female || 0 },
-      
-      concussion: { male: 0, female: 0 }, // Not in data
-      
+      concussion: { male: item.concussion_male || 0, female: item.concussion_female || 0 },
       avulsion: { male: item.avulsion_male || 0, female: item.avulsion_female || 0 }
     }
   };
 
+  // Page Five Data
   const pageFiveData = {
     additionalInjuries: {
       amputation: { male: item.amputation_loss_body_part_male || 0, female: item.amputation_loss_body_part_female || 0 },
@@ -398,10 +368,7 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
       tetanusAntitoxin: { male: item.tetanus_antitoxin_injection_male || 0, female: item.tetanus_antitoxin_injection_female || 0 },
       tetanusGlobulin: { male: item.tetanus_globulin_injection_male || 0, female: item.tetanus_globulin_injection_female || 0 },
       hepatitisB: { male: item.hepatitis_b_vaccination_male || 0, female: item.hepatitis_b_vaccination_female || 0 },
-      rabiesVaccine: { male: item.rabies_vaccination_male || 0, female: item.rabies_vaccination_female || 0 },
-      
-      covid19Vaccine: { male: 0, female: 0 }, // Not in data
-      
+      rabiesVaccine: { male: item.rabies_vaccination_male || 0, female: item.rabies_vaccination_female || 0 },      
       others: { male: item.others_immunization_male || 0, female: item.others_immunization_female || 0 }
     },
     medicalRecordsKeeping: {
@@ -416,28 +383,28 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
     otherHealthPrograms: {
       nutrition: { 
         seminar: item.nutrition_program?.includes('seminars') || false, 
-        visualAids: item.nutrition_program?.includes('visual_aids') || false, 
-        counselling: item.nutrition_program?.includes('counselling') || false 
+        visualAids: item.nutrition_program?.includes('use_of_visual_aid_materials') || false, 
+        counselling: item.nutrition_program?.includes('counseling') || false 
       },
       maternalChildCare: { 
         seminar: item.maternal_and_child_care_program?.includes('seminars') || false, 
-        visualAids: item.maternal_and_child_care_program?.includes('visual_aids') || false, 
-        counselling: item.maternal_and_child_care_program?.includes('counselling') || false 
+        visualAids: item.maternal_and_child_care_program?.includes('use_of_visual_aid_materials') || false, 
+        counselling: item.maternal_and_child_care_program?.includes('counseling') || false 
       },
       familyPlanning: { 
         seminar: item.family_planning_program?.includes('seminars') || false, 
-        visualAids: item.family_planning_program?.includes('visual_aids') || false, 
-        counselling: item.family_planning_program?.includes('counselling') || false 
+        visualAids: item.family_planning_program?.includes('use_of_visual_aid_materials') || false, 
+        counselling: item.family_planning_program?.includes('counseling') || false 
       },
       mentalHealth: { 
         seminar: item.mental_health_program?.includes('seminars') || false, 
-        visualAids: item.mental_health_program?.includes('visual_aids') || false, 
-        counselling: item.mental_health_program?.includes('counselling') || false 
+        visualAids: item.mental_health_program?.includes('use_of_visual_aid_materials') || false, 
+        counselling: item.mental_health_program?.includes('counseling') || false 
       },
       personalHealthMaintenance: { 
         seminar: item.personal_health_maintenance?.includes('seminars') || false, 
-        visualAids: item.personal_health_maintenance?.includes('visual_aids') || false, 
-        counselling: item.personal_health_maintenance?.includes('counselling') || false 
+        visualAids: item.personal_health_maintenance?.includes('use_of_visual_aid_materials') || false, 
+        counselling: item.personal_health_maintenance?.includes('counseling') || false 
       }
     },
     physicalFitnessProgram: {
@@ -461,6 +428,7 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
     }
   };
 
+  // Page Six Data
   const pageSixData = {
     physicalHazardsOthers: {
       substance: item.others_physical_hazards_sources || '\u00A0',
@@ -529,5 +497,3 @@ export const handlePrintPDF = async (item: any, generatePDFLocally: (component: 
   // Generate PDF locally (opens print dialog)
   await generatePDFLocally(documentComponent, filename);
 };
-
-export type { AnnualMedicalReportData };

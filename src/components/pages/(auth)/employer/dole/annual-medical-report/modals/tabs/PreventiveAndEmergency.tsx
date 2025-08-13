@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 // eslint-disable-next-line react-hooks/exhaustive-deps
 
 function PreventiveAndEmergency({
@@ -22,6 +22,8 @@ function PreventiveAndEmergency({
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
+  const otherCheckboxARef = useRef<HTMLInputElement>(null);
+  const otherCheckboxDRef = useRef<HTMLInputElement>(null);
 
   // Helper to check if a checkbox group is filled
   const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
@@ -73,7 +75,7 @@ function PreventiveAndEmergency({
         message: "Please select at least one option."
       });
       hasError = true;
-    } else if (Array.isArray(d) && d.includes("Other") && !dOther) {
+    } else if (Array.isArray(d) && d.includes("other details") && !dOther) {
       setError("conduct_inspection_of_workplace_other_specification", {
         type: "manual",
         message: "Section (d): Please specify 'Other'."
@@ -84,7 +86,7 @@ function PreventiveAndEmergency({
     setSelectedTab(3);
   };
 
-  // Clear errors on change
+  // Watch form values
   const occupationalHealthServicesBy = watch("occupational_health_services_by");
   const occupationalHealthServicesByOther = watch("occupational_health_services_by_other_specification");
   const occupationalHealthServicesAsService = watch("occupational_health_services_as_a_service");
@@ -92,6 +94,48 @@ function PreventiveAndEmergency({
   const conductInspection = watch("conduct_inspection_of_workplace");
   const conductInspectionOther = watch("conduct_inspection_of_workplace_other_specification");
 
+  // Sync local state with form data
+  useEffect(() => {
+    if (Array.isArray(occupationalHealthServicesBy) && occupationalHealthServicesBy.includes("Other")) {
+      setIsOtherCheckedA(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else if (occupationalHealthServicesByOther) {
+      setIsOtherCheckedA(true);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedA(false);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = false;
+      }
+    }
+  }, [occupationalHealthServicesBy, occupationalHealthServicesByOther]);
+
+  useEffect(() => {
+    if (Array.isArray(conductInspection) && conductInspection.includes("other details")) {
+      setIsOtherCheckedD(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else if (conductInspectionOther) {
+      setIsOtherCheckedD(true);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedD(false);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = false;
+      }
+    }
+  }, [conductInspection, conductInspectionOther]);
+
+  // Clear errors on change
   useEffect(() => {
     if (isChecked(occupationalHealthServicesBy)) {
       clearErrors("occupational_health_services_by");
@@ -167,11 +211,18 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("occupational_health_services_by")}
-                id="occupational_health_services_by"
+                id="occupational_health_services_by_other"
                 value="Other"
-                onChange={(e) => setIsOtherCheckedA(e.target.checked)}
+                ref={otherCheckboxARef}
+                onChange={(e) => {
+                  setIsOtherCheckedA(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && occupationalHealthServicesByOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
               />
-              <label htmlFor="occupational_health_services_by" className="ml-2 text-sm md:text-base">
+              <label htmlFor="occupational_health_services_by_other" className="ml-2 text-sm md:text-base">
                 other bodies/groups/institution (specify)
                 <span className="text-gray-500"></span>
               </label>
@@ -339,16 +390,16 @@ function PreventiveAndEmergency({
               {errors.conduct_inspection_of_workplace.message || "Section (d) is required."}
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
                 id="conduct_inspection_of_workplace"
-                value="the establishment/undertaking"
+                value="once every month"
               />
               <label htmlFor="conduct_inspection_of_workplace" className="ml-1 text-sm md:text-base">
-                the establishment/undertaking
+                once every month
               </label>
             </div>
             <div className="relative mt-2 flex items-center gap-2">
@@ -356,10 +407,10 @@ function PreventiveAndEmergency({
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
                 id="conduct_inspection_of_workplace"
-                value="government authority/institution"
+                value="once every three (3) months"
               />
               <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
-                government authority/institution
+                once every three (3) months
                 <span className="text-gray-500"></span>
               </label>
             </div>
@@ -368,11 +419,42 @@ function PreventiveAndEmergency({
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
                 id="conduct_inspection_of_workplace"
-                value="Other"
-                onChange={(e) => setIsOtherCheckedD(e.target.checked)}
+                value="once every two (2) months"
               />
               <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
-                other bodies/groups/institution (specify)
+                once every two (2) months
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("conduct_inspection_of_workplace")}
+                id="conduct_inspection_of_workplace"
+                value="once every six (6) months"
+              />
+              <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
+                once every six (6) months
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("conduct_inspection_of_workplace")}
+                id="conduct_inspection_of_workplace_other"
+                value="other details"
+                ref={otherCheckboxDRef}
+                onChange={(e) => {
+                  setIsOtherCheckedD(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && conductInspectionOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
+              />
+              <label htmlFor="conduct_inspection_of_workplace_other" className="ml-2 text-sm md:text-base">
+                other details
                 <span className="text-gray-500"></span>
               </label>
             </div>

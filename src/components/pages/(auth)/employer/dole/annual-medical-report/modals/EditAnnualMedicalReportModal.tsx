@@ -445,10 +445,24 @@ function EditAnnualMedicalReportModal({
         setValue("others_heat_female", annualMedicalReportData.others_heat_female);
         setValue("others_heat_total", annualMedicalReportData.others_heat_total);
 
-        // Diseases due to Radiation
-        setValue("decompression_sickness_male", annualMedicalReportData.decompression_sickness_male);
-        setValue("decompression_sickness_female", annualMedicalReportData.decompression_sickness_female);
-        setValue("decompression_sickness_total", annualMedicalReportData.decompression_sickness_total);
+        // Diseases due to Pressure Abnormalities
+        setValue("chilblain_male", annualMedicalReportData.chilblain_male);
+        setValue("chilblain_female", annualMedicalReportData.chilblain_female);
+        setValue("chilblain_total", annualMedicalReportData.chilblain_total);
+        setValue("frost_bite_male", annualMedicalReportData.frost_bite_male);
+        setValue("frost_bite_female", annualMedicalReportData.frost_bite_female);
+        setValue("frost_bite_total", annualMedicalReportData.frost_bite_total);
+        setValue("immersion_foot_male", annualMedicalReportData.immersion_foot_male);
+        setValue("immersion_foot_female", annualMedicalReportData.immersion_foot_female);
+        setValue("immersion_foot_total", annualMedicalReportData.immersion_foot_total);
+        setValue("general_hypothermia_male", annualMedicalReportData.general_hypothermia_male);
+        setValue("general_hypothermia_female", annualMedicalReportData.general_hypothermia_female);
+        setValue("general_hypothermia_total", annualMedicalReportData.general_hypothermia_total);
+        setValue("others_cold_temperature_male", annualMedicalReportData.others_cold_temperature_male);
+        setValue("others_cold_temperature_female", annualMedicalReportData.others_cold_temperature_female);
+        setValue("others_cold_temperature_total", annualMedicalReportData.others_cold_temperature_total);
+
+        // Diseases due to Pressure Abnormalities
         setValue("air_embolism_male", annualMedicalReportData.air_embolism_male);
         setValue("air_embolism_female", annualMedicalReportData.air_embolism_female);
         setValue("air_embolism_total", annualMedicalReportData.air_embolism_total);
@@ -464,6 +478,8 @@ function EditAnnualMedicalReportModal({
         setValue("altitude_sickness_male", annualMedicalReportData.altitude_sickness_male);
         setValue("altitude_sickness_female", annualMedicalReportData.altitude_sickness_female);
         setValue("altitude_sickness_total", annualMedicalReportData.altitude_sickness_total);
+
+        // Diseases due to Radiation
         setValue("cataract_radiation_male", annualMedicalReportData.cataract_radiation_male);
         setValue("cataract_radiation_female", annualMedicalReportData.cataract_radiation_female);
         setValue("cataract_radiation_total", annualMedicalReportData.cataract_radiation_total);
@@ -488,6 +504,9 @@ function EditAnnualMedicalReportModal({
         setValue("cuts_lacerations_punctures_male", annualMedicalReportData.cuts_lacerations_punctures_male);
         setValue("cuts_lacerations_punctures_female", annualMedicalReportData.cuts_lacerations_punctures_female);
         setValue("cuts_lacerations_punctures_total", annualMedicalReportData.cuts_lacerations_punctures_total);
+        setValue("concussion_male", annualMedicalReportData.concussion_male);
+        setValue("concussion_female", annualMedicalReportData.concussion_female);
+        setValue("concussion_total", annualMedicalReportData.concussion_total);
         setValue("avulsion_male", annualMedicalReportData.avulsion_male);
         setValue("avulsion_female", annualMedicalReportData.avulsion_female);
         setValue("avulsion_total", annualMedicalReportData.avulsion_total);

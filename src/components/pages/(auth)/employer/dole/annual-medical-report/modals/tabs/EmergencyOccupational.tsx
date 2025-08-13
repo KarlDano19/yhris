@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function EmergencyOccupational({
   register,
@@ -23,6 +23,8 @@ function EmergencyOccupational({
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
+  const otherCheckboxARef = useRef<HTMLInputElement>(null);
+  const otherCheckboxDRef = useRef<HTMLInputElement>(null);
 
   // Helper to check if a checkbox group is filled
   const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
@@ -120,6 +122,47 @@ function EmergencyOccupational({
   const personnelTraining = watch("occupational_health_personnel_training");
   const personnelTrainingOther = watch("occupational_health_personnel_training_other_specification");
 
+  // Sync local state with form data
+  useEffect(() => {
+    if (Array.isArray(providedTreatmentRoom) && providedTreatmentRoom.includes("Other")) {
+      setIsOtherCheckedA(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else if (providedTreatmentRoomOther) {
+      setIsOtherCheckedA(true);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedA(false);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = false;
+      }
+    }
+  }, [providedTreatmentRoom, providedTreatmentRoomOther]);
+
+  useEffect(() => {
+    if (Array.isArray(personnelTraining) && personnelTraining.includes("Other")) {
+      setIsOtherCheckedD(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else if (personnelTrainingOther) {
+      setIsOtherCheckedD(true);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedD(false);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = false;
+      }
+    }
+  }, [personnelTraining, personnelTrainingOther]);
+
   useEffect(() => {
     if (isChecked(providedTreatmentRoom)) {
       clearErrors("provided_treatment_room_medical_clinic");
@@ -209,12 +252,19 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("provided_treatment_room_medical_clinic")}
-                id="provided_treatment_room_medical_clinic"
+                id="provided_treatment_room_medical_clinic_other"
                 value="Other"
-                onChange={(e) => setIsOtherCheckedA(e.target.checked)}
+                ref={otherCheckboxARef}
+                onChange={(e) => {
+                  setIsOtherCheckedA(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && providedTreatmentRoomOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
               />
               <label
-                htmlFor="provided_treatment_room_medical_clinic"
+                htmlFor="provided_treatment_room_medical_clinic_other"
                 className="ml-2"
               >
                 others, please specify
@@ -634,12 +684,19 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_training_other"
                 value="Other"
-                onChange={(e) => setIsOtherCheckedD(e.target.checked)}
+                ref={otherCheckboxDRef}
+                onChange={(e) => {
+                  setIsOtherCheckedD(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && personnelTrainingOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_training_other"
                 className="ml-2"
               >
                 others, please specify

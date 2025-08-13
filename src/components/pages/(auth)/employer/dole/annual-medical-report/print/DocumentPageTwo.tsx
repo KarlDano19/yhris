@@ -11,6 +11,7 @@ interface OccupationalHealthTraining {
   dentist?: boolean;
   nurse?: boolean;
   firstAider?: boolean;
+  others?: boolean;
   othersSpecify?: string;
 }
 
@@ -28,7 +29,6 @@ interface DiseaseReportData {
     allergy?: { male: number; female: number };
     dermatoses?: { male: number; female: number };
     infectionAsFolliculitisAbscessParonychia?: { male: number; female: number };
-    abscessParoNychia?: { male: number; female: number };
     others?: { male: number; female: number };
   };
   head?: {
@@ -38,7 +38,6 @@ interface DiseaseReportData {
   eyes?: {
     errorOfRefraction?: { male: number; female: number };
     bacterialViral?: { male: number; female: number };
-    conjunctivitis?: { male: number; female: number };
     cataract?: { male: number; female: number };
     others?: { male: number; female: number };
   };
@@ -205,7 +204,7 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({
             <span>first aider</span>
           </div>
           <div className="flex items-center">
-            <span className="w-6 text-center">( )</span>
+            <span className="w-6 text-center">({occupationalHealthTraining?.others ? '✓' : ' '})</span>
             <span>others, please specify</span>
             <div className="border-b border-black ml-2 flex-1">
               {occupationalHealthTraining?.othersSpecify || '\u00A0'}
@@ -300,8 +299,7 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({
           <div className="ml-4">
             {renderConditionRow('allergy', diseaseData?.skin?.allergy?.male, diseaseData?.skin?.allergy?.female)}
             {renderConditionRow('dermatoses', diseaseData?.skin?.dermatoses?.male, diseaseData?.skin?.dermatoses?.female)}
-            {renderConditionRow('infection as folliculitis', diseaseData?.skin?.infectionAsFolliculitisAbscessParonychia?.male, diseaseData?.skin?.infectionAsFolliculitisAbscessParonychia?.female)}
-            {renderConditionRow('abscess/paro nychia', diseaseData?.skin?.abscessParoNychia?.male, diseaseData?.skin?.abscessParoNychia?.female)}
+            {renderConditionRow('infection as folliculitis abscess/paro nychia', diseaseData?.skin?.infectionAsFolliculitisAbscessParonychia?.male, diseaseData?.skin?.infectionAsFolliculitisAbscessParonychia?.female)}
             {renderConditionRow('Others', diseaseData?.skin?.others?.male, diseaseData?.skin?.others?.female)}
           </div>
 
@@ -316,8 +314,7 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({
           {renderCategoryHeader('Eyes:')}
           <div className="ml-4">
             {renderConditionRow('error of refraction', diseaseData?.eyes?.errorOfRefraction?.male, diseaseData?.eyes?.errorOfRefraction?.female)}
-            {renderConditionRow('bacterial/viral', diseaseData?.eyes?.bacterialViral?.male, diseaseData?.eyes?.bacterialViral?.female)}
-            {renderConditionRow('conjunctivitis', diseaseData?.eyes?.conjunctivitis?.male, diseaseData?.eyes?.conjunctivitis?.female)}
+            {renderConditionRow('bacterial/viral conjunctivitis', diseaseData?.eyes?.bacterialViral?.male, diseaseData?.eyes?.bacterialViral?.female)}
             {renderConditionRow('cataract', diseaseData?.eyes?.cataract?.male, diseaseData?.eyes?.cataract?.female)}
             {renderConditionRow('Others', diseaseData?.eyes?.others?.male, diseaseData?.eyes?.others?.female)}
           </div>

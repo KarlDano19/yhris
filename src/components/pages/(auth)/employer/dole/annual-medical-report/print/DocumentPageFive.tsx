@@ -11,7 +11,6 @@ interface ImmunizationData {
   tetanusGlobulin?: InjuryData;
   hepatitisB?: InjuryData;
   rabiesVaccine?: InjuryData;
-  covid19Vaccine?: InjuryData;
   others?: InjuryData;
 }
 
@@ -236,9 +235,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
           {renderImmunizationRow('Tetanus Antitoxin Injection', immunizationProgram?.tetanusAntitoxin?.male, immunizationProgram?.tetanusAntitoxin?.female)}
           {renderImmunizationRow('Tetanus Globulin Injection', immunizationProgram?.tetanusGlobulin?.male, immunizationProgram?.tetanusGlobulin?.female)}
           {renderImmunizationRow('Hepatitis B Vaccine', immunizationProgram?.hepatitisB?.male, immunizationProgram?.hepatitisB?.female)}
-          {renderImmunizationRow('Rabies Vaccine', immunizationProgram?.rabiesVaccine?.male, immunizationProgram?.rabiesVaccine?.female)}
-          {renderImmunizationRow('COVID-19 Vaccine', immunizationProgram?.covid19Vaccine?.male, immunizationProgram?.covid19Vaccine?.female)}
-          
+          {renderImmunizationRow('Rabies Vaccine', immunizationProgram?.rabiesVaccine?.male, immunizationProgram?.rabiesVaccine?.female)}          
           {renderImmunizationRow('Others (Please specify)', immunizationProgram?.others?.male, immunizationProgram?.others?.female)}
         </div>
       </div>

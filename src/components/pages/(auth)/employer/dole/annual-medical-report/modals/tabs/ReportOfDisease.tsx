@@ -25,6 +25,7 @@ import DiseaseDueToTemperature from "./components/report-of-disease/tabs/physica
 import DiseaseDueToRadiation from "./components/report-of-disease/tabs/physical-environment/DiseaseDueToRadiation";
 
 import classNames from "@/helpers/classNames";
+import DiseaseDueToPressure from "./components/report-of-disease/tabs/physical-environment/DiseaseDueToPressure";
 
 function ReportOfDisease({
   register,
@@ -51,6 +52,8 @@ function ReportOfDisease({
   const [isLymphaticOpen, setIsLymphaticOpen] = useState(false);
   const [isMountENTOpen, setIsMountENTOpen] = useState(false);
   const [isInfectionOpen, setIsInfectionOpen] = useState(false);
+  const [isDiseaseDueToPressureOpen, setIsDiseaseDueToPressureOpen] =
+    useState(false);
   const [isDiseaseDueToRadiationOpen, setIsDiseaseDueToRadiationOpen] =
     useState(false);
   const [isDiseaseDueToTemperatureOpen, setIsDiseaseDueToTemperatureOpen] =
@@ -77,6 +80,8 @@ function ReportOfDisease({
     setIsNeurologicalOpen(!isNeurologicalOpen);
   const toggleLymphaticOpen = () => setIsLymphaticOpen(!isLymphaticOpen);
   const toggleInfectionOpen = () => setIsInfectionOpen(!isInfectionOpen);
+  const toggleDiseaseDueToPressureOpen = () =>
+    setIsDiseaseDueToPressureOpen(!isDiseaseDueToPressureOpen);
   const toggleDiseaseDueToRadiationOpen = () =>
     setIsDiseaseDueToRadiationOpen(!isDiseaseDueToRadiationOpen);
   const toggleDiseaseDueToTemperatureOpen = () =>
@@ -268,9 +273,18 @@ function ReportOfDisease({
               <DiseaseDueToTemperature register={register} setValue={setValue} watch={watch} />
             </ToggleSection>
 
+            {/* Diseases due to Pressure */}
+            <ToggleSection 
+              title="c. Diseases due to Pressure Abnormalities:" 
+              isOpen={isDiseaseDueToPressureOpen} 
+              onToggle={toggleDiseaseDueToPressureOpen}
+            >
+              <DiseaseDueToPressure register={register} setValue={setValue} watch={watch}/>
+            </ToggleSection>
+
             {/* Diseases due to radiation */}
             <ToggleSection 
-              title="c. Diseases due to radiation:" 
+              title="d. Diseases due to radiation:" 
               isOpen={isDiseaseDueToRadiationOpen} 
               onToggle={toggleDiseaseDueToRadiationOpen}
             >

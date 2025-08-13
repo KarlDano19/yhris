@@ -23,6 +23,7 @@ export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProp
       'contusion_bruises_hematoma',
       'abrasions',
       'cuts_lacerations_punctures',
+      'concussion',
       'avulsion',
       'amputation_loss_body_part',
       'crushing_injury',

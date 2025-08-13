@@ -17,19 +17,34 @@ interface AnnualMedicalReportData {
     third: { male: number; female: number; total: number };
   };
   healthService?: {
-    organizedBy: 'establishment' | 'government' | 'other';
+    organizedBy: {
+      establishment: boolean;
+      government: boolean;
+      other: boolean;
+    };
     otherSpecify?: string;
-    serviceType?: 'solely' | 'common';
+    serviceType: {
+      solely: boolean;
+      common: boolean;
+    };
   };
   occupationalHealthStaff?: {
     consultant?: { name: string; address: string };
     physician?: { name: string; address: string };
     dentist?: { name: string; address: string };
     nurse?: { name: string; address: string };
-    inspectionFrequency?: 'monthly' | 'quarterly' | 'biannual' | 'other';
+    inspectionFrequency: {
+      onceEveryMonth: boolean;
+      onceEveryTwoMonths: boolean;
+      onceEveryThreeMonths: boolean;
+      onceEverySixMonths: boolean;
+      other: boolean;
+    };
+    inspectionFrequencyOtherDetails?: string;
   };
   emergencyServices?: {
     hasTreatmentRoom: boolean;
+    hasOthers: boolean;
     otherDetails?: string;
   };
   workSchedule?: {
@@ -155,15 +170,15 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
           <div className="text-xs mb-1">a. Occupational health services is organized/provided by:</div>
           <div className="ml-4 space-y-0.5">
             <div className="flex items-center">
-              <span className="w-6 text-center">({data.healthService?.organizedBy === 'establishment' ? '✓' : ' '})</span>
+              <span className="w-6 text-center">({data.healthService?.organizedBy?.establishment ? '✓' : ' '})</span>
               <span>the establishment/undertaking</span>
             </div>
             <div className="flex items-center">
-              <span className="w-6 text-center">({data.healthService?.organizedBy === 'government' ? '✓' : ' '})</span>
+              <span className="w-6 text-center">({data.healthService?.organizedBy?.government ? '✓' : ' '})</span>
               <span>government authority/institution</span>
             </div>
             <div className="flex items-center">
-              <span className="w-6 text-center">({data.healthService?.organizedBy === 'other' ? '✓' : ' '})</span>
+              <span className="w-6 text-center">({data.healthService?.organizedBy?.other ? '✓' : ' '})</span>
               <span>other bodies/groups/institution (specify)</span>
               <div className="border-b border-black ml-2 px-2 flex-1">
                 {data.healthService?.otherSpecify || 'N/A'}
@@ -175,11 +190,11 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
             <div className="text-xs">b. Occupational health services as described under number 7a above, is organized/provided as a Service:</div>
             <div className="ml-4 space-y-0.5 mt-1">
               <div className="flex items-center">
-                <span className="w-6 text-center">({data.healthService?.serviceType === 'solely' ? '✓' : ' '})</span>
+                <span className="w-6 text-center">({data.healthService?.serviceType?.solely ? '✓' : ' '})</span>
                 <span>solely for the workers of the establishment/undertaking</span>
               </div>
               <div className="flex items-center">
-                <span className="w-6 text-center">({data.healthService?.serviceType === 'common' ? '✓' : ' '})</span>
+                <span className="w-6 text-center">({data.healthService?.serviceType?.common ? '✓' : ' '})</span>
                 <span>common to a number of establishments/undertakings</span>
                 <div className="border-b border-black ml-2 flex-1"></div>
               </div>
@@ -191,7 +206,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
           <div className="text-xs">c. The employer engages the services of:</div>
           <div className="ml-4 space-y-1 mt-1">
             <div className="flex items-center">
-              <span className="w-6 text-center">(✓)</span>
+              <span className="w-6 text-center">({data.occupationalHealthStaff?.consultant?.name ? '✓' : ' '})</span>
               <span>Occupational Health Consultant (OSH Consultant)</span>
             </div>
             <div className="ml-6 grid grid-cols-2 gap-2">
@@ -206,7 +221,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
             </div>
             
             <div className="flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">({data.occupationalHealthStaff?.physician?.name ? '✓' : ' '})</span>
               <span>Occupational health physician</span>
             </div>
             <div className="ml-6 grid grid-cols-2 gap-2">
@@ -221,7 +236,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
             </div>
 
             <div className="flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">({data.occupationalHealthStaff?.dentist?.name ? '✓' : ' '})</span>
               <span>Occupational health dentist</span>
             </div>
             <div className="ml-6 grid grid-cols-2 gap-2">
@@ -236,7 +251,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
             </div>
 
             <div className="flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">({data.occupationalHealthStaff?.nurse?.name ? '✓' : ' '})</span>
               <span>Occupational health nurse</span>
             </div>
             <div className="ml-6 grid grid-cols-2 gap-2">
@@ -255,29 +270,29 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
             </div>
             <div className="flex flex-wrap space-x-4">
               <div className="flex items-center">
-                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency === 'monthly' ? '✓' : ' '})</span>
+                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency?.onceEveryMonth ? '✓' : ' '})</span>
                 <span>once every month</span>
               </div>
               <div className="flex items-center">
-                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency === 'quarterly' ? '✓' : ' '})</span>
-                <span>once every three (3) months</span>
+                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency?.onceEveryTwoMonths ? '✓' : ' '})</span>
+                <span>once every two (2) months</span>
               </div>
             </div>
             <div className="flex flex-wrap space-x-4">
               <div className="flex items-center">
-                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency === 'biannual' ? '✓' : ' '})</span>
-                <span>once every two (2) months</span>
+                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency?.onceEveryThreeMonths ? '✓' : ' '})</span>
+                <span>once every three (3) months</span>
               </div>
               <div className="flex items-center">
-                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency === 'other' ? '✓' : ' '})</span>
+                <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency?.onceEverySixMonths ? '✓' : ' '})</span>
                 <span>once every six (6) months</span>
               </div>
             </div>
-            <div>
-              <div className="flex items-center">
-                <span className="w-6 text-center">( )</span>
-                <span>other details</span>
-                <div className="border-b border-black ml-2 flex-1"></div>
+            <div className="flex items-center">
+              <span className="w-6 text-center">({data.occupationalHealthStaff?.inspectionFrequency?.other ? '✓' : ' '})</span>
+              <span>other details</span>
+              <div className="border-b border-black ml-2 flex-1">
+                {data.occupationalHealthStaff?.inspectionFrequencyOtherDetails || '\u00A0'}
               </div>
             </div>
           </div>
@@ -301,10 +316,10 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
           </div>
           <div className="ml-4 mt-0.5">
             <div className="flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">({data.emergencyServices?.hasOthers ? '✓' : ' '})</span>
               <span>others, please specify</span>
               <div className="border-b border-black ml-2 flex-1 text-xs">
-                {data.emergencyServices?.otherDetails || 'Provided by the client'}
+                {data.emergencyServices?.otherDetails || '\u00A0'}
               </div>
             </div>
           </div>
