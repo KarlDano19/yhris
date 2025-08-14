@@ -267,7 +267,7 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
                       <div className="flex-1">
                         <span className="text-xs">Others: </span>
                         <span className="text-xs italic">(Specify)</span>
-                        <span className="border-b border-black ml-3 pb-1 text-xs">
+                        <span className="border-b border-black ml-3 text-xs">
                           {data.purposeOfWemRequest.othersSpecify || ''}
                         </span>
                       </div>

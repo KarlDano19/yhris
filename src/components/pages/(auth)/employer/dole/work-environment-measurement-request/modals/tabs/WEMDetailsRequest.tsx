@@ -36,10 +36,14 @@ function WEMDetailsRequest({
   const lastWemDate = watch("last_wem_date");
 
   useEffect(() => {
-    if (purposeOfWemRequest && purposeOfWemRequest.length > 0) {
+    // Ensure arrays are properly handled for error clearing
+    const purposeArray = Array.isArray(purposeOfWemRequest) ? purposeOfWemRequest : (purposeOfWemRequest ? [purposeOfWemRequest] : []);
+    const wemConductedArray = Array.isArray(wemConductedBy) ? wemConductedBy : (wemConductedBy ? [wemConductedBy] : []);
+    
+    if (purposeArray && purposeArray.length > 0) {
       clearErrors("purpose_of_wem_request");
     }
-    if (wemConductedBy && wemConductedBy.length > 0) {
+    if (wemConductedArray && wemConductedArray.length > 0) {
       clearErrors("wem_conducted_by");
     }
     if (lastWemDate) {
@@ -48,14 +52,18 @@ function WEMDetailsRequest({
   }, [purposeOfWemRequest, wemConductedBy, lastWemDate, clearErrors]);
 
   const onValid = (data: any) => {
-    if (!data.purpose_of_wem_request || (Array.isArray(data.purpose_of_wem_request) && data.purpose_of_wem_request.length === 0)) {
+    // Ensure arrays are properly handled for validation
+    const purposeArray = Array.isArray(data.purpose_of_wem_request) ? data.purpose_of_wem_request : (data.purpose_of_wem_request ? [data.purpose_of_wem_request] : []);
+    const wemConductedArray = Array.isArray(data.wem_conducted_by) ? data.wem_conducted_by : (data.wem_conducted_by ? [data.wem_conducted_by] : []);
+    
+    if (!purposeArray || purposeArray.length === 0) {
       setError("purpose_of_wem_request", {
         type: "manual",
         message: "Please select at least one Purpose of WEM Request."
       });
       return;
     }
-    if (!data.wem_conducted_by || (Array.isArray(data.wem_conducted_by) && data.wem_conducted_by.length === 0)) {
+    if (!wemConductedArray || wemConductedArray.length === 0) {
       setError("wem_conducted_by", {
         type: "manual",
         message: "Please select at least one WEM Conducted By option."
@@ -166,19 +174,23 @@ function WEMDetailsRequest({
                   </span>
                 </label>
               </div>
-              <div className="relative flex items-center gap-2 mt-6 md:col-span-2">
+              <div className="relative flex items-center gap-2 mt-2 md:col-span-2">
                 <input
                   type="checkbox"
                   id="purpose_of_wem_request"
                   value="Others"
-                  checked={purposeOfWemRequest && Array.isArray(purposeOfWemRequest) && purposeOfWemRequest.some((value: string) => value.startsWith("Others"))}
+                  checked={(() => {
+                    const purposeArray = Array.isArray(purposeOfWemRequest) ? purposeOfWemRequest : (purposeOfWemRequest ? [purposeOfWemRequest] : []);
+                    return purposeArray.some((value: string) => value.startsWith("Others"));
+                  })()}
                   onChange={(e) => {
                     const currentValues = getValues("purpose_of_wem_request") || [];
+                    const currentArray = Array.isArray(currentValues) ? currentValues : (currentValues ? [currentValues] : []);
                     
                     if (e.target.checked) {
                       // Add "Others" if not already present
-                      if (!currentValues.some((value: string) => value.startsWith("Others"))) {
-                        const newValues = [...currentValues, "Others"];
+                      if (!currentArray.some((value: string) => value.startsWith("Others"))) {
+                        const newValues = [...currentArray, "Others"];
                         const event = {
                           target: {
                             name: "purpose_of_wem_request",
@@ -189,7 +201,7 @@ function WEMDetailsRequest({
                       }
                     } else {
                       // Remove "Others" if present
-                      const newValues = currentValues.filter((value: string) => !value.startsWith("Others"));
+                      const newValues = currentArray.filter((value: string) => !value.startsWith("Others"));
                       const event = {
                         target: {
                           name: "purpose_of_wem_request",
@@ -202,11 +214,13 @@ function WEMDetailsRequest({
                 />
                 {/* Show label when unchecked, show input when checked */}
                 {(() => {
-                  const hasOthers = purposeOfWemRequest?.some((value: string) => value.startsWith("Others"));
+                  // Ensure purposeOfWemRequest is always treated as an array
+                  const purposeArray = Array.isArray(purposeOfWemRequest) ? purposeOfWemRequest : (purposeOfWemRequest ? [purposeOfWemRequest] : []);
+                  const hasOthers = purposeArray.some((value: string) => value.startsWith("Others"));
                   
                   if (hasOthers) {
                     // Show input field when checked
-                    const othersValue = purposeOfWemRequest.find((value: string) => value.startsWith("Others"));
+                    const othersValue = purposeArray.find((value: string) => value.startsWith("Others"));
                     const specification = othersValue?.includes(":") ? othersValue.split(":")[1].trim() : "";
                     
                     return (
@@ -218,10 +232,11 @@ function WEMDetailsRequest({
                         defaultValue={specification}
                         onChange={(e) => {
                           const currentValues = getValues("purpose_of_wem_request") || [];
-                          const othersIndex = currentValues.findIndex((value: string) => value.startsWith("Others"));
+                          const currentArray = Array.isArray(currentValues) ? currentValues : (currentValues ? [currentValues] : []);
+                          const othersIndex = currentArray.findIndex((value: string) => value.startsWith("Others"));
                           
                           if (othersIndex !== -1) {
-                            const newValues = [...currentValues];
+                            const newValues = [...currentArray];
                             newValues[othersIndex] = `Others: ${e.target.value}`;
                             register("purpose_of_wem_request").onChange({
                               target: { name: "purpose_of_wem_request", value: newValues }

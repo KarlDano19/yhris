@@ -114,7 +114,7 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
                   {data.parametersToBeMeasured.chemicalHazards.others ? '✓' : ''}
                 </div>
                 <span className="text-xs mr-2">Others: Specify</span>
-                <div className="border-b border-black flex-1 pb-1 text-xs">
+                <div className="border-b border-black flex-1 text-xs">
                   {data.parametersToBeMeasured.chemicalHazards.othersSpecify || ''}
                 </div>
               </div>

@@ -40,21 +40,27 @@ function MonitoringAndHazardInfo({
       });
       return;
     }
-    if (!data.hazards_purpose_of_wem_request || (Array.isArray(data.hazards_purpose_of_wem_request) && data.hazards_purpose_of_wem_request.length === 0)) {
+    
+    // Ensure arrays are properly handled for validation
+    const hazardsPurposeArray = Array.isArray(data.hazards_purpose_of_wem_request) ? data.hazards_purpose_of_wem_request : (data.hazards_purpose_of_wem_request ? [data.hazards_purpose_of_wem_request] : []);
+    const chemicalHazardsArray = Array.isArray(data.chemical_hazards) ? data.chemical_hazards : (data.chemical_hazards ? [data.chemical_hazards] : []);
+    const ventilationArray = Array.isArray(data.ventilation) ? data.ventilation : (data.ventilation ? [data.ventilation] : []);
+    
+    if (!hazardsPurposeArray || hazardsPurposeArray.length === 0) {
       setError("hazards_purpose_of_wem_request", {
         type: "manual",
         message: "Please select at least one Purpose of WEM Request (Hazards)."
       });
       return;
     }
-    if (!data.chemical_hazards || (Array.isArray(data.chemical_hazards) && data.chemical_hazards.length === 0)) {
+    if (!chemicalHazardsArray || chemicalHazardsArray.length === 0) {
       setError("chemical_hazards", {
         type: "manual",
         message: "Please select at least one Chemical Hazard."
       });
       return;
     }
-    if (!data.ventilation) {
+    if (!ventilationArray || ventilationArray.length === 0) {
       setError("ventilation", {
         type: "manual",
         message: "Please select at least one Ventilation."
@@ -341,14 +347,18 @@ function MonitoringAndHazardInfo({
                         type="checkbox"
                         id="chemical_hazards_other"
                         value="Other"
-                        checked={chemicalHazards && Array.isArray(chemicalHazards) && chemicalHazards.some((value: string) => value.startsWith("Other"))}
+                        checked={(() => {
+                          const chemicalArray = Array.isArray(chemicalHazards) ? chemicalHazards : (chemicalHazards ? [chemicalHazards] : []);
+                          return chemicalArray.some((value: string) => value.startsWith("Other"));
+                        })()}
                         onChange={(e) => {
                           const currentValues = getValues("chemical_hazards") || [];
+                          const currentArray = Array.isArray(currentValues) ? currentValues : (currentValues ? [currentValues] : []);
                           
                           if (e.target.checked) {
                             // Add "Other" if not already present
-                            if (!currentValues.some((value: string) => value.startsWith("Other"))) {
-                              const newValues = [...currentValues, "Other"];
+                            if (!currentArray.some((value: string) => value.startsWith("Other"))) {
+                              const newValues = [...currentArray, "Other"];
                               const event = {
                                 target: {
                                   name: "chemical_hazards",
@@ -359,7 +369,7 @@ function MonitoringAndHazardInfo({
                             }
                           } else {
                             // Remove "Other" if present
-                            const newValues = currentValues.filter((value: string) => !value.startsWith("Other"));
+                            const newValues = currentArray.filter((value: string) => !value.startsWith("Other"));
                             const event = {
                               target: {
                                 name: "chemical_hazards",
@@ -372,11 +382,13 @@ function MonitoringAndHazardInfo({
                       />
                       {/* Show label when unchecked, show input when checked */}
                       {(() => {
-                        const hasOther = chemicalHazards?.some((value: string) => value.startsWith("Other"));
+                        // Ensure chemicalHazards is always treated as an array
+                        const chemicalArray = Array.isArray(chemicalHazards) ? chemicalHazards : (chemicalHazards ? [chemicalHazards] : []);
+                        const hasOther = chemicalArray.some((value: string) => value.startsWith("Other"));
                         
                         if (hasOther) {
                           // Show input field when checked
-                          const otherValue = chemicalHazards.find((value: string) => value.startsWith("Other"));
+                          const otherValue = chemicalArray.find((value: string) => value.startsWith("Other"));
                           const specification = otherValue?.includes(":") ? otherValue.split(":")[1].trim() : "";
                           
                           return (
@@ -387,10 +399,11 @@ function MonitoringAndHazardInfo({
                               defaultValue={specification}
                               onChange={(e) => {
                                 const currentValues = getValues("chemical_hazards") || [];
-                                const otherIndex = currentValues.findIndex((value: string) => value.startsWith("Other"));
+                                const currentArray = Array.isArray(currentValues) ? currentValues : (currentValues ? [currentValues] : []);
+                                const otherIndex = currentArray.findIndex((value: string) => value.startsWith("Other"));
                                 
                                 if (otherIndex !== -1) {
-                                  const newValues = [...currentValues];
+                                  const newValues = [...currentArray];
                                   newValues[otherIndex] = `Other: ${e.target.value}`;
                                   register("chemical_hazards").onChange({
                                     target: { name: "chemical_hazards", value: newValues }
