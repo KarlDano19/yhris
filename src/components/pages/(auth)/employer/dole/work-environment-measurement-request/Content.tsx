@@ -235,40 +235,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const handlePrint = () => {
-    // Create a new div element
-    const printDiv = document.createElement('div');
+  // const handlePrint = () => {
+  //   // Create a new div element
+  //   const printDiv = document.createElement('div');
 
-    // Copy the content of the original printSection
-    const originalPrintSection = document.getElementById('printSection');
-    if (originalPrintSection) {
-      printDiv.innerHTML = originalPrintSection.innerHTML;
-    }
+  //   // Copy the content of the original printSection
+  //   const originalPrintSection = document.getElementById('printSection');
+  //   if (originalPrintSection) {
+  //     printDiv.innerHTML = originalPrintSection.innerHTML;
+  //   }
 
-    // Style the new div to be off-screen
-    printDiv.style.width = '1980px';
-    printDiv.style.height = '100%';
-    printDiv.style.position = 'absolute';
-    printDiv.style.left = '-9999px';
-    printDiv.style.top = '-9999px';
+  //   // Style the new div to be off-screen
+  //   printDiv.style.width = '1980px';
+  //   printDiv.style.height = '100%';
+  //   printDiv.style.position = 'absolute';
+  //   printDiv.style.left = '-9999px';
+  //   printDiv.style.top = '-9999px';
 
-    // Add the new div to the body
-    document.body.appendChild(printDiv);
+  //   // Add the new div to the body
+  //   document.body.appendChild(printDiv);
 
-    // Use html2canvas on the new div
-    html2canvas(printDiv).then((canvas) => {
-      // Remove the temporary div
-      document.body.removeChild(printDiv);
+  //   // Use html2canvas on the new div
+  //   html2canvas(printDiv).then((canvas) => {
+  //     // Remove the temporary div
+  //     document.body.removeChild(printDiv);
 
-      const imgData = canvas.toDataURL('image/png');
-      const newWindow = window.open('', '_blank');
-      newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
-      newWindow?.document.close();
-      setTimeout(() => {
-        newWindow?.print();
-      }, 500);
-    });
-  };
+  //     const imgData = canvas.toDataURL('image/png');
+  //     const newWindow = window.open('', '_blank');
+  //     newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
+  //     newWindow?.document.close();
+  //     setTimeout(() => {
+  //       newWindow?.print();
+  //     }, 500);
+  //   });
+  // };
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -304,6 +304,37 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const pageSizeChange = (value: number) => {
     setCurrentPage(1);
     setPageSize(value);
+  };
+
+  const formatListVertical = (data: string[] | string) => {
+    // Handle both array and string inputs
+    let items: string[] = [];
+    
+    if (Array.isArray(data)) {
+      // If it's an array, check if it contains comma-separated strings
+      if (data.length === 1 && typeof data[0] === 'string' && data[0].includes(',')) {
+        // Handle case like ["OSHC,None (New Client),Accredited Wem Officer"]
+        items = data[0].split(',').map(item => item.trim()).filter(item => item.length > 0);
+      } else {
+        // Handle regular array of strings
+        items = data;
+      }
+    } else if (typeof data === 'string') {
+      // Split by comma and clean up whitespace
+      items = data.split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+    
+    if (!items || items.length === 0) return null;
+    
+    return (
+      <ul className="list-disc list-inside">
+        {items.map((str, index) => (
+          <li key={index} className="text-left">
+            {str.charAt(0).toUpperCase() + str.slice(1)}
+          </li>
+        ))}
+      </ul>
+    );
   };
 
   const renderRows = () => {
@@ -345,18 +376,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ')}
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.purpose_of_wem_request
-              .map((purpose: string) => purpose.charAt(0).toUpperCase() + purpose.slice(1))
-              .join(' ')}
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {formatListVertical(item.purpose_of_wem_request)}
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.wem_conducted_by
-              .map((conductedBy: string) => conductedBy.charAt(0).toUpperCase() + conductedBy.slice(1))
-              .join(' ')}
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {formatListVertical(item.wem_conducted_by)}
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.name_of_safety_officer.map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ')}
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {formatListVertical(item.name_of_safety_officer)}
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='relative inline-block'>
@@ -663,7 +690,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsSendEmailModalOpen}
         />
       )}
-      {/* Print Section */}
+      {/* Print Section
       <div className='container mx-auto p-4 hidden'>
         <div id='printSection'>
           <div className='overflow-x-auto'>
@@ -828,7 +855,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
           <p className='mt-4 text-xl text-center'>-- Nothing follows --</p>
         </div>
-      </div>
+      </div> */}
 
       <Tooltip id='search-tooltip'/>
     </>
