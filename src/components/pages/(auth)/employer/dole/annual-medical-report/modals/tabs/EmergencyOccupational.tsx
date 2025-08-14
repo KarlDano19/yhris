@@ -263,34 +263,35 @@ function EmergencyOccupational({
                   }
                 }}
               />
-              <label
-                htmlFor="provided_treatment_room_medical_clinic_other"
-                className="ml-2"
-              >
-                others, please specify
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            {isOtherCheckedA && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "provided_treatment_room_medical_clinic_other_specification",
-                    {
-                      required: isOtherCheckedA,
-                    }
+              {!isOtherCheckedA ? (
+                <label
+                  htmlFor="provided_treatment_room_medical_clinic_other"
+                  className="ml-2"
+                >
+                  others, please specify
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "provided_treatment_room_medical_clinic_other_specification",
+                      {
+                        required: isOtherCheckedA,
+                      }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.provided_treatment_room_medical_clinic_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.provided_treatment_room_medical_clinic_other_specification.message || "Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300"
-                />
-                {errors.provided_treatment_room_medical_clinic_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.provided_treatment_room_medical_clinic_other_specification.message || "Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -695,34 +696,35 @@ function EmergencyOccupational({
                   }
                 }}
               />
-              <label
-                htmlFor="occupational_health_personnel_training_other"
-                className="ml-2"
-              >
-                others, please specify
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            {isOtherCheckedD && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "occupational_health_personnel_training_other_specification",
-                    {
-                      required: isOtherCheckedD,
-                    }
+              {!isOtherCheckedD ? (
+                <label
+                  htmlFor="occupational_health_personnel_training_other"
+                  className="ml-2"
+                >
+                  others, please specify
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "occupational_health_personnel_training_other_specification",
+                      {
+                        required: isOtherCheckedD,
+                      }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.occupational_health_personnel_training_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.occupational_health_personnel_training_other_specification.message || "Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300"
-                />
-                {errors.occupational_health_personnel_training_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.occupational_health_personnel_training_other_specification.message || "Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

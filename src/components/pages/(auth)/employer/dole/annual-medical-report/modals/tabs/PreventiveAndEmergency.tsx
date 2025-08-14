@@ -222,31 +222,32 @@ function PreventiveAndEmergency({
                   }
                 }}
               />
-              <label htmlFor="occupational_health_services_by_other" className="ml-2 text-sm md:text-base">
-                other bodies/groups/institution (specify)
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            {isOtherCheckedA && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-1 md:col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "occupational_health_services_by_other_specification",
-                    {
-                      required: isOtherCheckedA,
-                    }
+              {!isOtherCheckedA ? (
+                <label htmlFor="occupational_health_services_by_other" className="ml-2 text-sm md:text-base">
+                  other bodies/groups/institution (specify)
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-1 md:col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "occupational_health_services_by_other_specification",
+                      {
+                        required: isOtherCheckedA,
+                      }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.occupational_health_services_by_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.occupational_health_services_by_other_specification.message || "Section (a): Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300 w-full"
-                />
-                {errors.occupational_health_services_by_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.occupational_health_services_by_other_specification.message || "Section (a): Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -453,29 +454,30 @@ function PreventiveAndEmergency({
                   }
                 }}
               />
-              <label htmlFor="conduct_inspection_of_workplace_other" className="ml-2 text-sm md:text-base">
-                other details
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            {isOtherCheckedD && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-1 md:col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "conduct_inspection_of_workplace_other_specification",
-                    { required: isOtherCheckedD }
+              {!isOtherCheckedD ? (
+                <label htmlFor="conduct_inspection_of_workplace_other" className="ml-2 text-sm md:text-base">
+                  other details
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-1 md:col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "conduct_inspection_of_workplace_other_specification",
+                      { required: isOtherCheckedD }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.conduct_inspection_of_workplace_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.conduct_inspection_of_workplace_other_specification.message || "Section (d): Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300 w-full"
-                />
-                {errors.conduct_inspection_of_workplace_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.conduct_inspection_of_workplace_other_specification.message || "Section (d): Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
