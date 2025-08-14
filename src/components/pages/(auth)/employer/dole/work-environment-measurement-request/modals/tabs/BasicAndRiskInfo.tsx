@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { Controller } from "react-hook-form";
-import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from "@/components/CustomDatePicker";
@@ -12,10 +11,7 @@ import useTagOfficer from "../../hooks/useTagOfficer";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-}
+
 
 function BasicAndRiskInfo({
   name_of_safety_officer,
@@ -42,7 +38,6 @@ function BasicAndRiskInfo({
   setError: any;
   clearErrors: any;
 }) {
-  const queryClient = useQueryClient();
   const [inputOfficer, setInputOfficer] = useState("");
   const {
     tagsOfficer,
@@ -88,18 +83,12 @@ function BasicAndRiskInfo({
 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: CachedProfileData } | undefined };
 
   useEffect(() => {
     if (employeeData) {
       setEmployeeItems(employeeData);
     }
-
-    if (cachedProfile?.state?.data) {
-      setValue("company_name", cachedProfile.state.data.name || "");
-      setValue("type_of_industry", cachedProfile.state.data.type_of_industry || "");
-    }
-  }, [employeeData, cachedProfile, setValue]);
+  }, [employeeData]);
 
   // Auto-calculate total workers
   const number_of_workers_male = watch('number_of_workers_male');
@@ -196,7 +185,77 @@ function BasicAndRiskInfo({
                 />
               </div>
             </div>
-            <div className="mt-4 space-y-6">
+            <div>
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Address
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="text"
+                  readOnly
+                  {...register("address", { required: true })}
+                  id="address"
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="region"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Region
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="text"
+                  readOnly
+                  {...register("region", { required: true })}
+                  id="region"
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="email_address"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Email Address
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="email"
+                  readOnly
+                  {...register("email_address", { required: true })}
+                  id="email_address"
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="tel_fax_no"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Tel/Fax No.
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="text"
+                  {...register("tel_fax_no")}
+                  id="tel_fax_no"
+                  className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                  placeholder="Enter telephone or fax number"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="pr-0 md:pr-6 space-y-6">
+          <div className="mt-4 space-y-6">
               <h1 className="block text-sm font-medium leading-6 text-gray-900">
                 Number of Workers
                 <span className="text-red-600">*</span>
@@ -250,8 +309,6 @@ function BasicAndRiskInfo({
                 />
               </div>
             </div>
-          </div>
-          <div className="pr-0 md:pr-6 space-y-6">
             <div className="mb-2">
               <h1 className="text-lg font-semibold">Risk and Safety</h1>
             </div>

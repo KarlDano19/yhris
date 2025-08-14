@@ -183,55 +183,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handlePrintPDFLocal = async (item: any) => {
     try {
-      // Get company name and address from cached profile data
-      const cachedProfile = queryClient
-        .getQueryCache()
-        .find(['employerProfileCache']) as {
-        state: { data: { 
-          name: string;
-          user: {
-            email: string;
-          };
-          building: string;
-          street: string;
-          locality: string;
-          city: string;
-          country: string;
-          zip_code: string;
-          region: string;
-          type_of_industry: string;
-        } } | undefined;
-      };
-      
-      const email = cachedProfile?.state?.data?.user?.email || '';
-      const region = cachedProfile?.state?.data?.region || '';
-      const typeOfIndustry = cachedProfile?.state?.data?.type_of_industry || '';
-      // Combine address fields from cached profile
-      const addressParts = [
-        cachedProfile?.state?.data?.building,
-        cachedProfile?.state?.data?.street,
-        cachedProfile?.state?.data?.locality,
-        cachedProfile?.state?.data?.city,
-        cachedProfile?.state?.data?.country,
-        cachedProfile?.state?.data?.zip_code
-      ].filter(Boolean); // Remove empty/undefined values
-      
-      const combinedAddress = addressParts.join(', ') || '\u00A0';
-      
       // Fetch detailed data using the print hook's function directly
       const detailedData = await getPrintWorkEnvironmentRequestDetails(item.id);
       
-      // Create item with combined address and cached profile data
-      const itemWithAddress = {
-        ...detailedData,
-        email_address: email,
-        address: combinedAddress,
-        region: region,
-        type_of_industry: typeOfIndustry,
-      };
-      
-      // Use detailed data for PDF generation
-      await handlePrintPDF(itemWithAddress, generatePDFLocally);
+      // Use the detailed data directly for PDF generation
+      await handlePrintPDF(detailedData, generatePDFLocally);
     } catch (error) {
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
     }

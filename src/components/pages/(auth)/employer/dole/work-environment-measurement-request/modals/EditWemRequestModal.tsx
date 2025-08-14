@@ -50,6 +50,10 @@ export default function EditWemRequestModal({
       setValue("date_of_application", workEnvironmentRequestData.date_of_application);
       setValue("company_name", workEnvironmentRequestData.company_name);
       setValue("type_of_industry", workEnvironmentRequestData.type_of_industry);
+      setValue("address", workEnvironmentRequestData.address);
+      setValue("region", workEnvironmentRequestData.region);
+      setValue("email_address", workEnvironmentRequestData.email_address);
+      setValue("tel_fax_no", workEnvironmentRequestData.tel_fax_no);
       setValue("number_of_workers_male", workEnvironmentRequestData.number_of_workers_male);
       setValue("number_of_workers_female", workEnvironmentRequestData.number_of_workers_female);
       setValue("number_of_workers_total", workEnvironmentRequestData.number_of_workers_total);
