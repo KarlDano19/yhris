@@ -7,14 +7,6 @@ interface WemRequestData {
   region: string;
   emailAddress: string;
   telFaxNo: string;
-  industryType: {
-    manufacturing: boolean;
-    manufacturingSpecify?: string;
-    services: boolean;
-    servicesSpecify?: string;
-    others: boolean;
-    othersSpecify?: string;
-  };
   numberOfWorkers: {
     male: number;
     female: number;
@@ -143,29 +135,23 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
-                      {data.industryType.manufacturing ? '✓' : ''}
                     </div>
                     <span className="mr-2">Manufacturing of</span>
-                    <div className="border-b border-black flex-1 pb-1">
-                      {data.industryType.manufacturingSpecify || ''}
+                    <div className="border-b border-black flex-1 mt-3">
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
-                      {data.industryType.services ? '✓' : ''}
                     </div>
                     <span className="mr-2">Service/s</span>
-                    <div className="border-b border-black flex-1 pb-1">
-                      {data.industryType.servicesSpecify || ''}
+                    <div className="border-b border-black flex-1 mt-3">
                     </div>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
-                      {data.industryType.others ? '✓' : ''}
+                    <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">  
                     </div>
                     <span className="mr-2">Others</span>
-                    <div className="border-b border-black flex-1 pb-1">
-                      {data.industryType.othersSpecify || ''}
+                    <div className="border-b border-black flex-1 mt-3">
                     </div>
                   </div>
                 </div>
@@ -280,10 +266,10 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
                       </div>
                       <div className="flex-1">
                         <span className="text-xs">Others: </span>
-                        <span className="text-xs italic">Specify</span>
-                        <div className="border-b border-black mt-1 pb-1 text-xs">
+                        <span className="text-xs italic">(Specify)</span>
+                        <span className="border-b border-black ml-3 pb-1 text-xs">
                           {data.purposeOfWemRequest.othersSpecify || ''}
-                        </div>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -305,10 +291,10 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
               </div>
               <div className="w-1/3 p-3">
                 <div className="flex items-start">
-                  <div className="w-4 h-4 border border-black mr-2 mt-0.5 flex items-center justify-center text-xs">
+                  <div className="w-4 h-4 border border-black mr-2 mt-0.5 flex items-center justify-center text-xs flex-shrink-0">
                     {data.purposeOfWemRequest.requiredByLaborInspector ? '✓' : ''}
                   </div>
-                  <span className="text-xs">Required by Labor Inspector (attach notice of inspection report)</span>
+                  <span className="text-xs leading-tight">Required by Labor Inspector (attach notice of inspection report)</span>
                 </div>
               </div>
             </div>
@@ -368,39 +354,39 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
           {/* Last Row - WEM Conducted by */}
           <div className="p-3">
             <div className="text-xs font-bold mb-1">WEM Conducted by:</div>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
-                  {data.wemConductedBy.oshc ? '✓' : ''}
+            <div className="space-y-2">
+              {/* Checkboxes in horizontal row */}
+              <div className="flex space-x-6">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
+                    {data.wemConductedBy.oshc ? '✓' : ''}
+                  </div>
+                  <span className="text-xs">OSHC</span>
                 </div>
-                <span className="text-xs mr-4">OSHC</span>
-                <span className="text-xs mr-2">Date of last WEM:</span>
-                <div className="border-b border-black w-32 pb-1 text-xs">
-                  {data.wemConductedBy.oshcDate || ''}
+                <div className="flex items-center">
+                  <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
+                    {data.wemConductedBy.accreditedProvider ? '✓' : ''}
+                  </div>
+                  <span className="text-xs">Accredited WEM Provider</span>
                 </div>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
-                  {data.wemConductedBy.accreditedProvider ? '✓' : ''}
-                </div>
-                <span className="text-xs mr-4">Accredited WEM Provider:</span>
-                <div className="border-b border-black flex-1 pb-1 mr-4 text-xs">
-                  {data.wemConductedBy.accreditedProviderName || ''}
-                </div>
-                <span className="text-xs mr-2">Date of last WEM:</span>
-                <div className="border-b border-black w-32 pb-1 text-xs">
-                  {data.wemConductedBy.accreditedProviderDate || ''}
-                </div>
-              </div>
-              <div className="flex items-center">
-                <div className="flex items-center mr-8">
+                <div className="flex items-center">
                   <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
                     {data.wemConductedBy.none ? '✓' : ''}
                   </div>
                   <span className="text-xs">None (New Client)</span>
                 </div>
+              </div>
+              
+              {/* Date and Conducted by fields below */}
+              <div className="flex items-center">
+                <span className="text-xs mr-2">Date of last WEM:</span>
+                <div className="border-b border-black w-32 pb-1 text-xs mr-6">
+                  {data.wemConductedBy.oshcDate || ''}
+                </div>
                 <span className="text-xs mr-2">Conducted by:</span>
-                <div className="border-b border-black flex-1 pb-1 text-xs"></div>
+                <div className="border-b border-black flex-1 pb-1 text-xs">
+                  {data.wemConductedBy.accreditedProviderName || ''}
+                </div>
               </div>
             </div>
           </div>

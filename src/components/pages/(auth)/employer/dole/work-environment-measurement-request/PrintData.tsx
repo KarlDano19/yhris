@@ -2,108 +2,16 @@ import React from 'react';
 import DocumentPageOne from './print/DocumentPageOne';
 import DocumentPageTwo from './print/DocumentPageTwo';
 
-interface WemRequestData {
-  dateOfApplication: string;
-  companyName: string;
-  address: string;
-  region: string;
-  emailAddress: string;
-  telFaxNo: string;
-  industryType: {
-    manufacturing: boolean;
-    manufacturingSpecify?: string;
-    services: boolean;
-    servicesSpecify?: string;
-    others: boolean;
-    othersSpecify?: string;
-  };
-  numberOfWorkers: {
-    male: number;
-    female: number;
-    total: number;
-  };
-  riskClassification: 'low' | 'medium' | 'high';
-  safetyOfficers: {
-    names: string[];
-    levels: {
-      safetyOfficer1: boolean;
-      safetyOfficer2: boolean;
-      safetyOfficer3: boolean;
-      accreditedSafetyOfficer3: boolean;
-      safetyOfficer4: boolean;
-    };
-  };
-  purposeOfWemRequest: {
-    workplaceImprovement: boolean;
-    clientRequirement: boolean;
-    others: boolean;
-    othersSpecify?: string;
-    oshsCompliance: boolean;
-    isoCompliance: boolean;
-    requiredByLaborInspector: boolean;
-  };
-  wemMonitoringCapability: {
-    internalMonitoringCapability: string;
-    equipmentOwned: string;
-    conductingInternalWem: boolean;
-    dateOfInternalMonitoring?: string;
-    personnelConductedWem?: string;
-  };
-  wemConductedBy: {
-    oshc: boolean;
-    oshcDate?: string;
-    accreditedProvider: boolean;
-    accreditedProviderDate?: string;
-    accreditedProviderName?: string;
-    none: boolean;
-  };
-}
-
-interface WemRequestDataPageTwo {
-  parametersToBeMeasured: {
-    physicalHazards: {
-      noise: boolean;
-      vibration: boolean;
-      illumination: boolean;
-      heat: boolean;
-    };
-    chemicalHazards: {
-      dust: boolean;
-      heavyMetals: boolean;
-      organicSolvents: boolean;
-      acids: boolean;
-      gases: boolean;
-      others: boolean;
-      othersSpecify: string;
-    };
-    ventilation: {
-      generalVentilation: boolean;
-      localExhaustVentilation: boolean;
-    };
-  };
-  requestingPersonnel: {
-    signature: string;
-    name: string;
-    position: string;
-  };
-}
-
-export const prepareWemRequestData = (item: any): WemRequestData => {
-  return {
+export const createWemRequestDocumentComponent = (item: any) => {
+  
+  // Page One Data
+  const pageOneData = {
     dateOfApplication: item.date_of_application || '\u00A0',
     companyName: item.company_name || '\u00A0',
-    address: item.address || '\u00A0', // This will now be the combined address from cached profile
+    address: item.address || '\u00A0',
     region: item.region || '\u00A0',
     emailAddress: item.email_address || '\u00A0',
     telFaxNo: item.tel_fax_no || '\u00A0',
-    industryType: {
-      manufacturing: item.type_of_industry?.toLowerCase().includes('manufacturing') || false,
-      manufacturingSpecify: item.type_of_industry || '\u00A0',
-      services: item.type_of_industry?.toLowerCase().includes('service') || false,
-      servicesSpecify: item.type_of_industry || '\u00A0',
-      others: !item.type_of_industry?.toLowerCase().includes('manufacturing') && !item.type_of_industry?.toLowerCase().includes('service'),
-      othersSpecify: item.type_of_industry || '\u00A0',
-    },
     numberOfWorkers: {
       male: item.number_of_workers_male || '\u00A0',
       female: item.number_of_workers_female || '\u00A0',
@@ -111,23 +19,49 @@ export const prepareWemRequestData = (item: any): WemRequestData => {
     },
     riskClassification: item.risk_classification?.toLowerCase() || '\u00A0',
     safetyOfficers: {
-      names: Array.isArray(item.name_of_safety_officer) ? item.name_of_safety_officer : [item.name_of_safety_officer || '\u00A0'],
+      names: (() => {
+        if (Array.isArray(item.name_of_safety_officer) && item.name_of_safety_officer.length > 0) {
+          // Handle comma-separated string in array
+          if (item.name_of_safety_officer[0].includes(',')) {
+            return item.name_of_safety_officer[0].split(',').map((name: string) => name.trim());
+          }
+          return item.name_of_safety_officer;
+        }
+        return [item.name_of_safety_officer || '\u00A0'];
+      })(),
       levels: {
-        safetyOfficer1: item.safety_officer_levels?.some((level: string) => level.toLowerCase().includes('safety officer level 1') || level.toLowerCase().includes('safety_officer_1')) || false,
-        safetyOfficer2: item.safety_officer_levels?.some((level: string) => level.toLowerCase().includes('safety officer level 2') || level.toLowerCase().includes('safety_officer_2')) || false,
-        safetyOfficer3: item.safety_officer_levels?.some((level: string) => level.toLowerCase().includes('safety officer level 3') || level.toLowerCase().includes('safety_officer_3')) || false,
-        accreditedSafetyOfficer3: item.safety_officer_levels?.some((level: string) => level.toLowerCase().includes('accredited safety officer 3') || level.toLowerCase().includes('accredited_safety_officer_3')) || false,
-        safetyOfficer4: item.safety_officer_levels?.some((level: string) => level.toLowerCase().includes('safety officer level 4') || level.toLowerCase().includes('safety_officer_4')) || false,
+        safetyOfficer1: Array.isArray(item.safety_officer_levels) && item.safety_officer_levels.length > 0 ? 
+          item.safety_officer_levels[0].toLowerCase().includes('safety officer level 1') || item.safety_officer_levels[0].toLowerCase().includes('safety_officer_1') : false,
+        safetyOfficer2: Array.isArray(item.safety_officer_levels) && item.safety_officer_levels.length > 0 ? 
+          item.safety_officer_levels[0].toLowerCase().includes('safety officer level 2') || item.safety_officer_levels[0].toLowerCase().includes('safety_officer_2') : false,
+        safetyOfficer3: Array.isArray(item.safety_officer_levels) && item.safety_officer_levels.length > 0 ? 
+          item.safety_officer_levels[0].toLowerCase().includes('safety officer level 3') || item.safety_officer_levels[0].toLowerCase().includes('safety_officer_3') : false,
+        accreditedSafetyOfficer3: Array.isArray(item.safety_officer_levels) && item.safety_officer_levels.length > 0 ? 
+          item.safety_officer_levels[0].toLowerCase().includes('accredited safety officer level 3') || item.safety_officer_levels[0].toLowerCase().includes('accredited safety officer 3') || item.safety_officer_levels[0].toLowerCase().includes('accredited_safety_officer_3') : false,
+        safetyOfficer4: Array.isArray(item.safety_officer_levels) && item.safety_officer_levels.length > 0 ? 
+          item.safety_officer_levels[0].toLowerCase().includes('safety officer level 4') || item.safety_officer_levels[0].toLowerCase().includes('safety_officer_4') : false,
       },
     },
     purposeOfWemRequest: {
-      workplaceImprovement: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.some((purpose: string) => purpose.toLowerCase().includes('workplace improvement') || purpose.toLowerCase().includes('workplace_improvement')) : false,
-      clientRequirement: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.some((purpose: string) => purpose.toLowerCase().includes('client requirement') || purpose.toLowerCase().includes('client_requirement')) : false,
-      others: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.some((purpose: string) => purpose.toLowerCase().includes('others')) : false,
-      othersSpecify: item.purpose_of_wem_request_others || '\u00A0',
-      oshsCompliance: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.some((purpose: string) => purpose.toLowerCase().includes('oshs compliance') || purpose.toLowerCase().includes('oshs_compliance')) : false,
-      isoCompliance: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.some((purpose: string) => purpose.toLowerCase().includes('iso compliance') || purpose.toLowerCase().includes('iso_compliance')) : false,
-      requiredByLaborInspector: Array.isArray(item.purpose_of_wem_request) ? item.purpose_of_wem_request.some((purpose: string) => purpose.toLowerCase().includes('required by labor inspector') || purpose.toLowerCase().includes('required_by_labor_inspector')) : false,
+      workplaceImprovement: Array.isArray(item.purpose_of_wem_request) && item.purpose_of_wem_request.length > 0 ? 
+        item.purpose_of_wem_request[0].toLowerCase().includes('workplace improvement') || item.purpose_of_wem_request[0].toLowerCase().includes('workplace_improvement') : false,
+      clientRequirement: Array.isArray(item.purpose_of_wem_request) && item.purpose_of_wem_request.length > 0 ? 
+        item.purpose_of_wem_request[0].toLowerCase().includes('client/customer requirement') || item.purpose_of_wem_request[0].toLowerCase().includes('client requirement') || item.purpose_of_wem_request[0].toLowerCase().includes('client_requirement') : false,
+      others: Array.isArray(item.purpose_of_wem_request) && item.purpose_of_wem_request.length > 0 ? 
+        item.purpose_of_wem_request[0].toLowerCase().includes('others') : false,
+      othersSpecify: (() => {
+        if (Array.isArray(item.purpose_of_wem_request) && item.purpose_of_wem_request.length > 0) {
+          const othersValue = item.purpose_of_wem_request[0].match(/others:\s*(.+)/i);
+          return othersValue ? othersValue[1].trim() : '\u00A0';
+        }
+        return '\u00A0';
+      })(),
+      oshsCompliance: Array.isArray(item.purpose_of_wem_request) && item.purpose_of_wem_request.length > 0 ? 
+        item.purpose_of_wem_request[0].toLowerCase().includes('oshs compliance') || item.purpose_of_wem_request[0].toLowerCase().includes('oshs_compliance') : false,
+      isoCompliance: Array.isArray(item.purpose_of_wem_request) && item.purpose_of_wem_request.length > 0 ? 
+        item.purpose_of_wem_request[0].toLowerCase().includes('iso compliance') || item.purpose_of_wem_request[0].toLowerCase().includes('iso_compliance') : false,
+      requiredByLaborInspector: Array.isArray(item.purpose_of_wem_request) && item.purpose_of_wem_request.length > 0 ? 
+        item.purpose_of_wem_request[0].toLowerCase().includes('required by labor inspector') || item.purpose_of_wem_request[0].toLowerCase().includes('required_by_labor_inspector') : false,
     },
     wemMonitoringCapability: {
       internalMonitoringCapability: item.wem_internal_monitoring_capability || '\u00A0',
@@ -137,37 +71,57 @@ export const prepareWemRequestData = (item: any): WemRequestData => {
       personnelConductedWem: item.personnel_who_conducted_wem || '\u00A0',
     },
     wemConductedBy: {
-      oshc: Array.isArray(item.wem_conducted_by) ? item.wem_conducted_by.some((conducted: string) => conducted.toLowerCase().includes('oshc')) : false,
+      oshc: Array.isArray(item.wem_conducted_by) && item.wem_conducted_by.length > 0 ? item.wem_conducted_by[0].toLowerCase().includes('oshc') : false,
       oshcDate: item.last_wem_date || '\u00A0',
-      accreditedProvider: Array.isArray(item.wem_conducted_by) ? item.wem_conducted_by.some((conducted: string) => conducted.toLowerCase().includes('accredited wem provider') || conducted.toLowerCase().includes('accredited_wem_provider')) : false,
+      accreditedProvider: Array.isArray(item.wem_conducted_by) && item.wem_conducted_by.length > 0 ? 
+        (item.wem_conducted_by[0].toLowerCase().includes('accredited wem provider') || 
+         item.wem_conducted_by[0].toLowerCase().includes('accredited_wem_provider') ||
+         item.wem_conducted_by[0].toLowerCase().includes('accredited wem officer')) : false,
       accreditedProviderDate: item.accredited_provider_date || '\u00A0',
       accreditedProviderName: item.accredited_provider_name || '\u00A0',
-      none: Array.isArray(item.wem_conducted_by) ? item.wem_conducted_by.some((conducted: string) => conducted.toLowerCase().includes('none')) : false,
+      none: Array.isArray(item.wem_conducted_by) && item.wem_conducted_by.length > 0 ? item.wem_conducted_by[0].toLowerCase().includes('none') : false,
     },
   };
-};
 
-export const prepareWemRequestDataPageTwo = (item: any): WemRequestDataPageTwo => {
-  return {
+  // Page Two Data
+  const pageTwoData = {
     parametersToBeMeasured: {
       physicalHazards: {
-        noise: Array.isArray(item.hazards_purpose_of_wem_request) ? item.hazards_purpose_of_wem_request.some((hazard: string) => hazard.toLowerCase().includes('noise')) : false,
-        vibration: Array.isArray(item.hazards_purpose_of_wem_request) ? item.hazards_purpose_of_wem_request.some((hazard: string) => hazard.toLowerCase().includes('vibration')) : false,
-        illumination: Array.isArray(item.hazards_purpose_of_wem_request) ? item.hazards_purpose_of_wem_request.some((hazard: string) => hazard.toLowerCase().includes('illumination')) : false,
-        heat: Array.isArray(item.hazards_purpose_of_wem_request) ? item.hazards_purpose_of_wem_request.some((hazard: string) => hazard.toLowerCase().includes('heat')) : false,
+        noise: Array.isArray(item.hazards_purpose_of_wem_request) && item.hazards_purpose_of_wem_request.length > 0 ? 
+          item.hazards_purpose_of_wem_request[0].toLowerCase().includes('noise') : false,
+        vibration: Array.isArray(item.hazards_purpose_of_wem_request) && item.hazards_purpose_of_wem_request.length > 0 ? 
+          item.hazards_purpose_of_wem_request[0].toLowerCase().includes('vibration') : false,
+        illumination: Array.isArray(item.hazards_purpose_of_wem_request) && item.hazards_purpose_of_wem_request.length > 0 ? 
+          item.hazards_purpose_of_wem_request[0].toLowerCase().includes('illumination') : false,
+        heat: Array.isArray(item.hazards_purpose_of_wem_request) && item.hazards_purpose_of_wem_request.length > 0 ? 
+          item.hazards_purpose_of_wem_request[0].toLowerCase().includes('heat') : false,
       },
       chemicalHazards: {
-        dust: Array.isArray(item.chemical_hazards) ? item.chemical_hazards.some((hazard: string) => hazard.toLowerCase().includes('dust')) : false,
-        heavyMetals: Array.isArray(item.chemical_hazards) ? item.chemical_hazards.some((hazard: string) => hazard.toLowerCase().includes('heavy metals') || hazard.toLowerCase().includes('heavy_metals')) : false,
-        organicSolvents: Array.isArray(item.chemical_hazards) ? item.chemical_hazards.some((hazard: string) => hazard.toLowerCase().includes('organic solvents') || hazard.toLowerCase().includes('organic_solvents')) : false,
-        acids: Array.isArray(item.chemical_hazards) ? item.chemical_hazards.some((hazard: string) => hazard.toLowerCase().includes('acids')) : false,
-        gases: Array.isArray(item.chemical_hazards) ? item.chemical_hazards.some((hazard: string) => hazard.toLowerCase().includes('gases')) : false,
-        others: Array.isArray(item.chemical_hazards) ? item.chemical_hazards.some((hazard: string) => hazard.toLowerCase().includes('others')) : false,
-        othersSpecify: item.chemical_hazards_others || '',
+        dust: Array.isArray(item.chemical_hazards) && item.chemical_hazards.length > 0 ? 
+          item.chemical_hazards[0].toLowerCase().includes('dust') : false,
+        heavyMetals: Array.isArray(item.chemical_hazards) && item.chemical_hazards.length > 0 ? 
+          item.chemical_hazards[0].toLowerCase().includes('heavy metals') || item.chemical_hazards[0].toLowerCase().includes('heavy_metals') : false,
+        organicSolvents: Array.isArray(item.chemical_hazards) && item.chemical_hazards.length > 0 ? 
+          item.chemical_hazards[0].toLowerCase().includes('organic solvents') || item.chemical_hazards[0].toLowerCase().includes('organic_solvents') : false,
+        acids: Array.isArray(item.chemical_hazards) && item.chemical_hazards.length > 0 ? 
+          item.chemical_hazards[0].toLowerCase().includes('acids') : false,
+        gases: Array.isArray(item.chemical_hazards) && item.chemical_hazards.length > 0 ? 
+          item.chemical_hazards[0].toLowerCase().includes('gases') : false,
+        others: Array.isArray(item.chemical_hazards) && item.chemical_hazards.length > 0 ? 
+          item.chemical_hazards[0].toLowerCase().includes('other') : false,
+        othersSpecify: (() => {
+          if (Array.isArray(item.chemical_hazards) && item.chemical_hazards.length > 0) {
+            const otherValue = item.chemical_hazards[0].match(/other:\s*(.+)/i);
+            return otherValue ? otherValue[1].trim() : '\u00A0';
+          }
+          return '\u00A0';
+        })(),
       },
       ventilation: {
-        generalVentilation: Array.isArray(item.ventilation) ? item.ventilation.some((vent: string) => vent.toLowerCase().includes('general ventilation') || vent.toLowerCase().includes('general_ventilation')) : false,
-        localExhaustVentilation: Array.isArray(item.ventilation) ? item.ventilation.some((vent: string) => vent.toLowerCase().includes('local exhaust ventilation') || vent.toLowerCase().includes('local_exhaust_ventilation')) : false,
+        generalVentilation: Array.isArray(item.ventilation) && item.ventilation.length > 0 ? 
+          item.ventilation[0].toLowerCase().includes('general ventilation') || item.ventilation[0].toLowerCase().includes('general_ventilation') : false,
+        localExhaustVentilation: Array.isArray(item.ventilation) && item.ventilation.length > 0 ? 
+          item.ventilation[0].toLowerCase().includes('local exhaust ventilation') || item.ventilation[0].toLowerCase().includes('local_exhaust_ventilation') : false,
       },
     },
     requestingPersonnel: {
@@ -176,9 +130,7 @@ export const prepareWemRequestDataPageTwo = (item: any): WemRequestDataPageTwo =
       position: item.requesting_personnel_position && item.requesting_personnel_position !== 'Update' ? item.requesting_personnel_position : '\u00A0',
     },
   };
-};
 
-export const createWemDocumentComponent = (wemRequestData: WemRequestData, wemRequestDataPageTwo: WemRequestDataPageTwo) => {
   return (
     <div className="bg-white">
       <style jsx>{`
@@ -187,9 +139,9 @@ export const createWemDocumentComponent = (wemRequestData: WemRequestData, wemRe
           break-after: page;
         }
       `}</style>
-      <DocumentPageOne data={wemRequestData} />
+      <DocumentPageOne data={pageOneData} />
       <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-      <DocumentPageTwo data={wemRequestDataPageTwo} />
+      <DocumentPageTwo data={pageTwoData} />
     </div>
   );
 };
@@ -199,19 +151,11 @@ export const generateWemFilename = (item: any) => {
 };
 
 export const handlePrintPDF = async (item: any, generatePDFLocally: (component: React.ReactElement, filename: string) => Promise<void>) => {
-  // Prepare data for WEM Request document (Page One)
-  const wemRequestData = prepareWemRequestData(item);
-
-  // Prepare data for WEM Request document (Page Two)
-  const wemRequestDataPageTwo = prepareWemRequestDataPageTwo(item);
-
-  // Create document component with both pages
-  const documentComponent = createWemDocumentComponent(wemRequestData, wemRequestDataPageTwo);
+  // Create document component with all pages
+  const documentComponent = createWemRequestDocumentComponent(item);
   
   const filename = generateWemFilename(item);
   
   // Generate PDF locally (opens print dialog)
   await generatePDFLocally(documentComponent, filename);
 };
-
-export type { WemRequestData, WemRequestDataPageTwo };

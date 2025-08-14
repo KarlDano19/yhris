@@ -166,16 +166,79 @@ function WEMDetailsRequest({
                   </span>
                 </label>
               </div>
-              <div className="relative flex gap-2 mt-6 md:col-span-2">
+              <div className="relative flex items-center gap-2 mt-6 md:col-span-2">
                 <input
                   type="checkbox"
-                  {...register("purpose_of_wem_request", { required: true })}
                   id="purpose_of_wem_request"
                   value="Others"
+                  checked={purposeOfWemRequest && Array.isArray(purposeOfWemRequest) && purposeOfWemRequest.some((value: string) => value.startsWith("Others"))}
+                  onChange={(e) => {
+                    const currentValues = getValues("purpose_of_wem_request") || [];
+                    
+                    if (e.target.checked) {
+                      // Add "Others" if not already present
+                      if (!currentValues.some((value: string) => value.startsWith("Others"))) {
+                        const newValues = [...currentValues, "Others"];
+                        const event = {
+                          target: {
+                            name: "purpose_of_wem_request",
+                            value: newValues
+                          }
+                        };
+                        register("purpose_of_wem_request").onChange(event);
+                      }
+                    } else {
+                      // Remove "Others" if present
+                      const newValues = currentValues.filter((value: string) => !value.startsWith("Others"));
+                      const event = {
+                        target: {
+                          name: "purpose_of_wem_request",
+                          value: newValues
+                        }
+                      };
+                      register("purpose_of_wem_request").onChange(event);
+                    }
+                  }}
                 />
-                <label htmlFor="required_by_labor_inspector" className="ml-2">
-                  Others
-                </label>
+                {/* Show label when unchecked, show input when checked */}
+                {(() => {
+                  const hasOthers = purposeOfWemRequest?.some((value: string) => value.startsWith("Others"));
+                  
+                  if (hasOthers) {
+                    // Show input field when checked
+                    const othersValue = purposeOfWemRequest.find((value: string) => value.startsWith("Others"));
+                    const specification = othersValue?.includes(":") ? othersValue.split(":")[1].trim() : "";
+                    
+                    return (
+                      <input
+                        type="text"
+                        id="purpose_of_wem_request_others"
+                        className="ml-2 w-56 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        placeholder="Please specify other purpose..."
+                        defaultValue={specification}
+                        onChange={(e) => {
+                          const currentValues = getValues("purpose_of_wem_request") || [];
+                          const othersIndex = currentValues.findIndex((value: string) => value.startsWith("Others"));
+                          
+                          if (othersIndex !== -1) {
+                            const newValues = [...currentValues];
+                            newValues[othersIndex] = `Others: ${e.target.value}`;
+                            register("purpose_of_wem_request").onChange({
+                              target: { name: "purpose_of_wem_request", value: newValues }
+                            });
+                          }
+                        }}
+                      />
+                    );
+                  } else {
+                    // Show label when unchecked
+                    return (
+                      <label htmlFor="purpose_of_wem_request" className="ml-2 flex items-center">
+                        Others
+                      </label>
+                    );
+                  }
+                })()}
               </div>
             </div>
           </div>

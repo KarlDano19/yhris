@@ -67,6 +67,9 @@ function MonitoringAndHazardInfo({
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
 
+  // Watch chemical hazards for conditional rendering
+  const chemicalHazards = watch("chemical_hazards");
+
   useEffect(() => {
     if (employeeData) {
       setEmployeeItems(employeeData);
@@ -326,23 +329,85 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("chemical_hazards", { required: true })}
-                        id="gasses"
-                        value="Gasses"
+                        id="gases"
+                        value="Gases"
                       />
-                      <label htmlFor="gasses" className="ml-2">
-                       Gasses
+                      <label htmlFor="gases" className="ml-2">
+                       Gases
                       </label>
                     </div>
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
-                        {...register("chemical_hazards", { required: true })}
-                        id="other"
+                        id="chemical_hazards_other"
                         value="Other"
+                        checked={chemicalHazards && Array.isArray(chemicalHazards) && chemicalHazards.some((value: string) => value.startsWith("Other"))}
+                        onChange={(e) => {
+                          const currentValues = getValues("chemical_hazards") || [];
+                          
+                          if (e.target.checked) {
+                            // Add "Other" if not already present
+                            if (!currentValues.some((value: string) => value.startsWith("Other"))) {
+                              const newValues = [...currentValues, "Other"];
+                              const event = {
+                                target: {
+                                  name: "chemical_hazards",
+                                  value: newValues
+                                }
+                              };
+                              register("chemical_hazards").onChange(event);
+                            }
+                          } else {
+                            // Remove "Other" if present
+                            const newValues = currentValues.filter((value: string) => !value.startsWith("Other"));
+                            const event = {
+                              target: {
+                                name: "chemical_hazards",
+                                value: newValues
+                              }
+                            };
+                            register("chemical_hazards").onChange(event);
+                          }
+                        }}
                       />
-                      <label htmlFor="other" className="ml-2">
-                        Other
-                      </label>
+                      {/* Show label when unchecked, show input when checked */}
+                      {(() => {
+                        const hasOther = chemicalHazards?.some((value: string) => value.startsWith("Other"));
+                        
+                        if (hasOther) {
+                          // Show input field when checked
+                          const otherValue = chemicalHazards.find((value: string) => value.startsWith("Other"));
+                          const specification = otherValue?.includes(":") ? otherValue.split(":")[1].trim() : "";
+                          
+                          return (
+                            <input
+                              type="text"
+                              id="chemical_hazards_other_specify"
+                              className="ml-2 w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                              defaultValue={specification}
+                              onChange={(e) => {
+                                const currentValues = getValues("chemical_hazards") || [];
+                                const otherIndex = currentValues.findIndex((value: string) => value.startsWith("Other"));
+                                
+                                if (otherIndex !== -1) {
+                                  const newValues = [...currentValues];
+                                  newValues[otherIndex] = `Other: ${e.target.value}`;
+                                  register("chemical_hazards").onChange({
+                                    target: { name: "chemical_hazards", value: newValues }
+                                  });
+                                }
+                              }}
+                            />
+                          );
+                        } else {
+                          // Show label when unchecked
+                          return (
+                            <label htmlFor="chemical_hazards_other" className="ml-2 flex items-center">
+                              Other
+                            </label>
+                          );
+                        }
+                      })()}
                     </div>
                   </div>
                 </div>

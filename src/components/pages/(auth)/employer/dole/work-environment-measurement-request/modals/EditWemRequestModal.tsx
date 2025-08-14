@@ -67,6 +67,7 @@ export default function EditWemRequestModal({
       setValue("safety_officer_levels", parseArrayField(workEnvironmentRequestData.safety_officer_levels));
       setValue("purpose_of_wem_request", parseArrayField(workEnvironmentRequestData.purpose_of_wem_request));
       setValue("wem_conducted_by", parseArrayField(workEnvironmentRequestData.wem_conducted_by));
+      setValue("last_wem_date", workEnvironmentRequestData.last_wem_date);
       setValue("chemical_hazards", parseArrayField(workEnvironmentRequestData.chemical_hazards));
       setValue("ventilation", parseArrayField(workEnvironmentRequestData.ventilation));
       setValue("hazards_purpose_of_wem_request", parseArrayField(workEnvironmentRequestData.hazards_purpose_of_wem_request));
@@ -75,7 +76,6 @@ export default function EditWemRequestModal({
       setValue("wem_equipment_owned_by_company", workEnvironmentRequestData.wem_equipment_owned_by_company);
       setValue("conducting_internal_wem", workEnvironmentRequestData.conducting_internal_wem ? "yes" : "no");
       setValue("date_of_internal_monitoring", workEnvironmentRequestData.date_of_internal_monitoring);
-      setValue("last_wem_date", workEnvironmentRequestData.last_wem_date);
       setValue("requesting_personnel_name", workEnvironmentRequestData.requesting_personnel_name);
       setValue("requesting_personnel_position", workEnvironmentRequestData.requesting_personnel_position);
       setValue("signature", workEnvironmentRequestData.signature);

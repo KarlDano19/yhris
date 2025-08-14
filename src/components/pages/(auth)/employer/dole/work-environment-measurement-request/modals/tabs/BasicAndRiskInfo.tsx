@@ -384,7 +384,7 @@ function BasicAndRiskInfo({
                   type="checkbox"
                   {...register("safety_officer_levels", { required: "Please select at least one Safety Officer Level." })}
                   id="safety_officer_level_3"
-                  value="Safety Officer Level 3"
+                  value="Accredited Safety Officer Level 3"
                 />
                 <label htmlFor="safety_officer_level_3" className="ml-2">
                   Accredited Safety Officer Level 3
