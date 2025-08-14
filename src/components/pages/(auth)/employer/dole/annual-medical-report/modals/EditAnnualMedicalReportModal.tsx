@@ -69,9 +69,10 @@ function EditAnnualMedicalReportModal({
       };
 
       // General Information
+      setValue("name_of_establishment", annualMedicalReportData.name_of_establishment);
+      setValue("name_of_owner_manager", annualMedicalReportData.name_of_owner_manager);
       setValue("address", annualMedicalReportData.address);
       setValue("type_of_industry", annualMedicalReportData.type_of_industry);
-      setValue("name_of_owner_manager", annualMedicalReportData.name_of_owner_manager);
       setValue("total_number_of_employees", annualMedicalReportData.total_number_of_employees);
       setValue("number_of_shifts", annualMedicalReportData.number_of_shifts);
       setValue("male_office_workers", annualMedicalReportData.male_office_workers);

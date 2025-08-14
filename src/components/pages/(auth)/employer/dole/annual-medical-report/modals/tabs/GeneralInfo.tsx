@@ -2,17 +2,9 @@
 
 import { useEffect } from "react";
 
-import { useQueryClient } from "@tanstack/react-query";
-
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
 
 function GeneralInfo({
   control,
@@ -29,32 +21,17 @@ function GeneralInfo({
   setValue: any;
   watch: any;
 }) {
-  const queryClient = useQueryClient();
-
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
   });
 
   const { data: employeeData } = useGetEmployeeItems();
-  const cachedProfile = queryClient
-    .getQueryCache()
-    .find(["employerProfileCache"]) as {
-    state: { data: CachedProfileData } | undefined;
-  };
 
   useEffect(() => {
     if (employeeData) {
       setValue("total_number_of_employees", employeeData.length);
     }
-    if (cachedProfile?.state?.data) {
-      setValue("company_name", cachedProfile.state.data.name || "");
-      setValue(
-        "type_of_industry",
-        cachedProfile.state.data.type_of_industry || ""
-      );
-      setValue("address", cachedProfile.state.data.city || "");
-    }
-  }, [employeeData, cachedProfile, setValue]);
+  }, [employeeData, setValue]);
 
   // Auto-calculate totals
   const male_office_workers = watch('male_office_workers');

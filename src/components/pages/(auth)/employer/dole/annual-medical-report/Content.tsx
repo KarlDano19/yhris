@@ -124,14 +124,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handlePrintPDFLocal = async (item: any) => {
     try {
-      // Get company name from cached profile data
-      const cachedProfile = queryClient
-        .getQueryCache()
-        .find(["employerProfileCache"]) as {
-        state: { data: { name: string } } | undefined;
-      };
-      const companyName = cachedProfile?.state?.data?.name || '';
-
       // Get current year for fallback
       const currentYear = new Date().getFullYear();
       
@@ -143,7 +135,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const detailedData = await getPrintAnnualMedicalReportDetails(item.id);
       
       // Use detailed data for PDF generation
-      await handlePrintPDF(detailedData, generatePDFLocally, companyName, reportPeriodFrom, reportPeriodTo);
+      await handlePrintPDF(detailedData, generatePDFLocally, detailedData.company_name, reportPeriodFrom, reportPeriodTo);
     } catch (error) {
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
     }
@@ -191,42 +183,42 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     annualMedicalReportRefetch();
   }, [currentPage, pageSize]);
 
-  const handlePrint = () => {
-    // Create a new div element
-    const printDiv = document.createElement("div");
+  // const handlePrint = () => {
+  //   // Create a new div element
+  //   const printDiv = document.createElement("div");
 
-    // Copy the content of the original printSection
-    const originalPrintSection = document.getElementById("printSection");
-    if (originalPrintSection) {
-      printDiv.innerHTML = originalPrintSection.innerHTML;
-    }
+  //   // Copy the content of the original printSection
+  //   const originalPrintSection = document.getElementById("printSection");
+  //   if (originalPrintSection) {
+  //     printDiv.innerHTML = originalPrintSection.innerHTML;
+  //   }
 
-    // Style the new div to be off-screen
-    printDiv.style.width = "1980px";
-    printDiv.style.height = "100%";
-    printDiv.style.position = "absolute";
-    printDiv.style.left = "-9999px";
-    printDiv.style.top = "-9999px";
+  //   // Style the new div to be off-screen
+  //   printDiv.style.width = "1980px";
+  //   printDiv.style.height = "100%";
+  //   printDiv.style.position = "absolute";
+  //   printDiv.style.left = "-9999px";
+  //   printDiv.style.top = "-9999px";
 
-    // Add the new div to the body
-    document.body.appendChild(printDiv);
+  //   // Add the new div to the body
+  //   document.body.appendChild(printDiv);
 
-    // Use html2canvas on the new div
-    html2canvas(printDiv).then((canvas) => {
-      // Remove the temporary div
-      document.body.removeChild(printDiv);
+  //   // Use html2canvas on the new div
+  //   html2canvas(printDiv).then((canvas) => {
+  //     // Remove the temporary div
+  //     document.body.removeChild(printDiv);
 
-      const imgData = canvas.toDataURL("image/png");
-      const newWindow = window.open("", "_blank");
-      newWindow?.document.write(
-        `<img src="${imgData}" style="width:100%;height:auto;">`
-      );
-      newWindow?.document.close();
-      setTimeout(() => {
-        newWindow?.print();
-      }, 500);
-    });
-  };
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const newWindow = window.open("", "_blank");
+  //     newWindow?.document.write(
+  //       `<img src="${imgData}" style="width:100%;height:auto;">`
+  //     );
+  //     newWindow?.document.close();
+  //     setTimeout(() => {
+  //       newWindow?.print();
+  //     }, 500);
+  //   });
+  // };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -598,13 +590,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteAnnualMedicalReportModalOpen}
         />
       )}
-      {isExportProgressModalOpen && (
+      {/* {isExportProgressModalOpen && (
         <ExportProgressModal
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
           itemsFilter={itemsFilter}
         />
-      )}
+      )} */}
     </>
   );
 }
