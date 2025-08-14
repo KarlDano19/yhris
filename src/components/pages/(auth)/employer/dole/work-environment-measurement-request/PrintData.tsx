@@ -12,6 +12,38 @@ export const createWemRequestDocumentComponent = (item: any) => {
     region: item.region || '\u00A0',
     emailAddress: item.email_address || '\u00A0',
     telFaxNo: item.tel_fax_no || '\u00A0',
+    typeOfIndustry: {
+      manufacturing: (() => {
+        const industryValue = item.type_of_industry || '';
+        if (industryValue.startsWith('Manufacturing of:')) {
+          return {
+            checked: true,
+            details: industryValue.replace('Manufacturing of:', '').trim() || '\u00A0'
+          };
+        }
+        return { checked: false, details: '\u00A0' };
+      })(),
+      service: (() => {
+        const industryValue = item.type_of_industry || '';
+        if (industryValue.startsWith('Service/s:')) {
+          return {
+            checked: true,
+            details: industryValue.replace('Service/s:', '').trim() || '\u00A0'
+          };
+        }
+        return { checked: false, details: '\u00A0' };
+      })(),
+      others: (() => {
+        const industryValue = item.type_of_industry || '';
+        if (industryValue.startsWith('Others:')) {
+          return {
+            checked: true,
+            details: industryValue.replace('Others:', '').trim() || '\u00A0'
+          };
+        }
+        return { checked: false, details: '\u00A0' };
+      })(),
+    },
     numberOfWorkers: {
       male: item.number_of_workers_male || '\u00A0',
       female: item.number_of_workers_female || '\u00A0',

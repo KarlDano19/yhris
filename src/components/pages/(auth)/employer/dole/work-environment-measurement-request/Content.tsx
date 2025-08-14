@@ -199,12 +199,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           country: string;
           zip_code: string;
           region: string;
+          type_of_industry: string;
         } } | undefined;
       };
       
       const email = cachedProfile?.state?.data?.user?.email || '';
       const companyName = cachedProfile?.state?.data?.name || '';
       const region = cachedProfile?.state?.data?.region || '';
+      const typeOfIndustry = cachedProfile?.state?.data?.type_of_industry || '';
       // Combine address fields from cached profile
       const addressParts = [
         cachedProfile?.state?.data?.building,
@@ -226,6 +228,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         email_address: email,
         address: combinedAddress,
         region: region,
+        type_of_industry: typeOfIndustry,
       };
       
       // Use detailed data for PDF generation

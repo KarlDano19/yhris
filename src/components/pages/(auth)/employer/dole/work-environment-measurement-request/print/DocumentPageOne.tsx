@@ -7,6 +7,20 @@ interface WemRequestData {
   region: string;
   emailAddress: string;
   telFaxNo: string;
+  typeOfIndustry: {
+    manufacturing: {
+      checked: boolean;
+      details: string;
+    };
+    service: {
+      checked: boolean;
+      details: string;
+    };
+    others: {
+      checked: boolean;
+      details: string;
+    };
+  };
   numberOfWorkers: {
     male: number;
     female: number;
@@ -135,23 +149,35 @@ const WemRequestDocument: React.FC<WemRequestDocumentProps> = ({ data }) => {
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
+                      {data.typeOfIndustry?.manufacturing?.checked ? '✓' : ''}
                     </div>
-                    <span className="mr-2">Manufacturing of</span>
-                    <div className="border-b border-black flex-1 mt-3">
+                    <span className="mr-2">Manufacturing of:</span>
+                    <div className="border-b border-black flex-1 relative mt-4">
+                      <span className="absolute bottom-0 left-0 text-xs">
+                        {data.typeOfIndustry?.manufacturing?.details}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">
+                      {data.typeOfIndustry?.service?.checked ? '✓' : ''}
                     </div>
-                    <span className="mr-2">Service/s</span>
-                    <div className="border-b border-black flex-1 mt-3">
+                    <span className="mr-2">Service/s:</span>
+                    <div className="border-b border-black flex-1 relative mt-4">
+                      <span className="absolute bottom-0 left-0 text-xs">
+                        {data.typeOfIndustry?.service?.details}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 border border-black mr-2 flex items-center justify-center text-xs">  
+                      {data.typeOfIndustry?.others?.checked ? '✓' : ''}
                     </div>
-                    <span className="mr-2">Others</span>
-                    <div className="border-b border-black flex-1 mt-3">
+                    <span className="mr-2">Others:</span>
+                    <div className="border-b border-black flex-1 relative mt-4">
+                      <span className="absolute bottom-0 left-0 text-xs">
+                        {data.typeOfIndustry?.others?.details}
+                      </span>
                     </div>
                   </div>
                 </div>
