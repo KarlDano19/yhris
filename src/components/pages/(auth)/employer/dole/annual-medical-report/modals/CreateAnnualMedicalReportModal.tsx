@@ -58,7 +58,7 @@ function CreateAnnualMedicalReportModal({
   // Set cached profile data when modal opens
   useEffect(() => {
     if (isOpen && cachedProfile?.state?.data) {
-      setValue("company_name", cachedProfile.state.data.name || "");
+      setValue("name_of_establishment", cachedProfile.state.data.name || "");
       setValue(
         "type_of_industry",
         cachedProfile.state.data.type_of_industry || ""
