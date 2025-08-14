@@ -9,7 +9,6 @@ import { Tooltip } from 'react-tooltip';
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import useTagOfficer from "../../hooks/useTagOfficer";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
@@ -187,39 +186,15 @@ function BasicAndRiskInfo({
               >
                 Type of Industry
               </label>
-              <div className="relative mt-2 mb-2">
-                <select
-                  id="industryType"
-                  disabled
-                  className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 cursor-not-allowed bg-gray-100"
-                  value={(() => {
-                    const currentValue = watch("type_of_industry");
-                    if (currentValue?.startsWith("Manufacturing of:")) return "manufacturing";
-                    if (currentValue?.startsWith("Service/s:")) return "service";
-                    if (currentValue?.startsWith("Others:")) return "others";
-                    return "";
-                  })()}
-                >
-                  <option value="">Select Industry Type</option>
-                  <option value="manufacturing">Manufacturing of: </option>
-                  <option value="service">Service/s: </option>
-                  <option value="others">Others: </option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                  <SelectChevronDown />
-                </div>
+              <div className="relative mt-2">
+                <input
+                  type="text"
+                  readOnly
+                  {...register("type_of_industry", { required: true })}
+                  id="type_of_industry"
+                  className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                />
               </div>
-              {watch("type_of_industry") && (
-                <div className="relative">
-                  <input
-                    type="text"
-                    readOnly
-                    {...register("type_of_industry", { required: true })}
-                    id="type_of_industry"
-                    className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-50"
-                  />
-                </div>
-              )}
             </div>
             <div className="mt-4 space-y-6">
               <h1 className="block text-sm font-medium leading-6 text-gray-900">

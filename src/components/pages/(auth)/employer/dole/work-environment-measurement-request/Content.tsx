@@ -204,7 +204,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       };
       
       const email = cachedProfile?.state?.data?.user?.email || '';
-      const companyName = cachedProfile?.state?.data?.name || '';
       const region = cachedProfile?.state?.data?.region || '';
       const typeOfIndustry = cachedProfile?.state?.data?.type_of_industry || '';
       // Combine address fields from cached profile

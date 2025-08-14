@@ -1,46 +1,6 @@
 import React from 'react';
 
-interface SafetyCommitteeData {
-  generalRequirement: string;
-  safetyCommitteeTypes: {
-    typeA: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeB: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeC: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeD: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeE: {
-      description: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-  };
-}
-
-interface DocumentPageTwoProps {
-  data: SafetyCommitteeData;
-}
-
-const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
+const DocumentPageTwo: React.FC = () => {
   return (
     <div className="bg-white text-black font-sans text-sm leading-tight max-w-4xl mx-auto p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
       {/* Header Section */}

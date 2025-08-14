@@ -3,108 +3,10 @@ import React from 'react';
 import DocumentPageOne from './print/DocumentPageOne';
 import DocumentPageTwo from './print/DocumentPageTwo';
 
-interface HealthAndSafetyReportData {
-  dateFiled: string;
-  regionalLaborOfficeNo: string;
-  fileNumber: string;
-  establishmentName: string;
-  address: string;
-  natureOfBusiness: string;
-  personsEmployed: {
-    management: {
-      shifts: Array<{
-        male: number;
-        female: number;
-      }>;
-    };
-    total: {
-      male: number;
-      female: number;
-    };
-  };
-  policyAndProgram: string;
-  safetyCommittee: {
-    type: string;
-    members: {
-      chairman: {
-        name: string;
-        position: string;
-      };
-      members: Array<{
-        name: string;
-        position: string;
-      }>;
-      secretary: {
-        name: string;
-        position: string;
-      };
-    };
-  };
-  technicalInformation: {
-    processDescription: string;
-  };
-  submittedBy: {
-    name: string;
-    position: string;
-    signature?: string;
-  };
-}
-
-interface SafetyCommitteeData {
-  generalRequirement: string;
-  safetyCommitteeTypes: {
-    typeA: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeB: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeC: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeD: {
-      workerRange: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-    typeE: {
-      description: string;
-      chairman: string;
-      members: string[];
-      secretary: string;
-    };
-  };
-}
-
-export const prepareHealthAndSafetyReportData = (item: any): HealthAndSafetyReportData => {
-  // Process shift employees data
-  const shiftEmployees = Array.isArray(item.shift_employees) ? item.shift_employees : [];
+export const createHealthAndSafetyDocumentComponent = (item: any) => {
   
-  // Helper function to safely parse shift data
-  const parseShiftData = (shiftData: any) => {
-    if (shiftData && typeof shiftData === 'object') {
-      return {
-        male: parseInt(shiftData.male || '0') || 0,
-        female: parseInt(shiftData.female || '0') || 0,
-      };
-    }
-    return { male: 0, female: 0 };
-  };
-  
-  // Process all shifts dynamically
-  const shifts = shiftEmployees.map(parseShiftData);
-  
-  return {
+  // Page One Data
+  const pageOneData = {
     dateFiled: item.date_of_report || '\u00A0',
     regionalLaborOfficeNo: item.regional_labor_office_no || '\u00A0',
     fileNumber: item.file_number || '\u00A0',
@@ -113,7 +15,21 @@ export const prepareHealthAndSafetyReportData = (item: any): HealthAndSafetyRepo
     natureOfBusiness: item.type_of_industry || '\u00A0',
     personsEmployed: {
       management: {
-        shifts: shifts,
+        shifts: (() => {
+          const shiftEmployees = Array.isArray(item.shift_employees) ? item.shift_employees : [];
+          
+          const parseShiftData = (shiftData: any) => {
+            if (shiftData && typeof shiftData === 'object') {
+              return {
+                male: parseInt(shiftData.male || '0') || 0,
+                female: parseInt(shiftData.female || '0') || 0,
+              };
+            }
+            return { male: 0, female: 0 };
+          };
+          
+          return shiftEmployees.map(parseShiftData);
+        })(),
       },
       total: {
         male: item.total_employees_male || 0,
@@ -157,63 +73,7 @@ export const prepareHealthAndSafetyReportData = (item: any): HealthAndSafetyRepo
       signature: item.signature || undefined,
     },
   };
-};
 
-export const prepareSafetyCommitteeData = (): SafetyCommitteeData => {
-  return {
-    generalRequirement: "A safety committee must be organized within sixty (60) days after standards take effect for existing establishments, or within one (1) month from the business start date for new establishments. The Safety Committee shall reorganize every January of the following year.",
-    safetyCommitteeTypes: {
-      typeA: {
-        workerRange: "For workplaces having a total of over four hundred (400) workers",
-        chairman: "The Manager or authorized representative",
-        members: [
-          "Two workers (must be union workers)",
-          "The company physician"
-        ],
-        secretary: "The safety man"
-      },
-      typeB: {
-        workerRange: "For workplaces having 200 - 400 workers",
-        chairman: "The Manager or his authorized representative",
-        members: [
-          "One supervisor",
-          "One worker",
-          "The company physician or company nurse"
-        ],
-        secretary: "The safety man"
-      },
-      typeC: {
-        workerRange: "For workplaces having 100 - 200 workers",
-        chairman: "The Manager or his authorized representative",
-        members: [
-          "One foreman",
-          "One worker",
-          "The first aider"
-        ],
-        secretary: "Appointed by the chairman"
-      },
-      typeD: {
-        workerRange: "For workplaces with less than 100 workers",
-        chairman: "Manager",
-        members: [
-          "One foreman",
-          "One worker"
-        ],
-        secretary: "Appointed by the Chairman"
-      },
-      typeE: {
-        description: "When two or more establishments are housed under one building, their individual safety committees shall organize into a joint coordination committee to plan and implement activities.",
-        chairman: "The chairman of an established committee",
-        members: [
-          "Two supervisors from two different establishments"
-        ],
-        secretary: "Appointed by the Chairman (in high rise buildings, the secretary shall be the building administrator)"
-      }
-    }
-  };
-};
-
-export const createHealthAndSafetyDocumentComponent = (healthAndSafetyReportData: HealthAndSafetyReportData, safetyCommitteeData: SafetyCommitteeData) => {
   return (
     <div className="bg-white">
       <style jsx>{`
@@ -222,9 +82,9 @@ export const createHealthAndSafetyDocumentComponent = (healthAndSafetyReportData
           break-after: page;
         }
       `}</style>
-      <DocumentPageOne data={healthAndSafetyReportData} />
+      <DocumentPageOne data={pageOneData} />
       <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
-      <DocumentPageTwo data={safetyCommitteeData} />
+      <DocumentPageTwo />
     </div>
   );
 };
@@ -234,19 +94,11 @@ export const generateHealthAndSafetyFilename = (item: any) => {
 };
 
 export const handlePrintPDF = async (item: any, generatePDFLocally: (component: React.ReactElement, filename: string) => Promise<void>) => {
-  // Prepare data for Health and Safety Report document (Page One)
-  const healthAndSafetyReportData = prepareHealthAndSafetyReportData(item);
-
-  // Prepare data for Safety Committee document (Page Two)
-  const safetyCommitteeData = prepareSafetyCommitteeData();
-
-  // Create document component with both pages
-  const documentComponent = createHealthAndSafetyDocumentComponent(healthAndSafetyReportData, safetyCommitteeData);
+  // Create document component with all pages
+  const documentComponent = createHealthAndSafetyDocumentComponent(item);
   
   const filename = generateHealthAndSafetyFilename(item);
   
   // Generate PDF locally (opens print dialog)
   await generatePDFLocally(documentComponent, filename);
 };
-
-export type { HealthAndSafetyReportData, SafetyCommitteeData };
