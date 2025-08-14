@@ -19,6 +19,7 @@ import classNames from '@/helpers/classNames';
 
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
 import useUpdateAnnualAccidentIllness from './hooks/useUpdateAnnualAccidentIllness';
+import { getPrintAnnualAccidentIllnessReportDetails } from './hooks/useGetPrintAnnualAccidentIllnessDetails';
 import CreateReportModal from './modals/CreateReportModal';
 import EditReportModal from './modals/EditReportModal';
 import DeleteReportModal from './modals/DeleteReportModal';
@@ -219,6 +220,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       
       const combinedAddress = addressParts.join(', ') || '\u00A0';
       
+      // Fetch detailed data using the print hook's function directly
+      const detailedData = await getPrintAnnualAccidentIllnessReportDetails(item.id);
+      
       // Filter data by year and get the correct item
       const year = item.year || new Date().getFullYear();
       
@@ -229,7 +233,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       
       // Create item with combined address and filtered data
       const itemWithData = {
-        ...(filteredItem || item),
+        ...(detailedData || filteredItem || item),
         company_name: companyName,
         address: combinedAddress,
         exposure_data: `JANUARY 1 TO DECEMBER 31, ${year}`,

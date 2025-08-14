@@ -1,32 +1,12 @@
 import React from 'react';
 import DocumentPageOne from './print/DocumentPageOne';
 
-interface AnnualWorkAccidentIllnessData {
-  date: string;
-  establishmentName: string;
-  natureOfBusiness: string;
-  address: string;
-  exposureData: string;
-  numberOfEmployees: number;
-  totalHoursWorked: number;
-  injurySummary: {
-    totalDisablingInjuries: number;
-    totalNonDisablingInjuries: number;
-    frequencyRate: number;
-    severityRate: number;
-    summary: string;
-  };
-  submittedBy: {
-    name: string;
-    position: string;
-  };
-}
-
-export const prepareAnnualWorkAccidentIllnessData = (item: any): AnnualWorkAccidentIllnessData => {
+export const createAnnualWorkAccidentIllnessDocumentComponent = (item: any) => {
   // Get the year from the item or use current year as fallback
   const year = item.year || new Date().getFullYear();
   
-  return {
+  // Prepare data for Annual Work Accident/Illness Exposure Data Report
+  const annualWorkAccidentIllnessData = {
     date: item.date_of_report || '\u00A0',
     establishmentName: item.company_name || '\u00A0',
     natureOfBusiness: item.type_of_industry || '\u00A0',
@@ -41,14 +21,10 @@ export const prepareAnnualWorkAccidentIllnessData = (item: any): AnnualWorkAccid
       severityRate: item.severity_rate || 0,
       summary: item.injury_summary || '\u00A0',
     },
-    submittedBy: {
-      name: item.name_signature && item.name_signature !== 'Update' ? item.name_signature : '\u00A0',
-      position: item.position && item.position !== 'Update' ? item.position : '\u00A0',
-    },
+    name_signature: item.name_signature && item.name_signature !== 'Update' ? item.name_signature : undefined,
+    signature: item.signature || undefined,
   };
-};
 
-export const createAnnualWorkAccidentIllnessDocumentComponent = (annualWorkAccidentIllnessData: AnnualWorkAccidentIllnessData) => {
   return (
     <div className="bg-white">
       <style jsx>{`
@@ -67,16 +43,11 @@ export const generateAnnualWorkAccidentIllnessFilename = (item: any) => {
 };
 
 export const handlePrintPDF = async (item: any, generatePDFLocally: (component: React.ReactElement, filename: string) => Promise<void>) => {
-  // Prepare data for Annual Work Accident/Illness Exposure Data Report
-  const annualWorkAccidentIllnessData = prepareAnnualWorkAccidentIllnessData(item);
-
-  // Create document component
-  const documentComponent = createAnnualWorkAccidentIllnessDocumentComponent(annualWorkAccidentIllnessData);
+  // Create document component with all pages
+  const documentComponent = createAnnualWorkAccidentIllnessDocumentComponent(item);
   
   const filename = generateAnnualWorkAccidentIllnessFilename(item);
   
   // Generate PDF locally (opens print dialog)
   await generatePDFLocally(documentComponent, filename);
 };
-
-export type { AnnualWorkAccidentIllnessData };

@@ -15,10 +15,8 @@ interface AnnualWorkAccidentIllnessData {
     severityRate: number;
     summary: string;
   };
-  submittedBy: {
-    name: string;
-    position: string;
-  };
+  name_signature?: string;
+  signature?: string;
 }
 
 interface DocumentPageOneProps {
@@ -142,14 +140,30 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
 
       {/* Signature/Approval Section */}
       <div className="mt-8 flex justify-end">
-        <div className="text-right">
-          <div className="border-b border-black w-48 pb-1 mb-2"></div>
-          <div className="text-xs font-bold">General Manager</div>
+        <div className="text-center relative">
+          {data.signature && (
+            <div className="absolute w-full right-2 -top-10 z-10">
+              <img 
+                src={data.signature} 
+                alt="Signature" 
+                style={{ 
+                  height: '80px', 
+                  objectFit: 'contain',
+                  display: 'block',
+                  margin: '0 auto'
+                }} 
+              />
+            </div>
+          )}
+          <div className="text-sm text-center border-b-2 mb-0.5 border-black">
+            {data.name_signature || ''}
+          </div>
+          <div className="text-xs text-center">General Manager</div>
         </div>
       </div>
 
       {/* Instructions and Definitions Section */}
-      <div className="mt-8 space-y-4">
+      <div className="mt-4 space-y-4">
         <div className="text-xs">
           <div className="ml-4">
             1. This report shall be accomplished with or without accident/illness occurrence and submitted to the Regional Labor Officer or Local Government not later than the 30th day of the month following the end of each calendar year.
