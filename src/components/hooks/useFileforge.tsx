@@ -61,20 +61,50 @@ const useFileforge = ({ onSuccess, onError }: UseFileforgeProps = {}) => {
         </html>
       `;
 
-      // Open in new window and print
-      const newWindow = window.open('', '_blank');
-      if (newWindow) {
-        newWindow.document.write(fullHtml);
-        newWindow.document.close();
-        
-        // Wait for content to load, then print
-        newWindow.onload = () => {
-          setTimeout(() => {
-            newWindow.focus();
-            newWindow.print();
-          }, 500);
-        };
+      // Create a hidden iframe for printing
+      const frame = document.createElement('iframe');
+      frame.style.position = 'fixed';
+      frame.style.right = '0';
+      frame.style.bottom = '0';
+      frame.style.width = '210mm'; // A4 width
+      frame.style.height = '297mm'; // A4 height
+      frame.style.border = '0';
+      frame.style.opacity = '0';
+      frame.style.visibility = 'hidden';
+      frame.style.overflow = 'hidden';
+      
+      document.body.appendChild(frame);
+      
+      // Get the document for the iframe
+      const frameDoc = frame.contentWindow?.document;
+      if (!frameDoc) {
+        document.body.removeChild(frame);
+        throw new Error("Could not create document frame");
       }
+      
+      // Write HTML content to the iframe
+      frameDoc.open();
+      frameDoc.write(fullHtml);
+      frameDoc.close();
+      
+      // Wait for the iframe to load, then print
+      frame.onload = () => {
+        try {
+          setTimeout(() => {
+            frame.contentWindow?.focus();
+            frame.contentWindow?.print();
+            
+            // Clean up - remove the iframe after printing
+            setTimeout(() => {
+              document.body.removeChild(frame);
+            }, 1000);
+          }, 500);
+        } catch (error) {
+          console.error('Print error:', error);
+          document.body.removeChild(frame);
+          onError?.(error as Error);
+        }
+      };
 
       onSuccess?.();
     } catch (error) {
@@ -84,8 +114,6 @@ const useFileforge = ({ onSuccess, onError }: UseFileforgeProps = {}) => {
       setIsGenerating(false);
     }
   };
-
-
 
   const previewHTML = async (component: React.ReactElement) => {
     try {
