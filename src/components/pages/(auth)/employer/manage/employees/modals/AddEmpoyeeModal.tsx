@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -31,27 +31,6 @@ export default function AddEmployeeModal({
   const { mutate, isLoading: isLoadingAddEmployee } = useAddEmployee();
 
   const onSubmit = handleSubmit((data) => {
-    if (!data.location) {
-      toast.custom(() => <CustomToast message="Please create a location first" type='error' />, {
-        duration: 5000,
-      });
-      return;
-    }
-
-    if (!data.department) {
-      toast.custom(() => <CustomToast message="Please select a department" type='error' />, {
-        duration: 5000,
-      });
-      return;
-    }
-
-    if (!data.position) {
-      toast.custom(() => <CustomToast message="Please select a position" type='error' />, {
-        duration: 5000,
-      });
-      return;
-    }
-
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -97,28 +76,16 @@ export default function AddEmployeeModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-7xl'>
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full mx-4 sm:my-8 sm:mx-8 sm:max-w-7xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Add Employee</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
-                  <div className='md:mx-6 my-4'>
+                  <div className='mx-4 md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
-                      <div className='px-4 pt-4 pb-6'>
-                        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-                          <div className='flex'>
-                            <div className='flex-shrink-0'>
-                              <XCircleIcon className='h-5 w-5 text-red-400' aria-hidden='true' />
-                            </div>
-                            <div className='ml-3'>
-                              <h3 className='text-sm font-medium text-red-800'>
-                                You cannot proceed due to incomplete fields. Please review.
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
-                        <div className='grid lg:grid-cols-6 gap-x-8 mt-7'>
-                          <div>
+                      <div className='px-2 sm:px-4 pt-4 pb-6'>
+                        <div className='grid lg:grid-cols-6 gap-x-8 mt-5'>
+                          <div className='mb-4'>
                             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                               Date of Employment
                               <span className='text-red-600'>*</span>
@@ -228,7 +195,7 @@ export default function AddEmployeeModal({
                             </div>
                           </div>
                         </div>
-                        <div className='grid grid-cols-3 gap-6 mt-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4'>
                           <div>
                             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                               Nationality
@@ -252,8 +219,8 @@ export default function AddEmployeeModal({
                                 id='gender'
                                 {...register('gender', { required: true })}
                                 className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
-                                defaultValue='Male'
                               >
+                                <option value="">Select Gender</option>
                                 <option>Male</option>
                                 <option>Female</option>
                               </select>
@@ -277,7 +244,7 @@ export default function AddEmployeeModal({
                             </div>
                           </div>
                         </div>
-                        <div className='grid grid-cols-3 gap-6 mt-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4'>
                           <div>
                             <label htmlFor='location' className='text-sm font-medium leading-6 text-gray-900'>
                               Location<span className='text-red-500'>*</span>
@@ -285,9 +252,10 @@ export default function AddEmployeeModal({
                             <div className='relative mt-2'>
                               <select
                                 id='location'
-                                {...register('location')}
+                                {...register('location', { required: true })}
                                 className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
                               >
+                                <option value="">Select Location</option>
                                 {locationItems && locationItems.map((item: any) => (
                                   <option key={item.id} value={item.name}>{item.name}</option>
                                 ))}
@@ -304,7 +272,7 @@ export default function AddEmployeeModal({
                             <div className='relative mt-2'>
                               <select
                                 id='position'
-                                {...register('position')}
+                                {...register('position', { required: true })}
                                 className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
                               >
                                 <option value="">Select Position</option>
@@ -324,7 +292,7 @@ export default function AddEmployeeModal({
                             <div className='relative mt-2'>
                               <select
                                 id='department'
-                                {...register('department')}
+                                {...register('department', { required: true })}
                                 className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
                               >
                                 <option value="">Select Department</option>
@@ -340,7 +308,7 @@ export default function AddEmployeeModal({
                         </div>
                       </div>
                       <hr />
-                      <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
+                      <div className='mt-5 sm:mt-4 flex flex-col-reverse sm:flex-row-reverse gap-3 px-2 sm:px-4'>
                         <button
                           type='submit'
                           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
@@ -371,7 +339,7 @@ export default function AddEmployeeModal({
                         </button>
                         <button
                           type='button'
-                          className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                          className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:w-auto'
                           onClick={() => setIsOpen(false)}
                           ref={cancelButtonRef}
                         >
