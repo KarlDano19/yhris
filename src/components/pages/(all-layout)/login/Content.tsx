@@ -204,6 +204,7 @@ function Content() {
                     </Link>
                     <button
                       type='submit'
+                      id='login-button'
                       className='w-full uppercase text-white bg-blue-600 enabled:hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center mb-5 disabled:opacity-50'
                       tabIndex={5}
                       disabled={isLoading}
@@ -233,7 +234,7 @@ function Content() {
                     </button>
                     <p className='text-sm font-light text-gray-500 text-center mb-9'>
                       Don&apos;t have an account yet?{' '}
-                      <Link href='/register' className='font-semibold text-blue-600 hover:underline'>
+                      <Link id='sign-up-link' href='/register' className='font-semibold text-blue-600 hover:underline'>
                         Sign Up here
                       </Link>
                     </p>
@@ -243,6 +244,7 @@ function Content() {
                   </div>
                   <div className='mb-5 relative'>
                     <button
+                      id='google-login-button'
                       className='flex lg:w-full items-center justify-center text-indigo-dye mt-8 lg:mt-4 font-semibold bg-white border border-gray-400 w-full lg:px-12 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => setCreateAccountModal(true)}
                       disabled={true}
@@ -250,6 +252,7 @@ function Content() {
                       <GoogleIcon className='w-4 h-4 mr-2' /> Google
                     </button>
                     <button
+                      id='facebook-login-button'
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => setCreateAccountModal(true)}
                       disabled={true}
@@ -257,6 +260,7 @@ function Content() {
                       <FacebookRoundedIcon className='w-4 h-4 mr-2' /> Facebook
                     </button>
                     <button
+                      id='yahshua-payroll-login-button'
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => loginWithYahshuaPayroll()}
                     >
@@ -266,11 +270,11 @@ function Content() {
                   </div>
                   <div className='text-sm'>
                     By continuing, you agree to our{' '}
-                    <Link href='/terms-of-service' target='_blank' className='text-[#355FD0] underline'>
+                    <Link id='terms-of-service-link' href='/terms-of-service' target='_blank' className='text-[#355FD0] underline'>
                       Terms of Service
                     </Link>
                     , and{' '}
-                    <Link href='/privacy-notice' target='_blank' className='text-[#355FD0] underline'>
+                    <Link id='privacy-notice-link' href='/privacy-notice' target='_blank' className='text-[#355FD0] underline'>
                       Privacy Notice
                     </Link>
                     .
