@@ -97,8 +97,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
-  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
-  const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+  // const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  // const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
@@ -190,36 +190,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handlePrintPDFLocal = async (item: any) => {
     try {
-      // Get company name and address from cached profile data
-      const cachedProfile = queryClient
-        .getQueryCache()
-        .find(['employerProfileCache']) as {
-        state: { data: { 
-          name: string;
-          building: string;
-          street: string;
-          locality: string;
-          city: string;
-          country: string;
-          zip_code: string;
-          region: string;
-        } } | undefined;
-      };
-      
-      const companyName = cachedProfile?.state?.data?.name || '';
-      
-      // Combine address fields from cached profile
-      const addressParts = [
-        cachedProfile?.state?.data?.building,
-        cachedProfile?.state?.data?.street,
-        cachedProfile?.state?.data?.locality,
-        cachedProfile?.state?.data?.city,
-        cachedProfile?.state?.data?.country,
-        cachedProfile?.state?.data?.zip_code
-      ].filter(Boolean); // Remove empty/undefined values
-      
-      const combinedAddress = addressParts.join(', ') || '\u00A0';
-      
       // Fetch detailed data using the print hook's function directly
       const detailedData = await getPrintAnnualAccidentIllnessReportDetails(item.id);
       
@@ -231,11 +201,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         reportItem.year === year
       );
       
-      // Create item with combined address and filtered data
+      // Create item with filtered data
       const itemWithData = {
         ...(detailedData || filteredItem || item),
-        company_name: companyName,
-        address: combinedAddress,
         exposure_data: `JANUARY 1 TO DECEMBER 31, ${year}`,
         // Ensure we use the number of employees from the filtered year
         number_of_employees: filteredItem ? filteredItem.number_of_employees : item.number_of_employees,
@@ -247,47 +215,47 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const handlePrintWithBranch = () => {
-    if (selectedBranch) {
-      const filteredItems = annualAccidentIllnessReportItems.filter((item: any) => item.branch === selectedBranch);
-      handlePrint();
-    }
-  };
+  // const handlePrintWithBranch = () => {
+  //   if (selectedBranch) {
+  //     const filteredItems = annualAccidentIllnessReportItems.filter((item: any) => item.branch === selectedBranch);
+  //     handlePrint();
+  //   }
+  // };
 
-  const handlePrint = () => {
-    // Create a new div element
-    const printDiv = document.createElement('div');
+  // const handlePrint = () => {
+  //   // Create a new div element
+  //   const printDiv = document.createElement('div');
 
-    // Copy the content of the original printSection
-    const originalPrintSection = document.getElementById('printSection');
-    if (originalPrintSection) {
-      printDiv.innerHTML = originalPrintSection.innerHTML;
-    }
+  //   // Copy the content of the original printSection
+  //   const originalPrintSection = document.getElementById('printSection');
+  //   if (originalPrintSection) {
+  //     printDiv.innerHTML = originalPrintSection.innerHTML;
+  //   }
 
-    // Style the new div to be off-screen
-    printDiv.style.width = '1980px';
-    printDiv.style.height = '100%';
-    printDiv.style.position = 'absolute';
-    printDiv.style.left = '-9999px';
-    printDiv.style.top = '-9999px';
+  //   // Style the new div to be off-screen
+  //   printDiv.style.width = '1980px';
+  //   printDiv.style.height = '100%';
+  //   printDiv.style.position = 'absolute';
+  //   printDiv.style.left = '-9999px';
+  //   printDiv.style.top = '-9999px';
 
-    // Add the new div to the body
-    document.body.appendChild(printDiv);
+  //   // Add the new div to the body
+  //   document.body.appendChild(printDiv);
 
-    // Use html2canvas on the new div
-    html2canvas(printDiv).then((canvas) => {
-      // Remove the temporary div
-      document.body.removeChild(printDiv);
+  //   // Use html2canvas on the new div
+  //   html2canvas(printDiv).then((canvas) => {
+  //     // Remove the temporary div
+  //     document.body.removeChild(printDiv);
 
-      const imgData = canvas.toDataURL('image/png');
-      const newWindow = window.open('', '_blank');
-      newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
-      newWindow?.document.close();
-      setTimeout(() => {
-        newWindow?.print();
-      }, 500);
-    });
-  };
+  //     const imgData = canvas.toDataURL('image/png');
+  //     const newWindow = window.open('', '_blank');
+  //     newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
+  //     newWindow?.document.close();
+  //     setTimeout(() => {
+  //       newWindow?.print();
+  //     }, 500);
+  //   });
+  // };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -725,7 +693,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      {isSelectBranchModalOpen && (
+      {/* {isSelectBranchModalOpen && (
         <SelectBranchModal
           isOpen={isSelectBranchModalOpen}
           setIsOpen={setIsSelectBranchModalOpen}
@@ -734,7 +702,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             handlePrintWithBranch();
           }}
         />
-      )}
+      )} */}
       {isCreateAnnualAccidentIllnessReportModalOpen && (
         <CreateReportModal
           refetch={annualAccidentIllnessReportRefetch}

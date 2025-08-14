@@ -2,6 +2,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -10,6 +11,18 @@ import InjurySummary from "./tabs/InjurySummary";
 import useAddAnnualAccidentIllnessReport from "../hooks/useAddAnnualAccidentIllnessReport";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+
+interface CachedProfileData {
+  name: string;
+  type_of_industry: string;
+  building: string;
+  street: string;
+  locality: string;
+  city: string;
+  country: string;
+  zip_code: string;
+  region: string;
+}
 
 function CreateReportModal({
   refetch,
@@ -25,6 +38,38 @@ function CreateReportModal({
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addAnnualAccidentIllnessReport, isLoading: isLoadingAddAnnualAccidentIllnessReport } = useAddAnnualAccidentIllnessReport();
+  const queryClient = useQueryClient();
+  
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(["employerProfileCache"]) as {
+    state: { data: CachedProfileData } | undefined;
+  };
+
+  // Set cached profile data when modal opens
+  useEffect(() => {
+    if (isOpen && cachedProfile?.state?.data) {
+      setValue("company_name", cachedProfile.state.data.name || "");
+      setValue(
+        "type_of_industry",
+        cachedProfile.state.data.type_of_industry || ""
+      );
+      
+      // Combine address fields from cached profile
+      const addressParts = [
+        cachedProfile.state.data.building,
+        cachedProfile.state.data.street,
+        cachedProfile.state.data.locality,
+        cachedProfile.state.data.city,
+        cachedProfile.state.data.country,
+        cachedProfile.state.data.zip_code
+      ].filter(Boolean); // Remove empty/undefined values
+      
+      const combinedAddress = addressParts.join(', ') || '\u00A0';
+      setValue("address", combinedAddress);
+      setValue("year", new Date().getFullYear() || "");
+    }
+  }, [isOpen, cachedProfile, setValue]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
