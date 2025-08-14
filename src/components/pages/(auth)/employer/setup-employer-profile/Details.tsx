@@ -111,7 +111,7 @@ const Details = ({
             className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
           />
         </div>
-        <div className='basis-1/3'>
+        <div className='basis-1/3 mr-10'>
           <label htmlFor='workSetUp' className='block mb-2 text-sm font-medium text-gray-900'>
             Work Set-up
           </label>
@@ -122,6 +122,7 @@ const Details = ({
             className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
           />
         </div>
+        <div className='basis-1/3'></div>
       </div>
       <div className='my-10'>
         <label>
@@ -260,6 +261,8 @@ const Details = ({
               </div>
             </div>
           </div>
+          <div className='basis-1/3 mr-10'></div>
+          <div className='basis-1/3 mr-10'></div>
         </div>
       </div>
       <div className='flex justify-end'>
