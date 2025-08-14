@@ -105,7 +105,7 @@ const getLatestQuarterDate = (data: any[], dateField: string, fallback: string =
 };
 
 // Utility function to get overall status from employee compensation logbook data
-const getOverallStatus = (data: any[], fallback: string = 'On Schedule') => {
+const getOverallStatus = (data: any[], fallback: string = '—') => {
   if (!data || !data.length) return fallback;
   
   // For analytics, the backend returns only the latest entry
@@ -274,7 +274,7 @@ const CompliancePolicy = () => {
   // DOLE data with all last submitted dates derived from API and real status data
   const doleComplianceData = [
     {
-      doleRequirement: 'Work Accident & Illness Report (WAIR)',
+      doleRequirement: 'Annual Work Accident & Illness Report (WAIR)',
       frequency: annualWairRecords?.[0]?.frequency,
       lastSubmitted: wairLastSubmitted,
       nextDueDate: computeHiddenNextDueDate(annualWairRecords, wairOverallStatus),

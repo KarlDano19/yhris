@@ -33,6 +33,8 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
         return 'bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-sm font-bold';
       case 'Approved':
         return 'bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold';
+      case '—':
+        return 'text-gray-500';
       default:
         return 'bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-bold';
     }
@@ -160,18 +162,22 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
                       {item.doleRequirement}
                     </td>
                     <td className="py-4 text-center text-sm text-gray-900">
-                      {item.frequency}
+                      {item.frequency || "—"}
                     </td>
                     <td className="py-4 text-center text-sm text-gray-900">
-                      {item.lastSubmitted}
+                      {item.lastSubmitted || "—"}
                     </td>
                     <td className="py-4 text-center text-sm text-gray-900">
-                      {item.nextDueDate}
+                      {item.nextDueDate || "—"}
                     </td>
                     <td className="py-4 text-center">
-                      <span className={getStatusColor(item.complianceStatus)}>
-                        {item.complianceStatus}
-                      </span>
+                      {item.complianceStatus === '—' ? (
+                        <span className="text-gray-500">—</span>
+                      ) : (
+                        <span className={getStatusColor(item.complianceStatus)}>
+                          {item.complianceStatus}
+                        </span>
+                      )}
                     </td>
                     <td className="py-4 text-center text-sm">
                       {(() => {
