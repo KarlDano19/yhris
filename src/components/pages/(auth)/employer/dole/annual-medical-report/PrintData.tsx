@@ -7,11 +7,11 @@ import DocumentPageFour from './print/DocumentPageFour';
 import DocumentPageFive from './print/DocumentPageFive';
 import DocumentPageSix from './print/DocumentPageSix';
 
-export const createAnnualMedicalDocumentComponent = (item: any, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string) => {
+export const createAnnualMedicalDocumentComponent = (item: any, reportPeriodFrom?: string, reportPeriodTo?: string) => {
   
   // Page One Data
   const pageOneData = {
-    establishmentName: companyName || '\u00A0',
+    establishmentName: item.name_of_establishment || '\u00A0',
     address: item.address || '\u00A0',
     ownerManager: item.name_of_owner_manager || '\u00A0',
     natureOfBusiness: item.type_of_industry || '\u00A0',
@@ -495,7 +495,7 @@ export const generateAnnualMedicalFilename = (item: any) => {
 
 export const handlePrintPDF = async (item: any, generatePDFLocally: (component: React.ReactElement, filename: string) => Promise<void>, companyName?: string, reportPeriodFrom?: string, reportPeriodTo?: string) => {
   // Create document component with all pages
-  const documentComponent = createAnnualMedicalDocumentComponent(item, companyName, reportPeriodFrom, reportPeriodTo);
+  const documentComponent = createAnnualMedicalDocumentComponent(item, reportPeriodFrom, reportPeriodTo);
   
   const filename = generateAnnualMedicalFilename(item);
   
