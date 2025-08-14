@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 
-export default function CreateJobPageFive({
+export default function CreateJobPagePostAs({
   setValue,
   register,
   setPageNumber,
@@ -43,6 +43,8 @@ export default function CreateJobPageFive({
   useEffect(() => {
     if (getValues('postAs') === 'upload') {
       setShowInput(true);
+    } else {
+      setShowInput(false);
     }
   }, [pageNumber]);
 
@@ -163,7 +165,7 @@ export default function CreateJobPageFive({
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
         <button
-          id='pageFiveNextBtn'
+          id='pagePostAsNextBtn'
           type='button'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
           onClick={() => {
@@ -182,14 +184,14 @@ export default function CreateJobPageFive({
           Next
         </button>
         <button
-          id='pageFiveBackBtn'
+          id='pagePostAsBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
           onClick={() => {
             if (isRangeBenefitsAdded) {
-              setPageNumber(3);
-            } else {
               setPageNumber(4);
+            } else {
+              setPageNumber(5);
             }
           }}
         >

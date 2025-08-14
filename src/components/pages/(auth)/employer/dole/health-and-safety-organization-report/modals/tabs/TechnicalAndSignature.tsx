@@ -19,6 +19,7 @@ function TechnicalAndSignature({
   setSelectedTab,
   setValue,
   watch,
+  isCreateModal,
 }: {
   control: any;
   register: any;
@@ -26,6 +27,7 @@ function TechnicalAndSignature({
   setSelectedTab: any;
   setValue: any;
   watch: any;
+  isCreateModal: boolean;
 }) {
 
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
@@ -36,6 +38,8 @@ function TechnicalAndSignature({
   const [signatureSource, setSignatureSource] = useState<string>("");
   const [technicalFileSource, setTechnicalFileSource] = useState<string>("");
   const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
+  const [showTechTooltip, setShowTechTooltip] = useState(false);
+  const [showSignatureTooltip, setShowSignatureTooltip] = useState(false);
 
   // Watch for existing file URLs from form
   const existingTechnicalFileUrl = watch("technical_information_file");
@@ -170,6 +174,19 @@ function TechnicalAndSignature({
     }
   }, [existingSignatureUrl]);
 
+  // Show tooltips for 2 seconds when component mounts (only in create modal)
+  useEffect(() => {
+    if (isCreateModal) {
+      setShowTechTooltip(true);
+      setShowSignatureTooltip(true);
+      const timer = setTimeout(() => {
+        setShowTechTooltip(false);
+        setShowSignatureTooltip(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreateModal]);
+
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
@@ -252,10 +269,17 @@ function TechnicalAndSignature({
                 className='inline-block ml-1 cursor-pointer'
                 data-tooltip-id='tech-file-upload-tooltip'
                 data-tooltip-place='right'
+                onMouseEnter={() => setShowTechTooltip(true)}
+                onMouseLeave={() => setShowTechTooltip(false)}
               >
                 <InfoIcon />
               </div>
-              <Tooltip id='tech-file-upload-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+              <Tooltip 
+                id='tech-file-upload-tooltip' 
+                opacity={1} 
+                style={{ fontSize: '10px' }}
+                isOpen={showTechTooltip}
+              >
                 <div>
                   <h2 className='text-[12px] font-medium'>Note: File uploads may disappear if the screen loses focus. Please re-upload if needed.</h2>
                 </div>
@@ -325,7 +349,28 @@ function TechnicalAndSignature({
           </div>
         </div>
         <div className="mt-4 px-2 md:px-6">
-          <h1 className="text-sm font-medium">Signature</h1>
+          <h1 className="text-sm font-medium">
+            Signature
+                          <div
+                className='inline-block ml-1 cursor-pointer'
+                data-tooltip-id='signature-upload-tooltip'
+                data-tooltip-place='right'
+                onMouseEnter={() => setShowSignatureTooltip(true)}
+                onMouseLeave={() => setShowSignatureTooltip(false)}
+              >
+                <InfoIcon />
+              </div>
+              <Tooltip 
+                id='signature-upload-tooltip' 
+                opacity={1} 
+                style={{ fontSize: '10px' }}
+                isOpen={showSignatureTooltip}
+              >
+                <div>
+                  <h2 className='text-[12px] font-medium'>Note: Draw or Upload signature may disappear if the screen loses focus. Please re-draw or re-upload if needed.</h2>
+                </div>
+              </Tooltip>
+          </h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div>
@@ -353,18 +398,6 @@ function TechnicalAndSignature({
             >
               Upload Signature
               <span className="text-red-600">*</span>
-              <div
-                className='inline-block ml-1 cursor-pointer'
-                data-tooltip-id='signature-upload-tooltip'
-                data-tooltip-place='right'
-              >
-                <InfoIcon />
-              </div>
-              <Tooltip id='signature-upload-tooltip' opacity={1} style={{ fontSize: '10px' }}>
-                <div>
-                  <h2 className='text-[12px] font-medium'>Note: File uploads may disappear if the screen loses focus. Please re-upload if needed.</h2>
-                </div>
-              </Tooltip>
             </label>
             <div className="relative mt-2">
               <input

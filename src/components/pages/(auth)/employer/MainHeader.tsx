@@ -21,7 +21,6 @@ import MainLogo from '@/svg/MainLogo';
 import useGetRights from '@/components/hooks/useGetRights';
 import useGetUsers from '@/components/hooks/useGetUsers';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
-import SubscriptionHeader from '@/components/pages/(auth)/employer/SubscriptionHeader';
 
 interface ErrorDetail {
   detail: string;
@@ -192,6 +191,11 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute }: { hasProf
                       <MainLogo />
                     </Link>
                   </div>
+                  <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
+                    <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
+                      <p className='text-sm font-bold'>Upgrade Now!</p>
+                    </Link>
+                  </div>
                 </div>
                 <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden'>
                   {/* Mobile menu button */}
@@ -271,7 +275,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute }: { hasProf
         )}
       </Popover>
       <FloatingHelpButton companyName={profile.name} />
-      {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute) && <SubscriptionHeader />}
+      {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute)}
     </>
   );
 };

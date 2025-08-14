@@ -15,7 +15,9 @@ async function submitApplication(data: any) {
       portfolio_url: data.portfolio,
       work_experience: data.exp,
       setup_preference: (data.setupPreference || '').join(),
+      screening_answers: data.screeningAnswers || []
     };
+    
     const formData = new FormData();
     formData.append('application_form', JSON.stringify(finalData));
     formData.append('job_posting', data.jobPosting);
@@ -46,9 +48,8 @@ async function submitApplication(data: any) {
   }
 }
 
-function useSubmitApplication() {
-  const query = useMutation((data: any) => submitApplication(data));
-  return query;
+export default function useSubmitApplication() {
+  return useMutation({
+    mutationFn: submitApplication,
+  });
 }
-
-export default useSubmitApplication;

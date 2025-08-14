@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
@@ -70,7 +71,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const menuOptions = [
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+
+  const menuOptions = [ 
     {
       name: 'Export',
       action: () => {
@@ -297,7 +303,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>SHC Minutes of Meeting</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -366,7 +372,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateShcMeetingMinutesModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_SHC_minute}
+                disabled={!cachedRigths?.state?.data?.create_dole_SHC_minute}
               >
                 CREATE
               </button>
@@ -415,7 +421,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -461,6 +467,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isCreateShcMeetingMinutesModalOpen}
           setIsOpen={setIsCreateShcMeetingMinutesModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isUpdateShcMinutesMeetingModalOpen && (
@@ -468,6 +475,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isUpdateShcMinutesMeetingModalOpen}
           setIsOpen={setIsUpdateShcMinutesMeetingModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isShcMinutesMeetingDeleteModalOpen && (

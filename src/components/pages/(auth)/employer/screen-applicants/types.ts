@@ -1,4 +1,5 @@
 import React, { Dispatch, ReactNode, SetStateAction } from 'react';
+import { FilterOptions } from './[id]/Filter';
 
 export type StateType = StageType[];
 
@@ -9,6 +10,7 @@ export type BlockPropTypes = {
   snapshot: any;
   jobPostDetailsRefetch: any;
   appliedApplicantRefetch: any;
+  filters?: FilterOptions;
 };
 
 export type WrapperPropTypes = {
@@ -69,6 +71,14 @@ export type ApplicantType = {
   checklists: string[];
   status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | null | undefined;
   stagePosition: number;
+  screeningFit?: 'good' | 'bad';
+  screeningAnswers?: Array<{
+    question: string;
+    answer: string;
+    idealAnswer?: string;
+    mustHave?: boolean;
+    isMatch?: boolean;
+  }>;
 };
 
 export type ApplicantsType = [] | ApplicantType[];
@@ -135,4 +145,5 @@ export type StageBlockTypes = {
   index: number;
   openMenuId: number | null;
   setOpenMenuId: any;
+  filters?: FilterOptions;
 };

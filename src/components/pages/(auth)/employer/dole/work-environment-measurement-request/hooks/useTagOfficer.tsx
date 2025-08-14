@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export default function useTagOfficer(input: string, setInput: any, arr: string[] = []) {
+export default function useTagOfficer(input: string, setInput: any, arr: string[] = [], setFormValue?: any) {
     const [tagsOfficer, setTagsOfficer] = useState(arr)
 
     const handleKeyDownOfficer = (event: any) => {
@@ -11,14 +11,22 @@ export default function useTagOfficer(input: string, setInput: any, arr: string[
                 newTagOfficer !== "" &&
                 !tagsOfficer.some((tagOfficer) => tagOfficer.toLowerCase() === newTagOfficer.toLowerCase())
             ) {
-                setTagsOfficer([...tagsOfficer, newTagOfficer])
+                const newTags = [...tagsOfficer, newTagOfficer]
+                setTagsOfficer(newTags)
+                if (setFormValue) {
+                    setFormValue("name_of_safety_officer", newTags)
+                }
                 setInput("")
             }
         }
     }
 
     const handleRemoveTagOfficer = (tagOfficer: string) => {
-        setTagsOfficer(tagsOfficer.filter((t) => t !== tagOfficer))
+        const newTags = tagsOfficer.filter((t) => t !== tagOfficer)
+        setTagsOfficer(newTags)
+        if (setFormValue) {
+            setFormValue("name_of_safety_officer", newTags)
+        }
     }
 
     return {tagsOfficer, setTagsOfficer, handleKeyDownOfficer, handleRemoveTagOfficer}

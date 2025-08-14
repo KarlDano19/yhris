@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -51,6 +52,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+  
+  // Employee Search
+    // For create modal
+    const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
+    const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
+
+    // For edit modal
+    const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
+    const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
 
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
@@ -316,7 +330,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Work Accident/Illness Report</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -385,7 +399,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkAccidentIllnessReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_wair}
+                disabled={!cachedRigths?.state?.data?.create_dole_wair}
               >
                 CREATE
               </button>
@@ -434,7 +448,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -496,6 +510,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isCreateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateWorkAccidentIllnessReportModalOpen}
+          formMethods={createFormMethods}
+          employeeSearch={createEmployeeSearch}
+          setEmployeeSearch={setCreateEmployeeSearch}
+          employeeSelected={createEmployeeSelected}
+          setEmployeeSelected={setCreateEmployeeSelected}
         />
       )}
       {isWorkAccidentIllnessReportDeleteModalOpen && (
@@ -510,6 +529,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isUpdateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsUpdateWorkAccidentIllnessReportModalOpen}
+          formMethods={editFormMethods}
+          employeeSearch={editEmployeeSearch}
+          setEmployeeSearch={setEditEmployeeSearch}
+          employeeSelected={editEmployeeSelected}
+          setEmployeeSelected={setEditEmployeeSelected}
         />
       )}
       {isExportProgressModalOpen && (

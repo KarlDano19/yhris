@@ -107,23 +107,23 @@ function WorkplaceWelfare({
           <div className="flex flex-col md:grid md:grid-cols-4 md:gap-2">
             <div className="relative mt-2 flex items-center gap-2">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("keeping_of_medical_records_of_workers")}
-                id="keeping_of_medical_records_of_workers"
+                id="keeping_of_medical_records_of_workers_done"
                 value="done"
               />
-              <label htmlFor="keeping_of_medical_records_of_workers" className="ml-1 text-sm">
+              <label htmlFor="keeping_of_medical_records_of_workers_done" className="ml-1 text-sm">
                 Done
               </label>
             </div>
             <div className="relative mt-2 flex items-center gap-2">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("keeping_of_medical_records_of_workers")}
-                id="keeping_of_medical_records_of_workers"
+                id="keeping_of_medical_records_of_workers_not_done"
                 value="not_done"
               />
-              <label htmlFor="keeping_of_medical_records_of_workers" className="ml-2 text-sm">
+              <label htmlFor="keeping_of_medical_records_of_workers_not_done" className="ml-2 text-sm">
                 Not Done
               </label>
             </div>
@@ -188,69 +188,69 @@ function WorkplaceWelfare({
           </label>
           {/* Desktop layout start */}
           <div className="hidden md:grid md:grid-cols-4 md:gap-2">
-            <div>Kind of Program</div>
-            <div>
-              <h1 className="text-sm font-medium pl-14">Seminars</h1>
+            <div className="text-sm font-medium">Kind of Program</div>
+            <div className="text-center">
+              <h1 className="text-sm font-medium">Seminars</h1>
             </div>
-            <div>
-              <h1 className="text-sm font-medium pl-14">Use of Visual Aid/ Materials</h1>
+            <div className="text-center">
+              <h1 className="text-sm font-medium">Use of Visual Aid/ Materials</h1>
             </div>
-            <div>
-              <h1 className="text-sm font-medium pl-14">Counseling</h1>
+            <div className="text-center">
+              <h1 className="text-sm font-medium">Counseling</h1>
             </div>
           </div>
           {/* Desktop layout end */}
 
           {/* Desktop layout start */}
           <div className="hidden md:grid md:grid-cols-4 md:gap-2 mt-4">
-            <div>Nutrition Program</div>
-            <div>
+            <div className="flex text-sm items-center">- Nutrition Program</div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("nutrition_program")} value="seminars" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("nutrition_program")} value="use_of_visual_aid_materials" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("nutrition_program")} value="counseling" />
             </div>
-            <div>Maternal and Child Care Program</div>
-            <div>
+            <div className="flex text-sm items-center">- Maternal and Child Care Program</div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("maternal_and_child_care_program")} value="seminars" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("maternal_and_child_care_program")} value="use_of_visual_aid_materials" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("maternal_and_child_care_program")} value="counseling" />
             </div>
-            <div>Family Planning Program</div>
-            <div>
+            <div className="flex text-sm items-center">- Family Planning Program</div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("family_planning_program")} value="seminars" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("family_planning_program")} value="use_of_visual_aid_materials" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("family_planning_program")} value="counseling" />
             </div>
-            <div>Mental Health Program</div>
-            <div>
+            <div className="flex text-sm items-center">- Mental Health Program</div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("mental_health_program")} value="seminars" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("mental_health_program")} value="use_of_visual_aid_materials" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("mental_health_program")} value="counseling" />
             </div>
-            <div>Personal Health Maintenance</div>
-            <div>
+            <div className="flex text-sm items-center">- Personal Health Maintenance</div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("personal_health_maintenance")} value="seminars" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("personal_health_maintenance")} value="use_of_visual_aid_materials" />
             </div>
-            <div>
+            <div className="flex justify-center items-center">
               <input type="checkbox" {...register("personal_health_maintenance")} value="counseling" />
             </div>
           </div>
@@ -546,29 +546,14 @@ function WorkplaceWelfare({
         <div>
           <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
             Physical Fitness Program
-            <span className="text-red-600">*</span>
           </label>
-          {errors.sports_activities && (
-            <p className="text-xs text-red-600 mt-1">
-              {errors.sports_activities.message || "Please select at least one option."}
-            </p>
-          )}
           <div className="flex flex-col md:grid md:grid-cols-4 md:gap-2 mt-2">
-            <div className="mb-2 md:mb-0">Sports Activities</div>
-            <div className="relative flex items-center gap-2">
-              <input
-                type="checkbox"
-                {...register("sports_activities")}
-                id="sports_activities_no"
-                value="no"
-              />
-              <label htmlFor="sports_activities_no" className="ml-1 text-sm">
-                No
-              </label>
+            <div className="mb-2 md:mb-0 text-sm">
+              Sports Activities<span className="text-red-600">*</span>
             </div>
             <div className="relative flex items-center gap-2">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("sports_activities")}
                 id="sports_activities_yes"
                 value="yes"
@@ -577,9 +562,25 @@ function WorkplaceWelfare({
                 Yes
               </label>
             </div>
+            <div className="relative flex items-center gap-2">
+              <input
+                type="radio"
+                {...register("sports_activities")}
+                id="sports_activities_no"
+                value="no"
+              />
+              <label htmlFor="sports_activities_no" className="ml-1 text-sm">
+                No
+              </label>
+            </div>
             <div className="hidden md:block">{""}</div>
             <div className="hidden md:block">{""}</div>
           </div>
+          {errors.sports_activities && (
+            <p className="text-xs text-red-600">
+              {errors.sports_activities.message || "Please select at least one option."}
+            </p>
+          )}
           <div className="flex flex-col md:grid md:grid-cols-4 md:gap-2 mt-2">
             <div className="col-span-1 flex items-center mb-2 md:mb-0">
               <label htmlFor="physical_fitness_program_others" className="text-sm font-medium">Others (Please specify):</label>
