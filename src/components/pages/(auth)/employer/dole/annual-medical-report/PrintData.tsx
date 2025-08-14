@@ -341,6 +341,11 @@ export const createAnnualMedicalDocumentComponent = (item: any, companyName?: st
         keratitis: { male: item.keratitis_male || 0, female: item.keratitis_female || 0 },
         burns: { male: item.burns_male || 0, female: item.burns_female || 0 },
         radiationRelatedCancers: { male: item.radiation_related_cancers_male || 0, female: item.radiation_related_cancers_female || 0 }
+      },
+      total: {
+        male: item.physical_environment_total_male || 0,
+        female: item.physical_environment_total_female || 0,
+        total: item.physical_environment_total || 0
       }
     },
     occupationalAccidents: {

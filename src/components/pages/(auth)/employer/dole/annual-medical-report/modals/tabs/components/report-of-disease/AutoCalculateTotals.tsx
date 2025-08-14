@@ -17,6 +17,56 @@ export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProp
       setValue(`${baseFieldName}_total`, maleValue + femaleValue);
     };
 
+    // Helper function to calculate grand total for physical environment diseases
+    const calculatePhysicalEnvironmentTotal = () => {
+      const physicalEnvironmentFields = [
+        // Diseases due to Noise and Vibration
+        'deafness_noise_induced',
+        'white_fingers_disease',
+        'musculo_skeletal_disturbances',
+        'fatigue',
+
+        // Diseases due to Temperature And Humidity abnormalities (HOT)
+        'heat_stroke',
+        'heat_cramps',
+        'dehydration',
+        'heat_exhaustion',
+        'others_heat',
+
+        // Diseases due to Temperature and Humidity abnormalities (COLD)
+        'chilblain',
+        'frost_bite',
+        'immersion_foot',
+        'general_hypothermia',
+        'others_cold_temperature',
+
+        // Diseases due to Pressure Abnormalities
+        'air_embolism',
+        'bends_disease',
+        'barotrauma',
+        'hypoxia',
+        'altitude_sickness',
+
+        // Diseases due to Radiation
+        'cataract_radiation',
+        'keratitis',
+        'burns',
+        'radiation_related_cancers',
+      ];
+
+      let totalMale = 0;
+      let totalFemale = 0;
+
+      physicalEnvironmentFields.forEach(fieldName => {
+        totalMale += Number(watchedValues[`${fieldName}_male`]) || 0;
+        totalFemale += Number(watchedValues[`${fieldName}_female`]) || 0;
+      });
+
+      setValue('physical_environment_total_male', totalMale);
+      setValue('physical_environment_total_female', totalFemale);
+      setValue('physical_environment_total', totalMale + totalFemale);
+    };
+
     // List of all base field names
     const fieldNames = [
       // Skin
@@ -157,6 +207,9 @@ export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProp
 
     // Calculate totals for all fields
     fieldNames.forEach(calculateTotal);
+    
+    // Calculate grand total for physical environment diseases
+    calculatePhysicalEnvironmentTotal();
     
   }, [watch, setValue, watchedValues]);
 

@@ -57,6 +57,14 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         </h1>
       </div>
     </div>
+    {/* Desktop Cold Temperature header - hidden on mobile */}
+    <div className="gap-4 pl-6 pt-4 pb-4 hidden md:block">
+      <h1 className="text-lg font-medium ">Hot Temperature</h1>
+    </div>
+    {/* Mobile Cold Temperature header - hidden on desktop */}
+    <div className="pl-7 block md:hidden pt-4 pb-4">
+      <h1 className="text-lg font-medium">Hot Temperature</h1>
+    </div>
     {/* Desktop layout - hidden on mobile */}
     <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
       <div className="flex justify-start items-center pl-6">

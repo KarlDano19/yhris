@@ -493,6 +493,11 @@ function EditAnnualMedicalReportModal({
         setValue("radiation_related_cancers_female", annualMedicalReportData.radiation_related_cancers_female);
         setValue("radiation_related_cancers_total", annualMedicalReportData.radiation_related_cancers_total);
 
+        // TOTAL NUMBER OF CASES - Physical Environment
+        setValue("physical_environment_total_male", annualMedicalReportData.physical_environment_total_male);
+        setValue("physical_environment_total_female", annualMedicalReportData.physical_environment_total_female);
+        setValue("physical_environment_total", annualMedicalReportData.physical_environment_total);
+
       // Workplace Safety Compliance
         // Report of Occupational Accidents/Injuries
         setValue("contusion_bruises_hematoma_male", annualMedicalReportData.contusion_bruises_hematoma_male);

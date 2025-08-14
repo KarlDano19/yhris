@@ -52,6 +52,11 @@ interface PhysicalEnvironmentDiseases {
     burns?: { male: number; female: number };
     radiationRelatedCancers?: { male: number; female: number };
   };
+  total?: {
+    male: number;
+    female: number;
+    total: number;
+  };
 }
 
 interface OccupationalAccidents {
@@ -141,13 +146,13 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({
       <div className="flex items-center text-xs font-bold mt-1 ml-8">
         <div className="w-1/2">TOTAL NUMBER</div>
         <div className="w-1/6 text-center">
-          <div className="border-b border-black mx-2">&nbsp;</div>
+          <div className="border-b border-black mx-2">{physicalEnvironmentDiseases?.total?.male || 0}</div>
         </div>
         <div className="w-1/6 text-center">
-          <div className="border-b border-black mx-2">&nbsp;</div>
+          <div className="border-b border-black mx-2">{physicalEnvironmentDiseases?.total?.female || 0}</div>
         </div>
         <div className="w-1/6 text-center">
-          <div className="border-b border-black mx-2">&nbsp;</div>
+          <div className="border-b border-black mx-2">{physicalEnvironmentDiseases?.total?.total || 0}</div>
         </div>
       </div>
     );

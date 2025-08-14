@@ -290,6 +290,99 @@ function ReportOfDisease({
             >
               <DiseaseDueToRadiation register={register} setValue={setValue} watch={watch}/>
             </ToggleSection>
+
+            {/* TOTAL NUMBER */}
+            <div className="mt-6 border-t-2 border-gray-300 pt-4">
+              <div className="hidden md:grid md:grid-cols-4 gap-4">
+                <div>{""}</div>
+                <div>
+                  <h1 className="text-sm font-medium pl-14">Male</h1>
+                </div>
+                <div>
+                  <h1 className="text-sm font-medium pl-14">Female</h1>
+                </div>
+                <div>
+                  <h1 className="text-sm font-medium pl-14">
+                    Total Number of Cases
+                  </h1>
+                </div>
+              </div>
+              <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
+                <div className="flex justify-start items-center pl-6">
+                  <div className="grid-item">
+                    <h1 className="block text-sm font-bold text-center items-start leading-6 text-gray-900">
+                      TOTAL NUMBER
+                    </h1>
+                  </div>
+                </div>
+                <div className="grid-item">
+                  <div className="mt-2 flex flex-row items-center">
+                    <input
+                      type="number"
+                      {...register(`physical_environment_total_male`)}
+                      id={`physical_environment_total_male`}
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 font-bold"
+                    />
+                  </div>
+                </div>
+                <div className="grid-item">
+                  <div className="mt-2">
+                    <input
+                      type="number"
+                      {...register(`physical_environment_total_female`)}
+                      id={`physical_environment_total_female`}
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 font-bold"
+                    />
+                  </div>
+                </div>
+                <div className="grid-item">
+                  <div className="mt-2">
+                    <input
+                      type="number"
+                      {...register(`physical_environment_total`)}
+                      id={`physical_environment_total`}
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Mobile layout for TOTAL NUMBER */}
+              <div className="pl-7 block md:hidden mb-6">
+                <h2 className="font-bold mb-2 text-sm">TOTAL NUMBER</h2>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Male</label>
+                    <input
+                      type="number"
+                      value={watch("physical_environment_total_male") || ""}
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Female</label>
+                    <input
+                      type="number"
+                      value={watch("physical_environment_total_female") || ""}
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+                    <input
+                      type="number"
+                      value={watch("physical_environment_total") || ""}
+                      readOnly
+                      className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
