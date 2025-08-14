@@ -214,7 +214,7 @@ function PersonalInformation({
               htmlFor="email"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Sex
+              Gender
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
