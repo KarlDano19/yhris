@@ -16,8 +16,6 @@ import html2canvas from "html2canvas";
 import { Tooltip } from "react-tooltip";
 import { useForm } from "react-hook-form";
 
-import { useQueryClient } from "@tanstack/react-query";
-
 import { handlePrintPDF } from './PrintData';
 import { getPrintAnnualMedicalReportDetails } from './hooks/useGetPrintAnnualMedicalReportDetails';
 import useFileforge from "@/components/hooks/useFileforge";
@@ -33,16 +31,10 @@ import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportMo
 import EditAnnualMedicalReportModal from "./modals/EditAnnualMedicalReportModal";
 import DeleteAnnualMedicalReportModal from "./modals/DeleteAnnualMedicalReportModal";
 
-import {
-  ArrowLeftIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import EditIcon from "@/svg/EditIcon";
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
-
-import classNames from "@/helpers/classNames";
 
 
 type PaginationProps = {

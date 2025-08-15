@@ -447,16 +447,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isCreateMemoModalOpen} 
         setIsOpen={setIsCreateMemoModalOpen} 
         refetch={refetch} 
-      />
-      <CreatePolicyModal 
-        isOpen={isCreatePolicyModalOpen} 
-        setIsOpen={setIsCreatePolicyModalOpen} 
-        refetch={refetch}
-      />
-      <CreateMemoModal 
-        isOpen={isCreateMemoModalOpen} 
-        setIsOpen={setIsCreateMemoModalOpen} 
-        refetch={refetch} 
         employeeData={employeeData} 
       />
       <CreatePolicyModal 
