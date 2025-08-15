@@ -95,22 +95,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const createFormMethods = useForm();
   const editFormMethods = useForm();
 
-  const menuOptions = [
-    {
-      name: 'Export',
-      action: () => {
-        setIsExportProgressModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
-    },
-    {
-      name: 'Generate Report',
-      action: () => {
-        setIsSelectBranchModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
-    },
-  ];
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       setIsSelectBranchModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
+  //   },
+  // ];
   const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
