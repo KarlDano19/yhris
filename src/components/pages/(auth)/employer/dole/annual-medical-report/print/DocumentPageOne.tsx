@@ -196,7 +196,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
               <div className="flex items-center">
                 <span className="w-6 text-center">({data.healthService?.serviceType?.common ? '✓' : ' '})</span>
                 <span>common to a number of establishments/undertakings</span>
-                <div className="border-b border-black ml-2 flex-1"></div>
+                <div className="border-b border-black ml-2 mt-3 flex-1"></div>
               </div>
             </div>
           </div>

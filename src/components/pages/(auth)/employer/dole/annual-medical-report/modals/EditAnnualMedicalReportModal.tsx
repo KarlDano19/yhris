@@ -94,6 +94,10 @@ function EditAnnualMedicalReportModal({
       setValue("occupational_health_services_by_other_specification", annualMedicalReportData.occupational_health_services_by_other_specification);
       setValue("occupational_health_services_as_a_service", parseArrayField(annualMedicalReportData.occupational_health_services_as_a_service));
       setValue("employer_engages_the_services_of", parseArrayField(annualMedicalReportData.employer_engages_the_services_of));
+      setValue("occupational_health_consultant_address", annualMedicalReportData.occupational_health_consultant_address);
+      setValue("occupational_health_physician_address", annualMedicalReportData.occupational_health_physician_address);
+      setValue("occupational_health_dentist_address", annualMedicalReportData.occupational_health_dentist_address);
+      setValue("occupational_health_nurse_address", annualMedicalReportData.occupational_health_nurse_address);
       setValue("conduct_inspection_of_workplace", parseArrayField(annualMedicalReportData.conduct_inspection_of_workplace));
       setValue("conduct_inspection_of_workplace_other_specification", annualMedicalReportData.conduct_inspection_of_workplace_other_specification);
 

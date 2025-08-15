@@ -313,65 +313,98 @@ function PreventiveAndEmergency({
               {errors.employer_engages_the_services_of.message || "Section (c) is required."}
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="relative mt-2 flex items-center gap-1">
-              <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_osh_consultant"
-                value="Occupational Health Consultant (OSH Consultant)"
-              />
-              <label
-                htmlFor="employer_engages_osh_consultant"
-                className="ml-1 text-sm md:text-base"
-              >
-                Occupational Health Consultant (OSH Consultant)
-              </label>
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center mb-2">
+              <div></div>
+              <div className="text-sm font-medium text-gray-900 text-center">Address</div>
             </div>
-            <div className="relative mt-2 flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_osh_consultant"
+                  value="Occupational Health Consultant (OSH Consultant)"
+                />
+                <label
+                  htmlFor="employer_engages_osh_consultant"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational Health Consultant (OSH Consultant)
+                </label>
+              </div>
               <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_physician"
-                value="Occupational health physician"
+                type="text"
+                {...register("occupational_health_consultant_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
               />
-              <label
-                htmlFor="employer_engages_physician"
-                className="ml-2 text-sm md:text-base"
-              >
-                Occupational health physician
-                <span className="text-gray-500"></span>
-              </label>
             </div>
-            <div className="relative mt-2 flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_physician"
+                  value="Occupational health physician"
+                />
+                <label
+                  htmlFor="employer_engages_physician"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational health physician
+                </label>
+              </div>
               <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_dentist"
-                value="Occupational health dentist"
+                type="text"
+                {...register("occupational_health_physician_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
               />
-              <label
-                htmlFor="employer_engages_dentist"
-                className="ml-2 text-sm md:text-base"
-              >
-                Occupational health dentist
-                <span className="text-gray-500"></span>
-              </label>
             </div>
-            <div className="relative mt-2 flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_dentist"
+                  value="Occupational health dentist"
+                />
+                <label
+                  htmlFor="employer_engages_dentist"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational health dentist
+                </label>
+              </div>
               <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_nurse"
-                value="Occupational health nurse"
+                type="text"
+                {...register("occupational_health_dentist_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
               />
-              <label
-                htmlFor="employer_engages_nurse"
-                className="ml-2 text-sm md:text-base"
-              >
-                Occupational health nurse
-                <span className="text-gray-500"></span>
-              </label>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_nurse"
+                  value="Occupational health nurse"
+                />
+                <label
+                  htmlFor="employer_engages_nurse"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational health nurse
+                </label>
+              </div>
+              <input
+                type="text"
+                {...register("occupational_health_nurse_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
+              />
             </div>
           </div>
         </div>

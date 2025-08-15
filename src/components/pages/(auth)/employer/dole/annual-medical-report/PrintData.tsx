@@ -54,19 +54,19 @@ export const createAnnualMedicalDocumentComponent = (item: any, reportPeriodFrom
     occupationalHealthStaff: {
       consultant: { 
         name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational Health Consultant (OSH Consultant)')) ? 'Occupational Health Consultant (OSH Consultant)' : '\u00A0', 
-        address: '\u00A0' // Not available in the data
+        address: item.occupational_health_consultant_address || '\u00A0'
       },
       physician: { 
         name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational health physician')) ? 'Occupational health physician' : '\u00A0', 
-        address: '\u00A0' // Not available in the data
+        address: item.occupational_health_physician_address || '\u00A0'
       },
       dentist: { 
         name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational health dentist')) ? 'Occupational health dentist' : '\u00A0', 
-        address: '\u00A0' // Not available in the data
+        address: item.occupational_health_dentist_address || '\u00A0'
       },
       nurse: { 
         name: Array.isArray(item.employer_engages_the_services_of) && item.employer_engages_the_services_of.some((service: string) => service.includes('Occupational health nurse')) ? 'Occupational health nurse' : '\u00A0', 
-        address: '\u00A0' // Not available in the data
+        address: item.occupational_health_nurse_address || '\u00A0'
       },
       inspectionFrequency: {
         onceEveryMonth: Array.isArray(item.conduct_inspection_of_workplace) && item.conduct_inspection_of_workplace.some((inspection: string) => inspection.includes('once every month')),
