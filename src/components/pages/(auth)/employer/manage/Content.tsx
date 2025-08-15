@@ -9,6 +9,7 @@ import EmployeeLogo from '@/svg/EmployeeLogo';
 import EvaluationHistoryLogo from '@/svg/EvalHistoryLogo';
 import EmployeeMovementLogo from '@/svg/EmployeeMovementLogo';
 import DocumentGeneratorLogo from '@/svg/DocumentGeneratorLogo';
+import Employee201RecordsLogo from '@/svg/Employee201RecordsLogo';
 
 const menus = [
   {
@@ -45,6 +46,11 @@ const menus = [
     icon: <DocumentGeneratorLogo />,
     text: 'Document Generator',
     link: '/manage/document-generator',
+  },
+  {
+    icon: <Employee201RecordsLogo />,
+    text: 'Employee 201 Records',
+    link: '/manage/employee-201-records',
   },
 ];
 
