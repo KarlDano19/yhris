@@ -1,37 +1,38 @@
 import { useMutation } from '@tanstack/react-query';
 
-export async function logout() {
+interface OTPResendPayload {
+  session_id: string;
+}
+
+async function resendOTP(payload: OTPResendPayload) {
   try {
     const config = {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
+      body: JSON.stringify(payload),
     };
-    const res = await fetch(`/api/logout/`, config);
+    const res = await fetch(`/api/login/otp/resend/`, config);
     if (!res.ok) {
       throw res.json();
     }
-    
-    // Don't clear OTP verification cookie - it should persist across logout/login cycles
-    // clearOTPVerificationCookie();
-    
     return res.json();
   } catch (err: any) {
-    // Don't clear OTP verification cookie even on error
-    // clearOTPVerificationCookie();
-    
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
       throw errStringify.response.data.message;
+    }
+    if (Object.hasOwn(errStringify, 'detail')) {
+      throw errStringify.detail;
     }
     throw errStringify.message;
   }
 }
 
-function useLogout() {
-  const query = useMutation(() => logout());
+function useOTPResend() {
+  const query = useMutation((payload: OTPResendPayload) => resendOTP(payload));
   return query;
 }
 
-export default useLogout;
+export default useOTPResend; 

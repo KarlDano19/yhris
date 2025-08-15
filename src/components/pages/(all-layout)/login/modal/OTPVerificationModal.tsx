@@ -1,0 +1,306 @@
+'use client';
+
+import { Fragment, useState, useEffect } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
+import useOTPVerification from '@/components/pages/(all-layout)/login/hooks/useOTPVerification';
+import useOTPResend from '@/components/pages/(all-layout)/login/hooks/useOTPResend';
+
+import { XCircleIcon, EnvelopeIcon } from '@heroicons/react/24/solid';
+
+interface OTPVerificationModalProps {
+  email: string;
+  sessionId: string;
+  expiresAt: string;
+  remainingAttempts: number;
+  timeRemainingSeconds: number;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: (data: any) => void;
+}
+
+const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
+  email,
+  sessionId,
+  expiresAt,
+  remainingAttempts,
+  timeRemainingSeconds,
+  isOpen,
+  onClose,
+  onSuccess
+}) => {
+  const [otpCode, setOtpCode] = useState<string>('');
+  const [timeRemaining, setTimeRemaining] = useState<number>(timeRemainingSeconds);
+  const [isResending, setIsResending] = useState<boolean>(false);
+  
+  const { mutate: verifyOTP, isLoading: isVerifying } = useOTPVerification();
+  const { mutate: resendOTP, isLoading: isResendLoading } = useOTPResend();
+
+  // Countdown timer
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen]);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setOtpCode('');
+      setTimeRemaining(timeRemainingSeconds);
+      setIsResending(false);
+    }
+  }, [isOpen, timeRemainingSeconds]);
+
+  const handleVerifyOTP = () => {
+    if (!otpCode.trim()) {
+      toast.custom(() => <CustomToast message="Please enter the OTP code" type='error' />, {
+        duration: 4000,
+      });
+      return;
+    }
+
+    const payload = {
+      session_id: sessionId,
+      code: otpCode.trim(),
+      email: email
+    };
+
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        onSuccess(data);
+        toast.custom(() => <CustomToast message={data.message} type='success' />, {
+          duration: 4000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 4000,
+        });
+      },
+    };
+
+    verifyOTP(payload, callbackReq);
+  };
+
+  const handleResendOTP = () => {
+    if (isResending || timeRemaining > 0) return;
+
+    const payload = {
+      session_id: sessionId
+    };
+
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        setIsResending(false);
+        setTimeRemaining(data.time_remaining_seconds || 600); // 10 minutes default
+        toast.custom(() => <CustomToast message={data.message} type='success' />, {
+          duration: 4000,
+        });
+      },
+      onError: (err: any) => {
+        setIsResending(false);
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 4000,
+        });
+      },
+    };
+
+    setIsResending(true);
+    resendOTP(payload, callbackReq);
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const isExpired = timeRemaining <= 0;
+
+  return (
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog
+        as='div'
+        className='fixed inset-0 z-50 overflow-y-auto flex items-center justify-center'
+        onClose={onClose}
+      >
+        <Transition.Child
+          as={Fragment}
+          enter='ease-out duration-300'
+          enterFrom='opacity-0'
+          enterTo='opacity-100'
+          leave='ease-in duration-200'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0'
+        >
+          <Dialog.Overlay className='fixed inset-0 bg-black bg-opacity-50' />
+        </Transition.Child>
+
+        <Transition.Child
+          as={Fragment}
+          enter='ease-out duration-300'
+          enterFrom='opacity-0 scale-95'
+          enterTo='opacity-100 scale-100'
+          leave='ease-in duration-200'
+          leaveFrom='opacity-100 scale-100'
+          leaveTo='opacity-0 scale-95'
+        >
+          <div className='inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6'>
+            <div className='flex items-center justify-between mb-4'>
+              <div className='flex items-center'>
+                <div className='mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10'>
+                  <EnvelopeIcon className='h-6 w-6 text-blue-600' aria-hidden='true' />
+                </div>
+                <div className='ml-3'>
+                  <Dialog.Title as='h3' className='text-lg leading-6 font-medium text-gray-900'>
+                    Enter Verification Code
+                  </Dialog.Title>
+                  <p className='text-sm text-gray-500'>
+                    We sent a code to {email}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className='text-gray-400 hover:text-gray-600'
+              >
+                <XCircleIcon className='h-6 w-6' />
+              </button>
+            </div>
+
+            <div className='space-y-4'>
+              {/* OTP Input */}
+              <div>
+                <label htmlFor='otp' className='block text-sm font-medium text-gray-700 mb-2'>
+                  Verification Code
+                </label>
+                <input
+                  type='text'
+                  id='otp'
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  placeholder='Enter 6-digit code'
+                  maxLength={6}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
+                  disabled={isVerifying || isExpired}
+                />
+              </div>
+
+              {/* Timer and Attempts */}
+              <div className='flex justify-between items-center text-sm'>
+                <div className='text-gray-600'>
+                  {isExpired ? (
+                    <span className='text-red-600'>Code expired</span>
+                  ) : (
+                    <span>Expires in {formatTime(timeRemaining)}</span>
+                  )}
+                </div>
+                <div className='text-gray-600'>
+                  {remainingAttempts} attempts remaining
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className='flex flex-col space-y-3'>
+                <button
+                  type='button'
+                  onClick={handleVerifyOTP}
+                  disabled={isVerifying || isExpired || !otpCode.trim()}
+                  className='w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm'
+                >
+                  {isVerifying ? (
+                    <>
+                      <svg
+                        className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                        xmlns='http://www.w3.org/2000/svg'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                      >
+                        <circle
+                          className='opacity-25'
+                          cx='12'
+                          cy='12'
+                          r='10'
+                          stroke='currentColor'
+                          strokeWidth='4'
+                        ></circle>
+                        <path
+                          className='opacity-75'
+                          fill='currentColor'
+                          d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                        ></path>
+                      </svg>
+                      Verifying...
+                    </>
+                  ) : (
+                    'Verify Code'
+                  )}
+                </button>
+
+                <button
+                  type='button'
+                  onClick={handleResendOTP}
+                  disabled={isResendLoading || isResending || (!isExpired && timeRemaining > 30)}
+                  className='w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm'
+                >
+                  {isResendLoading || isResending ? (
+                    <>
+                      <svg
+                        className='animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700'
+                        xmlns='http://www.w3.org/2000/svg'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                      >
+                        <circle
+                          className='opacity-25'
+                          cx='12'
+                          cy='12'
+                          r='10'
+                          stroke='currentColor'
+                          strokeWidth='4'
+                        ></circle>
+                        <path
+                          className='opacity-75'
+                          fill='currentColor'
+                          d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                        ></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : isExpired ? (
+                    'Resend Code'
+                  ) : (
+                    `Resend Code (${formatTime(timeRemaining)})`
+                  )}
+                </button>
+
+                <button
+                  type='button'
+                  onClick={onClose}
+                  className='w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm'
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition.Child>
+      </Dialog>
+    </Transition.Root>
+  );
+};
+
+export default OTPVerificationModal; 
