@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useRef, forwardRef } from 'react';
 
 import Link from 'next/link';
 
@@ -54,15 +54,6 @@ const statusOptions = [
   { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
 ];
 
-// Update PortalMenuItems to forward ref
-// const PortalMenuItems = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(function PortalMenuItems({ children, ...props }, ref) {
-//   if (typeof window === 'undefined') return null;
-//   return createPortal(
-//     <div {...props} ref={ref}>{children}</div>,
-//     document.body
-//   );
-// });
-
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const queryClient = useQueryClient();
   const cachedWAIReport = queryClient.getQueryCache().find(['workAccidentIlnessReportsItemsCache']) as {
@@ -98,17 +89,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
-  // const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
-  // const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
-  // const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  // const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
-  // const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
@@ -223,47 +214,47 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  // const handlePrintWithBranch = () => {
-  //   if (selectedBranch) {
-  //     const filteredItems = annualAccidentIllnessReportItems.filter((item: any) => item.branch === selectedBranch);
-  //     handlePrint();
-  //   }
-  // };
+  const handlePrintWithBranch = () => {
+    if (selectedBranch) {
+      const filteredItems = annualAccidentIllnessReportItems.filter((item: any) => item.branch === selectedBranch);
+      handlePrint();
+    }
+  };
 
-  // const handlePrint = () => {
-  //   // Create a new div element
-  //   const printDiv = document.createElement('div');
+  const handlePrint = () => {
+    // Create a new div element
+    const printDiv = document.createElement('div');
 
-  //   // Copy the content of the original printSection
-  //   const originalPrintSection = document.getElementById('printSection');
-  //   if (originalPrintSection) {
-  //     printDiv.innerHTML = originalPrintSection.innerHTML;
-  //   }
+    // Copy the content of the original printSection
+    const originalPrintSection = document.getElementById('printSection');
+    if (originalPrintSection) {
+      printDiv.innerHTML = originalPrintSection.innerHTML;
+    }
 
-  //   // Style the new div to be off-screen
-  //   printDiv.style.width = '1980px';
-  //   printDiv.style.height = '100%';
-  //   printDiv.style.position = 'absolute';
-  //   printDiv.style.left = '-9999px';
-  //   printDiv.style.top = '-9999px';
+    // Style the new div to be off-screen
+    printDiv.style.width = '1980px';
+    printDiv.style.height = '100%';
+    printDiv.style.position = 'absolute';
+    printDiv.style.left = '-9999px';
+    printDiv.style.top = '-9999px';
 
-  //   // Add the new div to the body
-  //   document.body.appendChild(printDiv);
+    // Add the new div to the body
+    document.body.appendChild(printDiv);
 
-  //   // Use html2canvas on the new div
-  //   html2canvas(printDiv).then((canvas) => {
-  //     // Remove the temporary div
-  //     document.body.removeChild(printDiv);
+    // Use html2canvas on the new div
+    html2canvas(printDiv).then((canvas) => {
+      // Remove the temporary div
+      document.body.removeChild(printDiv);
 
-  //     const imgData = canvas.toDataURL('image/png');
-  //     const newWindow = window.open('', '_blank');
-  //     newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
-  //     newWindow?.document.close();
-  //     setTimeout(() => {
-  //       newWindow?.print();
-  //     }, 500);
-  //   });
-  // };
+      const imgData = canvas.toDataURL('image/png');
+      const newWindow = window.open('', '_blank');
+      newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
+      newWindow?.document.close();
+      setTimeout(() => {
+        newWindow?.print();
+      }, 500);
+    });
+  };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -301,47 +292,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   // Menu options for Export and Generate Report
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_awair,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       setIsSelectBranchModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_awair,
-  //   },
-  // ];
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_awair,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       setIsSelectBranchModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_awair,
-  //   },
-  // ];
+  const menuOptions = [
+    {
+      name: 'Export',
+      action: () => {
+        setIsExportProgressModalOpen(true);
+      },
+      // disabled: !cachedRigths?.state?.data?.export_dole_awair,
+      disabled: false,
+    },
+    // {
+    //   name: 'Generate Report',
+    //   action: () => {
+    //     setIsSelectBranchModalOpen(true);
+    //   },
+    //   disabled: !cachedRigths?.state?.data?.generate_dole_awair,
+    // },
+  ];
 
-  // const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
-  //   const rect = event.currentTarget.getBoundingClientRect();
-  //   setMenuPosition({
-  //     top: rect.bottom + window.scrollY,
-  //     left: rect.right - 138 + window.scrollX, // 138px = 8.6rem
-  //   });
-  //   setOpenMenuId(id);
-  // };
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.right - 138 + window.scrollX, // 138px = 8.6rem
+    });
+    setOpenMenuId(id);
+  };
 
   const renderRows = () => {
     if (isAnnualAccidentIllnessReportLoading) {
@@ -431,47 +407,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EmailLogo />
               </button>
-              <div className='flex-1 flex justify-end relative menu-container'>
-                <button 
-                  className='py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                  onClick={(e) => handleMenuClick(e, item.id)}
-                >
-                  <span className='sr-only'>Open options</span>
-                  <div className='flex gap-4'>
-                    <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
-                  </div>
-                </button>
-                {openMenuId === item.id && (
-                  <div 
-                    className='absolute z-50 origin-top-right right-0 mt-2 w-[8.6rem] rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
-                    style={{ top: '100%' }}
-                  >
-                    <div className='py-1'>
-                      <span
-                        className='block px-4 py-2 text-sm cursor-pointer text-center text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        onClick={() => {
-                          setIsExportProgressModalOpen(true);
-                          setOpenMenuId(null);
-                        }}
-                      >
-                        Download
-                      </span>
-                      <span
-                        className='block px-4 py-2 text-sm cursor-pointer text-center text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        onClick={() => {
-                          setIsDeleteAnnualAccidentIllnessReportModalOpen({
-                            id: item.id,
-                            open: true,
-                          });
-                          setOpenMenuId(null);
-                        }}
-                      >
-                        Delete
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
               <button
                 onClick={() => handlePrintPDFLocal(item)}
                 disabled={isGenerating || !cachedRigths?.state?.data?.generate_dole_awair}
@@ -489,78 +424,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <DeleteIcon />
               </button>
-              {/* <div className='flex-1 flex justify-end'>
-                <Menu as='div' className='relative'>
-                  <Menu.Button
-                    className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                    ref={el => (menuButtonRefs.current[item.id] = el)}
-                    onClick={e => handleMenuOpen(e, item.id)}
-                  >
-                    <span className='sr-only'>Open options</span>
-                    <div className='flex gap-4'>
-                      <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
-                    </div>
-                  </Menu.Button>
-                  {openMenuId === item.id && (
-                    <PortalMenuItems
-                      ref={el => (menuRefs.current[item.id] = el)}
-                      style={{
-                        position: 'fixed',
-                        top: menuPosition.top,
-                        left: menuPosition.left,
-                        zIndex: 9999,
-                        width: '8.6rem',
-                      }}
-                      className='origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
-                    >
-                      <div className='py-1'>
-                        {[
-                          {
-                            name: 'Download',
-                            action: () => {
-                              setIsExportProgressModalOpen(true);
-                              setOpenMenuId(null);
-                            },
-                          },
-                          // {
-                          //   name: 'Print',
-                          //   action: () => {
-                          //     handlePrint();
-                          //   },
-                          // },
-                          // {
-                          //   name: 'Edit',
-                          //   action: () => {
-                          //     setIsExportProgressModalOpen(true);
-                          //   },
-                          // },
-                          {
-                            name: 'Delete',
-                            action: () => {
-                              setIsDeleteAnnualAccidentIllnessReportModalOpen({
-                                id: item.id,
-                                open: true,
-                              });
-                              setOpenMenuId(null);
-                            },
-                          },
-                        ].map((menuItem) => (
-                          <span
-                            key={menuItem.name}
-                            className={classNames(
-                              'block px-4 py-2 text-sm cursor-pointer text-center',
-                              'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                            )}
-                            onClick={menuItem.action}
-                          >
-                            {menuItem.name}
-                          </span>
-                        ))}
-                      </div>
-                    </PortalMenuItems>
-                  )}
-                </Menu>
-              </div> */}
             </div>
           </td>
         </tr>
@@ -640,7 +503,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            {/* <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateAnnualAccidentIllnessReportModalOpen(true)}
@@ -690,15 +553,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
-            </div> */}
-            <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsCreateAnnualAccidentIllnessReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_awair}
-              >
-                CREATE
-              </button>
             </div>
           </div>
 
@@ -752,7 +606,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           />
         </div>
       </div>
-      {/* {isSelectBranchModalOpen && (
+      {isSelectBranchModalOpen && (
         <SelectBranchModal
           isOpen={isSelectBranchModalOpen}
           setIsOpen={setIsSelectBranchModalOpen}
@@ -761,7 +615,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             handlePrintWithBranch();
           }}
         />
-      )} */}
+      )}
       {isCreateAnnualAccidentIllnessReportModalOpen && (
         <CreateReportModal
           refetch={annualAccidentIllnessReportRefetch}
