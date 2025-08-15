@@ -241,7 +241,7 @@ function SafetyAndHealthPolicyModal({
                           open: true,
                         })
                       }
-                      disabled={!cachedRigths?.state?.data?.send_email_dole_safety_health_policy || !hasActiveSubscription}
+                      // disabled={!cachedRigths?.state?.data?.send_email_dole_safety_health_policy || !hasActiveSubscription}
                       data-email-button
                       className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
