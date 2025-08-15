@@ -13,10 +13,12 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useSendEmail from '../hooks/useSendEmail';
+import useGetWorkEnvironmentRequestDetails from '../hooks/useGetWorkEnvironmentRequestDetails';
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
@@ -75,6 +77,43 @@ export default function SendEmailModal({
     const { mutate, isLoading } = useSendEmail();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
+    // Add hook to fetch Work Environment Measure details
+    const { data: workEnvironmentMeasureData } = useGetWorkEnvironmentRequestDetails(
+      isOpen?.id || null
+    );
+
+    // Add state for attachment
+    const [attachment, setAttachment] = useState<File | null>(null);
+    const [attachmentExist, setAttachmentExist] = useState(false);
+
+    // Get filename from attachment URL
+    const getFilenameFromUrl = (url: string) => {
+        if (!url) return '';
+        
+        // Remove AWS credentials from the URL if present
+        let cleanUrl = url;
+        if (url.includes('?AWSAccessKeyId=')) {
+            cleanUrl = url.split('?AWSAccessKeyId=')[0];
+        }
+        
+        const urlParts = cleanUrl.split('/');
+        return urlParts[urlParts.length - 1];
+    };
+
+    // Handle file attachment upload
+    const handleAttachmentUpload = ({ target }: { target: any }) => {
+      const file = target.files[0];
+      if (!file) return;
+      if (file.size <= 5000000) {
+        setAttachment(file);
+        setAttachmentExist(true);
+      } else {
+        toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+          duration: 5000,
+        });
+      }
+    };
+
     useEffect(() => {
         if (selectedTemplate && dataEmailTemplate) {
             const template = dataEmailTemplate.find((item: any) => item.id === parseInt(selectedTemplate));
@@ -116,41 +155,77 @@ export default function SendEmailModal({
 
     // Clear errors when subject changes
     useEffect(() => {
-        const subjectContent = watch('subject');
-        if (subjectContent && subjectContent.trim() !== '') {
-            clearErrors('subject');
-        }
+      const subjectValue = watch('subject');
+      if (subjectValue && subjectValue.trim() !== '') {
+        clearErrors('subject');
+      }
     }, [watch('subject'), clearErrors]);
 
     const customCloseModal = () => {
-        // Reset form state
-        // add reset state here if needed
-        
-        // Close the modal
-        setIsOpen({ id: 0, open: false });
+      // Reset form state
+      reset();
+      setAttachment(null);
+      setAttachmentExist(false);
+      
+      // Close the modal
+      setIsOpen({ id: 0, open: false });
     };
 
     const onSubmit = handleSubmit((data) => {
         // Validate "To" field manually since it uses tags
         if (tagsTo.length === 0) {
-            setError('to', {
-                type: 'manual',
-                message: 'At least one recipient is required'
-            });
-            toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
-            return;
+          setError('to', {
+            type: 'manual',
+            message: 'At least one recipient is required'
+          });
+          toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+          return;
         }
 
-        const payload = {
-            ...data,
-            to: tagsTo,
-            cc: tagsCc,
-            bcc: tagsBcc
-        };
+        // Validate subject
+        if (!data.subject || data.subject.trim() === '') {
+          setError('subject', {
+            type: 'manual',
+            message: 'Subject is required'
+          });
+          toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+          return;
+        }
+
+        // Validate message
+        if (isHtmlEmpty(data.message)) {
+          setError('message', {
+            type: 'manual',
+            message: 'Message is required'
+          });
+          toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+          return;
+        }
+
+        // Always use FormData for consistency
+        const payload = new FormData();
+        payload.append('to', JSON.stringify(tagsTo));
+        payload.append('context', data.message);
+        if (tagsCc.length > 0) payload.append('cc', JSON.stringify(tagsCc));
+        if (tagsBcc.length > 0) payload.append('bcc', JSON.stringify(tagsBcc));
+        payload.append('subject', data.subject);
+        
+        // Add attachment if provided
+        if (attachment) {
+          payload.append('attachment', attachment);
+        }
+        
+        // Add work_environment_measure_id if available
+        if (isOpen?.id) {
+          payload.append('work_environment_measure_id', isOpen.id.toString());
+        }
         const callbackReq = {
             onSuccess: () => {
                 setIsOpen({ id: 0, open: false });
                 refetch();
+                // Clear attachment state after successful send
+                setAttachment(null);
+                setAttachmentExist(false);
                 toast.custom(() => <CustomToast message={'Successfully sent email.'} type='success' />, {
                     duration: 5000,
                   });
@@ -191,7 +266,7 @@ export default function SendEmailModal({
                   >
                     <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                       <div className='flex bg-savoy-blue p-2 items-center'>
-                        <h3 className='flex-1 text-white ml-2 font-semibold'>Send Email</h3>
+                        <h3 className='flex-1 text-white ml-2 font-semibold'>Send Work Environment Measure</h3>
                         <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                       </div>
                       <form onSubmit={onSubmit}>
@@ -206,12 +281,11 @@ export default function SendEmailModal({
                                 {...register('template')}
                                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 onChange={(event) => {
+                                    setValue('template', event.target.value);
                                     setSelectedTemplate(event.target.value);
                                 }}
                               >
-                                <option value='' disabled>
-                                  Select...
-                                </option>
+                                <option value=''>Select...</option>
                                 {(dataEmailTemplate || []).map((item: any) => (
                                   <option key={item.id} value={item.id}>
                                     {item.subject}
@@ -224,31 +298,33 @@ export default function SendEmailModal({
                             </div>
                           </div>
                           <div className='sm:col-span-4 mt-4'>
-                            <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            <label htmlFor='subject' className='block text-sm font-medium leading-6 text-gray-900'>
                               Subject<span className='text-red-600'>*</span>
                             </label>
                             {errors.subject && (
                               <p className="text-xs text-red-600 mt-1">
-                                {errors.subject.message}
+                                {errors.subject.message || 'Subject is required'}
                               </p>
                             )}
-                            <input
-                              type='text'
-                              id='subject'
-                              {...register('subject', { required: 'Subject is required' })}
-                              className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                              onChange={(e) => {
-                                setValue('subject', e.target.value);
-                                if (e.target.value.trim() !== '') {
-                                  clearErrors('subject');
-                                } else {
-                                  setError('subject', {
-                                    type: 'manual',
-                                    message: 'Subject is required'
-                                  });
-                                }
-                              }}
-                            />
+                            <div className='relative mt-2'>
+                              <input
+                                type="text"
+                                id="subject"
+                                {...register('subject', { required: 'Subject is required' })}
+                                className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                onChange={(e) => {
+                                  setValue('subject', e.target.value);
+                                  if (e.target.value.trim() !== '') {
+                                    clearErrors('subject');
+                                  } else {
+                                    setError('subject', {
+                                      type: 'manual',
+                                      message: 'Subject is required'
+                                    });
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
                           <div className='sm:col-span-4 mt-4'>
                             <label htmlFor='to' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -399,7 +475,7 @@ export default function SendEmailModal({
                             </label>
                             {errors.message && (
                               <p className="text-xs text-red-600 mt-1">
-                                {errors.message.message}
+                                {errors.message.message || 'Message is required'}
                               </p>
                             )}
                             <div className='mt-2 h-72 mb-12'>
@@ -424,6 +500,51 @@ export default function SendEmailModal({
                                 value={watch('message')}
                               />
                             </div>
+                          </div>
+                          {/* Attachment section */}
+                          <div className='sm:col-span-4 mt-4'>
+                            <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                              Attachment
+                            </label>
+                            <div className='mt-2'>
+                              {/* Display existing attachment from backend */}
+                              {workEnvironmentMeasureData?.attachment && (
+                                <div className="mb-3 p-3 bg-gray-50 rounded-md">
+                                  <div className="flex items-center gap-2">
+                                    <ClipIcon hasFile={true} />
+                                    <span className="text-sm text-gray-600">
+                                      {getFilenameFromUrl(workEnvironmentMeasureData.attachment)}
+                                    </span>
+                                    <ArrowTopRightOnSquareIcon 
+                                      className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
+                                      onClick={() => window.open(workEnvironmentMeasureData.attachment, '_blank')}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">Current attachment (will be included in email)</p>
+                                </div>
+                              )}
+                              
+                              {/* File upload for new attachment */}
+                              <input
+                                id='attachment'
+                                type='file'
+                                onChange={handleAttachmentUpload}
+                                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                              />
+                              {attachmentExist ? (
+                                <button
+                                  type='button'
+                                  className='underline text-savoy-blue text-sm mt-1'
+                                  onClick={() => {
+                                    setAttachment(null);
+                                    setAttachmentExist(false);
+                                  }}
+                                >
+                                  Remove New Attachment
+                                </button>
+                              ) : null}
+                            </div>
+                            <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb. <span className='text-red-600'>Upload a new file to replace the current attachment.</span></p>
                           </div>
                         </div>
                         <hr />

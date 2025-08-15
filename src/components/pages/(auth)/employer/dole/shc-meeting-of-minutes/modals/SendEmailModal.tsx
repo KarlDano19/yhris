@@ -13,10 +13,12 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useSendEmail from '../hooks/useSendEmail';
+import useGetMinutesMeetingDetails from '../hooks/useGetMinutesMeetingDetails';
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
@@ -74,6 +76,43 @@ export default function SendEmailModal({
     const { data: dataEmailTemplate } = useGetEmailTemplateItems();
     const { mutate, isLoading } = useSendEmail();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
+    // Add hook to fetch SHC Meeting Minutes details
+    const { data: shcMeetingMinutesData } = useGetMinutesMeetingDetails(
+      isOpen?.id || null
+    );
+
+    // Add state for attachment
+    const [attachment, setAttachment] = useState<File | null>(null);
+    const [attachmentExist, setAttachmentExist] = useState(false);
+
+    // Get filename from attachment URL
+    const getFilenameFromUrl = (url: string) => {
+        if (!url) return '';
+        
+        // Remove AWS credentials from the URL if present
+        let cleanUrl = url;
+        if (url.includes('?AWSAccessKeyId=')) {
+            cleanUrl = url.split('?AWSAccessKeyId=')[0];
+        }
+        
+        const urlParts = cleanUrl.split('/');
+        return urlParts[urlParts.length - 1];
+    };
+
+    // Handle attachment upload
+    const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 3000 });
+                return;
+            }
+            setAttachment(file);
+            setAttachmentExist(true);
+        }
+    };
 
     useEffect(() => {
         if (selectedTemplate && dataEmailTemplate) {
@@ -133,16 +172,51 @@ export default function SendEmailModal({
             return;
         }
 
-        const payload = {
-            ...data,
-            to: tagsTo,
-            cc: tagsCc,
-            bcc: tagsBcc
-        };
+        // Validate subject
+        if (!data.subject || data.subject.trim() === '') {
+            setError('subject', {
+                type: 'manual',
+                message: 'Subject is required'
+            });
+            toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+            return;
+        }
+
+        // Validate message
+        if (isHtmlEmpty(data.message)) {
+            setError('message', {
+                type: 'manual',
+                message: 'Message is required'
+            });
+            toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+            return;
+        }
+
+        // Always use FormData for consistency
+        const payload = new FormData();
+        payload.append('to', JSON.stringify(tagsTo));
+        payload.append('context', data.message);
+        if (tagsCc.length > 0) payload.append('cc', JSON.stringify(tagsCc));
+        if (tagsBcc.length > 0) payload.append('bcc', JSON.stringify(tagsBcc));
+        payload.append('subject', data.subject);
+        
+        // Add attachment if provided
+        if (attachment) {
+            payload.append('attachment', attachment);
+        }
+        
+        // Add shc_meeting_minutes_id if available
+        if (isOpen?.id) {
+            payload.append('shc_meeting_minutes_id', isOpen.id.toString());
+        }
+
         const callbackReq = {
             onSuccess: () => {
                 setIsOpen({ id: 0, open: false });
                 refetch();
+                // Clear attachment state after successful send
+                setAttachment(null);
+                setAttachmentExist(false);
                 toast.custom(() => <CustomToast message={'Successfully sent email.'} type='success' />, {
                     duration: 5000,
                   });
@@ -156,7 +230,9 @@ export default function SendEmailModal({
 
     const customCloseModal = () => {
       // Reset form state
-      // add reset state here if needed
+      reset();
+      setAttachment(null);
+      setAttachmentExist(false);
       
       // Close the modal
       setIsOpen({ id: 0, open: false });
@@ -165,7 +241,7 @@ export default function SendEmailModal({
     return (
         <>
           <Transition.Root show={isOpen.open} as={Fragment}>
-            <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen({ id: 0, open: false })}>
+            <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
               <Transition.Child
                 as={Fragment}
                 enter='ease-out duration-300'
@@ -191,8 +267,8 @@ export default function SendEmailModal({
                   >
                     <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                       <div className='flex bg-savoy-blue p-2 items-center'>
-                        <h3 className='flex-1 text-white ml-2 font-semibold'>Send Email</h3>
-                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen({ id: 0, open: false })} />
+                        <h3 className='flex-1 text-white ml-2 font-semibold'>Send SHC Meeting Minutes</h3>
+                        <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                       </div>
                       <form onSubmit={onSubmit}>
                         <div className='px-4 pt-4 pb-6'>
@@ -422,6 +498,51 @@ export default function SendEmailModal({
                                 value={watch('message')}
                               />
                             </div>
+                          </div>
+                          {/* Attachment section */}
+                          <div className='sm:col-span-4 mt-4'>
+                            <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                              Attachment
+                            </label>
+                            <div className='mt-2'>
+                              {/* Display existing attachment from backend */}
+                              {shcMeetingMinutesData?.attachment && (
+                                <div className="mb-3 p-3 bg-gray-50 rounded-md">
+                                  <div className="flex items-center gap-2">
+                                    <ClipIcon hasFile={true} />
+                                    <span className="text-sm text-gray-600">
+                                      {getFilenameFromUrl(shcMeetingMinutesData.attachment)}
+                                    </span>
+                                    <ArrowTopRightOnSquareIcon 
+                                      className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
+                                      onClick={() => window.open(shcMeetingMinutesData.attachment, '_blank')}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">Current attachment (will be included in email)</p>
+                                </div>
+                              )}
+                              
+                              {/* File upload for new attachment */}
+                              <input
+                                id='attachment'
+                                type='file'
+                                onChange={handleAttachmentUpload}
+                                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                              />
+                              {attachmentExist ? (
+                                <button
+                                  type='button'
+                                  className='underline text-savoy-blue text-sm mt-1'
+                                  onClick={() => {
+                                    setAttachment(null);
+                                    setAttachmentExist(false);
+                                  }}
+                                >
+                                  Remove New Attachment
+                                </button>
+                              ) : null}
+                            </div>
+                            <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb. <span className='text-red-600'>Upload a new file to replace the current attachment.</span></p>
                           </div>
                         </div>
                         <hr />
