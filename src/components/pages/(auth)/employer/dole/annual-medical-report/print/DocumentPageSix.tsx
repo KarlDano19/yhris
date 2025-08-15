@@ -51,7 +51,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
       <div className="mb-2 ml-4">
         <div className="flex items-center mb-0.5">
           <div className="w-2/3 flex items-center">
-            <span className="w-6 text-center">( )</span>
+            <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
             <span className="ml-1 w-48">Others (Please specify)</span>
             <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
               {physicalHazardsOthers?.substance || ''}
@@ -71,7 +71,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
         <div className="text-xs">
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Viral</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {biologicalHazards?.viral?.substance || ''}
@@ -85,7 +85,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Bacterial</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {biologicalHazards?.bacterial?.substance || ''}
@@ -99,7 +99,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Fungal</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {biologicalHazards?.fungal?.substance || ''}
@@ -113,7 +113,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Parasitic</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {biologicalHazards?.parasitic?.substance || ''}
@@ -127,7 +127,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Others</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {biologicalHazards?.others?.substance || ''}
@@ -148,7 +148,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
         <div className="text-xs">
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Exhausting physical work</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {ergonomicStress?.exhaustingPhysicalWork?.substance || ''}
@@ -162,7 +162,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Prolonged standing</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {ergonomicStress?.prolongedStanding?.substance || ''}
@@ -176,7 +176,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Excessive mental effort</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {ergonomicStress?.excessiveMentalEffort?.substance || ''}
@@ -190,7 +190,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Unfavorable work posture</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {ergonomicStress?.unfavorableWorkPosture?.substance || ''}
@@ -204,7 +204,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Static/monotonous work</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {ergonomicStress?.staticMonotonousWork?.substance || ''}
@@ -218,7 +218,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({
           </div>
           <div className="flex items-center mb-0.5">
             <div className="w-2/3 flex items-center">
-              <span className="w-6 text-center">( )</span>
+              <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
               <span className="ml-1 w-48">Others, specify</span>
               <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                 {ergonomicStress?.othersSpecify?.substance || ''}

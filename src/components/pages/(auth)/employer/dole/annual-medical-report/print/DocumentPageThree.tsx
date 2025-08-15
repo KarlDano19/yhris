@@ -79,7 +79,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
     return (
       <div key={conditionName} className="flex items-center text-xs">
         <div className="flex items-center w-1/2">
-          <span className="w-6 text-center">( )</span>
+          <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
           <span className="ml-2">{conditionName}</span>
         </div>
         <div className="w-1/6 text-center">

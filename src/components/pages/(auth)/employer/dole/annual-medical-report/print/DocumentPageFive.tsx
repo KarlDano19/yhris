@@ -175,30 +175,6 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
     );
   };
 
-  // For hazards sections
-  const renderHazardRow = (hazardName: string, substance?: string, workers?: number, isSubItem = false) => {
-    const workersDisplay = workers ? workers.toString() : '\u00A0';
-    
-    return (
-      <div key={hazardName} className="flex items-center text-xs">
-        <div className={`w-3/4 text-left ${isSubItem ? 'ml-8' : ''}`}>
-          <div className="flex items-center">
-            <span className="w-6 text-center">( )</span>
-            <span className="ml-2">{hazardName}</span>
-          </div>
-          {substance && (
-            <div className="border-b border-black mt-1 min-h-4">
-              {substance}
-            </div>
-          )}
-        </div>
-        <div className="w-1/4 text-center">
-          <div className="border-b border-black mx-2">{workersDisplay}</div>
-        </div>
-      </div>
-    );
-  };
-
   const renderCheckbox = (isChecked?: boolean) => isChecked ? '✓' : ' ';
 
   return (
@@ -336,7 +312,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
           <div className="text-xs">
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">dust (Ex. Silica dust)</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {chemicalHazards?.dust?.substance || ''}
@@ -350,7 +326,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">liquids (Ex. Mercury)</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {chemicalHazards?.liquids?.substance || ''}
@@ -364,7 +340,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">mist/fumes/vapors (Ex. Mist<br/>from paint spraying)</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {chemicalHazards?.mistFumes?.substance || ''}
@@ -378,7 +354,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">gas (Ex. CO, H2S)</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {chemicalHazards?.gas?.substance || ''}
@@ -392,7 +368,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">others (please specify)<br/>(Ex. Solvents)</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {chemicalHazards?.others?.substance || ''}
@@ -413,7 +389,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
           <div className="text-xs">
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">noise</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {physicalHazards?.noise?.substance || ''}
@@ -427,7 +403,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">temperature/humidity</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {physicalHazards?.temperatureHumidity?.substance || ''}
@@ -441,7 +417,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">pressure</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {physicalHazards?.pressure?.substance || ''}
@@ -455,7 +431,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">illumination</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {physicalHazards?.illumination?.substance || ''}
@@ -469,7 +445,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">radiation/ultraviolet/<br/>microwave</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {physicalHazards?.radiationUltraviolet?.substance || ''}
@@ -483,7 +459,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({
             </div>
             <div className="flex items-center mb-0.5">
               <div className="w-2/3 flex items-center">
-                <span className="w-6 text-center">( )</span>
+                <span className="w-6 text-center">(<span className="text-xs text-white">{'✓'}</span>)</span>
                 <span className="ml-1 w-48">vibration</span>
                 <div className="border-b border-black flex-1 min-h-[1rem] text-xs">
                   {physicalHazards?.vibration?.substance || ''}
