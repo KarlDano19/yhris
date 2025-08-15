@@ -1,4 +1,6 @@
 import { StageType } from "../../types"
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 export default function setRequirements(state: any, action: any) {
   const { actionState, setActionState, formData } = action.payload
@@ -6,14 +8,6 @@ export default function setRequirements(state: any, action: any) {
       if (item.id === actionState.stageId) {
         return { ...item, requirements: formData }
       } else return item
-    })
-    setActionState({
-      ...actionState,
-      modal: {
-        whichModal: "SUCCESS",
-        isOpen: true,
-        title: "You have successfully set-up your stage requirements.",
-      },
     })
   return newState
 }

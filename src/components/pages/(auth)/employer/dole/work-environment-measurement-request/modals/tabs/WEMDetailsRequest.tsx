@@ -120,10 +120,10 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
-                  id="purpose_of_wem_request"
+                  id="purpose_of_wem_request_workplace_improvement"
                   value="Workplace Improvement"
                 />
-                <label htmlFor="purpose_of_wem_request" className="ml-2">
+                <label htmlFor="purpose_of_wem_request_workplace_improvement" className="ml-2">
                   Workplace Improvement
                 </label>
               </div>
@@ -131,10 +131,10 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
-                  id="purpose_of_wem_request"
+                  id="purpose_of_wem_request_oshs_compliance"
                   value="OSHS Compliance"
                 />
-                <label htmlFor="purpose_of_wem_request" className="ml-2">
+                <label htmlFor="purpose_of_wem_request_oshs_compliance" className="ml-2">
                   OSHS Compliance
                 </label>
               </div>
@@ -142,10 +142,10 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
-                  id="purpose_of_wem_request"
+                  id="purpose_of_wem_request_client_customer_requirement"
                   value="Client/Customer Requirement"
                 />
-                <label htmlFor="purpose_of_wem_request" className="ml-2">
+                <label htmlFor="purpose_of_wem_request_client_customer_requirement" className="ml-2">
                   Client/Customer Requirement
                 </label>
               </div>
@@ -153,10 +153,10 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
-                  id="purpose_of_wem_request"
+                  id="purpose_of_wem_request_iso_compliance"
                   value="ISO Compliance"
                 />
-                <label htmlFor="purpose_of_wem_request" className="ml-2">
+                <label htmlFor="purpose_of_wem_request_iso_compliance" className="ml-2">
                   ISO Compliance
                 </label>
               </div>
@@ -164,7 +164,7 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("purpose_of_wem_request", { required: true })}
-                  id="purpose_of_wem_request"
+                  id="purpose_of_wem_request_required_by_labor_inspector"
                   value="Required by Labor Inspector"
                 />
                 <label htmlFor="required_by_labor_inspector" className="ml-2">
@@ -277,10 +277,10 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("wem_conducted_by", { required: true })}
-                  id="wem_conducted_by"
+                  id="wem_conducted_by_oshc"
                   value="OSHC"
                 />
-                <label htmlFor="wem_conducted_by" className="ml-2">
+                <label htmlFor="wem_conducted_by_oshc" className="ml-2">
                   OSHC
                 </label>
               </div>
@@ -288,10 +288,10 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("wem_conducted_by", { required: true })}
-                  id="wem_conducted_by"
+                  id="wem_conducted_by_none_new_client"
                   value="None (New Client)"
                 />
-                <label htmlFor="wem_conducted_by" className="ml-2">
+                <label htmlFor="wem_conducted_by_none_new_client" className="ml-2">
                   None (New Client)
                 </label>
               </div>
@@ -299,10 +299,10 @@ function WEMDetailsRequest({
                 <input
                   type="checkbox"
                   {...register("wem_conducted_by", { required: true })}
-                  id="wem_conducted_by"
+                  id="wem_conducted_by_accredited_wem_officer"
                   value="Accredited Wem Officer"
                 />
-                <label htmlFor="wem_conducted_by" className="ml-2">
+                <label htmlFor="wem_conducted_by_accredited_wem_officer" className="ml-2">
                   Accredited Wem Officer
                 </label>
               </div>

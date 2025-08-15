@@ -165,7 +165,7 @@ const IntegrationSection = () => {
                 href="/register" 
                 className="bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
               >
-                Start 30 Day Free Trial
+                Sign up now for free!
               </Link>
               <Link 
                 href="#contact" 

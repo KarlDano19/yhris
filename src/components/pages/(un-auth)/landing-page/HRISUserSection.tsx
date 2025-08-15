@@ -150,7 +150,7 @@ const HRISUserSection = () => {
                 href="/register" 
                 className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
               >
-                Start 30-Day Free Trial
+                Sign up now for free!
               </Link>
               <Link 
                 href="/features" 

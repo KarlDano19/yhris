@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
 import CheckListIcon from '@/svg/CheckListIcon';
 import { initialActionState } from '../lib/initialActionState';
-import { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import StateContext from '../contexts/StateContext';
 import classNames from '@/helpers/classNames';
 
@@ -40,21 +40,37 @@ const menuList = [
 ];
 
 export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: PropTypes) {
-  const { state, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
+  const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
+  const menuRef = useRef<HTMLDivElement>(null);
   const { image, name, id } = applicant;
 
-  const handleOpenMenu = () => {
-    if (isOpenMenu) {
-      setOpenMenuId(null);
-      return;
+  const isPassedFinalInterview = applicant.status === 'hired';
+  
+  // Handle clicks outside the menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
     }
-    setOpenMenuId(id);
+    
+    if (isOpenMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpenMenu, setOpenMenuId]);
+
+  const handleOpenMenu = () => {
+    // Close if already open, otherwise open this one and close others
+    setOpenMenuId(isOpenMenu ? null : applicant.id);
   };
 
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
-  const isRejected = applicant.status === 'rejected'
-  const isWithdrawn = applicant.status === 'withdrawn'
-  const isPassedFinalInterview = applicant.status === 'hired';
+  const isRejected = applicant.status === 'rejected';
+  const isWithdrawn = applicant.status === 'withdrawn';
 
   const capitalizeFirstLetter = (text: any) => {
     return text.replace(/(?:^|\s)\S/, function (match: any) {
@@ -103,6 +119,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
       </button>
 
       {isOpenMenu && (
+        <div ref={menuRef}>
         <ul className='absolute left-0 top-6 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md'>
           {menuList.map((list) => {
             const { id, icon, name, whichModal, modalTitle } = list;
@@ -156,6 +173,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
             );
           })}
         </ul>
+        </div>
       )}
     </div>
   );

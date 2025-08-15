@@ -17,6 +17,7 @@ function PolicyAndComittee({
   setSelectedTab,
   setValue,
   watch,
+  isCreateModal,
 }: {
   control: any;
   register: any;
@@ -24,11 +25,13 @@ function PolicyAndComittee({
   setSelectedTab: any;
   setValue: any;
   watch: any;
+  isCreateModal: boolean;
 }) {
   const [fileUrl, setFileUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [committeeType, setCommitteeType] = useState<string>("A");
   const [fileSource, setFileSource] = useState<string>("");
+  const [showTooltip, setShowTooltip] = useState(false);
   
   // Watch for existing file URL from form
   const existingFileUrl = watch("policy_and_program_file");
@@ -77,6 +80,17 @@ function PolicyAndComittee({
       setFileSource("");
     }
   }, [existingFileUrl]);
+
+  // Show tooltip for 2 seconds when component mounts (only in create modal)
+  useEffect(() => {
+    if (isCreateModal) {
+      setShowTooltip(true);
+      const timer = setTimeout(() => {
+        setShowTooltip(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreateModal]);
 
   const handleCommitteeTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCommitteeType(e.target.value);
@@ -155,10 +169,17 @@ function PolicyAndComittee({
                 className='inline-block ml-1 cursor-pointer'
                 data-tooltip-id='file-upload-tooltip'
                 data-tooltip-place='right'
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
               >
                 <InfoIcon />
               </div>
-              <Tooltip id='file-upload-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+              <Tooltip 
+                id='file-upload-tooltip' 
+                opacity={1} 
+                style={{ fontSize: '10px' }}
+                isOpen={showTooltip}
+              >
                 <div>
                   <h2 className='text-[12px] font-medium'>Note: File uploads may disappear if the screen loses focus. Please re-upload if needed.</h2>
                 </div>

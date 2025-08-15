@@ -44,7 +44,7 @@ function BasicAndRiskInfo({
     setTagsOfficer,
     handleKeyDownOfficer,
     handleRemoveTagOfficer,
-  } = useTagOfficer(inputOfficer, setInputOfficer);
+  } = useTagOfficer(inputOfficer, setInputOfficer, [], setValue);
 
   // Always sync tagsOfficer with the form value using watch
   const watchedNames = watch ? watch("name_of_safety_officer") : name_of_safety_officer;

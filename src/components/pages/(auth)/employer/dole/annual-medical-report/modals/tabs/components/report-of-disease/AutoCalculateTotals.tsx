@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect } from 'react';
 
 interface AutoCalculateTotalsProps {
@@ -5,68 +7,15 @@ interface AutoCalculateTotalsProps {
   setValue: any;
 }
 
+// Define types for watch callback
+interface WatchObserverParams {
+  name?: string;
+  type?: string;
+  value?: any;
+}
+
 export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProps) {
-  // Watch all fields
-  const watchedValues = watch();
-  
   useEffect(() => {
-    // Helper function to calculate totals
-    const calculateTotal = (baseFieldName: string) => {
-      const maleValue = Number(watchedValues[`${baseFieldName}_male`]) || 0;
-      const femaleValue = Number(watchedValues[`${baseFieldName}_female`]) || 0;
-      setValue(`${baseFieldName}_total`, maleValue + femaleValue);
-    };
-
-    // Helper function to calculate grand total for physical environment diseases
-    const calculatePhysicalEnvironmentTotal = () => {
-      const physicalEnvironmentFields = [
-        // Diseases due to Noise and Vibration
-        'deafness_noise_induced',
-        'white_fingers_disease',
-        'musculo_skeletal_disturbances',
-        'fatigue',
-
-        // Diseases due to Temperature And Humidity abnormalities (HOT)
-        'heat_stroke',
-        'heat_cramps',
-        'dehydration',
-        'heat_exhaustion',
-        'others_heat',
-
-        // Diseases due to Temperature and Humidity abnormalities (COLD)
-        'chilblain',
-        'frost_bite',
-        'immersion_foot',
-        'general_hypothermia',
-        'others_cold_temperature',
-
-        // Diseases due to Pressure Abnormalities
-        'air_embolism',
-        'bends_disease',
-        'barotrauma',
-        'hypoxia',
-        'altitude_sickness',
-
-        // Diseases due to Radiation
-        'cataract_radiation',
-        'keratitis',
-        'burns',
-        'radiation_related_cancers',
-      ];
-
-      let totalMale = 0;
-      let totalFemale = 0;
-
-      physicalEnvironmentFields.forEach(fieldName => {
-        totalMale += Number(watchedValues[`${fieldName}_male`]) || 0;
-        totalFemale += Number(watchedValues[`${fieldName}_female`]) || 0;
-      });
-
-      setValue('physical_environment_total_male', totalMale);
-      setValue('physical_environment_total_female', totalFemale);
-      setValue('physical_environment_total', totalMale + totalFemale);
-    };
-
     // List of all base field names
     const fieldNames = [
       // Skin
@@ -205,13 +154,24 @@ export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProp
       'radiation_related_cancers',
     ];
 
-    // Calculate totals for all fields
-    fieldNames.forEach(calculateTotal);
+    // Set up subscriptions for male and female fields
+    const subscription = watch((value: any, { name, type }: WatchObserverParams) => {
+      if (name && (name.endsWith('_male') || name.endsWith('_female'))) {
+        // Extract the base field name
+        const baseFieldName = name.replace(/_(male|female)$/, '');
+        
+        // If this is a field we care about, recalculate its total
+        if (fieldNames.includes(baseFieldName)) {
+          const maleValue = Number(watch(`${baseFieldName}_male`)) || 0;
+          const femaleValue = Number(watch(`${baseFieldName}_female`)) || 0;
+          setValue(`${baseFieldName}_total`, maleValue + femaleValue, { shouldValidate: false });
+        }
+      }
+    });
     
-    // Calculate grand total for physical environment diseases
-    calculatePhysicalEnvironmentTotal();
-    
-  }, [watch, setValue, watchedValues]);
+    // Clean up subscription
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
 
   // This component doesn't render anything visible
   return null;

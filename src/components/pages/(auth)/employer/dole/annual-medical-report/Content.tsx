@@ -13,6 +13,10 @@ import {
 } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
+import { Tooltip } from "react-tooltip";
+import { useForm } from "react-hook-form";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import { handlePrintPDF } from './PrintData';
 import { getPrintAnnualMedicalReportDetails } from './hooks/useGetPrintAnnualMedicalReportDetails';
@@ -29,10 +33,16 @@ import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportMo
 import EditAnnualMedicalReportModal from "./modals/EditAnnualMedicalReportModal";
 import DeleteAnnualMedicalReportModal from "./modals/DeleteAnnualMedicalReportModal";
 
+import {
+  ArrowLeftIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import EditIcon from "@/svg/EditIcon";
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
+
+import classNames from "@/helpers/classNames";
 
 
 type PaginationProps = {
@@ -81,6 +91,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
@@ -402,7 +416,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <h2 className="text-xl font-bold text-indigo-dye">
             Annual Medical Report
           </h2>
-          <div className="mt-6 flex flex-col lg:flex-row items-left gap-4">
+          <div className={classNames("mt-6 flex flex-col lg:flex-row items-left gap-4", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className="flex-none flex flex-col lg:flex-row items-left gap-2">
               <div className="relative">
                 <CustomDatePicker
@@ -460,7 +474,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
                 onClick={() => setIsCreateAnnualMedicalReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_annual_medical_report}
+                disabled={!cachedRigths?.state?.data?.create_dole_annual_medical_report}
               >
                 CREATE
               </button>
@@ -514,7 +528,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          <div className="mt-8 flow-root">
+          <div className={classNames("mt-8 flow-root", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="min-w-full py-2 sm:px-6 lg:px-8">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
@@ -574,6 +588,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isCreateAnnualMedicalReportModalOpen}
           setIsOpen={setIsCreateAnnualMedicalReportModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isEditAnnualMedicalReportModalOpen && (
@@ -581,6 +596,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isEditAnnualMedicalReportModalOpen}
           setIsOpen={setIsEditAnnualMedicalReportModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isDeleteAnnualMedicalReportModalOpen && (

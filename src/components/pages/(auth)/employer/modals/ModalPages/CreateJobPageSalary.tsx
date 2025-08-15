@@ -6,7 +6,7 @@ import CustomToast from '@/components/CustomToast';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
-export default function CreateJobPageThree({
+export default function CreateJobPageSalary({
   watch,
   setValue,
   register,
@@ -238,7 +238,12 @@ export default function CreateJobPageThree({
           </div>
         </div>
         <div className='relative mt-2 flex gap-2'>
-          <input type='checkbox' {...register('is_show_salary', { required: true })} id='is_show_salary' value='true' />
+          <input 
+            type='checkbox' 
+            {...register('is_show_salary')} 
+            id='is_show_salary' 
+            onChange={(e) => setValue('is_show_salary', e.target.checked)}
+          />
           <label htmlFor='is_show_salary' className='ml-2'>
             Show Salary
           </label>
@@ -322,9 +327,9 @@ export default function CreateJobPageThree({
         <div className='relative flex gap-2 mt-4'>
           <input
             type='checkbox'
-            {...register('is_show_benefits', { required: true })}
+            {...register('is_show_benefits')}
             id='is_show_benefits'
-            value='true'
+            onChange={(e) => setValue('is_show_benefits', e.target.checked)}
           />
           <label htmlFor='is_show_benefits' className='ml-2'>
             Show Benefits
@@ -334,7 +339,7 @@ export default function CreateJobPageThree({
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
         <button
-          id='pageThreeNextBtn'
+          id='pageSalaryNextBtn'
           type='button'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
           onClick={async () => {
@@ -391,7 +396,7 @@ export default function CreateJobPageThree({
           Next
         </button>
         <button
-          id='pageThreeBackBtn'
+          id='pageSalaryBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
           onClick={() => setPageNumber(2)}

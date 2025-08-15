@@ -27,7 +27,7 @@ interface CachedProfileData {
   type_of_industry: string;
 }
 
-function Content() {
+function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [isEstablishmentRegistrationConfirmationModalOpen, setIsEstablishmentRegistrationConfirmationModalOpen] =
     useState(false);
     
@@ -142,6 +142,7 @@ function Content() {
         isOpen={isSafetyAndHealthPolicyModalOpen}
         setIsOpen={setIsSafetyAndHealthPolicyModalOpen}
         companyName={companyName}
+        hasActiveSubscription={hasActiveSubscription}
       />
     </div>
   );

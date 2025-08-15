@@ -5,18 +5,15 @@ interface AutoCalculateTotalsProps {
   setValue: any;
 }
 
-export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProps) {
-  // Watch all fields
-  const watchedValues = watch();
-  
-  useEffect(() => {
-    // Helper function to calculate totals
-    const calculateTotal = (baseFieldName: string) => {
-      const maleValue = Number(watchedValues[`${baseFieldName}_male`]) || 0;
-      const femaleValue = Number(watchedValues[`${baseFieldName}_female`]) || 0;
-      setValue(`${baseFieldName}_total`, maleValue + femaleValue);
-    };
+// Define types for watch callback
+interface WatchObserverParams {
+  name?: string;
+  type?: string;
+  value?: any;
+}
 
+export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProps) {
+  useEffect(() => {
     // List of all base field names
     const fieldNames = [
       // Report of Occupational Accidents/Injuries
@@ -42,10 +39,24 @@ export function AutoCalculateTotals({ watch, setValue }: AutoCalculateTotalsProp
       'others_immunization',
     ];
 
-    // Calculate totals for all fields
-    fieldNames.forEach(calculateTotal);
+    // Set up subscriptions for male and female fields
+    const subscription = watch((value: any, { name, type }: WatchObserverParams) => {
+      if (name && (name.endsWith('_male') || name.endsWith('_female'))) {
+        // Extract the base field name
+        const baseFieldName = name.replace(/_(male|female)$/, '');
+        
+        // If this is a field we care about, recalculate its total
+        if (fieldNames.includes(baseFieldName)) {
+          const maleValue = Number(watch(`${baseFieldName}_male`)) || 0;
+          const femaleValue = Number(watch(`${baseFieldName}_female`)) || 0;
+          setValue(`${baseFieldName}_total`, maleValue + femaleValue, { shouldValidate: false });
+        }
+      }
+    });
     
-  }, [watch, setValue, watchedValues]);
+    // Clean up subscription
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
 
   // This component doesn't render anything visible
   return null;

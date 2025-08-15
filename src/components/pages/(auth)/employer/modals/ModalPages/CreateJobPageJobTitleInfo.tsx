@@ -10,13 +10,14 @@ interface Field {
   value: any;
 }
 
-export default function CreateJobPageOne({
+export default function CreateJobPageTitleInfo({
   control,
   Controller,
   register,
   handleSubmit,
   setPageNumber,
   onSubmit,
+  errors,
 }: {
   control: any;
   Controller: any;
@@ -24,6 +25,7 @@ export default function CreateJobPageOne({
   handleSubmit: any;
   setPageNumber: Dispatch<number>;
   onSubmit: (data: any) => void;
+  errors?: any;
 }) {
 
   const firstFormSubmit = handleSubmit((data: any) => {
@@ -91,20 +93,35 @@ export default function CreateJobPageOne({
               Where would you like to advertise this job?
               <span className='text-red-600'>*</span>
             </label>
+            {errors.placeAdvertise && (
+              <p className='text-xs text-red-600 mt-1'>
+                {errors.placeAdvertise.message || "Please select at least one location to advertise the job."}
+              </p>
+            )}
             <div className='mt-2'>
               <Controller
                 name='placeAdvertise'
                 control={control}
                 rules={{
-                  required: true,
+                  required: "Please select at least one location to advertise the job",
+                  validate: (value: any) => (Array.isArray(value) && value.length > 0) || "Please select at least one location",
                 }}
                 render={({ field: { onChange, value } }: { field: Field }) => (
                   <Select
                     className='text-sm'
                     classNamePrefix='select'
                     options={advertiseOptions}
-                    value={advertiseOptions.find((item: any) => item.value === value)}
-                    onChange={(val) => onChange(val ? val.value : [])}
+                    value={advertiseOptions.filter((item: any) => 
+                      Array.isArray(value) 
+                        ? value.includes(item.value) 
+                        : item.value === value
+                    )}
+                    onChange={(val) => {
+                      const selectedValues = val ? val.map((item: any) => item.value) : [];
+                      if (selectedValues.length <= 10) {
+                        onChange(selectedValues);
+                      }
+                    }}
                     components={{
                       DropdownIndicator: () => (
                         <div className='pointer-events-none px-2'>
@@ -114,7 +131,17 @@ export default function CreateJobPageOne({
                       IndicatorSeparator: () => null,
                     }}
                     isClearable={false}
+                    isMulti
                     noOptionsMessage={() => null}
+                    placeholder='Select locations... (max 10)'
+                    isOptionDisabled={(option) => {
+                      // First check if it's a region header (these should always be disabled)
+                      if (option.isDisabled) return true;
+                      
+                      // Then check if we've reached the selection limit
+                      const currentSelections = Array.isArray(value) ? value.length : 0;
+                      return currentSelections >= 10;
+                    }}
                   />
                 )}
               />
@@ -125,7 +152,7 @@ export default function CreateJobPageOne({
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
         <button
-          id='pageOneNextBtn'
+          id='pageTitleInfoNextBtn'
           type='submit'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
         >

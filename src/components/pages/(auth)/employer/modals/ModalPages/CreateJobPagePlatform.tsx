@@ -1,7 +1,7 @@
 import { Dispatch, useEffect, useState } from 'react';
 import { LinkedIn, Facebook } from '@/svg/SocialMedia';
 
-export default function CreateJobPageSeven({
+export default function CreateJobPagePlatform({
   isLoading,
   setValue,
   getValues,
@@ -40,10 +40,28 @@ export default function CreateJobPageSeven({
   }, [selectedOptions, setValue]);
 
   useEffect(() => {
-    if (getValues && getValues('shared_to')) {
-      setSelectedOptions(getValues('shared_to'));
+    if (getValues) {
+      // Check for shared_to first (from API data)
+      const sharedTo = getValues('shared_to');
+      if (sharedTo) {
+        if (typeof sharedTo === 'string') {
+          setSelectedOptions(sharedTo.split(',').map(item => item.trim()));
+        } else if (Array.isArray(sharedTo)) {
+          setSelectedOptions(sharedTo);
+        }
+      } else if (getValues('postIn')) {
+        const postIn = getValues('postIn');
+        if (Array.isArray(postIn)) {
+          setSelectedOptions(postIn);
+        } else if (typeof postIn === 'string') {
+          setSelectedOptions(postIn.split(',').map(item => item.trim()));
+        } else {
+          setSelectedOptions([]);
+        }
+      }
     }
-  }, [pageNumber]);
+    // Add sharedTo as a dependency so it updates when the value changes
+  }, [pageNumber, getValues, getValues && getValues('shared_to')]);
 
   return (
     <>
@@ -107,7 +125,7 @@ export default function CreateJobPageSeven({
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
         <button
-          id='pageSevenNextBtn'
+          id='pagePlatformNextBtn'
           type='button'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
           onClick={() => {
@@ -144,10 +162,10 @@ export default function CreateJobPageSeven({
           {!isLoading && isEdit && 'Save'}
         </button>
         <button
-          id='pageSevenBackBtn'
+          id='pagePlatformBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-          onClick={() => setPageNumber(6)}
+          onClick={() => setPageNumber(7)}
         >
           Back
         </button>

@@ -23,6 +23,7 @@ function Header({ type, hasProfile, hasActiveSubscription }: { type: string; has
     'dashboard',
     'post-job',
     'screen-applicants',
+    'screening-question-guideline',
     'orient',
     'manage',
     'employee-separation',

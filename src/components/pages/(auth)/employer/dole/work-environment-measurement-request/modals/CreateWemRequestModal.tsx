@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 import { useQueryClient } from '@tanstack/react-query';
 import toast from "react-hot-toast";
 
@@ -33,13 +32,15 @@ function CreateWemRequestModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddWorkEnvironmentRequest,
@@ -71,7 +72,7 @@ function CreateWemRequestModal({
     }
   }, [isOpen, cachedProfile, setValue]);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -103,7 +104,7 @@ function CreateWemRequestModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => {setIsOpen(false)}}
       >
         <Transition.Child
           as={Fragment}

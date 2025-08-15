@@ -231,10 +231,10 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_noise"
                         value="noise"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_noise" className="ml-2">
                         Noise
                       </label>
                     </div>
@@ -242,10 +242,10 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_illumination"
                         value="illumination"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_illumination" className="ml-2">
                         Illumination
                       </label>
                     </div>
@@ -253,10 +253,10 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_vibration"
                         value="vibration"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_vibration" className="ml-2">
                        Vibration
                       </label>
                     </div>
@@ -264,10 +264,10 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_heat"
                         value="heat"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_heat" className="ml-2">
                         Heat
                       </label>
                     </div>
@@ -316,7 +316,7 @@ function MonitoringAndHazardInfo({
                         id="heavy_metals"
                         value="Heavy Metals"
                       />
-                      <label htmlFor="chemical_hazards" className="ml-2">
+                      <label htmlFor="heavy_metals" className="ml-2">
                        Heavy Metals
                       </label>
                     </div>
@@ -443,7 +443,7 @@ function MonitoringAndHazardInfo({
                 <input
                   type="checkbox"
                   {...register("ventilation")}
-                  id="ventilation"
+                  id="general_ventilation"
                   value="General Ventilation"
                 />
                 <label htmlFor="general_ventilation" className="ml-2">
@@ -454,7 +454,7 @@ function MonitoringAndHazardInfo({
                 <input
                   type="checkbox"
                   {...register("ventilation")}
-                  id="ventilation"
+                  id="local_exhaust_ventilation"
                   value="Local Exhaust Ventilation"
                 />
                 <label htmlFor="local_exhaust_ventilation" className="ml-2">

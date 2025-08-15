@@ -40,6 +40,8 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import classNames from '@/helpers/classNames';
+
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -462,7 +464,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Address Employee Issue</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -536,13 +538,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsIncidentReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_employee_issue}
+                disabled={!cachedProfile?.state?.data?.create_employee_issue}
               >
                 CREATE
               </button>
             </div>
           </div>
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>

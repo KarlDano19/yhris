@@ -221,13 +221,18 @@ function EmergencyOccupational({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pl-0 md:pl-6">
             <div className="relative mt-2 flex items-center gap-1">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("provided_treatment_room_medical_clinic")}
-                id="provided_treatment_room_medical_clinic"
+                id="provided_treatment_room_medical_clinic_yes"
                 value="yes"
+                onChange={() => {
+                  setIsOtherCheckedA(false);
+                  // Clear the other specification field
+                  setValue("provided_treatment_room_medical_clinic_other_specification", "");
+                }}
               />
               <label
-                htmlFor="provided_treatment_room_medical_clinic"
+                htmlFor="provided_treatment_room_medical_clinic_yes"
                 className="ml-1"
               >
                 yes
@@ -235,13 +240,18 @@ function EmergencyOccupational({
             </div>
             <div className="relative mt-2 flex items-center gap-2">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("provided_treatment_room_medical_clinic")}
-                id="provided_treatment_room_medical_clinic"
+                id="provided_treatment_room_medical_clinic_no"
                 value="no"
+                onChange={() => {
+                  setIsOtherCheckedA(false);
+                  // Clear the other specification field
+                  setValue("provided_treatment_room_medical_clinic_other_specification", "");
+                }}
               />
               <label
-                htmlFor="provided_treatment_room_medical_clinic"
+                htmlFor="provided_treatment_room_medical_clinic_no"
                 className="ml-2"
               >
                 no
@@ -250,7 +260,7 @@ function EmergencyOccupational({
             </div>
             <div className="relative mt-2 flex items-center gap-1">
               <input
-                type="checkbox"
+                type="radio"
                 {...register("provided_treatment_room_medical_clinic")}
                 id="provided_treatment_room_medical_clinic_other"
                 value="Other"
@@ -564,11 +574,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("schedule_of_attendance_of_full_time_first_aider")}
-                id="schedule_of_attendance_of_full_time_first_aider"
+                id="schedule_attendance_1st_shift"
                 value="1st shift"
               />
               <label
-                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                htmlFor="schedule_attendance_1st_shift"
                 className="ml-1"
               >
                 1st shift
@@ -578,11 +588,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("schedule_of_attendance_of_full_time_first_aider")}
-                id="schedule_of_attendance_of_full_time_first_aider"
+                id="schedule_attendance_2nd_shift"
                 value="2nd shift"
               />
               <label
-                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                htmlFor="schedule_attendance_2nd_shift"
                 className="ml-2"
               >
                 2nd shift
@@ -593,11 +603,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("schedule_of_attendance_of_full_time_first_aider")}
-                id="schedule_of_attendance_of_full_time_first_aider"
+                id="schedule_attendance_3rd_shift"
                 value="3rd shift"
               />
               <label
-                htmlFor="schedule_of_attendance_of_full_time_first_aider"
+                htmlFor="schedule_attendance_3rd_shift"
                 className="ml-2"
               >
                 3rd shift
@@ -627,11 +637,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_physician"
                 value="occupational health physician"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_physician"
                 className="ml-1"
               >
                 occupational health physician
@@ -641,11 +651,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_dentist"
                 value="occupational health dentist"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_dentist"
                 className="ml-2"
               >
                 occupational health dentist
@@ -656,11 +666,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_nurse"
                 value="occupational health nurse"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_nurse"
                 className="ml-1"
               >
                 occupational health nurse
@@ -670,11 +680,11 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_training"
+                id="occupational_health_personnel_first_aider"
                 value="first aider"
               />
               <label
-                htmlFor="occupational_health_personnel_training"
+                htmlFor="occupational_health_personnel_first_aider"
                 className="ml-2"
               >
                 first aider

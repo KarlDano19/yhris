@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useState, useEffect } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -29,13 +28,15 @@ function CreateHealthAndSafetyReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
   const {
     mutate: addWorkEnvironmentRequest,
     } = useAddHealthAndSafetyReport();
@@ -74,10 +75,14 @@ function CreateHealthAndSafetyReportModal({
 
   const handleClose = () => {
     setIsOpen(false);
+  };
+
+  const resetForm = () => {
+    setIsOpen(false);
     reset();
   };
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     if (data.employees) {
       data.shift_employees = JSON.stringify(data.employees);
     }
@@ -89,7 +94,7 @@ function CreateHealthAndSafetyReportModal({
             duration: 5000,
           }
         );
-        handleClose();
+        resetForm();
         if (typeof refetch === 'function') {
           refetch();
         }
@@ -116,7 +121,7 @@ function CreateHealthAndSafetyReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => handleClose()}
       >
         <Transition.Child
           as={Fragment}
@@ -169,6 +174,7 @@ function CreateHealthAndSafetyReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    isCreateModal={true}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -179,6 +185,7 @@ function CreateHealthAndSafetyReportModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    isCreateModal={true}
                   />
                 )}
               </Dialog.Panel>
