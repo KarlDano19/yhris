@@ -50,8 +50,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const tabs = [
     { id: 1, name: 'Workforce Overview', shortName: 'Workforce', isAvailable: true },
-    { id: 2, name: 'Employee Performance & Development', shortName: 'Performance', isAvailable: true },
-    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: true },
+    { id: 2, name: 'Employee Performance & Development', shortName: 'Performance', isAvailable: hasActiveSubscription },
+    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: hasActiveSubscription },
     // { id: 4, name: 'Compensation & Benefits', shortName: 'Compensation', isAvailable: false },
   ];
 
@@ -173,7 +173,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     <div
                       data-tooltip-id='content-tab-tooltip'
-                      data-tooltip-content='Coming soon.'
+                      data-tooltip-content='Subscription required to access this feature.'
                       data-tooltip-place='bottom'
                       className="cursor-not-allowed"
                     >
@@ -204,7 +204,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     ) : (
                       <div
                         data-tooltip-id='content-tab-tooltip'
-                        data-tooltip-content='Coming soon.'
+                        data-tooltip-content='Subscription required to access this feature.'
                         data-tooltip-place='bottom'
                       >
                         <h1 className="text-sm font-bold pb-2 text-center whitespace-nowrap text-gray-400 opacity-50">

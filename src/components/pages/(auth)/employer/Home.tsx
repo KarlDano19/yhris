@@ -107,6 +107,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       text: 'Analytics',
       link: '/analytics',
       isAvailable: true,
+      isGrayedOut: !hasActiveSubscription,
     },
     {
       icon: <SettingsLogo />,
