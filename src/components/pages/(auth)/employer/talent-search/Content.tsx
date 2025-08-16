@@ -22,6 +22,7 @@ import StarIcon from '@heroicons/react/24/outline/StarIcon';
 import StarFilledIcon from '@heroicons/react/24/solid/StarIcon';
 import BookmarkIcon from '@heroicons/react/24/outline/BookmarkIcon';
 import BookmarkFilledIcon from '@heroicons/react/24/solid/BookmarkIcon';
+import FilterModal from './modal/FilterModal';
 
 type T_ModalData = {
   id: number;
@@ -33,14 +34,31 @@ type T_CompareModalData = {
   open: boolean;
 };
 
+// Local storage keys
+const STORAGE_KEYS = {
+  SEARCH_FILTERS: 'talent-search-filters',
+  SEARCH_TAGS: 'talent-search-tags',
+  STARRED_TAGS: 'talent-search-starred-tags',
+  SEARCH_INPUT: 'talent-search-input',
+};
+
 const Content = () => {
   const [searchInput, setSearchInput] = useState('');
   const [starredTags, setStarredTags] = useState<Set<string>>(new Set());
   const [isApplicantProfileModalOpen, setIsApplicantProfileModalOpen] = useState<T_ModalData | null>(null);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState<T_CompareModalData | null>(null);
   const [selectedApplicants, setSelectedApplicants] = useState<Set<number>>(new Set());
-  const [filters, setFilters] = useState({
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [filters, setFilters] = useState<{
+    search: string;
+    location: string[];
+    gender: string;
+    salary: string;
+  }>({
     search: '',
+    location: [],
+    gender: '',
+    salary: '',
   });
   const [showFavoritesPanel, setShowFavoritesPanel] = useState(false);
 
@@ -58,6 +76,85 @@ const Content = () => {
   const { data: favoriteApplicants, refetch: refetchFavorites } = useGetApplicantFavorites();
   const addFavoriteMutation = useAddApplicantFavorite();
   const removeFavoriteMutation = useRemoveApplicantFavorite();
+
+  // Load saved state from localStorage on component mount
+  useEffect(() => {
+    try {
+      // Load filters
+      const savedFilters = localStorage.getItem(STORAGE_KEYS.SEARCH_FILTERS);
+      if (savedFilters) {
+        const parsedFilters = JSON.parse(savedFilters);
+        setFilters(parsedFilters);
+      }
+
+      // Load tags
+      const savedTags = localStorage.getItem(STORAGE_KEYS.SEARCH_TAGS);
+      if (savedTags) {
+        const parsedTags = JSON.parse(savedTags);
+        setTagsSearch(parsedTags);
+      }
+
+      // Load starred tags
+      const savedStarredTags = localStorage.getItem(STORAGE_KEYS.STARRED_TAGS);
+      if (savedStarredTags) {
+        const parsedStarredTags = JSON.parse(savedStarredTags);
+        setStarredTags(new Set(parsedStarredTags));
+      }
+
+      // Load search input
+      const savedSearchInput = localStorage.getItem(STORAGE_KEYS.SEARCH_INPUT);
+      if (savedSearchInput) {
+        setSearchInput(savedSearchInput);
+      }
+    } catch (error) {
+      console.error('Error loading saved search state:', error);
+    }
+  }, []);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SEARCH_FILTERS, JSON.stringify(filters));
+    } catch (error) {
+      console.error('Error saving filters:', error);
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SEARCH_TAGS, JSON.stringify(tagsSearch));
+    } catch (error) {
+      console.error('Error saving tags:', error);
+    }
+  }, [tagsSearch]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.STARRED_TAGS, JSON.stringify(Array.from(starredTags)));
+    } catch (error) {
+      console.error('Error saving starred tags:', error);
+    }
+  }, [starredTags]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SEARCH_INPUT, searchInput);
+    } catch (error) {
+      console.error('Error saving search input:', error);
+    }
+  }, [searchInput]);
+
+  // Clear saved state function
+  const clearSavedState = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEYS.SEARCH_FILTERS);
+      localStorage.removeItem(STORAGE_KEYS.SEARCH_TAGS);
+      localStorage.removeItem(STORAGE_KEYS.STARRED_TAGS);
+      localStorage.removeItem(STORAGE_KEYS.SEARCH_INPUT);
+    } catch (error) {
+      console.error('Error clearing saved state:', error);
+    }
+  };
 
   const isApplicantFavorited = (applicantId: number) =>
     favoriteApplicants?.some((fav: any) => fav.applicant?.id === applicantId);
@@ -124,25 +221,46 @@ const Content = () => {
     setSelectedApplicants(new Set());
   };
 
+  const handleFilterUpdate = (filterData: { location: string[]; gender: string; salary: string }) => {
+    setFilters((prev) => ({
+      ...prev,
+      location: filterData.location,
+      gender: filterData.gender,
+      salary: filterData.salary,
+    }));
+    setIsFilterModalOpen(false);
+    
+    // Automatically trigger search when filters are applied
+    // Build search query from current tags if any exist
+    const searchQuery = buildSearchQuery(tagsSearch, starredTags);
+    setFilters((prev) => ({
+      ...prev,
+      location: filterData.location,
+      gender: filterData.gender,
+      salary: filterData.salary,
+      search: searchQuery, // Keep existing search query
+    }));
+  };
+
   const handleToggleBookmark = (applicantId: number) => {
     if (isApplicantFavorited(applicantId)) {
       removeFavoriteMutation.mutate(applicantId, {
         onSuccess: () => {
           refetchFavorites();
-          toast.custom((t) => <CustomToast message='Removed from favorites!' type='success' />);
+          toast.custom((t) => <CustomToast message='Removed from favorites!' type='error' />, { duration: 4000 });
         },
         onError: (error: any) => {
-          toast.custom((t) => <CustomToast message={error?.toString() || 'Failed to remove favorite.'} type='error' />);
+          toast.custom((t) => <CustomToast message={error?.toString() || 'Failed to remove favorite.'} type='error' />, { duration: 4000 });
         },
       });
     } else {
       addFavoriteMutation.mutate(applicantId, {
         onSuccess: () => {
           refetchFavorites();
-          toast.custom((t) => <CustomToast message='Added to favorites!' type='success' />);
+          toast.custom((t) => <CustomToast message='Added to favorites!' type='success' />, { duration: 4000 });
         },
         onError: (error: any) => {
-          toast.custom((t) => <CustomToast message={error?.toString() || 'Failed to add favorite.'} type='error' />);
+          toast.custom((t) => <CustomToast message={error?.toString() || 'Failed to add favorite.'} type='error' />, { duration: 4000 });
         },
       });
     }
@@ -260,10 +378,88 @@ const Content = () => {
             >
               {isLoading ? 'Searching...' : 'Search'}
             </button>
-            <button className='bg-white border border-blue-600 rounded-md py-2 px-5 text-blue-600 text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+            <button 
+              onClick={() => setIsFilterModalOpen(true)}
+              className={`rounded-md py-2 px-5 text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 ${
+                (filters.location.length > 0 || filters.gender || filters.salary)
+                  ? 'bg-blue-100 border border-blue-600 text-blue-700'
+                  : 'bg-white border border-blue-600 text-blue-600'
+              }`}
+            >
               Filter
+              {(filters.location.length > 0 || filters.gender || filters.salary) && (
+                <span className='ml-1 bg-blue-600 text-white rounded-full px-1.5 py-0.5 text-xs'>
+                  {(filters.location.length > 0 ? 1 : 0) + (filters.gender ? 1 : 0) + (filters.salary ? 1 : 0)}
+                </span>
+              )}
             </button>
+            {/* Clear saved state button */}
+            {(filters.search || tagsSearch.length > 0 || starredTags.size > 0) && (
+              <button
+                onClick={() => {
+                  setFilters({ search: '', location: [], gender: '', salary: '' });
+                  setTagsSearch([]);
+                  setStarredTags(new Set());
+                  setSearchInput('');
+                  clearSavedState();
+                }}
+                className='bg-gray-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none'
+                title='Clear all search data'
+              >
+                Clear All
+              </button>
+            )}
           </div>
+
+          {/* Active Filters Display */}
+          {(filters.location.length > 0 || filters.gender || filters.salary) && (
+            <div className='flex justify-center mt-4'>
+              <div className='flex flex-wrap gap-2 max-w-2xl'>
+                {filters.location.map((location, index) => (
+                  <div
+                    key={index}
+                    className='flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm'
+                  >
+                    <span>📍 {location}</span>
+                    <button
+                      onClick={() => {
+                        const newLocations = filters.location.filter((_, i) => i !== index);
+                        setFilters(prev => ({ ...prev, location: newLocations }));
+                      }}
+                      className='text-green-600 hover:text-green-800 font-bold text-lg leading-none'
+                      title='Remove location filter'
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {filters.gender && (
+                  <div className='flex items-center gap-2 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm'>
+                    <span>👤 {filters.gender}</span>
+                    <button
+                      onClick={() => setFilters(prev => ({ ...prev, gender: '' }))}
+                      className='text-purple-600 hover:text-purple-800 font-bold text-lg leading-none'
+                      title='Remove gender filter'
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+                {filters.salary && (
+                  <div className='flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm'>
+                    <span>💰 {filters.salary}</span>
+                    <button
+                      onClick={() => setFilters(prev => ({ ...prev, salary: '' }))}
+                      className='text-orange-600 hover:text-orange-800 font-bold text-lg leading-none'
+                      title='Remove salary filter'
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Favorites Panel */}
           {showFavoritesPanel && (
@@ -362,13 +558,15 @@ const Content = () => {
           )}
 
           {/* Search Results */}
-          {filters.search && (
+          {(filters.search || filters.location.length > 0 || filters.gender || filters.salary) && (
             <>
               {/* Search Results Panel (existing code) */}
               <div className='mt-8'>
                 <div className='bg-white rounded-lg shadow-md p-6'>
                   <div className='flex justify-between items-center mb-4'>
-                    <h3 className='text-lg font-semibold'>Search Results</h3>
+                    <h3 className='text-lg font-semibold'>
+                      {filters.search ? 'Search Results' : 'Filtered Results'}
+                    </h3>
                     {selectedApplicants.size > 0 && (
                       <div className='flex items-center gap-2'>
                         <span className='text-sm text-gray-600'>{selectedApplicants.size} selected</span>
@@ -496,12 +694,16 @@ const Content = () => {
                       ))}
                     </div>
                   ) : (
-                    filters.search &&
-                    !isLoading && (
-                      <div className='text-center py-8'>
-                        <p className='text-gray-600'>No profiles found matching your search criteria.</p>
-                      </div>
-                    )
+                                         !isLoading && (
+                       <div className='text-center py-8'>
+                         <p className='text-gray-600'>
+                           {filters.search 
+                             ? 'No profiles found matching your search criteria.' 
+                             : 'No profiles found matching your filter criteria.'
+                           }
+                         </p>
+                       </div>
+                     )
                   )}
                 </div>
               </div>
@@ -518,6 +720,19 @@ const Content = () => {
       )}
       {isCompareModalOpen && (
         <CompareApplicantsModal isOpen={isCompareModalOpen} setIsOpen={setIsCompareModalOpen} refetch={refetch} />
+      )}
+      {isFilterModalOpen && (
+        <FilterModal 
+          isOpen={isFilterModalOpen} 
+          setIsOpen={setIsFilterModalOpen} 
+          refetch={refetch}
+          onFilterUpdate={handleFilterUpdate}
+          currentFilters={{
+            location: filters.location,
+            gender: filters.gender,
+            salary: filters.salary,
+          }}
+        />
       )}
     </div>
   );

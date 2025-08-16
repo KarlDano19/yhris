@@ -78,17 +78,6 @@ function ApplicantProfileModal({
                     Profile Details
                   </h3>
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log(applicantDetailsData);
-                      }}
-                      className="p-1 text-white hover:bg-savoy-blue/80 rounded"
-                    >
-                      <PrinterIcon className="w-6 h-6" />
-                    </button>
                     <XCircleIcon
                       className="w-8 h-8 text-white cursor-pointer"
                       onClick={() => customCloseModal()}

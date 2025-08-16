@@ -5,6 +5,9 @@ interface ApplicantFilters {
   search?: string;
   from?: string;
   to?: string;
+  location?: string[];
+  gender?: string;
+  salary?: string;
 }
 
 interface ApplicantData {
@@ -65,12 +68,33 @@ async function getApplicantItems(filters: any) {
     if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    
+    // Add new filter parameters
+    if (filters.location && Array.isArray(filters.location) && filters.location.length > 0) {
+      newFilters.location = filters.location;
+    }
+    if (filters.gender && filters.gender.trim() !== '') {
+      newFilters.gender = filters.gender;
+    }
+    if (filters.salary && filters.salary.trim() !== '') {
+      newFilters.salary = filters.salary;
+    }
 
-    const searchParams = new URLSearchParams(
-      Object.entries(newFilters)
-        .filter(([_, value]) => value !== undefined && value !== '')
-        .map(([key, value]) => [key, String(value)])
-    );
+    // Build search params, handling arrays for location
+    const searchParams = new URLSearchParams();
+    
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        if (key === 'location' && Array.isArray(value)) {
+          // Handle location array - send each location as a separate parameter
+          value.forEach(location => {
+            searchParams.append('location', location);
+          });
+        } else {
+          searchParams.append(key, String(value));
+        }
+      }
+    });
 
     const token = getCookie('token');
     const config = {
@@ -82,6 +106,13 @@ async function getApplicantItems(filters: any) {
     };
 
     if (token) {
+      // Debug: Log the search parameters being sent
+      console.log('Talent Search API Parameters:', {
+        url: `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/talent-search/?${searchParams}`,
+        filters: newFilters,
+        searchParams: searchParams.toString()
+      });
+      
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/talent-search/?${searchParams}`,
         config
