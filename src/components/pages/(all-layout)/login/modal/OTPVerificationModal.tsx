@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import toast from 'react-hot-toast';
@@ -31,9 +31,11 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   onClose,
   onSuccess
 }) => {
-  const [otpCode, setOtpCode] = useState<string>('');
+  const [otpCode, setOtpCode] = useState<string[]>(new Array(6).fill(''));
   const [timeRemaining, setTimeRemaining] = useState<number>(timeRemainingSeconds);
   const [isResending, setIsResending] = useState<boolean>(false);
+  
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   
   const { mutate: verifyOTP, isLoading: isVerifying } = useOTPVerification();
   const { mutate: resendOTP, isLoading: isResendLoading } = useOTPResend();
@@ -58,15 +60,55 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setOtpCode('');
+      setOtpCode(new Array(6).fill(''));
       setTimeRemaining(timeRemainingSeconds);
       setIsResending(false);
     }
   }, [isOpen, timeRemainingSeconds]);
 
+  const handleInputChange = (index: number, value: string) => {
+    if (value.length > 1) return; // Only allow single digit
+    
+    const newOtpCode = [...otpCode];
+    newOtpCode[index] = value;
+    setOtpCode(newOtpCode);
+
+    // Auto-focus next input if value is entered
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Handle backspace
+    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+    
+    // Handle arrow keys
+    if (e.key === 'ArrowLeft' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+    if (e.key === 'ArrowRight' && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain').replace(/\D/g, '').slice(0, 6);
+    
+    if (pastedData.length === 6) {
+      const newOtpCode = pastedData.split('');
+      setOtpCode(newOtpCode);
+      inputRefs.current[5]?.focus();
+    }
+  };
+
   const handleVerifyOTP = () => {
-    if (!otpCode.trim()) {
-      toast.custom(() => <CustomToast message="Please enter the OTP code" type='error' />, {
+    const otpString = otpCode.join('');
+    if (!otpString || otpString.length !== 6) {
+      toast.custom(() => <CustomToast message="Please enter the complete 6-digit OTP code" type='error' />, {
         duration: 4000,
       });
       return;
@@ -74,7 +116,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
 
     const payload = {
       session_id: sessionId,
-      code: otpCode.trim(),
+      code: otpString,
       email: email
     };
 
@@ -129,6 +171,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   };
 
   const isExpired = timeRemaining <= 0;
+  const isOtpComplete = otpCode.join('').length === 6;
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -184,19 +227,27 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
             <div className='space-y-4'>
               {/* OTP Input */}
               <div>
-                <label htmlFor='otp' className='block text-sm font-medium text-gray-700 mb-2'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Verification Code
                 </label>
-                <input
-                  type='text'
-                  id='otp'
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder='Enter 6-digit code'
-                  maxLength={6}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
-                  disabled={isVerifying || isExpired}
-                />
+                <div className='flex justify-center space-x-2' onPaste={handlePaste}>
+                  {otpCode.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => (inputRefs.current[index] = el)}
+                      type='text'
+                      inputMode='numeric'
+                      pattern='[0-9]*'
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleInputChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      className='w-12 h-12 text-center text-lg font-semibold border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                      disabled={isVerifying || isExpired}
+                      autoFocus={index === 0}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Timer and Attempts */}
@@ -218,7 +269,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                 <button
                   type='button'
                   onClick={handleVerifyOTP}
-                  disabled={isVerifying || isExpired || !otpCode.trim()}
+                  disabled={isVerifying || isExpired || !isOtpComplete}
                   className='w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm'
                 >
                   {isVerifying ? (
