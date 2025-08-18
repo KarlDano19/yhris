@@ -269,18 +269,18 @@ const Content = () => {
   return (
     <div>
       {/* Floating Action Buttons */}
-      <div className='fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden'>
+      <div className='fixed bottom-1 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden'>
         <div className='flex'>
           <button
             onClick={() => setShowFavoritesPanel((prev) => !prev)}
-            className='px-4 py-3 flex items-center gap-2 transition-all hover:bg-gray-50'
+            className='px-4 py-2 flex items-center gap-2 transition-all hover:bg-gray-50'
           >
             <BookmarkFilledIcon className='h-5 w-5 text-blue-600' />
             <span className='hidden sm:inline text-gray-700 font-medium'>Saved Profiles</span>
           </button>
           <div className='w-px bg-gray-300'></div>
           <Link href='/talent-search/email-history'>
-            <button className='px-4 py-3 flex items-center gap-2 transition-all hover:bg-gray-50'>
+            <button className='px-4 py-2 flex items-center gap-2 transition-all hover:bg-gray-50'>
               <svg className='h-5 w-5 text-blue-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
                   strokeLinecap='round'
@@ -403,7 +403,7 @@ const Content = () => {
                   setSearchInput('');
                   clearSavedState();
                 }}
-                className='bg-gray-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none'
+                className='bg-white rounded-md border border-red-600 py-2 px-5 text-red-600 text-sm font-semibold shadow hover:shadow-md focus:shadow-none'
                 title='Clear all search data'
               >
                 Clear All

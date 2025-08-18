@@ -47,12 +47,11 @@ const buildSearchQuery = (tags: string[], starredTags: Set<string>): string => {
         searchTerms.push(tag);
       }
     } else {
-      // For general tags without field specification, assume they're skills
-      const skillTag = `skills:${tag}`;
+      // For general tags without field specification, use as-is for general search
       if (starredTags.has(tag)) {
-        searchTerms.push(`+${skillTag}`);
+        searchTerms.push(`+${tag}`);
       } else {
-        searchTerms.push(skillTag);
+        searchTerms.push(tag);
       }
     }
   });
