@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   Chart as ChartJS,
@@ -6,7 +6,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -23,6 +23,19 @@ interface IssueTypeProps {
 }
 
 const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = false, error = null }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   // Calculate issue type distribution from the data
   const calculateIssueTypeDistribution = () => {
     // Handle both paginated structure (records) and flat array structure
@@ -85,7 +98,6 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
         data,
         backgroundColor: colors.slice(0, labels.length),
         borderWidth: 0,
-        cutout: '45%', // Creates the donut hole
       },
     ],
   };
@@ -95,7 +107,7 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'right' as const,
+        position: isMobile ? 'bottom' as const : 'right' as const,
         labels: {
           usePointStyle: true,
           pointStyle: 'circle',
@@ -209,9 +221,6 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
   if (isLoading) {
     return (
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-        <div className="flex items-center justify-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>
-        </div>
         <div className="flex items-center justify-center h-64">
           <div role='status' className='text-center'>
             <svg
@@ -240,9 +249,6 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
   if (error) {
     return (
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-        <div className="flex items-center justify-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>
-        </div>
         <div className="flex items-center justify-center h-64">
           <div className="text-red-500">Error loading issue type data</div>
         </div>
@@ -253,15 +259,16 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
   return (
     <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
       <div className="flex items-center justify-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>
+        <div className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>
+          <span className='text-sm text-gray-500'>
+            ({totalIssues < 10 ? `0${totalIssues}` : totalIssues} issues)
+          </span>
+        </div>
       </div>
       
       <div className="h-64 relative">
-        <Doughnut data={chartData} options={options} />
-        {/* Center text overlay */}
-        <div className="absolute top-1/2 left-20 md:left-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
-          <div className="text-4xl font-bold text-gray-900">{totalIssues < 10 ? `0${totalIssues}` : totalIssues}</div>
-        </div>
+        <Pie data={chartData} options={options} />
       </div>
     </div>
   );
