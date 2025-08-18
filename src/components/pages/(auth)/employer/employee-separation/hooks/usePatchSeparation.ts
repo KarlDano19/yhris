@@ -18,28 +18,36 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         context: '',
       };
       if (separationEmail.emailType === 'letters') {
-        data.subject = `Letter of ${separationEmail.separationLetter.type}`;
+        data.subject = separationEmail.separationLetter.subject
+          ? separationEmail.separationLetter.subject
+          : `Letter of ${separationEmail.separationLetter.type}`;
         data.to = separationEmail.separationLetter.to;
         data.cc = separationEmail.separationLetter.cc;
         data.bcc = separationEmail.separationLetter.bcc;
         data.context = separationEmail.separationLetter.message;
       }
       if (separationEmail.emailType === 'sign documents') {
-        data.subject = `Sign Documents | ${separationEmail.signDocuments.template}`;
+        data.subject = separationEmail.signDocuments.subject
+          ? separationEmail.signDocuments.subject
+          : `Sign Documents | ${separationEmail.signDocuments.template}`;
         data.to = separationEmail.signDocuments.to;
         data.cc = separationEmail.signDocuments.cc;
         data.bcc = separationEmail.signDocuments.bcc;
         data.context = separationEmail.signDocuments.message;
       }
       if (separationEmail.emailType === 'last pay') {
-        data.subject = `Last Pay | ${separationEmail.lastPay.template}`;
+        data.subject = separationEmail.lastPay.subject
+          ? separationEmail.lastPay.subject
+          : `Last Pay | ${separationEmail.lastPay.template}`;
         data.to = separationEmail.lastPay.to;
         data.cc = separationEmail.lastPay.cc;
         data.bcc = separationEmail.lastPay.bcc;
         data.context = separationEmail.lastPay.message;
       }
       if (separationEmail.emailType === 'quit claim') {
-        data.subject = `Quit Claim | ${separationEmail.quitClaim.template}`;
+        data.subject = separationEmail.quitClaim.subject
+          ? separationEmail.quitClaim.subject
+          : `Quit Claim | ${separationEmail.quitClaim.template}`;
         data.to = separationEmail.quitClaim.to;
         data.cc = separationEmail.quitClaim.cc;
         data.bcc = separationEmail.quitClaim.bcc;

@@ -13,6 +13,7 @@ import SplitViewBg from '@/assets/split-view-bg.png';
 import CustomToast from '@/components/CustomToast';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
+import { useLoopsSync } from '@/helpers/useLoopsSync';
 
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -45,6 +46,7 @@ const Content = () => {
   const [conformPassword, setConfirmPassword] = useState('');
   const { register, handleSubmit, reset, watch, formState: { errors }, clearErrors } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
+  const { syncToLoops } = useLoopsSync();
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const [backendEmailError, setBackendEmailError] = useState('');
@@ -53,11 +55,25 @@ const Content = () => {
     if (password !== '' || conformPassword !== '') {
       if (password === conformPassword) {
         const callBackReq = {
-          onSuccess: (data: any) => {
+          onSuccess: (responseData: any) => {
             setBackendPasswordError('');
             setBackendEmailError('');
+            
+            // Sync new user to Loops.so (simplified fields only)
+            const fullName = data.accountType === 'Employer' 
+              ? data.name 
+              : `${data.firstname} ${data.middlename ? data.middlename + ' ' : ''}${data.lastname}`.trim();
+            
+            syncToLoops({
+              email: data.email,
+              name: fullName, // Send the complete full name
+              userGroup: 'YAHSHUA HRIS',
+              product: 'YHRIS',
+              source: 'registration',
+            });
+            
             reset();
-            toast.custom(() => <CustomToast message={data.message} type='success' />, {
+            toast.custom(() => <CustomToast message={responseData.message} type='success' />, {
               duration: 7000,
             });
             router.push('/login');
@@ -351,16 +367,12 @@ const Content = () => {
                       <div className='ml-3 text-sm leading-6'>
                         <p id='checkbox-agree'>
                           I have read and agree with{' '}
-                          <Link href='#' className='text-savoy-blue underline'>
+                          <Link href='/terms-of-service' target='_blank' className='text-savoy-blue underline'>
                             Terms of Service
                           </Link>
-                          ,{' '}
-                          <Link href='#' className='text-savoy-blue underline'>
+                          ,and{' '}
+                          <Link href='/privacy-notice' target='_blank' className='text-savoy-blue underline'>
                             Privacy Notice
-                          </Link>
-                          , and{' '}
-                          <Link href='#' className='text-savoy-blue underline'>
-                            Personal Data Collection and Disclosure Policy
                           </Link>
                           .
                         </p>

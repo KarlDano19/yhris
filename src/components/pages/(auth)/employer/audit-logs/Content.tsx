@@ -5,20 +5,18 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
-import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import ViewAuditLogDetails from './modals/ViewAuditLogDetails';
 import useGetAuditLogsItems from './hooks/useGetAuditLogsItems';
-import classNames from '@/helpers/classNames';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from "@/svg/EditIcon";
-import DeleteIcon from "@/svg/DeleteIcon";
-import ViewAuditLogDetails from './modals/ViewAuditLogDetails';
+
+import classNames from '@/helpers/classNames';
 
 type PaginationProps = {
   totalRecords: number;
@@ -125,6 +123,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
+    if (!hasActiveSubscription) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>This feature is not available for your subscription.</h4>
+          </td>
+        </tr>
+      );
+    }
+
     if (isSearching || isAuditLogsLoading) {
       return (
         <tr>
@@ -185,7 +193,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Audit Logs</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-center gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -229,8 +237,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 />
               </div>
             </div>
-            <div className='flex-none lg:w-1/3'>
-              <div className='relative flex items-center'>
+            <div className='flex gap-2 lg:w-1/3'>
+              <div className='flex flex-row w-full items-center gap-2'>
                 <input
                   type='text'
                   name='search'
@@ -240,16 +248,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
             </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={handleSearch}
-            >
-              <MagnifyingGlassIcon className='h-5 w-5' />
-            </button>
             <div className='flex-1 flex justify-end'>
               <button
                 className='border border-blue-600 rounded-l-md py-2 px-5 text-blue-600 text-sm font-semibold hover:shadow-md focus:shadow-none disabled:opacity-50'

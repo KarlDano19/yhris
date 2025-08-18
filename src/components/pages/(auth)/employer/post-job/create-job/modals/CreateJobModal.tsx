@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -6,60 +6,77 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import SalaryRangeModal from '../../../modals/SalaryRangeModal';
-import CreateJobPageOne from '../../../modals/ModalPages/CreateJobPageOne';
-import CreateJobPageTwo from '../../../modals/ModalPages/CreateJobPageTwo';
-import CreateJobPageThree from '../../../modals/ModalPages/CreateJobPageThree';
-import CreateJobPageFour from '../../../modals/ModalPages/CreateJobPageFour';
-import CreateJobPageFive from '../../../modals/ModalPages/CreateJobPageFive';
-import CreateJobPageSix from '../../../modals/ModalPages/CreateJobPageSix';
-import CreateJobPageSeven from '../../../modals/ModalPages/CreateJobPageSeven';
+import CreateJobPageJobTitleInfo from '../../../modals/ModalPages/CreateJobPageJobTitleInfo';
+import CreateJobPageJobType from '../../../modals/ModalPages/CreateJobPageJobType';
+import CreateJobPageSalary from '../../../modals/ModalPages/CreateJobPageSalary';
+import CreateJobPageJobDescription from '../../../modals/ModalPages/CreateJobPageJobDescription';
+import CreateJobPageJobSettings from '../../../modals/ModalPages/CreateJobPageJobSettings';
+import CreateJobPagePostAs from '../../../modals/ModalPages/CreateJobPagePostAs';
+import CreateJobPagePreview from '../../../modals/ModalPages/CreateJobPagePreview';
+import CreateJobPagePlatform from '../../../modals/ModalPages/CreateJobPagePlatform';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-
-import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
 
 export default function CreateJobModal({
   isOpen,
   setIsOpen,
   openConfirmSocialShareModal,
+  pageNumber,
+  setPageNumber,
+  isSalaryRangeModalOpen,
+  setIsSalaryRangeModalOpen,
+  isRangeBenefitsAdded,
+  setIsRangeBenefitsAdded,
+  combinedFormData,
+  setCombinedFormData,
+  fileProps,
+  setFileProps,
+  screeningQuestions,
+  setScreeningQuestions,
+  autoRejectEnabled,
+  setAutoRejectEnabled,
+  firstForm,
+  secondForm,
+  thirdForm,
+  fourthForm,
+  fifthForm,
+  sixthForm,
+  seventhForm,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   openConfirmSocialShareModal: (social: string, og_url: string) => void;
+  pageNumber: number;
+  setPageNumber: Dispatch<number>;
+  isSalaryRangeModalOpen: boolean;
+  setIsSalaryRangeModalOpen: Dispatch<boolean>;
+  isRangeBenefitsAdded: boolean;
+  setIsRangeBenefitsAdded: Dispatch<boolean>;
+  combinedFormData: any;
+  setCombinedFormData: Dispatch<any>;
+  fileProps: { fileName?: string; fileSize?: number; file?: File };
+  setFileProps: Dispatch<{ fileName?: string; fileSize?: number; file?: File }>;
+  screeningQuestions: any[];
+  setScreeningQuestions: Dispatch<any[]>;
+  autoRejectEnabled: boolean;
+  setAutoRejectEnabled: Dispatch<boolean>;
+  firstForm: ReturnType<typeof useForm>;
+  secondForm: ReturnType<typeof useForm>;
+  thirdForm: ReturnType<typeof useForm>;
+  fourthForm: ReturnType<typeof useForm>;
+  fifthForm: ReturnType<typeof useForm>;
+  sixthForm: ReturnType<typeof useForm>;
+  seventhForm: ReturnType<typeof useForm>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
-  const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
-  const [combinedFormData, setCombinedFormData] = useState<any>({});
-  const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
-  const firstForm = useForm<any>({
-    defaultValues: {
-      country: 'Philippines',
-      language: 'English',
-    },
-  });
-  const secondForm = useForm();
-  const thirdForm = useForm<any>({
-    defaultValues: {
-      salary: {
-        salaryType: 'Range',
-      },
-    },
-  });
-  const fourthForm = useForm<any>({
-    defaultValues: {
-      jobDescription: CREATEJOB_TEMPLATE[0],
-      qualifications: QUALIFICATION_TEMPLATE[0],
-    },
-  });
-  const fifthForm = useForm();
-  const sixthForm = useForm();
-  const seventhForm = useForm();
   const { mutate, isLoading } = useAddJobPostItems();
 
   const customCloseModal = () => {
+    setIsOpen(false);
+  };
+
+  const resetForm = () => {
     firstForm.reset();
     secondForm.reset();
     thirdForm.reset();
@@ -67,6 +84,7 @@ export default function CreateJobModal({
     fifthForm.reset();
     sixthForm.reset();
     seventhForm.reset();
+    setPageNumber(1);
     setIsOpen(false);
   };
 
@@ -94,7 +112,14 @@ export default function CreateJobModal({
 
   const fifthFormSubmit = () => {
     const data = fifthForm.getValues();
-    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    // Include screening questions, auto-reject settings, and rejection feedback
+    const jobSettings = {
+      ...data,
+      screeningQuestions: window.screeningQuestions || [],
+      autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true,
+      rejectionFeedback: window.rejectionFeedback || ''
+    };
+    setCombinedFormData((prev: any) => ({ ...prev, ...jobSettings }));
     setPageNumber(6);
   };
 
@@ -103,6 +128,11 @@ export default function CreateJobModal({
     setCombinedFormData((prev: any) => ({ ...prev, ...data }));
     setPageNumber(7);
   };
+  const seventhFormSubmit = () => {
+    const data = seventhForm.getValues();
+    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    setPageNumber(8);
+  };
 
   const onSubmit = () => {
     const data = seventhForm.getValues();
@@ -110,7 +140,7 @@ export default function CreateJobModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-        customCloseModal();
+        resetForm();
         setIsSalaryRangeModalOpen(false);
         openConfirmSocialShareModal(data.job_post.shared_to, data.job_post.og_url);
       },
@@ -156,17 +186,18 @@ export default function CreateJobModal({
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   <div style={{ display: pageNumber == 1 ? 'block' : 'none' }}>
-                    <CreateJobPageOne
+                    <CreateJobPageJobTitleInfo
                       control={firstForm.control}
                       Controller={Controller}
                       register={firstForm.register}
                       handleSubmit={firstForm.handleSubmit}
                       setPageNumber={setPageNumber}
                       onSubmit={firstFormSubmit}
+                      errors={firstForm.formState.errors}
                     />
                   </div>
                   <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
-                    <CreateJobPageTwo
+                    <CreateJobPageJobType
                       control={secondForm.control}
                       setIsSalaryRangeModalOpen={setIsSalaryRangeModalOpen}
                       register={secondForm.register}
@@ -177,7 +208,7 @@ export default function CreateJobModal({
                     />
                   </div>
                   <div style={{ display: pageNumber == 3 ? 'block' : 'none' }}>
-                    <CreateJobPageThree
+                    <CreateJobPageSalary
                       watch={thirdForm.watch}
                       setValue={thirdForm.setValue}
                       register={thirdForm.register}
@@ -189,7 +220,7 @@ export default function CreateJobModal({
                     />
                   </div>
                   <div style={{ display: pageNumber == 4 ? 'block' : 'none' }}>
-                    <CreateJobPageFour
+                    <CreateJobPageJobDescription
                       setValue={fourthForm.setValue}
                       getValues={fourthForm.getValues}
                       register={fourthForm.register}
@@ -199,31 +230,44 @@ export default function CreateJobModal({
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
-                    <CreateJobPageFive
-                      setValue={fifthForm.setValue}
-                      register={fifthForm.register}
+                    <CreateJobPageJobSettings
                       setPageNumber={setPageNumber}
-                      getValues={fifthForm.getValues}
-                      isRangeBenefitsAdded={isRangeBenefitsAdded}
                       onSubmit={fifthFormSubmit}
+                      screeningQuestions={screeningQuestions}
+                      setScreeningQuestions={setScreeningQuestions}
+                      autoRejectEnabled={autoRejectEnabled}
+                      setAutoRejectEnabled={setAutoRejectEnabled}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
-                    <CreateJobPageSix
-                      firstFormGetValues={firstForm.getValues}
-                      fourthFormGetValues={fourthForm.getValues}
+                    <CreateJobPagePostAs
+                      setValue={sixthForm.setValue}
+                      register={sixthForm.register}
                       setPageNumber={setPageNumber}
+                      getValues={sixthForm.getValues}
+                      isRangeBenefitsAdded={isRangeBenefitsAdded}
                       onSubmit={sixthFormSubmit}
-                      fileProps={fileProps}
+                      pageNumber={pageNumber}
                     />
                   </div>
                   <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
-                    <CreateJobPageSeven
+                    <CreateJobPagePreview
+                      firstFormGetValues={firstForm.getValues}
+                      fourthFormGetValues={fourthForm.getValues}
+                      setPageNumber={setPageNumber}
+                      onSubmit={seventhFormSubmit}
+                      fileProps={fileProps}
+                    />
+                  </div>
+                  <div style={{ display: pageNumber == 8 ? 'block' : 'none' }}>
+                    <CreateJobPagePlatform
                       isLoading={isLoading}
                       setValue={seventhForm.setValue}
+                      getValues={seventhForm.getValues}
                       setPageNumber={setPageNumber}
                       register={seventhForm.register}
                       onSubmit={onSubmit}
+                      pageNumber={pageNumber}
                     />
                   </div>
                   <SalaryRangeModal

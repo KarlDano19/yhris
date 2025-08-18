@@ -17,6 +17,7 @@ function PolicyAndComittee({
   setSelectedTab,
   setValue,
   watch,
+  isCreateModal,
 }: {
   control: any;
   register: any;
@@ -24,19 +25,51 @@ function PolicyAndComittee({
   setSelectedTab: any;
   setValue: any;
   watch: any;
+  isCreateModal: boolean;
 }) {
   const [fileUrl, setFileUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [committeeType, setCommitteeType] = useState<string>("a");
+  const [fileSource, setFileSource] = useState<string>("");
+  const [showTooltip, setShowTooltip] = useState(false);
   
   // Watch for existing file URL from form
   const existingFileUrl = watch("policy_and_program_file");
 
+  // Track current file source and file
+  useEffect(() => {
+    const currentFile = watch("policy_and_program_file");
+    const currentSource = watch("file_source");
+    
+    if (currentFile && typeof currentFile === "string") {
+      return;
+    }
+
+    // Only show previews for unsaved files
+    if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("policy_and_program_file", file);
+      setValue("file_source", "upload");
+      setFileSource("upload");
+      setFileUrl(URL.createObjectURL(file));
+      setAttachmentExist(true);
+    }
+  };
+
   useEffect(() => {
     if (fileUrl) {
-      setValue("policy_and_program_file", fileUrl);
-    } else {
-      setFileUrl("");
+      // If fileUrl is a blob URL from upload
+      if (fileUrl.startsWith('blob:')) {
+        setFileSource("upload");
+      } else {
+        setValue("policy_and_program_file", fileUrl);
+        setFileSource("");
+      }
     }
   }, [fileUrl, setValue]);
 
@@ -44,8 +77,20 @@ function PolicyAndComittee({
   useEffect(() => {
     if (existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http')) {
       setAttachmentExist(true);
+      setFileSource("");
     }
   }, [existingFileUrl]);
+
+  // Show tooltip for 2 seconds when component mounts (only in create modal)
+  useEffect(() => {
+    if (isCreateModal) {
+      setShowTooltip(true);
+      const timer = setTimeout(() => {
+        setShowTooltip(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreateModal]);
 
   const handleCommitteeTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCommitteeType(e.target.value);
@@ -82,13 +127,16 @@ function PolicyAndComittee({
           (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof File && !data.policy_and_program_file.name) ||
           (typeof data.policy_and_program_file === 'string' && data.policy_and_program_file.trim() === ''));
       if (isFileMissing) {
-        toast.custom(() => <CustomToast message="Policy and Program file is required." type="error" />, { duration: 5000 });
+        toast.dismiss();
+        toast.custom(() => <CustomToast message="Policy and Program file is required." type="error" />);
         return;
       } else if (!data.chairman_name || data.chairman_name.trim() === "") {
-        toast.custom(() => <CustomToast message="Chairman name is required." type="error" />, { duration: 5000 });
+        const el = document.getElementById("chairman_name");
+        if (el) el.focus();
         return;
       } else if (!data.chairman_position || data.chairman_position.trim() === "") {
-        toast.custom(() => <CustomToast message="Chairman position is required." type="error" />, { duration: 5000 });
+        const el = document.getElementById("chairman_position");
+        if (el) el.focus();
         return;
       }
       setSelectedTab(3);
@@ -109,7 +157,7 @@ function PolicyAndComittee({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div className="flex-1">
             <label
               htmlFor="policy_and_program_file"
@@ -121,10 +169,17 @@ function PolicyAndComittee({
                 className='inline-block ml-1 cursor-pointer'
                 data-tooltip-id='file-upload-tooltip'
                 data-tooltip-place='right'
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
               >
                 <InfoIcon />
               </div>
-              <Tooltip id='file-upload-tooltip' opacity={1} style={{ fontSize: '10px' }}>
+              <Tooltip 
+                id='file-upload-tooltip' 
+                opacity={1} 
+                style={{ fontSize: '10px' }}
+                isOpen={showTooltip}
+              >
                 <div>
                   <h2 className='text-[12px] font-medium'>Note: File uploads may disappear if the screen loses focus. Please re-upload if needed.</h2>
                 </div>
@@ -133,13 +188,9 @@ function PolicyAndComittee({
             <div className="relative mt-2">
               <input
                 id="policy_and_program_file"
-                {...register("policy_and_program_file")}
-                onChange={(e) => {
-                  e.target.value ? setFileUrl("") : null;
-                  e.target.value ? setAttachmentExist(true) : null;
-                }}
                 type="file"
-                disabled={!!(existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http'))}
+                accept="*/*"
+                onChange={handleFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
               {attachmentExist ? (
@@ -154,29 +205,8 @@ function PolicyAndComittee({
                       >
                         View Existing File
                       </a>
-                      <button
-                        type="button"
-                        className="underline text-red-600 text-sm"
-                        onClick={() => {
-                          setValue("policy_and_program_file", "");
-                          setAttachmentExist(false);
-                        }}
-                      >
-                        Remove
-                      </button>
                     </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="underline text-savoy-blue text-sm"
-                      onClick={() => {
-                        setValue("policy_and_program_file", "");
-                        setAttachmentExist(false);
-                      }}
-                    >
-                      Remove Attachment
-                    </button>
-                  )}
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -209,10 +239,10 @@ function PolicyAndComittee({
           </div>
         </div>
         <hr className="my-4" />
-        <div className="mt-4 pl-6 pr-6">
+        <div className="mt-4 px-2 md:px-6">
           <h1 className="text-sm font-medium">Central Safety Committee</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4 pb-6">
           <div className="flex justify-center items-center">
             <div className="grid-item">
               <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
@@ -243,10 +273,10 @@ function PolicyAndComittee({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4 pb-6">
           {/* Render member inputs based on committee type */}
           {Array.from({ length: committeeMembersCount[committeeType as keyof typeof committeeMembersCount] }).map((_, index) => (
-            <div key={index} className="grid-item grid grid-cols-3 gap-4 col-span-4"> {/* Ensure it spans the full width */}
+            <div key={index} className="grid-item grid grid-cols-1 md:grid-cols-3 gap-4 col-span-4"> {/* Ensure it spans the full width */}
               <div className="mt-2">
               <div className="grid-item">
               <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">
@@ -275,7 +305,7 @@ function PolicyAndComittee({
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4 pb-6">
           <div className="flex justify-center items-center">
             <div className="grid-item">
               <h1 className="block text-sm font-medium text-center items-center leading-6 text-gray-900">

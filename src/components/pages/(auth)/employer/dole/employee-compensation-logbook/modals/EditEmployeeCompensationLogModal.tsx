@@ -1,12 +1,11 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetEmployeeCompensationLogbookDetails from '../hooks/useGetEmployeeCompensationLogbookDetails';
 import useUpdateEmployeeCompensationLogbook from '../hooks/useUpdateEmployeeCompensationLogbook';
 
@@ -22,27 +21,31 @@ export default function EditEmployeeCompensationLogModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
+  employeeItems,
+  employeeSearch,
+  setEmployeeSearch,
+  employeeSelected,
+  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
+  employeeItems: any[];
+  employeeSearch: string;
+  setEmployeeSearch: (value: string) => void;
+  employeeSelected: boolean;
+  setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
   const {
     data: employeeCompensationLogbookData,
     refetch: refetchEmployeeCompensationLogbook,
     remove: removeEmployeeCompensationLogbook,
   } = useGetEmployeeCompensationLogbookDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate, isLoading: isLoadingEditEmployeeCompensationLogbook } = useUpdateEmployeeCompensationLogbook();
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   useEffect(() => {
     if (isOpen) {
@@ -60,10 +63,17 @@ export default function EditEmployeeCompensationLogModal({
       setValue('nature_of_contingency', employeeCompensationLogbookData.nature_of_contingency);
       setValue('days_of_employee_absence', employeeCompensationLogbookData.days_of_employee_absence);
       setValue('remarks', employeeCompensationLogbookData.remarks);
+      
+      // Set employee search to show selected employee name
+      const selectedEmployee = employeeItems.find((emp: any) => emp.id === employeeCompensationLogbookData.employee);
+      if (selectedEmployee) {
+        setEmployeeSearch(`${selectedEmployee.firstname} ${selectedEmployee.lastname}`);
+        setEmployeeSelected(true);
+      }
     }
-  }, [employeeCompensationLogbookData]);
+  }, [employeeCompensationLogbookData, employeeItems]);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -83,13 +93,15 @@ export default function EditEmployeeCompensationLogModal({
 
   const customCloseModal = () => {
     reset();
+    setEmployeeSearch('');
+    setEmployeeSelected(false);
     removeEmployeeCompensationLogbook();
     setIsOpen(null);
   };
 
   return (
     <Transition.Root show={isOpen.open} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {customCloseModal()}}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -102,24 +114,24 @@ export default function EditEmployeeCompensationLogModal({
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
         </Transition.Child>
 
-        <div className='fixed inset-0 z-10 overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-2 text-center md:p-0">
             <Transition.Child
               as={Fragment}
               enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
+              enterFrom='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
+              enterTo='opacity-100 translate-y-0 md:scale-100'
               leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              leaveFrom='opacity-100 translate-y-0 md:scale-100'
+              leaveTo='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Employee Compensation Log</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 <form onSubmit={onSubmit}>
-                  <div className='px-4 pt-4 pb-6'>
+                  <div className='px-2 pt-4 pb-6 md:px-8'>
                     <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
                       <div className='flex'>
                         <div className='flex-shrink-0'>
@@ -132,7 +144,7 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           Date of Entry
@@ -184,26 +196,76 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
                           Employee Name<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                          <select
-                            id='position'
-                            {...register('employee', { required: true })}
-                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          <input
+                            id='name'
+                            type='text'
+                            placeholder='Select...'
+                            value={employeeSearch}
+                            onChange={e => setEmployeeSearch(e.target.value)}
+                            className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                            onClick={() => {
+                              if (!employeeSelected) {
+                                const dropdown = document.getElementById('employee-dropdown');
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden');
+                                }
+                              }
+                            }}
+                            readOnly={employeeSelected}
+                          />
+                          <div
+                            className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
+                            onClick={() => {
+                              if (!employeeSelected) {
+                                const dropdown = document.getElementById('employee-dropdown');
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden');
+                                }
+                              }
+                            }}
                           >
-                            <option value=''>Select...</option>
-                            {employeeItems.map((item: any) => {
-                              return (
-                                <option key={item.id} value={item.id}>{`${item.firstname} ${item.lastname}`}</option>
-                              );
-                            })}
-                          </select>
-                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                            <SelectChevronDown />
+                            {!employeeSelected ? (
+                              <span>
+                                <SelectChevronDown />
+                              </span>
+                            ) : (
+                              <button
+                                type='button'
+                                className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
+                                onClick={() => {
+                                  setValue('employee', '');
+                                  setEmployeeSearch('');
+                                  setEmployeeSelected(false);
+                                }}
+                                tabIndex={-1}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                          <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+                            {(employeeItems || [])
+                              .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
+                              .map((item: any) => (
+                                <div
+                                  key={item.id}
+                                  className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
+                                  onClick={() => {
+                                    setValue('employee', item.id);
+                                    setEmployeeSearch(`${item.firstname} ${item.lastname}`);
+                                    setEmployeeSelected(true);
+                                    document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                  }}
+                                >
+                                  {`${item.firstname} ${item.lastname}`}
+                                </div>
+                              ))}
                           </div>
                         </div>
                       </div>
@@ -233,7 +295,7 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           Place of Contingency
@@ -263,10 +325,10 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          No. of Days of Employee’s Absence
+                          No. of Days of Employee&apos;s Absence
                           <span className='text-red-600'>*</span>
                         </label>
                         <div className='mt-2'>
@@ -279,7 +341,7 @@ export default function EditEmployeeCompensationLogModal({
                         </div>
                       </div>
                     </div>
-                    <div className='sm:col-span-4 mt-4'>
+                    <div className='mt-4'>
                       <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                         Remarks<span className='text-red-600'>*</span>
                       </label>

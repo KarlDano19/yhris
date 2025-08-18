@@ -1,17 +1,10 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
-
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function IllnessDetails({
   control,
@@ -49,7 +42,7 @@ function IllnessDetails({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Illness</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="reportable_illness"
@@ -114,13 +107,14 @@ function IllnessDetails({
                     selected={field.value ? new Date(field.value) : null}
                     pickerOnChange={(date: any) => field.onChange(date)}
                     inputOnChange={(value: any) => field.onChange(value)}
+                    required={true}
                   />
                 )}
               />
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="days_of_absence_illness"

@@ -4,9 +4,13 @@ import { getCookie } from 'cookies-next';
 async function updateJobPostStatus(data: any) {
   try {
     const jobId = data['jobId'];
+    // Ensure the boolean value is correctly converted to string
+    const boolValue = data['is_active'] === true || data['is_active'] === 'true';
+    
     const payload = {
-      is_active: data['is_active'],
+      is_active: boolValue ? 'true' : 'false',
     };
+    
     const token = getCookie('token');
     const config = {
       method: 'PATCH',

@@ -1,16 +1,10 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
-
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { ChevronDownIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function InjuryDetails({
@@ -47,7 +41,7 @@ function InjuryDetails({
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Nature/Extent of Injury</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="extent_of_injury"
@@ -97,7 +91,7 @@ function InjuryDetails({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="date_of_disability"
@@ -169,7 +163,7 @@ function InjuryDetails({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="days_chargeable"
@@ -200,8 +194,8 @@ function InjuryDetails({
               {...register("disabling_injury", { required: true })}
               className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
             >
-              <option value="yes">Yes</option>
               <option value="no">No</option>
+              <option value="yes">Yes</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
               <SelectChevronDown />

@@ -275,7 +275,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Create Memo/Policy</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -320,9 +320,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   name='search'
                   id='search'
@@ -331,16 +330,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
-                </div>
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={handleSearch}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <Menu as='div' className='relative inline-block'>
@@ -402,7 +405,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </Menu>
             </div>
           </div>
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -437,8 +440,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <CreateMemoModal isOpen={isCreateMemoModalOpen} setIsOpen={setIsCreateMemoModalOpen} refetch={refetch} />
-      <CreatePolicyModal isOpen={isCreatePolicyModalOpen} setIsOpen={setIsCreatePolicyModalOpen} refetch={refetch} />
+      <CreateMemoModal 
+        isOpen={isCreateMemoModalOpen} 
+        setIsOpen={setIsCreateMemoModalOpen} 
+        refetch={refetch} 
+      />
+      <CreatePolicyModal 
+        isOpen={isCreatePolicyModalOpen} 
+        setIsOpen={setIsCreatePolicyModalOpen} 
+        refetch={refetch}
+      />
       <EmployeeResponsesModal 
         isOpen={isEmployeeResponsesModalOpen} 
         setIsOpen={setIsEmployeeResponsesModalOpen}

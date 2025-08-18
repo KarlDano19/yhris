@@ -1,6 +1,9 @@
 import { Dispatch, Fragment, useRef } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
+
 import Warning from '@/svg/Warning';
+
 export default function SalaryRangeModal({
   setPageNumber,
   isOpen,

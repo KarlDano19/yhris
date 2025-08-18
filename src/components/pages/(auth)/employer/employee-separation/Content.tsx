@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import LetterModal from './modals/LetterModal';
 import SignDocumentsModal from './modals/SignDocumentsModal';
@@ -34,12 +35,29 @@ import {
 } from '@/types/globals';
 import { useQueryClient } from '@tanstack/react-query';
 
+import classNames from '@/helpers/classNames';
+
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
   });
   const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
   const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
@@ -48,7 +66,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
   const [isDeleteSepartionModalOpen, setIsDeleteSepartionModalOpen] = useState<T_DeleteSepartionModal | null>(null);
   const { mutate, isLoading } = usePatchSeparation();
-  const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems(itemsFilter);
+  const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
@@ -87,6 +109,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     mutate(separationItemsCopy[itemIndex], callbackReq);
   };
 
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
@@ -103,7 +135,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    refetch();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
   };
 
   useEffect(() => {
@@ -118,56 +153,124 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataSeparation) {
-      dataSeparation.map((separation: any) => {
-        separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
-        separation['name'] = separation.name;
-        separation['reasonForLeaving'] = separation.reason_of_leaving;
-        separation['isLetterSent'] = separation.is_letter_sent;
-        separation['isLetterReceived'] = separation.is_letter_received;
-        separation['letterReceivedDate'] =
-          separation.letter_received_date &&
-          new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
-        separation['isDocumentsSent'] = separation.is_documents_sent;
-        separation['isDocumentsReceived'] = separation.is_documents_received;
-        separation['documentReceivedDate'] =
-          separation.documents_received_date &&
-          new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
-        separation['isLastPayReleased'] = separation.is_last_pay_released;
-        separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
-        separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
-        separation['quitclaimReceivedDate'] =
-          separation.quit_claim_received_date &&
-          new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
-        separation['separationLetter'] = {
-          date: '',
-          to: '',
-          message: '',
-        };
-        separation['acceptanceLetter'] = {
-          date: '',
-          to: '',
-          message: '',
-        };
-        separation['signDocuments'] = {
-          template: '',
-          to: '',
-          message: '',
-        };
-        separation['lastPay'] = {
-          template: '',
-          to: '',
-          message: '',
-        };
-        separation['quitClaim'] = {
-          template: '',
-          to: '',
-          message: '',
-        };
-        return separation;
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataSeparation.records) {
+        items = dataSeparation.records.map((separation: any) => {
+          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['name'] = separation.name;
+          separation['reasonForLeaving'] = separation.reason_of_leaving;
+          separation['isLetterSent'] = separation.is_letter_sent;
+          separation['isLetterReceived'] = separation.is_letter_received;
+          separation['letterReceivedDate'] =
+            separation.letter_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['isDocumentsSent'] = separation.is_documents_sent;
+          separation['isDocumentsReceived'] = separation.is_documents_received;
+          separation['documentReceivedDate'] =
+            separation.documents_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
+          separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
+          separation['quitclaimReceivedDate'] =
+            separation.quit_claim_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['separationLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['acceptanceLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['signDocuments'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['lastPay'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['quitClaim'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          return separation;
+        });
+        totalPages = dataSeparation.total_pages || 1;
+        totalRecords = dataSeparation.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataSeparation)) {
+        items = dataSeparation.map((separation: any) => {
+          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['name'] = separation.name;
+          separation['reasonForLeaving'] = separation.reason_of_leaving;
+          separation['isLetterSent'] = separation.is_letter_sent;
+          separation['isLetterReceived'] = separation.is_letter_received;
+          separation['letterReceivedDate'] =
+            separation.letter_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['isDocumentsSent'] = separation.is_documents_sent;
+          separation['isDocumentsReceived'] = separation.is_documents_received;
+          separation['documentReceivedDate'] =
+            separation.documents_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
+          separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
+          separation['quitclaimReceivedDate'] =
+            separation.quit_claim_received_date &&
+            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['separationLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['acceptanceLetter'] = {
+            date: '',
+            to: '',
+            message: '',
+          };
+          separation['signDocuments'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['lastPay'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          separation['quitClaim'] = {
+            template: '',
+            to: '',
+            message: '',
+          };
+          return separation;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setSeparationItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
       });
-      setSeparationItems(dataSeparation);
     }
-  }, [dataSeparation]);
+  }, [dataSeparation, pageSize]);
 
   const renderRows = () => {
     if (isSearching || isGetSeparationLoading) {
@@ -285,7 +388,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee Resignation/Separation</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -330,9 +433,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   data-tooltip-id='search-tooltip'
                   data-tooltip-content='Search for: Employee Name / Reason of Leaving'
@@ -340,29 +442,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
-                </div>
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={handleSearch}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsAddSeparationModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_separation}
+                disabled={!cachedProfile?.state?.data?.create_separation}
               >
                 CREATE
               </button>
             </div>
           </div>
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -397,13 +503,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {separationItems?.length}</p>
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
-      <AddSeparationModal isOpen={isAddSeparationModalOpen} setIsOpen={setIsAddSeparationModalOpen} refetch={refetch} />
+      <AddSeparationModal 
+        isOpen={isAddSeparationModalOpen} 
+        setIsOpen={setIsAddSeparationModalOpen} 
+        refetch={refetch} 
+      />
       <LetterModal
         separationItems={separationItems}
         refetch={refetch}

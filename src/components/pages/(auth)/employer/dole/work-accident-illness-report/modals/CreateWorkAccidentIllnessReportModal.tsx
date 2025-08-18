@@ -1,18 +1,15 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import useAddWorkAccidentIllnessReport from "../hooks/useAddWorkAccidentIllnessReports";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 import PersonalInformation from "./tabs/PersonalInformation";
-import EmployementDetails from "./tabs/EmployementDetails";
+import EmploymentDetails from "./tabs/EmploymentDetails";
 import IllnessDetails from "./tabs/IllnessDetails";
 import InjuryDetails from "./tabs/InjuryDetails";
 
@@ -20,24 +17,34 @@ function CreateWorkAccidentIllnessReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
+  employeeSearch,
+  setEmployeeSearch,
+  employeeSelected,
+  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
+  employeeSearch: string;
+  setEmployeeSearch: (value: string) => void;
+  employeeSelected: boolean;
+  setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = formMethods;
   const {
     mutate: addWorkAccidentIllnessReport,
     isLoading: isLoadingAddWorkAccidentIllnessReport,
   } = useAddWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
+      onSuccess: (data: any) => { 
         toast.custom(
           () => <CustomToast message={data.message} type="success" />,
           {
@@ -46,6 +53,8 @@ function CreateWorkAccidentIllnessReportModal({
         );
         setIsOpen(false);
         reset();
+        setEmployeeSearch('');
+        setEmployeeSelected(false);
         refetch();
       },
       onError: (err: any) => {
@@ -70,7 +79,7 @@ function CreateWorkAccidentIllnessReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
+        onClose={() => {setIsOpen(false)}}
       >
         <Transition.Child
           as={Fragment}
@@ -95,13 +104,13 @@ function CreateWorkAccidentIllnessReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center">
-                  <h3 className="flex-1 text-white ml-2 font-semibold">
+                  <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
                     Create Work Accident/Illness Report
                   </h3>
                   <XCircleIcon
-                    className="w-8 h-8 text-white cursor-pointer"
+                    className="w-6 h-6 sm:w-8 sm:h-8 text-white cursor-pointer"
                     onClick={() => setIsOpen(false)}
                   />
                 </div>
@@ -111,10 +120,16 @@ function CreateWorkAccidentIllnessReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    setValue={setValue}
+                    employeeItems={employeeItems || []}
+                    employeeSearch={employeeSearch}
+                    setEmployeeSearch={setEmployeeSearch}
+                    employeeSelected={employeeSelected}
+                    setEmployeeSelected={setEmployeeSelected}
                   />
                 )}
                 {selectedTab === 2 && (
-                  <EmployementDetails
+                  <EmploymentDetails
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}

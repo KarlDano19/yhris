@@ -57,8 +57,8 @@ const Content = () => {
 
   return (
     <>
-      <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
-        <div className='px-4 pt-8'>
+      <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8`}>
+        <div className='px-4 pt-24'>
           <h4 className='text-lg md:text-2xl text-indigo-dye font-bold md:font-semibold'>
             Find a job that&#39;s right for you!
           </h4>
@@ -123,7 +123,7 @@ const Content = () => {
           <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
             <div className='px-4 lg:px-5'>
               <div className='lg:flex'>
-                <div className='lg:w-[36%]'>
+                <div className='lg:w-[36%] overflow-y-auto max-h-screen'>
                   <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                     <>
                       {!isGetJobsLoading

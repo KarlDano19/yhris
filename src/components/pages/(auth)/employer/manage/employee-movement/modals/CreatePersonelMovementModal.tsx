@@ -20,9 +20,26 @@ function CreatePersonelMovementModal({
   setIsOpen: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm();
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addPersonnelMovement, isLoading: isLoadingAddPersonnelMovement } = useAddPersonnelMovement();
+
+  // Local state for employee search and selection, lifted up from EmployeeProfile
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
+  // Local state for current and new position
+  const [currentPosition, setCurrentPosition] = useState('');
+  const [newPosition, setNewPosition] = useState('');
+
+  // Reset form and local state only after successful submit
+  const resetForm = () => {
+    reset();
+    setEmployeeSearch('');
+    setEmployeeSelected(false);
+    setCurrentPosition('');
+    setNewPosition('');
+    setSelectedTab(1);
+  };
 
   const onSubmit = (data: any) => {
     const callbackReq = {
@@ -31,7 +48,7 @@ function CreatePersonelMovementModal({
           duration: 5000,
         });
         setIsOpen(false);
-        reset();
+        resetForm();
         refetch();
       },
       onError: (err: any) => {
@@ -41,9 +58,14 @@ function CreatePersonelMovementModal({
     addPersonnelMovement(data, callbackReq);
   };
 
+  // When closing the modal, do NOT reset the form or local state
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={handleClose}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -69,8 +91,8 @@ function CreatePersonelMovementModal({
             >
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Personal Movement Form (PMF)</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Create Personal Movement Form (PMF)</h3>
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={handleClose} />
                 </div>
                 {selectedTab === 1 && (
                   <EmployeeProfile
@@ -78,10 +100,20 @@ function CreatePersonelMovementModal({
                     watch={watch}
                     setValue={setValue}
                     register={register}
-                    handleSubmit={onSubmit}
+                    handleSubmit={handleSubmit}
+                    onValidSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingAddPersonnelMovement}
                     isEdit={false}
+                    employeeSearch={employeeSearch}
+                    setEmployeeSearch={setEmployeeSearch}
+                    employeeSelected={employeeSelected}
+                    setEmployeeSelected={setEmployeeSelected}
+                    currentPosition={currentPosition}
+                    setCurrentPosition={setCurrentPosition}
+                    newPosition={newPosition}
+                    setNewPosition={setNewPosition}
+                    errors={errors}
                   />
                 )}
               </Dialog.Panel>

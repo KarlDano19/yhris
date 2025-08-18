@@ -6,6 +6,10 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import { useLoopsSync } from '@/helpers/useLoopsSync';
+import { syncContactSimple, syncCompanyViaEvent } from '@/helpers/loopsSimple';
+import { getUserEmail } from '@/helpers/sessionUtils';
+import { LOOPS_CONFIG } from '@/lib/loopsConfig';
 import Details from './Details';
 import Settings from './Settings';
 import useSavedProfile from './hooks/useSavedProfile';
@@ -18,12 +22,49 @@ const Content = () => {
   const [progressBar, setProgressBar] = useState(0);
   const { register, setValue, watch, handleSubmit } = useForm<T_EmployerProfile>();
   const { mutate, isLoading } = useSavedProfile();
+  const { updateContact } = useLoopsSync(); // Removed sendEvent
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
-      onSuccess: async (data: any) => {
-        await updateSession({ hasProfile: true, hasActiveSubscription: true });
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+      onSuccess: async (responseData: any) => {
+        await updateSession({ hasProfile: true });
+        
+        // Update Loops with company profile
+        const userEmail = await getUserEmail(responseData, data);
+        
+        if (userEmail) {
+          try {
+            // Simple contact sync
+            await syncContactSimple({
+              email: userEmail,
+              name: responseData.first_name ? `${responseData.first_name} ${responseData.last_name || ''}`.trim() : 'User',
+              company: data.companyName,
+              source: 'employer-profile-setup',
+            });
+            
+            // Company data update
+            await syncCompanyViaEvent(userEmail, data);
+            
+            // Comprehensive contact update
+            updateContact({
+              email: userEmail,
+              properties: {
+                company: data.companyName,
+                name: responseData.first_name ? `${responseData.first_name} ${responseData.last_name || ''}`.trim() : 'User',
+                source: 'setup-employer-profile',
+                userGroup: 'YAHSHUA HRIS',
+                product: 'YHRIS',
+              }
+            });
+            
+          } catch (error) {
+            if (LOOPS_CONFIG.FEATURES.LOG_ERRORS) {
+              console.error('Error updating Loops:', error);
+            }
+          }
+        }
+        
+        toast.custom(() => <CustomToast message={responseData.message} type='success' />, { duration: 4000 });
         location.href = '/dashboard';
       },
       onError: (err: any) => {

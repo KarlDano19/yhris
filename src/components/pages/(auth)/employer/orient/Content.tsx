@@ -7,9 +7,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import Pagination from '@/components/Pagination';
 import classNames from '@/helpers/classNames';
 import SendContract from './SendContract';
 import Orient from './Orient';
@@ -27,7 +29,7 @@ import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
   const [orientItems, setOrientItems] = useState<any>([]);
   const [selectedOrientId, setSelectedOrientId] = useState('');
@@ -36,10 +38,24 @@ const Content = () => {
     to: '',
     search: '',
   });
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalPages: number;
+    totalRecords: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
   const {
     data: applicationOrient,
     refetch,
-  } = useGetApplicantOrient(Number(params.position), itemsFilter);
+    isLoading: isGetOrientLoading,
+  } = useGetApplicantOrient(Number(params.position), {
+    ...itemsFilter,
+    pageSize,
+    currentPage,
+  });
   const { mutate, isLoading } = useUpdateApplicantOrient();
   const { mutate: enrollToYP } = useEnrollEmployeeToYP();
   const { mutate: syncEmployees } = useSyncEmployees();
@@ -72,35 +88,86 @@ const Content = () => {
 
   useEffect(() => {
     if (applicationOrient) {
-      applicationOrient.map((item: any) => {
-        item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
-        item['isContractSent'] = item.is_contract_sent;
-        item['isContractReceived'] = item.is_contract_received;
-        item['contractReceivedDate'] = new Intl.DateTimeFormat('en-US').format(
-          new Date(item.contract_received_date && item.contract_received_date)
-        );
-        item['isIntroduced'] = item.is_introduction_sent;
-        item['isOriented'] = item.is_orientation_completed;
-        item['introduceTeam'] = {
-          to: '',
-          template: 'Test',
-          email: '',
-          cc: '',
-          bcc: '',
-        };
-        item['sendContract'] = {
-          to: '',
-          template: 'Test',
-          email: '',
-          cc: '',
-          bcc: '',
-        };
-        item['isEnrolled'] = item.is_enrolled;
-        return item;
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+      // Handle paginated response structure
+      if (applicationOrient.records) {
+        items = applicationOrient.records.map((item: any) => {
+          item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['isContractSent'] = item.is_contract_sent;
+          item['isContractReceived'] = item.is_contract_received;
+          item['contractReceivedDate'] = new Intl.DateTimeFormat('en-US').format(
+            new Date(item.contract_received_date && item.contract_received_date)
+          );
+          item['isIntroduced'] = item.is_introduction_sent;
+          item['isOriented'] = item.is_orientation_completed;
+          item['introduceTeam'] = {
+            to: '',
+            template: 'Test',
+            email: '',
+            cc: '',
+            bcc: '',
+          };
+          item['sendContract'] = {
+            to: '',
+            template: 'Test',
+            email: '',
+            cc: '',
+            bcc: '',
+          };
+          item['isEnrolled'] = item.is_enrolled;
+          return item;
+        });
+        totalPages = applicationOrient.total_pages || 1;
+        totalRecords = applicationOrient.total_records || items.length;
+      } else if (Array.isArray(applicationOrient)) {
+        items = applicationOrient.map((item: any) => {
+          item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['isContractSent'] = item.is_contract_sent;
+          item['isContractReceived'] = item.is_contract_received;
+          item['contractReceivedDate'] = new Intl.DateTimeFormat('en-US').format(
+            new Date(item.contract_received_date && item.contract_received_date)
+          );
+          item['isIntroduced'] = item.is_introduction_sent;
+          item['isOriented'] = item.is_orientation_completed;
+          item['introduceTeam'] = {
+            to: '',
+            template: 'Test',
+            email: '',
+            cc: '',
+            bcc: '',
+          };
+          item['sendContract'] = {
+            to: '',
+            template: 'Test',
+            email: '',
+            cc: '',
+            bcc: '',
+          };
+          item['isEnrolled'] = item.is_enrolled;
+          return item;
+        });
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+      setOrientItems(items);
+      setPagination({
+        totalPages,
+        totalRecords,
       });
-      setOrientItems(applicationOrient);
     }
-  }, [applicationOrient]);
+  }, [applicationOrient, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
 
   const setReceived = (id: string, emailType: string) => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
@@ -239,6 +306,33 @@ const Content = () => {
   };
 
   const renderRows = () => {
+    if (isGetOrientLoading) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div role='status' className='py-5 text-center'>
+              <svg
+                aria-hidden='true'
+                className='inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400'
+                viewBox='0 0 100 101'
+                fill='none'
+                xmlns='http://www.w3.org/2000/svg'
+              >
+                <path
+                  d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                  fill='currentColor'
+                />
+                <path
+                  d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
+                  fill='currentFill'
+                />
+              </svg>
+              <span className='sr-only'>Loading...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    }
     if (orientItems && orientItems.length > 0) {
       return orientItems.map((item: any, index: number) => (
         <tr key={index}>
@@ -322,7 +416,7 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Orient</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -367,29 +461,30 @@ const Content = () => {
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   name='search'
                   id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for: Applicant Name'
+                  data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={checkIfDateIsValid}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
             </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={checkIfDateIsValid}
-            >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
-            </div>
           </div>
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-              <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]'>
+              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table
                   className={classNames(
                     'min-w-full divide-y divide-gray-300 text-center',
@@ -421,9 +516,15 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {orientItems.length}</p>
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
@@ -573,7 +674,7 @@ const Content = () => {
       </NoticeModal>
       <NoticeModal isOpen={isSendOrientLink} setIsOpen={setIsSendOrientLink}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-          Would you like send the orientation link to the New Hire's registered email or send to his/her new company
+          Would you like send the orientation link to the New Hire&apos;s registered email or send to his/her new company
           email?
         </h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
@@ -652,7 +753,7 @@ const Content = () => {
               setNewHireOriented(false);
             }}
           >
-            NO, I DON'T.
+            NO, I DON&apos;T.
           </button>
         </div>
       </NoticeModal>
@@ -690,6 +791,7 @@ const Content = () => {
         setIsOpen={setIsEnrollModalOpen}
         message='You have successfully enrolled New Hire to YAHSHUA Payroll.'
       />
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };

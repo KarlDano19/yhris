@@ -1,14 +1,12 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
 import ExposureData from "./tabs/ExposureData";
 import InjurySummary from "./tabs/InjurySummary";
 import useAddAnnualAccidentIllnessReport from "../hooks/useAddAnnualAccidentIllnessReport";
-import useGetWorkAccidentIlnessReportsItems from "../hooks/useGetWorkAccidentIlnessReportsItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -16,28 +14,19 @@ function CreateReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { data: reportsData } = useGetWorkAccidentIlnessReportsItems();
-  const { register, handleSubmit, reset, control, setValue } =
-    useForm();
+  const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addAnnualAccidentIllnessReport, isLoading: isLoadingAddAnnualAccidentIllnessReport } = useAddAnnualAccidentIllnessReport();
 
-  useEffect(() => {
-    if (reportsData && reportsData.records) {
-      const totalDisabling = reportsData.records.filter((report: any) => report.disabling_injury).length;
-      const totalNonDisabling = reportsData.records.filter((report: any) => !report.disabling_injury).length;
-      setValue("total_all_disabling_injuries_illnesses", totalDisabling);
-      setValue("total_non_disabling_injuries", totalNonDisabling);
-    }
-  }, [reportsData, setValue]);
-  
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -69,7 +58,7 @@ function CreateReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
+        onClose={() => {setIsOpen(false)}}
       >
         <Transition.Child
           as={Fragment}
@@ -97,7 +86,7 @@ function CreateReportModal({
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Annual Work Accident/ Illness Exposure Data Report
+                    Create Annual Work Accident/ Illness Exposure Data Report
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
@@ -121,6 +110,7 @@ function CreateReportModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingAddAnnualAccidentIllnessReport}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}
               </Dialog.Panel>

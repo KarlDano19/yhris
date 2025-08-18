@@ -25,13 +25,12 @@ export const ProbationPeriodField = ({ formData, handleInputChange }: FieldProps
     </label>
     <input
       type="number"
-      disabled
       name="probationPeriod"
       value={(formData as EmploymentAgreementFormData).probationPeriod || ''}
       onChange={handleInputChange}
       min="1"
       max="12"
-      className="w-full px-3 py-2 border rounded-md bg-gray-100 text-gray-700 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="w-full px-3 py-2 border rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
       placeholder="Enter probation period in months"
       required
     />

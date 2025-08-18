@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -25,15 +25,17 @@ function UpdateShcMinutesMeetingModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {data: minutesMeetingData, remove: removeMinutesMeeting, refetch: refetchMinutesMeeting} = useGetMinutesMeetingDetails(isOpen.id);
   const {
     mutate: updateShcMinutesMeeting,
@@ -41,19 +43,19 @@ function UpdateShcMinutesMeetingModal({
   } = useUpdateShcMinutesMeeting();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
-          {
-            duration: 5000,
-          }
-        );
-        setIsOpen({ id: 0, open: false });
-        reset();
-        refetch();
-      },
+              onSuccess: (data: any) => {
+          toast.custom(
+            () => <CustomToast message={data.message} type="success" />,
+            {
+              duration: 5000,
+            }
+          );
+          setIsOpen({ id: 0, open: false });
+          setSelectedTab(1);
+          refetch();
+        },
       onError: (err: any) => {
         const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
         toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
@@ -61,7 +63,7 @@ function UpdateShcMinutesMeetingModal({
         });
       },
     };
-    updateShcMinutesMeeting(data, callbackReq);
+    updateShcMinutesMeeting({ data, shc_meeting_minutes_id: isOpen.id }, callbackReq);
   });
 
   useEffect(() => {
@@ -75,15 +77,19 @@ function UpdateShcMinutesMeetingModal({
         setValue("date_of_meeting", minutesMeetingData.date_of_meeting);
         setValue("time_of_meeting", minutesMeetingData.time_of_meeting);
         setValue("venue", minutesMeetingData.venue);
-        setValue("submitted_by", minutesMeetingData.submitted_by);
+        setValue("attendees", minutesMeetingData.attendees);
+        setValue("absentees", minutesMeetingData.absentees);
+        setValue("details_of_meeting", minutesMeetingData.details_of_meeting);
+        setValue("prepared_by", minutesMeetingData.prepared_by);
         setValue("position", minutesMeetingData.position);
-
+        setValue("signature", minutesMeetingData.signature);
     }
-  })
+  }, [minutesMeetingData, setValue]);
 
   const customCloseModal = () => {
     reset();
     removeMinutesMeeting();
+    setSelectedTab(1);
     setIsOpen(null);
   };
 
@@ -108,7 +114,7 @@ function UpdateShcMinutesMeetingModal({
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -118,10 +124,10 @@ function UpdateShcMinutesMeetingModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-4 w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Create Work Accident/Illness Report
+                    Edit Work Accident/Illness Report
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
@@ -134,6 +140,10 @@ function UpdateShcMinutesMeetingModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -153,6 +163,10 @@ function UpdateShcMinutesMeetingModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
+                    watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -12,27 +11,27 @@ import MonitoringAndHazardInfo from "./tabs/MonitoringAndHazardInfo";
 import DataPrivacyAndCertification from "./tabs/DataPrivacyAndCertification";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function CreateWemRequestModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { register, handleSubmit, reset, control, setValue, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddWorkEnvironmentRequest,
   } = useAddWorkEnvironmentRequest();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -64,7 +63,7 @@ function CreateWemRequestModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={setIsOpen}
+        onClose={() => {setIsOpen(false)}}
       >
         <Transition.Child
           as={Fragment}
@@ -89,13 +88,13 @@ function CreateWemRequestModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center">
-                  <h3 className="flex-1 text-white ml-2 font-semibold">
+                  <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
                     Create Work Environment Measurement (WEM) Request
                   </h3>
                   <XCircleIcon
-                    className="w-8 h-8 text-white cursor-pointer"
+                    className="w-6 h-6 sm:w-8 sm:h-8 text-white cursor-pointer"
                     onClick={() => setIsOpen(false)}
                   />
                 </div>
@@ -106,6 +105,11 @@ function CreateWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -114,6 +118,11 @@ function CreateWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -122,6 +131,11 @@ function CreateWemRequestModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    getValues={getValues}
+                    watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 4 && (
@@ -131,6 +145,10 @@ function CreateWemRequestModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
+                    watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

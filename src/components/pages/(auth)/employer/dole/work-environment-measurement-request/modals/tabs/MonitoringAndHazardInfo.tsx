@@ -4,9 +4,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
@@ -18,15 +16,53 @@ function MonitoringAndHazardInfo({
   register,
   handleSubmit,
   setSelectedTab,
+  getValues,
+  watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  getValues: any;
+  watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
-  const onSubmit = handleSubmit(() => {
+  const onValid = (data: any) => {
+    if (!data.conducting_internal_wem) {
+      setError("conducting_internal_wem", {
+        type: "manual",
+        message: "Please select Conducting Internal WEM."
+      });
+      return;
+    }
+    if (!data.hazards_purpose_of_wem_request || (Array.isArray(data.hazards_purpose_of_wem_request) && data.hazards_purpose_of_wem_request.length === 0)) {
+      setError("hazards_purpose_of_wem_request", {
+        type: "manual",
+        message: "Please select at least one Purpose of WEM Request (Hazards)."
+      });
+      return;
+    }
+    if (!data.chemical_hazards || (Array.isArray(data.chemical_hazards) && data.chemical_hazards.length === 0)) {
+      setError("chemical_hazards", {
+        type: "manual",
+        message: "Please select at least one Chemical Hazard."
+      });
+      return;
+    }
+    if (!data.ventilation) {
+      setError("ventilation", {
+        type: "manual",
+        message: "Please select at least one Ventilation."
+      });
+      return;
+    }
     setSelectedTab(4);
-  });
+  };
 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
@@ -38,7 +74,7 @@ function MonitoringAndHazardInfo({
   }, [employeeData]);
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleSubmit(onValid)}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -55,8 +91,8 @@ function MonitoringAndHazardInfo({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
-          <div className="border-r border-slate-300 pr-6 space-y-6 pl-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
+          <div className="border-r-0 md:border-r md:border-slate-300 pr-0 md:pr-6 space-y-6 pl-0 md:pl-6">
             <div className="mb-2">
               <h1 className="text-lg font-semibold">Monitoring Capability</h1>
             </div>
@@ -102,6 +138,11 @@ function MonitoringAndHazardInfo({
                 Conducting Internal WEM
                 <span className="text-red-600">*</span>
               </label>
+              {errors.conducting_internal_wem && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.conducting_internal_wem.message || "Please select Conducting Internal WEM."}
+                </p>
+              )}
               <div className="relative mt-2">
                 <div className="space-y-2">
                   <div>
@@ -157,7 +198,7 @@ function MonitoringAndHazardInfo({
               </div>
             </div>
           </div>
-          <div className="pr-6 space-y-6">
+          <div className="pr-0 md:pr-6 space-y-6">
             <div className="mb-2">
               <h1 className="text-lg font-semibold">Hazards</h1>
             </div>
@@ -171,15 +212,20 @@ function MonitoringAndHazardInfo({
                     Purpose of WEM Request
                     <span className="text-red-600">*</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  {errors.hazards_purpose_of_wem_request && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.hazards_purpose_of_wem_request.message || "Please select at least one Purpose of WEM Request (Hazards)."}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_noise"
                         value="noise"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_noise" className="ml-2">
                         Noise
                       </label>
                     </div>
@@ -187,10 +233,10 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_illumination"
                         value="illumination"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_illumination" className="ml-2">
                         Illumination
                       </label>
                     </div>
@@ -198,10 +244,10 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_vibration"
                         value="vibration"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_vibration" className="ml-2">
                        Vibration
                       </label>
                     </div>
@@ -209,10 +255,10 @@ function MonitoringAndHazardInfo({
                       <input
                         type="checkbox"
                         {...register("hazards_purpose_of_wem_request", { required: true })}
-                        id="hazards_purpose_of_wem_request"
+                        id="hazards_purpose_of_wem_request_heat"
                         value="heat"
                       />
-                      <label htmlFor="purpose_of_wem_request" className="ml-2">
+                      <label htmlFor="hazards_purpose_of_wem_request_heat" className="ml-2">
                         Heat
                       </label>
                     </div>
@@ -226,7 +272,12 @@ function MonitoringAndHazardInfo({
                     Chemical Hazards
                     <span className="text-red-600">*</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  {errors.chemical_hazards && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.chemical_hazards.message || "Please select at least one Chemical Hazard."}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="relative mt-2 flex gap-2">
                       <input
                         type="checkbox"
@@ -256,7 +307,7 @@ function MonitoringAndHazardInfo({
                         id="heavy_metals"
                         value="Heavy Metals"
                       />
-                      <label htmlFor="chemical_hazards" className="ml-2">
+                      <label htmlFor="heavy_metals" className="ml-2">
                        Heavy Metals
                       </label>
                     </div>
@@ -305,11 +356,16 @@ function MonitoringAndHazardInfo({
                 Ventilation
                 <span className="text-red-600">*</span>
               </label>
+              {errors.ventilation && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.ventilation.message || "Please select at least one Ventilation."}
+                </p>
+              )}
               <div className="relative mt-2 flex gap-2">
                 <input
                   type="checkbox"
                   {...register("ventilation")}
-                  id="ventilation"
+                  id="general_ventilation"
                   value="General Ventilation"
                 />
                 <label htmlFor="general_ventilation" className="ml-2">
@@ -320,7 +376,7 @@ function MonitoringAndHazardInfo({
                 <input
                   type="checkbox"
                   {...register("ventilation")}
-                  id="ventilation"
+                  id="local_exhaust_ventilation"
                   value="Local Exhaust Ventilation"
                 />
                 <label htmlFor="local_exhaust_ventilation" className="ml-2">

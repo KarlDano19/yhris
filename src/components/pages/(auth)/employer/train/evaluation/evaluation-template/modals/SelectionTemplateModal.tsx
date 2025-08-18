@@ -1,4 +1,5 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 
 import CreateEvaluationModal from './CreateEvaluationTemplateModal';
 
@@ -11,10 +12,12 @@ export default function SelectionModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: UseFormReturn<any>;
 }) {
   const cancelButtonRef = useRef(null);
   const [isCreateEvaluationTemplateOpen, setIsCreateEvaluationTemplateOpen] = useState(false);
@@ -82,6 +85,7 @@ export default function SelectionModal({
                     isOpen={isCreateEvaluationTemplateOpen}
                     setIsOpen={setIsCreateEvaluationTemplateOpen}
                     mainSetIsOpen={setIsOpen}
+                    formMethods={formMethods}
                   />
                 </Dialog.Panel>
               </Transition.Child>

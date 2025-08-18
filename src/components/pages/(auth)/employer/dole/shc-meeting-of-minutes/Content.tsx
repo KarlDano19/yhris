@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
@@ -70,7 +71,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const menuOptions = [
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+
+  const menuOptions = [ 
     {
       name: 'Export',
       action: () => {
@@ -82,13 +88,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (shcMinutesMeetingData) {
-      shcMinutesMeetingData.records.map((item: any) => {
-        const incidentDate = new Date(item.date_of_meeting);
-        item.date_of_meeting = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+      const formattedRecords = shcMinutesMeetingData.records.map((item: any) => {
+        // Create a new object to avoid mutating the original data
+        const formattedItem = { ...item };
+        
+        // Format date
+        const incidentDate = new Date(formattedItem.date_of_meeting);
+        formattedItem.date_of_meeting = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
 
-        return item;
+        // Format time_of_meeting to 12-hour format
+        if (formattedItem.time_of_meeting) {
+          const [hours, minutes, seconds] = formattedItem.time_of_meeting.split(":");
+          const date = new Date();
+          date.setHours(Number(hours), Number(minutes), Number(seconds || 0));
+          formattedItem.time_of_meeting = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+        
+        // Ensure attendees and absentees are arrays
+        formattedItem.attendees = Array.isArray(formattedItem.attendees) ? formattedItem.attendees : [];
+        formattedItem.absentees = Array.isArray(formattedItem.absentees) ? formattedItem.absentees : [];
+
+        return formattedItem;
       });
-      setShcMinutesMeetingItems(shcMinutesMeetingData.records);
+      
+      setShcMinutesMeetingItems(formattedRecords);
       setPagination({
         totalPages: shcMinutesMeetingData.total_pages,
         totalRecords: shcMinutesMeetingData.total_records,
@@ -211,10 +234,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.time_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.venue}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.attendees.length}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.absentees.length}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{Array.isArray(item.attendees) ? item.attendees.length : 0}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{Array.isArray(item.absentees) ? item.absentees.length : 0}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-            <div className='flex space-x-2'>
+            <div className='flex items-center justify-center space-x-2'>
               <button
                 onClick={() =>
                   setIsUpdateShcMinutesMeetingModalOpen({
@@ -227,6 +250,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                // className='opacity-50'
+                onClick={() =>
+                  setIsSendEmailModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+                // disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
+                // disabled={true}
+                // data-tooltip-id='email-tooltip'
+                // data-tooltip-content='Not available'
+                // data-tooltip-place='bottom'
+                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
+              >
+                <EmailLogo />
+              </button>
+              <button
                 onClick={() =>
                   setIsShcMinutesMeetingDeleteModalOpen({
                     id: item.id,
@@ -235,17 +275,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 }
               >
                 <DeleteIcon />
-              </button>
-              <button
-                onClick={() =>
-                  setIsSendEmailModalOpen({
-                    id: item.id,
-                    open: true,
-                  })
-                }
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
-              >
-                <EmailLogo />
               </button>
             </div>
           </td>
@@ -274,7 +303,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>SHC Minutes of Meeting</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -319,33 +348,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-full lg:w-1/3'>
-                <div className='relative flex items-center'>
-                  <input
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
                   type='text'
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
                   data-tooltip-content='Search for: Venue'
                   data-tooltip-place='bottom'
-                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                  className='block flex-1 rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100 flex items-center justify-center'
+                  onClick={handleSearch}
+                >
+                  <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={handleSearch}
-            >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateShcMeetingMinutesModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_SHC_minute}
+                disabled={!cachedRigths?.state?.data?.create_dole_SHC_minute}
               >
                 CREATE
               </button>
@@ -394,7 +421,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -415,7 +442,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Absentees
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
                         Actions
                       </th>
                     </tr>
@@ -423,15 +450,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+              <Pagination
+                pagination={pagination}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageSizeChange={pageSizeChange}
+                onPageChange={paginationChange}
+              />
           </div>
         </div>
       </div>
@@ -440,6 +467,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isCreateShcMeetingMinutesModalOpen}
           setIsOpen={setIsCreateShcMeetingMinutesModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isUpdateShcMinutesMeetingModalOpen && (
@@ -447,6 +475,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={shcMinutesMeetingRefetch}
           isOpen={isUpdateShcMinutesMeetingModalOpen}
           setIsOpen={setIsUpdateShcMinutesMeetingModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isShcMinutesMeetingDeleteModalOpen && (
@@ -472,6 +501,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip' />
+      <Tooltip id='email-tooltip' />
     </>
   );
 }

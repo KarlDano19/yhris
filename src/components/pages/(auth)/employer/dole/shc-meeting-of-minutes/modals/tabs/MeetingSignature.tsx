@@ -1,18 +1,12 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
+import Image from "next/image";
 
-import CustomToast from "@/components/CustomToast";
-import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import DrawSignatureModal from "../DrawSignatureModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
-import DrawSignatureModal from "../DrawSignatureModal";
 
 function TechnicalAndSignature({
   control,
@@ -20,45 +14,153 @@ function TechnicalAndSignature({
   onSubmit,
   setSelectedTab,
   setValue,
+  watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
   onSubmit: any;
   setSelectedTab: any;
   setValue: any;
+  watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
 
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState<string>("");
-  const [fileUrl, setFileUrl] = useState<string>("");
-  const [attachmentPolicyExist, setAttachmentPolicyExist] = useState(false);
-  const [attachmentExist, setAttachmentExist] = useState(false);
+  const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
+  const [signatureSource, setSignatureSource] = useState<string>("");
+
+  // Watch for existing signature URL from form
+  const existingSignatureUrl = watch("signature");
 
   const toggleDrawSignatureModal = () => {
     setDrawSignatureModal(!drawSignatureModal);
   };
 
+  // Track current signature source and file
+  useEffect(() => {
+    const currentSignature = watch("signature");
+    const currentSource = watch("signature_source");
+    
+    if (currentSignature && typeof currentSignature === "string") {
+      setPreviousSignatureFile(currentSignature);
+      return;
+    }
+
+    // Only show previews for unsaved signatures
+    if (currentSource === "draw") {
+    } else if (currentSource === "upload") {
+    }
+  }, [watch]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("signature", file);
+      setValue("previous_signature", previousSignatureFile);
+      setValue("signature_source", "upload");
+      setSignatureSource("upload");
+      setSignatureUrl(URL.createObjectURL(file));
+    }
+  };
+
+  // Handle drawn signature from modal
+  const handleDrawnSignature = (drawnSignatureDataUrl: string) => {
+    // Convert data URL to Blob
+    fetch(drawnSignatureDataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        // Create a File object from the Blob
+        const file = new File([blob], "signature.png", { type: "image/png" });
+        
+        // Update form state with the File object
+        setValue("signature", file);
+        setValue("previous_signature", previousSignatureFile);
+        setValue("signature_source", "draw");
+        setSignatureSource("draw");
+        setSignatureUrl(drawnSignatureDataUrl);
+      });
+  };
+
   useEffect(() => {
     if (signatureUrl) {
-      setValue("signature", signatureUrl);
-    } else {
-      setSignatureUrl("");
+      // If signatureUrl is a data URL from drawing
+      if (signatureUrl.startsWith('data:')) {
+        fetch(signatureUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], "signature.png", { type: "image/png" });
+            setValue("signature", file);
+            setValue("previous_signature", previousSignatureFile);
+            setValue("signature_source", "draw");
+            setSignatureSource("draw");
+          })
+          .catch(err => {
+            console.error("Error converting signature data URL to file:", err);
+          });
+      } else if (signatureUrl.startsWith('blob:')) {
+        // Uploaded file preview
+        setSignatureSource("upload");
+      } else {
+        setValue("signature", signatureUrl);
+        setValue("previous_signature", signatureUrl);
+        setValue("signature_source", "");
+        setSignatureSource("");
+      }
     }
-    if (!drawSignatureModal && signatureUrl) {
-      setSignatureUrl("");
+  }, [signatureUrl, setValue, previousSignatureFile]);
+
+  // Check if there are existing signature URLs (for edit mode)
+  useEffect(() => {
+    if (existingSignatureUrl && typeof existingSignatureUrl === 'string' && existingSignatureUrl.startsWith('http')) {
+      setSignatureUrl(existingSignatureUrl);
+      setSignatureSource("");
+      // Ensure the existing signature is properly set in form state
+      setValue("signature", existingSignatureUrl);
+      setValue("previous_signature", existingSignatureUrl);
     }
-  }, [signatureUrl, setValue, drawSignatureModal]);
+  }, [existingSignatureUrl, setValue]);
 
   useEffect(() => {
-    if (fileUrl) {
-      setValue("policy_and_program_on_safety_and_health", fileUrl);
-    } else {
-      setFileUrl("");
+    const signatureValue = watch("signature");
+    if (signatureValue && signatureValue !== "") {
+      clearErrors("signature");
     }
-  }, [fileUrl, setValue]);
+  }, [watch("signature"), clearErrors]);
+
+  // Handle form submission with validation (prepared_by, position, then signature)
+  const onValid = (data: any) => {
+    const preparedByValue = watch("prepared_by");
+    const positionValue = watch("position");
+    const signatureValue = watch("signature");
+
+    if (!preparedByValue || preparedByValue === "") {
+      const el = document.getElementById("prepared_by");
+      if (el) el.focus();
+      return;
+    }
+    if (!positionValue || positionValue === "") {
+      const el = document.getElementById("position");
+      if (el) el.focus();
+      return;
+    }
+    if (!signatureValue || signatureValue === "") {
+      setError("signature", {
+        type: "manual",
+        message: "Signature is required (draw or upload)."
+      });
+      return;
+    }
+    onSubmit();
+  };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={e => { e.preventDefault(); onValid({}); }}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -75,7 +177,7 @@ function TechnicalAndSignature({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div>
             <label
               htmlFor="prepared_by"
@@ -111,17 +213,22 @@ function TechnicalAndSignature({
             </div>
           </div>
         </div>
-        <div className="mt-4 pl-6 pr-6">
+        <div className="mt-4 px-2 md:px-6">
           <h1 className="text-sm font-medium">Signature</h1>
+          {errors.signature && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.signature.message || "Signature is required (draw or upload)."}
+              </p>
+            )}
         </div>
-        <div className="grid grid-cols-2 gap-6 mt-4 pl-6 pr-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div>
             <label
               htmlFor="draw_signature"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Draw Signature
-              <span className="text-red-600">*</span>
+              {!existingSignatureUrl && <span className="text-red-600">*</span>}
             </label>
             <div className="relative mt-2">
               <button
@@ -139,42 +246,54 @@ function TechnicalAndSignature({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Upload Signature
-              <span className="text-red-600">*</span>
+              {!existingSignatureUrl && <span className="text-red-600">*</span>}
             </label>
             <div className="relative mt-2">
               <input
                 id="signature"
-                {...register("signature")}
-                onChange={(e) => {
-                  e.target.value ? setSignatureUrl("") : null;
-                  e.target.value ? setAttachmentExist(true) : null;
-                }}
                 type="file"
-                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
-              {attachmentExist ? (
-                <button
-                  type="button"
-                  className="underline text-savoy-blue text-sm"
-                  onClick={() => {
-                    setValue("signature", "");
-                    setAttachmentExist(false);
-                  }}
-                >
-                  Remove Attachment
-                </button>
-              ) : null}
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) and no previews */}
+      {signatureUrl && (
+        <div className="mt-4 pl-4 pr-4 md:pl-0 md:pr-0">
+          <div
+            className={`text-center font-semibold mb-2 ${
+              signatureSource === "draw" || signatureSource === "upload"
+                ? "text-red-600"
+                : "text-green-600"
+            }`}
+          >
+            {signatureSource === "draw" || signatureSource === "upload" ? "Preview" : "Existing Signature"}
+          </div>
+          <Image
+            className="border-0 ring-1 ring-inset ring-gray-300 m-auto mb-6"
+            src={signatureUrl}
+            width={500}
+            height={200}
+            alt="signatureImage"
+          />
+        </div>
+      )}
+      
       {drawSignatureModal && (
         <DrawSignatureModal
           isOpen={drawSignatureModal}
           setIsOpen={setDrawSignatureModal}
-          setSignatureUrl={setSignatureUrl}
+          setSignatureUrl={(url: any) => {
+            setSignatureUrl(url);
+            handleDrawnSignature(url);
+          }}
         />
       )}
+      
       <hr />
       <div className="flex justify-between py-4 px-4">
         <button

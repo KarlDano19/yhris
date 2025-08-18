@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { useParams } from 'next/navigation';
 
@@ -27,30 +27,31 @@ export default function StageHeader({
 }: PropTypes) {
   const params = useParams();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [title, setTitle] = useState(stage.title);
+  const [stageTitle, setStageTitle] = useState(stage.title);
   const [isEditing, setIsEditing] = useState(false);
   const { dispatch, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutate: addMutate } = useAddStage();
   const { mutate: updateMutate } = useUpdateStage();
 
   const handleSave = () => {
-    let stageTitle;
-    if (title.trim() === '') {
+    let finalTitle;
+    if (stageTitle.trim() === '') {
       if (inputRef.current) inputRef.current.select();
       toast.custom(() => <CustomToast message='Stage title cannot be empty' type='error' />, {
         duration: 7000,
       });
       return;
     } else {
-      stageTitle = title.split('\n').join('');
+      finalTitle = stageTitle.split('\n').join('');
     }
     if (stage.isNewStage) {
-      saveStage(stageTitle);
+      saveStage(finalTitle);
     } else {
-      updateStageTitle(stageTitle);
+      updateStageTitle(finalTitle);
       dispatch({
         type: actionTypes.SET_TITLE,
-        payload: { title: stageTitle, stageId: stage.id },
+        payload: { title: finalTitle, stageId: stage.id },
       });
     }
     setIsEditing(false);
@@ -117,15 +118,34 @@ export default function StageHeader({
     setStageDropdownId(stage.id);
   };
 
+  // Handle clicks outside the dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setStageDropdownId(null);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [setStageDropdownId]);
+
+  const handleDropdownToggle = () => {
+    // Close if already open, otherwise open this one and close others
+    setStageDropdownId(stageDropdownId === stage.id ? null : stage.id);
+  };
+
   return (
     <div className='flex items-center justify-between gap-2 rounded-md border border-[#ACB9CB] relative'>
       <button type='button' className='p-4 disabled:invisible' onClick={() => setIsEditing((prev) => !prev)} disabled={stage.isNewStage}>
         <PencilIcon className='w-5' />
       </button>
       <textarea
-        rows={title.length <= 21 ? 1 : 2}
+        rows={stageTitle.length <= 21 ? 1 : 2}
         maxLength={42}
-        value={title}
+        value={stageTitle}
         ref={inputRef}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
@@ -133,7 +153,7 @@ export default function StageHeader({
             handleSave();
           }
         }}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => setStageTitle(e.target.value)}
         className={`${
           isEditing ? 'pointer-events-auto border-b border-black' : 'pointer-events-none'
         } outline-none bg-transparent hidden-scrollbar text-center font-semibold text-[15px] text-indigo-dye`}
@@ -145,7 +165,7 @@ export default function StageHeader({
         {stage.title}
       </textarea>
       <button
-        onClick={handleOpenDropdown}
+        onClick={handleDropdownToggle}
         type='button'
         className='border border-[#ACB9CB] px-3 py-6 rounded-md'
       >
@@ -154,9 +174,10 @@ export default function StageHeader({
 
       {/* dropdown */}
       {stageDropdownId === stage.id && (
-        <div className='grid absolute left-0 right-0 bg-white text-indigo-dye border border-[#ACB9CB] top-full z-20 p-4 gap-3 shadow-md'>
+        <div className='grid absolute left-0 right-0 bg-white text-indigo-dye border border-[#ACB9CB] top-full z-20 p-4 gap-3 shadow-md' ref={dropdownRef}>
           <button
-            onClick={() =>
+            onClick={() => {
+              setStageDropdownId(null); // Close dropdown after selection
               setActionState({
                 ...initialActionState,
                 stageId: stage.id,
@@ -165,8 +186,8 @@ export default function StageHeader({
                   whichModal: 'STAGE_REQUIREMENTS',
                   isOpen: true,
                 },
-              })
-            }
+              });
+            }}
             type='button'
             className='text-left disabled:opacity-50'
             disabled={stage.isNewStage}
@@ -174,18 +195,19 @@ export default function StageHeader({
             Set-up Stage Requirements
           </button>
           <button
-            onClick={() =>
+            onClick={() => {
+              setStageDropdownId(null); // Close dropdown after selection
               setActionState({
                 ...initialActionState,
                 stageId: stage.id,
                 isNewStage: stage.isNewStage,
                 modal: {
-                  title: `Are you sure you want to remove stage ${title}?`,
+                  title: `Are you sure you want to remove stage ${stage.title}?`,
                   whichModal: 'CONFIRMATION',
                   isOpen: true,
                 },
-              })
-            }
+              });
+            }}
             type='button'
             className='text-left'
           >

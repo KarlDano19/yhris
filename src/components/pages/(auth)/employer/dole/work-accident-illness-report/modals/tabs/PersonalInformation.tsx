@@ -1,16 +1,11 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-import toast from "react-hot-toast";
-
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+import { ClockIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function PersonalInformation({
@@ -18,24 +13,27 @@ function PersonalInformation({
   register,
   handleSubmit,
   setSelectedTab,
+  setValue,
+  employeeItems,
+  employeeSearch,
+  setEmployeeSearch,
+  employeeSelected,
+  setEmployeeSelected,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  setValue: any;
+  employeeItems: any[];
+  employeeSearch: string;
+  setEmployeeSearch: (value: string) => void;
+  employeeSelected: boolean;
+  setEmployeeSelected: (value: boolean) => void;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
   });
-
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -55,7 +53,7 @@ function PersonalInformation({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="email"
@@ -97,15 +95,25 @@ function PersonalInformation({
                 type="time"
                 {...register("time_of_incident", { required: true })}
                 id="time_of_incident"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden"
+                style={{ WebkitAppearance: 'none' }}
               />
+              <div 
+                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                onClick={() => {
+                  const timeInput = document.getElementById('time_of_incident') as HTMLInputElement;
+                  timeInput?.showPicker();
+                }}
+              >
+                <ClockIcon className="h-6 w-6 text-savoy-blue hover:text-indigo-300" />
+              </div>
             </div>
           </div>
         </div>
         <div className="mt-4">
           <h1 className="text-lg font-semibold">Personal Information</h1>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="employee"
@@ -114,23 +122,70 @@ function PersonalInformation({
               Name of Injured Worker<span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
-              <select
-                id="employee"
-                {...register("employee", { required: true })}
-                className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+              <input
+                id="name"
+                type="text"
+                placeholder="Select..."
+                value={employeeSearch}
+                onChange={e => setEmployeeSearch(e.target.value)}
+                className="appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6"
+                onClick={() => {
+                  if (!employeeSelected) {
+                    const dropdown = document.getElementById('employee-dropdown');
+                    if (dropdown) {
+                      dropdown.classList.toggle('hidden');
+                    }
+                  }
+                }}
+                readOnly={employeeSelected}
+              />
+              <div
+                className="absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer"
+                onClick={() => {
+                  if (!employeeSelected) {
+                    const dropdown = document.getElementById('employee-dropdown');
+                    if (dropdown) {
+                      dropdown.classList.toggle('hidden');
+                    }
+                  }
+                }}
               >
-                <option value="">Select...</option>
-                {employeeItems.map((item: any) => {
-                  return (
-                    <option
+                {!employeeSelected ? (
+                  <span>
+                    <SelectChevronDown />
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    className="text-savoy-blue hover:text-red-500 focus:outline-none text-3xl"
+                    onClick={() => {
+                      setValue('employee', '');
+                      setEmployeeSearch('');
+                      setEmployeeSelected(false);
+                    }}
+                    tabIndex={-1}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              <div id="employee-dropdown" className="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                {(employeeItems || [])
+                  .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
+                  .map((item: any) => (
+                    <div
                       key={item.id}
-                      value={item.id}
-                    >{`${item.firstname} ${item.lastname}`}</option>
-                  );
-                })}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                <SelectChevronDown />
+                      className="px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white"
+                      onClick={() => {
+                        setValue('employee', item.id);
+                        setEmployeeSearch(`${item.firstname} ${item.lastname}`);
+                        setEmployeeSelected(true);
+                        document.getElementById('employee-dropdown')?.classList.add('hidden');
+                      }}
+                    >
+                      {`${item.firstname} ${item.lastname}`}
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
@@ -178,7 +233,7 @@ function PersonalInformation({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
               htmlFor="address"

@@ -4,14 +4,16 @@ import React, { useEffect, useState, Fragment } from "react";
 
 import Link from "next/link";
 
-import { Menu, Transition } from "@headlessui/react";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
+import { Tooltip } from "react-tooltip";
+import { useForm } from "react-hook-form";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import CustomToast from "@/components/CustomToast";
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import classNames from "@/helpers/classNames";
 import useGetAnnualMedicalReportItems from "./hooks/useGetAnnualMedicalReportItems";
 import ExportProgressModal from "./modals/ExportProgressModal";
 import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportModal";
@@ -21,12 +23,12 @@ import DeleteAnnualMedicalReportModal from "./modals/DeleteAnnualMedicalReportMo
 import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/solid";
-import ExportLogo from "@/svg/ExportLogo";
+import PrintIcon from "@/svg/PrintIcon";
 import EditIcon from "@/svg/EditIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
-import { useQueryClient } from "@tanstack/react-query";
+
+import classNames from "@/helpers/classNames";
 
 type PaginationProps = {
   totalRecords: number;
@@ -75,37 +77,42 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
-  const menuOptions = [
-    {
-      name: "Export",
-      action: () => {
-        setIsExportProgressModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.export_dole_annual_medical_report,
-    },
-    {
-      name: "Generate Report",
-      action: () => {
-        handlePrint();
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_annual_medical_report,
-    },
-  ];
+  // const menuOptions = [
+  //   {
+  //     name: "Export",
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_annual_medical_report,
+  //   },
+  //   {
+  //     name: "Generate Report",
+  //     action: () => {
+  //       handlePrint();
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_annual_medical_report,
+  //   },
+  // ];
 
   useEffect(() => {
     if (annualMedicalReportData) {
-      annualMedicalReportData.records?.map((item: any) => {
-        const incidentDate = new Date(item.date_of_report);
-        item.date_of_incident = `${
-          incidentDate.getMonth() + 1
-        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
-
-        return item;
-      });
-      setAnnualMedicalReportItems(annualMedicalReportData.records);
+      const sortedRecords = [...annualMedicalReportData.records]
+        .map((item: any) => {
+          const incidentDate = new Date(item.date_of_report);
+          item.date_of_incident = `${
+            incidentDate.getMonth() + 1
+          }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+          return item;
+        })
+        .sort((a, b) => b.id - a.id);
+      setAnnualMedicalReportItems(sortedRecords);
       setPagination({
         totalPages: annualMedicalReportData.total_pages,
         totalRecords: annualMedicalReportData.total_records,
@@ -244,7 +251,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             {item.number_of_shifts}
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
-            <div className="flex space-x-2">
+            <div className="flex items-center justify-center space-x-2">
               <button
                 onClick={() =>
                   setIsEditAnnualMedicalReportModalOpen({
@@ -257,6 +264,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                className="opacity-50"
+                disabled={true}
+                data-tooltip-id='print-tooltip'
+                data-tooltip-content='Not available'
+                data-tooltip-place='bottom'
+              >
+                <PrintIcon />
+              </button>
+              <button
                 onClick={() =>
                   setIsDeleteAnnualMedicalReportModalOpen({
                     id: item.id,
@@ -267,9 +283,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <DeleteIcon />
               </button>
-              <button>
-                <ExportLogo />
-              </button>
+              
             </div>
           </td>
         </tr>
@@ -306,7 +320,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <h2 className="text-xl font-bold text-indigo-dye">
             Annual Medical Report
           </h2>
-          <div className="mt-6 flex flex-col lg:flex-row items-left gap-4">
+          <div className={classNames("mt-6 flex flex-col lg:flex-row items-left gap-4", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className="flex-none flex flex-col lg:flex-row items-left gap-2">
               <div className="relative">
                 <CustomDatePicker
@@ -362,13 +376,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className="flex-1 flex justify-start lg:justify-end">
               <button
-                className="bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
+                className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
                 onClick={() => setIsCreateAnnualMedicalReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_annual_medical_report}
+                disabled={!cachedRigths?.state?.data?.create_dole_annual_medical_report}
               >
                 CREATE
               </button>
-              <Menu as="div" className="relative">
+              {/* <Menu as="div" className="relative">
                 <Menu.Button className="bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50">
                   <span className="sr-only">Open options</span>
                   <div className="flex gap-4">
@@ -414,11 +428,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </div>
                   </Menu.Items>
                 </Transition>
-              </Menu>
+              </Menu> */}
             </div>
           </div>
 
-          <div className="mt-8 flow-root">
+          <div className={classNames("mt-8 flow-root", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="min-w-full py-2 sm:px-6 lg:px-8">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
@@ -440,7 +454,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                       >
-                        Total Hours Worked
+                        Number of Shifts
                       </th>
                       <th
                         scope="col"
@@ -455,15 +469,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+              <Pagination
+                pagination={pagination}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageSizeChange={pageSizeChange}
+                onPageChange={paginationChange}
+              />
           </div>
         </div>
       </div>
@@ -472,6 +486,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isCreateAnnualMedicalReportModalOpen}
           setIsOpen={setIsCreateAnnualMedicalReportModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isEditAnnualMedicalReportModalOpen && (
@@ -479,6 +494,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualMedicalReportRefetch}
           isOpen={isEditAnnualMedicalReportModalOpen}
           setIsOpen={setIsEditAnnualMedicalReportModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isDeleteAnnualMedicalReportModalOpen && (
@@ -495,6 +511,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           itemsFilter={itemsFilter}
         />
       )}
+      <Tooltip id='print-tooltip' />
     </>
   );
 }

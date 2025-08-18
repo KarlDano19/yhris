@@ -201,6 +201,7 @@ export type T_IncidentReport = {
 
 export type T_NTEForm = {
   template: string;
+  subject?: string;
   to: string | string[];
   cc?: string | string[];
   bcc?: string | string[];
@@ -214,10 +215,14 @@ export type T_IncidentReportEmail = {
   issueNTEForm: T_NTEForm;
   sendDecisionForm: any;
   dateReceived: any;
+  // NTE
+  nte_subject: string;
   nte_to: string;
   nte_cc: string;
   nte_bcc: string;
   nte_message: string;
+  // Decision
+  decision_subject: string;
   decision_to: string;
   decision_cc: string;
   decision_bcc: string;

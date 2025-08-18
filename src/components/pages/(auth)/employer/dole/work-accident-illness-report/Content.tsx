@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -52,6 +53,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+  
+  // Employee Search
+    // For create modal
+    const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
+    const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
+
+    // For edit modal
+    const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
+    const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
+
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -93,9 +107,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (workAccidentIlnessReportsData) {
       workAccidentIlnessReportsData.records.map((item: any) => {
         const incidentDate = new Date(item.date_of_incident);
-        item.date_of_incident = `${
-          incidentDate.getMonth() + 1
-        }/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+        item.date_of_incident = `${incidentDate.getMonth() + 1}/${incidentDate.getDate()}/${incidentDate.getFullYear()}`;
+
+        // Format time_of_incident to 12-hour format
+        if (item.time_of_incident) {
+          const [hours, minutes, seconds] = item.time_of_incident.split(":");
+          const date = new Date();
+          date.setHours(Number(hours), Number(minutes), Number(seconds || 0));
+          item.time_of_incident = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
 
         const returnDate = new Date(item.date_returned_to_work);
         item.date_returned_to_work = `${returnDate.getMonth() + 1}/${returnDate.getDate()}/${returnDate.getFullYear()}`;
@@ -310,7 +330,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Work Accident/Illness Report</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -355,8 +375,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-11/12 lg:w-1/3'>
-                <div className='relative flex items-center'>
+              <div className='flex flex-row w-full items-center gap-2'>
                   <input
                     type='text'
                     name='search'
@@ -368,20 +387,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     onChange={(e) => setPendingFilter({ ...pendingFilter, search: e.target.value })}
                     placeholder='Search ...'
                   />
-                </div>
+                  <button
+                    className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                    onClick={handleSearch}
+                  >
+                    <MagnifyingGlassIcon className='h-5 w-5' />
+                  </button>
               </div>
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={handleSearch}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkAccidentIllnessReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_wair}
+                disabled={!cachedRigths?.state?.data?.create_dole_wair}
               >
                 CREATE
               </button>
@@ -430,7 +448,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -465,15 +483,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+              <Pagination
+                pagination={pagination}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageSizeChange={pageSizeChange}
+                onPageChange={paginationChange}
+              />
           </div>
         </div>
       </div>
@@ -492,6 +510,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isCreateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateWorkAccidentIllnessReportModalOpen}
+          formMethods={createFormMethods}
+          employeeSearch={createEmployeeSearch}
+          setEmployeeSearch={setCreateEmployeeSearch}
+          employeeSelected={createEmployeeSelected}
+          setEmployeeSelected={setCreateEmployeeSelected}
         />
       )}
       {isWorkAccidentIllnessReportDeleteModalOpen && (
@@ -506,6 +529,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workAccidentIlnessReportsRefetch}
           isOpen={isUpdateWorkAccidentIllnessReportModalOpen}
           setIsOpen={setIsUpdateWorkAccidentIllnessReportModalOpen}
+          formMethods={editFormMethods}
+          employeeSearch={editEmployeeSearch}
+          setEmployeeSearch={setEditEmployeeSearch}
+          employeeSelected={editEmployeeSelected}
+          setEmployeeSelected={setEditEmployeeSelected}
         />
       )}
       {isExportProgressModalOpen && (
@@ -645,6 +673,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tr key={rowIndex}>
                     <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
                       {item.employee}
+                    </td>
+                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
+                      {item.time_of_incident}
                     </td>
                     <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
                       {item.age}

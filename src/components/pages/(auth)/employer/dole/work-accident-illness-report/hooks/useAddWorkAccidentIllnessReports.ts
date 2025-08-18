@@ -8,35 +8,45 @@ async function addWorkAccidentIllnessReport(data: any) {
     if (data.date_of_incident) {
       const incidentDate = new Date(data.date_of_incident);
       if (!isNaN(incidentDate.getTime())) {
-        data.date_of_incident = incidentDate.toISOString().split('T')[0];
+        const offset = incidentDate.getTimezoneOffset();
+        const adjustedDate = new Date(incidentDate.getTime() - offset * 60000);
+        data.date_of_incident = adjustedDate.toISOString().split('T')[0];
       }
     }
     
     if (data.date_of_disability) {
       const disabilityDate = new Date(data.date_of_disability);
       if (!isNaN(disabilityDate.getTime())) {
-        data.date_of_disability = disabilityDate.toISOString().split('T')[0];
+        const offset = disabilityDate.getTimezoneOffset();
+        const adjustedDate = new Date(disabilityDate.getTime() - offset * 60000);
+        data.date_of_disability = adjustedDate.toISOString().split('T')[0];
       }
     }
     
     if (data.date_returned_to_work) {
       const returnedDate = new Date(data.date_returned_to_work);
       if (!isNaN(returnedDate.getTime())) {
-        data.date_returned_to_work = returnedDate.toISOString().split('T')[0];
+        const offset = returnedDate.getTimezoneOffset();
+        const adjustedDate = new Date(returnedDate.getTime() - offset * 60000);
+        data.date_returned_to_work = adjustedDate.toISOString().split('T')[0];
       }
     }
     
     if (data.date_returned_to_work_illness) {
       const returnedIllnessDate = new Date(data.date_returned_to_work_illness);
       if (!isNaN(returnedIllnessDate.getTime())) {
-        data.date_returned_to_work_illness = returnedIllnessDate.toISOString().split('T')[0];
+        const offset = returnedIllnessDate.getTimezoneOffset();
+        const adjustedDate = new Date(returnedIllnessDate.getTime() - offset * 60000);
+        data.date_returned_to_work_illness = adjustedDate.toISOString().split('T')[0];
       }
     }
     
     if (data.date_of_illness) {
       const illnessDate = new Date(data.date_of_illness);
       if (!isNaN(illnessDate.getTime())) {
-        data.date_of_illness = illnessDate.toISOString().split('T')[0];
+        const offset = illnessDate.getTimezoneOffset();
+        const adjustedDate = new Date(illnessDate.getTime() - offset * 60000);
+        data.date_of_illness = adjustedDate.toISOString().split('T')[0];
       }
     }
 

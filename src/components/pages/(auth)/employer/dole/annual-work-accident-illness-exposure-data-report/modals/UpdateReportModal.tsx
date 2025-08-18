@@ -37,7 +37,7 @@ export default function UpdateReportModal({
         refetch: refetchWorkAccidentIllnessReport,
         remove: removeWorkAccidentIllnessReport,
   } = useGetAnnualAccidentIllnessReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch } = useForm();
   const { mutate, isLoading: isLoadingUpdateAnnualAccidentIllnessReport } = useUpdateAnnualAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
@@ -66,7 +66,7 @@ export default function UpdateReportModal({
       setValue('total_hours_worked', workAccidentIllnessReportData.total_hours_worked);
       setValue('total_non_disabling_injuries', workAccidentIllnessReportData.total_non_disabling_injuries);
       setValue('type_of_industry', workAccidentIllnessReportData.type_of_industry);
-      setValue('name_signature', workAccidentIllnessReportData.name_signature);
+      setValue('signature', workAccidentIllnessReportData.signature);
       setValue('year', workAccidentIllnessReportData.year);
       setValue('date_of_report', workAccidentIllnessReportData.date_of_report);
     }
@@ -154,6 +154,7 @@ export default function UpdateReportModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingUpdateAnnualAccidentIllnessReport}
                     setValue={setValue}
+                    watch={watch}
                   />
                 )}  
               </Dialog.Panel>

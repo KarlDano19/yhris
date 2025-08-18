@@ -8,6 +8,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
+import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -74,6 +75,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   const menuOptions = [
     {
@@ -235,7 +240,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.comittee_type}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.chairman_name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-            <div className='flex space-x-2'>
+            <div className='flex items-center justify-center space-x-2'>
               <button
                 onClick={() =>
                   setIsEditHealthAndSafetyReportModalOpen({
@@ -248,12 +253,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
+                // className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
+                // disabled={true}
+                // data-tooltip-id='email-tooltip'
+                // data-tooltip-content='Not available'
+                // data-tooltip-place='bottom'
+                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <EmailLogo />
               </button>
@@ -297,7 +308,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Health and Safety Organization Report</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -342,8 +353,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
-              <div className='flex-none w-full lg:w-1/3'>
-                <div className='relative flex items-center'>
+              <div className='flex flex-row w-full items-center gap-2'>
                   <input
                     type='text'
                   name='search'
@@ -355,20 +365,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                   placeholder='Search ...'
                 />
+                <button
+                  className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100 flex items-center justify-center'
+                  onClick={handleSearch}
+                >
+                    <MagnifyingGlassIcon className='h-5 w-5' />
+                </button>
               </div>
-            </div>
-            <button
-              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={handleSearch}
-            >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_health_safety_organization}
+                disabled={!cachedRigths?.state?.data?.create_dole_health_safety_organization}
               >
                 CREATE
               </button>
@@ -417,7 +426,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -435,7 +444,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Chairman/ Officer in Charge
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
                         Actions
                       </th>
                     </tr>
@@ -443,15 +452,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+              <Pagination
+                pagination={pagination}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageSizeChange={pageSizeChange}
+                onPageChange={paginationChange}
+              />
           </div>
         </div>
       </div>
@@ -470,6 +479,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isCreateHealthAndSafetyReportModalOpen}
           setIsOpen={setIsCreateHealthAndSafetyReportModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isDeleteHealthAndSafetyReportModalOpen && (
@@ -484,6 +494,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={healthAndSafetyReportItemsRefetch}
           isOpen={isEditHealthAndSafetyReportModalOpen}
           setIsOpen={setIsEditHealthAndSafetyReportModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isSendEmailModalOpen && (
@@ -665,6 +676,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div> */}
       <Tooltip id='search-tooltip' /> 
+      <Tooltip id='email-tooltip' />
     </>
   );
 }

@@ -9,26 +9,26 @@ import {
 
 import dynamic from "next/dynamic";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas"
-
+import toast from "react-hot-toast";
+import "react-quill/dist/quill.snow.css";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
-import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-
-import "react-quill/dist/quill.snow.css";
-import useUpdateSafetyAndHealthPolicy from "../hooks/useUpdateSafetyAndHealthPolicy";
 import CustomToast from "@/components/CustomToast";
-import toast from "react-hot-toast";
 import useGetSafetyAndHealthPolicyDetails from "../hooks/useGetSafetyANdHelathPolicyDetails";
+import useUpdateSafetyAndHealthPolicy from "../hooks/useUpdateSafetyAndHealthPolicy";
+import SendEmailModal from "./SendEmailModal";
+import { HandlePrint } from "./helper/HandlePrint";
+import { ENHANCED_QUILL_MODULES, ENHANCED_QUILL_FORMATS } from "./helper/CustomQuill";
+import "../styles.css";
+
 import EditIcon from "@/svg/EditIcon";
 import EmailLogo from "@/svg/EmailLogo";
-import SendEmailModal from "./SendEmailModal";
-import DownloadIcon from "@/svg/DownloadIcon";
 import PrintIcon from "@/svg/PrintIcon";
-import { useQueryClient } from "@tanstack/react-query";
+
+import classNames from "@/helpers/classNames";
 
 interface cachedRigthsData {
   name: string;
@@ -47,10 +47,12 @@ function SafetyAndHealthPolicyModal({
   companyName,
   isOpen,
   setIsOpen,
+  hasActiveSubscription,
 }: {
   companyName: string;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  hasActiveSubscription: boolean;
 }) {
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(
@@ -114,55 +116,6 @@ function SafetyAndHealthPolicyModal({
     setIsEdit(true);
   };
 
-  const downloadPDF = () => {
-    const content = document.getElementById("pdf-content"); // Get the content to be converted to PDF
-    if (content) {
-      html2canvas(content).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF();
-        const imgWidth = 190; // Set the width of the image in the PDF
-        const pageHeight = pdf.internal.pageSize.height;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-
-        let position = 0;
-
-        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-
-        pdf.save("SafetyAndHealthPolicy.pdf");
-      });
-    } else {
-      console.error("Content not found for PDF generation.");
-    }
-  };
-
-  const handlePrint = () => {
-    const content = document.getElementById("pdf-content"); // Get the content to be printed
-    if (content) {
-      html2canvas(content).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const newWindow = window.open("", "_blank");
-        newWindow?.document.write(
-          `<img src="${imgData}" style="width:100%;height:auto;">`
-        );
-        newWindow?.document.close();
-        setTimeout(() => {
-          newWindow?.print();
-        }, 500);
-      });
-    } else {
-      console.error("Content not found for printing.");
-    }
-  };
-
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
@@ -208,15 +161,14 @@ function SafetyAndHealthPolicyModal({
                   <div className="flex space-x-2 justify-end pr-6 pt-4">
                     <button
                       onClick={() => onEditClick()} // Pass the specific policy ID
-                      disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
+                      disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy || !hasActiveSubscription}
+                      data-edit-button
+                      className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
                       <EditIcon />
                     </button>
-                    <button onClick={handlePrint}>
+                    <button onClick={HandlePrint} data-print-button disabled={!hasActiveSubscription} className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}>
                       <PrintIcon />
-                    </button>
-                    <button onClick={downloadPDF}>
-                      <DownloadIcon />
                     </button>
                     <button
                       onClick={() =>
@@ -224,6 +176,9 @@ function SafetyAndHealthPolicyModal({
                           open: true,
                         })
                       }
+                      disabled={!cachedRigths?.state?.data?.send_email_dole_safety_health_policy || !hasActiveSubscription}
+                      data-email-button
+                      className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
                       <EmailLogo />
                     </button>
@@ -248,8 +203,8 @@ function SafetyAndHealthPolicyModal({
                               />
                               <ReactQuill
                                 onChange={(value) => setValue("body", value)}
-                                formats={QUILL_FORMATS}
-                                modules={QUILL_MODULES}
+                                formats={ENHANCED_QUILL_FORMATS}
+                                modules={ENHANCED_QUILL_MODULES}
                                 style={{
                                   height: "100%",
                                   padding: "5px 8px !important",
@@ -258,6 +213,7 @@ function SafetyAndHealthPolicyModal({
                                   watch("body") ||
                                   safetyAndHealthPolicyDetails.body
                                 } // Use fetched details
+                                className="quill-editor-container"
                               />
                             </div>
                           </div>
@@ -297,7 +253,7 @@ function SafetyAndHealthPolicyModal({
                             onClick={() => setIsEdit(false)}
                             ref={cancelButtonRef}
                           >
-                            Close
+                            Cancel
                           </button>
                         </div>
                       </form>
@@ -308,6 +264,7 @@ function SafetyAndHealthPolicyModal({
                         <div className="px-4 pb-6">
                           <div id="pdf-content" className="sm:col-span-4 mt-4">
                             <div
+                              className="policy-content"
                               dangerouslySetInnerHTML={{
                                 __html: safetyAndHealthPolicyDetails?.body.replace(
                                   /{{company_name}}/g,
@@ -334,15 +291,16 @@ function SafetyAndHealthPolicyModal({
               </Transition.Child>
             </div>
           </div>
+          
+          {isSendEmailModalOpen && (
+            <SendEmailModal
+              refetch={refetchSafetyAndHealthPolicyDetails}
+              isOpen={isSendEmailModalOpen}
+              setIsOpen={setIsSendEmailModalOpen}
+            />
+          )}
         </Dialog>
       </Transition.Root>
-      {isSendEmailModalOpen && (
-        <SendEmailModal
-          refetch={refetchSafetyAndHealthPolicyDetails}
-          isOpen={isSendEmailModalOpen}
-          setIsOpen={setIsSendEmailModalOpen}
-        />
-      )}
     </>
   );
 }

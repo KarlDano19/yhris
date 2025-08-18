@@ -17,6 +17,7 @@ import useGetUsers from '@/components/hooks/useGetUsers';
 import DeleteApprovalModal from './modal/DeleteModal';
 import useGetApprovalDetails from './hooks/useGetApprovalDetails';
 import useEditApproval from './hooks/useEditApproval';
+import classNames from '@/helpers/classNames';
 
 interface User {
   id: number;
@@ -35,7 +36,7 @@ type T_ModalData = {
   code?: string;
 };
 
-function Content() {
+function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const broadcastChannel = new BroadcastChannel('settings-integration-channel');
   const [approverTags, setApproverTags] = useState<ApproverTag[]>([]);
   const [inputApprover, setInputApprover] = useState('');
@@ -171,7 +172,7 @@ function Content() {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee Movement Settings</h2>
-          <div className='mt-6 flex flex-col lg:flex-row gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none lg:w-1/2'>
               <div className='relative flex items-center'>
                 <div className='w-full h-full bg-[#EAECEE] rounded-md'>
@@ -198,7 +199,7 @@ function Content() {
                 </div>
               </div>
             </div>
-            <div className='flex-none lg:w-1/2'>
+            <div className={classNames('flex-none lg:w-1/2', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
               <form onSubmit={onSubmit}>
                 <div className='relative flex items-center'>
                   <div className='w-full h-full'>
@@ -294,7 +295,7 @@ function Content() {
                     <button
                       type='submit'
                       className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-12 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                    >``
+                    >
                       Save
                     </button>
                   </span>

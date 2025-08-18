@@ -12,7 +12,10 @@ async function updateWorkAccidentIllnessReport(
       if (data.date_of_incident) {
         const incidentDate = new Date(data.date_of_incident);
         if (!isNaN(incidentDate.getTime())) {
-          data.date_of_incident = incidentDate.toISOString().slice(0, 10);
+          // Adjust for timezone offset to preserve local date
+          const offset = incidentDate.getTimezoneOffset();
+          const adjustedDate = new Date(incidentDate.getTime() - offset * 60000);
+          data.date_of_incident = adjustedDate.toISOString().slice(0, 10);
         } else {
           throw new Error("Invalid date_of_incident");
         }
@@ -22,7 +25,9 @@ async function updateWorkAccidentIllnessReport(
       if (data.date_returned_to_work) {
         const returnedDate = new Date(data.date_returned_to_work);
         if (!isNaN(returnedDate.getTime())) {
-          data.date_returned_to_work = returnedDate.toISOString().slice(0, 10);
+          const offset = returnedDate.getTimezoneOffset();
+          const adjustedDate = new Date(returnedDate.getTime() - offset * 60000);
+          data.date_returned_to_work = adjustedDate.toISOString().slice(0, 10);
         } else {
           throw new Error("Invalid date_returned_to_work");
         }
@@ -32,7 +37,9 @@ async function updateWorkAccidentIllnessReport(
       if (data.date_of_illness) {
         const illnessDate = new Date(data.date_of_illness);
         if (!isNaN(illnessDate.getTime())) {
-          data.date_of_illness = illnessDate.toISOString().slice(0, 10);
+          const offset = illnessDate.getTimezoneOffset();
+          const adjustedDate = new Date(illnessDate.getTime() - offset * 60000);
+          data.date_of_illness = adjustedDate.toISOString().slice(0, 10);
         } else {
           throw new Error("Invalid date_of_illness");
         }
@@ -41,7 +48,9 @@ async function updateWorkAccidentIllnessReport(
       if (data.date_of_disability) {
         const disabilityDate = new Date(data.date_of_disability);
         if (!isNaN(disabilityDate.getTime())) {
-          data.date_of_disability = disabilityDate.toISOString().slice(0, 10);
+          const offset = disabilityDate.getTimezoneOffset();
+          const adjustedDate = new Date(disabilityDate.getTime() - offset * 60000);
+          data.date_of_disability = adjustedDate.toISOString().slice(0, 10);
         } else {
           throw new Error("Invalid date_of_disability");
         }
@@ -50,7 +59,9 @@ async function updateWorkAccidentIllnessReport(
       if (data.date_returned_to_work_illness) {
         const returnedIllnessDate = new Date(data.date_returned_to_work_illness);
         if (!isNaN(returnedIllnessDate.getTime())) {
-          data.date_returned_to_work_illness = returnedIllnessDate.toISOString().slice(0, 10);
+          const offset = returnedIllnessDate.getTimezoneOffset();
+          const adjustedDate = new Date(returnedIllnessDate.getTime() - offset * 60000);
+          data.date_returned_to_work_illness = adjustedDate.toISOString().slice(0, 10);
         } else {
           throw new Error("Invalid date_returned_to_work_illness");
         }

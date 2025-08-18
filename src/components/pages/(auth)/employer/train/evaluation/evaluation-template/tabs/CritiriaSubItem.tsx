@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useFieldArray } from 'react-hook-form';
@@ -22,6 +22,7 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const criteriaRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
     setReorder(`child-${sectionIndex}`, (from: any, to: any) => {
@@ -31,6 +32,12 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
 
   const addCriteria = () => {
     append({ title: '', max_score: 1, is_disable_comment: true });
+    setTimeout(() => {
+      const lastIndex = fields.length;
+      if (criteriaRefs.current[lastIndex]) {
+        criteriaRefs.current[lastIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const copyCriteria = (criteria: any, index: number) => {
@@ -47,6 +54,13 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
     };
     
     append(newCriteria);
+    
+    setTimeout(() => {
+      const lastIndex = fields.length;
+      if (criteriaRefs.current[lastIndex]) {
+        criteriaRefs.current[lastIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const removeCriteria = (index: number) => {
@@ -81,22 +95,13 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
       <Droppable droppableId={`child-${sectionIndex}`} type='childContainer'>
         {(providedOther: any) => (
           <div {...providedOther.droppableProps} ref={providedOther.innerRef}>
-            <div
-              className='absolute mt-[1.5rem] right-[2rem] flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 cursor-pointer'
-              data-tooltip-id='add-criteria-tooltip'
-              data-tooltip-content='Add criteria'
-              data-tooltip-place='left'
-              onClick={() => addCriteria()}
-            >
-              <AddCircleIcon />
-            </div>
-            <Tooltip id='add-criteria-tooltip' style={{ fontSize: '10px' }} />
             {(fields || []).map((item: any, index: number) => {
               return (
                 <Draggable key={item.id} draggableId={item.id} index={index}>
                   {(providedOther: any, snapshotOther: any) => (
                     <div
-                      ref={providedOther.innerRef}
+                      ref={el => (criteriaRefs.current[index] = el)}
+                      {...providedOther.innerRef}
                       {...providedOther.draggableProps}
                       style={getSubItemStyle(snapshotOther.isDragging, providedOther.draggableProps.style)}
                     >
@@ -200,6 +205,20 @@ function CritiriaSubItem({ control, sectionIndex, setReorder, register, watch, s
                           </div>
                         </div>
                         <div className='w-[3rem]'></div>
+                        {index === fields.length - 1 && (
+                          <>
+                            <div
+                              className='absolute mt-[1rem] right-[2rem] flex items-center h-fit border rounded-xl border-[#ACB9CB] p-2 space-y-2 cursor-pointer'
+                              data-tooltip-id='add-criteria-tooltip'
+                              data-tooltip-content='Add criteria'
+                              data-tooltip-place='left'
+                              onClick={() => addCriteria()}
+                            >
+                              <AddCircleIcon />
+                            </div>
+                            <Tooltip id='add-criteria-tooltip' style={{ fontSize: '10px' }} />
+                          </>
+                        )}
                       </div>
                     </div>
                   )}

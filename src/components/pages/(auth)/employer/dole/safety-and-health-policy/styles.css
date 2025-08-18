@@ -1,0 +1,48 @@
+/* Hide Quill's custom bullet points */
+.quill-editor-container .ql-editor ul > li::before {
+  display: none !important;
+}
+
+/* Shared styles for both preview and editor */
+.policy-content,
+.quill-editor-container .ql-editor {
+  font-family: Arial, sans-serif;
+  font-size: 0.8rem;
+  color: #222;
+}
+
+.policy-content ul,
+.quill-editor-container .ql-editor ul {
+  list-style-type: disc !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem !important;
+}
+
+.policy-content li,
+.quill-editor-container .ql-editor li {
+  line-height: 1.5;
+  list-style-type: disc !important;
+  padding-left: 0.25rem;
+  display: list-item !important;
+}
+
+.policy-content h2,
+.quill-editor-container .ql-editor h2 {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.policy-content h3,
+.quill-editor-container .ql-editor h3 {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-top: 1rem;
+  color: #333;
+}
+
+.policy-content p,
+.quill-editor-container .ql-editor p {
+  line-height: 1.5;
+}

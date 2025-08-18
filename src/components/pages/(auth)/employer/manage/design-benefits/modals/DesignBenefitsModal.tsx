@@ -2,6 +2,7 @@ import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
+import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -34,7 +35,7 @@ export default function DesignBenefitsModal({
   const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, reset, trigger, getValues, setValue, formState: { errors } } = useForm<T_Benefit>();
+  const { register, handleSubmit, reset, trigger, getValues, setValue, clearErrors, watch, formState: { errors }, setError } = useForm<T_Benefit>();
   const { mutate, isLoading } = useAddBenefitItems();
 
   const onSubmit = handleSubmit((data) => {
@@ -60,6 +61,53 @@ export default function DesignBenefitsModal({
     };
     mutate(data, callbackReq);
   });
+
+  // Clear errors when title changes
+  useEffect(() => {
+    const titleValue = watch('title');
+    if (titleValue && titleValue !== "") {
+      clearErrors('title');
+    }
+  }, [watch('title'), clearErrors]);
+
+  // Clear errors when tagsTo changes
+  useEffect(() => {
+    if (tagsTo.length > 0) {
+      clearErrors('email');
+    }
+  }, [tagsTo, clearErrors]);
+
+  // Clear errors when purpose changes
+  useEffect(() => {
+    const purposeValue = watch('purpose');
+    if (purposeValue && purposeValue !== "") {
+      clearErrors('purpose');
+    }
+  }, [watch('purpose'), clearErrors]);
+
+  // Clear errors when purpose changes
+  useEffect(() => {
+    const benefitsValue = watch('benefits');
+    if (benefitsValue && benefitsValue !== "") {
+      clearErrors('benefits');
+    }
+  }, [watch('benefits'), clearErrors]);
+
+  // Clear errors when coverage changes
+  useEffect(() => {
+    const coverageValue = watch('coverage');
+    if (coverageValue && coverageValue !== "") {
+      clearErrors('coverage');
+    }
+  }, [watch('coverage'), clearErrors]);
+
+  // Clear errors when eligibility changes
+  useEffect(() => {
+    const eligibilityValue = watch('eligibility');
+    if (eligibilityValue && eligibilityValue !== "") {
+      clearErrors('eligibility');
+    }
+  }, [watch('eligibility'), clearErrors]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -103,9 +151,14 @@ export default function DesignBenefitsModal({
                     {page === 1 ? (
                       <div className='px-4 pt-4 pb-6'>
                         <div className='sm:col-span-4'>
-                          <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                          <label htmlFor='title' className='block text-sm font-medium leading-6 text-gray-900'>
                             Title<span className='text-red-600'>*</span>
                           </label>
+                          {errors.title && (
+                            <p className='text-xs text-red-600 mt-1'>
+                              {errors.title.message || 'Title is required.'}
+                            </p>
+                          )}
                           <div className='relative mt-2'>
                             <input
                               id='title'
@@ -120,9 +173,18 @@ export default function DesignBenefitsModal({
                           <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             To<span className='text-red-600'>*</span>
                           </label>
+                          {errors.email && (
+                            <p className='text-xs text-red-600 mt-1'>
+                              {errors.email.message || 'To field is required.'}
+                            </p>
+                          )}
                           <div className='mt-2 flex rounded-md shadow-sm'>
                             <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                              <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                              <div 
+                                className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                                data-tooltip-id='to-section-tooltip'
+                                data-tooltip-place='bottom'
+                              >
                                 {tagsTo.map((tagTo: string) => (
                                   <div
                                     key={tagTo}
@@ -138,9 +200,16 @@ export default function DesignBenefitsModal({
                                   type='text'
                                   value={inputTo}
                                   onKeyDown={handleKeyDownTo}
-                                  onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
+                                  onChange={(e) => setInputTo(e.target.value)}
                                   className='focus:none outline-none px-2 py-1 grow'
                                 />
+                                <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                  <div className='px-1'>
+                                    <h2 className='text-[12px] font-medium'>
+                                      Add multiple recipients by pressing Tab or Enter.
+                                    </h2>
+                                  </div>
+                                </Tooltip>
                               </div>
                             </div>
                             <button
@@ -165,11 +234,20 @@ export default function DesignBenefitsModal({
                         </div>
                         {isCCOpen && (
                           <div className='sm:col-span-4 mt-4'>
-                            <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            <label htmlFor='cc' className='block text-sm font-medium leading-6 text-gray-900'>
                               CC
                             </label>
+                            {errors.cc && (
+                              <p className='text-xs text-red-600 mt-1'>
+                                {errors.cc.message}
+                              </p>
+                            )}
                             <div className='mt-2'>
-                              <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
+                              <div 
+                                className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                                data-tooltip-id='cc-section-tooltip'
+                                data-tooltip-place='bottom'
+                              >
                                 {tagsCc.map((tag: string) => (
                                   <div
                                     key={tag}
@@ -185,9 +263,16 @@ export default function DesignBenefitsModal({
                                   type='text'
                                   value={inputCc}
                                   onKeyDown={handleKeyDown}
-                                  onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
+                                  onChange={(e) => setInputCc(e.target.value)}
                                   className='focus:none outline-none px-2 py-1 grow rounded-md'
                                 />
+                                <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                  <div className='px-1'>
+                                    <h2 className='text-[12px] font-medium'>
+                                      Add multiple recipients by pressing Tab or Enter.
+                                    </h2>
+                                  </div>
+                                </Tooltip>
                               </div>
                             </div>
                           </div>
@@ -197,8 +282,17 @@ export default function DesignBenefitsModal({
                             <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                               BCC
                             </label>
+                            {errors.bcc && (
+                              <p className='text-xs text-red-600 mt-1'>
+                                {errors.bcc.message}
+                              </p>
+                            )}
                             <div className='mt-2'>
-                              <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'>
+                              <div 
+                                className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'
+                                data-tooltip-id='bcc-section-tooltip'
+                                data-tooltip-place='bottom'
+                              >
                                 {tagsBcc.map((tagBcc: string) => (
                                   <div
                                     key={tagBcc}
@@ -214,9 +308,16 @@ export default function DesignBenefitsModal({
                                   type='text'
                                   value={inputBcc}
                                   onKeyDown={handleKeyDownBcc}
-                                  onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
+                                  onChange={(e) => setInputBcc(e.target.value)}
                                   className='focus:none outline-none px-2 py-1 grow rounded-md'
                                 />
+                                <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                  <div className='px-1'>
+                                    <h2 className='text-[12px] font-medium'>
+                                      Add multiple recipients by pressing Tab or Enter.
+                                    </h2>
+                                  </div>
+                                </Tooltip>
                               </div>
                             </div>
                           </div>
@@ -225,6 +326,9 @@ export default function DesignBenefitsModal({
                           <label htmlFor='purpose' className='block text-sm font-medium leading-6 text-gray-900'>
                             Purpose<span className='text-red-600'>*</span>
                           </label>
+                          {errors.purpose && (
+                            <p className='mt-1 text-xs text-red-600'>{errors.purpose.message}</p>
+                          )}
                           <div className='mt-2'>
                             <textarea
                               rows={4}
@@ -238,15 +342,15 @@ export default function DesignBenefitsModal({
                               id='purpose'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
-                            {errors.purpose && (
-                              <p className='mt-1 text-sm text-red-600'>{errors.purpose.message}</p>
-                            )}
                           </div>
                         </div>
                         <div className='sm:col-span-4 mt-4'>
                           <label htmlFor='benefits' className='block text-sm font-medium leading-6 text-gray-900'>
                             Benefits<span className='text-red-600'>*</span>
                           </label>
+                          {errors.benefits && (
+                            <p className='mt-1 text-xs text-red-600'>{errors.benefits.message}</p>
+                          )}
                           <div className='mt-2'>
                             <textarea
                               rows={4}
@@ -260,9 +364,6 @@ export default function DesignBenefitsModal({
                               id='benefits'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
-                            {errors.benefits && (
-                              <p className='mt-1 text-sm text-red-600'>{errors.benefits.message}</p>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -272,6 +373,11 @@ export default function DesignBenefitsModal({
                           <label htmlFor='coverage' className='block text-sm font-medium leading-6 text-gray-900'>
                             Coverage<span className='text-red-600'>*</span>
                           </label>
+                          {errors.coverage && (
+                            <p className='text-xs text-red-600 mt-1'>
+                              {errors.coverage.message || 'Coverage is required.'}
+                            </p>
+                          )}
                           <div className='mt-2'>
                             <textarea
                               rows={4}
@@ -285,15 +391,17 @@ export default function DesignBenefitsModal({
                               id='coverage'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
-                            {errors.coverage && (
-                              <p className='mt-1 text-sm text-red-600'>{errors.coverage.message}</p>
-                            )}
                           </div>
                         </div>
                         <div className='sm:col-span-4 mt-4'>
                           <label htmlFor='eligibility' className='block text-sm font-medium leading-6 text-gray-900'>
                             Eligibility<span className='text-red-600'>*</span>
                           </label>
+                          {errors.eligibility && (
+                            <p className='text-xs text-red-600 mt-1'>
+                              {errors.eligibility.message || 'Eligibility is required.'}
+                            </p>
+                          )}
                           <div className='mt-2'>
                             <textarea
                               rows={4}
@@ -307,9 +415,6 @@ export default function DesignBenefitsModal({
                               id='eligibility'
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
-                            {errors.eligibility && (
-                              <p className='mt-1 text-sm text-red-600'>{errors.eligibility.message}</p>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -321,67 +426,108 @@ export default function DesignBenefitsModal({
                           type='button'
                           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                           onClick={async (e) => {
-                            const title = await trigger('title');
-                            const email = await trigger('email');
-                            const purpose = await trigger('purpose');
-                            const benefits = await trigger('benefits');
-                            const cc = await trigger('cc');
-                            const bcc = await trigger('bcc');
-                            let results = null;
-                            if (isCCOpen && isBCCOpen) {
-                              if (tagsBcc.length === 0 && tagsCc.length === 0) {
-                                e.preventDefault();
-                                results = [title, email, purpose, benefits, false, false];
-                                setValue('bcc', []);
-                                setValue('cc', []);
-                              } else {
-                                results = [title, email, purpose, benefits, cc, bcc];
-                              }
-                            } else if (isCCOpen && !isBCCOpen) {
-                              if (tagsCc.length === 0) {
-                                e.preventDefault();
-                                results = [title, email, purpose, benefits, false];
-                                setValue('cc', []);
-                              } else {
-                                results = [title, email, purpose, benefits, cc];
-                              }
-                            } else if (!isCCOpen && isBCCOpen) {
-                              if (tagsBcc.length === 0) {
-                                e.preventDefault();
-                                results = [title, email, purpose, benefits, false];
-                                setValue('bcc', []);
-                              } else {
-                                (results = [title, email, purpose, benefits]), bcc;
-                              }
+                            e.preventDefault(); // Prevent any potential form submission
+                            
+                            const titleValue = watch('title');
+                            const purposeValue = watch('purpose');
+                            const benefitsValue = watch('benefits');
+                            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                            let hasErrors = false;
+                            
+                            // Clear any existing errors first
+                            clearErrors(['title', 'email', 'purpose', 'benefits', 'cc', 'bcc']);
+                            
+                            // Validate title field
+                            if (!titleValue || titleValue === "") {
+                              setError("title", {
+                                type: "manual",
+                                message: "Title is required."
+                              });
+                              hasErrors = true;
+                            }
+                            
+                            // Validate purpose field
+                            if (!purposeValue || purposeValue === "") {
+                              setError("purpose", {
+                                type: "manual",
+                                message: "Purpose is required."
+                              });
+                              hasErrors = true;
+                            }
+                            
+                            // Validate benefits field
+                            if (!benefitsValue || benefitsValue === "") {
+                              setError("benefits", {
+                                type: "manual",
+                                message: "Benefits is required."
+                              });
+                              hasErrors = true;
+                            }
+                            
+                            // Validate To field
+                            if (tagsTo.length === 0) {
+                              setError("email", {
+                                type: "manual",
+                                message: "To field is required."
+                              });
+                              hasErrors = true;
                             } else {
-                              if (tagsTo.length === 0) {
-                                e.preventDefault();
-                                results = [title, false, purpose, benefits];
-                                setValue('email', []);
-                              } else {
-                                results = [title, email, purpose, benefits];
+                              // Validate email format only if there are emails
+                              const invalidEmails = tagsTo.filter(email => !emailRegex.test(email));
+                              if (invalidEmails.length > 0) {
+                                setError("email", {
+                                  type: "manual",
+                                  message: "Please enter valid email addresses."
+                                });
+                                hasErrors = true;
                               }
                             }
-                            const incomplete = results.some((item: boolean) => !item);
-                            if (!incomplete) {
-                              if (tagsTo.length > 0) {
-                                setPage(2);
-                              } else {
-                                setValue('email', []);
+                            
+                            // Validate CC field if open and has emails (only validate format, not required)
+                            if (isCCOpen && tagsCc.length > 0) {
+                              const invalidCcEmails = tagsCc.filter(email => !emailRegex.test(email));
+                              if (invalidCcEmails.length > 0) {
+                                setError("cc", {
+                                  type: "manual",
+                                  message: "Please enter valid email addresses."
+                                });
+                                hasErrors = true;
                               }
-                            } else {
-                              toast.custom(
-                                () => (
-                                  <CustomToast
-                                    message={'You cannot proceed due to incomplete fields. Please review.'}
-                                    type='error'
-                                  />
-                                ),
-                                {
-                                  duration: 4000,
-                                }
-                              );
                             }
+                            
+                            // Validate BCC field if open and has emails (only validate format, not required)
+                            if (isBCCOpen && tagsBcc.length > 0) {
+                              const invalidBccEmails = tagsBcc.filter(email => !emailRegex.test(email));
+                              if (invalidBccEmails.length > 0) {
+                                setError("bcc", {
+                                  type: "manual",
+                                  message: "Please enter valid email addresses."
+                                });
+                                hasErrors = true;
+                              }
+                            }
+
+                            // If there are errors, focus on the first invalid field and return
+                            if (hasErrors) {
+                              if (!titleValue || titleValue === "") {
+                                const el = document.getElementById("title");
+                                if (el) el.focus();
+                              } else if (!purposeValue || purposeValue === "") {
+                                const el = document.getElementById("purpose");
+                                if (el) el.focus();
+                              } else if (!benefitsValue || benefitsValue === "") {
+                                const el = document.getElementById("benefits");
+                                if (el) el.focus();
+                              } else if (tagsTo.length === 0) {
+                                // Focus on the email input field
+                                const emailInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+                                if (emailInput) emailInput.focus();
+                              }
+                              return;
+                            }
+                            
+                            // If validation passes, proceed to next page
+                            setPage(2);
                           }}
                         >
                           Next
@@ -399,25 +545,6 @@ export default function DesignBenefitsModal({
                           </button>
                         </div>
                         <button
-                          onClick={async () => {
-                            const coverage = await trigger('coverage');
-                            const eligibility = await trigger('eligibility');
-                            const results = [coverage, eligibility];
-                            const incomplete = results.some((item: boolean) => !item);
-                            if (incomplete) {
-                              toast.custom(
-                                () => (
-                                  <CustomToast
-                                    message={'You cannot proceed due to incomplete fields. Please review.'}
-                                    type='error'
-                                  />
-                                ),
-                                {
-                                  duration: 4000,
-                                }
-                              );
-                            }
-                          }}
                           type='submit'
                           className='flex-none inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                           disabled={isLoading}

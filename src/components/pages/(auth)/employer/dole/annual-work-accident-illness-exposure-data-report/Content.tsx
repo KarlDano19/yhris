@@ -8,8 +8,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { Tooltip } from 'react-tooltip';
+import { createPortal } from 'react-dom';
+import { useForm } from 'react-hook-form';
 
-import UpdateReportModal from './modals/UpdateReportModal';
 import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
@@ -19,6 +21,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
 import CreateReportModal from './modals/CreateReportModal';
+import EditReportModal from './modals/EditReportModal';
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -43,7 +46,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [annualAccidentIllnessReportItems, setAnnualAccidentIllnessReportItems] = useState<any>([]);
   const [isDeleteAnnualAccidentIllnessReportModalOpen, setIsDeleteAnnualAccidentIllnessReportModalOpen] =
     useState<T_ModalData | null>(null);
-  const [isUpdateAnnualAccidentIllnessReportModalOpen, setIsUpdateAnnualAccidentIllnessReportModalOpen] =
+  const [isEditAnnualAccidentIllnessReportModalOpen, setIsEditAnnualAccidentIllnessReportModalOpen] =
     useState<T_ModalData | null>(null);
   const [isCreateAnnualAccidentIllnessReportModalOpen, setIsCreateAnnualAccidentIllnessReportModalOpen] =
     useState<boolean>(false);
@@ -73,6 +76,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -103,6 +111,33 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     annualAccidentIllnessReportRefetch();
   }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (openMenuId !== null) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.menu-container')) {
+          setOpenMenuId(null);
+        }
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
+
+  // Close all menus when changing pages
+  useEffect(() => {
+    setOpenMenuId(null);
+  }, [currentPage]);
+
+  // New function to handle menu clicks
+  const handleMenuClick = (event: React.MouseEvent, id: number) => {
+    event.stopPropagation();
+    setOpenMenuId(openMenuId === id ? null : id);
+  };
 
   const handlePrintWithBranch = () => {
     if (selectedBranch) {
@@ -241,7 +276,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex space-x-2'>
               <button
                 onClick={() =>
-                  setIsUpdateAnnualAccidentIllnessReportModalOpen({
+                  setIsEditAnnualAccidentIllnessReportModalOpen({
                     id: item.id,
                     open: true,
                   })
@@ -261,72 +296,46 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EmailLogo />
               </button>
-              <div className='flex-1 flex justify-end'>
-                <Menu as='div' className='relative'>
-                  <Menu.Button className=' py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                    <span className='sr-only'>Open options</span>
-                    <div className='flex gap-4'>
-                      <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
-                    </div>
-                  </Menu.Button>
-                  <Transition
-                    as={Fragment}
-                    enter='transition ease-out duration-100'
-                    enterFrom='transform opacity-0 scale-95'
-                    enterTo='transform opacity-100 scale-100'
-                    leave='transition ease-in duration-75'
-                    leaveFrom='transform opacity-100 scale-100'
-                    leaveTo='transform opacity-0 scale-95'
+              <div className='flex-1 flex justify-end relative menu-container'>
+                <button 
+                  className='py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                  onClick={(e) => handleMenuClick(e, item.id)}
+                >
+                  <span className='sr-only'>Open options</span>
+                  <div className='flex gap-4'>
+                    <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
+                  </div>
+                </button>
+                {openMenuId === item.id && (
+                  <div 
+                    className='absolute z-50 origin-top-right right-0 mt-2 w-[8.6rem] rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
+                    style={{ top: '100%' }}
                   >
-                    <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                      <div className='py-1'>
-                        {[
-                          {
-                            name: 'Download',
-                            action: () => {
-                              setIsExportProgressModalOpen(true);
-                            },
-                          },
-                          {
-                            name: 'Print',
-                            action: () => {
-                              handlePrint();
-                            },
-                          },
-                          {
-                            name: 'Edit',
-                            action: () => {
-                              setIsExportProgressModalOpen(true);
-                            },
-                          },
-                          {
-                            name: 'Delete',
-                            action: () => {
-                              setIsDeleteAnnualAccidentIllnessReportModalOpen({
-                                id: item.id,
-                                open: true,
-                              });
-                            },
-                          },
-                        ].map((menuItem) => (
-                          <Menu.Item key={menuItem.name}>
-                            {({ active }) => (
-                              <span
-                                className={classNames(
-                                  'block px-4 py-2 text-sm cursor-pointer text-center',
-                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                                )}
-                                onClick={menuItem.action}
-                              >
-                                {menuItem.name}
-                              </span>
-                            )}
-                          </Menu.Item>
-                        ))}
-                      </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
+                    <div className='py-1'>
+                      <span
+                        className='block px-4 py-2 text-sm cursor-pointer text-center text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        onClick={() => {
+                          setIsExportProgressModalOpen(true);
+                          setOpenMenuId(null);
+                        }}
+                      >
+                        Download
+                      </span>
+                      <span
+                        className='block px-4 py-2 text-sm cursor-pointer text-center text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        onClick={() => {
+                          setIsDeleteAnnualAccidentIllnessReportModalOpen({
+                            id: item.id,
+                            open: true,
+                          });
+                          setOpenMenuId(null);
+                        }}
+                      >
+                        Delete
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </td>
@@ -355,7 +364,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Annual Work Accident/ Illness Exposure Data Report</h2>
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -411,11 +420,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateAnnualAccidentIllnessReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_awair}
+                disabled={!cachedRigths?.state?.data?.create_dole_awair}
               >
                 CREATE
               </button>
-              <Menu as='div' className='relative'>
+              <Menu as='div' className='relative menu-container'>
                 <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
                   <div className='flex gap-4'>
@@ -460,7 +469,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          <div className='mt-8 flow-root'>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
@@ -495,16 +504,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
           </div>
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
       {isSelectBranchModalOpen && (
@@ -522,6 +531,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={annualAccidentIllnessReportRefetch}
           isOpen={isCreateAnnualAccidentIllnessReportModalOpen}
           setIsOpen={setIsCreateAnnualAccidentIllnessReportModalOpen}
+          formMethods={createFormMethods}
         />
       )}
       {isDeleteAnnualAccidentIllnessReportModalOpen && (
@@ -531,11 +541,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteAnnualAccidentIllnessReportModalOpen}
         />
       )}
-      {isUpdateAnnualAccidentIllnessReportModalOpen && (
-        <UpdateReportModal
+      {isEditAnnualAccidentIllnessReportModalOpen && (
+        <EditReportModal
           refetch={annualAccidentIllnessReportRefetch}
-          isOpen={isUpdateAnnualAccidentIllnessReportModalOpen}
-          setIsOpen={setIsUpdateAnnualAccidentIllnessReportModalOpen}
+          isOpen={isEditAnnualAccidentIllnessReportModalOpen}
+          setIsOpen={setIsEditAnnualAccidentIllnessReportModalOpen}
+          formMethods={editFormMethods}
         />
       )}
       {isExportProgressModalOpen && (
@@ -758,6 +769,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
         </div>
       </div> */}
+      <Tooltip id='email-tooltip'/>
     </>
   );
 }
