@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 
-import FilterLogo from '@/svg/FilterLogo';
 import ExitReasonsFilterModal from '../../../../modals/ExitReasonsFilterModal';
-import { Tooltip } from 'react-tooltip';
+
+import FilterLogo from '@/svg/FilterLogo';
 
 interface ExitReasonsProps {
   separationData?: any;

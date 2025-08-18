@@ -8,6 +8,7 @@ import OverallComplianceTrend from './components/compliance-policy-tab/OverallCo
 import PoliciesAcknowledgementTrend from './components/compliance-policy-tab/PoliciesAcknowledgementTrend';
 import PolicyComplianceTable from './components/compliance-policy-tab/PolicyComplianceTable';
 import DOLEComplianceTable from './components/compliance-policy-tab/DOLEComplianceTable';
+
 import useGetAnnualAccidentIllnessReportItems from '../hooks/useGetAnnualAccidentIllnessReportItems';
 import useGetAnnualMedicalReportItems from '../hooks/useGetAnnualMedicalReportItems';
 import useGetHealthAndSafetyReportItems from '../hooks/useGetHealthAndSafetyReportItems';

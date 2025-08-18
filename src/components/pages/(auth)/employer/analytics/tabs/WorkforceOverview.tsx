@@ -12,6 +12,7 @@ import DemographicBreakdown from './components/workforce-overview-tab/applicant-
 import RolePipelineTable from './components/workforce-overview-tab/role-pipeline-tab/RolePipelineTable';
 import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
+
 import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
 import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
