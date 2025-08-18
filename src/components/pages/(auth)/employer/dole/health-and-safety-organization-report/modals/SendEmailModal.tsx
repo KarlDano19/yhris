@@ -123,11 +123,29 @@ export default function SendEmailModal({
             const template = dataEmailTemplate.find((item: any) => item.id === parseInt(selectedTemplate));
             if (template) {
                 setValue('subject', template.subject);
-                if (employeeEmail) {
-                    setTagsTo([employeeEmail, ...template.to]);
-                } else {
-                    setTagsTo(template.to);
-                }
+                
+                // Use functional update to access current tagsTo state without causing infinite loop
+                setTagsTo(currentTagsTo => {
+                    const templateRecipients = template.to || [];
+                    
+                    // Combine existing emails with template emails, avoiding duplicates
+                    const combinedEmails = [...currentTagsTo];
+                    
+                    // Add template emails that aren't already present
+                    templateRecipients.forEach((email: string) => {
+                        if (!combinedEmails.includes(email)) {
+                            combinedEmails.push(email);
+                        }
+                    });
+                    
+                    // Ensure employeeEmail is included if it exists
+                    if (employeeEmail && !combinedEmails.includes(employeeEmail)) {
+                        combinedEmails.unshift(employeeEmail);
+                    }
+                    
+                    return combinedEmails;
+                });
+                
                 if (template.bcc) {
                     setIsBCCOpen(true);
                     setTagsBcc(template.bcc);
@@ -327,6 +345,43 @@ export default function SendEmailModal({
                                 {...register('template')}
                                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 onChange={(event) => {
+                                    const template = dataEmailTemplate.find(
+                                        (item: any) => item.id === parseInt(event.target.value)
+                                    );
+                                    if (template) {
+                                        setValue('subject', template.subject);
+                                        
+                                        // Preserve existing manually entered emails and add template emails
+                                        const currentEmails = tagsTo;
+                                        const templateRecipients = template.to || [];
+                                        
+                                        // Combine existing emails with template emails, avoiding duplicates
+                                        const combinedEmails = [...currentEmails];
+                                        
+                                        // Add template emails that aren't already present
+                                        templateRecipients.forEach((email: string) => {
+                                            if (!combinedEmails.includes(email)) {
+                                                combinedEmails.push(email);
+                                            }
+                                        });
+                                        
+                                        // Ensure employeeEmail is included if it exists
+                                        if (employeeEmail && !combinedEmails.includes(employeeEmail)) {
+                                            combinedEmails.unshift(employeeEmail);
+                                        }
+                                        
+                                        setTagsTo(combinedEmails);
+                                        
+                                        if (template.bcc) {
+                                            setIsBCCOpen(true);
+                                            setTagsBcc(template.bcc);
+                                        }
+                                        if (template.cc) {
+                                            setIsCCOPen(true);
+                                            setTagsCc(template.cc);
+                                        }
+                                        setValue('message', template.body);
+                                    }
                                     setSelectedTemplate(event.target.value);
                                 }}
                               >
