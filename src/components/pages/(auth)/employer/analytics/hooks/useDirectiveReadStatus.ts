@@ -71,7 +71,6 @@ const useDirectiveReadStatus = (
         
         return data;
       } catch (err: any) {
-        console.error('Error fetching directive read status:', err);
         throw err;
       }
     },

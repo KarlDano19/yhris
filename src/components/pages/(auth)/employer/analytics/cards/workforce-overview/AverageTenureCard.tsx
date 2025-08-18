@@ -58,11 +58,29 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
 
     const averageTenure = validEmployees > 0 ? totalTenure / validEmployees : 0;
 
-    // For trend analysis, we'll use a simplified approach
-    // In a real system, you'd compare with historical data
-    // For now, we'll show "No significant change" as per the sample UI
-    const trend = 'No significant change';
-    const isPositive = averageTenure > 2; // Positive if average tenure is above 2 years
+    // Trend analysis based on average tenure value
+    let trend = '';
+    let isPositive = true;
+    
+    if (averageTenure === 0) {
+      trend = 'No data available';
+      isPositive = true;
+    } else if (averageTenure < 1) {
+      trend = 'Low tenure - consider retention strategies';
+      isPositive = false;
+    } else if (averageTenure < 2) {
+      trend = 'Below average tenure';
+      isPositive = false;
+    } else if (averageTenure < 3) {
+      trend = 'Average tenure level';
+      isPositive = true;
+    } else if (averageTenure < 5) {
+      trend = 'Good tenure retention';
+      isPositive = true;
+    } else {
+      trend = 'Excellent tenure retention';
+      isPositive = true;
+    }
 
     return {
       averageTenure: Math.round(averageTenure * 10) / 10, // Round to 1 decimal place
