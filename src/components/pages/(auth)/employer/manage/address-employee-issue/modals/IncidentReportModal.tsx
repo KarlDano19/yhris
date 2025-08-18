@@ -97,7 +97,7 @@ export default function IncidentReportModal({
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {}}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
