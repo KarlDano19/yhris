@@ -53,13 +53,13 @@ const AttritionRateCard: React.FC<AttritionRateCardProps> = ({
     
     // Count leavers in the current quarter period
     const currentPeriodLeavers = separationData.filter((separation: any) => {
-      const separationDate = new Date(separation.separation_date || separation.created_at);
+      const separationDate = new Date(separation.date_of_separation || separation.separation_date || separation.created_at);
       return separationDate >= quarterStartDate && separationDate <= quarterEndDate;
     }).length;
 
     // Count leavers in the previous quarter period
     const previousPeriodLeavers = separationData.filter((separation: any) => {
-      const separationDate = new Date(separation.separation_date || separation.created_at);
+      const separationDate = new Date(separation.date_of_separation || separation.separation_date || separation.created_at);
       return separationDate >= previousQuarterStartDate && separationDate <= previousQuarterEndDate;
     }).length;
 

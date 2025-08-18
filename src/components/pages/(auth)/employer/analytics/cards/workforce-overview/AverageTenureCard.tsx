@@ -33,17 +33,17 @@ const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
 
     employeeData.forEach((employee: any) => {
       // Get start date from employee data
-      const startDate = new Date(employee.start_date || employee.created_at || employee.hire_date);
+      const startDate = new Date(employee.date_hired || employee.start_date || employee.created_at || employee.hire_date);
       
       // Check if employee has left (has separation date)
       const separationRecord = Array.isArray(separationData) ? separationData.find((separation: any) => 
-        separation.employee_id === employee.id || separation.employee_name === `${employee.firstname} ${employee.lastname}`
+        separation.employee_id === employee.id || separation.name === `${employee.firstname} ${employee.lastname}`
       ) : undefined;
       
       let endDate = currentDate; // Default to current date (still employed)
       if (separationRecord) {
         // Employee has left, use separation date
-        endDate = new Date(separationRecord.separation_date || separationRecord.created_at);
+        endDate = new Date(separationRecord.date_of_separation || separationRecord.separation_date || separationRecord.created_at);
       }
 
       // Calculate tenure in years
