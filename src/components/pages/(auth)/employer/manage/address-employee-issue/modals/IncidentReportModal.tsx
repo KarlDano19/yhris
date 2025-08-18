@@ -1,10 +1,11 @@
-import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -13,7 +14,12 @@ import useAddEmployeeIssueItems from '../hooks/useAddEmployeeIssueItems';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 import { T_IncidentReport } from '@/types/globals';
+import { issueTypeOptions } from '@/helpers/issueTypes';
 
+interface Field {
+  onChange: (value: any) => void;
+  value: any;
+}
 
 export default function IncidentReportModal({
   employeeIssueItems,
@@ -163,6 +169,10 @@ export default function IncidentReportModal({
                             }}
                             readOnly={employeeSelected}
                           />
+                          <input
+                            type='hidden'
+                            {...register('name', { required: true })}
+                          />
                           <div
                             className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
                             onClick={() => {
@@ -299,21 +309,36 @@ export default function IncidentReportModal({
                           Issue Type<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                          <select
-                            id='issueType'
-                            {...register('issueType', { required: true })}
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none bg-white'
-                          >
-                            <option value=''>Select issue type...</option>
-                            <option value='Tardiness'>Tardiness</option>
-                            <option value='Insubordination'>Insubordination</option>
-                            <option value='Misconduct'>Misconduct</option>
-                            <option value='Poor Performance'>Poor Performance</option>
-                            <option value='Absenteeism'>Absenteeism</option>
-                          </select>
-                          <div className='absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none'>
-                            <SelectChevronDown />
-                          </div>
+                          <Controller
+                            name='issueType'
+                            control={control}
+                            rules={{
+                              required: "Please select an issue type",
+                            }}
+                            render={({ field: { onChange, value } }: { field: Field }) => (
+                              <Select
+                                className='text-sm'
+                                classNamePrefix='select'
+                                options={issueTypeOptions}
+                                value={issueTypeOptions.find((item: any) => item.value === value) || null}
+                                onChange={(val: any) => {
+                                  onChange(val ? val.value : '');
+                                }}
+                                components={{
+                                  DropdownIndicator: () => (
+                                    <div className='pointer-events-none px-2'>
+                                      <SelectChevronDown />
+                                    </div>
+                                  ),
+                                  IndicatorSeparator: () => null,
+                                }}
+                                isClearable={false}
+                                isOptionDisabled={(option: any) => option.isDisabled}
+                                noOptionsMessage={() => null}
+                                placeholder='Select issue type...'
+                              />
+                            )}
+                          />
                         </div>
                       </div>
                     </div>
