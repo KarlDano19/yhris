@@ -51,7 +51,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const tabs = [
     { id: 1, name: 'Workforce Overview', shortName: 'Workforce', isAvailable: true },
     { id: 2, name: 'Employee Performance & Development', shortName: 'Performance', isAvailable: hasActiveSubscription },
-    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: hasActiveSubscription },
+    { id: 3, name: 'Compliance & Policy', shortName: 'Compliance', isAvailable: hasActiveSubscription, isHidden: true },
     // { id: 4, name: 'Compensation & Benefits', shortName: 'Compensation', isAvailable: false },
   ];
 
@@ -163,7 +163,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className="hidden md:flex flex-row justify-between space-x-2 w-3/4">
               {tabs.map((tab) => (
                 <div key={tab.id} className="cursor-pointer">
-                  {tab.isAvailable ? (
+                  {tab.isHidden ? (
+                    <div className="text-lg font-bold pb-2 text-center invisible">
+                      {tab.name}
+                    </div>
+                  ) : tab.isAvailable ? (
                     <h1 
                       onClick={() => handleTabChange(tab.id)}
                       className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
@@ -194,7 +198,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     key={tab.id} 
                     className={tab.isAvailable ? "cursor-pointer flex-shrink-0" : "cursor-not-allowed flex-shrink-0"}
                   >
-                    {tab.isAvailable ? (
+                    {tab.isHidden ? (
+                      <div className="text-sm font-bold pb-2 text-center whitespace-nowrap invisible">
+                        {tab.shortName}
+                      </div>
+                    ) : tab.isAvailable ? (
                       <h1 
                         onClick={() => handleTabChange(tab.id)}
                         className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${activeTab === tab.id ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}
