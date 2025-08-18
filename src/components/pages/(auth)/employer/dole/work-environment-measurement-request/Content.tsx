@@ -66,15 +66,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
+  const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     onSuccess: () => {
-      toast.custom(() => <CustomToast message='PDF generated successfully!' type='success' />, { duration: 3000 });
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
     },
     onError: (error) => {
+      setGeneratingItemId(null);
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
     }
   });
@@ -190,12 +193,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handlePrintPDFLocal = async (item: any) => {
     try {
+      setGeneratingItemId(item.id);
       // Fetch detailed data using the print hook's function directly
       const detailedData = await getPrintWorkEnvironmentRequestDetails(item.id);
       
       // Use the detailed data directly for PDF generation
       await handlePrintPDF(detailedData, generatePDFLocally);
     } catch (error) {
+      setGeneratingItemId(null);
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
     }
   };
@@ -401,10 +406,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EmailLogo />
               </button>
               <button
-                                    onClick={() => handlePrintPDFLocal(item)}
-                disabled={isGenerating || !cachedRigths?.state?.data?.generate_dole_work_environment_request}
+                onClick={() => handlePrintPDFLocal(item)}
+                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_work_environment_request}
+                className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
-                <PrintIcon />
+                {generatingItemId === item.id ? (
+                  <div className="animate-spin inline-block w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full">
+                  </div>
+                ) : (
+                  <PrintIcon />
+                )}
               </button>
               <button
                 onClick={() =>
