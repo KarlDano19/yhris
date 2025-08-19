@@ -22,6 +22,9 @@ The application uses custom React hooks to encapsulate API calls and data fetchi
 - **useGetAdminProfile** - Fetch admin profile
 
 ### Mutation Hooks (Data Modification)
+- **useLogin** - Handle user login with OTP support
+- **useOTPVerification** - Verify OTP codes
+- **useOTPResend** - Resend OTP codes
 - **useLogout** - Handle user logout
 - **useSyncEmployees** - Sync employees with third-party systems
 - **useEnrollEmployeeToYP** - Enroll employee to YP system
@@ -275,6 +278,141 @@ function SecureComponent() {
 **Cache Key**: `['locationItemsCache']`
 
 **Returns**: Array of location objects
+
+### useLogin
+
+**Purpose**: Handles user login with OTP support
+
+**API Endpoint**: `POST /api/login/`
+
+**Type**: Mutation
+
+**Returns**: Login response with OTP requirement flag
+
+**Usage**:
+```typescript
+import useLogin from '@/components/pages/(all-layout)/login/hooks/useLogin';
+
+function LoginForm() {
+  const { mutate: login, isLoading } = useLogin();
+  
+  const handleLogin = (credentials) => {
+    login(credentials, {
+      onSuccess: (response) => {
+        if (response.otp_required) {
+          // Show OTP modal
+          setShowOTPModal(true);
+          setOtpData(response);
+        } else {
+          // Direct login
+          window.location.href = '/dashboard';
+        }
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    });
+  };
+  
+  return (
+    <form onSubmit={handleLogin}>
+      {/* Form fields */}
+    </form>
+  );
+}
+```
+
+### useOTPVerification
+
+**Purpose**: Verifies OTP codes for two-factor authentication
+
+**API Endpoint**: `POST /api/login/otp/verify/`
+
+**Type**: Mutation
+
+**Payload**:
+```typescript
+interface OTPVerificationPayload {
+  session_id: string;
+  code: string;
+  email: string;
+  remember_device?: boolean;
+}
+```
+
+**Usage**:
+```typescript
+import useOTPVerification from '@/components/pages/(all-layout)/login/hooks/useOTPVerification';
+
+function OTPModal() {
+  const { mutate: verifyOTP, isLoading } = useOTPVerification();
+  
+  const handleVerify = (otpCode) => {
+    verifyOTP({
+      session_id: sessionId,
+      code: otpCode,
+      email: userEmail,
+      remember_device: rememberDevice
+    }, {
+      onSuccess: (data) => {
+        // Create session and redirect
+        setSession(data);
+      },
+      onError: (error) => {
+        toast.error('Invalid OTP code');
+      },
+    });
+  };
+  
+  return (
+    <OTPInput onComplete={handleVerify} />
+  );
+}
+```
+
+### useOTPResend
+
+**Purpose**: Resends OTP code to user's email
+
+**API Endpoint**: `POST /api/login/otp/resend/`
+
+**Type**: Mutation
+
+**Payload**:
+```typescript
+interface OTPResendPayload {
+  session_id: string;
+}
+```
+
+**Usage**:
+```typescript
+import useOTPResend from '@/components/pages/(all-layout)/login/hooks/useOTPResend';
+
+function ResendButton() {
+  const { mutate: resendOTP, isLoading } = useOTPResend();
+  
+  const handleResend = () => {
+    resendOTP({
+      session_id: currentSessionId
+    }, {
+      onSuccess: (data) => {
+        toast.success('New OTP sent to your email');
+        setTimeRemaining(data.time_remaining_seconds);
+      },
+      onError: (error) => {
+        toast.error('Failed to resend OTP');
+      },
+    });
+  };
+  
+  return (
+    <button onClick={handleResend} disabled={isLoading}>
+      {isLoading ? 'Sending...' : 'Resend Code'}
+    </button>
+  );
+}
+```
 
 ### useLogout
 
