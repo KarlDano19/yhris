@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -25,15 +25,17 @@ function UpdateShcMinutesMeetingModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {data: minutesMeetingData, remove: removeMinutesMeeting, refetch: refetchMinutesMeeting} = useGetMinutesMeetingDetails(isOpen.id);
   const {
     mutate: updateShcMinutesMeeting,
@@ -41,20 +43,19 @@ function UpdateShcMinutesMeetingModal({
   } = useUpdateShcMinutesMeeting();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
-          {
-            duration: 5000,
-          }
-        );
-        setIsOpen({ id: 0, open: false });
-        reset();
-        setSelectedTab(1);
-        refetch();
-      },
+              onSuccess: (data: any) => {
+          toast.custom(
+            () => <CustomToast message={data.message} type="success" />,
+            {
+              duration: 5000,
+            }
+          );
+          setIsOpen({ id: 0, open: false });
+          setSelectedTab(1);
+          refetch();
+        },
       onError: (err: any) => {
         const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
         toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
@@ -98,7 +99,7 @@ function UpdateShcMinutesMeetingModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => customCloseModal()}
       >
         <Transition.Child
           as={Fragment}
@@ -142,6 +143,7 @@ function UpdateShcMinutesMeetingModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (

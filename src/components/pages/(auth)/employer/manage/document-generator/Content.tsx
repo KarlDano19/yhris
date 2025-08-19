@@ -32,7 +32,9 @@ import { handleProceedUtil } from './utils/handleProceed';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
-export default function Content() {
+import classNames from '@/helpers/classNames';
+
+export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { mutate: uploadAttachment } = useUploadEmployeeIssueAttachments();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -522,7 +524,7 @@ export default function Content() {
           </div>
           <div className="px-2 md:px-8 lg:px-4">
             <h2 className="text-xl font-bold text-indigo-dye">Document Generator</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+            <div className={classNames("grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
               <div className="transition-all duration-300">
                 <Form 
                   documentType={documentType}

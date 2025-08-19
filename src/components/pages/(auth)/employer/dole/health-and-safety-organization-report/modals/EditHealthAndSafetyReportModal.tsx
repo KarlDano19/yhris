@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -22,10 +21,12 @@ function EditHealthAndSafetyReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
   const {
@@ -33,7 +34,7 @@ function EditHealthAndSafetyReportModal({
     refetch: refetchHealthAndSafetyReport,
     remove: removeHealthAndSafetyReport,
   } = useGetHealthAndSafetyReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, getValues, watch } = useForm();
+  const { register, handleSubmit, reset, control, setValue, getValues, watch } = formMethods;
   const {
     mutate: updateHealthAndSafetyReport,
     isLoading: isLoadingUpdateHealthAndSafetyReport,
@@ -89,7 +90,7 @@ function EditHealthAndSafetyReportModal({
     }
   }, [healthAndSafetyReportData, setValue]);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit((data: any) => {
     // Convert date_of_report to YYYY-MM-DD before appending to FormData
     if (data.date_of_report) {
       const dateObj = new Date(data.date_of_report);
@@ -158,7 +159,7 @@ function EditHealthAndSafetyReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => customCloseModal()}
       >
         <Transition.Child
           as={Fragment}
@@ -211,6 +212,7 @@ function EditHealthAndSafetyReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    isCreateModal={false}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -221,6 +223,7 @@ function EditHealthAndSafetyReportModal({
                     onSubmit={onSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    isCreateModal={false}
                   />
                 )}
               </Dialog.Panel>

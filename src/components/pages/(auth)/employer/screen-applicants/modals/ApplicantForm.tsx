@@ -8,7 +8,7 @@ import classNames from '@/helpers/classNames';
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 import StateContext from '../contexts/StateContext';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../lib/initialActionState';
@@ -141,6 +141,34 @@ export default function ApplicantForm({ title }: PropTypes) {
     );
   };
 
+  const renderAnswersTab = () => {
+    return (
+      <>
+        {applicantProfile.screening_answers && applicantProfile.screening_answers !== null && applicantProfile.screening_answers.length > 0 ? (
+          <div className='mt-6 space-y-6'>
+            {applicantProfile.screening_answers.map((item: any, index: number) => (
+              <div key={index} className='bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                <div className='flex items-start'>
+                  <div className='mr-3'>
+                    <QuestionMarkCircleIcon className='h-6 w-6 text-blue-700' />
+                  </div>
+                  <div>
+                    <p className='font-semibold'>{item.question}</p>
+                    <p className='mt-2 text-gray-700'>{item.answer}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className='mt-8 text-center'>
+            <p className='text-gray-500'>No screening questions were answered by this applicant.</p>
+          </div>
+        )}
+      </>
+    );
+  };
+
   const renderResumeView = () => {
     return (
       <>
@@ -186,8 +214,8 @@ export default function ApplicantForm({ title }: PropTypes) {
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
-                    <div className='w-full grid grid-cols-2'>
-                      <div className='mr-5'>
+                    <div className='w-full grid grid-cols-3'>
+                      <div className='mr-2'>
                         <button
                           className={classNames(
                             'px-4 py-2 font-bold rounded-md w-full',
@@ -198,7 +226,7 @@ export default function ApplicantForm({ title }: PropTypes) {
                           Applicant Profile
                         </button>
                       </div>
-                      <div className='ml-5'>
+                      <div className='mx-2'>
                         <button
                           className={classNames(
                             'px-4 py-2 font-bold rounded-md w-full',
@@ -209,11 +237,25 @@ export default function ApplicantForm({ title }: PropTypes) {
                           Job Experience
                         </button>
                       </div>
+                      <div className='ml-2'>
+                        <button
+                          className={classNames(
+                            'px-4 py-2 font-bold rounded-md w-full',
+                            currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                          )}
+                          onClick={() => setCurrentTab(3)}
+                        >
+                          Answers
+                        </button>
+                      </div>
                     </div>
                   )}
                   {!viewCV && currentTab == 1 && renderProfileTab()}
                   {!viewCV && currentTab == 2 && (
                     <div className='h-[28rem] overflow-y-auto'>{renderJobExpTab()}</div>
+                  )}
+                  {!viewCV && currentTab == 3 && (
+                    <div className='h-[28rem] overflow-y-auto'>{renderAnswersTab()}</div>
                   )}
                   {viewCV && renderResumeView()}
                 </div>

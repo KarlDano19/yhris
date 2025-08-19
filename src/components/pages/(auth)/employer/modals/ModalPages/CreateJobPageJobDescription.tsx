@@ -6,7 +6,7 @@ import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
 
-export default function CreateJobPageFour({
+export default function CreateJobPageJobDescription({
   setValue,
   getValues,
   register,
@@ -126,7 +126,12 @@ export default function CreateJobPageFour({
           </div>
         </div>
         <div className='relative mt-2 flex gap-2'>
-          <input type='checkbox' {...register('is_show_roles', { required: true })} id='is_show_roles' value='true' />
+          <input 
+            type='checkbox' 
+            {...register('is_show_roles')} 
+            id='is_show_roles' 
+            onChange={(e) => setValue('is_show_roles', e.target.checked)} 
+          />
           <label htmlFor='is_show_roles' className='ml-2'>
             Show Roles
           </label>
@@ -162,9 +167,9 @@ export default function CreateJobPageFour({
         <div className='relative mt-2 flex gap-2'>
           <input
             type='checkbox'
-            {...register('is_show_remarks', { required: true })}
+            {...register('is_show_remarks')}
             id='is_show_remarks'
-            value='true'
+            onChange={(e) => setValue('is_show_remarks', e.target.checked)}
           />
           <label htmlFor='is_show_remarks' className='ml-2'>
             Show Notes/Remarks
@@ -174,7 +179,7 @@ export default function CreateJobPageFour({
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
         <button
-          id='pageFourNextBtn'
+          id='pageJobDescriptionNextBtn'
           type='button'
           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
           onClick={async () => {
@@ -204,7 +209,7 @@ export default function CreateJobPageFour({
           Next
         </button>
         <button
-          id='pageFourBackBtn'
+          id='pageJobDescriptionBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
           onClick={() => {

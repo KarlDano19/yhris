@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -19,34 +19,41 @@ function CreateShcMettingMinutesModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: addShcMeetingMinutes,
     isLoading: isLoadingAddShcMeetingMinutes,
   } = useAddShcMeetingMinutes();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const onSubmit = handleSubmit((data) => {
+  const resetForm = () => {
+    reset();
+    setIsOpen(false);
+    setSelectedTab(1);
+  };
+
+  const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
-          {
-            duration: 5000,
-          }
-        );
-        setIsOpen(false);
-        reset();
-        refetch();
-      },
+              onSuccess: (data: any) => {
+          toast.custom(
+            () => <CustomToast message={data.message} type="success" />,
+            {
+              duration: 5000,
+            }
+          );
+          resetForm();
+          refetch();
+        },
       onError: (err: any) => {
         const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
         toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
@@ -69,7 +76,7 @@ function CreateShcMettingMinutesModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => {setIsOpen(false)}}
       >
         <Transition.Child
           as={Fragment}
@@ -113,6 +120,7 @@ function CreateShcMettingMinutesModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    watch={watch}
                   />
                 )}
                 {selectedTab === 2 && (

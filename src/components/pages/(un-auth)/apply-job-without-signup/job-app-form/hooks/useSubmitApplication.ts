@@ -20,7 +20,9 @@ async function submitApplication(data: any) {
       college: data.college,
       skills: data.skills,
       education: data.education,
+      screening_answers: data.screeningAnswers || [],
     };
+    
     const formData = new FormData();
     if (data.skills && Array.isArray(data.skills) && data.skills.length > 0) {
       formData.append('skills', data.skills.join(','));
@@ -57,9 +59,8 @@ async function submitApplication(data: any) {
   }
 }
 
-function useSubmitApplication() {
-  const query = useMutation((data: any) => submitApplication(data));
-  return query;
+export default function useSubmitApplication() {
+  return useMutation({
+    mutationFn: submitApplication,
+  });
 }
-
-export default useSubmitApplication;

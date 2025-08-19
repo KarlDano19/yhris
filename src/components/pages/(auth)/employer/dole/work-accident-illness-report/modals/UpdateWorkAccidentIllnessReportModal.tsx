@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller, set } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -24,10 +23,20 @@ export default function UpdateWorkAccidentIllnessReportModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
+  employeeSearch,
+  setEmployeeSearch,
+  employeeSelected,
+  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: any;
+  employeeSearch: string;
+  setEmployeeSearch: (value: string) => void;
+  employeeSelected: boolean;
+  setEmployeeSelected: (value: boolean) => void;
 }) {
     const cancelButtonRef = useRef(null);
     const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -37,7 +46,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
         refetch: refetchWorkAccidentIllnessReport,
         remove: removeWorkAccidentIllnessReport,
   } = useGetWorkAccidentIllnessReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
@@ -84,11 +93,22 @@ export default function UpdateWorkAccidentIllnessReportModal({
       setValue('days_chargeable_illness', workAccidentIllnessReportData.days_chargeable_illness);
       setValue('date_returned_to_work_illness', workAccidentIllnessReportData.date_returned_to_work_illness);
       setValue('disabling_injury', workAccidentIllnessReportData.disabling_injury ? 'yes' : 'no');
+
+      // Set employee search state if employee data is available
+      if (workAccidentIllnessReportData.employee && employeeData) {
+        const employee = employeeData.find((emp: any) => emp.id === workAccidentIllnessReportData.employee);
+        if (employee) {
+          setEmployeeSearch(`${employee.firstname} ${employee.lastname}`);
+          setEmployeeSelected(true);
+        }
+      }
     }
-  }, [workAccidentIllnessReportData]);
+  }, [workAccidentIllnessReportData, employeeData]);
 
   const customCloseModal = () => {
     reset();
+    setEmployeeSearch('');
+    setEmployeeSelected(false);
     removeWorkAccidentIllnessReport();
     setIsOpen(null);
   }
@@ -118,7 +138,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={() => {customCloseModal()}}
       >
         <Transition.Child
           as={Fragment}
@@ -159,6 +179,12 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    setValue={setValue}
+                    employeeItems={employeeItems || []}
+                    employeeSearch={employeeSearch}
+                    setEmployeeSearch={setEmployeeSearch}
+                    employeeSelected={employeeSelected}
+                    setEmployeeSelected={setEmployeeSelected}
                   />
                 )}
                 {selectedTab === 2 && (

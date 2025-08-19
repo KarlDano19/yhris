@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 import { INITIAL_STATE, stageReducer } from '../reducers/stageReducer';
 import { initialActionState } from '../lib/initialActionState';
-import { ModalTypes, StageType } from '../types';
+import { ModalTypes, StageType, ApplicantType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
 import CustomToast from '@/components/CustomToast';
@@ -22,6 +22,7 @@ import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
+import Filter, { FilterOptions } from './Filter';
 import DragAndDrop from './DragAndDrop';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
 import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
@@ -29,6 +30,7 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
+import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -42,7 +44,7 @@ type ModalSelectedTypes = {
   };
 };
 
-export default function Content() {
+export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const params = useParams();
   const { mutate: updateMutate } = useUpdateStage();
   const { mutate: updateStatusMutate } = useUpdateStatus();
@@ -73,6 +75,103 @@ export default function Content() {
   })?.requirements;
   const { mutate: emailMutate } = useSendEmail();
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    rating: ['Good Fit', 'Not Fit'],
+    status: ['Ongoing', 'Passed', 'Rejected'],
+  });
+
+  // Get screening questions and ideal answers from the job posting
+  const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
+  const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
+      setScreeningQuestions(dataJobPostDetails.screening_questions || []);
+    } else {
+      setScreeningQuestions([]);
+    }
+  }, [dataJobPostDetails]);
+
+  // Process applicants and evaluate their screening answers
+  const processApplicants = (applicants: any[]) => {
+    if (!screeningQuestions.length || !applicants?.length) return applicants;
+
+    return applicants.map((applicant) => {
+      // Skip already processed applicants
+      if (applicant.screeningFit) return applicant;
+
+      // Get the applicant's screening answers
+      const answers =
+        applicant.applicant?.screening_answers && applicant.applicant.screening_answers !== null
+          ? applicant.applicant.screening_answers
+          : [];
+
+      // Only check if mustHave questions match their ideal answers
+      let isGoodFit = true;
+
+      if (!answers.length) {
+        // If no answers (empty due to previous data), treat as good fit
+        isGoodFit = true;
+      } else {
+        // Process each answer and check if it matches the ideal answer for mustHave questions
+        // Only check questions that should be shown to candidates
+        answers.forEach((answer: { question: string; answer: string | string[] }) => {
+          const question = screeningQuestions.find((q) => q.question === answer.question);
+          if (question && question.mustHave && question.showToCandidates !== false) {
+            const responseType = question.responseType || 'Yes / No';
+            let isMatch = false;
+
+            if (responseType === 'Text') {
+              // For text questions, just check if they provided an answer
+              isMatch = String(answer.answer).trim() !== '';
+            } else if (responseType === 'Multiple Choice') {
+              // For multiple choice, check if any of the applicant's answers match any ideal answers
+              const idealAnswers = Array.isArray(question.idealAnswer) ? question.idealAnswer : [question.idealAnswer];
+              const applicantAnswers = Array.isArray(answer.answer) ? answer.answer : [answer.answer];
+
+              isMatch = Boolean(
+                idealAnswers.some((ideal: any) =>
+                  applicantAnswers.some((app: any) => app.toLowerCase() === ideal.toLowerCase())
+                )
+              );
+            } else {
+              // Default case: Yes/No or other types
+              const idealAnswer = Array.isArray(question.idealAnswer) ? question.idealAnswer[0] : question.idealAnswer;
+              const applicantAnswer = Array.isArray(answer.answer) ? answer.answer[0] : answer.answer;
+              isMatch = applicantAnswer.toLowerCase() === idealAnswer.toLowerCase();
+            }
+
+            // If it's a must-have and doesn't match, applicant is not a good fit
+            if (!isMatch) {
+              isGoodFit = false;
+            }
+          }
+        });
+
+        // Check if any mustHave questions were not answered
+        // Only check questions that should be shown to candidates
+        screeningQuestions
+          .filter((question) => question.showToCandidates !== false)
+          .forEach((question) => {
+            if (question.mustHave) {
+              const wasAnswered = answers.some((answer: { question: string }) => answer.question === question.question);
+
+              if (!wasAnswered) {
+                isGoodFit = false;
+              }
+            }
+          });
+      }
+
+      const screeningFit = isGoodFit ? 'good' : 'bad';
+
+      return {
+        ...applicant,
+        screeningFit,
+        screeningAnswers: answers,
+      };
+    });
+  };
 
   useEffect(() => {
     if (dataJobPostDetails) {
@@ -93,7 +192,11 @@ export default function Content() {
     }
 
     if (dataJobPostDetails && dataAppliedApplicants) {
-      dataAppliedApplicants.forEach((item: any) => {
+      // Process the applicants to determine if they are good fits
+      const processed = processApplicants(dataAppliedApplicants);
+      setProcessedApplicants(processed);
+
+      processed.forEach((item: any) => {
         let newData = {
           id: item.applicant.id,
           email: item.applicant.email,
@@ -104,11 +207,13 @@ export default function Content() {
           status: item.status,
           stagePosition: item.job_stages,
           stage_notes: item.stage_notes || [],
+          screeningFit: item.screeningFit,
+          screeningAnswers: item.screeningAnswers || [],
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });
     }
-  }, [dataJobPostDetails, dataAppliedApplicants]);
+  }, [dataJobPostDetails, dataAppliedApplicants, screeningQuestions]);
 
   const handleFormSubmit = (data: any, isOpen?: any) => {
     if (whichModal) {
@@ -121,6 +226,11 @@ export default function Content() {
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message='Successfully set-up stage requirements.' type='success' />, {
+              duration: 4000,
+            });
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -139,8 +249,13 @@ export default function Content() {
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message='Successfully updated the checklist.' type='success' />, {
+              duration: 4000,
+            });
             jobPostDetailsRefetch();
             appliedApplicantRefetch();
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -155,6 +270,8 @@ export default function Content() {
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -169,6 +286,8 @@ export default function Content() {
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            // Reset actionState after successful submission to allow modal to be reopened
+            setActionState(initialActionState);
           },
           onError: (err: any) => {
             toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -190,7 +309,14 @@ export default function Content() {
       },
     },
     CHECKLIST: {
-      component: <Checklist title={title} requirements={requirements} handleFormSubmit={handleFormSubmit} />,
+      component: (
+        <Checklist
+          title={title}
+          requirements={requirements}
+          handleFormSubmit={handleFormSubmit}
+          hasActiveSubscription={hasActiveSubscription}
+        />
+      ),
       dispatch: {
         type: CHECKLIST,
         payload: { actionState, setActionState },
@@ -245,6 +371,10 @@ export default function Content() {
     }
   };
 
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  };
+
   return (
     <>
       {!isGetJobPostDetailsLoading && (
@@ -263,7 +393,7 @@ export default function Content() {
                 </h2>
                 {whichModal && modals[whichModal].component}
 
-                <div className='flex justify-end'>
+                <div className='flex justify-end items-center gap-4 my-6'>
                   <div className='flex-1 flex justify-start lg:justify-between gap-2'>
                     <button
                       onClick={() => setIsAddApplicantModalOpen(true)}
@@ -273,6 +403,7 @@ export default function Content() {
                     </button>
                     <AddStageBtn handleAddStage={handleAddStage} />
                   </div>
+                  <Filter onFilterChange={handleFilterChange} />
                 </div>
 
                 <DragAndDrop
@@ -280,6 +411,7 @@ export default function Content() {
                   gridCols={gridCols}
                   jobPostDetailsRefetch={jobPostDetailsRefetch}
                   appliedApplicantRefetch={appliedApplicantRefetch}
+                  filters={filters}
                 />
               </div>
             </div>

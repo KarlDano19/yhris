@@ -2,11 +2,17 @@ import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 async function updateStatus(data: any) {
-              const finalData = {
-            "status": data.status,
-            "job_posting": data.job_posting_id,
-            "stage_notes": data.stage_notes
-          }
+    const finalData: any = {
+      "status": data.status,
+      "job_posting": data.job_posting_id,
+      "stage_notes": data.stage_notes
+    }
+    
+    // Include personalized feedback if provided (for rejections)
+    if (data.status === 'rejected' && data.feedback) {
+      finalData.personalized_feedback = data.feedback;
+    }
+    
     const token = getCookie('token');
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/applicants/update-status/${data.id}/`, {
       method: "PUT",
