@@ -115,7 +115,7 @@ export default function UpdateJobModal({
         notesRemarks: jobPostDataDetails.job_remark,
       });
       // Normalize screening questions for the Job Settings page
-      if (jobPostDataDetails.screening_questions) {
+      if (jobPostDataDetails.screening_questions && jobPostDataDetails.screening_questions !== null) {
         const normalizedQuestions = jobPostDataDetails.screening_questions.map((q: any, idx: number) => ({
           id: q.id || q.question_id || idx + 1,
           question: q.question || q.text || '',
