@@ -16,7 +16,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed'],
+    status: ['Ongoing', 'Passed', 'Rejected'],
   });
 
   const toggleFilter = () => {
