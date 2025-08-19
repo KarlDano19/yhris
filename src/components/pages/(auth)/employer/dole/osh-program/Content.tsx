@@ -12,17 +12,21 @@ import CustomToast from "@/components/CustomToast";
 
 import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
 import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
+import useGetOshProgramVersionHistory from "./hooks/useGetOshProgramVersionHistory";
 import CompanyProfile from "./tabs/CompanyProfile";
 import ProgramAndPolicy from "./tabs/ProgramAndPolicy";
 import RiskManagement from "./tabs/RiskManagement";
 import SafetyMeasures from "./tabs/SafetyMeasures";
 import ComplianceAndCost from "./tabs/ComplianceAndCost";
 import HealthAndWelfare from "./tabs/HealthAndWelfare";
+import UnsavedChangesModal from "./modals/UnsavedChangesModal";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import VersionHistoryModal from "./modals/VersionHistoryModal";
+import VersionHistoryDetailsModal from "./modals/VersionHistoryDetailsModal";
 
 import { 
   T_OshProgram, 
@@ -45,12 +49,27 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
   const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+  const [isSavingChanges, setIsSavingChanges] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Version History Modal States
+  const [isVersionHistoryModalOpen, setIsVersionHistoryModalOpen] = useState(false);
+  const [isVersionHistoryDetailsModalOpen, setIsVersionHistoryDetailsModalOpen] = useState(false);
+  const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
   
   const queryClient = useQueryClient();
   
   // Only fetch once on initial mount, then rely on manual refetch
   const { data: oshProgramDetails, refetch, isLoading } = useGetOshProgramDetails(true);
   const { mutateAsync: updateOshProgramDetails } = useUpdateOshProgramDetails();
+  
+  // Get version history for limit checking
+  const { data: versionHistoryData, refetch: refetchVersionHistory } = useGetOshProgramVersionHistory({
+    page_size: 1,
+    current_page: 1
+  });
 
   const statusOptions = [
     { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
@@ -77,6 +96,34 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
+  };
+
+
+
+  // Version History Modal Handlers
+  const handleOpenVersionHistory = () => {
+    setIsVersionHistoryModalOpen(true);
+  };
+
+  const handleCloseVersionHistory = () => {
+    setIsVersionHistoryModalOpen(false);
+    // Refetch version history to ensure count is updated
+    refetchVersionHistory();
+  };
+
+  const handleViewVersionDetails = (versionId: number) => {
+    setSelectedVersionId(versionId);
+    setIsVersionHistoryModalOpen(false);
+    setIsVersionHistoryDetailsModalOpen(true);
+  };
+
+  const handleCloseVersionDetails = () => {
+    setIsVersionHistoryDetailsModalOpen(false);
+  };
+
+  const handleBackToVersionHistory = () => {
+    setIsVersionHistoryDetailsModalOpen(false);
+    setIsVersionHistoryModalOpen(true);
   };
 
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
@@ -283,19 +330,114 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       await updateOshProgramDetails(processedData);
       handleSuccessfulSubmission();
     } catch (error: any) {
-      toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
+      // Don't show success toast if there's an error
+      throw error; // Re-throw the error to be handled by the calling function
     }
+  };
+
+  // Check if there are unsaved changes in the current tab
+  const hasUnsavedChanges = (): boolean => {
+    const formValues = watch();
+    const originalData = oshProgramDetails;
+    
+    if (!originalData) return false;
+    
+    // Get fields for the current tab only
+    const currentTabFields = OSH_PROGRAM_TABS.FIELDS[selectedTab] || [];
+    
+    // Compare form values with original data for current tab only
+    for (const field of currentTabFields) {
+      const formValue = formValues[field];
+      const originalValue = originalData[field];
+      
+      // Handle different data types
+      if (formValue !== originalValue) {
+        // For arrays, do deep comparison
+        if (Array.isArray(formValue) && Array.isArray(originalValue)) {
+          if (JSON.stringify(formValue) !== JSON.stringify(originalValue)) {
+            return true;
+          }
+        }
+        // For objects, do deep comparison
+        else if (typeof formValue === 'object' && typeof originalValue === 'object' && formValue !== null && originalValue !== null) {
+          if (JSON.stringify(formValue) !== JSON.stringify(originalValue)) {
+            return true;
+          }
+        }
+        // For primitive values, direct comparison
+        else if (formValue !== originalValue) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  };
+
+  // Handle navigation with unsaved changes check
+  const handleNavigation = (url: string) => {
+    if (hasUnsavedChanges()) {
+      setPendingNavigation(url);
+      setShowUnsavedChangesModal(true);
+    } else {
+      window.location.href = url;
+    }
+  };
+
+  // Handle save changes from modal
+  const handleSaveChanges = async () => {
+    setIsSavingChanges(true);
+    try {
+      await submitCurrentTab();
+      setShowUnsavedChangesModal(false);
+      if (pendingNavigation) {
+        window.location.href = pendingNavigation;
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
+    } finally {
+      setIsSavingChanges(false);
+    }
+  };
+
+  // Handle discard changes from modal
+  const handleDiscardChanges = () => {
+    setShowUnsavedChangesModal(false);
+    if (pendingNavigation) {
+      window.location.href = pendingNavigation;
+    }
+  };
+
+  // Handle close modal
+  const handleCloseModal = () => {
+    setShowUnsavedChangesModal(false);
+    setPendingNavigation(null);
+  };
+
+  // Get current tab name
+  const getCurrentTabName = (): string => {
+    const tabNames = {
+      1: 'Company Profile',
+      2: 'OSH Program and Policy',
+      3: 'Risk Management',
+      4: 'Health and Welfare Program',
+      5: 'Safety Measures',
+      6: 'Compliance and Cost'
+    };
+    return tabNames[selectedTab] || 'current tab';
   };
 
   // Handle successful submission
   const handleSuccessfulSubmission = (): void => {
     // Refresh data from backend to ensure frontend state is in sync
     refetch().then(() => {
-      toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+      // Success toast will be shown after 3-second timeout in submitCurrentTab
     }).catch(() => {
-      // Still show success message even if refetch fails
-      toast.custom(() => <CustomToast message="Successfully updated OSH Program Details" type="success" />);
+      // Still continue even if refetch fails
     });
+    
+    // Invalidate version history cache to update version count
+    queryClient.invalidateQueries({ queryKey: ['oshProgramVersionHistory'] });
   };
 
   useEffect(() => {
@@ -494,38 +636,60 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   // Custom submit handler
-  const submitCurrentTab = () => {
+  const submitCurrentTab = async () => {
+    // Prevent multiple submissions
+    if (isSaving) return;
+    
+    // Check if there are actual changes before submitting
+    if (!hasUnsavedChanges()) {
+      toast.custom(() => <CustomToast message="No changes detected. Nothing to save." type="info" />);
+      return;
+    }
+    
     // First clear any existing validation messages
     setValidationMessage("");
     setMissingFields([]);
 
-    // Directly trigger form validation and submission
-    // No need to fetch before submitting
-    onSubmit();
+    // Set loading state
+    setIsSaving(true);
+
+    try {
+      // Start the form submission
+      await onSubmit();
+      
+      // Only show success toast if no error occurred
+      toast.custom(() => <CustomToast message="Successfully updated OSH Program Details." type="success" />);
+      
+    } catch (error: any) {
+      // Show error toast
+      toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
+    } finally {
+      // Reset loading state
+      setIsSaving(false);
+    }
   };
 
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex p-4">
-          <Link href="/dole" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+          <button 
+            onClick={() => handleNavigation('/dole')} 
+            className="flex-none flex gap-3 items-center hover:bg-gray-200"
+          >
             <ArrowLeftIcon className="h-5 w-5" />
             <h4>DOLE</h4>
-          </Link>
+          </button>
         </div>
         <div className="px-2 md:px-8 lg:px-4">
           <h2 className="text-xl font-bold text-indigo-dye">OSH Program</h2>
           <div className="flex-1 flex justify-end space-x-4">
-            {/* Commented out for now */}
-            
-            {/* <DownloadBorderIcon/> */}
-            {/* <HistoryIcon/> */}
             <div className='relative inline-block'>
               <select
                 value={oshProgramDetails?.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(e.target.value)}
                 disabled={!hasActiveSubscription}
-                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(oshProgramDetails?.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+                className={`px-4 py-3 rounded-lg text-sm font-bold ${getStatusColor(oshProgramDetails?.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
                   <option
@@ -545,11 +709,39 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <button
-              className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
-              onClick={submitCurrentTab}
               disabled={!hasActiveSubscription}
+              title="Download"
             >
-              Save
+              <DownloadBorderIcon/>
+            </button>
+            <div className="relative flex items-center">
+              <button
+                onClick={handleOpenVersionHistory}
+                disabled={!hasActiveSubscription}
+                title="View Version History"
+                className="relative"
+              >
+                <HistoryIcon/>
+                {versionHistoryData?.version_info && (
+                  <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center min-w-[16px]">
+                    {versionHistoryData.version_info.current_count > 50 ? '50+' : versionHistoryData.version_info.current_count}
+                  </div>
+                )}
+              </button>
+            </div>
+            <button
+              className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2"
+              onClick={submitCurrentTab}
+              disabled={!hasActiveSubscription || isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Saving...
+                </>
+              ) : (
+                'Save'
+              )}
             </button>
           </div>
         </div>
@@ -569,36 +761,90 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         )}
         
+        {/* Version Limit Warning */}
+        {versionHistoryData?.version_info && (
+          <>
+            {!versionHistoryData.version_info.can_create_new && (
+              <div className="mt-2 px-2 md:px-8 lg:px-4">
+                <div className="rounded-md bg-red-50 border border-red-200 p-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-red-800">
+                        Version Limit Reached
+                      </h3>
+                      <div className="mt-1 text-sm text-red-700">
+                        <p>
+                          You&apos;ve reached the maximum limit of {versionHistoryData.version_info.max_limit} versions. 
+                          Please delete some older versions before creating new ones.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {versionHistoryData.version_info.remaining_slots <= 5 && versionHistoryData.version_info.remaining_slots > 0 && (
+              <div className="mt-2 px-2 md:px-8 lg:px-4">
+                <div className="rounded-md bg-yellow-50 border border-yellow-200 p-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">
+                        Approaching Version Limit
+                      </h3>
+                      <div className="mt-1 text-sm text-yellow-700">
+                        <p>
+                          You have {versionHistoryData.version_info.remaining_slots} version slots remaining. 
+                          Consider deleting old versions to free up space.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        
         <div className="mt-8">
           {/* Desktop tabs */}
           <div className="hidden md:flex flex-row justify-between space-x-2">
             <div onClick={() => handleTabChange(1 as TabNumber)} className="cursor-pointer">
-              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+              <h1 className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${selectedTab === 1 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
                 Company Profile
               </h1>
             </div>
             <div onClick={() => handleTabChange(2 as TabNumber)} className="cursor-pointer">
-              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 2 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+              <h1 className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${selectedTab === 2 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
                 OSH Program and Policy
               </h1>
             </div>
             <div onClick={() => handleTabChange(3 as TabNumber)} className="cursor-pointer">
-              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 3 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+              <h1 className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${selectedTab === 3 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
                 Risk Management
               </h1>
             </div>
             <div onClick={() => handleTabChange(4 as TabNumber)} className="cursor-pointer">
-              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 4 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+              <h1 className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${selectedTab === 4 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
                 Health and Welfare Program
               </h1>
             </div>
             <div onClick={() => handleTabChange(5 as TabNumber)} className="cursor-pointer">
-              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 5 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+              <h1 className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${selectedTab === 5 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
                 Safety Measures
               </h1>
             </div>
             <div onClick={() => handleTabChange(6 as TabNumber)} className="cursor-pointer">
-              <h1 className={`text-lg font-bold pb-2 text-center ${selectedTab === 6 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
+              <h1 className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${selectedTab === 6 ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}>
                 Compliance and Cost
               </h1>
             </div>
@@ -703,6 +949,39 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           />
         )}
       </div>
+
+      {/* Unsaved Changes Modal */}
+      {showUnsavedChangesModal && (
+      <UnsavedChangesModal
+        isOpen={showUnsavedChangesModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveChanges}
+        onDiscard={handleDiscardChanges}
+        isLoading={isSavingChanges}
+        currentTab={getCurrentTabName()}
+      />
+      )}
+
+      {/* Version History Modal */}
+      {isVersionHistoryModalOpen && (
+        <VersionHistoryModal
+          isOpen={isVersionHistoryModalOpen}
+          onClose={handleCloseVersionHistory}
+          onViewDetails={handleViewVersionDetails}
+        />
+      )}
+
+      {/* Version History Details Modal */}
+      {isVersionHistoryDetailsModalOpen && (
+        <VersionHistoryDetailsModal
+          isOpen={isVersionHistoryDetailsModalOpen}
+          onClose={handleCloseVersionDetails}
+          onBack={handleBackToVersionHistory}
+          versionId={selectedVersionId || undefined}
+          currentPage={1}
+          totalPages={14}
+        />
+      )}
     </>
   );
 }
