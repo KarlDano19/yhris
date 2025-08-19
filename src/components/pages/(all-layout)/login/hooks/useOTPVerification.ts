@@ -4,6 +4,7 @@ interface OTPVerificationPayload {
   session_id: string;
   code: string;
   email: string;
+  remember_device?: boolean; // NEW: Remember device option
 }
 
 async function verifyOTP(payload: OTPVerificationPayload) {
@@ -37,4 +38,4 @@ function useOTPVerification() {
   return query;
 }
 
-export default useOTPVerification; 
+export default useOTPVerification;

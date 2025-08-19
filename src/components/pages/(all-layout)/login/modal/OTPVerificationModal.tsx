@@ -29,14 +29,15 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   timeRemainingSeconds,
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
 }) => {
   const [otpCode, setOtpCode] = useState<string[]>(new Array(6).fill(''));
   const [timeRemaining, setTimeRemaining] = useState<number>(timeRemainingSeconds);
   const [isResending, setIsResending] = useState<boolean>(false);
-  
+  const [rememberDevice, setRememberDevice] = useState<boolean>(false); // NEW: Add remember device state
+
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  
+
   const { mutate: verifyOTP, isLoading: isVerifying } = useOTPVerification();
   const { mutate: resendOTP, isLoading: isResendLoading } = useOTPResend();
 
@@ -61,14 +62,14 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setOtpCode(new Array(6).fill(''));
-      setTimeRemaining(timeRemainingSeconds);
+      setTimeRemaining(timeRemainingSeconds); 
       setIsResending(false);
     }
   }, [isOpen, timeRemainingSeconds]);
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
-    
+
     const newOtpCode = [...otpCode];
     newOtpCode[index] = value;
     setOtpCode(newOtpCode);
@@ -84,7 +85,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
     if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
-    
+
     // Handle arrow keys
     if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -97,7 +98,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text/plain').replace(/\D/g, '').slice(0, 6);
-    
+
     if (pastedData.length === 6) {
       const newOtpCode = pastedData.split('');
       setOtpCode(newOtpCode);
@@ -108,7 +109,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   const handleVerifyOTP = () => {
     const otpString = otpCode.join('');
     if (!otpString || otpString.length !== 6) {
-      toast.custom(() => <CustomToast message="Please enter the complete 6-digit OTP code" type='error' />, {
+      toast.custom(() => <CustomToast message='Please enter the complete 6-digit OTP code' type='error' />, {
         duration: 4000,
       });
       return;
@@ -117,7 +118,8 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
     const payload = {
       session_id: sessionId,
       code: otpString,
-      email: email
+      email: email,
+      remember_device: rememberDevice, // NEW: Include remember device option
     };
 
     const callbackReq = {
@@ -141,13 +143,13 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
     if (isResending || timeRemaining > 0) return;
 
     const payload = {
-      session_id: sessionId
+      session_id: sessionId,
     };
 
     const callbackReq = {
       onSuccess: (data: any) => {
         setIsResending(false);
-        setTimeRemaining(data.time_remaining_seconds || 600); // 10 minutes default
+        setTimeRemaining(data.time_remaining_seconds || 300); // 5 minutes default
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 4000,
         });
@@ -211,15 +213,10 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                   <Dialog.Title as='h3' className='text-lg leading-6 font-medium text-gray-900'>
                     Enter Verification Code
                   </Dialog.Title>
-                  <p className='text-sm text-gray-500'>
-                    We sent a code to {email}
-                  </p>
+                  <p className='text-sm text-gray-500'>We sent a code to {email}</p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className='text-gray-400 hover:text-gray-600'
-              >
+              <button onClick={onClose} className='text-gray-400 hover:text-gray-600'>
                 <XCircleIcon className='h-6 w-6' />
               </button>
             </div>
@@ -227,9 +224,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
             <div className='space-y-4'>
               {/* OTP Input */}
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Verification Code
-                </label>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>Verification Code</label>
                 <div className='flex justify-center space-x-2' onPaste={handlePaste}>
                   {otpCode.map((digit, index) => (
                     <input
@@ -250,6 +245,20 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                 </div>
               </div>
 
+              {/* Remember Device Checkbox */}
+              <div className='flex items-center mb-4'>
+                <input
+                  id='remember-device'
+                  type='checkbox'
+                  checked={rememberDevice}
+                  onChange={(e) => setRememberDevice(e.target.checked)}
+                  className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
+                />
+                <label htmlFor='remember-device' className='ml-2 block text-sm text-gray-700'>
+                  Remember this device for 14 days
+                </label>
+              </div>
+
               {/* Timer and Attempts */}
               <div className='flex justify-between items-center text-sm'>
                 <div className='text-gray-600'>
@@ -259,9 +268,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                     <span>Expires in {formatTime(timeRemaining)}</span>
                   )}
                 </div>
-                <div className='text-gray-600'>
-                  {remainingAttempts} attempts remaining
-                </div>
+                <div className='text-gray-600'>{remainingAttempts} attempts remaining</div>
               </div>
 
               {/* Action Buttons */}
@@ -354,4 +361,4 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   );
 };
 
-export default OTPVerificationModal; 
+export default OTPVerificationModal;
