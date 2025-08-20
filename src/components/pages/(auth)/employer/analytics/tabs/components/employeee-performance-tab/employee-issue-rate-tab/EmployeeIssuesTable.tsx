@@ -2,13 +2,7 @@ import React from 'react';
 
 import Pagination from '@/components/Pagination';
 
-interface EmployeeIssueData {
-  name: string;
-  department: string;
-  issueType: string;
-  dateReported: string;
-  status: string;
-}
+import { getStatusColor, processEmployeeIssuesData, EmployeeIssueData } from './calculations/employeeIssuesTableCalc';
 
 interface PaginationData {
   totalRecords: number;
@@ -36,20 +30,8 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
   onPageChange,
   onPageSizeChange
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'NTE Issued':
-        return 'text-red-600 font-medium';
-      case 'Resolved':
-        return 'text-green-600 font-medium';
-      case 'Under Hearing':
-        return 'text-orange-600 font-medium';
-      case 'Pending':
-        return 'text-yellow-600 font-medium';
-      default:
-        return 'text-gray-600';
-    }
-  };
+  // Process data using shared utility
+  const processedData = processEmployeeIssuesData(data);
 
   if (isLoading) {
     return (
@@ -110,8 +92,8 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
               </tr>
             </thead>
             <tbody>
-              {data.length > 0 ? (
-                data.map((issue, index) => (
+              {processedData.length > 0 ? (
+                processedData.map((issue, index) => (
                   <tr key={index} className="border-b border-[#CCD8EA] hover:bg-gray-50">
                     <td className="text-center py-4 text-sm text-gray-900">
                       {issue.name}

@@ -7,6 +7,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { calculateIssueTypeDistribution } from './calculations/issueTypeCalc';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -36,46 +37,8 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Calculate issue type distribution from the data
-  const calculateIssueTypeDistribution = () => {
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = Array.isArray(employeeIssueData) ? employeeIssueData : employeeIssueData?.records;
-    
-    if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
-      return {
-        labels: ['No Data'],
-        data: [1],
-        totalIssues: 0,
-        percentages: [100]
-      };
-    }
-
-    // Count issues by type
-    const issueTypeCounts: { [key: string]: number } = {};
-    let totalIssues = 0;
-
-    dataArray.forEach((issue: EmployeeIssueData) => {
-      const issueType = issue.issue_type || 'Unspecified';
-      issueTypeCounts[issueType] = (issueTypeCounts[issueType] || 0) + 1;
-      totalIssues++;
-    });
-
-    // Convert to arrays for chart
-    const labels = Object.keys(issueTypeCounts);
-    const data = Object.values(issueTypeCounts);
-    
-    // Calculate percentages
-    const percentages = data.map(count => ((count / totalIssues) * 100).toFixed(1));
-
-    return {
-      labels,
-      data,
-      totalIssues,
-      percentages
-    };
-  };
-
-  const { labels, data, totalIssues, percentages } = calculateIssueTypeDistribution();
+  // Calculate issue type distribution using shared utility
+  const { labels, data, totalIssues, percentages } = calculateIssueTypeDistribution(employeeIssueData);
 
   // Color palette for different issue types
   const colors = [
