@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface AnalyticsWorkforceOverviewPrintProps {
+interface WorkforceOverviewDocumentProps {
   kpiData: {
     totalEmployees: { value: number; trend: string };
     newHires: { value: number; trend: string };
@@ -26,6 +26,7 @@ interface AnalyticsWorkforceOverviewPrintProps {
     numberOfApplicants: number;
     status: string;
     dateJobOpened: string;
+    dateJobClosed: string;
     turnaroundTime: number;
     currentPipeline: string;
     jobId: number;
@@ -43,7 +44,7 @@ interface AnalyticsWorkforceOverviewPrintProps {
   activeSubTab: number;
 }
 
-const AnalyticsWorkforceOverviewPrint: React.FC<AnalyticsWorkforceOverviewPrintProps> = ({
+const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
   kpiData,
   applicantData,
   demographicData,
@@ -240,6 +241,7 @@ const AnalyticsWorkforceOverviewPrint: React.FC<AnalyticsWorkforceOverviewPrintP
               <th className="border border-gray-300 p-1 text-center text-xs">No. of Applicants</th>
               <th className="border border-gray-300 p-1 text-center text-xs">Status</th>
               <th className="border border-gray-300 p-1 text-center text-xs">Date Job Opened</th>
+              <th className="border border-gray-300 p-1 text-center text-xs">Date Job Closed</th>
               <th className="border border-gray-300 p-1 text-center text-xs">Turnaround Time</th>
               <th className="border border-gray-300 p-1 text-center text-xs">Current Pipeline</th>
             </tr>
@@ -251,6 +253,7 @@ const AnalyticsWorkforceOverviewPrint: React.FC<AnalyticsWorkforceOverviewPrintP
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.numberOfApplicants}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.status}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.dateJobOpened}</td>
+                <td className="border border-gray-300 p-1 text-center text-xs">{item.dateJobClosed}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">
                   {item.turnaroundTime === 0 ? 'Today' :
                    item.turnaroundTime === 1 ? '1 day' :
@@ -407,4 +410,4 @@ const AnalyticsWorkforceOverviewPrint: React.FC<AnalyticsWorkforceOverviewPrintP
   );
 };
 
-export default AnalyticsWorkforceOverviewPrint; 
+export default WorkforceOverviewDocument; 

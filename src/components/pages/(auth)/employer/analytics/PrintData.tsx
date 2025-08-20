@@ -1,6 +1,6 @@
 import React from 'react';
 
-import AnalyticsWorkforceOverviewPrint from './print/AnalyticsWorkforceOverviewPrint';
+import WorkforceOverviewDocument from './print/WorkforceOverviewDocument';
 
 import { calculateTotalActiveEmployees } from './cards/workforce-overview/calculations/totalActiveEmployeesCalc';
 import { calculateNewHires } from './cards/workforce-overview/calculations/newHiresCalc';
@@ -128,7 +128,7 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
           break-after: page;
         }
       `}</style>
-      <AnalyticsWorkforceOverviewPrint 
+      <WorkforceOverviewDocument 
         kpiData={kpiData}
         applicantData={applicantData}
         demographicData={demographicData}

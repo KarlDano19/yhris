@@ -55,11 +55,25 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   // Fetch overall applicants data across all job postings
   const { data: appliedApplicantsData, isLoading: applicantsLoading, error: applicantsError } = useGetOverallApplicants();
 
-  // Fetch job postings data for role pipeline analysis (without date filter)
+  // Helper function to format date for API
+  const formatDateForAPI = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  // Fetch job postings data for role pipeline analysis (with analytics search type)
   const jobPostFilters = {
     currentPage: rolePipelineCurrentPage,
     pageSize: rolePipelinePageSize,
     search: '',
+    from: formatDateForAPI(dateFilter?.from || ''),
+    to: formatDateForAPI(dateFilter?.to || ''),
+    search_type: 'analytics', // Use analytics search type to filter by both created_at and updated_at
   };
 
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
@@ -89,10 +103,17 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   // Fetch employee data for headcount calculation
   const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems();
 
-  // Fetch job postings when component loads and when pagination changes
+  // Reset pagination when date filter changes
+  useEffect(() => {
+    if (dateFilter?.from || dateFilter?.to) {
+      setRolePipelineCurrentPage(1);
+    }
+  }, [dateFilter?.from, dateFilter?.to]);
+
+  // Fetch job postings when component loads, pagination changes, or date filter changes
   useEffect(() => {
     refetchJobPost();
-  }, [rolePipelineCurrentPage, rolePipelinePageSize]);
+  }, [rolePipelineCurrentPage, rolePipelinePageSize, dateFilter?.from, dateFilter?.to]);
 
   // Refetch job postings when tab is activated
   useEffect(() => {
