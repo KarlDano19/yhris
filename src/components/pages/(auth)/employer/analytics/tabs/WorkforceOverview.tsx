@@ -101,10 +101,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
     }
   }, [activeSubTab]);
 
-
-
-
-
   // Transform job postings data for role pipeline table
   const rolePipelineData = useMemo(() => {
     if (!jobPostData?.records || !Array.isArray(jobPostData.records)) {
@@ -114,15 +110,22 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
     return jobPostData.records.map((job: any) => {
       // Calculate turnaround time (days since job opened)
       const jobOpenedDate = new Date(job.created_at);
+      const jobClosedDate = new Date(job.updated_at);
       const currentDate = new Date();
       const turnaroundTime = Math.ceil((currentDate.getTime() - jobOpenedDate.getTime()) / (1000 * 60 * 60 * 24));
 
-      // Format date
-      const formattedDate = jobOpenedDate.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
+      // Helper function to format dates
+      const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      };
+
+      // Format dates
+      const formattedDateOpened = formatDate(jobOpenedDate);
+      const formattedDateClosed = formatDate(jobClosedDate);
 
       // Determine status based on job data
       const status = job.is_active ? 'Ongoing' : 'Closed';
@@ -132,14 +135,18 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
         ? `${job.applicant_applied_no} applicants` 
         : 'No applicants yet';
 
+      // Only show job closed date if status is Closed
+      const dateJobClosed = status === 'Closed' ? formattedDateClosed : '—';
+
       return {
         role: job.job_title || 'Unknown Role',
         numberOfApplicants: job.applicant_applied_no || 0,
         status: status,
-        dateJobOpened: formattedDate,
+        dateJobOpened: formattedDateOpened,
+        dateJobClosed: dateJobClosed,
         turnaroundTime: turnaroundTime,
         currentPipeline: currentPipeline,
-        jobId: job.id
+        jobId: job.id,
       };
     });
   }, [jobPostData]);

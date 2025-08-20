@@ -81,7 +81,7 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
   // Calculate attrition data for sub-tab 3 - Use shared utility function
   const calculateAttritionData = () => {
     // Use the shared attrition rate calculation utility
-    const { attritionData } = calculateAttritionRateData(separationData, dateFilter, employeeData?.length || 143);
+    const { dateRange, attritionData } = calculateAttritionRateData(separationData, dateFilter, employeeData?.length || 143);
     
     // Calculate overall attrition rate from the monthly data
     const totalExits = attritionData.reduce((sum, item) => sum + item.totalExits, 0);
@@ -90,7 +90,8 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
 
     return {
       attritionRate: overallAttritionRate.toFixed(1),
-      monthlyAttritionData: attritionData
+      monthlyAttritionData: attritionData,
+      dateRange: dateRange
     };
   };
 

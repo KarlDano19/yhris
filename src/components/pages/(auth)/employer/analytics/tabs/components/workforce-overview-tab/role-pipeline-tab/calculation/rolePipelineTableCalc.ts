@@ -5,6 +5,7 @@ export interface RolePipelineData {
   numberOfApplicants: number;
   status: string;
   dateJobOpened: string;
+  dateJobClosed: string;
   turnaroundTime: number;
   currentPipeline: string;
   jobId?: number;
@@ -19,6 +20,7 @@ export interface ProcessedRolePipelineData {
   numberOfApplicants: number;
   status: string;
   dateJobOpened: string;
+  dateJobClosed: string;
   turnaroundTime: number;
   currentPipeline: string;
   jobId: number;
@@ -87,6 +89,7 @@ export const processRolePipelineData = (
       numberOfApplicants: job.numberOfApplicants || 0,
       status: job.status || 'Unknown',
       dateJobOpened: job.dateJobOpened || 'Unknown',
+      dateJobClosed: job.dateJobClosed || 'Unknown',
       turnaroundTime: job.turnaroundTime || 0,
       currentPipeline: currentPipeline,
       jobId: job.jobId || 0
