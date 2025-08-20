@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import {
   Chart as ChartJS,
@@ -8,6 +8,8 @@ import {
 } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { calculateIssueTypeDistribution } from './calculations/issueTypeCalc';
+import ColorPaletteModal from '../../../../modals/ColorPaletteModal';
+import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -25,6 +27,8 @@ interface IssueTypeProps {
 
 const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = false, error = null }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const [customColors, setCustomColors] = useState<string[]>([]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -38,28 +42,42 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
   }, []);
 
   // Calculate issue type distribution using shared utility
-  const { labels, data, totalIssues, percentages } = calculateIssueTypeDistribution(employeeIssueData);
+  const { labels, data, totalIssues, percentages, colors } = calculateIssueTypeDistribution(employeeIssueData, customColors);
 
-  // Color palette for different issue types
-  const colors = [
-    '#8B5CF6', // Purple
-    '#F97316', // Orange
-    '#3B82F6', // Blue
-    '#EF4444', // Red
-    '#06B6D4', // Cyan
-    '#10B981', // Green
-    '#F59E0B', // Amber
-    '#8B5A2B', // Brown
-    '#9CA3AF', // Gray
-    '#EC4899', // Pink
-  ];
+  // Handle color palette save
+  const handleColorPaletteSave = (colors: string[]) => {
+    // Create a mapping of issue type names to their new colors
+    const issueTypeColorMap: { [key: string]: string } = {};
+    labels.forEach((label, index) => {
+      issueTypeColorMap[label] = colors[index] || '#8B5CF6';
+    });
+    
+    // Save the issue type-to-color mapping
+    localStorage.setItem('issueTypeColorMapping', JSON.stringify(issueTypeColorMap));
+    
+    // Update custom colors for immediate use
+    setCustomColors(colors);
+  };
+
+  // Load saved color palette on component mount
+  useEffect(() => {
+    // Load legacy color palette format for backward compatibility
+    const savedColors = localStorage.getItem('issueTypeColorPalette');
+    if (savedColors) {
+      try {
+        setCustomColors(JSON.parse(savedColors));
+      } catch (error) {
+        console.error('Error loading saved color palette:', error);
+      }
+    }
+  }, []);
 
   const chartData = {
     labels,
     datasets: [
       {
         data,
-        backgroundColor: colors.slice(0, labels.length),
+        backgroundColor: colors,
         borderWidth: 0,
       },
     ],
@@ -70,35 +88,7 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: isMobile ? 'bottom' as const : 'right' as const,
-        labels: {
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 13,
-          font: {
-            size: 12,
-          },
-          generateLabels: (chart: any) => {
-            const data = chart.data;
-            if (data.labels.length && data.datasets.length) {
-              return data.labels.map((label: string, index: number) => {
-                const dataset = data.datasets[0];
-                const value = dataset.data[index];
-                const percentage = percentages[index];
-                return {
-                  text: `${label} (${percentage}%)`,
-                  fillStyle: dataset.backgroundColor[index],
-                  strokeStyle: dataset.backgroundColor[index],
-                  lineWidth: 0,
-                  pointStyle: 'circle',
-                  hidden: false,
-                  index: index,
-                };
-              });
-            }
-            return [];
-          },
-        },
+        display: false, // Hide the default legend to use custom one
       },
       tooltip: {
         enabled: false,
@@ -221,18 +211,56 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
 
   return (
     <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-      <div className="flex items-center justify-center mb-4">
-        <div className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>
           <span className='text-sm text-gray-500'>
             ({totalIssues < 10 ? `0${totalIssues}` : totalIssues} issues)
           </span>
         </div>
+        <button
+          onClick={() => setIsColorModalOpen(true)}
+          className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+          title="Customize colors"
+        >
+          <Squares2X2Icon className="w-4 h-4" />
+          Colors
+        </button>
       </div>
       
-      <div className="h-64 relative">
+      <div className="h-80 relative">
         <Pie data={chartData} options={options} />
       </div>
+
+      {/* Custom Scrollable Legend */}
+      <div className="mt-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-2">Issue Types</h4>
+        <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+          <div className="space-y-2">
+            {labels.map((label, index) => (
+              <div key={index} className="flex items-center space-x-2 text-sm">
+                <div 
+                  className="w-3 h-3 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: colors[index] }}
+                ></div>
+                <span className="text-gray-700 flex-1 min-w-0">
+                  <span className="truncate block">{label}</span>
+                  <span className="text-gray-500 text-xs">({percentages[index]}%)</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Color Palette Modal */}
+      <ColorPaletteModal
+        isOpen={isColorModalOpen}
+        onClose={() => setIsColorModalOpen(false)}
+        onSave={handleColorPaletteSave}
+        currentColors={colors}
+        departmentNames={labels}
+      />
     </div>
   );
 };

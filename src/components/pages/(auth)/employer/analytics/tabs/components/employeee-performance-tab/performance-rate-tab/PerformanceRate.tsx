@@ -17,7 +17,7 @@ import { calculateDepartmentPerformance } from './calculations/performanceRateCa
 import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
 ChartJS.register(
-  CategoryScale,
+  CategoryScale,  
   LinearScale,
   BarElement,
   Title,
@@ -215,12 +215,18 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
         {/* Title at bottom */}
         <div className="mt-4">
           <h3 className="text-lg text-gray-600 text-center mb-3">Average Score</h3>
-          <div className="overflow-x-auto">
-            <div className="flex justify-start space-x-6 min-w-max pb-2 px-2">
+          <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+            <div className="space-y-2">
               {departmentPerformanceData.map((dept, index) => (
-                <div key={index} className="flex items-center space-x-2 flex-shrink-0">
-                  <div className="w-4 h-4 rounded" style={{ backgroundColor: dept.color }}></div>
-                  <span className="text-sm text-gray-600 whitespace-nowrap">{dept.name}</span>
+                <div key={index} className="flex items-center space-x-2 text-sm">
+                  <div 
+                    className="w-3 h-3 rounded flex-shrink-0" 
+                    style={{ backgroundColor: dept.color }}
+                  ></div>
+                  <span className="text-gray-700 flex-1 min-w-0">
+                    <span className="truncate block">{dept.name}</span>
+                    <span className="text-gray-500 text-xs">Score: {dept.score}% | Employees: {dept.count}</span>
+                  </span>
                 </div>
               ))}
             </div>

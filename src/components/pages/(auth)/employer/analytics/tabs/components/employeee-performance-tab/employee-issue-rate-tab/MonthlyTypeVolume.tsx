@@ -14,6 +14,7 @@ import {
 import { Line } from 'react-chartjs-2';
 
 import { calculateMonthlyVolume } from './calculations/monthlyTypeVolumeCalc';
+import AverageLegendIcon from '@/svg/AverageLegendIcon';
 
 ChartJS.register(
   CategoryScale,
@@ -177,7 +178,7 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
         </h3>
       </div>
       
-      <div className="h-64">
+      <div className="h-96">
         {monthlyData.length > 0 ? (
           <Line data={data} options={options} />
         ) : (
@@ -188,6 +189,14 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
             </div>
           </div>
         )}
+      </div>
+
+      {/* Legend */}
+      <div className="flex justify-center mt-2">
+        <div className="flex items-center space-x-2">
+          <AverageLegendIcon />
+          <span className="text-lg text-gray-600">Monthly Issue Volume</span>
+        </div>
       </div>
     </div>
   );
