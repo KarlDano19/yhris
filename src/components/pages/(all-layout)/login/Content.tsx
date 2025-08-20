@@ -15,6 +15,7 @@ import CustomToast from '@/components/CustomToast';
 import SplitLayout from '@/components/SplitView';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 import EmailVerificationModal from './modal/EmailVerificationModal';
+import OTPVerificationModal from './modal/OTPVerificationModal';
 
 import { EnvelopeIcon, LockClosedIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { EyeIcon } from '@heroicons/react/24/solid';
@@ -32,16 +33,29 @@ function Content() {
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
   const [showEmailVerificationModal, setEmailVerificationModal] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otpData, setOtpData] = useState<any>(null);
 
   const { mutate, isLoading } = useLogin();
   const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        if (data.is_valid) {
-          setSession(data);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+      onSuccess: (response: any) => {
+        if (response.otp_required) {
+          // Show OTP modal
+          setOtpData({
+            sessionId: response.session_id,
+            expiresAt: response.expires_at,
+            remainingAttempts: response.remaining_attempts,
+            timeRemainingSeconds: response.time_remaining_seconds,
+            email: data.email
+          });
+          setShowOTPModal(true);
+          toast.custom(() => <CustomToast message={response.message} type='success' />, { duration: 4000 });
+        } else if (response.is_valid) {
+          setSession(response);
+          toast.custom(() => <CustomToast message={response.message} type='success' />, { duration: 4000 });
         } else {
           setEmailVerificationModal(true);
         }
@@ -91,6 +105,11 @@ function Content() {
       isLoggedIn: true,
     });
     setSession(data);
+  };
+
+  const handleOTPSuccess = (data: any) => {
+    setSession(data);
+    setShowOTPModal(false);
   };
 
   useEffect(() => {
@@ -286,6 +305,18 @@ function Content() {
                 isOpen={showEmailVerificationModal}
                 onClose={() => setEmailVerificationModal(false)}
               />
+              {otpData && (
+                <OTPVerificationModal
+                  email={otpData.email}
+                  sessionId={otpData.sessionId}
+                  expiresAt={otpData.expiresAt}
+                  remainingAttempts={otpData.remainingAttempts}
+                  timeRemainingSeconds={otpData.timeRemainingSeconds}
+                  isOpen={showOTPModal}
+                  onClose={() => setShowOTPModal(false)}
+                  onSuccess={handleOTPSuccess}
+                />
+              )}
             </div>
           </>
         }
