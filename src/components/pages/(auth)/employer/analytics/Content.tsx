@@ -52,6 +52,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     validRegions?: string[];
     selectedJobFilter?: string;
   } | null>(null);
+  
+  const [employeePerformanceData, setEmployeePerformanceData] = useState<{
+    activeSubTab: number;
+    evaluationData: any[];
+    employeeIssueData: any[];
+    employeePerformanceTableData: any[];
+    employeeIssuesTableData: any[];
+  } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Get current tab's date filter
@@ -96,7 +104,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onDataReady={setWorkforceData}
         />;
       case 2:
-        return <EmployeePerformance dateFilter={currentAppliedDateFilter} />;
+        return <EmployeePerformance 
+          dateFilter={currentAppliedDateFilter} 
+          onDataReady={setEmployeePerformanceData}
+        />;
       case 3:
         return <CompliancePolicy />;
       // case 4:
@@ -149,6 +160,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             workforceData.rolePipelinePageSize,
             workforceData.validRegions,
             workforceData.selectedJobFilter
+          );
+          break;
+        case 2: // Employee Performance
+          if (!employeePerformanceData) {
+            throw new Error('No employee performance data available for printing');
+          }
+          await handlePrintAnalytics(
+            activeTab,
+            currentTab.name,
+            generatePDFLocally,
+            [], // employeeData - not needed for employee performance
+            [], // appliedApplicantsData - not needed for employee performance
+            [], // separationData - not needed for employee performance
+            [], // allJobPostData - not needed for employee performance
+            currentAppliedDateFilter,
+            employeePerformanceData.activeSubTab,
+            undefined, // pipelineData - not needed for employee performance
+            undefined, // rolePipelineData - not needed for employee performance
+            undefined, // rolePipelineCurrentPage - not needed for employee performance
+            undefined, // rolePipelinePageSize - not needed for employee performance
+            undefined, // validRegions - not needed for employee performance
+            undefined, // selectedJobFilter - not needed for employee performance
+            employeePerformanceData.evaluationData,
+            employeePerformanceData.employeeIssueData,
+            employeePerformanceData.employeePerformanceTableData,
+            employeePerformanceData.employeeIssuesTableData
           );
           break;
         // Add other tabs here as they are implemented

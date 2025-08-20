@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import {
   Chart as ChartJS,
@@ -12,7 +12,7 @@ import {
 import { Bar } from 'react-chartjs-2';
 
 import ColorPaletteModal from '../../../../modals/ColorPaletteModal';
-import { generateDistinctColors } from '@/helpers/colorGenerator';
+import { calculateDepartmentPerformance } from './calculations/performanceRateCalc';
 
 import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
@@ -35,93 +35,10 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
 
-  // Generate default colors dynamically (unlimited)
-  const defaultColors = generateDistinctColors(20);
-
-  // Calculate department performance rates from evaluation data
-  const calculateDepartmentPerformance = () => {
-    if (!evaluationData) return [];
-
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = evaluationData.records || evaluationData;
-    if (!dataArray || dataArray.length === 0) return [];
-
-    // Sort data by ID in descending order to get the latest evaluations first
-    const sortedDataArray = [...dataArray].sort((a: any, b: any) => {
-      const idA = parseInt(a.id) || 0;
-      const idB = parseInt(b.id) || 0;
-      return idB - idA;
-    });
-
-    // Take only the first 10 latest evaluations if not showing all
-    const limitedDataArray = showAllDepartments ? sortedDataArray : sortedDataArray.slice(0, 10);
-
-    // Group evaluations by department
-    const departmentGroups: { [key: string]: any[] } = {};
-    
-    limitedDataArray.forEach((item: any) => {
-      const department = item.department || 'Unknown';
-      if (!departmentGroups[department]) {
-        departmentGroups[department] = [];
-      }
-      departmentGroups[department].push(item);
-    });
-
-    // Use custom colors or generate consistent colors based on department name
-    const getColorForDepartment = (departmentName: string, index: number) => {
-      // First, try to get saved department-specific color mapping
-      const savedMapping = localStorage.getItem('departmentColorMapping');
-      if (savedMapping) {
-        try {
-          const departmentColorMap = JSON.parse(savedMapping);
-          if (departmentColorMap[departmentName]) {
-            return departmentColorMap[departmentName];
-          }
-        } catch (error) {
-          console.error('Error loading department color mapping:', error);
-        }
-      }
-      
-      // If no saved mapping, use custom colors by index
-      if (customColors.length > 0 && customColors[index]) {
-        return customColors[index];
-      }
-      
-      // Otherwise, use default colors or generate consistent colors
-      if (defaultColors[index]) {
-        return defaultColors[index];
-      }
-      
-      // Fallback to unlimited color generation
-      const generatedColors = generateDistinctColors(Math.max(index + 1, 20));
-      return generatedColors[index];
-    };
-
-    // Calculate performance rate for each department
-    const departmentPerformanceData = Object.entries(departmentGroups).map(([department, evaluations], index) => {
-      const totalScore = evaluations.reduce((sum: number, evaluation: any) => {
-        return sum + (parseFloat(evaluation.score) || 0);
-      }, 0);
-      
-      const averageScore = evaluations.length > 0 ? totalScore / evaluations.length : 0;
-      
-      // Get the highest ID from evaluations in this department
-      const highestId = Math.max(...evaluations.map((evaluation: any) => parseInt(evaluation.id) || 0));
-      
-      return {
-        name: department,
-        score: Math.round(averageScore * 100) / 100,
-        color: getColorForDepartment(department, index),
-        count: evaluations.length,
-        highestId: highestId
-      };
-    });
-
-    // Sort by highest ID in descending order for display order
-    return departmentPerformanceData.sort((a, b) => b.highestId - a.highestId);
-  };
-
-  const departmentPerformanceData = calculateDepartmentPerformance();
+  // Calculate department performance using shared utility
+  const { departmentPerformanceData, totalDepartments } = useMemo(() => {
+    return calculateDepartmentPerformance(evaluationData, showAllDepartments, customColors);
+  }, [evaluationData, showAllDepartments, customColors]);
 
 
 
@@ -130,7 +47,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
     // Create a mapping of department names to their new colors
     const departmentColorMap: { [key: string]: string } = {};
     departmentPerformanceData.forEach((dept, index) => {
-      departmentColorMap[dept.name] = colors[index] || defaultColors[index] || '#3B82F6';
+      departmentColorMap[dept.name] = colors[index] || '#3B82F6';
     });
     
     // Save the department-to-color mapping
@@ -152,28 +69,6 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
       }
     }
   }, []);
-
-  // Calculate total number of departments (before filtering)
-  const getTotalDepartments = () => {
-    if (!evaluationData) return 0;
-    
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = evaluationData.records || evaluationData;
-    if (!dataArray || dataArray.length === 0) return 0;
-    
-    const departmentGroups: { [key: string]: any[] } = {};
-    dataArray.forEach((item: any) => {
-      const department = item.department || 'Unknown';
-      if (!departmentGroups[department]) {
-        departmentGroups[department] = [];
-      }
-      departmentGroups[department].push(item);
-    });
-    
-    return Object.keys(departmentGroups).length;
-  };
-
-  const totalDepartments = getTotalDepartments();
 
   // Calculate dynamic height based on number of departments
   const getChartHeight = () => {

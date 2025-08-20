@@ -1,6 +1,7 @@
 import React from 'react';
 
 import WorkforceOverviewDocument from './print/WorkforceOverviewDocument';
+import EmployeePerformanceDocument from './print/EmployeePerformanceDocument';
 
 import { calculateTotalActiveEmployees } from './cards/workforce-overview/calculations/totalActiveEmployeesCalc';
 import { calculateNewHires } from './cards/workforce-overview/calculations/newHiresCalc';
@@ -12,6 +13,14 @@ import { calculateDemographicBreakdown } from './tabs/components/workforce-overv
 import { processRolePipelineData } from './tabs/components/workforce-overview-tab/role-pipeline-tab/calculation/rolePipelineTableCalc';
 import { calculateAttritionRateData } from './tabs/components/workforce-overview-tab/attrition-rate-tab/calculations/attritionRateCalc';
 import { calculateExitReasonsData } from './tabs/components/workforce-overview-tab/attrition-rate-tab/calculations/exitReasons';
+
+// Employee Performance calculation imports
+import { calculateAveragePerformance } from './cards/employee-performance/calculations/averagePerformanceCalc';
+import { calculateResolvedVSOngoing } from './cards/employee-performance/calculations/resolvedVSOngoingCalc';
+import { calculateIssueTypeDistribution } from './tabs/components/employeee-performance-tab/employee-issue-rate-tab/calculations/issueTypeCalc';
+import { calculateMonthlyVolume } from './tabs/components/employeee-performance-tab/employee-issue-rate-tab/calculations/monthlyTypeVolumeCalc';
+import { calculateDepartmentPerformance } from './tabs/components/employeee-performance-tab/performance-rate-tab/calculations/performanceRateCalc';
+import { calculatePerformanceTrend } from './tabs/components/employeee-performance-tab/performance-rate-tab/calculations/performanceTrendCalc';
 
 export const createAnalyticsWorkforceOverviewDocumentComponent = (
   employeeData: any[],
@@ -141,6 +150,104 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
   );
 };
 
+export const createAnalyticsEmployeePerformanceDocumentComponent = (
+  evaluationData: any[],
+  employeeIssueData: any[],
+  dateFilter: { from: string; to: string },
+  activeSubTab: number = 1,
+  employeePerformanceTableData?: any[],
+  employeeIssuesTableData?: any[]
+) => {
+  // Calculate KPI data
+  const calculateKPIs = () => {
+    // Average Performance - Use shared utility function
+    const averagePerformanceData = calculateAveragePerformance(evaluationData);
+
+    // Resolved vs Ongoing Issues - Use shared utility function
+    const resolvedVSOngoingData = calculateResolvedVSOngoing(employeeIssueData);
+
+    return {
+      averagePerformance: {
+        value: averagePerformanceData.averageScore,
+        maxScore: averagePerformanceData.maxScore,
+        totalEmployees: averagePerformanceData.totalEmployees
+      },
+      resolvedVSOngoing: {
+        resolvedPercentage: resolvedVSOngoingData.resolvedPercentage,
+        ongoingPercentage: resolvedVSOngoingData.ongoingPercentage,
+        totalIssues: resolvedVSOngoingData.totalIssues,
+        resolvedIssues: resolvedVSOngoingData.resolvedIssues,
+        ongoingIssues: resolvedVSOngoingData.ongoingIssues
+      }
+    };
+  };
+
+  // Calculate performance rate data by department using shared utility
+  const calculatePerformanceRateData = () => {
+    const { departmentPerformanceData } = calculateDepartmentPerformance(evaluationData, true, []);
+    return departmentPerformanceData.map(dept => ({
+      name: dept.name,
+      score: dept.score,
+      count: dept.count
+    }));
+  };
+
+  // Calculate performance trend data using shared utility
+  const calculatePerformanceTrendData = () => {
+    const { displayData } = calculatePerformanceTrend(evaluationData, dateFilter, 'All Departments');
+    return displayData;
+  };
+
+  // Calculate issue type data
+  const calculateIssueTypeData = () => {
+    const { labels, data, percentages } = calculateIssueTypeDistribution(employeeIssueData);
+    
+    return labels.map((label, index) => ({
+      reason: label,
+      count: data[index],
+      percentage: percentages[index]
+    }));
+  };
+
+  // Calculate monthly issue volume data
+  const calculateMonthlyIssueVolumeData = () => {
+    const { labels, data } = calculateMonthlyVolume(employeeIssueData, dateFilter);
+    
+    return labels.map((label, index) => ({
+      month: label,
+      count: data[index]
+    }));
+  };
+
+  const kpiData = calculateKPIs();
+  const performanceRateData = calculatePerformanceRateData();
+  const performanceTrendData = calculatePerformanceTrendData();
+  const issueTypeData = calculateIssueTypeData();
+  const monthlyIssueVolumeData = calculateMonthlyIssueVolumeData();
+
+  return (
+    <div className="bg-white">
+      <style jsx>{`
+        .page-break {
+          page-break-after: always;
+          break-after: page;
+        }
+      `}</style>
+      <EmployeePerformanceDocument 
+        kpiData={kpiData}
+        performanceRateData={performanceRateData}
+        performanceTrendData={performanceTrendData}
+        employeePerformanceTableData={employeePerformanceTableData || []}
+        issueTypeData={issueTypeData}
+        monthlyIssueVolumeData={monthlyIssueVolumeData}
+        employeeIssuesTableData={employeeIssuesTableData || []}
+        dateFilter={dateFilter}
+        activeSubTab={activeSubTab}
+      />
+    </div>
+  );
+};
+
 export const generateAnalyticsFilename = (tabName: string, dateFilter: { from: string; to: string }) => {
   const dateFrom = dateFilter.from ? new Date(dateFilter.from).toISOString().split('T')[0] : 'all-time';
   const dateTo = dateFilter.to ? new Date(dateFilter.to).toISOString().split('T')[0] : 'all-time';
@@ -162,7 +269,12 @@ export const handlePrintAnalytics = async (
   rolePipelineCurrentPage?: number,
   rolePipelinePageSize?: number,
   validRegions?: string[],
-  selectedJobFilter?: string
+  selectedJobFilter?: string,
+  // Employee Performance specific parameters
+  evaluationData?: any[],
+  employeeIssueData?: any[],
+  employeePerformanceTableData?: any[],
+  employeeIssuesTableData?: any[]
 ) => {
   // Create document component based on tab
   let documentComponent: React.ReactElement;
@@ -182,6 +294,16 @@ export const handlePrintAnalytics = async (
         rolePipelinePageSize,
         validRegions,
         selectedJobFilter || 'All Jobs'
+      );
+      break;
+    case 2: // Employee Performance
+      documentComponent = createAnalyticsEmployeePerformanceDocumentComponent(
+        evaluationData || [],
+        employeeIssueData || [],
+        dateFilter,
+        activeSubTab,
+        employeePerformanceTableData,
+        employeeIssuesTableData
       );
       break;
     // Add other tabs here as they are implemented

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
@@ -19,6 +19,7 @@ import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems'
 import useGetAllEvaluationHistoryItems from '@/components/hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
 import useGetAllEmployeeIssueItems from '@/components/hooks/useGetAllEmployeeIssueItems';
+import { transformEvaluationData } from './components/employeee-performance-tab/performance-rate-tab/calculations/employeePerformanceTableCalc';
 
 
 interface EmployeePerformanceData {
@@ -40,9 +41,16 @@ interface EmployeePerformanceProps {
     from: string;
     to: string;
   };
+  onDataReady?: (data: {
+    activeSubTab: number;
+    evaluationData: any[];
+    employeeIssueData: any[];
+    employeePerformanceTableData: any[];
+    employeeIssuesTableData: any[];
+  }) => void;
 }
 
-const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFilter }) => {
+const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFilter, onDataReady }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
 
@@ -129,22 +137,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     setEmployeeIssuePageSize(value);
   };
 
-  // Transform API data to match table format (Employee Performance)
-  const transformEvaluationData = (apiData: any) => {
-    if (!apiData || !apiData.records) return [];
-    
-    return apiData.records.map((item: any) => ({
-      name: item.employee_name || 'N/A',
-      department: item.department || 'N/A',
-      score: item.score?.toString() || 'N/A',
-      lastEvaluation: item.date_of_evaluation ? new Date(item.date_of_evaluation).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }) : 'N/A',
-      status: item.status || 'N/A'
-    }));
-  };
+
 
   // Transform employee issues API data to match table format (Employee Issue Rate)
   const transformEmployeeIssueData = (apiData: any) => {
@@ -175,6 +168,19 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
       return 'Pending';
     }
   };
+
+  // Notify parent component when data is ready for printing
+  useEffect(() => {
+    if (onDataReady && allEvaluationData && allEmployeeIssueData) {
+      onDataReady({
+        activeSubTab,
+        evaluationData: allEvaluationData,
+        employeeIssueData: allEmployeeIssueData,
+        employeePerformanceTableData: transformEvaluationData(evaluationData),
+        employeeIssuesTableData: transformEmployeeIssueData(employeeIssueData)
+      });
+    }
+  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, onDataReady]);
 
   // Render Tab Content
   const renderTabContent = () => {
