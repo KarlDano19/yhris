@@ -100,11 +100,16 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
         beginAtZero: true,
         max: Math.ceil(maxValue * 1.2), // Add 20% padding
         ticks: {
-          stepSize: Math.max(1, Math.ceil(maxValue / 4)), // Dynamic step size
+          stepSize: Math.max(1, Math.ceil(maxValue / 5)),
           color: '#6b7280',
           font: {
             size: 12,
           },
+          callback: function(value: any) {
+            // Only show values that are multiples of the step size
+            const stepSize = Math.max(1, Math.ceil(maxValue / 5));
+            return value % stepSize === 0 ? value : '';
+          }
         },
         grid: {
           color: '#f0f0f0',
