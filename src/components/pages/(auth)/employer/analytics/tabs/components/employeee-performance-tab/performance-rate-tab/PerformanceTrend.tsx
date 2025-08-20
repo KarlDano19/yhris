@@ -187,7 +187,17 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             <FilterLogo className="w-5 h-5" />
           </button>
           <h3 className="text-lg font-semibold text-gray-900 text-center flex-1 px-4">
-            {selectedDepartment !== 'All Departments' ? `${selectedDepartment} Performance Trend` : 'All Departments Performance Trend'} {dateFilter?.from && dateFilter?.to ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` : `(${displayData.length > 0 ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` : 'No Data'})`}
+            {selectedDepartment !== 'All Departments' 
+              ? `${selectedDepartment} Performance Trend` 
+              : 'All Departments Performance Trend'
+            } {
+              dateFilter?.from && dateFilter?.to 
+                ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` 
+                : `(${displayData.length > 0 
+                    ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` 
+                    : 'No Data'
+                  })`
+            }
           </h3>
           <div className="w-10 flex-shrink-0"></div>
         </div>

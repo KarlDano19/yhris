@@ -23,18 +23,4 @@ export const getStatusColor = (status: string): string => {
   }
 };
 
-export const processEmployeeIssuesData = (
-  rawData?: any[]
-): EmployeeIssueData[] => {
-  if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
-    return [];
-  }
-
-  return rawData.map((issue: any) => ({
-    name: issue.employee_name || issue.name || 'Unknown',
-    department: issue.department || issue.employee_department || 'Unknown',
-    issueType: issue.issue_type || 'Unknown',
-    dateReported: issue.incident_date || issue.date_reported || issue.created_at || 'Unknown',
-    status: issue.status || 'Pending'
-  }));
-}; 
+ 

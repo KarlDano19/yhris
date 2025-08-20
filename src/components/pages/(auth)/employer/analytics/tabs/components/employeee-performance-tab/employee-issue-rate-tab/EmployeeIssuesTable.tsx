@@ -2,7 +2,7 @@ import React from 'react';
 
 import Pagination from '@/components/Pagination';
 
-import { getStatusColor, processEmployeeIssuesData, EmployeeIssueData } from './calculations/employeeIssuesTableCalc';
+import { getStatusColor, EmployeeIssueData } from './calculations/employeeIssuesTableCalc';
 
 interface PaginationData {
   totalRecords: number;
@@ -30,8 +30,8 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
   onPageChange,
   onPageSizeChange
 }) => {
-  // Process data using shared utility
-  const processedData = processEmployeeIssuesData(data);
+  // Data is already processed/transformed, use directly
+  const processedData = data;
 
   if (isLoading) {
     return (

@@ -146,7 +146,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     return apiData.records.map((item: any) => ({
       name: item.name || 'N/A',
       department: item.department || 'N/A',
-      issueType: item.issue_type || 'N/A',
+      issueType: item.issue_type || 'Not Specified',
       dateReported: item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -160,7 +160,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
   const getIssueStatus = (item: any) => {
     if (item.is_decision_sent && item.is_decision_received) {
       return 'Resolved';
-    } else if (item.investigate && item.investigate.id) {
+    } else if (item.investigate && item.investigate && item.investigate.id) {
       return 'Under Hearing';
     } else if (item.is_nte_sent && item.is_nte_received) {
       return 'NTE Issued';
