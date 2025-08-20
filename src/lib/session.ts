@@ -9,6 +9,8 @@ export interface SessionData {
   hasProfile: boolean;
   hasPendingTransaction: boolean;
   hasActiveSubscription: boolean;
+  // SECURITY FIX: Removed otpVerified and otpVerifiedAt
+  // These fields allowed frontend-controlled OTP bypass
 }
 
 export const defaultSession: SessionData = {
@@ -33,3 +35,13 @@ export const sessionOptions: SessionOptions = {
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// SECURITY FIX: Removed OTP verification functions
+// These functions enabled dangerous OTP bypass mechanisms:
+// - isOTPVerificationValid()
+// - setOTPVerificationCookie()
+// - getOTPVerificationCookie() 
+// - clearOTPVerificationCookie()
+//
+// OTP verification is now handled ONLY by backend cache,
+// preventing client-side manipulation.

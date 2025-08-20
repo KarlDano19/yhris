@@ -7,6 +7,14 @@ import DateCalendar from '@/svg/DateCalendar';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
+// Custom styles for year and month dropdowns
+const customStyles = `
+  .react-datepicker__year-select,
+  .react-datepicker__month-select {
+    padding: 2px 12px 2px 12px !important;
+  }
+`;
+
 const CustomDatePicker = ({
   id,
   selected = new Date(),
@@ -83,26 +91,32 @@ const CustomDatePicker = ({
   });
 
   return (
-    // @ts-ignore
-    <DatePicker
-      wrapperClassName='w-full'
-      popperClassName='!z-20'
-      selected={selected}
-      onChange={date => {
-        if (date) {
-          pickerOnChange(date);
-          inputOnChange(date);
-        }
-      }}
-      minDate={minDate}
-      customInput={<CustomInput />}
-      popperModifiers={[
-        {
-          name: 'arrow',
-          options: { padding: 24 },
-        },
-      ]}
-    />
+    <>
+      <style>{customStyles}</style>
+      {/* @ts-ignore */}
+      <DatePicker
+        wrapperClassName='w-full'
+        popperClassName='!z-20'
+        selected={selected}
+        onChange={date => {
+          if (date) {
+            pickerOnChange(date);
+            inputOnChange(date);
+          }
+        }}
+        minDate={minDate}
+        customInput={<CustomInput />}
+        popperModifiers={[
+          {
+            name: 'arrow',
+            options: { padding: 24 },
+          },
+        ]}
+        showYearDropdown
+        showMonthDropdown
+        dropdownMode='select'
+      />
+    </>
   );
 };
 

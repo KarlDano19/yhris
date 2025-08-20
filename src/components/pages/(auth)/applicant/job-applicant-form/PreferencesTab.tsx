@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
 
 import { PlusIcon, CheckIcon } from '@heroicons/react/24/solid';
 
@@ -31,6 +32,26 @@ function PreferencesTab({
     control: control,
     name: 'experiences',
   });
+
+  // Autofill work experience from profile
+  const { data: applicantProfileData } = useGetApplicantProfile();
+  useEffect(() => {
+    const currentExperiences = watch('experiences');
+    if (
+      applicantProfileData &&
+      applicantProfileData.work_experience &&
+      Array.isArray(applicantProfileData.work_experience) &&
+      (!currentExperiences || currentExperiences.length === 0)
+    ) {
+      const experiences = applicantProfileData.work_experience.map((exp: any) => ({
+        ...exp,
+        dateFrom: exp.dateFrom ? new Date(exp.dateFrom) : null,
+        dateTo: exp.dateTo ? new Date(exp.dateTo) : null,
+      }));
+      setValue('experiences', experiences);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applicantProfileData, setValue]);
 
   const onSubmit = handleSubmit((data: any) => {
     let hasError = false;
