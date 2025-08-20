@@ -27,9 +27,22 @@ interface WorkforceOverviewProps {
     from: string;
     to: string;
   };
+  onDataReady?: (data: {
+    activeSubTab: number;
+    employeeData: any[];
+    appliedApplicantsData: any[];
+    separationData: any[];
+    allJobPostData: any[];
+    pipelineData: any;
+    rolePipelineData: any[];
+    rolePipelineCurrentPage: number;
+    rolePipelinePageSize: number;
+    validRegions?: string[];
+    selectedJobFilter?: string;
+  }) => void;
 }
 
-const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => {
+const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDataReady }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
 
   // Pagination State for Role Pipeline
@@ -87,6 +100,8 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
       refetchJobPost();
     }
   }, [activeSubTab]);
+
+
 
 
 
@@ -166,6 +181,25 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
       totalPages: jobPostData.total_pages || jobPostData.totalPages || 1
     };
   }, [jobPostData]);
+
+  // Notify parent component when data is ready for printing
+  useEffect(() => {
+    if (onDataReady && employeeData && appliedApplicantsData && allSeparationData && allJobPostData) {
+      onDataReady({
+        activeSubTab,
+        employeeData,
+        appliedApplicantsData,
+        separationData: allSeparationData,
+        allJobPostData,
+        pipelineData,
+        rolePipelineData,
+        rolePipelineCurrentPage,
+        rolePipelinePageSize,
+        validRegions: getValidRegions().filter((region): region is string => region !== null),
+        selectedJobFilter
+      });
+    }
+  }, [activeSubTab, employeeData, appliedApplicantsData, allSeparationData, allJobPostData, pipelineData, rolePipelineData, rolePipelineCurrentPage, rolePipelinePageSize, selectedJobFilter, onDataReady]);
 
   // Workforce metrics are now handled by separate calculation components
 

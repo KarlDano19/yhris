@@ -7,13 +7,18 @@ import { useSearchParams, useRouter } from 'next/navigation';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from 'react-tooltip';
+import toast from "react-hot-toast";
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import WorkforceOverview from './tabs/WorkforceOverview';
 import EmployeePerformance from './tabs/EmployeePerformance';
 import CompliancePolicy from './tabs/CompliancePolicy';
 import CompensationBenefits from './tabs/CompensationBenefits';
+import useFileforge from "@/components/hooks/useFileforge";
+import CustomToast from "@/components/CustomToast";
+import { handlePrintAnalytics } from './PrintData';
 
+import PrintIcon from "@/svg/PrintIcon";
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const searchParams = useSearchParams();
@@ -33,9 +38,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     3: { from: '', to: '' },
   });
 
+  // State for print functionality
+  const [workforceData, setWorkforceData] = useState<{
+    activeSubTab: number;
+    employeeData: any[];
+    appliedApplicantsData: any[];
+    separationData: any[];
+    allJobPostData: any[];
+    pipelineData: any;
+    rolePipelineData: any[];
+    rolePipelineCurrentPage: number;
+    rolePipelinePageSize: number;
+    validRegions?: string[];
+    selectedJobFilter?: string;
+  } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   // Get current tab's date filter
   const currentDateFilter = tabDateFilters[activeTab] || { from: '', to: '' };
   const currentAppliedDateFilter = tabAppliedDateFilters[activeTab] || { from: '', to: '' };
+
+  // Fileforge hook for PDF generation
+  const { generatePDFLocally } = useFileforge({
+    onSuccess: () => {
+      setIsGenerating(false);
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      setIsGenerating(false);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
+  });
 
   // Handle tab parameter from URL
   useEffect(() => {
@@ -58,7 +91,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const renderActiveTab = () => {
     switch (activeTab) {
       case 1:
-        return <WorkforceOverview dateFilter={currentAppliedDateFilter} />;
+        return <WorkforceOverview 
+          dateFilter={currentAppliedDateFilter} 
+          onDataReady={setWorkforceData}
+        />;
       case 2:
         return <EmployeePerformance dateFilter={currentAppliedDateFilter} />;
       case 3:
@@ -66,7 +102,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // case 4:
       //   return <CompensationBenefits />;
       default:
-        return <WorkforceOverview dateFilter={currentAppliedDateFilter} />;
+        return <WorkforceOverview 
+          dateFilter={currentAppliedDateFilter} 
+          onDataReady={setWorkforceData}
+        />;
     }
   };
 
@@ -77,6 +116,48 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       router.push('/analytics');
     } else {
       router.push(`/analytics?tab=${tabId}`);
+    }
+  };
+
+  const handlePrint = async () => {
+    try {
+      setIsGenerating(true);
+      
+      const currentTab = tabs.find(tab => tab.id === activeTab);
+      if (!currentTab) {
+        throw new Error('Invalid tab');
+      }
+
+      switch (activeTab) {
+        case 1: // Workforce Overview
+          if (!workforceData) {
+            throw new Error('No workforce data available for printing');
+          }
+          await handlePrintAnalytics(
+            activeTab,
+            currentTab.name,
+            generatePDFLocally,
+            workforceData.employeeData,
+            workforceData.appliedApplicantsData,
+            workforceData.separationData,
+            workforceData.allJobPostData,
+            currentAppliedDateFilter,
+            workforceData.activeSubTab,
+            workforceData.pipelineData,
+            workforceData.rolePipelineData,
+            workforceData.rolePipelineCurrentPage,
+            workforceData.rolePipelinePageSize,
+            workforceData.validRegions,
+            workforceData.selectedJobFilter
+          );
+          break;
+        // Add other tabs here as they are implemented
+        default:
+          throw new Error(`Print functionality not implemented for tab ${activeTab}`);
+      }
+    } catch (error: any) {
+      setIsGenerating(false);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
     }
   };
 
@@ -153,6 +234,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 }}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
+              <button
+                className='hover:bg-gray-100'
+                onClick={handlePrint}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <div className="animate-spin inline-block w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full">
+                  </div>
+                ) : (
+                  <PrintIcon />
+                )}
               </button>
             </div>
           </div>

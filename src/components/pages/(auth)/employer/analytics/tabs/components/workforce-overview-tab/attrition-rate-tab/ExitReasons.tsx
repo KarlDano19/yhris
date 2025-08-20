@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 
 import ExitReasonsFilterModal from '../../../../modals/ExitReasonsFilterModal';
 
+import { calculateExitReasonsData } from './calculations/exitReasons';
+
 import FilterLogo from '@/svg/FilterLogo';
 
 interface ExitReasonsProps {
@@ -18,59 +20,9 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedPositionFilter, setSelectedPositionFilter] = useState<string>('All Positions');
 
-  // Calculate exit reasons data from separation data
-  const exitReasonsData = useMemo(() => {
-    if (!separationData || !Array.isArray(separationData)) {
-      return [];
-    }
-
-    // Filter by position if selected
-    let filteredData = separationData;
-    if (selectedPositionFilter !== 'All Positions') {
-      filteredData = separationData.filter((separation: any) => 
-        separation.position === selectedPositionFilter
-      );
-    }
-
-    // Count separations by reason
-    const reasonCounts: { [key: string]: number } = {};
-
-    filteredData.forEach((separation: any) => {
-      const reason = separation.reason_of_leaving || 'Unknown';
-      reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
-    });
-
-    // Convert to array format
-    return Object.entries(reasonCounts)
-      .map(([reason, count]) => ({
-        reason,
-        count
-      }))
-      .sort((a, b) => b.count - a.count); // Sort by count descending
-  }, [separationData, selectedPositionFilter]);
-
-  // Get unique positions from separation data
-  const uniquePositions = useMemo(() => {
-    if (!separationData || !Array.isArray(separationData)) {
-      return [];
-    }
-
-    const positions = new Set<string>();
-    separationData.forEach((separation: any) => {
-      if (separation.position) {
-        positions.add(separation.position);
-      }
-    });
-    
-    return Array.from(positions).sort();
-  }, [separationData]);
-
-  // Get the title text for exit reasons
-  const titleText = useMemo(() => {
-    if (!separationData || !Array.isArray(separationData) || separationData.length === 0) {
-      return 'No data available';
-    }
-    return selectedPositionFilter !== 'All Positions' ? selectedPositionFilter : '';
+  // Calculate exit reasons data using shared utility
+  const { exitReasonsData, uniquePositions, titleText } = useMemo(() => {
+    return calculateExitReasonsData(separationData, selectedPositionFilter);
   }, [separationData, selectedPositionFilter]);
 
   if (isLoading) {

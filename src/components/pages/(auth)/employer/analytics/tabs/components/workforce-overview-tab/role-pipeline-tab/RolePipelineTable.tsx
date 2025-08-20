@@ -2,19 +2,13 @@ import React from 'react';
 
 import Pagination from '@/components/Pagination';
 
-interface RolePipelineData {
-  role: string;
-  numberOfApplicants: number;
-  status: string;
-  dateJobOpened: string;
-  turnaroundTime: number;
-  currentPipeline: string;
-  jobId?: number;
-}
-
-interface PipelineData {
-  [jobId: number]: { [stageTitle: string]: number };
-}
+import { 
+  RolePipelineData, 
+  PipelineData, 
+  formatTurnaroundTime, 
+  formatPipelineInfo, 
+  getStatusColor 
+} from './calculation/rolePipelineTableCalc';
 
 interface PaginationData {
   totalRecords: number;
@@ -44,41 +38,6 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
   onPageSizeChange,
   pipelineData = {}
 }) => {
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Ongoing':
-        return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'Closed':
-        return 'text-red-600 bg-red-50 border-red-200';
-      case 'Draft':
-        return 'text-gray-600 bg-gray-50 border-gray-200';
-      case 'Expired':
-        return 'text-orange-600 bg-orange-50 border-orange-200';
-      default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
-
-  const formatTurnaroundTime = (days: number) => {
-    if (days === 0) return 'Today';
-    if (days === 1) return '1 day';
-    return `${days} days`;
-  };
-
-  const formatPipelineInfo = (pipeline: string, applicants: number, jobId?: number) => {
-    if (applicants === 0) return 'No applicants yet';
-    
-    if (jobId && pipelineData[jobId]) {
-      const stageBreakdown = Object.entries(pipelineData[jobId])
-        .map(([stage, count]) => `${stage}: ${count}`)
-        .join(', ');
-      return stageBreakdown;
-    }
-    
-    if (applicants === 1) return '1';
-    return pipeline;
-  };
 
   if (isLoading) {
     return (
@@ -180,7 +139,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                         <span className="font-medium">{formatTurnaroundTime(role.turnaroundTime)}</span>
                       </td>
                       <td className="py-4 text-sm text-gray-900 text-center">
-                        {formatPipelineInfo(role.currentPipeline, role.numberOfApplicants, role.jobId)}
+                        {formatPipelineInfo(role.currentPipeline, role.numberOfApplicants, role.jobId, pipelineData)}
                       </td>
                     </tr>
                   ))

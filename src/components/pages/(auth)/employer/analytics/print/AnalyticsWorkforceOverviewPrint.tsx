@@ -52,12 +52,26 @@ const AnalyticsWorkforceOverviewPrint: React.FC<AnalyticsWorkforceOverviewPrintP
   activeSubTab
 }) => {
   const formatDateRange = () => {
+    const formatDate = (dateString: string) => {
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      } catch (error) {
+        // If date parsing fails, return the original string
+        return dateString;
+      }
+    };
+
     if (dateFilter.from && dateFilter.to) {
-      return `${dateFilter.from} to ${dateFilter.to}`;
+      return `${formatDate(dateFilter.from)} to ${formatDate(dateFilter.to)}`;
     } else if (dateFilter.from) {
-      return `From ${dateFilter.from}`;
+      return `From ${formatDate(dateFilter.from)}`;
     } else if (dateFilter.to) {
-      return `Until ${dateFilter.to}`;
+      return `Until ${formatDate(dateFilter.to)}`;
     }
     return 'All Time';
   };
@@ -65,128 +79,113 @@ const AnalyticsWorkforceOverviewPrint: React.FC<AnalyticsWorkforceOverviewPrintP
   const renderKPICards = () => (
     <div className="mb-8">
       <h2 className="text-lg font-bold text-gray-900 mb-4">Workforce Overview - Key Performance Indicators</h2>
-      <div className="grid grid-cols-5 gap-3">
-        {/* Total Active Employees */}
-        <div className="border border-gray-300 rounded-lg p-3 bg-white">
-          <h3 className="text-xs font-semibold text-gray-600 mb-1 text-center">Total Active Employees</h3>
-          <div className="text-lg font-bold text-gray-900 mb-1 text-center">{kpiData.totalEmployees.value}</div>
-          <p className="text-xs text-gray-500 text-center leading-tight">{kpiData.totalEmployees.trend}</p>
-        </div>
-
-        {/* New Hires */}
-        <div className="border border-gray-300 rounded-lg p-3 bg-white">
-          <h3 className="text-xs font-semibold text-gray-600 mb-1 text-center">New Hires</h3>
-          <div className="text-lg font-bold text-gray-900 mb-1 text-center">{kpiData.newHires.value}</div>
-          <p className="text-xs text-gray-500 text-center leading-tight">{kpiData.newHires.trend}</p>
-        </div>
-
-        {/* Separated Employees */}
-        <div className="border border-gray-300 rounded-lg p-3 bg-white">
-          <h3 className="text-xs font-semibold text-gray-600 mb-1 text-center">Separated Employees</h3>
-          <div className="text-lg font-bold text-gray-900 mb-1 text-center">{kpiData.separatedEmployees.value}</div>
-          <p className="text-xs text-gray-500 text-center leading-tight">{kpiData.separatedEmployees.trend}</p>
-        </div>
-
-        {/* Attrition Rate */}
-        <div className="border border-gray-300 rounded-lg p-3 bg-white">
-          <h3 className="text-xs font-semibold text-gray-600 mb-1 text-center">Attrition Rate</h3>
-          <div className="text-lg font-bold text-gray-900 mb-1 text-center">{kpiData.attritionRate.value}%</div>
-          <p className="text-xs text-gray-500 text-center leading-tight">{kpiData.attritionRate.trend}</p>
-        </div>
-
-        {/* Average Tenure */}
-        <div className="border border-gray-300 rounded-lg p-3 bg-white">
-          <h3 className="text-xs font-semibold text-gray-600 mb-1 text-center">Average Tenure</h3>
-          <div className="text-lg font-bold text-gray-900 mb-1 text-center">{kpiData.averageTenure.value} years</div>
-          <p className="text-xs text-gray-500 text-center leading-tight">{kpiData.averageTenure.trend}</p>
-        </div>
-      </div>
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 p-2 text-left">Metric</th>
+            <th className="border border-gray-300 p-2 text-center">Value</th>
+            <th className="border border-gray-300 p-2 text-left">Trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="border border-gray-300 p-2 font-medium">Total Active Employees</td>
+            <td className="border border-gray-300 p-2 text-center font-bold">{kpiData.totalEmployees.value}</td>
+            <td className="border border-gray-300 p-2 text-sm">{kpiData.totalEmployees.trend}</td>
+          </tr>
+          <tr>
+            <td className="border border-gray-300 p-2 font-medium">New Hires</td>
+            <td className="border border-gray-300 p-2 text-center font-bold">{kpiData.newHires.value}</td>
+            <td className="border border-gray-300 p-2 text-sm">{kpiData.newHires.trend}</td>
+          </tr>
+          <tr>
+            <td className="border border-gray-300 p-2 font-medium">Separated Employees</td>
+            <td className="border border-gray-300 p-2 text-center font-bold">{kpiData.separatedEmployees.value}</td>
+            <td className="border border-gray-300 p-2 text-sm">{kpiData.separatedEmployees.trend}</td>
+          </tr>
+          <tr>
+            <td className="border border-gray-300 p-2 font-medium">Attrition Rate</td>
+            <td className="border border-gray-300 p-2 text-center font-bold">{kpiData.attritionRate.value}%</td>
+            <td className="border border-gray-300 p-2 text-sm">{kpiData.attritionRate.trend}</td>
+          </tr>
+          <tr>
+            <td className="border border-gray-300 p-2 font-medium">Average Tenure</td>
+            <td className="border border-gray-300 p-2 text-center font-bold">{kpiData.averageTenure.value} years</td>
+            <td className="border border-gray-300 p-2 text-sm">{kpiData.averageTenure.trend}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 
   const renderApplicantVsHired = () => (
-    <div className="mb-8" style={{ pageBreakInside: 'avoid', minHeight: 'fit-content' }}>
+    <div className="mb-8">
       <h2 className="text-lg font-bold text-gray-900 mb-4">Applicant vs Hired Analysis</h2>
       <div className="grid grid-cols-2 gap-6">
-        {/* Overall Applicants Status Summary Component */}
-        <div className="border border-gray-300 rounded-lg p-4" style={{ pageBreakInside: 'avoid' }}>
+        {/* Overall Applicants Status Summary */}
+        <div>
           <h3 className="text-base font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
-          
           {applicantData.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-gray-300">
-                    <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Status</th>
-                    <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Count</th>
-                    <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Percentage</th>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2 text-center">Status</th>
+                  <th className="border border-gray-300 p-2 text-center">Count</th>
+                  <th className="border border-gray-300 p-2 text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applicantData.map((item, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-300 p-2 text-center">{item.status}</td>
+                    <td className="border border-gray-300 p-2 text-center">{item.count}</td>
+                    <td className="border border-gray-300 p-2 text-center">{item.percentage}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {applicantData.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-200">
-                      <td className="text-center py-3 px-2 text-gray-900 font-medium text-xs">{item.status}</td>
-                      <td className="text-center py-3 px-2 text-gray-700 text-xs">{item.count}</td>
-                      <td className="text-center py-3 px-2">
-                        <div className="flex flex-col">
-                          <span className={`font-semibold text-xs ${item.color}`}>{item.percentage}</span>
-                          <span className="text-xs text-gray-500">{item.label}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           ) : (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-gray-500 text-center">
-                <div className="text-sm font-semibold mb-2">No Data Available</div>
-                <div className="text-xs">No applicant data found for the selected criteria</div>
-              </div>
+            <div className="text-center py-8 text-gray-500">
+              <div className="font-semibold mb-2">No Data Available</div>
+              <div className="text-sm">No applicant data found for the selected criteria</div>
             </div>
           )}
         </div>
 
-        {/* Demographic Breakdown Component */}
-        <div className="border border-gray-300 rounded-lg p-4" style={{ pageBreakInside: 'avoid' }}>
+        {/* Demographic Breakdown */}
+        <div>
           <h3 className="text-base font-semibold text-gray-900 mb-4">Demographic Breakdown</h3>
-          
           {demographicData ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-gray-300">
-                    <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Demographic</th>
-                    <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Details</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-gray-200">
-                    <td className="text-center py-3 px-2 text-gray-900 font-medium text-xs">Female Applicants</td>
-                    <td className="text-center py-3 px-2 text-gray-700 text-xs">{demographicData.femalePercentage || '0%'}</td>
-                  </tr>
-                  <tr className="border-b border-gray-200">
-                    <td className="text-center py-3 px-2 text-gray-900 font-medium text-xs">Male Applicants</td>
-                    <td className="text-center py-3 px-2 text-gray-700 text-xs">{demographicData.malePercentage || '0%'}</td>
-                  </tr>
-                  <tr className="border-b border-gray-200">
-                    <td className="text-center py-3 px-2 text-gray-900 font-medium text-xs">Most Common Regions</td>
-                    <td className="text-center py-3 px-2 text-gray-700 text-xs">{demographicData.mostCommonRegion || 'N/A'}</td>
-                  </tr>
-                  <tr className="border-b border-gray-200">
-                    <td className="text-center py-3 px-2 text-gray-900 font-medium text-xs">Most Common Age Group</td>
-                    <td className="text-center py-3 px-2 text-gray-700 text-xs">{demographicData.mostCommonAgeGroup || 'N/A'}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2 text-center">Demographic</th>
+                  <th className="border border-gray-300 p-2 text-center">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 p-2 text-center">Female Applicants</td>
+                  <td className="border border-gray-300 p-2 text-center">{demographicData.femalePercentage || '0%'}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 p-2 text-center">Male Applicants</td>
+                  <td className="border border-gray-300 p-2 text-center">{demographicData.malePercentage || '0%'}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 p-2 text-center">Most Common Regions</td>
+                  <td className="border border-gray-300 p-2 text-center">{demographicData.mostCommonRegion || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 p-2 text-center">Most Common Age Group</td>
+                  <td className="border border-gray-300 p-2 text-center">{demographicData.mostCommonAgeGroup || 'N/A'}</td>
+                </tr>
+              </tbody>
+            </table>
           ) : (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-gray-500 text-center">
-                <div className="text-sm font-semibold mb-2">No Data Available</div>
-                <div className="text-xs">No demographic data found for the selected criteria</div>
-              </div>
+            <div className="text-center py-8 text-gray-500">
+              <div className="font-semibold mb-2">No Data Available</div>
+              <div className="text-sm">No demographic data found for the selected criteria</div>
             </div>
           )}
         </div>
@@ -195,188 +194,132 @@ const AnalyticsWorkforceOverviewPrint: React.FC<AnalyticsWorkforceOverviewPrintP
   );
 
   const renderRolePipeline = () => (
-    <div className="mb-8" style={{ pageBreakInside: 'avoid', minHeight: 'fit-content' }}>
+    <div className="mb-8">
       <h2 className="text-lg font-bold text-gray-900 mb-4">Role Turnaround and Pipeline Analysis</h2>
       
-      <div className="bg-white rounded-lg border border-gray-300 shadow-sm" style={{ pageBreakInside: 'avoid' }}>
-        <div className="p-6">
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-300">
-                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">Role</th>
-                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">No. of Applicants</th>
-                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">Status</th>
-                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">Date Job Opened</th>
-                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">Turnaround Time</th>
-                  <th className="pb-4 text-center text-sm font-semibold text-gray-900">Current Pipeline</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rolePipelineData.length > 0 ? (
-                  rolePipelineData.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-200">
-                      <td className="py-4 text-sm text-gray-900 font-medium text-center">{item.role}</td>
-                      <td className="py-4 text-sm text-gray-900 text-center">{item.numberOfApplicants}</td>
-                      <td className="py-4 text-sm text-center">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
-                          item.status === 'Ongoing' ? 'text-blue-600 bg-blue-50 border-blue-200' :
-                          item.status === 'Closed' ? 'text-red-600 bg-red-50 border-red-200' :
-                          item.status === 'Draft' ? 'text-gray-600 bg-gray-50 border-gray-200' :
-                          item.status === 'Expired' ? 'text-orange-600 bg-orange-50 border-orange-200' :
-                          'text-gray-600 bg-gray-50 border-gray-200'
-                        }`}>
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="py-4 text-sm text-gray-900 text-center">{item.dateJobOpened}</td>
-                      <td className="py-4 text-sm text-gray-900 text-center">
-                        <span className="font-medium">
-                          {item.turnaroundTime === 0 ? 'Today' :
-                           item.turnaroundTime === 1 ? '1 day' :
-                           `${item.turnaroundTime} days`}
-                        </span>
-                      </td>
-                      <td className="py-4 text-sm text-gray-900 text-center">
-                        {item.numberOfApplicants === 0 ? 'No applicants yet' : item.currentPipeline}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="text-gray-400 text-lg mb-2">No job postings found</div>
-                        <div className="text-gray-500 text-sm">Create your first job posting to see role pipeline data</div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+      {rolePipelineData.length > 0 ? (
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 p-2 text-center">Role</th>
+              <th className="border border-gray-300 p-2 text-center">No. of Applicants</th>
+              <th className="border border-gray-300 p-2 text-center">Status</th>
+              <th className="border border-gray-300 p-2 text-center">Date Job Opened</th>
+              <th className="border border-gray-300 p-2 text-center">Turnaround Time</th>
+              <th className="border border-gray-300 p-2 text-center">Current Pipeline</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rolePipelineData.map((item, index) => (
+              <tr key={index}>
+                <td className="border border-gray-300 p-2 text-center">{item.role}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.numberOfApplicants}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.status}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.dateJobOpened}</td>
+                <td className="border border-gray-300 p-2 text-center">
+                  {item.turnaroundTime === 0 ? 'Today' :
+                   item.turnaroundTime === 1 ? '1 day' :
+                   `${item.turnaroundTime} days`}
+                </td>
+                <td className="border border-gray-300 p-2 text-center">
+                  {item.numberOfApplicants === 0 ? 'No applicants yet' : item.currentPipeline}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="text-center py-12 text-gray-500">
+          <div className="text-lg mb-2">No job postings found</div>
+          <div className="text-sm">Create your first job posting to see role pipeline data</div>
         </div>
-      </div>
+      )}
     </div>
   );
 
   const renderAttritionRate = () => (
-    <div className="mb-8" style={{ pageBreakInside: 'avoid', minHeight: 'fit-content' }}>
+    <div className="mb-8">
       <h2 className="text-lg font-bold text-gray-900 mb-4">Attrition Rate Analysis</h2>
       
       <div className="grid grid-cols-2 gap-6">
-        {/* Attrition Rate Component */}
-        <div className="border border-gray-300 rounded-lg p-4" style={{ pageBreakInside: 'avoid' }}>
+        {/* Attrition Rate */}
+        <div>
           <h3 className="text-base font-semibold text-gray-900 mb-4">Attrition Rate for {formatDateRange()}</h3>
           
           {attritionData.attritionRate !== '0' ? (
             <>
-              <div className="overflow-x-auto mb-6">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b-2 border-gray-300">
-                      <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Month</th>
-                      <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Attrition Rate</th>
-                      <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Total Exits</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-gray-200">
-                      <td className="text-center py-3 px-2 text-gray-900 font-medium text-xs">Current</td>
-                      <td className="text-center py-3 px-2 text-green-600 font-semibold text-xs">{attritionData.attritionRate}%</td>
-                      <td className="text-center py-3 px-2 text-gray-700 text-xs">{attritionData.exitReasons.reduce((sum, item) => sum + item.count, 0)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <table className="w-full border-collapse border border-gray-300 mb-4">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 p-2 text-center">Month</th>
+                    <th className="border border-gray-300 p-2 text-center">Attrition Rate</th>
+                    <th className="border border-gray-300 p-2 text-center">Total Exits</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-gray-300 p-2 text-center">Current</td>
+                    <td className="border border-gray-300 p-2 text-center font-semibold">{attritionData.attritionRate}%</td>
+                    <td className="border border-gray-300 p-2 text-center">{attritionData.exitReasons.reduce((sum, item) => sum + item.count, 0)}</td>
+                  </tr>
+                </tbody>
+              </table>
 
-              {/* Guidelines Section */}
-              <div className="bg-yellow-50 border-2 border-dashed border-yellow-400 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-yellow-800 mb-3">Attrition Rate Guidelines</h4>
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-start">
-                    <span className="text-green-600 font-medium w-32 flex-shrink-0">0-10% - <span className="font-bold">Healthy</span>:</span>
-                    <span className="text-gray-700">Indicates strong employee retention and stable work culture.</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-blue-600 font-medium w-32 flex-shrink-0">11-15% - <span className="font-bold">Manageable</span>:</span>
-                    <span className="text-gray-700">Still within normal range but worth monitoring for trends.</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-orange-600 font-medium w-32 flex-shrink-0">16-20% - <span className="font-bold">Concerning</span>:</span>
-                    <span className="text-gray-700">May reflect issues in employee satisfaction, engagement, or job fit.</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-red-600 font-medium w-32 flex-shrink-0">Above 20% - <span className="font-bold">High</span>:</span>
-                    <span className="text-gray-700">Signals potential problems in management, culture, workload, or compensation that may require attention.</span>
-                  </div>
+              <div className="border border-gray-300 p-4 bg-gray-50">
+                <h4 className="font-semibold mb-3">Attrition Rate Guidelines</h4>
+                <div className="space-y-2 text-sm">
+                  <div><strong>0-10% - Healthy:</strong> Indicates strong employee retention and stable work culture.</div>
+                  <div><strong>11-15% - Manageable:</strong> Still within normal range but worth monitoring for trends.</div>
+                  <div><strong>16-20% - Concerning:</strong> May reflect issues in employee satisfaction, engagement, or job fit.</div>
+                  <div><strong>Above 20% - High:</strong> Signals potential problems in management, culture, workload, or compensation.</div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-center">
-                <div className="text-gray-400 text-sm mb-2">No separation data available</div>
-                <div className="text-gray-500 text-xs">Separation records will appear here when available</div>
-              </div>
+            <div className="text-center py-8 text-gray-500">
+              <div className="font-semibold mb-2">No separation data available</div>
+              <div className="text-sm">Separation records will appear here when available</div>
             </div>
           )}
         </div>
 
-        {/* Exit Reasons Component */}
-        <div className="border border-gray-300 rounded-lg p-4" style={{ pageBreakInside: 'avoid' }}>
+        {/* Exit Reasons */}
+        <div>
           <h3 className="text-base font-semibold text-gray-900 mb-4">Exit Reasons</h3>
           
           {attritionData.exitReasons.length > 0 ? (
             <>
-              <div className="overflow-x-auto mb-6">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b-2 border-gray-300">
-                      <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Exit Reason</th>
-                      <th className="text-center py-3 px-2 font-semibold text-gray-700 text-xs">Count</th>
+              <table className="w-full border-collapse border border-gray-300 mb-4">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 p-2 text-center">Exit Reason</th>
+                    <th className="border border-gray-300 p-2 text-center">Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {attritionData.exitReasons.map((item, index) => (
+                    <tr key={index}>
+                      <td className="border border-gray-300 p-2 text-center">{item.reason}</td>
+                      <td className="border border-gray-300 p-2 text-center">{item.count}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {attritionData.exitReasons.map((item, index) => (
-                      <tr key={index} className="border-b border-gray-200">
-                        <td className="text-center py-3 px-2 text-gray-900 font-medium text-xs">{item.reason}</td>
-                        <td className="text-center py-3 px-2 text-gray-700 text-xs">{item.count}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
 
-              {/* Guidelines Section */}
-              <div className="bg-yellow-50 border-2 border-dashed border-yellow-400 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-yellow-800 mb-3">Exit Reason Guidelines</h4>
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-start">
-                    <span className="text-gray-800 font-medium w-40 flex-shrink-0"><span className="font-bold">Voluntary Resignation</span> (0-1 per month):</span>
-                    <span className="text-gray-700">This is usually normal, but more than 1 may suggest employees are unhappy or looking for better opportunities.</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-gray-800 font-medium w-40 flex-shrink-0"><span className="font-bold">AWOL</span> (0 per month):</span>
-                    <span className="text-gray-700">This should not happen; even one case could point to deeper issues like poor onboarding or unmet expectations.</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-gray-800 font-medium w-40 flex-shrink-0"><span className="font-bold">Layoff</span> (0 per month):</span>
-                    <span className="text-gray-700">Layoffs should be rare and usually signal changes in company structure or budget.</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-gray-800 font-medium w-40 flex-shrink-0"><span className="font-bold">Termination</span> (0-1 per month):</span>
-                    <span className="text-gray-700">Some terminations are expected, but frequent cases may indicate hiring or training problems.</span>
-                  </div>
+              <div className="border border-gray-300 p-4 bg-gray-50">
+                <h4 className="font-semibold mb-3">Exit Reason Guidelines</h4>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Voluntary Resignation (0-1 per month):</strong> Usually normal, but more than 1 may suggest issues.</div>
+                  <div><strong>AWOL (0 per month):</strong> Should not happen; could point to deeper issues.</div>
+                  <div><strong>Layoff (0 per month):</strong> Should be rare and signal company changes.</div>
+                  <div><strong>Termination (0-1 per month):</strong> Some expected, but frequent cases may indicate problems.</div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-center">
-                <div className="text-gray-400 text-sm mb-2">No exit reasons data available</div>
-                <div className="text-gray-500 text-xs">Separation records will appear here when available</div>
-              </div>
+            <div className="text-center py-8 text-gray-500">
+              <div className="font-semibold mb-2">No exit reasons data available</div>
+              <div className="text-sm">Separation records will appear here when available</div>
             </div>
           )}
         </div>
