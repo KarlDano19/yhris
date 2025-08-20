@@ -271,6 +271,7 @@ const Content = () => {
         jobPost['is_show_remarks'] = jobPost['is_show_remarks'];
         jobPost['is_show_benefits'] = jobPost['is_show_benefits'];
         jobPost['is_show_roles'] = jobPost['is_show_roles'];
+        jobPost['company_logo'] = jobPost['company_logo'];
         jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
       });
       setJobPostHistoryItems(dataJobPost.records);
