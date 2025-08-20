@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import Card from '../../Card';
+import { calculateImprovementPostTraining } from './calculations/improvementPostTrainingCalc';
 
 interface ImprovementPostTrainingCardProps {
   evaluationData?: {
@@ -15,37 +16,9 @@ const ImprovementPostTrainingCard: React.FC<ImprovementPostTrainingCardProps> = 
   isLoading = false,
   error = null
 }) => {
-  // Calculate improvement post-training percentage
-  const calculateImprovementPostTraining = useMemo(() => {
-    if (!evaluationData?.records || evaluationData.records.length === 0) {
-      return {
-        improvementPercentage: 0,
-        totalEvaluations: 0,
-        improvedEmployees: 0,
-        trend: 'No data available'
-      };
-    }
-
-    const totalEvaluations = evaluationData.records.length;
-    let improvedEmployees = 0;
-
-    // This is a placeholder calculation - in a real system, you'd compare pre and post-training performance
-    // For now, we'll simulate that 70% of employees showed improvement after training
-    improvedEmployees = Math.round(totalEvaluations * 0.7);
-
-    const improvementPercentage = totalEvaluations > 0 ? (improvedEmployees / totalEvaluations) * 100 : 0;
-
-    // Calculate trend (simulated increase from Q1)
-    const previousQuarterImprovement = Math.round(totalEvaluations * 0.4); // 40% in Q1
-    const increase = improvedEmployees - previousQuarterImprovement;
-    const increasePercentage = previousQuarterImprovement > 0 ? (increase / previousQuarterImprovement) * 100 : 0;
-
-    return {
-      improvementPercentage: Math.round(improvementPercentage),
-      totalEvaluations,
-      improvedEmployees,
-      trend: `Increased ${Math.round(increasePercentage)}% rate from Q1`
-    };
+  // Calculate improvement post-training using shared utility
+  const improvementData = useMemo(() => {
+    return calculateImprovementPostTraining(evaluationData);
   }, [evaluationData]);
 
   if (isLoading) {
@@ -80,9 +53,9 @@ const ImprovementPostTrainingCard: React.FC<ImprovementPostTrainingCardProps> = 
         % of Improvement<br />Post-training
       </h3>
       <Card
-        value={`${calculateImprovementPostTraining.improvementPercentage}%`}
-        trend={calculateImprovementPostTraining.trend}
-        isPositive={calculateImprovementPostTraining.improvementPercentage >= 60} // Positive if 60% or higher
+        value={`${improvementData.improvementPercentage}%`}
+        trend={improvementData.trend}
+        isPositive={improvementData.improvementPercentage >= 60} // Positive if 60% or higher
         showSeeMore={true}
       />
     </div>
