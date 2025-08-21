@@ -53,7 +53,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     rolePipelinePageSize: number;
     validRegions?: string[];
     selectedJobFilter?: string;
-    totalRecords?: number;
     allJobPostsForPrint?: any[];
   } | null>(null);
   

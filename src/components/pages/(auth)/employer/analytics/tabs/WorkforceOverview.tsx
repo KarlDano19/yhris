@@ -81,7 +81,10 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
 
   // Fetch all job posts data for demographic analysis (without pagination)
-  const { data: allJobPostData } = useGetAllJobPostItems();
+  const { data: allJobPostData, refetch: refetchAllJobPost } = useGetAllJobPostItems({
+    from: formatDateForAPI(dateFilter?.from || ''),
+    to: formatDateForAPI(dateFilter?.to || '')
+  });
 
   // Get selected job when filtering
   const selectedJob = useMemo(() => {
@@ -116,6 +119,11 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   useEffect(() => {
     refetchJobPost();
   }, [rolePipelineCurrentPage, rolePipelinePageSize, dateFilter?.from, dateFilter?.to]);
+
+  // Fetch all job posts when date filter changes
+  useEffect(() => {
+    refetchAllJobPost();
+  }, [dateFilter?.from, dateFilter?.to]);
 
   // Refetch job postings when tab is activated
   useEffect(() => {

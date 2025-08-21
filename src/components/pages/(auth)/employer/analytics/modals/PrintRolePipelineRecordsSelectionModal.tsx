@@ -1,23 +1,15 @@
 import React, { useState, Fragment } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { PrinterIcon, XCircleIcon, CheckIcon } from '@heroicons/react/24/solid';
+import { PrinterIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 interface JobRecord {
   id: number;
   job_title?: string;
-  numberOfApplicants?: number;
   applicant_applied_no?: number;
-  status?: string;
   is_active?: boolean;
-  dateJobOpened?: string;
-  created_at?: string;
-  dateJobClosed?: string;
-  updated_at?: string;
-  turnaroundTime?: number;
-  currentPipeline?: string;
 }
 
 interface PrintRolePipelineRecordsSelectionModalProps {
@@ -228,11 +220,11 @@ const PrintRolePipelineRecordsSelectionModal: React.FC<PrintRolePipelineRecordsS
                                   </p>
                                   <div className="flex items-center text-xs text-gray-500 mt-1">
                                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mr-2 ${
-                                      (record.status === 'Ongoing' || record.is_active) 
+                                      (record.is_active) 
                                         ? 'text-blue-600 bg-blue-50 border-blue-200' 
                                         : 'text-red-600 bg-red-50 border-red-200'
                                     }`}>
-                                      {record.status || (record.is_active ? 'Ongoing' : 'Closed')}
+                                      {(record.is_active ? 'Ongoing' : 'Closed')}
                                     </span>
                                     <span className="mr-3">Applicants: { record.applicant_applied_no || 0}</span>
                                   </div>
