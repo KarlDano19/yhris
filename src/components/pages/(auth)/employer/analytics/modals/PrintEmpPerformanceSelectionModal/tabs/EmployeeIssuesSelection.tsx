@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
-interface IssueTypeRecord {
-  reason: string;
-  count: number;
-  percentage: string;
-  color: string;
+interface EmployeeIssueRecord {
+  name: string;
+  department: string;
+  issueType: string;
+  dateReported: string;
+  status: string;
 }
 
-interface IssueTypeSelectionProps {
-  issueTypeRecords: IssueTypeRecord[];
+interface EmployeeIssuesSelectionProps {
+  employeeIssueRecords: EmployeeIssueRecord[];
   selectedOption: string;
   setSelectedOption: (option: string) => void;
   selectedRecords: Set<string>;
@@ -23,8 +24,8 @@ interface IssueTypeSelectionProps {
   }>;
 }
 
-const IssueTypeSelection: React.FC<IssueTypeSelectionProps> = ({
-  issueTypeRecords,
+const EmployeeIssuesSelection: React.FC<EmployeeIssuesSelectionProps> = ({
+  employeeIssueRecords,
   selectedOption,
   setSelectedOption,
   selectedRecords,
@@ -38,7 +39,7 @@ const IssueTypeSelection: React.FC<IssueTypeSelectionProps> = ({
       {/* Print Options */}
       <div className="mb-6">
         <p className="text-sm text-gray-600 mb-4">
-          Choose how you want to select issue types for printing:
+          Choose how you want to select employee issues for printing:
         </p>
         
         <div className="grid grid-cols-2 gap-3">
@@ -78,12 +79,12 @@ const IssueTypeSelection: React.FC<IssueTypeSelectionProps> = ({
         </div>
       </div>
 
-      {/* Issue Type Records Dropdown */}
+      {/* Employee Issue Records Dropdown */}
       {selectedOption === 'selected' && (
         <div className="mb-6">
           <div className="mb-3">
             <h4 className="text-sm font-medium text-gray-900">
-              Select Issue Types to Include ({issueTypeRecords.length} total)
+              Select Employee Issues to Include ({employeeIssueRecords.length} total)
             </h4>
           </div>
 
@@ -95,13 +96,13 @@ const IssueTypeSelection: React.FC<IssueTypeSelectionProps> = ({
             >
               <span className="text-gray-900">
                 {selectedRecords.size === 0 
-                  ? 'Select issue types to include...' 
+                  ? 'Select employee issues to include...' 
                   : selectedRecords.size === 1
-                    ? issueTypeRecords.find(record => selectedRecords.has(record.reason))?.reason || 
-                      'Selected issue type'
-                    : selectedRecords.size === issueTypeRecords.length
-                      ? 'All issue types selected'
-                      : `${selectedRecords.size} issue types selected`
+                    ? employeeIssueRecords.find(record => selectedRecords.has(record.name))?.name || 
+                      'Selected issue'
+                    : selectedRecords.size === employeeIssueRecords.length
+                      ? 'All employee issues selected'
+                      : `${selectedRecords.size} employee issues selected`
                 }
               </span>
               <SelectChevronDown />
@@ -109,32 +110,37 @@ const IssueTypeSelection: React.FC<IssueTypeSelectionProps> = ({
 
             {isDropdownOpen && (
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {issueTypeRecords.map((record) => (
+                {employeeIssueRecords.map((record) => (
                   <div
-                    key={record.reason}
+                    key={`${record.name}-${record.issueType}-${record.dateReported}`}
                     className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                    onClick={() => handleRecordSelection(record.reason)}
+                    onClick={() => handleRecordSelection(record.name)}
                   >
                     <input
                       type="checkbox"
-                      checked={selectedRecords.has(record.reason)}
-                      onChange={() => handleRecordSelection(record.reason)}
+                      checked={selectedRecords.has(record.name)}
+                      onChange={() => handleRecordSelection(record.name)}
                       className="rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue mr-3"
                       onClick={(e) => e.stopPropagation()}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div 
-                          className="w-4 h-4 rounded-full flex-shrink-0" 
-                          style={{ backgroundColor: record.color }}
-                        ></div>
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {record.reason}
-                        </p>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {record.name}
+                      </p>
+                      <div className="flex items-center text-xs text-gray-500 mt-1">
+                        <span className="mr-3">Dept: {record.department}</span>
+                        <span className="mr-3">Type: {record.issueType}</span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          record.status === 'Resolved' ? 'text-green-600 bg-green-50 border-green-200' :
+                          record.status === 'Under Hearing' ? 'text-blue-600 bg-blue-50 border-blue-200' :
+                          record.status === 'NTE Issued' ? 'text-yellow-600 bg-yellow-50 border-yellow-200' :
+                          'text-red-600 bg-red-50 border-red-200'
+                        }`}>
+                          {record.status}
+                        </span>
                       </div>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <span className="mr-3">Count: {record.count}</span>
-                        <span>Percentage: {record.percentage}%</span>
+                      <div className="text-xs text-gray-400 mt-1">
+                        Reported: {record.dateReported}
                       </div>
                     </div>
                   </div>
@@ -148,4 +154,4 @@ const IssueTypeSelection: React.FC<IssueTypeSelectionProps> = ({
   );
 };
 
-export default IssueTypeSelection;
+export default EmployeeIssuesSelection;

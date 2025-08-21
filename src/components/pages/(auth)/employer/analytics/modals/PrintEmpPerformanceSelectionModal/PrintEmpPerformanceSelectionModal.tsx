@@ -5,6 +5,8 @@ import { PrinterIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
 import PerformanceRateSelection from './tabs/PerformanceRateSelection';
 import PerformanceTableSelection from './tabs/PerformanceTableSelection';
+import IssueTypeSelection from './tabs/IssueTypeSelection';
+import EmployeeIssuesSelection from './tabs/EmployeeIssuesSelection';
 
 interface DepartmentRecord {
   name: string;
@@ -21,6 +23,21 @@ interface EmployeeRecord {
   status: string;
 }
 
+interface IssueTypeRecord {
+  reason: string;
+  count: number;
+  percentage: string;
+  color: string;
+}
+
+interface EmployeeIssueRecord {
+  name: string;
+  department: string;
+  issueType: string;
+  dateReported: string;
+  status: string;
+}
+
 interface PrintEmpPerformanceSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,6 +45,8 @@ interface PrintEmpPerformanceSelectionModalProps {
   isLoading?: boolean;
   departmentRecords?: DepartmentRecord[];
   employeeRecords?: EmployeeRecord[];
+  issueTypeRecords?: IssueTypeRecord[];
+  employeeIssueRecords?: EmployeeIssueRecord[];
   activeSubTab?: number;
 }
 
@@ -38,6 +57,8 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
   isLoading = false,
   departmentRecords = [],
   employeeRecords = [],
+  issueTypeRecords = [],
+  employeeIssueRecords = [],
   activeSubTab = 1
 }) => {
   const [selectedOption, setSelectedOption] = useState<string>('all');
@@ -48,12 +69,30 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
     let selectedIds: string[] = [];
     
     // Determine which records to use based on current step
-    const currentRecords = currentSelectionStep === 1 ? departmentRecords : employeeRecords;
+    let currentRecords: any[];
+    switch (currentSelectionStep) {
+      case 1: // Performance Rate
+        currentRecords = departmentRecords;
+        break;
+      case 2: // Performance Table
+        currentRecords = employeeRecords;
+        break;
+      case 3: // Issue Type
+        currentRecords = issueTypeRecords;
+        break;
+      case 4: // Employee Issues
+        currentRecords = employeeIssueRecords;
+        break;
+      default:
+        currentRecords = [];
+    }
     
     switch (selectedOption) {
       case 'all':
         // Use all records for current step
-        selectedIds = currentRecords.map(record => record.name);
+        selectedIds = currentRecords.map(record => 
+          currentSelectionStep === 3 ? record.reason : record.name
+        );
         break;
       case 'selected':
         // Use manually selected records
@@ -83,8 +122,30 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
   };
 
   const getPrintOptions = () => {
-    const recordCount = currentSelectionStep === 1 ? departmentRecords.length : employeeRecords.length;
-    const recordType = currentSelectionStep === 1 ? 'departments' : 'employees';
+    let recordCount: number;
+    let recordType: string;
+    
+    switch (currentSelectionStep) {
+      case 1: // Performance Rate
+        recordCount = departmentRecords.length;
+        recordType = 'departments';
+        break;
+      case 2: // Performance Table
+        recordCount = employeeRecords.length;
+        recordType = 'employees';
+        break;
+      case 3: // Issue Type
+        recordCount = issueTypeRecords.length;
+        recordType = 'issue types';
+        break;
+      case 4: // Employee Issues
+        recordCount = employeeIssueRecords.length;
+        recordType = 'employee issues';
+        break;
+      default:
+        recordCount = 0;
+        recordType = 'records';
+    }
     
     return [
       {
@@ -121,6 +182,28 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
         return (
           <PerformanceTableSelection
             employeeRecords={employeeRecords}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            selectedRecords={selectedRecords}
+            handleRecordSelection={handleRecordSelection}
+            printOptions={printOptions}
+          />
+        );
+      case 3: // Issue Type
+        return (
+          <IssueTypeSelection
+            issueTypeRecords={issueTypeRecords}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            selectedRecords={selectedRecords}
+            handleRecordSelection={handleRecordSelection}
+            printOptions={printOptions}
+          />
+        );
+      case 4: // Employee Issues
+        return (
+          <EmployeeIssuesSelection
+            employeeIssueRecords={employeeIssueRecords}
             selectedOption={selectedOption}
             setSelectedOption={setSelectedOption}
             selectedRecords={selectedRecords}
@@ -165,7 +248,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-2xl">
+              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-4xl">
                 <div className="flex bg-savoy-blue p-4 items-center gap-4">
                   <PrinterIcon className="w-6 h-6 text-white" />
                   <h3 className="flex-1 text-white font-semibold">
@@ -198,6 +281,24 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                         </div>
                         <span className="ml-2 text-sm font-medium">Performance Table</span>
                       </div>
+                      <div className={`w-8 h-1 ${currentSelectionStep >= 3 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
+                      <div className={`flex items-center ${currentSelectionStep >= 3 ? 'text-savoy-blue' : 'text-gray-400'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                          currentSelectionStep >= 3 ? 'bg-savoy-blue text-white' : 'bg-gray-200 text-gray-500'
+                        }`}>
+                          3
+                        </div>
+                        <span className="ml-2 text-sm font-medium">Issue Type</span>
+                      </div>
+                      <div className={`w-8 h-1 ${currentSelectionStep >= 4 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
+                      <div className={`flex items-center ${currentSelectionStep >= 4 ? 'text-savoy-blue' : 'text-gray-400'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                          currentSelectionStep >= 4 ? 'bg-savoy-blue text-white' : 'bg-gray-200 text-gray-500'
+                        }`}>
+                          4
+                        </div>
+                        <span className="ml-2 text-sm font-medium">Employee Issues</span>
+                      </div>
                     </div>
                   </div>
 
@@ -227,7 +328,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                     </div>
                     
                     <div className="flex gap-2">
-                      {currentSelectionStep < 2 && (
+                      {currentSelectionStep < 4 && (
                         <button
                           onClick={() => {
                             setCurrentSelectionStep(currentSelectionStep + 1);
@@ -239,7 +340,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                           Next
                         </button>
                       )}
-                      {currentSelectionStep === 2 && (
+                      {currentSelectionStep === 4 && (
                         <button
                           onClick={handleConfirm}
                           disabled={isLoading || (selectedOption === 'selected' && selectedRecords.size === 0)}

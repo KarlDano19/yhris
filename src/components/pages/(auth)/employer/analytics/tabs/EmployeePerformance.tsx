@@ -62,6 +62,19 @@ interface EmployeePerformanceProps {
       lastEvaluation: string;
       status: string;
     }>;
+    issueTypeRecords?: Array<{
+      reason: string;
+      count: number;
+      percentage: string;
+      color: string;
+    }>;
+    employeeIssueRecords?: Array<{
+      name: string;
+      department: string;
+      issueType: string;
+      dateReported: string;
+      status: string;
+    }>;
   }) => void;
 }
 
@@ -218,6 +231,39 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     }));
   };
 
+  // Calculate issue type records for print modal
+  const issueTypeRecords = useMemo(() => {
+    if (!allEmployeeIssueData) return [];
+    
+    // Use the same calculation as IssueType component but always show all issue types for print
+    const { calculateIssueTypeDistribution } = require('./components/employeee-performance-tab/employee-issue-rate-tab/calculations/issueTypeCalc');
+    const { labels, data, percentages, colors } = calculateIssueTypeDistribution(allEmployeeIssueData, [], true); // Always pass true to show all issue types
+    
+    return labels.map((label: string, index: number) => ({
+      reason: label,
+      count: data[index],
+      percentage: percentages[index],
+      color: colors[index]
+    }));
+  }, [allEmployeeIssueData]);
+
+  // Transform all employee issue data for employee issue records (not paginated)
+  const transformAllEmployeeIssueData = (apiData: any) => {
+    if (!apiData || !Array.isArray(apiData)) return [];
+    
+    return apiData.map((item: any) => ({
+      name: item.name || 'N/A',
+      department: item.department || 'N/A',
+      issueType: item.issue_type || 'Not Specified',
+      dateReported: item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      status: getIssueStatus(item)
+    }));
+  };
+
   // Notify parent component when data is ready for printing
   useEffect(() => {
     if (onDataReady && allEvaluationData && allEmployeeIssueData) {
@@ -230,10 +276,12 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
         showAllDepartments,
         showAllIssueTypes,
         departmentRecords,
-        employeeRecords: transformAllEvaluationData(allEvaluationData) // Use all evaluation data, not just paginated data
+        employeeRecords: transformAllEvaluationData(allEvaluationData), // Use all evaluation data, not just paginated data
+        issueTypeRecords,
+        employeeIssueRecords: transformAllEmployeeIssueData(allEmployeeIssueData) // Use all employee issue data, not just paginated data
       });
     }
-  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, showAllDepartments, showAllIssueTypes, departmentRecords, onDataReady]);
+  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, showAllDepartments, showAllIssueTypes, departmentRecords, issueTypeRecords, onDataReady]);
 
   // Render Tab Content
   const renderTabContent = () => {

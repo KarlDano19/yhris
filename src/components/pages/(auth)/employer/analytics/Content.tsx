@@ -78,6 +78,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       lastEvaluation: string;
       status: string;
     }>;
+    issueTypeRecords?: Array<{
+      reason: string;
+      count: number;
+      percentage: string;
+      color: string;
+    }>;
+    employeeIssueRecords?: Array<{
+      name: string;
+      department: string;
+      issueType: string;
+      dateReported: string;
+      status: string;
+    }>;
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -209,34 +222,39 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           // Determine which data to pass based on the step
           const selectedDepartments = step === 1 ? selectedRecords as string[] : undefined;
           const selectedEmployees = step === 2 ? selectedRecords as string[] : undefined;
+          const selectedIssueTypes = step === 3 ? selectedRecords as string[] : undefined;
+          const selectedEmployeeIssues = step === 4 ? selectedRecords as string[] : undefined;
           
-          await handlePrintAnalytics(
-            activeTab,
-            currentTab.name,
-            generatePDFLocally,
-            [], // employeeData - not needed for employee performance
-            [], // appliedApplicantsData - not needed for employee performance
-            [], // separationData - not needed for employee performance
-            [], // allJobPostData - not needed for employee performance
-            currentAppliedDateFilter,
-            employeePerformanceData.activeSubTab,
-            undefined, // pipelineData - not needed for employee performance
-            undefined, // rolePipelineData - not needed for employee performance
-            undefined, // validRegions - not needed for employee performance
-            undefined, // selectedJobFilter - not needed for employee performance
-            selectedOption, // printOption for employee performance
-            undefined, // allJobPostsForPrint - not needed for employee performance
-            undefined, // selectedRecords - not needed for employee performance
-            employeePerformanceData.evaluationData,
-            employeePerformanceData.employeeIssueData,
-            employeePerformanceData.employeePerformanceTableData,
-            employeePerformanceData.employeeIssuesTableData,
-            employeePerformanceData.showAllDepartments,
-            employeePerformanceData.showAllIssueTypes,
-            selectedDepartments, // selected departments for employee performance
-            selectedEmployees, // selected employees for employee performance
-            employeePerformanceData.evaluationData // allEvaluationData - use the same data for now
-          );
+                      await handlePrintAnalytics(
+              activeTab,
+              currentTab.name,
+              generatePDFLocally,
+              [], // employeeData - not needed for employee performance
+              [], // appliedApplicantsData - not needed for employee performance
+              [], // separationData - not needed for employee performance
+              [], // allJobPostData - not needed for employee performance
+              currentAppliedDateFilter,
+              employeePerformanceData.activeSubTab,
+              undefined, // pipelineData - not needed for employee performance
+              undefined, // rolePipelineData - not needed for employee performance
+              undefined, // validRegions - not needed for employee performance
+              undefined, // selectedJobFilter - not needed for employee performance
+              selectedOption, // printOption for employee performance
+              undefined, // allJobPostsForPrint - not needed for employee performance
+              undefined, // selectedRecords - not needed for employee performance
+              employeePerformanceData.evaluationData,
+              employeePerformanceData.employeeIssueData,
+              employeePerformanceData.employeePerformanceTableData,
+              employeePerformanceData.employeeIssuesTableData,
+              employeePerformanceData.showAllDepartments,
+              employeePerformanceData.showAllIssueTypes,
+              selectedDepartments, // selected departments for employee performance
+              selectedEmployees, // selected employees for employee performance
+              employeePerformanceData.evaluationData, // allEvaluationData - use the same data for now
+              selectedIssueTypes, // selected issue types for employee performance
+              selectedEmployeeIssues, // selected employee issues for employee performance
+              employeePerformanceData.employeeIssueData // allEmployeeIssueData - use the same data for now
+            );
           break;
         // Add other tabs here as they are implemented
         default:
@@ -441,6 +459,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isLoading={isGenerating}
         departmentRecords={employeePerformanceData?.departmentRecords || []}
         employeeRecords={employeePerformanceData?.employeeRecords || []}
+        issueTypeRecords={employeePerformanceData?.issueTypeRecords || []}
+        employeeIssueRecords={employeePerformanceData?.employeeIssueRecords || []}
         activeSubTab={employeePerformanceData?.activeSubTab || 1}
       />
       

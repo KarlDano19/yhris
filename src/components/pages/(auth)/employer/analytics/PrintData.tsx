@@ -241,7 +241,10 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
   printOption?: string,
   selectedDepartments?: string[],
   selectedEmployees?: string[],
-  allEvaluationData?: any[]
+  allEvaluationData?: any[],
+  selectedIssueTypes?: string[],
+  selectedEmployeeIssues?: string[],
+  allEmployeeIssueData?: any[]
 ) => {
   // Calculate KPI data
   const calculateKPIs = () => {
@@ -307,17 +310,53 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     return displayData;
   };
 
-  // Calculate issue type data
+  // Calculate issue type data with filtering
   const calculateIssueTypeData = () => {
-    
-    const { labels, data, percentages, colors } = calculateIssueTypeDistribution(employeeIssueData, [], showAllIssueTypes);
-    
-    return labels.map((label, index) => ({
+    // Always get all issue types for printing, regardless of showAllIssueTypes state
+    const { labels, data, percentages, colors } = calculateIssueTypeDistribution(employeeIssueData, [], true);
+    let filteredData = labels.map((label, index) => ({
       reason: label,
       count: data[index],
       percentage: percentages[index],
       color: colors[index]
     }));
+    
+    // Handle print options for issue type data
+    if (printOption && selectedIssueTypes) {
+      switch (printOption) {
+        case 'all':
+          // Use all issue types
+          filteredData = labels.map((label, index) => ({
+            reason: label,
+            count: data[index],
+            percentage: percentages[index],
+            color: colors[index]
+          }));
+          break;
+        case 'selected':
+          // Filter by selected issue types
+          if (selectedIssueTypes.length > 0) {
+            filteredData = labels.map((label, index) => ({
+              reason: label,
+              count: data[index],
+              percentage: percentages[index],
+              color: colors[index]
+            })).filter(issueType => 
+              selectedIssueTypes.includes(issueType.reason)
+            );
+          }
+          break;
+        default:
+          filteredData = labels.map((label, index) => ({
+            reason: label,
+            count: data[index],
+            percentage: percentages[index],
+            color: colors[index]
+          }));
+      }
+    }
+    
+    return filteredData;
   };
 
   // Calculate monthly issue volume data
@@ -384,12 +423,80 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     return filteredData;
   };
 
+  // Transform all employee issue data to table format
+  const transformAllEmployeeIssueDataToTable = (data: any[]) => {
+    if (!data || !Array.isArray(data)) return [];
+    
+    return data.map((item: any) => ({
+      name: item.name || 'N/A',
+      department: item.department || 'N/A',
+      issueType: item.issue_type || 'Not Specified',
+      dateReported: item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      status: getIssueStatus(item)
+    }));
+  };
+
+  // Helper function to determine issue status
+  const getIssueStatus = (item: any) => {
+    if (item.is_decision_sent && item.is_decision_received) {
+      return 'Resolved';
+    } else if (item.investigate && item.investigate && item.investigate.id) {
+      return 'Under Hearing';
+    } else if (item.is_nte_sent && item.is_nte_received) {
+      return 'NTE Issued';
+    } else {
+      return 'Pending';
+    }
+  };
+
+  // Calculate employee issues table data with filtering
+  const calculateEmployeeIssuesTableData = () => {
+    let filteredData = employeeIssuesTableData || [];
+    
+    // Handle print options for employee issues table data
+    if (printOption && selectedEmployeeIssues) {
+      switch (printOption) {
+        case 'all':
+          // Use all employee issues from allEmployeeIssueData if available
+          if (allEmployeeIssueData && allEmployeeIssueData.length > 0) {
+            filteredData = transformAllEmployeeIssueDataToTable(allEmployeeIssueData);
+          } else {
+            // Fallback to paginated data
+            filteredData = employeeIssuesTableData || [];
+          }
+          break;
+        case 'selected':
+          // Filter by selected employee issues
+          if (selectedEmployeeIssues.length > 0) {
+            // Use all employee issue data for selection if available
+            const allData = allEmployeeIssueData && allEmployeeIssueData.length > 0 
+              ? transformAllEmployeeIssueDataToTable(allEmployeeIssueData)
+              : (employeeIssuesTableData || []);
+            
+            filteredData = allData.filter(issue => 
+              selectedEmployeeIssues.includes(issue.name)
+            );
+          }
+          break;
+        default:
+          filteredData = employeeIssuesTableData || [];
+      }
+    }
+    
+    return filteredData;
+  };
+
   const kpiData = calculateKPIs();
   const performanceRateData = calculatePerformanceRateData();
   const performanceTrendData = calculatePerformanceTrendData();
   const issueTypeData = calculateIssueTypeData();
   const monthlyIssueVolumeData = calculateMonthlyIssueVolumeData();
   const filteredEmployeePerformanceTableData = calculateEmployeePerformanceTableData();
+  const filteredEmployeeIssuesTableData = calculateEmployeeIssuesTableData();
 
   return (
     <div className="bg-white">
@@ -406,7 +513,7 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
         employeePerformanceTableData={filteredEmployeePerformanceTableData}
         issueTypeData={issueTypeData}
         monthlyIssueVolumeData={monthlyIssueVolumeData}
-        employeeIssuesTableData={employeeIssuesTableData || []}
+        employeeIssuesTableData={filteredEmployeeIssuesTableData}
         dateFilter={dateFilter}
         activeSubTab={activeSubTab}
       />
@@ -447,7 +554,10 @@ export const handlePrintAnalytics = async (
   showAllIssueTypes?: boolean,
   selectedDepartments?: string[],
   selectedEmployees?: string[],
-  allEvaluationData?: any[]
+  allEvaluationData?: any[],
+  selectedIssueTypes?: string[],
+  selectedEmployeeIssues?: string[],
+  allEmployeeIssueData?: any[]
 ) => {
   // Create document component based on tab
   let documentComponent: React.ReactElement;
@@ -483,7 +593,10 @@ export const handlePrintAnalytics = async (
         printOption,
         selectedDepartments,
         selectedEmployees,
-        allEvaluationData // Pass the actual allEvaluationData
+        allEvaluationData, // Pass the actual allEvaluationData
+        selectedIssueTypes, // Pass the selected issue types
+        selectedEmployeeIssues, // Pass the selected employee issues
+        allEmployeeIssueData // Pass the actual allEmployeeIssueData
       );
       break;
     // Add other tabs here as they are implemented
