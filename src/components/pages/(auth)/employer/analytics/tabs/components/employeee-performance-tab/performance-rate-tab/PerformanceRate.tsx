@@ -28,10 +28,10 @@ ChartJS.register(
 interface PerformanceRateProps {
   evaluationData?: any;
   onShowAllChange?: (showAll: boolean) => void;
+  showAllDepartments?: boolean;
 }
 
-const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onShowAllChange }) => {
-  const [showAllDepartments, setShowAllDepartments] = useState(false);
+const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onShowAllChange, showAllDepartments = false }) => {
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
 
@@ -198,7 +198,6 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
               <button
                 onClick={() => {
                   const newShowAll = !showAllDepartments;
-                  setShowAllDepartments(newShowAll);
                   onShowAllChange?.(newShowAll);
                 }}
                 className="px-3 py-1 text-sm bg-savoy-blue text-white rounded hover:bg-opacity-90 transition-colors"

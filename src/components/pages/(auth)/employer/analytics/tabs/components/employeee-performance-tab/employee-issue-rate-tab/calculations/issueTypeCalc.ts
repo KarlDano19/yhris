@@ -6,13 +6,15 @@ export interface IssueTypeData {
   totalIssues: number;
   percentages: string[];
   colors: string[];
+  totalIssueTypes: number;
 }
 
 export const calculateIssueTypeDistribution = (
   employeeIssueData?: any[] | {
     records?: any[];
   },
-  customColors: string[] = []
+  customColors: string[] = [],
+  showAllIssueTypes: boolean = false
 ): IssueTypeData => {
   // Handle both paginated structure (records) and flat array structure
   const dataArray = Array.isArray(employeeIssueData) ? employeeIssueData : employeeIssueData?.records;
@@ -23,7 +25,8 @@ export const calculateIssueTypeDistribution = (
       data: [1],
       totalIssues: 0,
       percentages: ['100'],
-      colors: ['#9CA3AF']
+      colors: ['#9CA3AF'],
+      totalIssueTypes: 0
     };
   }
 
@@ -38,11 +41,16 @@ export const calculateIssueTypeDistribution = (
   });
 
   // Convert to arrays for chart
-  const labels = Object.keys(issueTypeCounts);
-  const data = Object.values(issueTypeCounts);
+  const allLabels = Object.keys(issueTypeCounts);
+  const allData = Object.values(issueTypeCounts);
   
-  // Calculate percentages
-  const percentages = data.map(count => ((count / totalIssues) * 100).toFixed(1));
+  // Limit to top 10 issue types if not showing all
+  const limitedLabels = showAllIssueTypes ? allLabels : allLabels.slice(0, 10);
+  const limitedData = showAllIssueTypes ? allData : allData.slice(0, 10);
+  
+  // Calculate percentages based on limited data
+  const limitedTotalIssues = limitedData.reduce((sum, count) => sum + count, 0);
+  const percentages = limitedData.map(count => ((count / limitedTotalIssues) * 100).toFixed(1));
 
   // Generate default colors dynamically (unlimited)
   const generateDistinctColors = (count: number) => {
@@ -100,13 +108,14 @@ export const calculateIssueTypeDistribution = (
   };
 
   // Generate colors for each issue type
-  const colors = labels.map((label, index) => getColorForIssueType(label, index));
+  const colors = limitedLabels.map((label: string, index: number) => getColorForIssueType(label, index));
 
   return {
-    labels,
-    data,
-    totalIssues,
+    labels: limitedLabels,
+    data: limitedData,
+    totalIssues: limitedTotalIssues,
     percentages,
-    colors
+    colors,
+    totalIssueTypes: allLabels.length
   };
 }; 

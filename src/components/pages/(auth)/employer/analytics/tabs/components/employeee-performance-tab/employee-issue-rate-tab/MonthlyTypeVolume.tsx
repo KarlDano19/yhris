@@ -42,12 +42,29 @@ interface MonthlyTypeVolumeProps {
   };
   isLoading?: boolean;
   error?: any;
+  showAllIssueTypes?: boolean;
 }
 
-const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData, dateFilter, isLoading = false, error = null }) => {
+const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData, dateFilter, isLoading = false, error = null, showAllIssueTypes = false }) => {
   // Calculate monthly issue volume using shared utility
   const { labels, data: monthlyData } = calculateMonthlyVolume(employeeIssueData, dateFilter);
   const maxValue = Math.max(...monthlyData, 1); // Ensure at least 1 for proper scaling
+
+  // Calculate dynamic height to match IssueType chart
+  const getChartHeight = () => {
+    const baseHeight = 400;
+    const minHeight = 300;
+    const maxHeight = 600;
+    
+    // Use the same logic as IssueType for consistency
+    if (monthlyData.length <= 8) {
+      return baseHeight;
+    } else if (monthlyData.length <= 15) {
+      return Math.min(baseHeight + (monthlyData.length - 8) * 20, maxHeight);
+    } else {
+      return maxHeight;
+    }
+  };
 
   const data = {
     labels,
@@ -183,7 +200,7 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
         </h3>
       </div>
       
-      <div className="h-96">
+      <div style={{ height: `${getChartHeight()}px` }}>
         {monthlyData.length > 0 ? (
           <Line data={data} options={options} />
         ) : (

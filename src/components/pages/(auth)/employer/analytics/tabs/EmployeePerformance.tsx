@@ -53,6 +53,7 @@ interface EmployeePerformanceProps {
 const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFilter, onDataReady }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
+  const [showAllIssueTypes, setShowAllIssueTypes] = useState(false);
 
   // Pagination State for Employee Performance
   const [employeePerformancePageSize, setEmployeePerformancePageSize] = useState(5);
@@ -194,6 +195,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
               <PerformanceRate 
                 evaluationData={allEvaluationData} 
                 onShowAllChange={setShowAllDepartments}
+                showAllDepartments={showAllDepartments}
               />
 
               {/* Performance Trend - Line Chart */}
@@ -240,12 +242,14 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
         return (
           <>
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={`grid gap-6 ${showAllIssueTypes ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
               {/* Issue Type - Pie Chart */}
               <IssueType 
                 employeeIssueData={allEmployeeIssueData}
                 isLoading={allEmployeeIssueLoading}
                 error={allEmployeeIssueError}
+                onShowAllChange={setShowAllIssueTypes}
+                showAllIssueTypes={showAllIssueTypes}
               />
 
               {/* Monthly Issue Volume - Line Chart */}
@@ -254,6 +258,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
                 dateFilter={dateFilter}
                 isLoading={allEmployeeIssueLoading}
                 error={allEmployeeIssueError}
+                showAllIssueTypes={showAllIssueTypes}
               />
             </div>
 

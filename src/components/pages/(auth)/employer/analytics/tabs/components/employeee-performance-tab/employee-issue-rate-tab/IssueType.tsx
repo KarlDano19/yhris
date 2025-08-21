@@ -23,9 +23,11 @@ interface IssueTypeProps {
   };
   isLoading?: boolean;
   error?: any;
+  onShowAllChange?: (showAll: boolean) => void;
+  showAllIssueTypes?: boolean;
 }
 
-const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = false, error = null }) => {
+const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = false, error = null, onShowAllChange, showAllIssueTypes = false }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
@@ -42,7 +44,7 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
   }, []);
 
   // Calculate issue type distribution using shared utility
-  const { labels, data, totalIssues, percentages, colors } = calculateIssueTypeDistribution(employeeIssueData, customColors);
+  const { labels, data, totalIssues, percentages, colors, totalIssueTypes } = calculateIssueTypeDistribution(employeeIssueData, customColors, showAllIssueTypes);
 
   // Handle color palette save
   const handleColorPaletteSave = (colors: string[]) => {
@@ -218,14 +220,27 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
             ({totalIssues < 10 ? `0${totalIssues}` : totalIssues} issues)
           </span>
         </div>
-        <button
-          onClick={() => setIsColorModalOpen(true)}
-          className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
-          title="Customize colors"
-        >
-          <Squares2X2Icon className="w-4 h-4" />
-          Colors
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsColorModalOpen(true)}
+            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+            title="Customize colors"
+          >
+            <Squares2X2Icon className="w-4 h-4" />
+            Colors
+          </button>
+          {totalIssueTypes > 10 && (
+            <button
+              onClick={() => {
+                const newShowAll = !showAllIssueTypes;
+                onShowAllChange?.(newShowAll);
+              }}
+              className="px-3 py-1 text-sm bg-savoy-blue text-white rounded hover:bg-opacity-90 transition-colors"
+            >
+              {showAllIssueTypes ? 'Show Less' : 'Show All'}
+            </button>
+          )}
+        </div>
       </div>
       
       <div className="h-80 relative">
@@ -235,8 +250,8 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
       {/* Custom Scrollable Legend */}
       <div className="mt-4">
         <h4 className="text-sm font-medium text-gray-700 mb-2">Issue Types</h4>
-        <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-          <div className="space-y-2">
+        <div className={`border border-gray-200 rounded-lg p-3 bg-gray-50 ${showAllIssueTypes ? '' : 'max-h-48 overflow-y-auto'}`}>
+          <div className={showAllIssueTypes ? 'grid grid-cols-3 gap-4' : 'space-y-2'}>
             {labels.map((label, index) => (
               <div key={index} className="flex items-center space-x-2 text-sm">
                 <div 
