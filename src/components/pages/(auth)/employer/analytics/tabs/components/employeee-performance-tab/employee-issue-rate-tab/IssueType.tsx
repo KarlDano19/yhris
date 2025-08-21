@@ -221,14 +221,14 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
           </span>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={() => setIsColorModalOpen(true)}
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
-            title="Customize colors"
-          >
-            <Squares2X2Icon className="w-4 h-4" />
-            Colors
-          </button>
+        <button
+          onClick={() => setIsColorModalOpen(true)}
+          className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+          title="Customize colors"
+        >
+          <Squares2X2Icon className="w-4 h-4" />
+          Colors
+        </button>
           {totalIssueTypes > 10 && (
             <button
               onClick={() => {
