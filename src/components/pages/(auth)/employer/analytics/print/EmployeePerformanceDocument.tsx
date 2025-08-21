@@ -9,6 +9,7 @@ interface EmployeePerformanceDocumentProps {
     name: string;
     score: number;
     count: number;
+    color: string;
   }>;
   performanceTrendData: Array<{
     month: string;
@@ -26,6 +27,7 @@ interface EmployeePerformanceDocumentProps {
     reason: string;
     count: number;
     percentage: string;
+    color: string;
   }>;
   monthlyIssueVolumeData: Array<{
     month: string;
@@ -155,7 +157,15 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
           <tbody>
             {performanceRateData.map((item, index) => (
               <tr key={index}>
-                <td className="border border-gray-300 p-1 text-center text-xs">{item.name}</td>
+                <td className="border border-gray-300 p-1 text-center text-xs">
+                  <div className="flex items-center justify-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    {item.name}
+                  </div>
+                </td>
                 <td className="border border-gray-300 p-1 text-center font-bold text-xs">{item.score}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.count}</td>
               </tr>
@@ -243,7 +253,7 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
     <div className="mb-4 ml-3">
       <h3 className="text-xs font-semibold text-gray-900 mb-2">Employee Issue Types</h3>
       
-      {issueTypeData.length > 0 ? (
+      {issueTypeData && issueTypeData.length > 0 ? (
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
@@ -255,7 +265,15 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
           <tbody>
             {issueTypeData.map((item, index) => (
               <tr key={index}>
-                <td className="border border-gray-300 p-1 text-center text-xs">{item.reason}</td>
+                <td className="border border-gray-300 p-1 text-center text-xs">
+                  <div className="flex items-center justify-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    {item.reason}
+                  </div>
+                </td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.count}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.percentage}%</td>
               </tr>
@@ -266,6 +284,7 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
         <div className="text-center py-6 text-gray-500">
           <div className="text-sm mb-1">No issue type data available</div>
           <div className="text-xs">Employee issue records will appear here when available</div>
+          <div className="text-xs mt-2">Debug: issueTypeData length = {issueTypeData?.length || 0}</div>
         </div>
       )}
     </div>

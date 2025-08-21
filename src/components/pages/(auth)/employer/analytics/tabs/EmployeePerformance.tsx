@@ -47,6 +47,8 @@ interface EmployeePerformanceProps {
     employeeIssueData: any[];
     employeePerformanceTableData: any[];
     employeeIssuesTableData: any[];
+    showAllDepartments: boolean;
+    showAllIssueTypes: boolean;
   }) => void;
 }
 
@@ -178,10 +180,12 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
         evaluationData: allEvaluationData,
         employeeIssueData: allEmployeeIssueData,
         employeePerformanceTableData: transformEvaluationData(evaluationData),
-        employeeIssuesTableData: transformEmployeeIssueData(employeeIssueData)
+        employeeIssuesTableData: transformEmployeeIssueData(employeeIssueData),
+        showAllDepartments,
+        showAllIssueTypes
       });
     }
-  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, onDataReady]);
+  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, showAllDepartments, showAllIssueTypes, onDataReady]);
 
   // Render Tab Content
   const renderTabContent = () => {

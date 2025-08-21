@@ -156,7 +156,9 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
   dateFilter: { from: string; to: string },
   activeSubTab: number = 1,
   employeePerformanceTableData?: any[],
-  employeeIssuesTableData?: any[]
+  employeeIssuesTableData?: any[],
+  showAllDepartments: boolean = false,
+  showAllIssueTypes: boolean = false
 ) => {
   // Calculate KPI data
   const calculateKPIs = () => {
@@ -184,11 +186,12 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
 
   // Calculate performance rate data by department using shared utility
   const calculatePerformanceRateData = () => {
-    const { departmentPerformanceData } = calculateDepartmentPerformance(evaluationData, true, []);
+    const { departmentPerformanceData } = calculateDepartmentPerformance(evaluationData, showAllDepartments, []);
     return departmentPerformanceData.map(dept => ({
       name: dept.name,
       score: dept.score,
-      count: dept.count
+      count: dept.count,
+      color: dept.color
     }));
   };
 
@@ -200,12 +203,14 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
 
   // Calculate issue type data
   const calculateIssueTypeData = () => {
-    const { labels, data, percentages } = calculateIssueTypeDistribution(employeeIssueData);
+    
+    const { labels, data, percentages, colors } = calculateIssueTypeDistribution(employeeIssueData, [], showAllIssueTypes);
     
     return labels.map((label, index) => ({
       reason: label,
       count: data[index],
-      percentage: percentages[index]
+      percentage: percentages[index],
+      color: colors[index]
     }));
   };
 
@@ -274,7 +279,9 @@ export const handlePrintAnalytics = async (
   evaluationData?: any[],
   employeeIssueData?: any[],
   employeePerformanceTableData?: any[],
-  employeeIssuesTableData?: any[]
+  employeeIssuesTableData?: any[],
+  showAllDepartments?: boolean,
+  showAllIssueTypes?: boolean
 ) => {
   // Create document component based on tab
   let documentComponent: React.ReactElement;
@@ -303,7 +310,9 @@ export const handlePrintAnalytics = async (
         dateFilter,
         activeSubTab,
         employeePerformanceTableData,
-        employeeIssuesTableData
+        employeeIssuesTableData,
+        showAllDepartments || false,
+        showAllIssueTypes || false
       );
       break;
     // Add other tabs here as they are implemented

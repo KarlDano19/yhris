@@ -59,6 +59,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     employeeIssueData: any[];
     employeePerformanceTableData: any[];
     employeeIssuesTableData: any[];
+    showAllDepartments: boolean;
+    showAllIssueTypes: boolean;
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -185,7 +187,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             employeePerformanceData.evaluationData,
             employeePerformanceData.employeeIssueData,
             employeePerformanceData.employeePerformanceTableData,
-            employeePerformanceData.employeeIssuesTableData
+            employeePerformanceData.employeeIssuesTableData,
+            employeePerformanceData.showAllDepartments,
+            employeePerformanceData.showAllIssueTypes
           );
           break;
         // Add other tabs here as they are implemented

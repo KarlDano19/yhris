@@ -219,7 +219,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
               {departmentPerformanceData.map((dept, index) => (
                 <div key={index} className="flex items-center space-x-2 text-sm">
                   <div 
-                    className="w-3 h-3 rounded flex-shrink-0" 
+                    className="w-8 h-8 rounded-full flex-shrink-0" 
                     style={{ backgroundColor: dept.color }}
                   ></div>
                   <span className="text-gray-700 flex-1 min-w-0">
