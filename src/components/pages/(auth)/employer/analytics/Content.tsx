@@ -16,6 +16,8 @@ import CompliancePolicy from './tabs/CompliancePolicy';
 import CompensationBenefits from './tabs/CompensationBenefits';
 import useFileforge from "@/components/hooks/useFileforge";
 import CustomToast from "@/components/CustomToast";
+import PrintRolePipelineRecordsSelectionModal from './modals/PrintRolePipelineRecordsSelectionModal';
+
 import { handlePrintAnalytics } from './PrintData';
 
 import PrintIcon from "@/svg/PrintIcon";
@@ -51,6 +53,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     rolePipelinePageSize: number;
     validRegions?: string[];
     selectedJobFilter?: string;
+    totalRecords?: number;
+    allJobPostsForPrint?: any[];
   } | null>(null);
   
   const [employeePerformanceData, setEmployeePerformanceData] = useState<{
@@ -63,6 +67,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     showAllIssueTypes: boolean;
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   // Get current tab's date filter
   const currentDateFilter = tabDateFilters[activeTab] || { from: '', to: '' };
@@ -133,6 +138,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handlePrint = async () => {
+    // For Workforce Overview tab, show the print records selection modal
+    if (activeTab === 1) {
+      setShowPrintModal(true);
+      return;
+    }
+
+    // For other tabs, proceed with normal print functionality
+    await executePrint();
+  };
+
+  const executePrint = async (selectedOption?: string, selectedRecords?: number[]) => {
     try {
       setIsGenerating(true);
       
@@ -158,10 +174,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             workforceData.activeSubTab,
             workforceData.pipelineData,
             workforceData.rolePipelineData,
-            workforceData.rolePipelineCurrentPage,
-            workforceData.rolePipelinePageSize,
             workforceData.validRegions,
-            workforceData.selectedJobFilter
+            workforceData.selectedJobFilter,
+            selectedOption,
+            workforceData.allJobPostsForPrint,
+            selectedRecords
           );
           break;
         case 2: // Employee Performance
@@ -180,10 +197,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             employeePerformanceData.activeSubTab,
             undefined, // pipelineData - not needed for employee performance
             undefined, // rolePipelineData - not needed for employee performance
-            undefined, // rolePipelineCurrentPage - not needed for employee performance
-            undefined, // rolePipelinePageSize - not needed for employee performance
             undefined, // validRegions - not needed for employee performance
             undefined, // selectedJobFilter - not needed for employee performance
+            undefined, // printOption - not needed for employee performance
+            undefined, // allJobPostsForPrint - not needed for employee performance
+            undefined, // selectedRecords - not needed for employee performance
             employeePerformanceData.evaluationData,
             employeePerformanceData.employeeIssueData,
             employeePerformanceData.employeePerformanceTableData,
@@ -200,6 +218,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsGenerating(false);
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
     }
+  };
+
+  const handlePrintModalConfirm = async (selectedOption: string, selectedRecords?: number[]) => {
+    setShowPrintModal(false);
+    await executePrint(selectedOption, selectedRecords);
   };
 
   return (
@@ -366,6 +389,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      
+      {/* Print Records Selection Modal */}
+      <PrintRolePipelineRecordsSelectionModal
+        isOpen={showPrintModal}
+        onClose={() => setShowPrintModal(false)}
+        onConfirm={handlePrintModalConfirm}
+        currentPageSize={workforceData?.rolePipelinePageSize || 5}
+        isLoading={isGenerating}
+        jobRecords={workforceData?.allJobPostsForPrint || []}
+      />
+      
       <Tooltip id='content-tab-tooltip' />
     </>
   );

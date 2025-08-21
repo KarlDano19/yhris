@@ -41,7 +41,6 @@ interface WorkforceOverviewDocumentProps {
     dateRange?: string;
   };
   dateFilter: { from: string; to: string };
-  activeSubTab: number;
 }
 
 const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
@@ -51,7 +50,6 @@ const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
   rolePipelineData,
   attritionData,
   dateFilter,
-  activeSubTab
 }) => {
   const formatDateRange = () => {
     const formatDate = (dateString: string) => {
@@ -232,7 +230,7 @@ const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
   const renderRolePipeline = () => (
     <div className="mb-4">
       <h2 className="text-sm font-bold text-gray-900 mb-2">Role Turnaround and Pipeline Analysis</h2>
-      
+
       {rolePipelineData.length > 0 ? (
         <table className="w-full border-collapse border border-gray-300 ml-3">
           <thead>

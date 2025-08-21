@@ -39,6 +39,8 @@ interface WorkforceOverviewProps {
     rolePipelinePageSize: number;
     validRegions?: string[];
     selectedJobFilter?: string;
+    totalRecords?: number;
+    allJobPostsForPrint?: any[];
   }) => void;
 }
 
@@ -224,10 +226,12 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
         rolePipelineCurrentPage,
         rolePipelinePageSize,
         validRegions: getValidRegions().filter((region): region is string => region !== null),
-        selectedJobFilter
+        selectedJobFilter,
+        totalRecords: paginationData.totalRecords,
+        allJobPostsForPrint: allJobPostData
       });
     }
-  }, [activeSubTab, employeeData, appliedApplicantsData, allSeparationData, allJobPostData, pipelineData, rolePipelineData, rolePipelineCurrentPage, rolePipelinePageSize, selectedJobFilter, onDataReady]);
+  }, [activeSubTab, employeeData, appliedApplicantsData, allSeparationData, allJobPostData, pipelineData, rolePipelineData, rolePipelineCurrentPage, rolePipelinePageSize, selectedJobFilter, paginationData.totalRecords, onDataReady]);
 
   // Workforce metrics are now handled by separate calculation components
 

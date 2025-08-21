@@ -31,10 +31,11 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
   activeSubTab: number = 1,
   pipelineData?: { [jobId: number]: { [stageTitle: string]: number } },
   rolePipelineData?: any[],
-  rolePipelineCurrentPage?: number,
-  rolePipelinePageSize?: number,
   validRegions?: string[],
-  selectedJobFilter?: string
+  selectedJobFilter?: string,
+  printOption?: string,
+  allJobPostsForPrint?: any[],
+  selectedRecords?: number[]
 ) => {
   // Calculate KPI data
   const calculateKPIs = () => {
@@ -82,9 +83,88 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
     );
   };
 
+  // Transform all job posts data to role pipeline format
+  const transformAllJobPostsToRolePipeline = (allJobPosts: any[]) => {
+    if (!allJobPosts || !Array.isArray(allJobPosts)) {
+      return [];
+    }
+
+    return allJobPosts.map((job: any) => {
+      // Calculate turnaround time (days since job opened)
+      const jobOpenedDate = new Date(job.created_at);
+      const jobClosedDate = new Date(job.updated_at);
+      const currentDate = new Date();
+      const turnaroundTime = Math.ceil((currentDate.getTime() - jobOpenedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Helper function to format dates
+      const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      };
+
+      // Format dates
+      const formattedDateOpened = formatDate(jobOpenedDate);
+      const formattedDateClosed = formatDate(jobClosedDate);
+
+      // Determine status based on job data
+      const status = job.is_active ? 'Ongoing' : 'Closed';
+
+      // Generate pipeline information using applicant_applied_no
+      const currentPipeline = job.applicant_applied_no > 0 
+        ? `${job.applicant_applied_no} applicants` 
+        : 'No applicants yet';
+
+      // Only show job closed date if status is Closed
+      const dateJobClosed = status === 'Closed' ? formattedDateClosed : '—';
+
+      return {
+        role: job.job_title || 'Unknown Role',
+        numberOfApplicants: job.applicant_applied_no || 0,
+        status: status,
+        dateJobOpened: formattedDateOpened,
+        dateJobClosed: dateJobClosed,
+        turnaroundTime: turnaroundTime,
+        currentPipeline: currentPipeline,
+        jobId: job.id,
+      };
+    });
+  };
+
   // Use paginated role pipeline data for sub-tab 2 - Use shared utility function
   const getRolePipelineData = () => {
-    return processRolePipelineData(rolePipelineData, pipelineData);
+    let dataToProcess = rolePipelineData;
+    
+    // Handle print options for role pipeline data
+    if (printOption && rolePipelineData) {
+      switch (printOption) {
+        case 'all':
+          // For all records, use the all job posts data
+          if (allJobPostsForPrint && allJobPostsForPrint.length > 0) {
+            dataToProcess = transformAllJobPostsToRolePipeline(allJobPostsForPrint);
+          } else {
+            // Fallback to current data if all job posts not available
+            dataToProcess = rolePipelineData;
+          }
+          break;
+        case 'selected':
+          // For selected records, filter by the selected IDs
+          if (selectedRecords && selectedRecords.length > 0 && allJobPostsForPrint) {
+            const selectedJobs = allJobPostsForPrint.filter(job => selectedRecords.includes(job.id));
+            dataToProcess = transformAllJobPostsToRolePipeline(selectedJobs);
+          } else {
+            // Fallback to current data if no selections
+            dataToProcess = rolePipelineData;
+          }
+          break;
+        default:
+          dataToProcess = rolePipelineData;
+      }
+    }
+    
+    return processRolePipelineData(dataToProcess, pipelineData);
   };
 
   // Calculate attrition data for sub-tab 3 - Use shared utility function
@@ -144,7 +224,6 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
         rolePipelineData={rolePipelineDataForPrint}
         attritionData={{ ...attritionData, exitReasons: exitReasonsData }}
         dateFilter={dateFilter}
-        activeSubTab={activeSubTab}
       />
     </div>
   );
@@ -271,10 +350,12 @@ export const handlePrintAnalytics = async (
   activeSubTab: number = 1,
   pipelineData?: { [jobId: number]: { [stageTitle: string]: number } },
   rolePipelineData?: any[],
-  rolePipelineCurrentPage?: number,
-  rolePipelinePageSize?: number,
   validRegions?: string[],
   selectedJobFilter?: string,
+  // Print options for Workforce Overview
+  printOption?: string,
+  allJobPostsForPrint?: any[],
+  selectedRecords?: number[],
   // Employee Performance specific parameters
   evaluationData?: any[],
   employeeIssueData?: any[],
@@ -288,7 +369,7 @@ export const handlePrintAnalytics = async (
   
   switch (tabId) {
     case 1: // Workforce Overview
-      documentComponent = createAnalyticsWorkforceOverviewDocumentComponent(
+            documentComponent = createAnalyticsWorkforceOverviewDocumentComponent(
         employeeData,
         appliedApplicantsData,
         separationData,
@@ -297,10 +378,11 @@ export const handlePrintAnalytics = async (
         activeSubTab,
         pipelineData,
         rolePipelineData,
-        rolePipelineCurrentPage,
-        rolePipelinePageSize,
         validRegions,
-        selectedJobFilter || 'All Jobs'
+        selectedJobFilter || 'All Jobs',
+        printOption,
+        allJobPostsForPrint,
+        selectedRecords
       );
       break;
     case 2: // Employee Performance
