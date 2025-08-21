@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
@@ -49,6 +49,19 @@ interface EmployeePerformanceProps {
     employeeIssuesTableData: any[];
     showAllDepartments: boolean;
     showAllIssueTypes: boolean;
+    departmentRecords?: Array<{
+      name: string;
+      score: number;
+      count: number;
+      color: string;
+    }>;
+    employeeRecords?: Array<{
+      name: string;
+      department: string;
+      score: string;
+      lastEvaluation: string;
+      status: string;
+    }>;
   }) => void;
 }
 
@@ -172,6 +185,39 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     }
   };
 
+  // Calculate department records for print modal
+  const departmentRecords = useMemo(() => {
+    if (!allEvaluationData) return [];
+    
+    // Use the same calculation as PerformanceRate component but always show all departments for print
+    const { calculateDepartmentPerformance } = require('./components/employeee-performance-tab/performance-rate-tab/calculations/performanceRateCalc');
+    const { departmentPerformanceData } = calculateDepartmentPerformance(allEvaluationData, true, []); // Always pass true to show all departments
+    
+    return departmentPerformanceData.map((dept: any) => ({
+      name: dept.name,
+      score: dept.score,
+      count: dept.count,
+      color: dept.color
+    }));
+  }, [allEvaluationData]); // Remove showAllDepartments dependency since we always want all departments
+
+  // Transform all evaluation data for employee records (not paginated)
+  const transformAllEvaluationData = (apiData: any) => {
+    if (!apiData || !Array.isArray(apiData)) return [];
+    
+    return apiData.map((item: any) => ({
+      name: item.employee_name || 'N/A',
+      department: item.department || 'N/A',
+      score: item.score?.toString() || 'N/A',
+      lastEvaluation: item.date_of_evaluation ? new Date(item.date_of_evaluation).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      status: item.status || 'N/A'
+    }));
+  };
+
   // Notify parent component when data is ready for printing
   useEffect(() => {
     if (onDataReady && allEvaluationData && allEmployeeIssueData) {
@@ -182,10 +228,12 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
         employeePerformanceTableData: transformEvaluationData(evaluationData),
         employeeIssuesTableData: transformEmployeeIssueData(employeeIssueData),
         showAllDepartments,
-        showAllIssueTypes
+        showAllIssueTypes,
+        departmentRecords,
+        employeeRecords: transformAllEvaluationData(allEvaluationData) // Use all evaluation data, not just paginated data
       });
     }
-  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, showAllDepartments, showAllIssueTypes, onDataReady]);
+  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, showAllDepartments, showAllIssueTypes, departmentRecords, onDataReady]);
 
   // Render Tab Content
   const renderTabContent = () => {

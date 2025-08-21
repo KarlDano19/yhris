@@ -237,7 +237,11 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
   employeePerformanceTableData?: any[],
   employeeIssuesTableData?: any[],
   showAllDepartments: boolean = false,
-  showAllIssueTypes: boolean = false
+  showAllIssueTypes: boolean = false,
+  printOption?: string,
+  selectedDepartments?: string[],
+  selectedEmployees?: string[],
+  allEvaluationData?: any[]
 ) => {
   // Calculate KPI data
   const calculateKPIs = () => {
@@ -265,8 +269,31 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
 
   // Calculate performance rate data by department using shared utility
   const calculatePerformanceRateData = () => {
-    const { departmentPerformanceData } = calculateDepartmentPerformance(evaluationData, showAllDepartments, []);
-    return departmentPerformanceData.map(dept => ({
+    // Always get all departments for printing, regardless of showAllDepartments state
+    const { departmentPerformanceData } = calculateDepartmentPerformance(evaluationData, true, []);
+    let filteredData = departmentPerformanceData;
+    
+    // Handle print options for performance rate data
+    if (printOption && selectedDepartments) {
+      switch (printOption) {
+        case 'all':
+          // Use all departments
+          filteredData = departmentPerformanceData;
+          break;
+        case 'selected':
+          // Filter by selected departments
+          if (selectedDepartments.length > 0) {
+            filteredData = departmentPerformanceData.filter(dept => 
+              selectedDepartments.includes(dept.name)
+            );
+          }
+          break;
+        default:
+          filteredData = departmentPerformanceData;
+      }
+    }
+    
+    return filteredData.map(dept => ({
       name: dept.name,
       score: dept.score,
       count: dept.count,
@@ -303,11 +330,66 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     }));
   };
 
+  // Transform all evaluation data to table format
+  const transformAllEvaluationDataToTable = (data: any[]) => {
+    if (!data || !Array.isArray(data)) return [];
+    
+    return data.map((item: any) => ({
+      name: item.employee_name || 'N/A',
+      department: item.department || 'N/A',
+      score: item.score?.toString() || 'N/A',
+      lastEvaluation: item.date_of_evaluation ? new Date(item.date_of_evaluation).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      status: item.status || 'N/A'
+    }));
+  };
+
+  // Calculate employee performance table data with filtering
+  const calculateEmployeePerformanceTableData = () => {
+    let filteredData = employeePerformanceTableData || [];
+    
+    // Handle print options for employee performance table data
+    if (printOption && selectedEmployees) {
+      switch (printOption) {
+        case 'all':
+          // Use all employees from allEvaluationData if available
+          if (allEvaluationData && allEvaluationData.length > 0) {
+            filteredData = transformAllEvaluationDataToTable(allEvaluationData);
+          } else {
+            // Fallback to paginated data
+            filteredData = employeePerformanceTableData || [];
+          }
+          break;
+        case 'selected':
+          // Filter by selected employees
+          if (selectedEmployees.length > 0) {
+            // Use all evaluation data for selection if available
+            const allData = allEvaluationData && allEvaluationData.length > 0 
+              ? transformAllEvaluationDataToTable(allEvaluationData)
+              : (employeePerformanceTableData || []);
+            
+            filteredData = allData.filter(employee => 
+              selectedEmployees.includes(employee.name)
+            );
+          }
+          break;
+        default:
+          filteredData = employeePerformanceTableData || [];
+      }
+    }
+    
+    return filteredData;
+  };
+
   const kpiData = calculateKPIs();
   const performanceRateData = calculatePerformanceRateData();
   const performanceTrendData = calculatePerformanceTrendData();
   const issueTypeData = calculateIssueTypeData();
   const monthlyIssueVolumeData = calculateMonthlyIssueVolumeData();
+  const filteredEmployeePerformanceTableData = calculateEmployeePerformanceTableData();
 
   return (
     <div className="bg-white">
@@ -321,7 +403,7 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
         kpiData={kpiData}
         performanceRateData={performanceRateData}
         performanceTrendData={performanceTrendData}
-        employeePerformanceTableData={employeePerformanceTableData || []}
+        employeePerformanceTableData={filteredEmployeePerformanceTableData}
         issueTypeData={issueTypeData}
         monthlyIssueVolumeData={monthlyIssueVolumeData}
         employeeIssuesTableData={employeeIssuesTableData || []}
@@ -362,7 +444,10 @@ export const handlePrintAnalytics = async (
   employeePerformanceTableData?: any[],
   employeeIssuesTableData?: any[],
   showAllDepartments?: boolean,
-  showAllIssueTypes?: boolean
+  showAllIssueTypes?: boolean,
+  selectedDepartments?: string[],
+  selectedEmployees?: string[],
+  allEvaluationData?: any[]
 ) => {
   // Create document component based on tab
   let documentComponent: React.ReactElement;
@@ -394,7 +479,11 @@ export const handlePrintAnalytics = async (
         employeePerformanceTableData,
         employeeIssuesTableData,
         showAllDepartments || false,
-        showAllIssueTypes || false
+        showAllIssueTypes || false,
+        printOption,
+        selectedDepartments,
+        selectedEmployees,
+        allEvaluationData // Pass the actual allEvaluationData
       );
       break;
     // Add other tabs here as they are implemented

@@ -17,6 +17,7 @@ import CompensationBenefits from './tabs/CompensationBenefits';
 import useFileforge from "@/components/hooks/useFileforge";
 import CustomToast from "@/components/CustomToast";
 import PrintRolePipelineRecordsSelectionModal from './modals/PrintRolePipelineRecordsSelectionModal';
+import PrintEmpPerformanceSelectionModal from './modals/PrintEmpPerformanceSelectionModal/PrintEmpPerformanceSelectionModal';
 
 import { handlePrintAnalytics } from './PrintData';
 
@@ -64,9 +65,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     employeeIssuesTableData: any[];
     showAllDepartments: boolean;
     showAllIssueTypes: boolean;
+    departmentRecords?: Array<{
+      name: string;
+      score: number;
+      count: number;
+      color: string;
+    }>;
+    employeeRecords?: Array<{
+      name: string;
+      department: string;
+      score: string;
+      lastEvaluation: string;
+      status: string;
+    }>;
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [showEmpPerformancePrintModal, setShowEmpPerformancePrintModal] = useState(false);
 
   // Get current tab's date filter
   const currentDateFilter = tabDateFilters[activeTab] || { from: '', to: '' };
@@ -143,11 +158,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return;
     }
 
+    // For Employee Performance tab, show the print records selection modal
+    if (activeTab === 2) {
+      setShowEmpPerformancePrintModal(true);
+      return;
+    }
+
     // For other tabs, proceed with normal print functionality
     await executePrint();
   };
 
-  const executePrint = async (selectedOption?: string, selectedRecords?: number[]) => {
+  const executePrint = async (selectedOption?: string, selectedRecords?: number[] | string[], step?: number) => {
     try {
       setIsGenerating(true);
       
@@ -177,13 +198,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             workforceData.selectedJobFilter,
             selectedOption,
             workforceData.allJobPostsForPrint,
-            selectedRecords
+            selectedRecords as number[]
           );
           break;
         case 2: // Employee Performance
           if (!employeePerformanceData) {
             throw new Error('No employee performance data available for printing');
           }
+          
+          // Determine which data to pass based on the step
+          const selectedDepartments = step === 1 ? selectedRecords as string[] : undefined;
+          const selectedEmployees = step === 2 ? selectedRecords as string[] : undefined;
+          
           await handlePrintAnalytics(
             activeTab,
             currentTab.name,
@@ -198,7 +224,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             undefined, // rolePipelineData - not needed for employee performance
             undefined, // validRegions - not needed for employee performance
             undefined, // selectedJobFilter - not needed for employee performance
-            undefined, // printOption - not needed for employee performance
+            selectedOption, // printOption for employee performance
             undefined, // allJobPostsForPrint - not needed for employee performance
             undefined, // selectedRecords - not needed for employee performance
             employeePerformanceData.evaluationData,
@@ -206,7 +232,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             employeePerformanceData.employeePerformanceTableData,
             employeePerformanceData.employeeIssuesTableData,
             employeePerformanceData.showAllDepartments,
-            employeePerformanceData.showAllIssueTypes
+            employeePerformanceData.showAllIssueTypes,
+            selectedDepartments, // selected departments for employee performance
+            selectedEmployees, // selected employees for employee performance
+            employeePerformanceData.evaluationData // allEvaluationData - use the same data for now
           );
           break;
         // Add other tabs here as they are implemented
@@ -222,6 +251,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handlePrintModalConfirm = async (selectedOption: string, selectedRecords?: number[]) => {
     setShowPrintModal(false);
     await executePrint(selectedOption, selectedRecords);
+  };
+
+  const handleEmpPerformancePrintModalConfirm = async (selectedOption: string, selectedRecords?: string[], step?: number) => {
+    setShowEmpPerformancePrintModal(false);
+    await executePrint(selectedOption, selectedRecords, step);
   };
 
   return (
@@ -397,6 +431,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         currentPageSize={workforceData?.rolePipelinePageSize || 5}
         isLoading={isGenerating}
         jobRecords={workforceData?.allJobPostsForPrint || []}
+      />
+      
+      {/* Employee Performance Print Records Selection Modal */}
+      <PrintEmpPerformanceSelectionModal
+        isOpen={showEmpPerformancePrintModal}
+        onClose={() => setShowEmpPerformancePrintModal(false)}
+        onConfirm={handleEmpPerformancePrintModalConfirm}
+        isLoading={isGenerating}
+        departmentRecords={employeePerformanceData?.departmentRecords || []}
+        employeeRecords={employeePerformanceData?.employeeRecords || []}
+        activeSubTab={employeePerformanceData?.activeSubTab || 1}
       />
       
       <Tooltip id='content-tab-tooltip' />
