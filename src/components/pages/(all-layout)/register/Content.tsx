@@ -19,6 +19,7 @@ import { EyeIcon } from '@heroicons/react/24/solid';
 import { EyeSlashIcon } from '@heroicons/react/24/outline';
 import DropDownArrow from '@/svg/DropDownArrow';
 import MainIconOnly from '@/svg/MainIconOnly';
+import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Register } from '@/types/globals';
 
@@ -111,6 +112,16 @@ const Content = () => {
   };
   return (
     <>
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link 
+          href="/landing-page" 
+          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 hover:shadow-xl"
+        >
+          <ChevronLeftIcon />
+        </Link>
+      </div>
+      
       <SplitLayout
         left={
           <>
