@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
@@ -13,6 +14,8 @@ import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useAddEmail from '../hook/useAddEmail';
 import CustomDatePicker from '@/components/CustomDatePicker'
+
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
@@ -300,6 +303,11 @@ export default function EmailProfileModal({
     setTagsTo(applicantEmail ? [applicantEmail] : []);
     setTagsCc([]);
     setTagsBcc([]);
+    setIsCCOPen(false);
+    setIsBCCOpen(false);
+    setInputTo('');
+    setInputCc('');
+    setInputBcc('');
 
     // Close the modal
     setIsOpen({ id: 0, open: false });
@@ -453,30 +461,65 @@ export default function EmailProfileModal({
                         </label>
                         {errors.to && <p className='text-xs text-red-600 mt-1'>{errors.to.message}</p>}
                         {activeTab === 0 ? (
-                          <div className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 min-h-[40px] flex flex-wrap items-center gap-2'>
-                            {tagsTo.map((tag, index) => (
-                              <span
-                                key={index}
-                                className='inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
+                          <div className="mt-2 flex rounded-md shadow-sm">
+                            <div className="relative flex flex-grow items-stretch focus-within:z-10">
+                              <div 
+                                className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full"
+                                data-tooltip-id='to-section-tooltip'
+                                data-tooltip-place='bottom'
                               >
-                                {tag}
-                                <button
-                                  type='button'
-                                  onClick={() => handleRemoveTagTo(tag)}
-                                  className='text-blue-600 hover:text-blue-800'
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                            <input
-                              type='text'
-                              value={inputTo}
-                              onChange={(e) => setInputTo(e.target.value)}
-                              onKeyDown={handleKeyDownTo}
-                              className='flex-1 min-w-0 border-none outline-none bg-transparent'
-                              placeholder={tagsTo.length === 0 ? 'Enter email addresses...' : ''}
-                            />
+                                {tagsTo.map((tagTo) => (
+                                  <div
+                                    key={tagTo}
+                                    className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm"
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveTagTo(tagTo)}
+                                    >
+                                      <XMarkIcon className="w-4 h-4" />
+                                    </button>
+                                    <p>{tagTo}</p>
+                                  </div>
+                                ))}
+                                <input
+                                  type="text"
+                                  value={inputTo}
+                                  onKeyDown={handleKeyDownTo}
+                                  onChange={(e) => setInputTo(e.target.value)}
+                                  className="focus:none outline-none px-2 py-1 grow"
+                                />
+                                <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                  <div className='px-1'>
+                                    <h2 className='text-[12px] font-medium'>
+                                      Add multiple recipients by pressing Tab or Enter.
+                                    </h2>
+                                  </div>
+                                </Tooltip>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                                isCCOpen
+                                  ? "bg-savoy-blue text-white hover:bg-blue-700"
+                                  : "bg-gray-50"
+                              }`}
+                              onClick={() => setIsCCOPen(!isCCOpen)}
+                            >
+                              CC
+                            </button>
+                            <button
+                              type="button"
+                              className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                                isBCCOpen
+                                  ? "bg-savoy-blue text-white hover:bg-blue-700"
+                                  : "bg-gray-50"
+                              }`}
+                              onClick={() => setIsBCCOpen(!isBCCOpen)}
+                            >
+                              BCC
+                            </button>
                           </div>
                         ) : (
                           <input
@@ -487,6 +530,98 @@ export default function EmailProfileModal({
                           />
                         )}
                       </div>
+                      {isCCOpen && activeTab === 0 && (
+                        <div className="sm:col-span-4 mt-4">
+                          <label
+                            htmlFor="cc"
+                            className="block text-sm font-medium leading-6 text-gray-900"
+                          >
+                            CC
+                          </label>
+                          <div className="mt-2">
+                            <div 
+                              className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full"
+                              data-tooltip-id='cc-section-tooltip'
+                              data-tooltip-place='bottom'
+                            >
+                              {tagsCc.map((tag) => (
+                                <div
+                                  key={tag}
+                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveTag(tag)}
+                                  >
+                                    <XMarkIcon className="w-4 h-4" />
+                                  </button>
+                                  <p>{tag}</p>
+                                </div>
+                              ))}
+                              <input
+                                type="text"
+                                value={inputCc}
+                                onKeyDown={handleKeyDown}
+                                onChange={(e) => setInputCc(e.target.value)}
+                                className="focus:none outline-none px-2 py-1 grow rounded-md"
+                              />
+                              <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter.
+                                  </h2>
+                                </div>
+                              </Tooltip>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {isBCCOpen && activeTab === 0 && (
+                        <div className="sm:col-span-4 mt-4">
+                          <label
+                            htmlFor="bcc"
+                            className="block text-sm font-medium leading-6 text-gray-900"
+                          >
+                            BCC
+                          </label>
+                          <div className="mt-2">
+                            <div 
+                              className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm"
+                              data-tooltip-id='bcc-section-tooltip'
+                              data-tooltip-place='bottom'
+                            >
+                              {tagsBcc.map((tagBcc) => (
+                                <div
+                                  key={tagBcc}
+                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveTagBcc(tagBcc)}
+                                  >
+                                    <XMarkIcon className="w-4 h-4" />
+                                  </button>
+                                  <p>{tagBcc}</p>
+                                </div>
+                              ))}
+                              <input
+                                type="text"
+                                value={inputBcc}
+                                onKeyDown={handleKeyDownBcc}
+                                onChange={(e) => setInputBcc(e.target.value)}
+                                className="focus:none outline-none px-2 py-1 grow rounded-md"
+                              />
+                              <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter.
+                                  </h2>
+                                </div>
+                              </Tooltip>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>

@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import DropDownArrow from '@/svg/DropDownArrow';
-import regions from '@/utils/regions';
+import regions from '@/utils/location';
 import colleges from '@/utils/colleges';
 import nationalities from '@/utils/nationalities';
 import degrees from '@/utils/degrees';

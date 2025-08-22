@@ -9,13 +9,11 @@ import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
 import DropDownArrow from '@/svg/DropDownArrow';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import regions from '@/utils/regions';
+import regions from '@/utils/location';
 import colleges from '@/utils/colleges';
 import nationalities from '@/utils/nationalities';
 import degrees from '@/utils/degrees';
 import educationalAttainment from '@/utils/educational-attainment';
-import countryCode from '@/utils/country-code';
 
 const Tab = ({
   register,

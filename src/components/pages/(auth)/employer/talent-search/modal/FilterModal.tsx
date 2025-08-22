@@ -2,11 +2,13 @@ import { Dispatch, Fragment, useState, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 
 import classNames from '@/helpers/classNames';
 import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import regions from '@/utils/regions';
+import { locationOptions } from '@/utils/locationOptions';
+import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
 interface FilterData {
   location: string[];
@@ -22,8 +24,6 @@ interface FilterModalProps {
   currentFilters?: FilterData;
 }
 
-// Use the same regions as the applicant edit profile
-const LOCATION_OPTIONS = regions.map((region) => region.value);
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Any'];
 
@@ -50,11 +50,6 @@ export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate
 
   const watchedLocation = watch('location');
 
-  // Location search state
-  const [locationSearchInput, setLocationSearchInput] = useState('');
-  const [filteredLocations, setFilteredLocations] = useState(LOCATION_OPTIONS);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-
   // Reset form when modal opens with current filters
   useEffect(() => {
     if (isOpen && currentFilters) {
@@ -64,24 +59,9 @@ export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate
 
   const onSubmit = (data: FilterData) => {
     onFilterUpdate(data);
+    setIsOpen(false);
   };
 
-  const handleLocationToggle = (location: string) => {
-    const currentLocations = watchedLocation || [];
-    const newLocations = currentLocations.includes(location)
-      ? currentLocations.filter((loc) => loc !== location)
-      : [...currentLocations, location];
-
-    setValue('location', newLocations);
-  };
-
-  const removeLocation = (locationToRemove: string) => {
-    const currentLocations = watchedLocation || [];
-    setValue(
-      'location',
-      currentLocations.filter((loc) => loc !== locationToRemove)
-    );
-  };
 
   const clearAllFilters = () => {
     reset({
@@ -89,37 +69,8 @@ export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate
       gender: '',
       salary: '',
     });
-    setLocationSearchInput('');
-    setFilteredLocations(LOCATION_OPTIONS);
-    setShowLocationDropdown(false);
   };
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (!target.closest('.location-dropdown-container')) {
-        setShowLocationDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Filter locations based on search input
-  useEffect(() => {
-    if (locationSearchInput.trim() === '') {
-      setFilteredLocations(LOCATION_OPTIONS);
-    } else {
-      const filtered = LOCATION_OPTIONS.filter((location) =>
-        location.toLowerCase().includes(locationSearchInput.toLowerCase())
-      );
-      setFilteredLocations(filtered);
-    }
-  }, [locationSearchInput]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -155,66 +106,63 @@ export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className='px-4 pt-4 pb-2'>
-                    <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>Location</label>
-
-                    {/* Location dropdown with search */}
-                    <div className='relative location-dropdown-container'>
-                      <div>
-                        <input
-                          type='text'
-                          value={locationSearchInput}
-                          onChange={(e) => setLocationSearchInput(e.target.value)}
-                          onFocus={() => setShowLocationDropdown(true)}
-                          placeholder='Search and select regions...'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6'
-                        />
-                      </div>
-
-                      {/* Location dropdown */}
-                      {showLocationDropdown && (
-                        <div className='absolute z-10 w-full max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg'>
-                          {filteredLocations.length > 0 ? (
-                            filteredLocations.map((location) => (
-                              <div
-                                key={location}
-                                onClick={() => handleLocationToggle(location)}
-                                className={`px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm ${
-                                  watchedLocation?.includes(location) ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                                }`}
-                              >
-                                {location}
-                                {watchedLocation?.includes(location) && <span className='ml-2 text-blue-600'>✓</span>}
-                              </div>
-                            ))
-                          ) : (
-                            <div className='px-3 py-2 text-gray-500 text-sm'>
-                              No regions found matching &ldquo;{locationSearchInput}&rdquo;
-                            </div>
+                    <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
+                      Location
+                    </label>
+                    <Controller
+                      name='location'
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <Select
+                          className='text-sm'
+                          classNamePrefix='select'
+                          options={locationOptions}
+                          value={locationOptions.filter((item: any) => 
+                            Array.isArray(value) 
+                              ? value.includes(item.value) 
+                              : item.value === value
                           )}
-                        </div>
+                          onChange={(val) => {
+                            const selectedValues = val ? val.map((item: any) => item.value).filter(Boolean) : [];
+                            onChange(selectedValues);
+                          }}
+                          components={{
+                            DropdownIndicator: () => (
+                              <div className='pointer-events-none px-2'>
+                                <SelectChevronDown />
+                              </div>
+                            ),
+                            IndicatorSeparator: () => null,
+                          }}
+                          isClearable={false}
+                          isMulti
+                          noOptionsMessage={() => null}
+                          placeholder='Select locations...'
+                          menuPortalTarget={document.body}
+                          menuPosition='fixed'
+                          maxMenuHeight={200}
+                          styles={{
+                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                            menu: (base) => ({
+                              ...base,
+                              maxHeight: 200,
+                            }),
+                            menuList: (base) => ({
+                              ...base,
+                              maxHeight: 200,
+                            }),
+                          }}
+                          isOptionDisabled={(option) => {
+                            // First check if it's a region header (these should always be disabled)
+                            if (option.isDisabled) return true;
+                            
+                            // Then check if we've reached the selection limit
+                            const currentSelections = Array.isArray(value) ? value.length : 0;
+                            return currentSelections >= 10;
+                          }}
+                        />
                       )}
-                    </div>
-
-                    {/* Selected locations display */}
-                    {watchedLocation && watchedLocation.length > 0 && (
-                      <div className='mb-3 flex flex-wrap gap-2'>
-                        {watchedLocation.map((loc) => (
-                          <span
-                            key={loc}
-                            className='inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
-                          >
-                            {loc}
-                            <button
-                              type='button'
-                              onClick={() => removeLocation(loc)}
-                              className='text-blue-600 hover:text-blue-800'
-                            >
-                              <XMarkIcon className='h-3 w-3' />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    />
                   </div>
 
                   <div className='px-4 pb-2'>

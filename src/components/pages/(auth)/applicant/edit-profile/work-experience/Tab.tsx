@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -43,6 +43,18 @@ function WorkExperienceTab({
   
   // State to track currently employed status for each experience
   const [currentlyEmployed, setCurrentlyEmployed] = useState<boolean[]>([]);
+
+  // Initialize currently employed state based on existing data
+  useEffect(() => {
+    if (fields.length > 0) {
+      const initialCurrentlyEmployed = fields.map((field: any, index: number) => {
+        const experience = watch(`experiences.${index}`);
+        // Check if dateTo is empty string, null, or undefined
+        return !experience?.dateTo || experience.dateTo === '' || experience.dateTo === null;
+      });
+      setCurrentlyEmployed(initialCurrentlyEmployed);
+    }
+  }, [fields, watch]);
 
   const onSubmit = handleSubmit((data: any) => {
     let hasError = false;
