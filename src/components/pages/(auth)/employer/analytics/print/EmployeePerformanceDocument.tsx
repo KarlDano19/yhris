@@ -363,8 +363,12 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
         <div className="mb-4">
           <h2 className="text-sm font-bold text-gray-900 mb-2">Performance Rate</h2>
           {renderPerformanceRate()}
-          {renderPerformanceTrend()}
-          {renderEmployeePerformanceTable()}
+          <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+            {renderPerformanceTrend()}
+          </div>
+          <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+            {renderEmployeePerformanceTable()}
+          </div>
         </div>
         
         {/* Training Analysis - Commented out until content is available */}
@@ -376,20 +380,12 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
           </div>
         </div> */}
         
-        {/* Conditional Page Break - Only if content would be cut off */}
-        <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-          {/* Employee Issue Rate */}
-          <div className="mb-4">
-            <h2 className="text-sm font-bold text-gray-900 mb-2">Employee Issue Rate</h2>
-            {renderIssueType()}
-            {renderMonthlyIssueVolume()}
-            {renderEmployeeIssuesTable()}
-          </div>
-
-          {/* Footer */}
-          <div className="border-t border-gray-300 text-center text-gray-500 text-xs">
-            <p>This report was generated automatically by the HRIS Analytics System</p>
-          </div>
+        {/* Employee Issue Rate */}
+        <div className="mb-4">
+          <h2 className="text-sm font-bold text-gray-900 mb-2">Employee Issue Rate</h2>
+          {renderIssueType()}
+          {renderMonthlyIssueVolume()}
+          {renderEmployeeIssuesTable()}
         </div>
       </>
     );

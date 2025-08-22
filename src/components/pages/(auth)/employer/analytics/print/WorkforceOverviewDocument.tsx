@@ -378,11 +378,6 @@ const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
         <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
           {/* Attrition Rate */}
           {renderAttritionRate()}
-
-        {/* Footer */}
-        <div className="border-t border-gray-300 text-center text-gray-500 text-xs">
-            <p>This report was generated automatically by the HRIS Analytics System</p>
-        </div>
         </div>
       </>
     );
