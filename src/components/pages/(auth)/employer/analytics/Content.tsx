@@ -237,10 +237,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           const selectedIssueTypes = issueTypeRecords || (step === 3 ? selectedRecords as string[] : undefined);
           const selectedEmployeeIssues = employeeIssueRecords || (step === 4 ? selectedRecords as string[] : undefined);
           
-
-          
-
-          
           await handlePrintAnalytics(
               activeTab,
               currentTab.name,
