@@ -434,7 +434,8 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                             setCurrentSelectionStep(nextStep);
                             loadStepSelections(nextStep);
                           }}
-                          className="px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-opacity-90 transition-colors"
+                          disabled={selectedOption === 'selected' && selectedRecords.size === 0}
+                          className="px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Next
                         </button>
