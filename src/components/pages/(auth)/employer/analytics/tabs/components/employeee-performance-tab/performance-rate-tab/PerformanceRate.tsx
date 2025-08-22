@@ -72,7 +72,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
 
   // Calculate dynamic height based on number of departments
   const getChartHeight = () => {
-    const baseHeight = 400;
+    const baseHeight = 300;
     const minHeight = 300;
     const maxHeight = 600;
     
@@ -212,7 +212,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
         </div>
 
         {/* Title at bottom */}
-        <div className="mt-4">
+        <div className="mt-5">
           <h4 className="text-sm font-medium text-gray-700 mb-2">Departments</h4>
           <div className={`border border-gray-200 rounded-lg p-3 bg-gray-50 ${showAllDepartments ? '' : 'max-h-48 overflow-y-auto'}`}>
             <div className={showAllDepartments ? 'grid grid-cols-3 gap-4' : 'space-y-2'}>

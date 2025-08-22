@@ -52,7 +52,7 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
 
   // Calculate dynamic height to match IssueType chart
   const getChartHeight = () => {
-    const baseHeight = 400;
+    const baseHeight = 500;
     const minHeight = 300;
     const maxHeight = 600;
     

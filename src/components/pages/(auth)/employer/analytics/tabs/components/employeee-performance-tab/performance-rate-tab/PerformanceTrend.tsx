@@ -140,6 +140,9 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             return value;
           }
         },
+        afterFit: function(axis: any) {
+          axis.paddingTop = 20;
+        }
       },
       x: {
         grid: {
@@ -162,7 +165,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
 
   // Calculate dynamic height to match PerformanceRate chart
   const getChartHeight = () => {
-    const baseHeight = 400;
+    const baseHeight = 475;
     const minHeight = 300;
     const maxHeight = 600;
     
