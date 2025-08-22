@@ -65,6 +65,7 @@ const Content = () => {
     gender: '',
     salary: '',
   });
+  const [hasSearched, setHasSearched] = useState(false);
   const [showFavoritesPanel, setShowFavoritesPanel] = useState(false);
 
   const {
@@ -175,13 +176,23 @@ const Content = () => {
     
     // Update search query after toggling star
     const searchQuery = buildSearchQuery(tagsSearch, newStarredTags);
-    setFilters((prev) => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       search: searchQuery,
-    }));
+    };
+    
+    setFilters(newFilters);
+    
+    // Reset hasSearched if all filters are cleared
+    if (!searchQuery && newFilters.location.length === 0 && !newFilters.gender && !newFilters.salary) {
+      setHasSearched(false);
+    }
   };
 
   const handleSearch = () => {
+    // Mark that search has been performed
+    setHasSearched(true);
+    
     // Add current input as a tag if it's not empty
     let updatedTags = tagsSearch;
     if (searchInput.trim() && !tagsSearch.includes(searchInput.trim())) {
@@ -212,10 +223,17 @@ const Content = () => {
     
     // Update search query after removing tag
     const searchQuery = buildSearchQuery(newTags, newStarredTags);
-    setFilters((prev) => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       search: searchQuery,
-    }));
+    };
+    
+    setFilters(newFilters);
+    
+    // Reset hasSearched if all filters are cleared
+    if (!searchQuery && newFilters.location.length === 0 && !newFilters.gender && !newFilters.salary) {
+      setHasSearched(false);
+    }
   };
 
   const handleSelectApplicant = (applicantId: number) => {
@@ -243,6 +261,9 @@ const Content = () => {
   };
 
   const handleFilterUpdate = (filterData: { location: string[]; gender: string; salary: string }) => {
+    // Mark that search has been performed (when filters are applied)
+    setHasSearched(true);
+    
     // Build search query from current tags if any exist
     const searchQuery = buildSearchQuery(tagsSearch, starredTags);
     
@@ -642,14 +663,17 @@ const Content = () => {
             )}
 
             {/* Search Results */}
-            {(filters.search || filters.location.length > 0 || filters.gender || filters.salary) && (
+            {hasSearched && (
               <>
                 {/* Search Results Panel (existing code) */}
                 <div className='mt-8 mb-10'>
                   <div className='bg-white rounded-lg shadow-md p-6'>
                     <div className='flex justify-between items-center mb-4'>
                       <h3 className='text-lg font-semibold'>
-                        {filters.search ? 'Search Results' : 'Filtered Results'}
+                        {filters.search || filters.location.length > 0 || filters.gender || filters.salary 
+                          ? (filters.search ? 'Search Results' : 'Filtered Results')
+                          : 'All Available Profiles'
+                        }
                       </h3>
                       {selectedApplicants.size > 0 && (
                         <div className='flex items-center gap-2'>
