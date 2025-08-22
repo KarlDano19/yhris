@@ -244,7 +244,11 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
   allEvaluationData?: any[],
   selectedIssueTypes?: string[],
   selectedEmployeeIssues?: string[],
-  allEmployeeIssueData?: any[]
+  allEmployeeIssueData?: any[],
+  departmentPrintOption?: string,
+  employeePrintOption?: string,
+  issueTypePrintOption?: string,
+  employeeIssuePrintOption?: string
 ) => {
   // Calculate KPI data
   const calculateKPIs = () => {
@@ -277,24 +281,17 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     let filteredData = departmentPerformanceData;
     
     // Handle print options for performance rate data
-    if (printOption && selectedDepartments) {
-      switch (printOption) {
-        case 'all':
-          // Use all departments
-          filteredData = departmentPerformanceData;
-          break;
-        case 'selected':
-          // Filter by selected departments
-          if (selectedDepartments.length > 0) {
-            filteredData = departmentPerformanceData.filter(dept => 
-              selectedDepartments.includes(dept.name)
-            );
-          }
-          break;
-        default:
-          filteredData = departmentPerformanceData;
-      }
+    const currentPrintOption = departmentPrintOption || printOption;
+    
+
+    
+    if (currentPrintOption === 'selected' && selectedDepartments && selectedDepartments.length > 0) {
+      // Filter by selected departments only when option is 'selected' and we have selections
+      filteredData = departmentPerformanceData.filter(dept => 
+        selectedDepartments.includes(dept.name)
+      );
     }
+    // If currentPrintOption is 'all' or undefined, use all departments (no filtering)
     
     return filteredData.map(dept => ({
       name: dept.name,
@@ -322,39 +319,14 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     }));
     
     // Handle print options for issue type data
-    if (printOption && selectedIssueTypes) {
-      switch (printOption) {
-        case 'all':
-          // Use all issue types
-          filteredData = labels.map((label, index) => ({
-            reason: label,
-            count: data[index],
-            percentage: percentages[index],
-            color: colors[index]
-          }));
-          break;
-        case 'selected':
-          // Filter by selected issue types
-          if (selectedIssueTypes.length > 0) {
-            filteredData = labels.map((label, index) => ({
-              reason: label,
-              count: data[index],
-              percentage: percentages[index],
-              color: colors[index]
-            })).filter(issueType => 
-              selectedIssueTypes.includes(issueType.reason)
-            );
-          }
-          break;
-        default:
-          filteredData = labels.map((label, index) => ({
-            reason: label,
-            count: data[index],
-            percentage: percentages[index],
-            color: colors[index]
-          }));
-      }
+    const currentPrintOption = issueTypePrintOption || printOption;
+    if (currentPrintOption === 'selected' && selectedIssueTypes && selectedIssueTypes.length > 0) {
+      // Filter by selected issue types only when option is 'selected' and we have selections
+      filteredData = filteredData.filter(issueType => 
+        selectedIssueTypes.includes(issueType.reason)
+      );
     }
+    // If currentPrintOption is 'all' or undefined, use all issue types (no filtering)
     
     return filteredData;
   };
@@ -391,33 +363,21 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     let filteredData = employeePerformanceTableData || [];
     
     // Handle print options for employee performance table data
-    if (printOption && selectedEmployees) {
-      switch (printOption) {
-        case 'all':
-          // Use all employees from allEvaluationData if available
-          if (allEvaluationData && allEvaluationData.length > 0) {
-            filteredData = transformAllEvaluationDataToTable(allEvaluationData);
-          } else {
-            // Fallback to paginated data
-            filteredData = employeePerformanceTableData || [];
-          }
-          break;
-        case 'selected':
-          // Filter by selected employees
-          if (selectedEmployees.length > 0) {
-            // Use all evaluation data for selection if available
-            const allData = allEvaluationData && allEvaluationData.length > 0 
-              ? transformAllEvaluationDataToTable(allEvaluationData)
-              : (employeePerformanceTableData || []);
-            
-            filteredData = allData.filter(employee => 
-              selectedEmployees.includes(employee.name)
-            );
-          }
-          break;
-        default:
-          filteredData = employeePerformanceTableData || [];
-      }
+    const currentPrintOption = employeePrintOption || printOption;
+    
+    // Always use all evaluation data if available for better selection
+    const allData = allEvaluationData && allEvaluationData.length > 0 
+      ? transformAllEvaluationDataToTable(allEvaluationData)
+      : (employeePerformanceTableData || []);
+    
+    if (currentPrintOption === 'selected' && selectedEmployees && selectedEmployees.length > 0) {
+      // Filter by selected employees only when option is 'selected' and we have selections
+      filteredData = allData.filter(employee => 
+        selectedEmployees.includes(employee.name)
+      );
+    } else {
+      // If currentPrintOption is 'all' or undefined, use all employees (no filtering)
+      filteredData = allData;
     }
     
     return filteredData;
@@ -458,33 +418,21 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     let filteredData = employeeIssuesTableData || [];
     
     // Handle print options for employee issues table data
-    if (printOption && selectedEmployeeIssues) {
-      switch (printOption) {
-        case 'all':
-          // Use all employee issues from allEmployeeIssueData if available
-          if (allEmployeeIssueData && allEmployeeIssueData.length > 0) {
-            filteredData = transformAllEmployeeIssueDataToTable(allEmployeeIssueData);
-          } else {
-            // Fallback to paginated data
-            filteredData = employeeIssuesTableData || [];
-          }
-          break;
-        case 'selected':
-          // Filter by selected employee issues
-          if (selectedEmployeeIssues.length > 0) {
-            // Use all employee issue data for selection if available
-            const allData = allEmployeeIssueData && allEmployeeIssueData.length > 0 
-              ? transformAllEmployeeIssueDataToTable(allEmployeeIssueData)
-              : (employeeIssuesTableData || []);
-            
-            filteredData = allData.filter(issue => 
-              selectedEmployeeIssues.includes(issue.name)
-            );
-          }
-          break;
-        default:
-          filteredData = employeeIssuesTableData || [];
-      }
+    const currentPrintOption = employeeIssuePrintOption || printOption;
+    
+    // Always use all employee issue data if available for better selection
+    const allData = allEmployeeIssueData && allEmployeeIssueData.length > 0 
+      ? transformAllEmployeeIssueDataToTable(allEmployeeIssueData)
+      : (employeeIssuesTableData || []);
+    
+    if (currentPrintOption === 'selected' && selectedEmployeeIssues && selectedEmployeeIssues.length > 0) {
+      // Filter by selected employee issues only when option is 'selected' and we have selections
+      filteredData = allData.filter(issue => 
+        selectedEmployeeIssues.includes(issue.name)
+      );
+    } else {
+      // If currentPrintOption is 'all' or undefined, use all employee issues (no filtering)
+      filteredData = allData;
     }
     
     return filteredData;
@@ -557,8 +505,14 @@ export const handlePrintAnalytics = async (
   allEvaluationData?: any[],
   selectedIssueTypes?: string[],
   selectedEmployeeIssues?: string[],
-  allEmployeeIssueData?: any[]
+  allEmployeeIssueData?: any[],
+  // New separate print options for each section
+  departmentPrintOption?: string,
+  employeePrintOption?: string,
+  issueTypePrintOption?: string,
+  employeeIssuePrintOption?: string
 ) => {
+
   // Create document component based on tab
   let documentComponent: React.ReactElement;
   
@@ -590,13 +544,17 @@ export const handlePrintAnalytics = async (
         employeeIssuesTableData,
         showAllDepartments || false,
         showAllIssueTypes || false,
-        printOption,
+        printOption, // main printOption (fallback)
         selectedDepartments,
         selectedEmployees,
         allEvaluationData, // Pass the actual allEvaluationData
         selectedIssueTypes, // Pass the selected issue types
         selectedEmployeeIssues, // Pass the selected employee issues
-        allEmployeeIssueData // Pass the actual allEmployeeIssueData
+        allEmployeeIssueData, // Pass the actual allEmployeeIssueData
+        departmentPrintOption, // department-specific print option
+        employeePrintOption, // employee-specific print option
+        issueTypePrintOption, // issue type-specific print option
+        employeeIssuePrintOption // employee issue-specific print option
       );
       break;
     // Add other tabs here as they are implemented

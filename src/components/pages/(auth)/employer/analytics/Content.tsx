@@ -181,7 +181,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     await executePrint();
   };
 
-  const executePrint = async (selectedOption?: string, selectedRecords?: number[] | string[], step?: number) => {
+  const executePrint = async (
+    selectedOption?: string, 
+    selectedRecords?: number[] | string[], 
+    step?: number,
+    departmentOption?: string,
+    departmentRecords?: string[],
+    employeeOption?: string,
+    employeeRecords?: string[],
+    issueTypeOption?: string,
+    issueTypeRecords?: string[],
+    employeeIssueOption?: string,
+    employeeIssueRecords?: string[]
+  ) => {
     try {
       setIsGenerating(true);
       
@@ -219,13 +231,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             throw new Error('No employee performance data available for printing');
           }
           
-          // Determine which data to pass based on the step
-          const selectedDepartments = step === 1 ? selectedRecords as string[] : undefined;
-          const selectedEmployees = step === 2 ? selectedRecords as string[] : undefined;
-          const selectedIssueTypes = step === 3 ? selectedRecords as string[] : undefined;
-          const selectedEmployeeIssues = step === 4 ? selectedRecords as string[] : undefined;
+          // Use the new parameters if provided, otherwise fall back to step-based logic
+          const selectedDepartments = departmentRecords || (step === 1 ? selectedRecords as string[] : undefined);
+          const selectedEmployees = employeeRecords || (step === 2 ? selectedRecords as string[] : undefined);
+          const selectedIssueTypes = issueTypeRecords || (step === 3 ? selectedRecords as string[] : undefined);
+          const selectedEmployeeIssues = employeeIssueRecords || (step === 4 ? selectedRecords as string[] : undefined);
           
-                      await handlePrintAnalytics(
+
+          
+
+          
+          await handlePrintAnalytics(
               activeTab,
               currentTab.name,
               generatePDFLocally,
@@ -239,7 +255,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               undefined, // rolePipelineData - not needed for employee performance
               undefined, // validRegions - not needed for employee performance
               undefined, // selectedJobFilter - not needed for employee performance
-              selectedOption, // printOption for employee performance
+              selectedOption, // main printOption (fallback)
               undefined, // allJobPostsForPrint - not needed for employee performance
               undefined, // selectedRecords - not needed for employee performance
               employeePerformanceData.evaluationData,
@@ -253,7 +269,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               employeePerformanceData.evaluationData, // allEvaluationData - use the same data for now
               selectedIssueTypes, // selected issue types for employee performance
               selectedEmployeeIssues, // selected employee issues for employee performance
-              employeePerformanceData.employeeIssueData // allEmployeeIssueData - use the same data for now
+              employeePerformanceData.employeeIssueData, // allEmployeeIssueData - use the same data for now
+              departmentOption, // department-specific print option
+              employeeOption, // employee-specific print option
+              issueTypeOption, // issue type-specific print option
+              employeeIssueOption // employee issue-specific print option
             );
           break;
         // Add other tabs here as they are implemented
@@ -271,9 +291,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     await executePrint(selectedOption, selectedRecords);
   };
 
-  const handleEmpPerformancePrintModalConfirm = async (selectedOption: string, selectedRecords?: string[], step?: number) => {
+  const handleEmpPerformancePrintModalConfirm = async (
+    selectedOption: string, 
+    selectedRecords?: string[], 
+    step?: number,
+    allSelections?: {
+      departments: { option: string; records: string[] };
+      employees: { option: string; records: string[] };
+      issueTypes: { option: string; records: string[] };
+      employeeIssues: { option: string; records: string[] };
+    }
+  ) => {
     setShowEmpPerformancePrintModal(false);
-    await executePrint(selectedOption, selectedRecords, step);
+    
+
+    
+    if (allSelections) {
+
+      
+      // Use the new allSelections structure
+      await executePrint(
+        'all', // Use 'all' as the main option since we're handling individual selections
+        [], // Empty array since we're using allSelections
+        4, // Always step 4 since we're collecting all selections
+        allSelections.departments.option,
+        allSelections.departments.records,
+        allSelections.employees.option,
+        allSelections.employees.records,
+        allSelections.issueTypes.option,
+        allSelections.issueTypes.records,
+        allSelections.employeeIssues.option,
+        allSelections.employeeIssues.records
+      );
+    } else {
+      // Fallback to old structure for backward compatibility
+      await executePrint(selectedOption, selectedRecords, step);
+    }
   };
 
   return (

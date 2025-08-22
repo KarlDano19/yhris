@@ -92,7 +92,7 @@ const PrintRolePipelineRecordsSelectionModal: React.FC<PrintRolePipelineRecordsS
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+      <Dialog as="div" className="relative z-50" onClose={() => onClose()}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -124,7 +124,7 @@ const PrintRolePipelineRecordsSelectionModal: React.FC<PrintRolePipelineRecordsS
                   </h3>
                   <XCircleIcon
                     className="w-6 h-6 text-white cursor-pointer"
-                    onClick={handleClose}
+                    onClick={() => onClose()}
                   />
                 </div>
 

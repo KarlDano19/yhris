@@ -41,7 +41,17 @@ interface EmployeeIssueRecord {
 interface PrintEmpPerformanceSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (selectedOption: string, selectedRecords?: string[], customRecords?: number) => void;
+  onConfirm: (
+    selectedOption: string, 
+    selectedRecords?: string[], 
+    customRecords?: number,
+    allSelections?: {
+      departments: { option: string; records: string[] };
+      employees: { option: string; records: string[] };
+      issueTypes: { option: string; records: string[] };
+      employeeIssues: { option: string; records: string[] };
+    }
+  ) => void;
   isLoading?: boolean;
   departmentRecords?: DepartmentRecord[];
   employeeRecords?: EmployeeRecord[];
@@ -64,50 +74,83 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
   const [selectedOption, setSelectedOption] = useState<string>('all');
   const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
   const [currentSelectionStep, setCurrentSelectionStep] = useState<number>(1);
+  
+  // Store selections for each step
+  const [stepSelections, setStepSelections] = useState<{
+    [key: number]: {
+      selectedOption: string;
+      selectedRecords: Set<string>;
+    };
+  }>({});
 
   const handleConfirm = () => {
-    let selectedIds: string[] = [];
+    // Save current step selections before collecting all
+    const updatedStepSelections = {
+      ...stepSelections,
+      [currentSelectionStep]: {
+        selectedOption,
+        selectedRecords
+      }
+    };
     
-    // Determine which records to use based on current step
-    let currentRecords: any[];
-    switch (currentSelectionStep) {
-      case 1: // Performance Rate
-        currentRecords = departmentRecords;
-        break;
-      case 2: // Performance Table
-        currentRecords = employeeRecords;
-        break;
-      case 3: // Issue Type
-        currentRecords = issueTypeRecords;
-        break;
-      case 4: // Employee Issues
-        currentRecords = employeeIssueRecords;
-        break;
-      default:
-        currentRecords = [];
-    }
+    // Collect all selections from all steps, including current step
+    const allSelections = {
+      step1: {
+        selectedOption: currentSelectionStep === 1 ? selectedOption : (updatedStepSelections[1]?.selectedOption || 'all'),
+        selectedRecords: currentSelectionStep === 1 ? selectedRecords : (updatedStepSelections[1]?.selectedRecords || new Set())
+      },
+      step2: {
+        selectedOption: currentSelectionStep === 2 ? selectedOption : (updatedStepSelections[2]?.selectedOption || 'all'),
+        selectedRecords: currentSelectionStep === 2 ? selectedRecords : (updatedStepSelections[2]?.selectedRecords || new Set())
+      },
+      step3: {
+        selectedOption: currentSelectionStep === 3 ? selectedOption : (updatedStepSelections[3]?.selectedOption || 'all'),
+        selectedRecords: currentSelectionStep === 3 ? selectedRecords : (updatedStepSelections[3]?.selectedRecords || new Set())
+      },
+      step4: {
+        selectedOption: currentSelectionStep === 4 ? selectedOption : (updatedStepSelections[4]?.selectedOption || 'all'),
+        selectedRecords: currentSelectionStep === 4 ? selectedRecords : (updatedStepSelections[4]?.selectedRecords || new Set())
+      }
+    };
     
-    switch (selectedOption) {
-      case 'all':
-        // Use all records for current step
-        selectedIds = currentRecords.map(record => 
-          currentSelectionStep === 3 ? record.reason : record.name
-        );
-        break;
-      case 'selected':
-        // Use manually selected records
-        selectedIds = Array.from(selectedRecords);
-        break;
-    }
+
     
-    // Pass the step information to help the parent component know which type of selection this is
-    onConfirm(selectedOption, selectedIds, currentSelectionStep);
+    // Convert selections to arrays for the parent component
+    const departmentSelections = allSelections.step1.selectedOption === 'all' 
+      ? departmentRecords.map(record => record.name)
+      : Array.from(allSelections.step1.selectedRecords);
+      
+    const employeeSelections = allSelections.step2.selectedOption === 'all'
+      ? employeeRecords.map(record => record.name)
+      : Array.from(allSelections.step2.selectedRecords);
+      
+    const issueTypeSelections = allSelections.step3.selectedOption === 'all'
+      ? issueTypeRecords.map(record => record.reason)
+      : Array.from(allSelections.step3.selectedRecords);
+      
+    const employeeIssueSelections = allSelections.step4.selectedOption === 'all'
+      ? employeeIssueRecords.map(record => record.name)
+      : Array.from(allSelections.step4.selectedRecords);
+    
+
+    
+    // Pass all selections to the parent component
+    onConfirm('all', [], 4, {
+      departments: { option: allSelections.step1.selectedOption, records: departmentSelections },
+      employees: { option: allSelections.step2.selectedOption, records: employeeSelections },
+      issueTypes: { option: allSelections.step3.selectedOption, records: issueTypeSelections },
+      employeeIssues: { option: allSelections.step4.selectedOption, records: employeeIssueSelections }
+    });
+    
+    // Close the modal after printing
+    handleClose();
   };
 
   const handleClose = () => {
     setSelectedOption('all');
     setSelectedRecords(new Set());
     setCurrentSelectionStep(1);
+    setStepSelections({});
     onClose();
   };
 
@@ -119,6 +162,39 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
       newSelected.add(recordName);
     }
     setSelectedRecords(newSelected);
+    
+    // Update step selections
+    setStepSelections(prev => ({
+      ...prev,
+      [currentSelectionStep]: {
+        selectedOption,
+        selectedRecords: newSelected
+      }
+    }));
+  };
+
+  const handleOptionChange = (option: string) => {
+    setSelectedOption(option);
+    
+    // Update step selections
+    setStepSelections(prev => ({
+      ...prev,
+      [currentSelectionStep]: {
+        selectedOption: option,
+        selectedRecords
+      }
+    }));
+  };
+
+  const loadStepSelections = (step: number) => {
+    const savedSelections = stepSelections[step];
+    if (savedSelections) {
+      setSelectedOption(savedSelections.selectedOption);
+      setSelectedRecords(savedSelections.selectedRecords);
+    } else {
+      setSelectedOption('all');
+      setSelectedRecords(new Set());
+    }
   };
 
   const getPrintOptions = () => {
@@ -172,7 +248,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
           <PerformanceRateSelection
             departmentRecords={departmentRecords}
             selectedOption={selectedOption}
-            setSelectedOption={setSelectedOption}
+            setSelectedOption={handleOptionChange}
             selectedRecords={selectedRecords}
             handleRecordSelection={handleRecordSelection}
             printOptions={printOptions}
@@ -183,7 +259,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
           <PerformanceTableSelection
             employeeRecords={employeeRecords}
             selectedOption={selectedOption}
-            setSelectedOption={setSelectedOption}
+            setSelectedOption={handleOptionChange}
             selectedRecords={selectedRecords}
             handleRecordSelection={handleRecordSelection}
             printOptions={printOptions}
@@ -194,7 +270,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
           <IssueTypeSelection
             issueTypeRecords={issueTypeRecords}
             selectedOption={selectedOption}
-            setSelectedOption={setSelectedOption}
+            setSelectedOption={handleOptionChange}
             selectedRecords={selectedRecords}
             handleRecordSelection={handleRecordSelection}
             printOptions={printOptions}
@@ -205,7 +281,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
           <EmployeeIssuesSelection
             employeeIssueRecords={employeeIssueRecords}
             selectedOption={selectedOption}
-            setSelectedOption={setSelectedOption}
+            setSelectedOption={handleOptionChange}
             selectedRecords={selectedRecords}
             handleRecordSelection={handleRecordSelection}
             printOptions={printOptions}
@@ -224,7 +300,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+      <Dialog as="div" className="relative z-50" onClose={() => onClose()}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -252,11 +328,14 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                 <div className="flex bg-savoy-blue p-4 items-center gap-4">
                   <PrinterIcon className="w-6 h-6 text-white" />
                   <h3 className="flex-1 text-white font-semibold">
-                    Print Employee Performance Records Selection
+                    {currentSelectionStep === 1 && 'Print Performance Rate Selection'}
+                    {currentSelectionStep === 2 && 'Print Performance Table Selection'}
+                    {currentSelectionStep === 3 && 'Print Issue Type Selection'}
+                    {currentSelectionStep === 4 && 'Print Employee Issues Selection'}
                   </h3>
                   <XCircleIcon
                     className="w-6 h-6 text-white cursor-pointer"
-                    onClick={handleClose}
+                    onClick={() => onClose()}
                   />
                 </div>
 
@@ -316,13 +395,23 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                       {currentSelectionStep > 1 && (
                         <button
                           onClick={() => {
-                            setCurrentSelectionStep(currentSelectionStep - 1);
-                            setSelectedOption('all');
-                            setSelectedRecords(new Set());
+                            // Save current selections
+                            setStepSelections(prev => ({
+                              ...prev,
+                              [currentSelectionStep]: {
+                                selectedOption,
+                                selectedRecords
+                              }
+                            }));
+                            
+                            // Move to previous step and load its selections
+                            const previousStep = currentSelectionStep - 1;
+                            setCurrentSelectionStep(previousStep);
+                            loadStepSelections(previousStep);
                           }}
                           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                         >
-                          Previous
+                          Back
                         </button>
                       )}
                     </div>
@@ -331,9 +420,19 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                       {currentSelectionStep < 4 && (
                         <button
                           onClick={() => {
-                            setCurrentSelectionStep(currentSelectionStep + 1);
-                            setSelectedOption('all');
-                            setSelectedRecords(new Set());
+                            // Save current selections
+                            setStepSelections(prev => ({
+                              ...prev,
+                              [currentSelectionStep]: {
+                                selectedOption,
+                                selectedRecords
+                              }
+                            }));
+                            
+                            // Move to next step and load its selections
+                            const nextStep = currentSelectionStep + 1;
+                            setCurrentSelectionStep(nextStep);
+                            loadStepSelections(nextStep);
                           }}
                           className="px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-opacity-90 transition-colors"
                         >
