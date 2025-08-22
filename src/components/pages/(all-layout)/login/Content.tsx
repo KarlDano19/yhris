@@ -24,6 +24,7 @@ import GoogleIcon from '@/svg/GoogleIcon';
 import MainIconOnly from '@/svg/MainIconOnly';
 import FacebookRoundedIcon from '@/svg/FacebookRoundedIcon';
 import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
+import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Login } from '@/types/globals';
 
@@ -140,6 +141,16 @@ function Content() {
 
   return (
     <>
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link 
+          href="/landing-page" 
+          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 hover:shadow-xl"
+        >
+          <ChevronLeftIcon />
+        </Link>
+      </div>
+      
       <SplitLayout
         left={
           <>
