@@ -207,19 +207,20 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-gray-500">
               <div className="text-lg font-semibold mb-2">No Data Available</div>
-              <div className="text-sm">No issues found for the selected period</div>
             </div>
           </div>
         )}
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center mt-2">
-        <div className="flex items-center space-x-2">
-          <AverageLegendIcon />
-          <span className="text-lg text-gray-600">Monthly Issue Volume</span>
+      {monthlyData.length > 0 && (
+        <div className="flex justify-center mt-2">
+          <div className="flex items-center space-x-2">
+            <AverageLegendIcon />
+            <span className="text-lg text-gray-600">Monthly Issue Volume</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

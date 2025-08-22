@@ -214,19 +214,20 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-gray-500">
                 <div className="text-lg font-semibold mb-2">No Data Available</div>
-                <div className="text-sm">No {selectedDepartment !== 'All Departments' ? selectedDepartment : 'department'} evaluations found for the current year</div>
               </div>
             </div>
           )}
         </div>
 
         {/* Legend */}
-        <div className="flex justify-center mt-2">
-          <div className="flex items-center space-x-2">
-            <AverageLegendIcon />
-            <span className="text-lg text-gray-600">Average Score</span>
+        {displayData.length > 0 && (
+          <div className="flex justify-center mt-2">
+            <div className="flex items-center space-x-2">
+              <AverageLegendIcon />
+              <span className="text-lg text-gray-600">Average Score</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <PerformanceTrendFilterModal

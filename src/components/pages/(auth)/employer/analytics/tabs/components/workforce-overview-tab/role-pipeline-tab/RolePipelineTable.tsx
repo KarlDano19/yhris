@@ -153,8 +153,7 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                   <tr>
                     <td colSpan={7} className="py-12 text-center">
                       <div className="flex flex-col items-center">
-                        <div className="text-gray-400 text-lg mb-2">No job postings found</div>
-                        <div className="text-gray-500 text-sm">Create your first job posting to see role pipeline data</div>
+                        <div className="text-gray-500 font-semibold mb-2">No data available</div>
                       </div>
                     </td>
                   </tr>

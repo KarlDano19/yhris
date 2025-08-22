@@ -82,6 +82,17 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const [showAllIssueTypes, setShowAllIssueTypes] = useState(false);
 
+  // Helper function to format date for API
+  const formatDateForAPI = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   // Pagination State for Employee Performance
   const [employeePerformancePageSize, setEmployeePerformancePageSize] = useState(5);
   const [employeePerformanceCurrentPage, setEmployeePerformanceCurrentPage] = useState(1);
@@ -111,7 +122,10 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     data: allEvaluationData,
     isLoading: allEvaluationLoading,
     error: allEvaluationError,
-  } = useGetAllEvaluationHistoryItems();
+  } = useGetAllEvaluationHistoryItems({
+    from: formatDateForAPI(dateFilter?.from || ''),
+    to: formatDateForAPI(dateFilter?.to || '')
+  });
 
   // Filters for the employee issues API
   const employeeIssueFilters = {
@@ -134,7 +148,10 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     data: allEmployeeIssueData,
     isLoading: allEmployeeIssueLoading,
     error: allEmployeeIssueError,
-  } = useGetAllEmployeeIssueItems();
+  } = useGetAllEmployeeIssueItems({
+    from: formatDateForAPI(dateFilter?.from || ''),
+    to: formatDateForAPI(dateFilter?.to || '')
+  });
 
   // Sub Tab Navigation
   const subTabs = [

@@ -114,7 +114,7 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                  <td colSpan={5} className="py-8 text-center font-semibold text-gray-500">
                     No data available
                   </td>
                 </tr>
@@ -122,7 +122,7 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
             </tbody>
           </table>
         </div>
-        {pagination && (
+        {pagination && processedData.length > 0 && (
           <Pagination
             pagination={pagination}
             currentPage={currentPage}

@@ -123,10 +123,9 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
           </div>
         </>
       ) : (
-        <div className="flex items-center justify-center h-32">
+        <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="text-gray-400 text-lg mb-2">No separation data available</div>
-            <div className="text-gray-500 text-sm">Separation records will appear here when available</div>
+            <div className="text-gray-500 font-semibold mb-2">No data available</div>
           </div>
         </div>
       )}

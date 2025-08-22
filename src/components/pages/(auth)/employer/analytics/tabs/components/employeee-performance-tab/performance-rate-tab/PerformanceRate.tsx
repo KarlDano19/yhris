@@ -168,10 +168,10 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
         <h3 className="text-lg font-semibold text-gray-900 mb-8">
           Performance Rate by Department
         </h3>
+        <div className='h-14'></div>
         <div className="h-96 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-lg text-gray-600 mb-2">No Data Available</div>
-            <div className="text-sm text-gray-500">No evaluation data found for departments</div>
+            <div className="text-lg font-semibold text-gray-500 mb-2">No Data Available</div>
           </div>
         </div>
       </div>

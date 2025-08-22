@@ -213,6 +213,49 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
     );
   }
 
+  // Show fallback if no data
+  if (totalIssues === 0) {
+    return (
+      <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-900">Issue Type Distribution</h3>
+            <span className='text-sm text-gray-500'>
+              ({totalIssues < 10 ? `0${totalIssues}` : totalIssues} issues)
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsColorModalOpen(true)}
+              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+              title="Customize colors"
+            >
+              <Squares2X2Icon className="w-4 h-4" />
+              Colors
+            </button>
+            {totalIssueTypes > 10 && (
+              <button
+                onClick={() => {
+                  const newShowAll = !showAllIssueTypes;
+                  onShowAllChange?.(newShowAll);
+                }}
+                className="px-3 py-1 text-sm bg-savoy-blue text-white rounded hover:bg-opacity-90 transition-colors"
+              >
+                {showAllIssueTypes ? 'Show Less' : 'Show All'}
+              </button>
+            )}
+          </div>
+        </div>
+        <div className='h-14'></div>
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-lg font-semibold text-gray-500 mb-2">No Data Available</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
       <div className="flex justify-between items-center mb-4">
@@ -250,25 +293,27 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
       </div>
 
       {/* Custom Scrollable Legend */}
-      <div className="mt-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Issue Types</h4>
-        <div className={`border border-gray-200 rounded-lg p-3 bg-gray-50 ${showAllIssueTypes ? '' : 'max-h-48 overflow-y-auto'}`}>
-          <div className={showAllIssueTypes ? 'grid grid-cols-3 gap-4' : 'space-y-2'}>
-            {labels.map((label, index) => (
-              <div key={index} className="flex items-center space-x-2 text-sm">
-                <div 
-                  className="w-8 h-8 rounded flex-shrink-0" 
-                  style={{ backgroundColor: colors[index] }}
-                ></div>
-                <span className="text-gray-700 flex-1 min-w-0">
-                  <span className="truncate block">{label}</span>
-                  <span className="text-gray-500 text-xs">({percentages[index]}%)</span>
-                </span>
-              </div>
-            ))}
+      {totalIssues > 0 && (
+        <div className="mt-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Issue Types</h4>
+          <div className={`border border-gray-200 rounded-lg p-3 bg-gray-50 ${showAllIssueTypes ? '' : 'max-h-48 overflow-y-auto'}`}>
+            <div className={showAllIssueTypes ? 'grid grid-cols-3 gap-4' : 'space-y-2'}>
+              {labels.map((label, index) => (
+                <div key={index} className="flex items-center space-x-2 text-sm">
+                  <div 
+                    className="w-8 h-8 rounded flex-shrink-0" 
+                    style={{ backgroundColor: colors[index] }}
+                  ></div>
+                  <span className="text-gray-700 flex-1 min-w-0">
+                    <span className="truncate block">{label}</span>
+                    <span className="text-gray-500 text-xs">({percentages[index]}%)</span>
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Color Palette Modal */}
       <ColorPaletteModal
