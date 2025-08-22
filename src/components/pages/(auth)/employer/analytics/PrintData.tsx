@@ -519,7 +519,7 @@ export const handlePrintAnalytics = async (
   
   switch (tabId) {
     case 1: // Workforce Overview
-            documentComponent = createAnalyticsWorkforceOverviewDocumentComponent(
+        documentComponent = createAnalyticsWorkforceOverviewDocumentComponent(
         employeeData,
         appliedApplicantsData,
         separationData,

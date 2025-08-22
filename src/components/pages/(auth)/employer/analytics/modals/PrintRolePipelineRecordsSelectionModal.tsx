@@ -50,6 +50,9 @@ const PrintRolePipelineRecordsSelectionModal: React.FC<PrintRolePipelineRecordsS
     }
     
     onConfirm(selectedOption, selectedIds, undefined);
+
+    // Close the modal after printing
+    handleClose();
   };
 
   const handleClose = () => {
