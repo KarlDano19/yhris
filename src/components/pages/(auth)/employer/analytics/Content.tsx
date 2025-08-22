@@ -338,14 +338,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <h2 className='text-xl font-bold text-indigo-dye'>Analytics</h2>
           
           {/* Date Range Picker */}
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+          <div className='mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-4'>
+            <div className='flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto'>
+              <div className='relative w-full sm:w-auto'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full sm:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={currentDateFilter.from}
                   pickerOnChange={(date: any) => {
@@ -362,13 +362,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-center sm:text-left'>to</p>
+              <div className='relative w-full sm:w-auto'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full sm:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={currentDateFilter.to}
                   pickerOnChange={(date: any) => {
@@ -387,7 +387,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 />
               </div>
             </div>
-            <div className='flex gap-2'>
+            <div className='flex gap-2 w-full sm:w-auto justify-center sm:justify-start'>
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
                 onClick={() => {
