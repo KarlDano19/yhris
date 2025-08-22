@@ -104,6 +104,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
+    pageMargins: {
+      top: '0.1in',
+      right: '0.1in',
+      bottom: '0.1in',
+      left: '0.1in'
+    },
     onSuccess: () => {
       setGeneratingItemId(null);
       toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
