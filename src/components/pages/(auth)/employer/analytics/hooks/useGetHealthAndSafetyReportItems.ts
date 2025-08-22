@@ -39,7 +39,7 @@ function useGetHealthAndSafetyReportItems() {
     () => getHealthAndSafetyReportItems(),
     {
       refetchOnWindowFocus: false,
-      keepPreviousData: false,
+      keepPreviousData: true,
     }
   );
   return query;

@@ -1,8 +1,6 @@
 import React from 'react';
 
-import WorkforceOverviewDocument from './print/WorkforceOverviewDocument';
-import EmployeePerformanceDocument from './print/EmployeePerformanceDocument';
-
+// Workforce Overview calculation imports
 import { calculateTotalActiveEmployees } from './cards/workforce-overview/calculations/totalActiveEmployeesCalc';
 import { calculateNewHires } from './cards/workforce-overview/calculations/newHiresCalc';
 import { calculateSeparatedEmployees } from './cards/workforce-overview/calculations/separatedEmployeesCalc';
@@ -21,6 +19,9 @@ import { calculateIssueTypeDistribution } from './tabs/components/employeee-perf
 import { calculateMonthlyVolume } from './tabs/components/employeee-performance-tab/employee-issue-rate-tab/calculations/monthlyTypeVolumeCalc';
 import { calculateDepartmentPerformance } from './tabs/components/employeee-performance-tab/performance-rate-tab/calculations/performanceRateCalc';
 import { calculatePerformanceTrend } from './tabs/components/employeee-performance-tab/performance-rate-tab/calculations/performanceTrendCalc';
+
+import WorkforceOverviewDocument from './print/WorkforceOverviewDocument';
+import EmployeePerformanceDocument from './print/EmployeePerformanceDocument';
 
 export const createAnalyticsWorkforceOverviewDocumentComponent = (
   employeeData: any[],

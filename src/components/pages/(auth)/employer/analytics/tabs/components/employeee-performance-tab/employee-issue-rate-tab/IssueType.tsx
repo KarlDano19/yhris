@@ -7,8 +7,10 @@ import {
   Legend,
 } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
-import { calculateIssueTypeDistribution } from './calculations/issueTypeCalc';
+
 import ColorPaletteModal from '../../../../modals/ColorPaletteModal';
+import { calculateIssueTypeDistribution } from './calculations/issueTypeCalc';
+
 import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
 ChartJS.register(ArcElement, Tooltip, Legend);

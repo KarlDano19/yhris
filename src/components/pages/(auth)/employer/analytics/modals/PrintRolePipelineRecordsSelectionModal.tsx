@@ -1,8 +1,8 @@
 import React, { useState, Fragment } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { PrinterIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
+import { PrinterIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 interface JobRecord {

@@ -39,7 +39,7 @@ function useGetShcMinutesMeetingItems() {
     () => getShcMinutesMeetingItems(),
     {
       refetchOnWindowFocus: false,
-      keepPreviousData: false,
+      keepPreviousData: true,
     }
   );
   return query;

@@ -39,7 +39,7 @@ function useGetSafetyAndHealthPolicyDetails() {
     () => getSafetyAndHealthPolicyDetails(),
     {
         refetchOnWindowFocus: false,
-        keepPreviousData: false,
+        keepPreviousData: true,
     }
   );
     return query;

@@ -14,13 +14,12 @@ import IssueType from './components/employeee-performance-tab/employee-issue-rat
 import MonthlyTypeVolume from './components/employeee-performance-tab/employee-issue-rate-tab/MonthlyTypeVolume';
 import EmployeeIssuesTable from './components/employeee-performance-tab/employee-issue-rate-tab/EmployeeIssuesTable';
 import InterventionRecommendations from './components/employeee-performance-tab/employee-issue-rate-tab/InterventionRecommendations';
+import { transformEvaluationData } from './components/employeee-performance-tab/performance-rate-tab/calculations/employeePerformanceTableCalc';
 
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import useGetAllEvaluationHistoryItems from '@/components/hooks/useGetEvaluationHistoryItems';
 import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
 import useGetAllEmployeeIssueItems from '@/components/hooks/useGetAllEmployeeIssueItems';
-import { transformEvaluationData } from './components/employeee-performance-tab/performance-rate-tab/calculations/employeePerformanceTableCalc';
-
 
 interface EmployeePerformanceData {
   averageScore: number;

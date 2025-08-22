@@ -213,7 +213,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
 
         {/* Title at bottom */}
         <div className="mt-4">
-          <h3 className="text-lg text-gray-600 text-center mb-3">Average Score</h3>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Departments</h4>
           <div className={`border border-gray-200 rounded-lg p-3 bg-gray-50 ${showAllDepartments ? '' : 'max-h-48 overflow-y-auto'}`}>
             <div className={showAllDepartments ? 'grid grid-cols-3 gap-4' : 'space-y-2'}>
               {departmentPerformanceData.map((dept, index) => (
