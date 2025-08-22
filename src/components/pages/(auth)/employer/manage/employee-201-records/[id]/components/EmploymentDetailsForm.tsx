@@ -1,3 +1,4 @@
+// components/EmploymentDetailsForm.tsx (updated)
 import { useMemo, useState } from "react";
 import Section from "../common/Section";
 import Grid from "../common/Grid";
@@ -5,72 +6,82 @@ import Field from "../common/Field";
 import type { Employee } from "@/types/employee-201-records/employee";
 import { s } from "../utils/_shared";
 
-// SALARY modal
-import SalaryHistoryModal, {
-  type SalaryHistoryEntry,
-} from "../modals/EmploymentDetails/SalaryHistoryModal";
+import SalaryHistoryModal, { type SalaryHistoryEntry } from "../modals/EmploymentDetails/SalaryHistoryModal";
+import EmploymentHistoryModal, { type EmploymentHistoryItem } from "../modals/EmploymentDetails/EmploymentHistoryModal";
 
-// EMPLOYMENT modal
-import EmploymentHistoryModal, {
-  type EmploymentHistoryItem,
-} from "../modals/EmploymentDetails/EmploymentHistoryModal";
+import CustomDatePicker from "@/components/CustomDatePicker";
+import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type Props = {
   emp?: Partial<Employee>;
   onViewSalaryHistory?: () => void;
   onViewEmploymentHistory?: () => void;
+  /** Bubble user-edits upward (no initial mount emissions) */
+  onPatchChange?: (patch: Record<string, any>) => void;
 };
 
-const STATUS_OPTIONS = [
-  "Active",
-  "Probationary",
-  "Contract",
-  "On Leave",
-  "Terminated",
-] as const;
+const STATUS_OPTIONS = ["Active", "Probationary", "Contract", "On Leave", "Terminated"] as const;
 
 export default function EmploymentDetailsForm({
   emp,
   onViewSalaryHistory,
   onViewEmploymentHistory,
+  onPatchChange,
 }: Props) {
+  const emit = (patch: Record<string, any>) => onPatchChange?.(patch);
   const [showSalaryModal, setShowSalaryModal] = useState(false);
   const [showEmploymentModal, setShowEmploymentModal] = useState(false);
 
-  // Map incoming data to what the UI needs (supports legacy aliases)
-  const systemId = emp?.id ?? (emp as any)?.employeeId ?? "";
-  const hireDate = (emp as any)?.hireDate ?? emp?.dateHired ?? "";
-  const employmentStatus = emp?.employmentStatus ?? (emp as any)?.status ?? "";
-  const location = emp?.location ?? (emp as any)?.workLocation ?? "";
-  const salary = useMemo(
-    () => formatMoney((emp as any)?.salary ?? emp?.basePay ?? ""),
-    [emp]
+  // ---- date helpers ----
+  const toDate = (val?: string | Date | null): Date | undefined => {
+    if (!val) return undefined;
+    if (val instanceof Date) return isNaN(val.getTime()) ? undefined : val;
+    const mdy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(val);
+    if (mdy) {
+      const [, mm, dd, yyyy] = mdy;
+      const d = new Date(+yyyy, +mm - 1, +dd);
+      return isNaN(d.getTime()) ? undefined : d;
+    }
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? undefined : d;
+  };
+
+  const getHireDateFromEmp = (e?: Partial<Employee>): Date | undefined =>
+    toDate(s((e as any)?.hireDate)) ||
+    toDate(s((e as any)?.dateHired)) ||
+    toDate(s((e as any)?.hiredDate)) ||
+    undefined;
+
+  // ---- initial values (no emits here) ----
+  const initialHireDate = useMemo(() => getHireDateFromEmp(emp), [emp]);
+  const [hireDate, setHireDate] = useState<Date | undefined>(initialHireDate);
+
+  const [systemId, setSystemId] = useState<string>(emp?.id ?? (emp as any)?.employeeId ?? "");
+  const [employmentStatus, setEmploymentStatus] = useState<string>(
+    emp?.employmentStatus ?? (emp as any)?.status ?? ""
+  );
+  const [location, setLocation] = useState<string>(emp?.location ?? (emp as any)?.workLocation ?? "");
+
+  const formatMoney = (value: string | number): string => {
+    if (value === "" || value === null || value === undefined) return "";
+    const num = typeof value === "number" ? value : Number(String(value).replace(/[^0-9.-]/g, ""));
+    if (Number.isNaN(num)) return String(value);
+    return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const [salaryText, setSalaryText] = useState<string>(() =>
+    formatMoney((emp as any)?.salary ?? emp?.basePay ?? "")
   );
 
-  const locations = (emp?.locationsList as unknown as string[]) ?? [
-    "MAIN",
-    "Annex",
-    "Remote",
-  ];
+  const locations = (emp?.locationsList as unknown as string[]) ?? ["MAIN", "Annex", "Remote"];
 
-  // Example salary entries — replace with your data source
+  // Example data — replace with your backend values
   const salaryEntries: SalaryHistoryEntry[] = [
-    {
-      position: emp?.position ?? emp?.jobTitle ?? "Accounting Officer",
-      salary: 35000,
-      effectiveDate: "2025-08-08",
-    },
-    {
-      position: emp?.position ?? emp?.jobTitle ?? "Accounting Officer",
-      salary: 42500,
-      effectiveDate: "2025-08-13",
-    },
+    { position: emp?.position ?? emp?.jobTitle ?? "Accounting Officer", salary: 35000, effectiveDate: "2025-08-08" },
+    { position: emp?.position ?? emp?.jobTitle ?? "Accounting Officer", salary: 42500, effectiveDate: "2025-08-13" },
   ];
 
-  // Example employment history items — replace with your data source
-  const [employmentItems, setEmploymentItems] = useState<
-    EmploymentHistoryItem[]
-  >([
+  const [employmentItems, setEmploymentItems] = useState<EmploymentHistoryItem[]>([
     {
       position: "Accounting Officer",
       company: "ABC Company Inc.",
@@ -90,35 +101,75 @@ export default function EmploymentDetailsForm({
   ]);
 
   const employeeName =
-    emp?.name ??
-    ([emp?.firstName, emp?.lastName].filter(Boolean).join(" ").trim() || "—");
+    emp?.name ?? ([emp?.firstName, emp?.lastName].filter(Boolean).join(" ").trim() || "—");
 
   return (
     <Section title="">
       {/* Row 1: System ID | Date Hired | Employment Status | Location */}
       <Grid>
-        <Field label="System ID" defaultValue={s(systemId)} />
+        <Field
+          label="System ID"
+          defaultValue={s(systemId)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setSystemId(v);
+            emit({ systemId: v }); // emit only on user change
+          }}
+        />
 
-        {/* Date (own input because Field is text-only) */}
-        <LabeledDate label="Date Hired" defaultValue={s(hireDate)} />
+        {/* Date Hired with CustomDatePicker */}
+        <div className="relative">
+          <label className="mb-1 block text-sm font-medium text-gray-700">Date Hired</label>
+          <CustomDatePicker
+            id="date-hired"
+            selected={hireDate ?? null}
+            pickerOnChange={(d: Date | null) => {
+              const v = d ?? undefined;
+              setHireDate(v);
+              emit({ hireDate: v }); // emit on user change
+            }}
+            inputOnChange={(d: Date | null) => {
+              const v = d ?? undefined;
+              setHireDate(v);
+              emit({ hireDate: v });
+            }}
+            placeholder="MM/DD/YYYY"
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+          />
+        </div>
 
-        {/* Selects (own component because Field is text-only) */}
         <LabeledSelect
           label="Employment Status"
           options={STATUS_OPTIONS as unknown as string[]}
           defaultValue={s(employmentStatus)}
+          onChange={(val) => {
+            setEmploymentStatus(val);
+            emit({ employmentStatus: val });
+          }}
         />
 
         <LabeledSelect
           label="Location"
           options={locations}
           defaultValue={s(location || "MAIN")}
+          onChange={(val) => {
+            setLocation(val);
+            emit({ location: val });
+          }}
         />
       </Grid>
 
       {/* Row 2: Salary | Salary History | Employment History | spacer */}
       <Grid>
-        <Field label="Salary" defaultValue={s(salary)} />
+        <Field
+          label="Salary"
+          defaultValue={s(salaryText)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setSalaryText(v);
+            emit({ salary: v });
+          }}
+        />
 
         <div className="flex items-end">
           <button
@@ -146,7 +197,6 @@ export default function EmploymentDetailsForm({
           </button>
         </div>
 
-        {/* Empty spacer to keep a clean 4-column grid */}
         <div />
       </Grid>
 
@@ -171,69 +221,41 @@ export default function EmploymentDetailsForm({
   );
 }
 
-/* ---------- local helpers to match Field styling ---------- */
-function LabeledDate({
-  label,
-  defaultValue,
-  className = "",
-}: {
-  label: string;
-  defaultValue?: string;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
-        {label}
-      </label>
-      <input
-        type="date"
-        defaultValue={defaultValue}
-        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none placeholder:text-gray-400 focus:border-[#355fd0]"
-      />
-    </div>
-  );
-}
-
+/* ---------- local select to match Field look ---------- */
 function LabeledSelect({
   label,
   options,
   defaultValue,
   className = "",
+  onChange,
 }: {
   label: string;
   options: string[];
   defaultValue?: string;
   className?: string;
+  onChange?: (value: string) => void;
 }) {
   return (
     <div className={className}>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
-        {label}
-      </label>
-      <select
-        defaultValue={defaultValue}
-        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#355fd0]"
-      >
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <div className="relative mt-2">
+        <select
+          defaultValue={defaultValue}
+          onChange={(e) => onChange?.(e.target.value)}
+          className="appearance-none w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#355fd0] sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100"
+        >
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+
+        {/* Chevron */}
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+          <SelectChevronDown />
+        </div>
+      </div>
     </div>
   );
-}
-
-function formatMoney(value: string | number): string {
-  if (value === "" || value === null || value === undefined) return "";
-  const num =
-    typeof value === "number"
-      ? value
-      : Number(String(value).replace(/[^0-9.-]/g, ""));
-  if (Number.isNaN(num)) return String(value);
-  return num.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }

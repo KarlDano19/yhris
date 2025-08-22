@@ -128,7 +128,7 @@ export default function EmploymentHistoryModal({
                         aria-label="Edit employment"
                         title="Edit"
                       >
-                        <PencilSquareIcon className="h-5 w-5 text-gray-700" />
+                        <PencilSquareIcon className="h-5 w-5 text-[#355fd0]" />
                       </button>
                       <button
                         type="button"

@@ -5,6 +5,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { SalaryHistoryEntry } from "./SalaryHistoryModal";
 import TrendChart, { TrendPoint } from "../../common/TrendChart";
+import { ChevronDoubleRightIcon } from "@heroicons/react/20/solid";
 
 type HrNote = { id: string; text: string; createdAt: Date };
 
@@ -106,7 +107,7 @@ export default function SalaryHistoryAnalysis({
           /* Show items that are hidden on web but needed in export (e.g., employee name) */
           [data-export] .export-only { display: block !important; }
           /* Tweak card borders to be clear on PDF */
-          [data-export] .card { border-color: #e5e7eb !important; }
+          [data-export] .card { border-color: #ffffffff !important; }
         `;
         doc.head.appendChild(style);
       },
@@ -283,6 +284,31 @@ export default function SalaryHistoryAnalysis({
 
 /* ---------- helpers ---------- */
 
+function TrendIcon({ up = true }: { up?: boolean }) {
+  // center of the 13x19 viewBox is roughly (6.5, 9.5)
+  const rotate = up ? undefined : "rotate(180 6.5 9.5)";
+  const fill = up ? "#4CEE52" : "#FF4C4C";
+
+  return (
+    <svg
+      viewBox="0 0 13 19"
+      width={13}
+      height={19}
+      className="absolute right-2 top-2 print:block"
+      aria-hidden="true"
+      style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <g transform={rotate}>
+        <path
+          d="M12.666 18.9902L0.666016 18.9902L6.66602 9.99023L12.666 18.9902ZM12.666 8.99023L0.666016 8.99023L6.66602 -0.00976562L12.666 8.99023Z"
+          fill={fill}
+        />
+      </g>
+    </svg>
+  );
+}
+
 function Metric({
   title,
   value,
@@ -293,20 +319,15 @@ function Metric({
   up?: boolean;
 }) {
   return (
-    <div className="relative flex h-28 flex-col items-center justify-center rounded-xl border p-4">
-      {up !== undefined && (
-        <span
-          className="absolute right-2 top-2 text-sm font-bold"
-          style={{ color: up ? "#4CEE52" : "#FF4C4C" }}
-        >
-          {up ? "↑" : "↓"}
-        </span>
-      )}
-      <div className="text-lg font-semibold">{value}</div>
+    <div className="metric-card relative flex h-28 flex-col items-center justify-center rounded-xl border border-slate-300/70 p-4 print:break-inside-avoid">
+      {up !== undefined && <TrendIcon up={up} />}
+      <div className="text-lg font-semibold text-slate-800">{value}</div>
       <div className="mt-1 text-xs text-gray-500">{title}</div>
     </div>
   );
 }
+
+
 
 function formatMoney(n: number) {
   return n.toLocaleString(undefined, {

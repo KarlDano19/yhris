@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { EmploymentHistoryItem } from "./EmploymentHistoryModal";
+import CustomDatePicker from "@/components/CustomDatePicker"; // adjust path if needed
 
 /** Multi-add employment history form */
 export default function AddEmploymentForm({
@@ -16,6 +17,19 @@ export default function AddEmploymentForm({
   defaultTo?: string;
 }) {
   const todayIso = new Date().toISOString().slice(0, 10);
+
+  // helpers
+  const toYmd = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+  const toDate = (ymd?: string | null) => {
+    if (!ymd) return null;
+    const d = new Date(ymd);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
 
   // Top draft (blank first row)
   const [draft, setDraft] = useState<EmploymentHistoryItem>({
@@ -69,7 +83,6 @@ export default function AddEmploymentForm({
 
   // Save everything (list + any valid, still-filled draft)
   const handleSaveAll = () => {
-    console.log("heyheyhey")
     const bundle: EmploymentHistoryItem[] = [...items];
     if (draft.position.trim() && draft.company.trim() && draft.dateFrom) {
       bundle.push({
@@ -125,29 +138,35 @@ export default function AddEmploymentForm({
 
           <Field label="Date From">
             <div className="relative">
-              <input
-                type="date"
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 text-sm outline-none focus:border-[#355fd0]"
-                value={draft.dateFrom}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, dateFrom: e.target.value }))
+              <CustomDatePicker
+                id="draft-date-from"
+                selected={toDate(draft.dateFrom)} // null if empty
+                pickerOnChange={(d: Date | null) =>
+                  setDraft((prev) => ({ ...prev, dateFrom: d ? toYmd(d) : "" }))
                 }
+                inputOnChange={(d: Date | null) =>
+                  setDraft((prev) => ({ ...prev, dateFrom: d ? toYmd(d) : "" }))
+                }
+                placeholder="MM/DD/YYYY"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               />
-              <CalendarIcon />
             </div>
           </Field>
 
           <Field label="Date To">
             <div className="relative">
-              <input
-                type="date"
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 text-sm outline-none focus:border-[#355fd0]"
-                value={draft.dateTo ?? ""}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, dateTo: e.target.value }))
+              <CustomDatePicker
+                id="draft-date-to"
+                selected={toDate(draft.dateTo ?? "")}
+                pickerOnChange={(d: Date | null) =>
+                  setDraft((prev) => ({ ...prev, dateTo: d ? toYmd(d) : "" }))
                 }
+                inputOnChange={(d: Date | null) =>
+                  setDraft((prev) => ({ ...prev, dateTo: d ? toYmd(d) : "" }))
+                }
+                placeholder="MM/DD/YYYY"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               />
-              <CalendarIcon />
             </div>
           </Field>
         </div>
@@ -200,28 +219,34 @@ export default function AddEmploymentForm({
               </Field>
               <Field label="Date From">
                 <div className="relative">
-                  <input
-                    type="date"
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 text-sm outline-none focus:border-[#355fd0]"
-                    value={it.dateFrom}
-                    onChange={(e) =>
-                      updateItem(idx, { dateFrom: e.target.value })
+                  <CustomDatePicker
+                    id={`item-${idx}-date-from`}
+                    selected={toDate(it.dateFrom)}
+                    pickerOnChange={(d: Date | null) =>
+                      updateItem(idx, { dateFrom: d ? toYmd(d) : "" })
                     }
+                    inputOnChange={(d: Date | null) =>
+                      updateItem(idx, { dateFrom: d ? toYmd(d) : "" })
+                    }
+                    placeholder="MM/DD/YYYY"
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                   />
-                  <CalendarIcon />
                 </div>
               </Field>
               <Field label="Date To">
                 <div className="relative">
-                  <input
-                    type="date"
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 text-sm outline-none focus:border-[#355fd0]"
-                    value={it.dateTo ?? ""}
-                    onChange={(e) =>
-                      updateItem(idx, { dateTo: e.target.value })
+                  <CustomDatePicker
+                    id={`item-${idx}-date-to`}
+                    selected={toDate(it.dateTo ?? "")}
+                    pickerOnChange={(d: Date | null) =>
+                      updateItem(idx, { dateTo: d ? toYmd(d) : "" })
                     }
+                    inputOnChange={(d: Date | null) =>
+                      updateItem(idx, { dateTo: d ? toYmd(d) : "" })
+                    }
+                    placeholder="MM/DD/YYYY"
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                   />
-                  <CalendarIcon />
                 </div>
               </Field>
             </div>
@@ -275,7 +300,6 @@ export default function AddEmploymentForm({
 }
 
 /* --- small UI helpers --- */
-
 function Field({
   label,
   children,
@@ -285,39 +309,8 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-gray-700">
-        {label}
-      </span>
+      <span className="mb-1 block text-sm font-medium text-gray-700">{label}</span>
       {children}
     </label>
-  );
-}
-
-function CalendarIcon() {
-  return (
-    <svg
-      aria-hidden
-      className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <rect
-        x="3"
-        y="4"
-        width="18"
-        height="18"
-        rx="2"
-        stroke="#9CA3AF"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M8 2v4M16 2v4M3 10h18"
-        stroke="#9CA3AF"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }
