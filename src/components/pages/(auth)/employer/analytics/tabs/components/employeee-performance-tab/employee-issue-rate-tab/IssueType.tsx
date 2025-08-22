@@ -255,7 +255,7 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
             {labels.map((label, index) => (
               <div key={index} className="flex items-center space-x-2 text-sm">
                 <div 
-                  className="w-8 h-8 rounded-full flex-shrink-0" 
+                  className="w-8 h-8 rounded flex-shrink-0" 
                   style={{ backgroundColor: colors[index] }}
                 ></div>
                 <span className="text-gray-700 flex-1 min-w-0">

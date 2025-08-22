@@ -125,7 +125,7 @@ const IssueTypeSelection: React.FC<IssueTypeSelectionProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <div 
-                          className="w-4 h-4 rounded-full flex-shrink-0" 
+                          className="w-4 h-4 rounded flex-shrink-0" 
                           style={{ backgroundColor: record.color }}
                         ></div>
                         <p className="text-sm font-medium text-gray-900 truncate">
