@@ -3,7 +3,7 @@ import type { Employee } from "@/types/employee-201-records/employee";
 export const MOCK_EMPLOYEES: Employee[] = [
   {
     id: "1",
-    avatar: "/assets/placeholder1.png",
+    avatar: "male",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -22,7 +22,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "2",
-    avatar: "/assets/placeholder2.png",
+    avatar: "female",
     complete: false,
     percent: 35,
     alert: true,
@@ -45,7 +45,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "3",
-    avatar: "/assets/placeholder1.png",
+    avatar: "male",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -64,7 +64,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "4",
-    avatar: "/assets/placeholder1.png",
+    avatar: "female",
     complete: true,
     percent: 100,
     location: "Davao",
@@ -83,7 +83,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "5",
-    avatar: "/assets/placeholder2.png",
+    avatar: "male",
     complete: true,
     percent: 100,
     location: "Cebu",
@@ -102,7 +102,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "6",
-    avatar: "/assets/placeholder1.png",
+    avatar: "female",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -121,7 +121,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "7",
-    avatar: "/assets/placeholder1.png",
+    avatar: "male",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -140,7 +140,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "8",
-    avatar: "/assets/placeholder2.png",
+    avatar: "female",
     complete: true,
     percent: 100,
     location: "Davao",
@@ -159,7 +159,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "9",
-    avatar: "/assets/placeholder1.png",
+    avatar: "male",
     complete: false,
     percent: 75,
     alert: true,
@@ -181,7 +181,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "10",
-    avatar: "/assets/placeholder2.png",
+    avatar: "female",
     complete: true,
     percent: 100,
     location: "Cebu",
@@ -200,7 +200,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "11",
-    avatar: "/assets/placeholder1.png",
+    avatar: "male",
     complete: true,
     percent: 100,
     location: "Davao",
@@ -219,7 +219,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "12",
-    avatar: "/assets/placeholder1.png",
+    avatar: "female",
     complete: true,
     percent: 100,
     location: "Manila",

@@ -1,11 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type { Employee } from "@/types/employee-201-records/employee";
-import { useEmployee } from "./hooks/useEmployee"; // adjust if your hook path differs
+
+// Data
+import { useEmployee } from "./hooks/useEmployee";
 import { toDisplayEmployee } from "./utils/toDisplayEmployee";
+
+// UI
 import EmployeeHeaderSkeleton from "./components/EmployeeHeaderSkeleton";
 import EmployeeHeader, { TabKey } from "./components/EmployeeHeader";
 import ConfirmModal from "./modals/ConfirmModal";
@@ -20,8 +24,16 @@ import PerformanceEvaluationForm from "./components/PerformanceEvaluationForm";
 import BenefitsComplianceForm from "./components/BenefitsComplianceForm";
 import DocumentRepositoryForm from "./components/DocumentRepositoryForm";
 
-// ✅ Toasts
-import toast from "react-hot-toast";
+// Helpers
+import { notify } from "./utils/notify";
+import { labelForTab } from "./utils/labelForTab";
+import { useSectionLoader } from "./hooks/useSectionLoader";
+import { SectionMap, sectionOrder } from "./types/section";
+
+// PATCH hooks
+import { usePersonalDetailsPatch, buildPersonalDetailsPayload } from "./hooks/usePersonalDetailsPatch";
+import { useEmploymentDetailsPatch, buildEmploymentDetailsPayload } from "./hooks/useEmploymentDetailsPatch";
+import { useTrainingDevelopmentPatch, buildTrainingDevelopmentPayload } from "./hooks/useTrainingDevelopmentPatch";
 
 export interface ContentProps {
   params: { id: string };
@@ -29,40 +41,18 @@ export interface ContentProps {
   hasActiveSubscription: boolean;
 }
 
-type SectionState = {
-  loaded: boolean;
-  loading: boolean;
-  dirty: boolean;
-  saving: boolean;
-  savedAt?: number;
-};
+export default function Employee201Content({ params, emp }: ContentProps) {
+  const router = useRouter();
 
-type SectionMap = Record<TabKey, SectionState>;
-
-const sectionOrder: TabKey[] = [
-  "personal",
-  "employment",
-  "training",
-  "disciplinary",
-  "performance",
-  "benefits",
-  "documents",
-];
-
-export default function Employee201Content({
-  params,
-  emp,
-  hasActiveSubscription,
-}: ContentProps) {
+  // ------------------------ State ------------------------
   const [activeTab, setActiveTab] = useState<TabKey>("personal");
   const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmBusy, setConfirmBusy] = useState(false); // 🔄 modal loading state
-  const router = useRouter();
+  const [confirmBusy, setConfirmBusy] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [pendingTab, setPendingTab] = useState<TabKey | null>(null);
 
-  // initialize per-section state
+  // per-section flags
   const [sections, setSections] = useState<SectionMap>(() =>
     sectionOrder.reduce((acc, key) => {
       acc[key] = { loaded: false, loading: false, dirty: false, saving: false };
@@ -70,12 +60,37 @@ export default function Employee201Content({
     }, {} as SectionMap)
   );
 
-  // global dirty = any section dirty
-  const isDirty = useMemo(
-    () => Object.values(sections).some((s) => s.dirty),
-    [sections]
-  );
+  // accumulate patches from forms
+  const personalPatchRef = useRef<Record<string, any>>({});
+  const employmentPatchRef = useRef<Record<string, any>>({});
+  const trainingRowsRef = useRef<any[]>([]);
 
+  const isDirty = useMemo(() => Object.values(sections).some((s) => s.dirty), [sections]);
+
+  // ------------------------ Data hooks ------------------------
+  const { data, isLoading } = useEmployee(params?.id);
+  const employee = toDisplayEmployee(data, emp);
+  const employeeDetails: Partial<Employee> | undefined = data ?? emp;
+
+  // PATCH hooks (sim mode by default; configure when backend is ready)
+  const { save: savePersonal } = usePersonalDetailsPatch(params?.id);
+  const { save: saveEmployment } = useEmploymentDetailsPatch(params?.id);
+  const { save: saveTraining } = useTrainingDevelopmentPatch(params?.id);
+  
+
+  // Section loader with race guard
+  const { loadSection } = useSectionLoader(setSections);
+
+  // ------------------------ Derived flags ------------------------
+  const canSave = !!(
+    !isLoading &&
+    !sections[activeTab]?.loading &&
+    !sections[activeTab]?.saving &&
+    sections[activeTab]?.dirty
+  );
+  const saving = sections[activeTab]?.saving;
+
+  // ------------------------ Navigation helpers ------------------------
   function attemptNavigate(href: string | "back") {
     if (isDirty) {
       setPendingHref(href);
@@ -84,7 +99,20 @@ export default function Employee201Content({
       href === "back" ? router.back() : router.push(href);
     }
   }
+  function proceedAfterLeave() {
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      void loadSection(pendingTab);
+      setPendingTab(null);
+      return;
+    }
+    if (pendingHref) {
+      pendingHref === "back" ? router.back() : router.push(pendingHref);
+      setPendingHref(null);
+    }
+  }
 
+  // warn on unload when dirty
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (!isDirty) return;
@@ -95,61 +123,63 @@ export default function Employee201Content({
     return () => window.removeEventListener("beforeunload", beforeUnload);
   }, [isDirty]);
 
-  const { data, isLoading } = useEmployee(params?.id);
-
+  // keyboard: Esc to close, Ctrl/Cmd+S to open
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setShowConfirm(false);
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (canSave) setShowConfirm(true);
+      }
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  }, [canSave]);
 
-  const employee = toDisplayEmployee(data, emp);
-  const employeeDetails: Partial<Employee> | undefined = data ?? emp;
-
-  // --- Mock API layer ---
-  const mockFetchSection = (key: TabKey) =>
-    new Promise<void>((resolve) =>
-      setTimeout(resolve, 600 + Math.random() * 600)
-    );
-  const mockSaveSection = (key: TabKey) =>
-    new Promise<void>((resolve, reject) =>
-      setTimeout(() => {
-        // flip a coin to demonstrate error toast occasionally (optional)
-        // Math.random() < 0.9 ? resolve() : reject(new Error("Network error"));
-        resolve();
-      }, 700 + Math.random() * 800)
-    );
-
-  // Load the initial tab once parent data loaded
+  // load initial tab when parent data ready
   useEffect(() => {
-    if (!isLoading) {
-      loadSection(activeTab);
-    }
+    if (!isLoading) void loadSection(activeTab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
-  async function loadSection(key: TabKey) {
-    setSections((prev) => {
-      const s = prev[key];
-      if (!s || s.loaded || s.loading) return prev;
-      return { ...prev, [key]: { ...s, loading: true } };
-    });
-    await mockFetchSection(key);
-    setSections((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], loading: false, loaded: true },
-    }));
+  // Wrapper change → mark dirty (guards inputs only; still keep per-form emit)
+  const handleWrapperChange: React.FormEventHandler<HTMLDivElement> = (e) => {
+    const t = e.target as HTMLElement;
+    if (t instanceof HTMLInputElement || t instanceof HTMLSelectElement || t instanceof HTMLTextAreaElement) {
+      setSections((prev) => ({ ...prev, [activeTab]: { ...prev[activeTab], dirty: true } }));
+    }
+  };
+
+  // ------------------------ Save helpers ------------------------
+  async function savePersonalTab() {
+    const payload = buildPersonalDetailsPayload(personalPatchRef.current || {});
+    const res = await savePersonal(payload);
+    if (!res.ok) throw res.error;
+    personalPatchRef.current = {}; // clear after success
+    return res;
   }
 
-  // 🔄 Save current section with toast loading + modal busy state
-  async function saveCurrentSection() {
+  async function saveEmploymentTab() {
+    const payload = buildEmploymentDetailsPayload(employmentPatchRef.current || {});
+    const res = await saveEmployment(payload);
+    if (!res.ok) throw res.error;
+    employmentPatchRef.current = {}; // clear after success
+    return res;
+  }
+
+  async function saveTrainingTab() {
+    const payload = buildTrainingDevelopmentPayload(trainingRowsRef.current || []);
+    const res = await saveTraining(payload);
+    if (!res.ok) throw res.error;
+    // clear local buffer after success (optional)
+    trainingRowsRef.current = [];
+    return res;
+  }
+
+  const saveCurrentSection = useCallback(async () => {
     const key = activeTab;
     const s = sections[key];
     if (!s) return;
-
-    // nothing to save — just close the modal
     if (!s.dirty) {
       setShowConfirm(false);
       return;
@@ -159,55 +189,54 @@ export default function Employee201Content({
     setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: true } }));
 
     const savePromise = (async () => {
-      await mockSaveSection(key);
+      if (key === "personal") {
+        await savePersonalTab();
+      } else if (key === "employment") {
+        await saveEmploymentTab();
+      } else if (key === "training") {
+        await saveTrainingTab();
+      }else {
+        // fallback demo save for other tabs
+        await new Promise<void>((r) => setTimeout(r, 1000));
+      }
+
       setSections((prev) => ({
         ...prev,
-        [key]: {
-          ...prev[key],
-          saving: false,
-          dirty: false,
-          savedAt: Date.now(),
-        },
+        [key]: { ...prev[key], saving: false, dirty: false, savedAt: Date.now() },
       }));
     })();
 
-    await toast.promise(savePromise, {
+    const ok = await notify.promise(savePromise, {
       loading: `Saving ${labelForTab(key)}…`,
-      success: `${labelForTab(key)} saved successfully!`,
+      success: `${labelForTab(key)} saved successfully.`,
       error: `Failed to save ${labelForTab(key)}.`,
     });
 
     setConfirmBusy(false);
-    setShowConfirm(false); // stay on the same tab
-  }
+    if (ok) setShowConfirm(false);
+    else setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: false } }));
+  }, [activeTab, sections]);
 
-  // Tab click: block if current tab is dirty; otherwise load on demand
-  const handleTabClick = (key: TabKey) => {
-    if (key === activeTab) return;
-    const curDirty = sections[activeTab]?.dirty;
+  // ------------------------ Tab click ------------------------
+  const handleTabClick = useCallback(
+    (key: TabKey) => {
+      if (key === activeTab) return;
+      const curDirty = sections[activeTab]?.dirty;
+      if (curDirty) {
+        setPendingTab(key);
+        setShowLeaveConfirm(true);
+        return;
+      }
+      setActiveTab(key);
+      void loadSection(key);
+    },
+    [activeTab, sections]
+  );
 
-    if (curDirty) {
-      setPendingTab(key);
-      setShowLeaveConfirm(true);
-      return;
-    }
-
-    setActiveTab(key);
-    void loadSection(key);
-  };
-
-  // Per-section change tracking: current section only
-  const onSectionChange = () => {
-    setSections((prev) => ({
-      ...prev,
-      [activeTab]: { ...prev[activeTab], dirty: true },
-    }));
-  };
-
+  // ------------------------ Render ------------------------
   const renderActiveForm = () => {
     const s = sections[activeTab];
     if (!s || s.loading || !s.loaded) {
-      // lightweight skeleton while the section loads
       return (
         <div className="space-y-6 animate-pulse">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -221,11 +250,40 @@ export default function Employee201Content({
 
     switch (activeTab) {
       case "personal":
-        return <PersonalInfoForm emp={employeeDetails} />;
+        return (
+          <PersonalInfoForm
+            emp={employeeDetails}
+            onPatchChange={(patch) => {
+              Object.assign(personalPatchRef.current, patch);
+              setSections((prev) => ({ ...prev, personal: { ...prev.personal, dirty: true } }));
+            }}
+          />
+        );
+
       case "employment":
-        return <EmploymentDetailsForm emp={employeeDetails} />;
+        return (
+          <EmploymentDetailsForm
+            emp={employeeDetails}
+            onPatchChange={(patch) => {
+              Object.assign(employmentPatchRef.current, patch);
+              setSections((prev) => ({ ...prev, employment: { ...prev.employment, dirty: true } }));
+            }}
+          />
+        );
+
       case "training":
-        return <TrainingDevelopmentForm emp={employeeDetails} />;
+        return (
+          <TrainingDevelopmentForm
+            emp={employeeDetails}
+            onChange={(rows) => {
+              trainingRowsRef.current = rows;
+              setSections((prev) => ({
+                ...prev,
+                training: { ...prev.training, dirty: true },
+              }));
+            }}
+          />
+        );
       case "disciplinary":
         return <DisciplinaryRecordsForm emp={employeeDetails} />;
       case "performance":
@@ -238,8 +296,6 @@ export default function Employee201Content({
         return null;
     }
   };
-
-  const saving = sections[activeTab]?.saving;
 
   return (
     <>
@@ -266,31 +322,23 @@ export default function Employee201Content({
 
           <button
             onClick={() => setShowConfirm(true)}
-            disabled={
-              isLoading ||
-              sections[activeTab]?.loading ||
-              sections[activeTab]?.saving
-            }
+            disabled={!canSave}
             className="rounded-md bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
           </button>
         </div>
 
-        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">
+        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">
           {isLoading ? (
             <EmployeeHeaderSkeleton />
           ) : (
-            <EmployeeHeader
-              employee={employee}
-              activeTab={activeTab}
-              setActiveTab={handleTabClick}
-            />
+            <EmployeeHeader employee={employee} activeTab={activeTab} setActiveTab={handleTabClick} />
           )}
         </div>
 
         {/* DYNAMIC FORM */}
-        <div className="mt-6 mb-24 space-y-8" onChange={onSectionChange}>
+        <div className="mt-6 mb-24 space-y-8" onChange={handleWrapperChange}>
           {isLoading ? (
             <div className="space-y-6 animate-pulse">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -320,15 +368,9 @@ export default function Employee201Content({
         <ConfirmModal
           title="Save changes?"
           message="Are you sure you want to save this section’s changes?"
-          onCancel={() => {
-            if (!confirmBusy) setShowConfirm(false);
-          }}
-          onConfirm={() => {
-            if (!confirmBusy) void saveCurrentSection();
-          }}
-          // 🆕 Pass busy flag so the modal can show a spinner & disable buttons
-          // Make sure your ConfirmModal accepts `busy?: boolean`
-          busy={confirmBusy as any}
+          onCancel={() => { if (!confirmBusy) setShowConfirm(false); }}
+          onConfirm={() => { if (!confirmBusy) void saveCurrentSection(); }}
+          busy={confirmBusy}
         />
       )}
 
@@ -341,111 +383,42 @@ export default function Employee201Content({
             setPendingTab(null);
           }}
           onDiscard={() => {
-            // Discard only CURRENT section changes
-            setSections((prev) => ({
-              ...prev,
-              [activeTab]: { ...prev[activeTab], dirty: false },
-            }));
+            setSections((prev) => ({ ...prev, [activeTab]: { ...prev[activeTab], dirty: false } }));
             setShowLeaveConfirm(false);
-
-            toast("Discarded changes.", { icon: "⚠️" });
-
-            if (pendingTab) {
-              setActiveTab(pendingTab);
-              void loadSection(pendingTab);
-              setPendingTab(null);
-              return;
-            }
-
-            if (pendingHref) {
-              pendingHref === "back" ? router.back() : router.push(pendingHref);
-              setPendingHref(null);
-            }
+            notify.warning("Discarded changes.");
+            proceedAfterLeave();
           }}
           onSaveAndLeave={async () => {
-            // Save current section only, then proceed
             const key = activeTab;
             const s = sections[key];
-
             if (!s?.dirty) {
               setShowLeaveConfirm(false);
-              if (pendingTab) {
-                setActiveTab(pendingTab);
-                void loadSection(pendingTab);
-                setPendingTab(null);
-                return;
-              }
-              if (pendingHref) {
-                pendingHref === "back"
-                  ? router.back()
-                  : router.push(pendingHref);
-                setPendingHref(null);
-              }
+              proceedAfterLeave();
               return;
             }
-
-            setSections((prev) => ({
-              ...prev,
-              [key]: { ...prev[key], saving: true },
-            }));
+            setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: true } }));
 
             const leavePromise = (async () => {
-              await mockSaveSection(key);
+              // keep modal flow light for non-main save actions
+              await new Promise<void>((r) => setTimeout(r, 1000));
               setSections((prev) => ({
                 ...prev,
-                [key]: {
-                  ...prev[key],
-                  saving: false,
-                  dirty: false,
-                  savedAt: Date.now(),
-                },
+                [key]: { ...prev[key], saving: false, dirty: false, savedAt: Date.now() },
               }));
             })();
 
-            await toast.promise(leavePromise, {
+            const ok = await notify.promise(leavePromise, {
               loading: `Saving ${labelForTab(key)}…`,
               success: `${labelForTab(key)} saved.`,
               error: `Failed to save ${labelForTab(key)}.`,
             });
 
             setShowLeaveConfirm(false);
-
-            if (pendingTab) {
-              setActiveTab(pendingTab);
-              void loadSection(pendingTab);
-              setPendingTab(null);
-              return;
-            }
-
-            if (pendingHref) {
-              pendingHref === "back" ? router.back() : router.push(pendingHref);
-              setPendingHref(null);
-            }
+            if (ok) proceedAfterLeave();
+            else setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: false } }));
           }}
         />
       )}
     </>
   );
-}
-
-/** Helper: human-readable tab labels for toasts */
-function labelForTab(key: TabKey) {
-  switch (key) {
-    case "personal":
-      return "Personal Information";
-    case "employment":
-      return "Employment Details";
-    case "training":
-      return "Training & Development";
-    case "disciplinary":
-      return "Disciplinary Records";
-    case "performance":
-      return "Performance & Evaluation";
-    case "benefits":
-      return "Benefits & Compliance";
-    case "documents":
-      return "Document Repository";
-    default:
-      return key;
-  }
 }

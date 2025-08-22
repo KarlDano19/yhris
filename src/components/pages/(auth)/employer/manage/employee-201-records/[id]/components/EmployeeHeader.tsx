@@ -11,6 +11,7 @@ import {
   ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 import Tab from "../common/Tab";
+import PlacholderPicture from "@/svg/PlaceholderPicture"; // ⬅️ add this
 import type { Employee } from "@/types/employee-201-records/employee";
 
 export type TabKey =
@@ -32,38 +33,52 @@ export default function EmployeeHeader({
     role: string;
     complete: boolean;
     progress: number;
-    avatar: string;
+    avatar: string; // "male" | "female" | URL
     email: string;
   };
   activeTab: TabKey;
   setActiveTab: (k: TabKey) => void;
 }) {
+  const isSvgAvatar = employee.avatar === "male" || employee.avatar === "female";
+
   return (
     <div className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center gap-6 min-w-0">
-        <div className="flex w-full md:w-auto justify-center md:justify-start items-center gap-4 md:pr-5 text-center md:text-left">
-          <div className="relative h-[80px] w-[80px] md:h-[100px] md:w-[100px] flex-shrink-0">
+      <div className="flex min-w-0 flex-col gap-6 md:flex-row md:items-center">
+        <div className="flex w-full items-center justify-center gap-4 text-center md:w-auto md:justify-start md:pr-5 md:text-left">
+          {/* Avatar */}
+          <div className="relative h-[80px] w-[80px] flex-shrink-0 md:h-[100px] md:w-[100px]">
             <div
-              className={`absolute inset-0 rounded-full border-4 border-yellow-400 ${
+              className={`absolute inset-0 scale-110 rounded-full border-4 border-yellow-400 ${
                 employee.complete ? "border-solid" : "border-dashed"
-              } scale-110`}
+              }`}
             />
-            <Image
-              src={employee.avatar}
-              alt={employee.name}
-              width={100}
-              height={100}
-              className="relative rounded-full object-cover"
-            />
+            {isSvgAvatar ? (
+              <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
+                <PlacholderPicture
+                  gender={employee.avatar as "male" | "female"}
+                  className="h-14 w-14 md:h-16 md:w-16"
+                  title={employee.name}
+                />
+              </div>
+            ) : (
+              <Image
+                src={employee.avatar}
+                alt={employee.name}
+                width={100}
+                height={100}
+                className="relative rounded-full object-cover"
+              />
+            )}
           </div>
 
+          {/* Name + role + progress */}
           <div>
             <div className="font-semibold text-indigo-dye">{employee.name}</div>
             <div className="text-sm text-gray-500">{employee.role}</div>
 
-            <div className="mt-2 flex items-center justify-center md:justify-start gap-3">
+            <div className="mt-2 flex items-center justify-center gap-3 md:justify-start">
               <div
-                className={`h-2 w-40 md:w-48 overflow-hidden rounded-full ${
+                className={`h-2 w-40 overflow-hidden rounded-full md:w-48 ${
                   employee.complete ? "bg-green-100" : "bg-rose-100"
                 }`}
               >
@@ -85,10 +100,11 @@ export default function EmployeeHeader({
           </div>
         </div>
 
-        <div className="hidden md:block h-24 w-[4px] rounded-full bg-gray-500" />
+        <div className="hidden h-24 w-[4px] rounded-full bg-gray-500 md:block" />
 
+        {/* Tabs */}
         <nav
-          className="flex flex-wrap justify-center md:flex-nowrap md:justify-start md:overflow-x-auto md:no-scrollbar items-center gap-2 sm:gap-6"
+          className="no-scrollbar flex flex-wrap items-center justify-center gap-2 sm:gap-6 md:flex-nowrap md:justify-start md:overflow-x-auto"
           role="tablist"
           aria-label="Employee sections"
         >

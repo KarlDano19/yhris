@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import Section from "../common/Section";
 import Field from "../common/Field";
+import CustomDatePicker from "@/components/CustomDatePicker"; // ← using your custom picker
 import type { Employee } from "@/types/employee-201-records/employee";
 
 type TrainingItem = {
@@ -21,6 +22,11 @@ function toISODateInput(value?: string | Date | null): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+function toDate(iso?: string): Date | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 function extractTrainings(emp?: Partial<Employee>): Array<Partial<TrainingItem>> {
@@ -61,11 +67,10 @@ export default function TrainingDevelopmentForm({
   initialTrainings?: Partial<TrainingItem>[];
   onChange?: (rows: TrainingItem[]) => void;
 }) {
-  // Seed ONCE — no useEffect resync to avoid loops
-  const initialSeed = useMemo(() => buildSeed(initialTrainings, emp), []); // <- empty deps on purpose
+  // Seed ONCE — no effect-based resync
+  const initialSeed = useMemo(() => buildSeed(initialTrainings, emp), []); // intentionally []
   const [rows, setRows] = useState<TrainingItem[]>(initialSeed);
 
-  // Optional manual reset API (call from parent if you need to refresh from latest emp)
   const resetFromEmp = useCallback(() => {
     const next = buildSeed(initialTrainings, emp);
     setRows(next);
@@ -109,20 +114,12 @@ export default function TrainingDevelopmentForm({
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-medium text-slate-700">Completed Trainings</h3>
         <div className="flex items-center gap-2">
-          {/* Optional: expose reset button while testing, or call resetFromEmp from parent */}
-          {/* <button
-            type="button"
-            onClick={resetFromEmp}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50"
-          >
-            Reset from employee
-          </button> */}
+          {/* <button onClick={resetFromEmp} className="rounded-lg border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">Reset from employee</button> */}
           <button
             type="button"
             onClick={addRow}
             className="flex items-center gap-2 rounded-lg border border-blue-500 text-blue-600 px-3 py-2 text-sm hover:bg-blue-50"
           >
-            <span className="text-lg leading-none">＋</span>
             Add Training
           </button>
         </div>
@@ -158,18 +155,36 @@ export default function TrainingDevelopmentForm({
                 value={row.title}
                 onChange={(e) => update(row.id, { title: e.target.value })}
               />
-              <Field
-                label="Date Completed"
-                type="date"
-                value={row.dateCompleted}
-                onChange={(e) => update(row.id, { dateCompleted: e.target.value })}
-              />
+
+              {/* Date Completed using CustomDatePicker */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Date Completed
+                </label>
+                <div className="relative">
+                  <CustomDatePicker
+                    id={`training-date-${row.id}`}
+                    selected={toDate(row.dateCompleted)} // Date | null
+                    pickerOnChange={(d: Date | null) =>
+                      update(row.id, { dateCompleted: d ? toISODateInput(d) : "" })
+                    }
+                    inputOnChange={(d: Date | null) =>
+                      update(row.id, { dateCompleted: d ? toISODateInput(d) : "" })
+                    }
+                    placeholder="MM/DD/YYYY"
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
               <Field
                 label="Training Provider"
                 placeholder="Enter Training Provider..."
                 value={row.provider}
                 onChange={(e) => update(row.id, { provider: e.target.value })}
               />
+
+              {/* Proof upload */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Proof of Completion (e.g., Certificate)

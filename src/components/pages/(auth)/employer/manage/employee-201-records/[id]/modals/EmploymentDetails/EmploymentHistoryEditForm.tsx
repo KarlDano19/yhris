@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { EmploymentHistoryItem } from "./EmploymentHistoryModal";
+import CustomDatePicker from "@/components/CustomDatePicker"; // ← adjust path if needed
 
 export default function EmploymentHistoryEditForm({
   initial,
@@ -19,6 +20,19 @@ export default function EmploymentHistoryEditForm({
 
   const upd = (patch: Partial<EmploymentHistoryItem>) =>
     setForm((f) => ({ ...f, ...patch }));
+
+  // helpers for date <-> string
+  const toDate = (ymd?: string | null) => {
+    if (!ymd) return null;
+    const d = new Date(ymd);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+  const toYmd = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -54,25 +68,35 @@ export default function EmploymentHistoryEditForm({
 
           <Field label="Date From">
             <div className="relative">
-              <input
-                type="date"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-9 text-sm outline-none focus:border-[#355fd0]"
-                value={form.dateFrom}
-                onChange={(e) => upd({ dateFrom: e.target.value })}
+              <CustomDatePicker
+                id="edit-date-from"
+                selected={toDate(form.dateFrom)} // Date | null
+                pickerOnChange={(d: Date | null) =>
+                  upd({ dateFrom: d ? toYmd(d) : "" })
+                }
+                inputOnChange={(d: Date | null) =>
+                  upd({ dateFrom: d ? toYmd(d) : "" })
+                }
+                placeholder="MM/DD/YYYY"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               />
-              <CalendarIcon />
             </div>
           </Field>
 
           <Field label="Date To">
             <div className="relative">
-              <input
-                type="date"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-9 text-sm outline-none focus:border-[#355fd0]"
-                value={form.dateTo ?? ""}
-                onChange={(e) => upd({ dateTo: e.target.value || undefined })}
+              <CustomDatePicker
+                id="edit-date-to"
+                selected={toDate(form.dateTo ?? "")}
+                pickerOnChange={(d: Date | null) =>
+                  upd({ dateTo: d ? toYmd(d) : undefined })
+                }
+                inputOnChange={(d: Date | null) =>
+                  upd({ dateTo: d ? toYmd(d) : undefined })
+                }
+                placeholder="MM/DD/YYYY"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               />
-              <CalendarIcon />
             </div>
           </Field>
         </div>
@@ -120,39 +144,8 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-gray-700">
-        {label}
-      </span>
+      <span className="mb-1 block text-sm font-medium text-gray-700">{label}</span>
       {children}
     </label>
-  );
-}
-
-function CalendarIcon() {
-  return (
-    <svg
-      aria-hidden
-      className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <rect
-        x="3"
-        y="4"
-        width="18"
-        height="18"
-        rx="2"
-        stroke="#9CA3AF"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M8 2v4M16 2v4M3 10h18"
-        stroke="#9CA3AF"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }
