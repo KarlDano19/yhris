@@ -72,7 +72,7 @@ const AttritionRate: React.FC<AttritionRateProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-8">{title}</h3>
       
       {attritionData.length > 0 ? (
         <>
