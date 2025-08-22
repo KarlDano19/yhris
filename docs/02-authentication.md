@@ -86,21 +86,40 @@ export async function middleware(request: NextRequest) {
 
 ### Session Management
 - `GET /api/get-session` - Retrieve current session data
-- `POST /api/login` - Authenticate user and create session
+- `POST /api/login` - Authenticate user and create session (with OTP support)
 - `POST /api/logout` - Destroy session
 - `POST /api/update-session` - Update session properties
 
-### Login API Route
+### OTP Authentication
+- `POST /api/login/otp/verify` - Verify OTP code
+- `POST /api/login/otp/resend` - Resend OTP code
+
+### Login API Route with OTP
 ```typescript
-// Example structure for login endpoint
+// Login endpoint with OTP support
 export async function POST(request: Request) {
   const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
   
-  // Validate credentials
-  // Set session data
+  // Validate credentials with backend
+  const response = await validateCredentials(credentials);
+  
+  if (response.otp_required) {
+    // Return OTP session data
+    return NextResponse.json({
+      otp_required: true,
+      session_id: response.session_id,
+      expires_at: response.expires_at,
+      remaining_attempts: response.remaining_attempts,
+      time_remaining_seconds: response.time_remaining_seconds,
+      message: "OTP sent to your email"
+    });
+  }
+  
+  // Set session data for direct login
   session.isLoggedIn = true;
   session.email = userEmail;
   session.accountType = userType;
+  session.token = response.token;
   
   await session.save();
   return NextResponse.json({ success: true });
@@ -109,24 +128,46 @@ export async function POST(request: Request) {
 
 ## Authentication Flow
 
-### Login Process
+### Login Process with OTP
 1. User submits credentials via login form
 2. Frontend calls `/api/login` endpoint
 3. Backend validates credentials with external API
-4. Session is created with user data
-5. User is redirected based on role and profile status
+4. If OTP is required:
+   - OTP code is generated and sent to user's email
+   - Frontend displays OTP verification modal
+   - User enters 6-digit code
+   - Code is verified via `/api/login/otp/verify`
+   - Session is created upon successful verification
+5. If OTP is not required:
+   - Session is created directly with user data
+6. User is redirected based on role and profile status
+
+### OTP Verification Process
+1. User receives 6-digit code via email
+2. Code is entered in verification modal
+3. Frontend validates code format (6 digits)
+4. Code is sent with session ID for verification
+5. Backend validates:
+   - Session ID validity
+   - Code correctness
+   - Expiration status
+   - Attempt limits
+6. Upon success, JWT token is issued
+7. Session is created with authentication data
 
 ### Session Validation
 1. Middleware checks session on each request
 2. Route access is validated against user role
 3. Profile completion status is enforced
 4. Subscription status is validated for premium features
+5. OTP device recognition (if "Remember Device" was selected)
 
 ### Logout Process
 1. User triggers logout action
 2. Session is destroyed on server
-3. User is redirected to login page
-4. Client-side state is cleared
+3. OTP session (if any) is invalidated
+4. User is redirected to login page
+5. Client-side state is cleared
 
 ## Role-Based Access Control
 
@@ -183,17 +224,28 @@ if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription
 - Encrypted session cookies
 - Configurable cookie options
 - Automatic session expiration
+- OTP-based two-factor authentication
+
+### OTP Security
+- Time-based expiration (5 minutes default)
+- Limited verification attempts (5 attempts)
+- Session-bound OTP codes
+- Rate limiting on resend requests
+- Optional device recognition (14 days)
+- Secure email delivery
 
 ### Route Protection
 - Middleware-based protection
 - Role-based access control
 - Profile completion enforcement
 - Subscription status validation
+- OTP verification enforcement
 
 ### CSRF Protection
 - Iron Session provides built-in CSRF protection
 - Secure cookie configuration
 - HttpOnly cookies for security
+- Session ID validation for OTP
 
 ## Best Practices
 
