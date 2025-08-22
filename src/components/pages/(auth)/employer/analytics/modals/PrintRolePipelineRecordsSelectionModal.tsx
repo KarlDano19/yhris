@@ -10,6 +10,8 @@ interface JobRecord {
   job_title?: string;
   applicant_applied_no?: number;
   is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface PrintRolePipelineRecordsSelectionModalProps {
@@ -227,6 +229,11 @@ const PrintRolePipelineRecordsSelectionModal: React.FC<PrintRolePipelineRecordsS
                                       {(record.is_active ? 'Ongoing' : 'Closed')}
                                     </span>
                                     <span className="mr-3">Applicants: { record.applicant_applied_no || 0}</span>
+                                    <span className="mr-3">|</span>
+                                    <span className="mr-3">Opened: {record.created_at ? new Date(record.created_at).toLocaleDateString() : 'Unknown'}</span>
+                                    {!record.is_active && record.updated_at && (
+                                      <span>Closed: {new Date(record.updated_at).toLocaleDateString()}</span>
+                                    )}
                                   </div>
                                 </div>
                               </div>
