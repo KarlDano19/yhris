@@ -75,7 +75,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: emailMutate } = useSendEmail();
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed'],
+    status: ['Ongoing', 'Passed', 'Rejected'],
   });
   
   // Get screening questions and ideal answers from the job posting
@@ -83,8 +83,10 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
 
   useEffect(() => {
-    if (dataJobPostDetails?.screening_questions) {
+    if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
       setScreeningQuestions(dataJobPostDetails.screening_questions || []);
+    } else {
+      setScreeningQuestions([]);
     }
   }, [dataJobPostDetails]);
 
@@ -97,14 +99,16 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       if (applicant.screeningFit) return applicant;
       
       // Get the applicant's screening answers
-      const answers = applicant.applicant?.screening_answers || [];
+      const answers = applicant.applicant?.screening_answers && applicant.applicant.screening_answers !== null 
+        ? applicant.applicant.screening_answers 
+        : [];
       
       // Only check if mustHave questions match their ideal answers
       let isGoodFit = true;
       
       if (!answers.length) {
-        // If no answers, treat as not a good fit by default
-        isGoodFit = false;
+        // If no answers (empty due to previous data), treat as good fit
+        isGoodFit = true;
       } else {
         // Process each answer and check if it matches the ideal answer for mustHave questions
         // Only check questions that should be shown to candidates

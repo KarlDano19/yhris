@@ -128,7 +128,7 @@ export default function ApplicantForm({ title }: PropTypes) {
   const renderAnswersTab = () => {
     return (
       <>
-        {applicantProfile.screening_answers && applicantProfile.screening_answers.length > 0 ? (
+        {applicantProfile.screening_answers && applicantProfile.screening_answers !== null && applicantProfile.screening_answers.length > 0 ? (
           <div className='mt-6 space-y-6'>
             {applicantProfile.screening_answers.map((item: any, index: number) => (
               <div key={index} className='bg-white p-4 rounded-md shadow-sm border border-gray-200'>
