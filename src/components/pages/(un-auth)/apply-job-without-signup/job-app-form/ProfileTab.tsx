@@ -596,6 +596,16 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
           <div className='grid-item'>
             <label htmlFor='email' className='text-sm font-medium leading-6 text-gray-900'>
               Email Address<span className='text-red-500'>*</span>
+            </label>
+            <div className='mt-2'>
+              <input
+                type='email'
+                {...register('email', { required: true })}
+                id='email'
+                className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+              />
+            </div>
+          </div>
           <div className="grid-item">
             <label
               htmlFor="gender"
@@ -637,22 +647,6 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
                 id="age"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 min="0"
-              />
-            </div>
-          </div>
-          <div className="grid-item">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium leading-6 text-gray-900"
-            >
-              Email Address<span className="text-red-500">*</span>
-            </label>
-            <div className='mt-2'>
-              <input
-                type='email'
-                {...register('email', { required: true })}
-                id='email'
-                className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
               />
             </div>
           </div>
@@ -900,26 +894,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
             )}
           </div>
         </div>
-        <div className='grid-item'>
-          <label htmlFor='gender' className='block text-sm font-medium leading-6 text-gray-900'>
-            Gender<span className='text-red-500'>*</span>
-          </label>
-          <div className='relative mt-2'>
-            <select
-              id='gender'
-              {...register('gender', { required: true })}
-              className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-              defaultValue='Male'
-              tabIndex={8}
-            >
-              <option value={'Male'}>Male</option>
-              <option value={'Female'}>Female</option>
-            </select>
-            <div className='absolute right-3 top-[14px]'>
-              <DropDownArrow />
-            </div>
-          </div>
-        </div>
+
         <div className='grid-item'>
           <label htmlFor='skills' className='text-sm font-medium leading-6 text-gray-900'>
             Skills
