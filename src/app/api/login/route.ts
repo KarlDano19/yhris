@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
         message: data.message,
         is_valid: false
       }, { status: 200 });
-    } else {
-      // Direct login successful
+    } else if (data.is_valid) {
+      // Direct login successful and email verified
       session['isLoggedIn'] = true;
       session['email'] = credentials.email;
       session['token'] = data.token;
@@ -65,6 +65,13 @@ export async function POST(request: NextRequest) {
         message: data.message,
         has_pending_transaction: data.has_pending_transaction,
         has_active_subscription: data.has_active_subscription,
+      }, { status: 200 });
+    } else {
+      // Email not verified - don't create session
+      return NextResponse.json({
+        is_valid: false,
+        message: data.message,
+        account_type: data.account_type,
       }, { status: 200 });
     }
   } catch (err: any) {
