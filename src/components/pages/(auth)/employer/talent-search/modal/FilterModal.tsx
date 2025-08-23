@@ -7,7 +7,7 @@ import Select from 'react-select';
 import classNames from '@/helpers/classNames';
 import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { locationOptions } from '@/utils/locationOptions';
+import { advertiseOptions } from '@/utils/advertiseOptions';
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
 interface FilterData {
@@ -116,8 +116,8 @@ export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate
                         <Select
                           className='text-sm'
                           classNamePrefix='select'
-                          options={locationOptions}
-                          value={locationOptions.filter((item: any) => 
+                          options={advertiseOptions}
+                          value={advertiseOptions.filter((item: any) => 
                             Array.isArray(value) 
                               ? value.includes(item.value) 
                               : item.value === value
