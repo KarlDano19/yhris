@@ -12,8 +12,15 @@ export async function logout() {
     if (!res.ok) {
       throw res.json();
     }
+    
+    // Don't clear OTP verification cookie - it should persist across logout/login cycles
+    // clearOTPVerificationCookie();
+    
     return res.json();
   } catch (err: any) {
+    // Don't clear OTP verification cookie even on error
+    // clearOTPVerificationCookie();
+    
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
       throw errStringify.response.data.message;

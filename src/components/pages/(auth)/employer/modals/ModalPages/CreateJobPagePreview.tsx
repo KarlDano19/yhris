@@ -1,56 +1,215 @@
 import { Dispatch } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon } from '@heroicons/react/24/outline';
+import BenefitsIcon from '@/svg/BenefitsIcon';
+import FileCaseIcon from '@/svg/FileCaseIcon';
+import JobDetailsLocation from '@/svg/JobDetailLocation';
+import formatPrice from '@/helpers/currencyFormat';
+
+// Extend Window interface to include our custom properties
+declare global {
+  interface Window {
+    is_show_roles?: boolean;
+    is_show_salary?: boolean;
+    is_show_benefits?: boolean;
+    is_show_remarks?: boolean;
+  }
+}
 
 export default function CreateJobPagePreview({
   firstFormGetValues,
+  secondFormGetValues,
+  thirdFormGetValues,
   fourthFormGetValues,
   setPageNumber,
   onSubmit,
   fileProps,
 }: {
   firstFormGetValues: any;
+  secondFormGetValues: any;
+  thirdFormGetValues: any;
   fourthFormGetValues: any;
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   fileProps: any;
 }) {
-  const markup = { __html: fourthFormGetValues('jobDescription') };
-  const markup2 = { __html: fourthFormGetValues('qualifications') };
-
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
 
   const cachedData: any = cachedProfile?.state?.data;
 
+  const renderRoleDescription = (jobDescription: any) => {
+    const markup = { __html: jobDescription };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+
+  const renderQualificationsDescription = (qualifications: any) => {
+    const markup = { __html: qualifications };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+  
+  const renderNotesRemarks = (notesRemarks: any) => {
+    const markup = { __html: notesRemarks };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+
   return (
     <>
       <div className='px-4 pb-6'>
-        {/* start */}
-        <div className='sm:col-span-4 mt-4'>
-          <label className='block text-sm font-medium leading-6 text-gray-900'>
-            Preview
-          </label>
-          <div className='relative flex flex-col space-y-2 mt-2 text-sm font-medium leading-6 text-gray-900 rounded-md border-2 border-text-gray-400 px-2 py-3'>
-            <p className='font-bold'>{firstFormGetValues('jobTitle')}</p>
-            <p>
-              {cachedData?.name || 'Company Name'} - <span>{firstFormGetValues('placeAdvertise')}</span>
+        {/* Job Header */}
+        <div className='grid grid-cols-4 px-4 mt-5'>
+          <div className='col-span-3 lg:col-span-2 flex'>
+            <span className='mt-1 ml-1'>
+              <FileCaseIcon className='h-6 w-6' />
+            </span>
+            <div className='ml-6'>
+              <h5 className='text-xl font-semibold text-indigo-dye'>
+                {firstFormGetValues('jobTitle')}
+              </h5>
+              <h6 className='text-indigo-dye text-sm'> 
+                for a {cachedData?.industry || 'Technology'} Company
+              </h6>
+              <h6 className='text-indigo-dye text-sm'> 
+                {firstFormGetValues('placeAdvertise')}
+              </h6>
+            </div>
+          </div>
+          <div className='col-span-1 lg:col-span-2 px-1'>
+            <div
+              className='lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md hidden lg:block'
+              style={{
+                backgroundImage: `url(${cachedData?.logo || '/assets/no-photo.png'})`,
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            ></div>
+          </div>
+        </div>
+        
+        {/* Job Details */}
+        <div className='border-t border-gray-300 my-5 p-4'>
+          <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
+          <div className='details mx-5 mt-2'>
+            {/* Role section - only show if is_show_roles is true */}
+            {window.is_show_roles !== false && fourthFormGetValues('jobDescription') && (
+              <>
+                <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                  <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                  Role
+                </h6>
+                <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                  {renderRoleDescription(fourthFormGetValues('jobDescription'))}
+                </div>
+              </>
+            )}
+            
+            {/* Location */}
+            <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+              <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
+              Location
+            </h6>
+            <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
+              {firstFormGetValues('placeAdvertise')}
             </p>
-            <span className='top-20 left-0 w-full border' />
-            <div className='mt-[8rem]'>
-              Role:
-              <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>
+            
+            {/* Qualifications */}
+            <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+              <CheckCircleIcon className='h-5 w-5 mr-1' />
+              Qualifications
+            </h6>
+            <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+              {fourthFormGetValues('qualifications') ? renderQualificationsDescription(fourthFormGetValues('qualifications')) : 'No qualifications specified'}
             </div>
-            <div className='mt-8'>
-              <p>Qualifications:</p>
-              <p className='ql-editor !p-0' dangerouslySetInnerHTML={markup2}></p>
-            </div>
-            {fileProps.fileName && (
-              <div className='mt-4'>
-                <object data={URL.createObjectURL(fileProps.file)} width='100%' height='500px' />
-              </div>
+            
+            {/* Job Type */}
+            <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+              <BriefcaseIcon className='h-5 w-5 mr-1' />
+              Job Type
+            </h6>
+            <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+              {secondFormGetValues('jobType') ? secondFormGetValues('jobType').join(', ') : 'No job type specified'}
+            </p>
+            
+            {/* Work Setup */}
+            {secondFormGetValues('workSetup') && secondFormGetValues('workSetup').length > 0 && (
+              <>
+                <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                  <HomeIcon className='h-5 w-5 mr-1' />
+                  Work Setup
+                </h6>
+                <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                  {secondFormGetValues('workSetup').join(', ')}
+                </p>
+              </>
+            )}
+            
+            {/* Schedule */}
+            <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+              <ClockIcon className='h-5 w-5 mr-1' />
+              Schedule
+            </h6>
+            <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+              {secondFormGetValues('schedule') ? secondFormGetValues('schedule').join(', ') : 'No schedule specified'}
+            </p>
+            
+            {/* Salary Range - only show if is_show_salary is true */}
+            {window.is_show_salary !== false && (
+              <>
+                <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                  <BanknotesIcon className='h-5 w-5 mr-1' />
+                  Salary Range
+                </h6>
+                <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                  {thirdFormGetValues('salary')?.salaryType === 'Range' ? (
+                    <>
+                      PHP {formatPrice(thirdFormGetValues('salary')?.salaryRangeMin || 0)} - {formatPrice(thirdFormGetValues('salary')?.salaryRangeMax || 0)}
+                    </>
+                  ) : (
+                    <>PHP {formatPrice(thirdFormGetValues('salary')?.salaryValue || 0)}</>
+                  )}
+                  &nbsp;/ {thirdFormGetValues('salary')?.rate || 'No rate specified'}
+                </p>
+              </>
+            )}
+            
+            {/* Benefits - only show if is_show_benefits is true */}
+            {window.is_show_benefits !== false && thirdFormGetValues('benefits') && thirdFormGetValues('benefits').length > 0 && (
+              <>
+                <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                  <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
+                  Benefits
+                </h6>
+                <ul className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                  {thirdFormGetValues('benefits').join(', ')}
+                </ul>
+              </>
+            )}
+            
+            {/* Notes/Remarks - only show if is_show_remarks is true */}
+            {window.is_show_remarks !== false && firstFormGetValues('notesRemarks') && (
+              <>
+                <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                  <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                  Notes/Remarks
+                </h6>
+                <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                  {renderNotesRemarks(firstFormGetValues('notesRemarks'))}
+                </p>
+              </>
             )}
           </div>
         </div>
+        
+        {/* Uploaded Job Description File */}
+        {fileProps.fileName && (
+          <div className='px-4 pb-6'>
+            <div className='border-t border-gray-300 my-5 p-4'>
+              <h5 className='text-xl font-semibold text-indigo-dye mb-4'>Uploaded Job Description</h5>
+              <object data={URL.createObjectURL(fileProps.file)} width='100%' height='500px' />
+            </div>
+          </div>
+        )}
       </div>
       <hr />
       <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>

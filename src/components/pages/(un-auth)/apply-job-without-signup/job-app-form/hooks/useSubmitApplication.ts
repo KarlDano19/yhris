@@ -14,12 +14,23 @@ async function submitApplication(data: any) {
       nationality: data.nationality,
       religion: data.religion,
       portfolio_url: data.portfolio,
-      work_experience: data.exp,
+      work_experience: data.exp || data.experiences || [],
       setup_preference: (data.setupPreference || '').join(),
-      screening_answers: data.screeningAnswers || []
+      expected_salary: data.expected_salary,
+      educational_attainment: data.educationalAttainment,
+      college: data.college,
+      skills: data.skills,
+      education: data.education,
+      screening_answers: data.screeningAnswers || [],
     };
     
     const formData = new FormData();
+    if (data.skills && Array.isArray(data.skills) && data.skills.length > 0) {
+      formData.append('skills', data.skills.join(','));
+    }
+    if (data.education && Array.isArray(data.education) && data.education.length > 0) {
+      formData.append('education', data.education.join(','));
+    }
     formData.append('application_form', JSON.stringify(finalData));
     formData.append('job_posting', data.jobPosting);
     if (data.profilePicture.length !== 0) {

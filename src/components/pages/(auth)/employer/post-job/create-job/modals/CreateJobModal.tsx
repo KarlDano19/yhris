@@ -253,6 +253,8 @@ export default function CreateJobModal({
                   <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
                     <CreateJobPagePreview
                       firstFormGetValues={firstForm.getValues}
+                      secondFormGetValues={secondForm.getValues}
+                      thirdFormGetValues={thirdForm.getValues}
                       fourthFormGetValues={fourthForm.getValues}
                       setPageNumber={setPageNumber}
                       onSubmit={seventhFormSubmit}

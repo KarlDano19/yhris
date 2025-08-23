@@ -137,3 +137,44 @@ div.remove-height {
     white-space: nowrap !important;
   }
 }
+
+/* Force dropdowns to open downwards and control height */
+select {
+  direction: ltr;
+}
+
+select option {
+  direction: ltr;
+}
+
+/* Control dropdown height and ensure it opens downwards */
+select[size] {
+  height: auto;
+  max-height: 200px;
+}
+
+/* For the address dropdown specifically */
+#address {
+  direction: ltr;
+}
+
+#address option {
+  direction: ltr;
+}
+
+/* Additional styling to force dropdown direction */
+select:focus {
+  direction: ltr;
+}
+
+/* Ensure dropdown opens downwards */
+select[size="1"] {
+  direction: ltr;
+}
+
+/* Override any browser-specific dropdown behavior */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}

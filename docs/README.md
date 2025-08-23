@@ -11,6 +11,7 @@ This documentation is organized into the following modules:
 ### Core Architecture
 - [App Router Structure](./01-app-router.md) - Next.js 14 App Router implementation
 - [Authentication & Sessions](./02-authentication.md) - Iron Session implementation and middleware
+- [OTP Authentication](./16-otp-authentication.md) - Two-factor authentication with OTP
 - [State Management](./03-state-management.md) - Zustand and TanStack Query setup
 
 ### Components & UI
@@ -46,7 +47,7 @@ This documentation is organized into the following modules:
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand + TanStack Query
-- **Authentication**: Iron Session
+- **Authentication**: Iron Session with OTP 2FA
 - **Forms**: React Hook Form
 - **UI**: Headless UI + Hero Icons
 

@@ -23,11 +23,16 @@ The application follows a component-based architecture with reusable UI componen
 ### Page Components (`/src/components/pages/`)
 Organized by route structure:
 - **`(all-layout)/`** - Shared layout components
+  - **`login/`** - Login page components including OTP modals
 - **`(auth)/`** - Authenticated user components
   - **`admin/`** - Admin-specific components
   - **`applicant/`** - Applicant-specific components  
   - **`employer/`** - Employer-specific components
 - **`(un-auth)/`** - Public page components
+
+### Authentication Components
+- **OTPVerificationModal** - OTP verification modal with 6-digit input
+- **EmailVerificationModal** - Email verification prompt modal
 
 ### Provider Components
 - **PostHogProvider** - Analytics provider
@@ -273,6 +278,62 @@ function useConfirmModal() {
     closeModal,
     confirm,
   };
+}
+```
+
+### OTPVerificationModal
+
+Two-factor authentication modal with 6-digit OTP input for enhanced login security.
+
+```typescript
+interface OTPVerificationModalProps {
+  email: string;
+  sessionId: string;
+  expiresAt: string;
+  remainingAttempts: number;
+  timeRemainingSeconds: number;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: (data: any) => void;
+}
+```
+
+**Features**:
+- 6-digit input fields with auto-focus navigation
+- Countdown timer showing expiration
+- Attempt counter display
+- Paste support for OTP codes
+- Resend functionality with cooldown
+- Remember device option (14 days)
+- Keyboard navigation (arrow keys, backspace)
+- Loading states for verification/resend
+- Expired state handling
+
+**Usage**:
+```typescript
+import OTPVerificationModal from '@/components/pages/(all-layout)/login/modal/OTPVerificationModal';
+
+function LoginPage() {
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otpData, setOtpData] = useState(null);
+  
+  const handleOTPSuccess = (data) => {
+    // Create session and redirect
+    setSession(data);
+  };
+  
+  return (
+    <OTPVerificationModal
+      email={otpData?.email}
+      sessionId={otpData?.sessionId}
+      expiresAt={otpData?.expiresAt}
+      remainingAttempts={otpData?.remainingAttempts}
+      timeRemainingSeconds={otpData?.timeRemainingSeconds}
+      isOpen={showOTPModal}
+      onClose={() => setShowOTPModal(false)}
+      onSuccess={handleOTPSuccess}
+    />
+  );
 }
 ```
 
