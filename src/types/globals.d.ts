@@ -171,13 +171,14 @@ export type T_EmployerProfile = {
   email: string;
   mobileNumber: string;
   landlineNumber: string;
+  region: string;
+  province: string;
+  city: string;
+  locality: string;
+  country: string;
   building: string;
   street: string;
-  locality: string;
-  city: string;
   zipCode: string;
-  country: string;
-  region: string;
   language: string;
   currency: string;
   imagePath: any;

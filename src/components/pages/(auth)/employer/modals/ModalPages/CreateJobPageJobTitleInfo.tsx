@@ -3,7 +3,7 @@ import { Dispatch } from 'react';
 import Select from 'react-select';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
-import { advertiseOptions } from '@/utils/advertiseOptions';
+import { advertiseOptions } from '@/utils/philippinesAdvertiseOptions';
 
 interface Field {
   onChange: (value: any) => void;
