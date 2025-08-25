@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
+import Document from './Document';
 
 interface DocumentPageSevenProps {
   data: T_OshProgram;
@@ -9,18 +10,8 @@ interface DocumentPageSevenProps {
 }
 
 const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data, isMultiPage = false, pageNumber = 7 }) => {
-
   return (
-    <div
-      className="bg-white text-black font-sans text-xs leading-tight w-full h-full flex flex-col"
-      style={{
-        fontFamily: 'Arial, sans-serif',
-        width: '210mm',
-        height: '297mm',
-        boxSizing: 'border-box',
-        padding: '32px 40px 32px 60px'
-      }}
-    >
+    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
       {/* Top Section - Emergency Health Personnel and Facilities */}
       <div className="mb-6">
         <p className="text-xs text-gray-700 mb-2">
@@ -200,12 +191,7 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data, isMultiPage
           from occurrence using the prescribed form (Work Accident / Incident Notification).
         </p>
       </div>
-
-      {/* Footer */}
-      <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
-        <span className="text-xs text-gray-600">Page | {pageNumber}</span>
-      </div>
-    </div>
+    </Document>
   );
 };
 

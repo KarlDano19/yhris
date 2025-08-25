@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
+import Document from './Document';
 
 interface DocumentPageFourteenProps {
   data: T_OshProgram;
@@ -9,18 +10,8 @@ interface DocumentPageFourteenProps {
 }
 
 const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data, isMultiPage = false, pageNumber = 14 }) => {
-
   return (
-    <div
-      className="bg-white text-black font-sans text-xs leading-tight w-full h-full flex flex-col"
-      style={{
-        fontFamily: 'Arial, sans-serif',
-        width: '210mm',
-        height: '297mm',
-        boxSizing: 'border-box',
-        padding: '32px 40px 32px 60px'
-      }}
-    >
+    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
       {/* Main Content - Annex A Policy */}
       <div className="mb-6">
         <h1 className="text-base font-bold text-gray-900 mb-4 text-center">
@@ -88,12 +79,7 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data, isMul
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
-        <span className="text-xs text-gray-600">Page | {pageNumber}</span>
-      </div>
-    </div>
+    </Document>
   );
 };
 

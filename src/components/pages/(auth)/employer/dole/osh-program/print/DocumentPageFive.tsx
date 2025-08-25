@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
+import Document from './Document';
 
 interface DocumentPageFiveProps {
   data: T_OshProgram;
@@ -9,18 +10,8 @@ interface DocumentPageFiveProps {
 }
 
 const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({ data, isMultiPage = false, pageNumber = 5 }) => {
-
   return (
-    <div 
-      className="bg-white text-black font-sans text-xs leading-tight w-full h-full flex flex-col" 
-      style={{ 
-        fontFamily: 'Arial, sans-serif',
-        width: '210mm',
-        height: '297mm',
-        boxSizing: 'border-box',
-        padding: '32px 40px 32px 60px'
-      }}
-    >
+    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
       {/* Top Section - First Aid Facilities (continued from previous page) */}
       <div className="mb-4">
         <div className="space-y-2">
@@ -173,12 +164,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({ data, isMultiPage =
             </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
-        <span className="text-xs text-gray-600">Page | {pageNumber}</span>
-      </div>
-    </div>
+    </Document>
   );
 };
 

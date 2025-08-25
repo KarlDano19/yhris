@@ -96,46 +96,16 @@ export default function VersionHistoryDetailsModal({
     setZoomLevel(Math.max(50, Math.min(optimalZoom, 200))); // Clamp between 50% and 200%
   };
 
-  // Function to calculate dynamic page numbers based on content
-  const calculatePageNumbers = () => {
-    let currentPage = 1;
-    const pageNumbers = [];
-    
-    // Page 1 - Company Profile (usually fits on one page)
-    pageNumbers.push(currentPage++);
-    
-    // Page 2 - Basic Components (usually fits on one page)
-    pageNumbers.push(currentPage++);
-    
-    // Page 3 - Company Commitment (usually fits on one page)
-    pageNumbers.push(currentPage++);
-    
-    // Page 4 - Risk Assessment Matrix (may span multiple pages due to table)
-    const riskData = typeof transformedData?.emergency_and_disaster_preparedness === 'string' 
-      ? JSON.parse(transformedData.emergency_and_disaster_preparedness) 
-      : transformedData?.emergency_and_disaster_preparedness || [];
-    
-    const riskEntries = Array.isArray(riskData) ? riskData : [];
-    const riskPages = Math.max(1, Math.ceil(riskEntries.length / 4)); // Estimate 4 entries per page
-    
-    for (let i = 0; i < riskPages; i++) {
-      pageNumbers.push(currentPage++);
-    }
-    
-    // Page 5+ - Remaining pages (usually one page each)
-    const remainingPages = 14 - pageNumbers.length;
-    for (let i = 0; i < remainingPages; i++) {
-      pageNumbers.push(currentPage++);
-    }
-    
-    return pageNumbers;
+  // Function to get page numbers 1-14
+  const getPageNumbers = () => {
+    return Array.from({ length: 14 }, (_, i) => i + 1);
   };
 
   const handlePrint = async () => {
     if (!transformedData) return;
     
     try {
-      const pageNumbers = calculatePageNumbers();
+      const pageNumbers = getPageNumbers();
       
       await generatePDFLocally(
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
@@ -222,7 +192,7 @@ export default function VersionHistoryDetailsModal({
                 <div className="bg-gray-50 px-4 py-2 border-b">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
-                      Page {currentPageIndex} of {transformedData ? calculatePageNumbers().length : totalPages}
+                      Page {currentPageIndex} of {transformedData ? getPageNumbers().length : totalPages}
                     </p>
                     <div className="flex items-center space-x-2">
                       <button
@@ -234,7 +204,7 @@ export default function VersionHistoryDetailsModal({
                       </button>
                       <button
                         onClick={handleNextPage}
-                        disabled={currentPageIndex === (transformedData ? calculatePageNumbers().length : totalPages)}
+                        disabled={currentPageIndex === (transformedData ? getPageNumbers().length : totalPages)}
                         className="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Next
@@ -261,7 +231,7 @@ export default function VersionHistoryDetailsModal({
                       }}
                     >
                       {(() => {
-                        const pageNumbers = calculatePageNumbers();
+                        const pageNumbers = getPageNumbers();
                         const currentPageNumber = pageNumbers[currentPageIndex - 1] || currentPageIndex;
                         
                         if (currentPageIndex === 1) {
