@@ -1,17 +1,14 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
-import Document from './Document';
 
 interface DocumentPageTwelveProps {
   data: T_OshProgram;
-  isMultiPage?: boolean;
-  pageNumber?: number;
 }
 
-const DocumentPageTwelve: React.FC<DocumentPageTwelveProps> = ({ data, isMultiPage = false, pageNumber = 12 }) => {
+const DocumentPageTwelve: React.FC<DocumentPageTwelveProps> = ({ data }) => {
   return (
-    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
+    <>
       {/* Page Header - Continuation from previous page */}
       <div className="mb-4 ml-10">
         <p className="text-xs text-gray-700 mb-2">
@@ -115,7 +112,7 @@ const DocumentPageTwelve: React.FC<DocumentPageTwelveProps> = ({ data, isMultiPa
           <li className="text-xs text-gray-700">• Third offense - Dismissal</li>
         </ul>
       </div>
-    </Document>
+    </>
   );
 };
 

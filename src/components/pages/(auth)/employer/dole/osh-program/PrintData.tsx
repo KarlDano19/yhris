@@ -12,6 +12,8 @@ import DocumentPageEleven from "./print/DocumentPageEleven";
 import DocumentPageTwelve from "./print/DocumentPageTwelve";
 import DocumentPageThirteen from "./print/DocumentPageThirteen";
 import DocumentPageFourteen from "./print/DocumentPageFourteen";
+import Document from "./print/Document";
+
 import { T_OshProgram } from "@/types/osh-program";
 
 interface PrintOshProgramOptions {
@@ -19,6 +21,42 @@ interface PrintOshProgramOptions {
   filename?: string;
   generatePDFLocally: (content: React.ReactElement, filename: string) => Promise<void>;
 }
+
+// Function to render page content based on page index
+const renderPageContent = (pageIndex: number, data: T_OshProgram) => {
+  switch (pageIndex) {
+    case 1:
+      return <DocumentPageOne data={data as any} />;
+    case 2:
+      return <DocumentPageTwo data={data as any} />;
+    case 3:
+      return <DocumentPageThree data={data as any} />;
+    case 4:
+      return <DocumentPageFour data={data as any} />;
+    case 5:
+      return <DocumentPageFive data={data as any} />;
+    case 6:
+      return <DocumentPageSix data={data as any} />;
+    case 7:
+      return <DocumentPageSeven data={data as any} />;
+    case 8:
+      return <DocumentPageEight data={data as any} />;
+    case 9:
+      return <DocumentPageNine data={data as any} />;
+    case 10:
+      return <DocumentPageTen data={data as any} />;
+    case 11:
+      return <DocumentPageEleven data={data as any} />;
+    case 12:
+      return <DocumentPageTwelve data={data as any} />;
+    case 13:
+      return <DocumentPageThirteen data={data as any} />;
+    case 14:
+      return <DocumentPageFourteen data={data as any} />;
+    default:
+      return <DocumentPageOne data={data as any} />;
+  }
+};
 
 export const printOshProgram = async ({
   data,
@@ -33,20 +71,11 @@ export const printOshProgram = async ({
   
   await generatePDFLocally(
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-      <DocumentPageOne data={data as any} isMultiPage={true} pageNumber={pageNumbers[0]} />
-      <DocumentPageTwo data={data as any} isMultiPage={true} pageNumber={pageNumbers[1]} />
-      <DocumentPageThree data={data as any} isMultiPage={true} pageNumber={pageNumbers[2]} />
-      <DocumentPageFour data={data as any} isMultiPage={true} pageNumber={pageNumbers[3]} />
-      <DocumentPageFive data={data as any} isMultiPage={true} pageNumber={pageNumbers[4]} />
-      <DocumentPageSix data={data as any} isMultiPage={true} pageNumber={pageNumbers[5]} />
-      <DocumentPageSeven data={data as any} isMultiPage={true} pageNumber={pageNumbers[6]} />
-      <DocumentPageEight data={data as any} isMultiPage={true} pageNumber={pageNumbers[7]} />
-      <DocumentPageNine data={data as any} isMultiPage={true} pageNumber={pageNumbers[8]} />
-      <DocumentPageTen data={data as any} isMultiPage={true} pageNumber={pageNumbers[9]} />
-      <DocumentPageEleven data={data as any} isMultiPage={true} pageNumber={pageNumbers[10]} />
-      <DocumentPageTwelve data={data as any} isMultiPage={true} pageNumber={pageNumbers[11]} />
-      <DocumentPageThirteen data={data as any} isMultiPage={true} pageNumber={pageNumbers[12]} />
-      <DocumentPageFourteen data={data as any} isMultiPage={true} pageNumber={pageNumbers[13]} />
+      {pageNumbers.map((pageNumber) => (
+        <Document key={pageNumber} isMultiPage={true} pageNumber={pageNumber}>
+          {renderPageContent(pageNumber, data)}
+        </Document>
+      ))}
     </div>,
     filename
   );

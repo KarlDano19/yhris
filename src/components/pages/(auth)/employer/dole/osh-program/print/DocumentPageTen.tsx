@@ -1,17 +1,14 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
-import Document from './Document';
 
 interface DocumentPageTenProps {
   data: T_OshProgram;
-  isMultiPage?: boolean;
-  pageNumber?: number;
 }
 
-const DocumentPageTen: React.FC<DocumentPageTenProps> = ({ data, isMultiPage = false, pageNumber = 10 }) => {
+const DocumentPageTen: React.FC<DocumentPageTenProps> = ({ data }) => {
   return (
-    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
+    <>
       {/* Top Section - Previous Section Headers */}
       <div className="mb-6">
         <h2 className="text-base font-bold text-gray-900 mb-2">
@@ -102,7 +99,7 @@ const DocumentPageTen: React.FC<DocumentPageTenProps> = ({ data, isMultiPage = f
           </div>
         </div>
       </div>
-    </Document>
+    </>
   );
 };
 

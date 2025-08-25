@@ -65,9 +65,48 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   const queryClient = useQueryClient();
   
+  // Get cached profile data for auto-filling company information
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(["employerProfileCache"]) as {
+    state: { data: { name: string; mobile_number: string; building: string; street: string; locality: string; city: string; country: string; zip_code: string } } | undefined;
+  };
+  
+
+  
   // Only fetch once on initial mount, then rely on manual refetch
   const { data: oshProgramDetails, refetch, isLoading } = useGetOshProgramDetails(true);
   const { mutateAsync: updateOshProgramDetails } = useUpdateOshProgramDetails();
+  
+  // Auto-fill company information from cached profile data when available
+  useEffect(() => {
+    if (cachedProfile?.state?.data && setValue && selectedTab === 1) {
+      // Force override the company name with cached profile data
+      if (cachedProfile.state.data.name) {
+        setValue("company_name", cachedProfile.state.data.name, { shouldDirty: false });
+      }
+      
+      // Auto-fill phone number with mobile number from cached profile
+      if (cachedProfile.state.data.mobile_number) {
+        setValue("phone_number", cachedProfile.state.data.mobile_number, { shouldDirty: false });
+      }
+      
+      // Auto-fill complete address by combining address fields from cached profile
+      if (cachedProfile.state.data.building || cachedProfile.state.data.street || cachedProfile.state.data.locality || cachedProfile.state.data.city || cachedProfile.state.data.country || cachedProfile.state.data.zip_code) {
+        const addressParts = [
+          cachedProfile.state.data.building,
+          cachedProfile.state.data.street,
+          cachedProfile.state.data.locality,
+          cachedProfile.state.data.city,
+          cachedProfile.state.data.country,
+          cachedProfile.state.data.zip_code
+        ].filter(Boolean); // Remove empty/undefined values
+        
+        const combinedAddress = addressParts.join(', ');
+        setValue("complete_address", combinedAddress, { shouldDirty: false });
+      }
+    }
+  }, [cachedProfile?.state?.data, setValue, selectedTab, oshProgramDetails]);
   
   // Get version history for limit checking
   const { data: versionHistoryData, refetch: refetchVersionHistory } = useGetOshProgramVersionHistory({
@@ -472,10 +511,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (oshProgramDetails) {
       // Tab 1: Company Profile
-      setValue("company_name", oshProgramDetails.company_name);
+      // Only set company_name from backend if no cached profile data is available
+      if (!cachedProfile?.state?.data?.name) {
+        setValue("company_name", oshProgramDetails.company_name);
+      }
       setValue("date_established", oshProgramDetails.date_established);
-      setValue("complete_address", oshProgramDetails.complete_address);
-      setValue("phone_number", oshProgramDetails.phone_number);
+      // Only set complete_address from backend if no cached profile data is available
+      if (!cachedProfile?.state?.data?.building && !cachedProfile?.state?.data?.street && !cachedProfile?.state?.data?.locality && !cachedProfile?.state?.data?.city && !cachedProfile?.state?.data?.country && !cachedProfile?.state?.data?.zip_code) {
+        setValue("complete_address", oshProgramDetails.complete_address);
+      }
+      // Only set phone_number from backend if no cached profile data is available
+      if (!cachedProfile?.state?.data?.mobile_number) {
+        setValue("phone_number", oshProgramDetails.phone_number);
+      }
       setValue("fax_number", oshProgramDetails.fax_number);
       setValue("website_url", oshProgramDetails.website_url);
       setValue("company_owner", oshProgramDetails.company_owner);
@@ -930,6 +978,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             watch={watch}
             setValue={setValue}
             missingFields={missingFields}
+            cachedProfile={cachedProfile?.state?.data}
           />
         )}
         {selectedTab === 2 && (

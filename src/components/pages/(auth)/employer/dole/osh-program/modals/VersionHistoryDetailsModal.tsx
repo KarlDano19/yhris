@@ -28,6 +28,7 @@ import DocumentPageEleven from '../print/DocumentPageEleven';
 import DocumentPageTwelve from '../print/DocumentPageTwelve';
 import DocumentPageThirteen from '../print/DocumentPageThirteen';
 import DocumentPageFourteen from '../print/DocumentPageFourteen';
+import Document from '../print/Document';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
@@ -130,7 +131,70 @@ export default function VersionHistoryDetailsModal({
     }
   };
 
-
+  // Function to render the current page with Document wrapper
+  const renderCurrentPage = () => {
+    if (!transformedData) return null;
+    
+    const pageNumbers = getPageNumbers();
+    const currentPageNumber = pageNumbers[currentPageIndex - 1] || currentPageIndex;
+    
+    let pageContent;
+    switch (currentPageIndex) {
+      case 1:
+        pageContent = <DocumentPageOne data={transformedData as any} />;
+        break;
+      case 2:
+        pageContent = <DocumentPageTwo data={transformedData as any} />;
+        break;
+      case 3:
+        pageContent = <DocumentPageThree data={transformedData as any} />;
+        break;
+      case 4:
+        pageContent = <DocumentPageFour data={transformedData as any} />;
+        break;
+      case 5:
+        pageContent = <DocumentPageFive data={transformedData as any} />;
+        break;
+      case 6:
+        pageContent = <DocumentPageSix data={transformedData as any} />;
+        break;
+      case 7:
+        pageContent = <DocumentPageSeven data={transformedData as any} />;
+        break;
+      case 8:
+        pageContent = <DocumentPageEight data={transformedData as any} />;
+        break;
+      case 9:
+        pageContent = <DocumentPageNine data={transformedData as any} />;
+        break;
+      case 10:
+        pageContent = <DocumentPageTen data={transformedData as any} />;
+        break;
+      case 11:
+        pageContent = <DocumentPageEleven data={transformedData as any} />;
+        break;
+      case 12:
+        pageContent = <DocumentPageTwelve data={transformedData as any} />;
+        break;
+      case 13:
+        pageContent = <DocumentPageThirteen data={transformedData as any} />;
+        break;
+      case 14:
+        pageContent = <DocumentPageFourteen data={transformedData as any} />;
+        break;
+      default:
+        pageContent = <DocumentPageOne data={transformedData as any} />;
+    }
+    
+    return (
+      <Document 
+        isMultiPage={true} 
+        pageNumber={currentPageNumber}
+      >
+        {pageContent}
+      </Document>
+    );
+  };
 
   return (
     <>
@@ -207,50 +271,8 @@ export default function VersionHistoryDetailsModal({
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-savoy-blue"></div>
                     </div>
                   ) : transformedData ? (
-                    <div 
-                      className="bg-white shadow-lg relative flex-shrink-0"
-                      style={{ 
-                        width: '210mm', 
-                        height: '240mm', 
-                        transform: `scale(${Math.min(zoomLevel / 100, window.innerWidth < 768 ? 0.5 : 0.8)})`, 
-                        transformOrigin: 'top center',
-                        margin: '0 auto'
-                      }}
-                    >
-                      {(() => {
-                        const pageNumbers = getPageNumbers();
-                        const currentPageNumber = pageNumbers[currentPageIndex - 1] || currentPageIndex;
-                        
-                        if (currentPageIndex === 1) {
-                          return <DocumentPageOne data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 2) {
-                          return <DocumentPageTwo data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 3) {
-                          return <DocumentPageThree data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 4) {
-                          return <DocumentPageFour data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 5) {
-                          return <DocumentPageFive data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 6) {
-                          return <DocumentPageSix data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 7) {
-                          return <DocumentPageSeven data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 8) {
-                          return <DocumentPageEight data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 9) {
-                          return <DocumentPageNine data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 10) {
-                          return <DocumentPageTen data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 11) {
-                          return <DocumentPageEleven data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 12) {
-                          return <DocumentPageTwelve data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else if (currentPageIndex === 13) {
-                          return <DocumentPageThirteen data={transformedData as any} pageNumber={currentPageNumber} />;
-                        } else {
-                          return <DocumentPageFourteen data={transformedData as any} pageNumber={currentPageNumber} />;
-                        }
-                      })()}
+                    <div className="bg-white shadow-lg relative flex-shrink-0">
+                      {renderCurrentPage()}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-64">

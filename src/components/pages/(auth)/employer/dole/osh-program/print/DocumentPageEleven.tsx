@@ -1,17 +1,14 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
-import Document from './Document';
 
 interface DocumentPageElevenProps {
   data: T_OshProgram;
-  isMultiPage?: boolean;
-  pageNumber?: number;
 }
 
-const DocumentPageEleven: React.FC<DocumentPageElevenProps> = ({ data, isMultiPage = false, pageNumber = 11 }) => {
+const DocumentPageEleven: React.FC<DocumentPageElevenProps> = ({ data }) => {
   return (
-    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
+    <>
       {/* Top Section - Safety Equipment Requirements */}
       <div className="mb-4">
         <p className="text-xs text-gray-700 mb-1">
@@ -55,7 +52,7 @@ const DocumentPageEleven: React.FC<DocumentPageElevenProps> = ({ data, isMultiPa
           <strong>F. Rain Coat</strong> - Required during rainy season (a must for all employees working at active level/floor) Site supervisors may opted to send the workers home (discretion of site operations)
         </p>
       </div>
-    </Document>
+    </>
   );
 };
 

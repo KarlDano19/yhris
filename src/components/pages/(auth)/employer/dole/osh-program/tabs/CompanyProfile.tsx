@@ -12,7 +12,8 @@ export default function CompanyProfile({
   validationMessage,
   watch,
   setValue,
-  missingFields = []
+  missingFields = [],
+  cachedProfile
 }: {
   control: any;
   register: any;
@@ -21,6 +22,7 @@ export default function CompanyProfile({
   watch?: any;
   setValue?: any;
   missingFields?: string[];
+  cachedProfile?: { name: string; mobile_number: string; building: string; street: string; locality: string; city: string; country: string; zip_code: string };
 }) {
   // Initialize ref to track first render
   const initializedRef = useRef(false);
@@ -82,6 +84,45 @@ export default function CompanyProfile({
       setValue("total_number_of_employees", total);
     }
   }, [maleEmployees, femaleEmployees, setValue]);
+
+  // Auto-fill company information from cached profile data (fallback)
+  useEffect(() => {
+    if (cachedProfile && setValue && initializedRef.current) {
+      // Auto-fill company name if empty
+      if (cachedProfile.name) {
+        const currentCompanyName = watch ? watch("company_name") : "";
+        if (!currentCompanyName || currentCompanyName.trim() === "") {
+          setValue("company_name", cachedProfile.name, { shouldDirty: false });
+        }
+      }
+      
+      // Auto-fill phone number if empty
+      if (cachedProfile.mobile_number) {
+        const currentPhoneNumber = watch ? watch("phone_number") : "";
+        if (!currentPhoneNumber || currentPhoneNumber.trim() === "") {
+          setValue("phone_number", cachedProfile.mobile_number, { shouldDirty: false });
+        }
+      }
+      
+      // Auto-fill complete address if empty
+      if (cachedProfile.building || cachedProfile.street || cachedProfile.locality || cachedProfile.city || cachedProfile.country || cachedProfile.zip_code) {
+        const currentAddress = watch ? watch("complete_address") : "";
+        if (!currentAddress || currentAddress.trim() === "") {
+          const addressParts = [
+            cachedProfile.building,
+            cachedProfile.street,
+            cachedProfile.locality,
+            cachedProfile.city,
+            cachedProfile.country,
+            cachedProfile.zip_code
+          ].filter(Boolean);
+          
+          const combinedAddress = addressParts.join(', ');
+          setValue("complete_address", combinedAddress, { shouldDirty: false });
+        }
+      }
+    }
+  }, [cachedProfile, setValue, watch]);
 
   // Function to handle checkbox changes for business_description
   const handleBusinessDescriptionChange = (value: string, checked: boolean) => {
@@ -212,7 +253,8 @@ export default function CompanyProfile({
                 type="text"
                 {...register("company_name")}
                 id="company_name"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
+                readOnly
+                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
                   ${isMissingField('company_name') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>

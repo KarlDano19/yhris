@@ -1,17 +1,14 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
-import Document from './Document';
 
 interface DocumentPageThreeProps {
   data: T_OshProgram;
-  isMultiPage?: boolean;
-  pageNumber?: number;
 }
 
-const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data, isMultiPage = false, pageNumber = 3 }) => {
+const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
   return (
-    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
+    <>
       {/* Document Header */}
       <div className="text-left mb-8">
         <h1 className="text-lg font-bold text-gray-900">
@@ -79,7 +76,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data, isMultiPage
           </div>
         </div>
       </div>
-    </Document>
+    </>
   );
 };
 

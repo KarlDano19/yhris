@@ -1,17 +1,14 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
-import Document from './Document';
 
 interface DocumentPageNineProps {
   data: T_OshProgram;
-  isMultiPage?: boolean;
-  pageNumber?: number;
 }
 
-const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data, isMultiPage = false, pageNumber = 9 }) => {
+const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
   return (
-    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
+    <>
       {/* Top Section - Worker Facilities Continuation */}
       <div className="mb-6">
         <div className="border border-gray-300">
@@ -199,7 +196,7 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data, isMultiPage =
           </ul>
         </div>
       </div>
-    </Document>
+    </>
   );
 };
 

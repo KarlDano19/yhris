@@ -1,17 +1,14 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
-import Document from './Document';
 
 interface DocumentPageTwoProps {
   data: T_OshProgram;
-  isMultiPage?: boolean;
-  pageNumber?: number;
 }
 
-const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data, isMultiPage = false, pageNumber = 2 }) => {
+const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
   return (
-    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
+    <>
       {/* Document Header */}
       <div className="text-center mb-6">
         <h1 className="text-xl font-bold text-gray-900 mb-2">
@@ -174,7 +171,7 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data, isMultiPage = f
           <span className="text-xs text-gray-900">Cost of Implementing Company OSH program</span>
         </div>
       </div>
-    </Document>
+    </>
   );
 };
 

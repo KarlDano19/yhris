@@ -1,17 +1,14 @@
 import React from 'react';
 
 import { T_OshProgram } from '@/types/osh-program';
-import Document from './Document';
 
 interface DocumentPageSixProps {
   data: T_OshProgram;
-  isMultiPage?: boolean;
-  pageNumber?: number;
 }
 
-const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data, isMultiPage = false, pageNumber = 6 }) => {
+const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
   return (
-    <Document isMultiPage={isMultiPage} pageNumber={pageNumber}>
+    <>
       {/* Top Section - Joint Coordinating Committee (continued from previous page) */}
       <div className="mb-4">
         <p className="text-xs text-gray-700 mb-2">
@@ -144,7 +141,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data, isMultiPage = f
           </div>
         </div>
       </div>
-    </Document>
+    </>
   );
 };
 
