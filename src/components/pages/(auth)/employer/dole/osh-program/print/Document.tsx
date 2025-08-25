@@ -21,7 +21,7 @@ const Document: React.FC<DocumentProps> = ({
       style={{ 
         fontFamily: 'Arial, sans-serif',
         width: '210mm',
-        minHeight: '297mm',
+        height: '297mm',
         boxSizing: 'border-box',
         padding: '32px 40px 32px 60px',
         ...style
