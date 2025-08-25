@@ -224,7 +224,7 @@ export default function VersionHistoryDetailsModal({
                       className="bg-white shadow-lg relative flex-shrink-0"
                       style={{ 
                         width: '210mm', 
-                        height: '297mm', 
+                        height: '240mm', 
                         transform: `scale(${Math.min(zoomLevel / 100, window.innerWidth < 768 ? 0.5 : 0.8)})`, 
                         transformOrigin: 'top center',
                         margin: '0 auto'
