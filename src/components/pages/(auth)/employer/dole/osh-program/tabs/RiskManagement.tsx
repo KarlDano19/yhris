@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useFieldArray } from "react-hook-form";
 
 import { MinusIcon, XCircleIcon } from "@heroicons/react/24/solid";
@@ -18,6 +18,9 @@ export default function RiskManagement({
     control: control,
     name: "emergency_and_disaster_preparedness",
   });
+  
+  // Ref for the table container to enable scrolling
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize with an empty row if there are no fields
   useEffect(() => {
@@ -34,6 +37,14 @@ export default function RiskManagement({
       priority: "",
       control_measures: ""
     });
+    
+    // Auto-scroll to the bottom of the page after a short delay to ensure DOM update
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   return (
@@ -62,7 +73,7 @@ export default function RiskManagement({
             Emergency and Disaster Preparedness
           </label>
         </div>
-        <div className="mt-4 w-full overflow-x-auto">
+        <div className="mt-4 w-full overflow-x-auto" ref={tableContainerRef}>
           <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
               <tr>
