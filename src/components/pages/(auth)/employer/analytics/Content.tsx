@@ -5,15 +5,23 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from 'react-tooltip';
+import toast from "react-hot-toast";
 
 import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomToast from "@/components/CustomToast";
+import useFileforge from "@/components/hooks/useFileforge";
 import WorkforceOverview from './tabs/WorkforceOverview';
 import EmployeePerformance from './tabs/EmployeePerformance';
 import CompliancePolicy from './tabs/CompliancePolicy';
 import CompensationBenefits from './tabs/CompensationBenefits';
+import PrintRolePipelineRecordsSelectionModal from './modals/PrintRolePipelineRecordsSelectionModal';
+import PrintEmpPerformanceSelectionModal from './modals/PrintEmpPerformanceSelectionModal/PrintEmpPerformanceSelectionModal';
 
+import { handlePrintAnalytics } from './PrintData';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import PrintIcon from "@/svg/PrintIcon";
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const searchParams = useSearchParams();
@@ -33,9 +41,76 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     3: { from: '', to: '' },
   });
 
+  // State for print functionality
+  const [workforceData, setWorkforceData] = useState<{
+    activeSubTab: number;
+    employeeData: any[];
+    appliedApplicantsData: any[];
+    separationData: any[];
+    allJobPostData: any[];
+    pipelineData: any;
+    rolePipelineData: any[];
+    rolePipelineCurrentPage: number;
+    rolePipelinePageSize: number;
+    validRegions?: string[];
+    selectedJobFilter?: string;
+    allJobPostsForPrint?: any[];
+  } | null>(null);
+  
+  const [employeePerformanceData, setEmployeePerformanceData] = useState<{
+    activeSubTab: number;
+    evaluationData: any[];
+    employeeIssueData: any[];
+    employeePerformanceTableData: any[];
+    employeeIssuesTableData: any[];
+    showAllDepartments: boolean;
+    showAllIssueTypes: boolean;
+    departmentRecords?: Array<{
+      name: string;
+      score: number;
+      count: number;
+      color: string;
+    }>;
+    employeeRecords?: Array<{
+      name: string;
+      department: string;
+      score: string;
+      lastEvaluation: string;
+      status: string;
+    }>;
+    issueTypeRecords?: Array<{
+      reason: string;
+      count: number;
+      percentage: string;
+      color: string;
+    }>;
+    employeeIssueRecords?: Array<{
+      name: string;
+      department: string;
+      issueType: string;
+      dateReported: string;
+      status: string;
+    }>;
+  } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [showEmpPerformancePrintModal, setShowEmpPerformancePrintModal] = useState(false);
+
   // Get current tab's date filter
   const currentDateFilter = tabDateFilters[activeTab] || { from: '', to: '' };
   const currentAppliedDateFilter = tabAppliedDateFilters[activeTab] || { from: '', to: '' };
+
+  // Fileforge hook for PDF generation
+  const { generatePDFLocally } = useFileforge({
+    onSuccess: () => {
+      setIsGenerating(false);
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      setIsGenerating(false);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
+  });
 
   // Handle tab parameter from URL
   useEffect(() => {
@@ -58,15 +133,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const renderActiveTab = () => {
     switch (activeTab) {
       case 1:
-        return <WorkforceOverview dateFilter={currentAppliedDateFilter} />;
+        return <WorkforceOverview 
+          dateFilter={currentAppliedDateFilter} 
+          onDataReady={setWorkforceData}
+        />;
       case 2:
-        return <EmployeePerformance dateFilter={currentAppliedDateFilter} />;
+        return <EmployeePerformance 
+          dateFilter={currentAppliedDateFilter} 
+          onDataReady={setEmployeePerformanceData}
+        />;
       case 3:
         return <CompliancePolicy />;
       // case 4:
       //   return <CompensationBenefits />;
       default:
-        return <WorkforceOverview dateFilter={currentAppliedDateFilter} />;
+        return <WorkforceOverview 
+          dateFilter={currentAppliedDateFilter} 
+          onDataReady={setWorkforceData}
+        />;
     }
   };
 
@@ -77,6 +161,167 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       router.push('/analytics');
     } else {
       router.push(`/analytics?tab=${tabId}`);
+    }
+  };
+
+  const handlePrint = async () => {
+    // For Workforce Overview tab, show the print records selection modal
+    if (activeTab === 1) {
+      setShowPrintModal(true);
+      return;
+    }
+
+    // For Employee Performance tab, show the print records selection modal
+    if (activeTab === 2) {
+      setShowEmpPerformancePrintModal(true);
+      return;
+    }
+
+    // For other tabs, proceed with normal print functionality
+    await executePrint();
+  };
+
+  const executePrint = async (
+    selectedOption?: string, 
+    selectedRecords?: number[] | string[], 
+    step?: number,
+    departmentOption?: string,
+    departmentRecords?: string[],
+    employeeOption?: string,
+    employeeRecords?: string[],
+    issueTypeOption?: string,
+    issueTypeRecords?: string[],
+    employeeIssueOption?: string,
+    employeeIssueRecords?: string[]
+  ) => {
+    try {
+      setIsGenerating(true);
+      
+      const currentTab = tabs.find(tab => tab.id === activeTab);
+      if (!currentTab) {
+        throw new Error('Invalid tab');
+      }
+
+      switch (activeTab) {
+        case 1: // Workforce Overview
+          if (!workforceData) {
+            throw new Error('No workforce data available for printing');
+          }
+          await handlePrintAnalytics(
+            activeTab,
+            currentTab.name,
+            generatePDFLocally,
+            workforceData.employeeData,
+            workforceData.appliedApplicantsData,
+            workforceData.separationData,
+            workforceData.allJobPostData,
+            currentAppliedDateFilter,
+            workforceData.activeSubTab,
+            workforceData.pipelineData,
+            workforceData.rolePipelineData,
+            workforceData.validRegions,
+            workforceData.selectedJobFilter,
+            selectedOption,
+            workforceData.allJobPostsForPrint,
+            selectedRecords as number[]
+          );
+          break;
+        case 2: // Employee Performance
+          if (!employeePerformanceData) {
+            throw new Error('No employee performance data available for printing');
+          }
+          
+          // Use the new parameters if provided, otherwise fall back to step-based logic
+          const selectedDepartments = departmentRecords || (step === 1 ? selectedRecords as string[] : undefined);
+          const selectedEmployees = employeeRecords || (step === 2 ? selectedRecords as string[] : undefined);
+          const selectedIssueTypes = issueTypeRecords || (step === 3 ? selectedRecords as string[] : undefined);
+          const selectedEmployeeIssues = employeeIssueRecords || (step === 4 ? selectedRecords as string[] : undefined);
+          
+          await handlePrintAnalytics(
+              activeTab,
+              currentTab.name,
+              generatePDFLocally,
+              [], // employeeData - not needed for employee performance
+              [], // appliedApplicantsData - not needed for employee performance
+              [], // separationData - not needed for employee performance
+              [], // allJobPostData - not needed for employee performance
+              currentAppliedDateFilter,
+              employeePerformanceData.activeSubTab,
+              undefined, // pipelineData - not needed for employee performance
+              undefined, // rolePipelineData - not needed for employee performance
+              undefined, // validRegions - not needed for employee performance
+              undefined, // selectedJobFilter - not needed for employee performance
+              selectedOption, // main printOption (fallback)
+              undefined, // allJobPostsForPrint - not needed for employee performance
+              undefined, // selectedRecords - not needed for employee performance
+              employeePerformanceData.evaluationData,
+              employeePerformanceData.employeeIssueData,
+              employeePerformanceData.employeePerformanceTableData,
+              employeePerformanceData.employeeIssuesTableData,
+              employeePerformanceData.showAllDepartments,
+              employeePerformanceData.showAllIssueTypes,
+              selectedDepartments, // selected departments for employee performance
+              selectedEmployees, // selected employees for employee performance
+              employeePerformanceData.evaluationData, // allEvaluationData - use the same data for now
+              selectedIssueTypes, // selected issue types for employee performance
+              selectedEmployeeIssues, // selected employee issues for employee performance
+              employeePerformanceData.employeeIssueData, // allEmployeeIssueData - use the same data for now
+              departmentOption, // department-specific print option
+              employeeOption, // employee-specific print option
+              issueTypeOption, // issue type-specific print option
+              employeeIssueOption // employee issue-specific print option
+            );
+          break;
+        // Add other tabs here as they are implemented
+        default:
+          throw new Error(`Print functionality not implemented for tab ${activeTab}`);
+      }
+    } catch (error: any) {
+      setIsGenerating(false);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const handlePrintModalConfirm = async (selectedOption: string, selectedRecords?: number[]) => {
+    setShowPrintModal(false);
+    await executePrint(selectedOption, selectedRecords);
+  };
+
+  const handleEmpPerformancePrintModalConfirm = async (
+    selectedOption: string, 
+    selectedRecords?: string[], 
+    step?: number,
+    allSelections?: {
+      departments: { option: string; records: string[] };
+      employees: { option: string; records: string[] };
+      issueTypes: { option: string; records: string[] };
+      employeeIssues: { option: string; records: string[] };
+    }
+  ) => {
+    setShowEmpPerformancePrintModal(false);
+    
+
+    
+    if (allSelections) {
+
+      
+      // Use the new allSelections structure
+      await executePrint(
+        'all', // Use 'all' as the main option since we're handling individual selections
+        [], // Empty array since we're using allSelections
+        4, // Always step 4 since we're collecting all selections
+        allSelections.departments.option,
+        allSelections.departments.records,
+        allSelections.employees.option,
+        allSelections.employees.records,
+        allSelections.issueTypes.option,
+        allSelections.issueTypes.records,
+        allSelections.employeeIssues.option,
+        allSelections.employeeIssues.records
+      );
+    } else {
+      // Fallback to old structure for backward compatibility
+      await executePrint(selectedOption, selectedRecords, step);
     }
   };
 
@@ -93,14 +338,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <h2 className='text-xl font-bold text-indigo-dye'>Analytics</h2>
           
           {/* Date Range Picker */}
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
-              <div className='relative'>
+          <div className='mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-4'>
+            <div className='flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto'>
+              <div className='relative w-full sm:w-auto'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full sm:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={currentDateFilter.from}
                   pickerOnChange={(date: any) => {
@@ -117,13 +362,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-center sm:text-left'>to</p>
+              <div className='relative w-full sm:w-auto'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full sm:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={currentDateFilter.to}
                   pickerOnChange={(date: any) => {
@@ -142,7 +387,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 />
               </div>
             </div>
-            <div className='flex gap-2'>
+            <div className='flex gap-2 w-full sm:w-auto justify-center sm:justify-start'>
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
                 onClick={() => {
@@ -153,6 +398,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 }}
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
+              <button
+                className='hover:bg-gray-100'
+                onClick={handlePrint}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <div className="animate-spin inline-block w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full">
+                  </div>
+                ) : (
+                  <PrintIcon />
+                )}
               </button>
             </div>
           </div>
@@ -232,6 +489,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+      
+      {/* Print Records Selection Modal */}
+      <PrintRolePipelineRecordsSelectionModal
+        isOpen={showPrintModal}
+        onClose={() => setShowPrintModal(false)}
+        onConfirm={handlePrintModalConfirm}
+        currentPageSize={workforceData?.rolePipelinePageSize || 5}
+        isLoading={isGenerating}
+        jobRecords={workforceData?.allJobPostsForPrint || []}
+      />
+      
+      {/* Employee Performance Print Records Selection Modal */}
+      <PrintEmpPerformanceSelectionModal
+        isOpen={showEmpPerformancePrintModal}
+        onClose={() => setShowEmpPerformancePrintModal(false)}
+        onConfirm={handleEmpPerformancePrintModalConfirm}
+        isLoading={isGenerating}
+        departmentRecords={employeePerformanceData?.departmentRecords || []}
+        employeeRecords={employeePerformanceData?.employeeRecords || []}
+        issueTypeRecords={employeePerformanceData?.issueTypeRecords || []}
+        employeeIssueRecords={employeePerformanceData?.employeeIssueRecords || []}
+        activeSubTab={employeePerformanceData?.activeSubTab || 1}
+      />
+      
       <Tooltip id='content-tab-tooltip' />
     </>
   );

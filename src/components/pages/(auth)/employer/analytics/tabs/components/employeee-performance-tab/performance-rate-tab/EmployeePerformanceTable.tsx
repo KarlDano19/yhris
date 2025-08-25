@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Pagination from '@/components/Pagination';
+import { getStatusColor } from './calculations/employeePerformanceTableCalc';
 
 interface EmployeeData {
   name: string;
@@ -36,16 +37,7 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
   onPageChange,
   onPageSizeChange
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Passed':
-        return 'text-green-600 font-medium';
-      case 'Did not Pass':
-        return 'text-red-600 font-medium';
-      default:
-        return 'text-gray-600';
-    }
-  };
+
 
   if (isLoading) {
     return (
@@ -145,7 +137,7 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                  <td colSpan={5} className="py-8 text-center font-semibold text-gray-500">
                     No data available
                   </td>
                 </tr>
@@ -153,7 +145,7 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
             </tbody>
           </table>
         </div>
-        {pagination && (
+        {pagination && data.length > 0 && (
           <Pagination
             pagination={pagination}
             currentPage={currentPage}

@@ -39,7 +39,7 @@ function useGetWorkEnvironmentRequestItems() {
     () => getWorkEnvironmentRequestItems(),
     {
       refetchOnWindowFocus: false,
-      keepPreviousData: false,
+      keepPreviousData: true,
     }
   );
   return query;

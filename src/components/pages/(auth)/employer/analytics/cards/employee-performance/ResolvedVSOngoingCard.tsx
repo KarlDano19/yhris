@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import Card from '../../Card';
+import { calculateResolvedVSOngoing } from './calculations/resolvedVSOngoingCalc';
 
 interface ResolvedVSOngoingCardProps {
   employeeIssueData?: any[];
@@ -13,44 +14,9 @@ const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
   isLoading = false,
   error = null
 }) => {
-  // Calculate resolved vs ongoing issues percentages
-  const calculateIssueResolutionRate = useMemo(() => {
-    if (!employeeIssueData || !Array.isArray(employeeIssueData) || employeeIssueData.length === 0) {
-      return {
-        resolvedPercentage: 0,
-        ongoingPercentage: 0,
-        totalIssues: 0,
-        resolvedIssues: 0,
-        ongoingIssues: 0
-      };
-    }
-
-    const totalIssues = employeeIssueData.length;
-    let resolvedIssues = 0;
-    let ongoingIssues = 0;
-
-    employeeIssueData.forEach((issue: any) => {
-      // Resolved: decision has been sent AND received (employee signed)
-      if (issue.is_decision_sent && issue.is_decision_received) {
-        resolvedIssues++;
-      } 
-      // Ongoing: decision has not been sent yet (company hasn't reached decision)
-      else if (!issue.is_decision_sent) {
-        ongoingIssues++;
-      }
-      // Note: Issues where decision is sent but not received are not counted in either category
-    });
-
-    const resolvedPercentage = totalIssues > 0 ? ((resolvedIssues / totalIssues) * 100) : 0;
-    const ongoingPercentage = totalIssues > 0 ? ((ongoingIssues / totalIssues) * 100) : 0;
-
-    return {
-      resolvedPercentage: Math.round(resolvedPercentage * 10) / 10, // Round to 1 decimal
-      ongoingPercentage: Math.round(ongoingPercentage * 10) / 10, // Round to 1 decimal
-      totalIssues,
-      resolvedIssues,
-      ongoingIssues
-    };
+  // Calculate resolved vs ongoing issues using shared utility
+  const issueData = useMemo(() => {
+    return calculateResolvedVSOngoing(employeeIssueData);
   }, [employeeIssueData]);
 
   if (isLoading) {
@@ -103,8 +69,8 @@ const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
         % of Resolved Employee<br />Issues vs. Ongoing Issues
       </h3>
       <Card
-        value={`${calculateIssueResolutionRate.resolvedPercentage}%`}
-        trend={`${calculateIssueResolutionRate.resolvedIssues} resolved, ${calculateIssueResolutionRate.ongoingIssues} ongoing out of ${calculateIssueResolutionRate.totalIssues} total issues`}
+        value={`${issueData.resolvedPercentage}%`}
+        trend={`${issueData.resolvedIssues} resolved, ${issueData.ongoingIssues} ongoing out of ${issueData.totalIssues} total issues`}
         showSeeMore={true}
       />
     </div>

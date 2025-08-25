@@ -13,6 +13,9 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
+import { calculateMonthlyVolume } from './calculations/monthlyTypeVolumeCalc';
+import AverageLegendIcon from '@/svg/AverageLegendIcon';
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -39,117 +42,29 @@ interface MonthlyTypeVolumeProps {
   };
   isLoading?: boolean;
   error?: any;
+  showAllIssueTypes?: boolean;
 }
 
-const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData, dateFilter, isLoading = false, error = null }) => {
-  // Calculate monthly issue volume from the data
-  const calculateMonthlyVolume = () => {
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = Array.isArray(employeeIssueData) ? employeeIssueData : employeeIssueData?.records;
+const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData, dateFilter, isLoading = false, error = null, showAllIssueTypes = false }) => {
+  // Calculate monthly issue volume using shared utility
+  const { labels, data: monthlyData } = calculateMonthlyVolume(employeeIssueData, dateFilter);
+  const maxValue = Math.max(...monthlyData, 1); // Ensure at least 1 for proper scaling
+
+  // Calculate dynamic height to match IssueType chart
+  const getChartHeight = () => {
+    const baseHeight = 500;
+    const minHeight = 300;
+    const maxHeight = 600;
     
-    if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
-      return {
-        labels: [],
-        data: []
-      };
-    }
-
-    const months = [
-      { name: 'January', value: 0 },
-      { name: 'February', value: 1 },
-      { name: 'March', value: 2 },
-      { name: 'April', value: 3 },
-      { name: 'May', value: 4 },
-      { name: 'June', value: 5 },
-      { name: 'July', value: 6 },
-      { name: 'August', value: 7 },
-      { name: 'September', value: 8 },
-      { name: 'October', value: 9 },
-      { name: 'November', value: 10 },
-      { name: 'December', value: 11 },
-    ];
-
-    // Filter issues based on date range or current year
-    const filteredIssues = dataArray.filter((issue: EmployeeIssueData) => {
-      if (!issue.incident_date) return false;
-      
-      const issueDate = new Date(issue.incident_date);
-      
-      if (dateFilter?.from && dateFilter?.to) {
-        const fromDate = new Date(dateFilter.from);
-        const toDate = new Date(dateFilter.to);
-        return issueDate >= fromDate && issueDate <= toDate;
-      } else {
-        // Fallback to current year if no date range is selected
-        const currentYear = new Date().getFullYear();
-        return issueDate.getFullYear() === currentYear;
-      }
-    });
-
-    // If date range is selected, show all months in the range
-    if (dateFilter?.from && dateFilter?.to) {
-      const fromDate = new Date(dateFilter.from);
-      const toDate = new Date(dateFilter.to);
-      const fromMonth = fromDate.getMonth();
-      const toMonth = toDate.getMonth();
-      const fromYear = fromDate.getFullYear();
-      const toYear = toDate.getFullYear();
-      
-      // Create array of months in the selected range
-      const rangeMonths = [];
-      let currentDate = new Date(fromYear, fromMonth, 1);
-      const endDate = new Date(toYear, toMonth + 1, 0); // Last day of toMonth
-      
-      while (currentDate <= endDate) {
-        const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
-        const monthValue = currentDate.getMonth();
-        
-        // Count issues for this month
-        const monthIssues = filteredIssues.filter((issue: EmployeeIssueData) => {
-          const issueDate = new Date(issue.incident_date);
-          return issueDate.getMonth() === monthValue && 
-                 issueDate.getFullYear() === currentDate.getFullYear();
-        });
-        
-        rangeMonths.push({
-          month: monthName,
-          count: monthIssues.length
-        });
-        
-        // Move to next month
-        currentDate.setMonth(currentDate.getMonth() + 1);
-      }
-      
-      return {
-        labels: rangeMonths.map(item => item.month),
-        data: rangeMonths.map(item => item.count)
-      };
+    // Use the same logic as IssueType for consistency
+    if (monthlyData.length <= 8) {
+      return baseHeight;
+    } else if (monthlyData.length <= 15) {
+      return Math.min(baseHeight + (monthlyData.length - 8) * 20, maxHeight);
     } else {
-      // For current year, only show months with data
-      const monthlyData = months.map(month => {
-        const monthIssues = filteredIssues.filter((issue: EmployeeIssueData) => {
-          const issueDate = new Date(issue.incident_date);
-          return issueDate.getMonth() === month.value;
-        });
-
-        return {
-          month: month.name,
-          count: monthIssues.length
-        };
-      });
-
-      // Filter out months with no data (count = 0)
-      const monthsWithData = monthlyData.filter(item => item.count > 0);
-      
-      return {
-        labels: monthsWithData.map(item => item.month),
-        data: monthsWithData.map(item => item.count)
-      };
+      return maxHeight;
     }
   };
-
-  const { labels, data: monthlyData } = calculateMonthlyVolume();
-  const maxValue = Math.max(...monthlyData, 1); // Ensure at least 1 for proper scaling
 
   const data = {
     labels,
@@ -202,11 +117,16 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
         beginAtZero: true,
         max: Math.ceil(maxValue * 1.2), // Add 20% padding
         ticks: {
-          stepSize: Math.max(1, Math.ceil(maxValue / 4)), // Dynamic step size
+          stepSize: Math.max(1, Math.ceil(maxValue / 5)),
           color: '#6b7280',
           font: {
             size: 12,
           },
+          callback: function(value: any) {
+            // Only show values that are multiples of the step size
+            const stepSize = Math.max(1, Math.ceil(maxValue / 5));
+            return value % stepSize === 0 ? value : '';
+          }
         },
         grid: {
           color: '#f0f0f0',
@@ -280,18 +200,27 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
         </h3>
       </div>
       
-      <div className="h-64">
+      <div style={{ height: `${getChartHeight()}px` }}>
         {monthlyData.length > 0 ? (
           <Line data={data} options={options} />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-gray-500">
               <div className="text-lg font-semibold mb-2">No Data Available</div>
-              <div className="text-sm">No issues found for the selected period</div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Legend */}
+      {monthlyData.length > 0 && (
+        <div className="flex justify-center mt-2">
+          <div className="flex items-center space-x-2">
+            <AverageLegendIcon />
+            <span className="text-lg text-gray-600">Monthly Issue Volume</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,13 +14,14 @@ async function updateProfile(profile: T_EmployerProfile) {
     data.append('email', profile.email);
     data.append('mobile_number', profile.mobileNumber);
     data.append('landline_number', profile.landlineNumber);
+    data.append('region', profile.region);
+    data.append('province', profile.province);
+    data.append('city', profile.city);
+    data.append('locality', profile.locality);
     data.append('building', profile.building);
     data.append('street', profile.street);
-    data.append('locality', profile.locality);
-    data.append('city', profile.city);
-    data.append('zip_code', profile.zipCode);
     data.append('country', profile.country);
-    data.append('region', profile.region);
+    data.append('zip_code', profile.zipCode);
     data.append('language', profile.language);
     data.append('currency', profile.currency);
     if (profile.companyLogo) {

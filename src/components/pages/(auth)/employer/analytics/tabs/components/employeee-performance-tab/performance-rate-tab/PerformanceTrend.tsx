@@ -15,6 +15,7 @@ import { Line } from 'react-chartjs-2';
 
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import PerformanceTrendFilterModal from '../../../../modals/PerformanceTrendFilterModal';
+import { calculatePerformanceTrend } from './calculations/performanceTrendCalc';
 
 import FilterLogo from '@/svg/FilterLogo';
 import AverageLegendIcon from '@/svg/AverageLegendIcon';
@@ -58,187 +59,10 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
     }
   }, [evaluationData, selectedDepartment]);
 
-  // Calculate Performance Trend using real data
-  const performanceTrendData = useMemo(() => {
-    if (!evaluationData) return [];
-
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = evaluationData.records || evaluationData;
-    if (!dataArray || dataArray.length === 0) return [];
-
-    const months = [
-      { name: 'January', value: 0 },
-      { name: 'February', value: 1 },
-      { name: 'March', value: 2 },
-      { name: 'April', value: 3 },
-      { name: 'May', value: 4 },
-      { name: 'June', value: 5 },
-      { name: 'July', value: 6 },
-      { name: 'August', value: 7 },
-      { name: 'September', value: 8 },
-      { name: 'October', value: 9 },
-      { name: 'November', value: 10 },
-      { name: 'December', value: 11 },
-    ];
-
-    // Filter evaluations based on date range or current year
-    const allEvaluations = dataArray.filter((item: any) => {
-      const evaluationDate = new Date(item.date_of_evaluation);
-      
-      if (dateFilter?.from && dateFilter?.to) {
-        const fromDate = new Date(dateFilter.from);
-        const toDate = new Date(dateFilter.to);
-        return evaluationDate >= fromDate && evaluationDate <= toDate;
-      } else {
-        // Fallback to current year if no date range is selected
-        const currentYear = new Date().getFullYear();
-        return evaluationDate.getFullYear() === currentYear;
-      }
-    });
-
-    // If date range is selected, show all months in the range
-    if (dateFilter?.from && dateFilter?.to) {
-      const fromDate = new Date(dateFilter.from);
-      const toDate = new Date(dateFilter.to);
-      const fromMonth = fromDate.getMonth();
-      const toMonth = toDate.getMonth();
-      const fromYear = fromDate.getFullYear();
-      const toYear = toDate.getFullYear();
-      
-      // Create array of months in the selected range
-      const rangeMonths = [];
-      let currentDate = new Date(fromYear, fromMonth, 1);
-      const endDate = new Date(toYear, toMonth + 1, 0); // Last day of toMonth
-      
-      while (currentDate <= endDate) {
-        const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
-        const monthValue = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
-        
-        if (selectedDepartment === 'All Departments') {
-          // Calculate average across ALL departments for this month
-          const monthEvaluations = allEvaluations.filter((item: any) => {
-            const evaluationDate = new Date(item.date_of_evaluation);
-            return evaluationDate.getMonth() === monthValue && 
-                   evaluationDate.getFullYear() === currentYear;
-          });
-
-          if (monthEvaluations.length === 0) {
-            rangeMonths.push({
-              month: monthName,
-              score: 0,
-              count: 0
-            });
-          } else {
-            // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
-            const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
-              return sum + (parseFloat(item.score) || 0);
-            }, 0);
-
-            const averageScore = totalScore / monthEvaluations.length;
-
-            rangeMonths.push({
-              month: monthName,
-              score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
-              count: monthEvaluations.length
-            });
-          }
-        } else {
-          // Calculate for specific department
-          const departmentMonthEvaluations = allEvaluations.filter((item: any) => {
-            const evaluationDate = new Date(item.date_of_evaluation);
-            return evaluationDate.getMonth() === monthValue && 
-                   evaluationDate.getFullYear() === currentYear &&
-                   item.department === selectedDepartment;
-          });
-
-          if (departmentMonthEvaluations.length === 0) {
-            rangeMonths.push({
-              month: monthName,
-              score: 0,
-              count: 0
-            });
-          } else {
-            // Monthly Performance Rate = Sum of Scores in Month of the Department / Specific Employees Evaluated in a Department in a Month
-            const totalScore = departmentMonthEvaluations.reduce((sum: number, item: any) => {
-              return sum + (parseFloat(item.score) || 0);
-            }, 0);
-
-            const averageScore = totalScore / departmentMonthEvaluations.length;
-
-            rangeMonths.push({
-              month: monthName,
-              score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
-              count: departmentMonthEvaluations.length
-            });
-          }
-        }
-        
-        // Move to next month
-        currentDate.setMonth(currentDate.getMonth() + 1);
-      }
-      
-      return rangeMonths;
-    } else {
-      // For current year, only show months with data
-      const monthlyData = months.map(month => {
-        if (selectedDepartment === 'All Departments') {
-          // Calculate average across ALL departments for this month
-          const monthEvaluations = allEvaluations.filter((item: any) => {
-            const evaluationDate = new Date(item.date_of_evaluation);
-            return evaluationDate.getMonth() === month.value;
-          });
-
-          if (monthEvaluations.length === 0) {
-            return { month: month.name, score: 0, count: 0 };
-          }
-
-          // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
-          const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
-            return sum + (parseFloat(item.score) || 0);
-          }, 0);
-
-          const averageScore = totalScore / monthEvaluations.length;
-
-          return {
-            month: month.name,
-            score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
-            count: monthEvaluations.length
-          };
-        } else {
-          // Calculate for specific department
-          const departmentMonthEvaluations = allEvaluations.filter((item: any) => {
-            const evaluationDate = new Date(item.date_of_evaluation);
-            return evaluationDate.getMonth() === month.value && 
-                   item.department === selectedDepartment;
-          });
-
-          if (departmentMonthEvaluations.length === 0) {
-            return { month: month.name, score: 0, count: 0 };
-          }
-
-          // Monthly Performance Rate = Sum of Scores in Month of the Department / Specific Employees Evaluated in a Department in a Month
-          const totalScore = departmentMonthEvaluations.reduce((sum: number, item: any) => {
-            return sum + (parseFloat(item.score) || 0);
-          }, 0);
-
-          const averageScore = totalScore / departmentMonthEvaluations.length;
-
-          return {
-            month: month.name,
-            score: Math.round(averageScore * 100) / 100, // Round to 2 decimal places
-            count: departmentMonthEvaluations.length
-          };
-        }
-      });
-
-      // Filter out months with no data (score = 0)
-      return monthlyData.filter(item => item.score > 0);
-    }
+  // Calculate Performance Trend using shared utility
+  const { displayData } = useMemo(() => {
+    return calculatePerformanceTrend(evaluationData, dateFilter, selectedDepartment);
   }, [evaluationData, selectedDepartment, dateFilter]);
-
-  // Get the months with data for display
-  const displayData = performanceTrendData;
 
   const data = {
     labels: displayData.map(item => {
@@ -316,6 +140,9 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             return value;
           }
         },
+        afterFit: function(axis: any) {
+          axis.paddingTop = 20;
+        }
       },
       x: {
         grid: {
@@ -338,7 +165,7 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
 
   // Calculate dynamic height to match PerformanceRate chart
   const getChartHeight = () => {
-    const baseHeight = 400;
+    const baseHeight = 475;
     const minHeight = 300;
     const maxHeight = 600;
     
@@ -363,7 +190,17 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             <FilterLogo className="w-5 h-5" />
           </button>
           <h3 className="text-lg font-semibold text-gray-900 text-center flex-1 px-4">
-            {selectedDepartment !== 'All Departments' ? `${selectedDepartment} Performance Trend` : 'All Departments Performance Trend'} {dateFilter?.from && dateFilter?.to ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` : `(${displayData.length > 0 ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` : 'No Data'})`}
+            {selectedDepartment !== 'All Departments' 
+              ? `${selectedDepartment} Performance Trend` 
+              : 'All Departments Performance Trend'
+            } {
+              dateFilter?.from && dateFilter?.to 
+                ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` 
+                : `(${displayData.length > 0 
+                    ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` 
+                    : 'No Data'
+                  })`
+            }
           </h3>
           <div className="w-10 flex-shrink-0"></div>
         </div>
@@ -377,19 +214,20 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-gray-500">
                 <div className="text-lg font-semibold mb-2">No Data Available</div>
-                <div className="text-sm">No {selectedDepartment !== 'All Departments' ? selectedDepartment : 'department'} evaluations found for the current year</div>
               </div>
             </div>
           )}
         </div>
 
         {/* Legend */}
-        <div className="flex justify-center mt-2">
-          <div className="flex items-center space-x-2">
-            <AverageLegendIcon />
-            <span className="text-lg text-gray-600">Average Score</span>
+        {displayData.length > 0 && (
+          <div className="flex justify-center mt-2">
+            <div className="flex items-center space-x-2">
+              <AverageLegendIcon />
+              <span className="text-lg text-gray-600">Average Score</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <PerformanceTrendFilterModal

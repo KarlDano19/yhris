@@ -115,7 +115,7 @@ export default function UpdateJobModal({
         notesRemarks: jobPostDataDetails.job_remark,
       });
       // Normalize screening questions for the Job Settings page
-      if (jobPostDataDetails.screening_questions) {
+      if (jobPostDataDetails.screening_questions && jobPostDataDetails.screening_questions !== null) {
         const normalizedQuestions = jobPostDataDetails.screening_questions.map((q: any, idx: number) => ({
           id: q.id || q.question_id || idx + 1,
           question: q.question || q.text || '',
@@ -357,11 +357,12 @@ export default function UpdateJobModal({
                   <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
                     <CreateJobPagePreview
                       firstFormGetValues={firstForm.getValues}
+                      secondFormGetValues={secondForm.getValues}
+                      thirdFormGetValues={thirdForm.getValues}
                       fourthFormGetValues={fourthForm.getValues}
                       setPageNumber={setPageNumber}
                       onSubmit={seventhFormSubmit}
                       fileProps={fileProps}
-
                     />
                   </div>
                   <div style={{ display: pageNumber == 8 ? 'block' : 'none' }}>

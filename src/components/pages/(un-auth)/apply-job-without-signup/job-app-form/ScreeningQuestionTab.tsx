@@ -25,7 +25,7 @@ function ScreeningQuestionTab({
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
 
   useEffect(() => {
-    if (jobPostingData?.screening_questions) {
+    if (jobPostingData?.screening_questions && jobPostingData.screening_questions !== null) {
       // Filter questions to only show those that should be shown to candidates
       const filteredQuestions = jobPostingData.screening_questions.filter((question: any) => {
         // Show question if showToCandidates is explicitly true or undefined (default to true for backward compatibility)
@@ -40,6 +40,8 @@ function ScreeningQuestionTab({
         setValue(`screeningAnswers.${index}.question`, question.question);
         setValue(`screeningAnswers.${index}.responseType`, question.responseType);
       });
+    } else {
+      setScreeningQuestions([]);
     }
   }, [jobPostingData, setValue]);
 

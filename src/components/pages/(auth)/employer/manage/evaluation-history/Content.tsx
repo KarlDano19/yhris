@@ -227,7 +227,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      from: value,
+                      from: value?.target?.value === '' ? null : value,
                     });
                   }}
                 />
@@ -248,7 +248,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   inputOnChange={(value: any) => {
                     setItemsFilter({
                       ...itemsFilter,
-                      to: value,
+                      to: value?.target?.value === '' ? null : value,
                     });
                   }}
                   minDate={itemsFilter.from}

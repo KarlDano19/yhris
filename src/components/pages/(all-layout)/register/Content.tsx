@@ -13,11 +13,13 @@ import SplitViewBg from '@/assets/split-view-bg.png';
 import CustomToast from '@/components/CustomToast';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
+import { useLoopsSync } from '@/helpers/useLoopsSync';
 
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { EyeSlashIcon } from '@heroicons/react/24/outline';
 import DropDownArrow from '@/svg/DropDownArrow';
 import MainIconOnly from '@/svg/MainIconOnly';
+import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Register } from '@/types/globals';
 
@@ -45,6 +47,7 @@ const Content = () => {
   const [conformPassword, setConfirmPassword] = useState('');
   const { register, handleSubmit, reset, watch, formState: { errors }, clearErrors } = useForm<T_Register>();
   const { mutate, isLoading } = useRegisterAccount();
+  const { syncToLoops } = useLoopsSync();
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const [backendEmailError, setBackendEmailError] = useState('');
@@ -53,11 +56,25 @@ const Content = () => {
     if (password !== '' || conformPassword !== '') {
       if (password === conformPassword) {
         const callBackReq = {
-          onSuccess: (data: any) => {
+          onSuccess: (responseData: any) => {
             setBackendPasswordError('');
             setBackendEmailError('');
+            
+            // Sync new user to Loops.so (simplified fields only)
+            const fullName = data.accountType === 'Employer' 
+              ? data.name 
+              : `${data.firstname} ${data.middlename ? data.middlename + ' ' : ''}${data.lastname}`.trim();
+            
+            syncToLoops({
+              email: data.email,
+              name: fullName, // Send the complete full name
+              userGroup: 'YAHSHUA HRIS',
+              product: 'YHRIS',
+              source: 'registration',
+            });
+            
             reset();
-            toast.custom(() => <CustomToast message={data.message} type='success' />, {
+            toast.custom(() => <CustomToast message={responseData.message} type='success' />, {
               duration: 7000,
             });
             router.push('/login');
@@ -95,6 +112,16 @@ const Content = () => {
   };
   return (
     <>
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link 
+          href="/landing-page" 
+          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 hover:shadow-xl"
+        >
+          <ChevronLeftIcon />
+        </Link>
+      </div>
+      
       <SplitLayout
         left={
           <>

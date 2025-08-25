@@ -13,23 +13,38 @@ import RolePipelineTable from './components/workforce-overview-tab/role-pipeline
 import AttritionRate from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
 import ExitReasons from './components/workforce-overview-tab/attrition-rate-tab/ExitReasons';
 
-import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
-import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
 import useGetAllSeparationItems from '@/components/hooks/useGetAllSeparationItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import useGetOverallApplicants from '../hooks/useGetOverallApplicants';
+import useGetJobPostItems from '../hooks/useGetJobPostItems';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
 
-import { getValidRegions } from '@/helpers/advertiseOptions';
+import { getValidRegions } from '@/utils/advertiseOptions';
 
 interface WorkforceOverviewProps {
   dateFilter?: {
     from: string;
     to: string;
   };
+  onDataReady?: (data: {
+    activeSubTab: number;
+    employeeData: any[];
+    appliedApplicantsData: any[];
+    separationData: any[];
+    allJobPostData: any[];
+    pipelineData: any;
+    rolePipelineData: any[];
+    rolePipelineCurrentPage: number;
+    rolePipelinePageSize: number;
+    validRegions?: string[];
+    selectedJobFilter?: string;
+    totalRecords?: number;
+    allJobPostsForPrint?: any[];
+  }) => void;
 }
 
-const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => {
+const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDataReady }) => {
   const [activeSubTab, setActiveSubTab] = useState(1);
 
   // Pagination State for Role Pipeline
@@ -42,17 +57,34 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   // Fetch overall applicants data across all job postings
   const { data: appliedApplicantsData, isLoading: applicantsLoading, error: applicantsError } = useGetOverallApplicants();
 
-  // Fetch job postings data for role pipeline analysis (without date filter)
+  // Helper function to format date for API
+  const formatDateForAPI = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  // Fetch job postings data for role pipeline analysis (with analytics search type)
   const jobPostFilters = {
     currentPage: rolePipelineCurrentPage,
     pageSize: rolePipelinePageSize,
     search: '',
+    from: formatDateForAPI(dateFilter?.from || ''),
+    to: formatDateForAPI(dateFilter?.to || ''),
+    search_type: 'analytics', // Use analytics search type to filter by both created_at and updated_at
   };
 
   const { data: jobPostData, refetch: refetchJobPost } = useGetJobPostItems(jobPostFilters);
 
   // Fetch all job posts data for demographic analysis (without pagination)
-  const { data: allJobPostData } = useGetAllJobPostItems();
+  const { data: allJobPostData, refetch: refetchAllJobPost } = useGetAllJobPostItems({
+    from: formatDateForAPI(dateFilter?.from || ''),
+    to: formatDateForAPI(dateFilter?.to || '')
+  });
 
   // Get selected job when filtering
   const selectedJob = useMemo(() => {
@@ -76,10 +108,22 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
   // Fetch employee data for headcount calculation
   const { data: employeeData, isLoading: employeeLoading, error: employeeError } = useGetEmployeeItems();
 
-  // Fetch job postings when component loads and when pagination changes
+  // Reset pagination when date filter changes
+  useEffect(() => {
+    if (dateFilter?.from || dateFilter?.to) {
+      setRolePipelineCurrentPage(1);
+    }
+  }, [dateFilter?.from, dateFilter?.to]);
+
+  // Fetch job postings when component loads, pagination changes, or date filter changes
   useEffect(() => {
     refetchJobPost();
-  }, [rolePipelineCurrentPage, rolePipelinePageSize]);
+  }, [rolePipelineCurrentPage, rolePipelinePageSize, dateFilter?.from, dateFilter?.to]);
+
+  // Fetch all job posts when date filter changes
+  useEffect(() => {
+    refetchAllJobPost();
+  }, [dateFilter?.from, dateFilter?.to]);
 
   // Refetch job postings when tab is activated
   useEffect(() => {
@@ -87,8 +131,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
       refetchJobPost();
     }
   }, [activeSubTab]);
-
-
 
   // Transform job postings data for role pipeline table
   const rolePipelineData = useMemo(() => {
@@ -99,15 +141,22 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
     return jobPostData.records.map((job: any) => {
       // Calculate turnaround time (days since job opened)
       const jobOpenedDate = new Date(job.created_at);
+      const jobClosedDate = new Date(job.updated_at);
       const currentDate = new Date();
       const turnaroundTime = Math.ceil((currentDate.getTime() - jobOpenedDate.getTime()) / (1000 * 60 * 60 * 24));
 
-      // Format date
-      const formattedDate = jobOpenedDate.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
+      // Helper function to format dates
+      const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      };
+
+      // Format dates
+      const formattedDateOpened = formatDate(jobOpenedDate);
+      const formattedDateClosed = formatDate(jobClosedDate);
 
       // Determine status based on job data
       const status = job.is_active ? 'Ongoing' : 'Closed';
@@ -117,14 +166,18 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
         ? `${job.applicant_applied_no} applicants` 
         : 'No applicants yet';
 
+      // Only show job closed date if status is Closed
+      const dateJobClosed = status === 'Closed' ? formattedDateClosed : '—';
+
       return {
         role: job.job_title || 'Unknown Role',
         numberOfApplicants: job.applicant_applied_no || 0,
         status: status,
-        dateJobOpened: formattedDate,
+        dateJobOpened: formattedDateOpened,
+        dateJobClosed: dateJobClosed,
         turnaroundTime: turnaroundTime,
         currentPipeline: currentPipeline,
-        jobId: job.id
+        jobId: job.id,
       };
     });
   }, [jobPostData]);
@@ -166,6 +219,27 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter }) => 
       totalPages: jobPostData.total_pages || jobPostData.totalPages || 1
     };
   }, [jobPostData]);
+
+  // Notify parent component when data is ready for printing
+  useEffect(() => {
+    if (onDataReady && employeeData && appliedApplicantsData && allSeparationData && allJobPostData) {
+      onDataReady({
+        activeSubTab,
+        employeeData,
+        appliedApplicantsData,
+        separationData: allSeparationData,
+        allJobPostData,
+        pipelineData,
+        rolePipelineData,
+        rolePipelineCurrentPage,
+        rolePipelinePageSize,
+        validRegions: getValidRegions().filter((region): region is string => region !== null),
+        selectedJobFilter,
+        totalRecords: paginationData.totalRecords,
+        allJobPostsForPrint: allJobPostData
+      });
+    }
+  }, [activeSubTab, employeeData, appliedApplicantsData, allSeparationData, allJobPostData, pipelineData, rolePipelineData, rolePipelineCurrentPage, rolePipelinePageSize, selectedJobFilter, paginationData.totalRecords, onDataReady]);
 
   // Workforce metrics are now handled by separate calculation components
 

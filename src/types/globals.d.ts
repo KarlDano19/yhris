@@ -171,13 +171,14 @@ export type T_EmployerProfile = {
   email: string;
   mobileNumber: string;
   landlineNumber: string;
+  region: string;
+  province: string;
+  city: string;
+  locality: string;
+  country: string;
   building: string;
   street: string;
-  locality: string;
-  city: string;
   zipCode: string;
-  country: string;
-  region: string;
   language: string;
   currency: string;
   imagePath: any;
@@ -357,4 +358,16 @@ export type T_ApplicantProfile = {
   contactPersonContactNo: string;
   contactPersonRelationship: string;
   contactPersonAge: number;
+  education?: string;
+  college?: string;
+  expected_salary?: number;
+  educationalAttainment?: string;
+  skills?: string[];
+  experiences?: {
+    position: string;
+    majorRole: string;
+    companyOrg: string;
+    dateFrom: string;
+    dateTo: string;
+  }[];
 }

@@ -18,6 +18,7 @@ import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
 import AnalyticsLogo from '@/svg/AnalyticsLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
+import TalentSearchIcon from '@/svg/TalentSearchIcon';
 import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
 
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
@@ -45,6 +46,12 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/post-job',
       isAvailable: true,
       isGrayedOut: false,
+    },
+    {
+      icon: <TalentSearchIcon />,
+      text: 'Talent Search',
+      link: '/talent-search',
+      isAvailable: true,
     },
     {
       icon: <ScreenApplicantsLogo />,

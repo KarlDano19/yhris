@@ -35,6 +35,7 @@ function Header({ type, hasProfile, hasActiveSubscription }: { type: string; has
     'dole',
     'analytics',
     'audit-logs',
+    'talent-search',
   ];
   const applicantRoutes: string[] = [
     'application-tracker',

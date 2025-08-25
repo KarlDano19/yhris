@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import {
   Chart as ChartJS,
@@ -12,12 +12,12 @@ import {
 import { Bar } from 'react-chartjs-2';
 
 import ColorPaletteModal from '../../../../modals/ColorPaletteModal';
-import { generateDistinctColors } from '@/helpers/colorGenerator';
+import { calculateDepartmentPerformance } from './calculations/performanceRateCalc';
 
 import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
 ChartJS.register(
-  CategoryScale,
+  CategoryScale,  
   LinearScale,
   BarElement,
   Title,
@@ -28,100 +28,17 @@ ChartJS.register(
 interface PerformanceRateProps {
   evaluationData?: any;
   onShowAllChange?: (showAll: boolean) => void;
+  showAllDepartments?: boolean;
 }
 
-const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onShowAllChange }) => {
-  const [showAllDepartments, setShowAllDepartments] = useState(false);
+const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onShowAllChange, showAllDepartments = false }) => {
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
 
-  // Generate default colors dynamically (unlimited)
-  const defaultColors = generateDistinctColors(20);
-
-  // Calculate department performance rates from evaluation data
-  const calculateDepartmentPerformance = () => {
-    if (!evaluationData) return [];
-
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = evaluationData.records || evaluationData;
-    if (!dataArray || dataArray.length === 0) return [];
-
-    // Sort data by ID in descending order to get the latest evaluations first
-    const sortedDataArray = [...dataArray].sort((a: any, b: any) => {
-      const idA = parseInt(a.id) || 0;
-      const idB = parseInt(b.id) || 0;
-      return idB - idA;
-    });
-
-    // Take only the first 10 latest evaluations if not showing all
-    const limitedDataArray = showAllDepartments ? sortedDataArray : sortedDataArray.slice(0, 10);
-
-    // Group evaluations by department
-    const departmentGroups: { [key: string]: any[] } = {};
-    
-    limitedDataArray.forEach((item: any) => {
-      const department = item.department || 'Unknown';
-      if (!departmentGroups[department]) {
-        departmentGroups[department] = [];
-      }
-      departmentGroups[department].push(item);
-    });
-
-    // Use custom colors or generate consistent colors based on department name
-    const getColorForDepartment = (departmentName: string, index: number) => {
-      // First, try to get saved department-specific color mapping
-      const savedMapping = localStorage.getItem('departmentColorMapping');
-      if (savedMapping) {
-        try {
-          const departmentColorMap = JSON.parse(savedMapping);
-          if (departmentColorMap[departmentName]) {
-            return departmentColorMap[departmentName];
-          }
-        } catch (error) {
-          console.error('Error loading department color mapping:', error);
-        }
-      }
-      
-      // If no saved mapping, use custom colors by index
-      if (customColors.length > 0 && customColors[index]) {
-        return customColors[index];
-      }
-      
-      // Otherwise, use default colors or generate consistent colors
-      if (defaultColors[index]) {
-        return defaultColors[index];
-      }
-      
-      // Fallback to unlimited color generation
-      const generatedColors = generateDistinctColors(Math.max(index + 1, 20));
-      return generatedColors[index];
-    };
-
-    // Calculate performance rate for each department
-    const departmentPerformanceData = Object.entries(departmentGroups).map(([department, evaluations], index) => {
-      const totalScore = evaluations.reduce((sum: number, evaluation: any) => {
-        return sum + (parseFloat(evaluation.score) || 0);
-      }, 0);
-      
-      const averageScore = evaluations.length > 0 ? totalScore / evaluations.length : 0;
-      
-      // Get the highest ID from evaluations in this department
-      const highestId = Math.max(...evaluations.map((evaluation: any) => parseInt(evaluation.id) || 0));
-      
-      return {
-        name: department,
-        score: Math.round(averageScore * 100) / 100,
-        color: getColorForDepartment(department, index),
-        count: evaluations.length,
-        highestId: highestId
-      };
-    });
-
-    // Sort by highest ID in descending order for display order
-    return departmentPerformanceData.sort((a, b) => b.highestId - a.highestId);
-  };
-
-  const departmentPerformanceData = calculateDepartmentPerformance();
+  // Calculate department performance using shared utility
+  const { departmentPerformanceData, totalDepartments } = useMemo(() => {
+    return calculateDepartmentPerformance(evaluationData, showAllDepartments, customColors);
+  }, [evaluationData, showAllDepartments, customColors]);
 
 
 
@@ -130,7 +47,7 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
     // Create a mapping of department names to their new colors
     const departmentColorMap: { [key: string]: string } = {};
     departmentPerformanceData.forEach((dept, index) => {
-      departmentColorMap[dept.name] = colors[index] || defaultColors[index] || '#3B82F6';
+      departmentColorMap[dept.name] = colors[index] || '#3B82F6';
     });
     
     // Save the department-to-color mapping
@@ -153,31 +70,9 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
     }
   }, []);
 
-  // Calculate total number of departments (before filtering)
-  const getTotalDepartments = () => {
-    if (!evaluationData) return 0;
-    
-    // Handle both paginated structure (records) and flat array structure
-    const dataArray = evaluationData.records || evaluationData;
-    if (!dataArray || dataArray.length === 0) return 0;
-    
-    const departmentGroups: { [key: string]: any[] } = {};
-    dataArray.forEach((item: any) => {
-      const department = item.department || 'Unknown';
-      if (!departmentGroups[department]) {
-        departmentGroups[department] = [];
-      }
-      departmentGroups[department].push(item);
-    });
-    
-    return Object.keys(departmentGroups).length;
-  };
-
-  const totalDepartments = getTotalDepartments();
-
   // Calculate dynamic height based on number of departments
   const getChartHeight = () => {
-    const baseHeight = 400;
+    const baseHeight = 300;
     const minHeight = 300;
     const maxHeight = 600;
     
@@ -273,10 +168,10 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
         <h3 className="text-lg font-semibold text-gray-900 mb-8">
           Performance Rate by Department
         </h3>
+        <div className='h-14'></div>
         <div className="h-96 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-lg text-gray-600 mb-2">No Data Available</div>
-            <div className="text-sm text-gray-500">No evaluation data found for departments</div>
+            <div className="text-lg font-semibold text-gray-500 mb-2">No Data Available</div>
           </div>
         </div>
       </div>
@@ -303,7 +198,6 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
               <button
                 onClick={() => {
                   const newShowAll = !showAllDepartments;
-                  setShowAllDepartments(newShowAll);
                   onShowAllChange?.(newShowAll);
                 }}
                 className="px-3 py-1 text-sm bg-savoy-blue text-white rounded hover:bg-opacity-90 transition-colors"
@@ -318,14 +212,20 @@ const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onSho
         </div>
 
         {/* Title at bottom */}
-        <div className="mt-4">
-          <h3 className="text-lg text-gray-600 text-center mb-3">Average Score</h3>
-          <div className="overflow-x-auto">
-            <div className="flex justify-start space-x-6 min-w-max pb-2 px-2">
+        <div className="mt-5">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Departments</h4>
+          <div className={`border border-gray-200 rounded-lg p-3 bg-gray-50 ${showAllDepartments ? '' : 'max-h-48 overflow-y-auto'}`}>
+            <div className={showAllDepartments ? 'grid grid-cols-3 gap-4' : 'space-y-2'}>
               {departmentPerformanceData.map((dept, index) => (
-                <div key={index} className="flex items-center space-x-2 flex-shrink-0">
-                  <div className="w-4 h-4 rounded" style={{ backgroundColor: dept.color }}></div>
-                  <span className="text-sm text-gray-600 whitespace-nowrap">{dept.name}</span>
+                <div key={index} className="flex items-center space-x-2 text-sm">
+                  <div 
+                    className="w-8 h-8 rounded flex-shrink-0" 
+                    style={{ backgroundColor: dept.color }}
+                  ></div>
+                  <span className="text-gray-700 flex-1 min-w-0">
+                    <span className="truncate block">{dept.name}</span>
+                    <span className="text-gray-500 text-xs">Score: {dept.score}% | Employees: {dept.count}</span>
+                  </span>
                 </div>
               ))}
             </div>

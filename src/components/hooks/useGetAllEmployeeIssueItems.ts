@@ -1,9 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getAllEmployeeIssueItems() {
+interface DateFilter {
+  from?: string;
+  to?: string;
+}
+
+async function getAllEmployeeIssueItems(dateFilter?: DateFilter) {
   try {
-    let newFilters = { view_type: 'select' };
+    let newFilters: any = { view_type: 'select' };
+    
+    // Add date filters if provided
+    if (dateFilter?.from) {
+      newFilters.from = dateFilter.from;
+    }
+    if (dateFilter?.to) {
+      newFilters.to = dateFilter.to;
+    }
+    
+    // Add analytics search type to filter by both incident_date and created_at
+    newFilters.search_type = 'analytics';
+    
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -30,11 +47,15 @@ async function getAllEmployeeIssueItems() {
   }
 }
 
-function useGetAllEmployeeIssueItems() {
-  const query = useQuery(['allEmployeeIssueItemsCache'], () => getAllEmployeeIssueItems(), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+function useGetAllEmployeeIssueItems(dateFilter?: DateFilter) {
+  const query = useQuery(
+    ['allEmployeeIssueItemsCache', dateFilter], 
+    () => getAllEmployeeIssueItems(dateFilter), 
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }
