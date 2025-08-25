@@ -13,6 +13,7 @@ import CustomToast from "@/components/CustomToast";
 import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
 import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
 import useGetOshProgramVersionHistory from "./hooks/useGetOshProgramVersionHistory";
+import useFileforge from "./hooks/useFileforge";
 import CompanyProfile from "./tabs/CompanyProfile";
 import ProgramAndPolicy from "./tabs/ProgramAndPolicy";
 import RiskManagement from "./tabs/RiskManagement";
@@ -22,11 +23,14 @@ import HealthAndWelfare from "./tabs/HealthAndWelfare";
 import UnsavedChangesModal from "./modals/UnsavedChangesModal";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import PrintIcon from "@/svg/PrintIcon";
 import HistoryIcon from "@/svg/HistoryIcon";
-import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import VersionHistoryModal from "./modals/VersionHistoryModal";
 import VersionHistoryDetailsModal from "./modals/VersionHistoryDetailsModal";
+
+// Import shared print utility
+import { printOshProgram } from "./PrintData";
 
 import { 
   T_OshProgram, 
@@ -69,6 +73,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: versionHistoryData, refetch: refetchVersionHistory } = useGetOshProgramVersionHistory({
     page_size: 1,
     current_page: 1
+  });
+
+  // Fileforge hook for PDF generation
+  const { generatePDFLocally, isGenerating } = useFileforge({
+    onSuccess: () => {
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
   });
 
   const statusOptions = [
@@ -124,6 +138,21 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleBackToVersionHistory = () => {
     setIsVersionHistoryDetailsModalOpen(false);
     setIsVersionHistoryModalOpen(true);
+  };
+
+  // Print function to generate PDF of the latest OSH program version
+  const handlePrint = async () => {
+    if (!oshProgramDetails) return;
+    
+    try {
+      await printOshProgram({
+        data: oshProgramDetails,
+        filename: "osh-program-latest-version.pdf",
+        generatePDFLocally
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+    }
   };
 
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
@@ -709,10 +738,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <button
-              disabled={!hasActiveSubscription}
-              title="Download"
+              onClick={handlePrint}
+              disabled={!hasActiveSubscription || isGenerating || !oshProgramDetails}
+              title={isGenerating ? "Generating PDF..." : "Print Latest Version"}
+              className="relative"
             >
-              <DownloadBorderIcon/>
+              {isGenerating ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+              ) : (
+                <PrintIcon/>
+              )}
             </button>
             <div className="relative flex items-center">
               <button

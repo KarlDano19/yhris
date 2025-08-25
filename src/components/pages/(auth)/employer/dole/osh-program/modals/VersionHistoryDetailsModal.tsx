@@ -10,6 +10,10 @@ import {
   MinusIcon,
   ArrowsPointingOutIcon
 } from "@heroicons/react/24/solid";
+import useFileforge from '../hooks/useFileforge';
+import { printOshProgram } from '../PrintData';
+
+// Import document components for preview (not for printing)
 import DocumentPageOne from '../print/DocumentPageOne';
 import DocumentPageTwo from '../print/DocumentPageTwo';
 import DocumentPageThree from '../print/DocumentPageThree';
@@ -24,7 +28,6 @@ import DocumentPageEleven from '../print/DocumentPageEleven';
 import DocumentPageTwelve from '../print/DocumentPageTwelve';
 import DocumentPageThirteen from '../print/DocumentPageThirteen';
 import DocumentPageFourteen from '../print/DocumentPageFourteen';
-import useFileforge from '../hooks/useFileforge';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
@@ -105,27 +108,11 @@ export default function VersionHistoryDetailsModal({
     if (!transformedData) return;
     
     try {
-      const pageNumbers = getPageNumbers();
-      
-      await generatePDFLocally(
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-          <DocumentPageOne data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[0]} />
-          <DocumentPageTwo data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[1]} />
-          <DocumentPageThree data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[2]} />
-          <DocumentPageFour data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[3]} />
-          <DocumentPageFive data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[4]} />
-          <DocumentPageSix data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[5]} />
-          <DocumentPageSeven data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[6]} />
-          <DocumentPageEight data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[7]} />
-          <DocumentPageNine data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[8]} />
-          <DocumentPageTen data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[9]} />
-          <DocumentPageEleven data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[10]} />
-          <DocumentPageTwelve data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[11]} />
-          <DocumentPageThirteen data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[12]} />
-          <DocumentPageFourteen data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[13]} />
-        </div>,
-        `osh-program-version-${versionData?.version_number_formatted || 'unknown'}.pdf`
-      );
+      await printOshProgram({
+        data: transformedData,
+        filename: `osh-program-version-${versionData?.version_number_formatted || 'unknown'}.pdf`,
+        generatePDFLocally
+      });
     } catch (error) {
       console.error('Print error:', error);
     }
@@ -176,7 +163,7 @@ export default function VersionHistoryDetailsModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-4xl max-h-[98vh] overflow-y-auto">
+              <Dialog.Panel className="relative transform overflow-visible rounded-b-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-4xl max-h-[98vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex bg-savoy-blue p-4 items-center">
                   <h3 className="flex-1 text-white font-semibold text-lg">
