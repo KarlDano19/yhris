@@ -12,7 +12,7 @@ const DocumentPageTwelve: React.FC<DocumentPageTwelveProps> = ({ data }) => {
       {/* Page Header - Continuation from previous page */}
       <div className="mb-4 ml-10">
         <p className="text-xs text-gray-700 mb-2">
-          Fifth offense - Dismissal
+        • Fifth offense - Dismissal
         </p>
       </div>
 
