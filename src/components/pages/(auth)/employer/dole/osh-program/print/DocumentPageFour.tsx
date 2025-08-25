@@ -5,9 +5,10 @@ import { T_OshProgram } from '@/types/osh-program';
 interface DocumentPageFourProps {
   data: T_OshProgram;
   isMultiPage?: boolean;
+  pageNumber?: number;
 }
 
-const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage = false }) => {
+const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage = false, pageNumber = 4 }) => {
   return (
     <div 
       className="bg-white text-black font-sans text-xs leading-tight w-full h-full flex flex-col" 
@@ -26,18 +27,18 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
         </h1>
       </div>
 
-      {/* Section 2.1 Conduct of Risk Assesxsent */}
+      {/* Section 2.1 Conduct of Risk Assessment */}
       <div className="mb-4">
         <h2 className="text-base font-semibold text-gray-900 mb-1">
-          2.1 Conduct of Risk Assesxsent
+          2.1 Conduct of Risk Assessment
         </h2>
         <p className="text-xs text-gray-700 mb-3">
-          Kindly accomplish. Pls use additional pages if needed. You may also wish to attach your Company&apos;s Risk Assesxsent Matrix as substitute.
+          Kindly accomplish. Pls use additional pages if needed. You may also wish to attach your Company&apos;s Risk Assessment Matrix as substitute.
         </p>
 
-        {/* Risk Assesxsent Matrix Table */}
+        {/* Risk Assessment Matrix Table */}
         <div className="mb-3">
-          <h3 className="text-xs font-medium text-gray-900 mb-1">Risk Assesxsent Matrix</h3>
+          <h3 className="text-xs font-medium text-gray-900 mb-1">Risk Assessment Matrix</h3>
           <div className="border border-gray-300">
             <div className="grid grid-cols-5 bg-gray-100 text-xs font-medium text-gray-900">
               <div className="p-2 border-r border-gray-300">Task</div>
@@ -194,7 +195,7 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
 
       {/* Footer */}
       <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
-        <span className="text-xs text-gray-600">Page | 4</span>
+        <span className="text-xs text-gray-600">Page | {pageNumber}</span>
       </div>
     </div>
   );

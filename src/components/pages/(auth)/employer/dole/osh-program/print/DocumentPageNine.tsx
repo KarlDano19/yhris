@@ -5,9 +5,10 @@ import { T_OshProgram } from '@/types/osh-program';
 interface DocumentPageNineProps {
   data: T_OshProgram;
   isMultiPage?: boolean;
+  pageNumber?: number;
 }
 
-const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data, isMultiPage = false }) => {
+const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data, isMultiPage = false, pageNumber = 9 }) => {
 
   return (
     <div
@@ -210,7 +211,7 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data, isMultiPage =
 
       {/* Footer */}
       <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
-        <span className="text-xs text-gray-600">Page | 9</span>
+        <span className="text-xs text-gray-600">Page | {pageNumber}</span>
       </div>
     </div>
   );

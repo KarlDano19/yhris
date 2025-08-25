@@ -96,26 +96,63 @@ export default function VersionHistoryDetailsModal({
     setZoomLevel(Math.max(50, Math.min(optimalZoom, 200))); // Clamp between 50% and 200%
   };
 
+  // Function to calculate dynamic page numbers based on content
+  const calculatePageNumbers = () => {
+    let currentPage = 1;
+    const pageNumbers = [];
+    
+    // Page 1 - Company Profile (usually fits on one page)
+    pageNumbers.push(currentPage++);
+    
+    // Page 2 - Basic Components (usually fits on one page)
+    pageNumbers.push(currentPage++);
+    
+    // Page 3 - Company Commitment (usually fits on one page)
+    pageNumbers.push(currentPage++);
+    
+    // Page 4 - Risk Assessment Matrix (may span multiple pages due to table)
+    const riskData = typeof transformedData?.emergency_and_disaster_preparedness === 'string' 
+      ? JSON.parse(transformedData.emergency_and_disaster_preparedness) 
+      : transformedData?.emergency_and_disaster_preparedness || [];
+    
+    const riskEntries = Array.isArray(riskData) ? riskData : [];
+    const riskPages = Math.max(1, Math.ceil(riskEntries.length / 4)); // Estimate 4 entries per page
+    
+    for (let i = 0; i < riskPages; i++) {
+      pageNumbers.push(currentPage++);
+    }
+    
+    // Page 5+ - Remaining pages (usually one page each)
+    const remainingPages = 14 - pageNumbers.length;
+    for (let i = 0; i < remainingPages; i++) {
+      pageNumbers.push(currentPage++);
+    }
+    
+    return pageNumbers;
+  };
+
   const handlePrint = async () => {
     if (!transformedData) return;
     
     try {
+      const pageNumbers = calculatePageNumbers();
+      
       await generatePDFLocally(
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-          <DocumentPageOne data={transformedData as any} isMultiPage={true} />
-          <DocumentPageTwo data={transformedData as any} isMultiPage={true} />
-          <DocumentPageThree data={transformedData as any} isMultiPage={true} />
-          <DocumentPageFour data={transformedData as any} isMultiPage={true} />
-          <DocumentPageFive data={transformedData as any} isMultiPage={true} />
-          <DocumentPageSix data={transformedData as any} isMultiPage={true} />
-          <DocumentPageSeven data={transformedData as any} isMultiPage={true} />
-          <DocumentPageEight data={transformedData as any} isMultiPage={true} />
-          <DocumentPageNine data={transformedData as any} isMultiPage={true} />
-          <DocumentPageTen data={transformedData as any} isMultiPage={true} />
-          <DocumentPageEleven data={transformedData as any} isMultiPage={true} />
-          <DocumentPageTwelve data={transformedData as any} isMultiPage={true} />
-          <DocumentPageThirteen data={transformedData as any} isMultiPage={true} />
-          <DocumentPageFourteen data={transformedData as any} isMultiPage={true} />
+          <DocumentPageOne data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[0]} />
+          <DocumentPageTwo data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[1]} />
+          <DocumentPageThree data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[2]} />
+          <DocumentPageFour data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[3]} />
+          <DocumentPageFive data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[4]} />
+          <DocumentPageSix data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[5]} />
+          <DocumentPageSeven data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[6]} />
+          <DocumentPageEight data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[7]} />
+          <DocumentPageNine data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[8]} />
+          <DocumentPageTen data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[9]} />
+          <DocumentPageEleven data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[10]} />
+          <DocumentPageTwelve data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[11]} />
+          <DocumentPageThirteen data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[12]} />
+          <DocumentPageFourteen data={transformedData as any} isMultiPage={true} pageNumber={pageNumbers[13]} />
         </div>,
         `osh-program-version-${versionData?.version_number_formatted || 'unknown'}.pdf`
       );
@@ -185,7 +222,7 @@ export default function VersionHistoryDetailsModal({
                 <div className="bg-gray-50 px-4 py-2 border-b">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
-                      Page {currentPageIndex} of {totalPages}
+                      Page {currentPageIndex} of {transformedData ? calculatePageNumbers().length : totalPages}
                     </p>
                     <div className="flex items-center space-x-2">
                       <button
@@ -197,7 +234,7 @@ export default function VersionHistoryDetailsModal({
                       </button>
                       <button
                         onClick={handleNextPage}
-                        disabled={currentPageIndex === totalPages}
+                        disabled={currentPageIndex === (transformedData ? calculatePageNumbers().length : totalPages)}
                         className="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Next
@@ -223,35 +260,40 @@ export default function VersionHistoryDetailsModal({
                         margin: '0 auto'
                       }}
                     >
-                      {currentPageIndex === 1 ? (
-                        <DocumentPageOne data={transformedData as any} />
-                      ) : currentPageIndex === 2 ? (
-                        <DocumentPageTwo data={transformedData as any} />
-                      ) : currentPageIndex === 3 ? (
-                        <DocumentPageThree data={transformedData as any} />
-                      ) : currentPageIndex === 4 ? (
-                        <DocumentPageFour data={transformedData as any} />
-                      ) : currentPageIndex === 5 ? (
-                        <DocumentPageFive data={transformedData as any} />
-                      ) : currentPageIndex === 6 ? (
-                        <DocumentPageSix data={transformedData as any} />
-                      ) : currentPageIndex === 7 ? (
-                        <DocumentPageSeven data={transformedData as any} />
-                      ) : currentPageIndex === 8 ? (
-                        <DocumentPageEight data={transformedData as any} />
-                      ) : currentPageIndex === 9 ? (
-                        <DocumentPageNine data={transformedData as any} />
-                      ) : currentPageIndex === 10 ? (
-                        <DocumentPageTen data={transformedData as any} />
-                      ) : currentPageIndex === 11 ? (
-                        <DocumentPageEleven data={transformedData as any} />
-                      ) : currentPageIndex === 12 ? (
-                        <DocumentPageTwelve data={transformedData as any} />
-                      ) : currentPageIndex === 13 ? (
-                        <DocumentPageThirteen data={transformedData as any} />
-                      ) : (
-                        <DocumentPageFourteen data={transformedData as any} />
-                      )}
+                      {(() => {
+                        const pageNumbers = calculatePageNumbers();
+                        const currentPageNumber = pageNumbers[currentPageIndex - 1] || currentPageIndex;
+                        
+                        if (currentPageIndex === 1) {
+                          return <DocumentPageOne data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 2) {
+                          return <DocumentPageTwo data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 3) {
+                          return <DocumentPageThree data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 4) {
+                          return <DocumentPageFour data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 5) {
+                          return <DocumentPageFive data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 6) {
+                          return <DocumentPageSix data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 7) {
+                          return <DocumentPageSeven data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 8) {
+                          return <DocumentPageEight data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 9) {
+                          return <DocumentPageNine data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 10) {
+                          return <DocumentPageTen data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 11) {
+                          return <DocumentPageEleven data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 12) {
+                          return <DocumentPageTwelve data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else if (currentPageIndex === 13) {
+                          return <DocumentPageThirteen data={transformedData as any} pageNumber={currentPageNumber} />;
+                        } else {
+                          return <DocumentPageFourteen data={transformedData as any} pageNumber={currentPageNumber} />;
+                        }
+                      })()}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-64">

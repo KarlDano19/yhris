@@ -5,9 +5,10 @@ import { T_OshProgram } from '@/types/osh-program';
 interface DocumentPageSevenProps {
   data: T_OshProgram;
   isMultiPage?: boolean;
+  pageNumber?: number;
 }
 
-const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data, isMultiPage = false }) => {
+const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data, isMultiPage = false, pageNumber = 7 }) => {
 
   return (
     <div
@@ -202,7 +203,7 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data, isMultiPage
 
       {/* Footer */}
       <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
-        <span className="text-xs text-gray-600">Page | 7</span>
+        <span className="text-xs text-gray-600">Page | {pageNumber}</span>
       </div>
     </div>
   );
