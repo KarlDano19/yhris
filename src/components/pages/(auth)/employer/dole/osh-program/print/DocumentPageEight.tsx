@@ -11,26 +11,27 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data, isMultiPage
 
   return (
     <div
-      className="bg-white text-black font-sans text-sm leading-tight w-full h-full p-8 flex flex-col"
+      className="bg-white text-black font-sans text-xs leading-tight w-full h-full flex flex-col"
       style={{
         fontFamily: 'Arial, sans-serif',
         width: '210mm',
         height: '297mm',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        padding: '32px 40px 32px 60px'
       }}
     >
       {/* Top Section - Work Accident Reporting */}
-      <div className="mb-6">
-        <p className="text-sm text-gray-700 mb-2">
+      <div className="mb-2">
+        <p className="text-xs text-gray-700 mb-2">
           After the conduct of investigation, the company shall prepare and submit work accident report using the prescribed form (WAIR).
         </p>
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-xs text-gray-700 mb-2">
           Moreover, other work accidents resulting to disabling injuries such as Permanent Partial Disability and Temporary Total Disability shall be reported to the DOLE Regional Office within 30 days after the date of occurrence of accident using the DOLE prescribed form (WAIR).
         </p>
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-xs text-gray-700 mb-2">
           All near misses shall be recorded and reported. A system for notification and reporting of work accidents including near misses within the company shall be developed and reviewed by the OSH Committee as necessary.
         </p>
-        <p className="text-sm text-gray-700 mb-3">
+        <p className="text-xs text-gray-700 mb-3">
           (Kindly submit reports on the following: Work Accident /Injury Report (WAIR), Annual Exposure Data Report (AEDR), Annual Medical Report (AMR))
         </p>
 
@@ -67,11 +68,11 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data, isMultiPage
       </div>
 
       {/* Section 10.0 Provision and use of PPE */}
-      <div className="mb-6">
+      <div className="mb-2">
         <h2 className="text-base font-bold text-gray-900 mb-2">
           10.0 Provision and use of PPE
         </h2>
-        <p className="text-sm text-gray-700 mb-3">
+        <p className="text-xs text-gray-700 mb-3">
           Issuance of PPE shall be supplemented by training on the application, use, handling, cleaning and maintenance.
         </p>
         <div className="border border-gray-300 mb-4">
@@ -106,30 +107,30 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data, isMultiPage
       </div>
 
       {/* Section 11.0 Safety Signage */}
-      <div className="mb-6">
+      <div className="mb-2">
         <h2 className="text-base font-bold text-gray-900 mb-2">
           11.0 Safety Signage
         </h2>
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-xs text-gray-700 mb-2">
           The safety signages include warning to workers and employees and the public about the hazards within the workplace.
         </p>
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-xs text-gray-700 mb-2">
           Type of Safety Signage: Kindly attach picture.
         </p>
       </div>
 
       {/* Section 12.0 Dust control and management */}
-      <div className="mb-6">
+      <div className="mb-2">
         <h2 className="text-base font-bold text-gray-900 mb-2">
           12.0 Dust control and management and regulation on activities such as building of temporary structures and lifting and operation of electrical, mechanical, communications system and other requirements
         </h2>
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-xs text-gray-700 mb-2">
           Kindly attach dust control procedures, plans on temporary structures, permits applicable for the operation of electrical, mechanical, communications systems and other requirements
         </p>
       </div>
 
       {/* Section 13.0 Workers Facilities Provided */}
-      <div className="mb-6">
+      <div className="flex-1">
         <h2 className="text-base font-bold text-gray-900 mb-2">
           13.0 Workers Facilities Provided
         </h2>
@@ -149,39 +150,14 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data, isMultiPage
           </div>
           {[
             {
-              facility: 'Adequate supply of drinking water',
+              facility: 'a. Adequate supply of drinking water',
               provided: data.adequate_supply_of_drinking_water,
               remarks: data.adequate_supply_of_drinking_water_remarks || ''
             },
             {
-              facility: 'Adequate sanitary and washing facilities',
+              facility: 'b. Adequate sanitary and washing facilities',
               provided: data.adequate_sanitary_and_washing_facilities,
               remarks: data.adequate_sanitary_and_washing_facilities_remarks || ''
-            },
-            {
-              facility: 'Suitable living accommodation',
-              provided: data.suitable_living_accommodation,
-              remarks: data.suitable_living_accommodation_remarks || ''
-            },
-            {
-              facility: 'Separate sanitary, washing and sleeping facilities',
-              provided: data.separate_sanitary_washing_and_sleeping_facilities,
-              remarks: data.separate_sanitary_washing_and_sleeping_facilities_remarks || ''
-            },
-            {
-              facility: 'Lactation station',
-              provided: data.lactation_station,
-              remarks: data.lactation_station_remarks || ''
-            },
-            {
-              facility: 'Ramps, railings and the like',
-              provided: data.ramps_railings_and_like,
-              remarks: data.ramps_railings_and_like_remarks || ''
-            },
-            {
-              facility: 'Other workers welfare facilities',
-              provided: data.other_workers_welfare_facilities,
-              remarks: data.other_workers_welfare_facilities_remarks || ''
             }
           ].map((entry, index) => (
             <div key={index} className="grid grid-cols-[2fr_1fr_1fr] text-xs border-b border-gray-300 last:border-b-0">
@@ -205,8 +181,8 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data, isMultiPage
       </div>
 
       {/* Footer */}
-      <div className={isMultiPage ? "mt-8" : "mt-auto"}>
-        <span className="text-sm text-gray-600">Page | 8</span>
+      <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
+        <span className="text-xs text-gray-600">Page | 8</span>
       </div>
     </div>
   );

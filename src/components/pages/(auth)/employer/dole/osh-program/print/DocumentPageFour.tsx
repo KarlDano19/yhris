@@ -10,7 +10,7 @@ interface DocumentPageFourProps {
 const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage = false }) => {
   return (
     <div 
-      className="bg-white text-black font-sans text-sm leading-tight w-full h-full flex flex-col" 
+      className="bg-white text-black font-sans text-xs leading-tight w-full h-full flex flex-col" 
       style={{ 
         fontFamily: 'Arial, sans-serif',
         width: '210mm',
@@ -26,18 +26,18 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
         </h1>
       </div>
 
-      {/* Section 2.1 Conduct of Risk Assessment */}
+      {/* Section 2.1 Conduct of Risk Assesxsent */}
       <div className="mb-4">
         <h2 className="text-base font-semibold text-gray-900 mb-1">
-          2.1 Conduct of Risk Assessment
+          2.1 Conduct of Risk Assesxsent
         </h2>
-        <p className="text-sm text-gray-700 mb-3">
-          Kindly accomplish. Pls use additional pages if needed. You may also wish to attach your Company&apos;s Risk Assessment Matrix as substitute.
+        <p className="text-xs text-gray-700 mb-3">
+          Kindly accomplish. Pls use additional pages if needed. You may also wish to attach your Company&apos;s Risk Assesxsent Matrix as substitute.
         </p>
 
-        {/* Risk Assessment Matrix Table */}
+        {/* Risk Assesxsent Matrix Table */}
         <div className="mb-3">
-          <h3 className="text-sm font-medium text-gray-900 mb-1">Risk Assessment Matrix</h3>
+          <h3 className="text-xs font-medium text-gray-900 mb-1">Risk Assesxsent Matrix</h3>
           <div className="border border-gray-300">
             <div className="grid grid-cols-5 bg-gray-100 text-xs font-medium text-gray-900">
               <div className="p-2 border-r border-gray-300">Task</div>
@@ -97,26 +97,26 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
         <h2 className="text-base font-semibold text-gray-900 mb-1">
           2.2 Medical Surveillance
         </h2>
-        <p className="text-sm text-gray-700 mb-3">
+        <p className="text-xs text-gray-700 mb-3">
           The company will require all employees to undergo a baseline or initial medical health examination prior to assigning to a potentially hazardous activity. The examination will include but not limited to the following:
         </p>
         
         <div className="space-y-2">
           {/* a. Routine */}
           <div className="flex items-start">
-            <span className="text-sm text-gray-700 mr-2 w-4 flex-shrink-0">a.</span>
+            <span className="text-xs text-gray-700 mr-2 w-4 flex-shrink-0">a.</span>
             <div className="flex-1">
-              <span className="text-sm text-gray-700">Routine:</span>
+              <span className="text-xs text-gray-700">Routine:</span>
               <div className="ml-4 mt-1 space-y-1">
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">( )</span>
-                  <span className="text-sm text-gray-700">CBC</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">Chest X-ray</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">Urinalysis</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">Stool exam</span>
+                  <span className="text-xs text-gray-700 mr-2">( )</span>
+                  <span className="text-xs text-gray-700">CBC</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">Chest X-ray</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">Urinalysis</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">Stool exam</span>
                 </div>
               </div>
             </div>
@@ -124,17 +124,17 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
 
           {/* b. Special */}
           <div className="flex items-start">
-            <span className="text-sm text-gray-700 mr-2 w-4 flex-shrink-0">b.</span>
+            <span className="text-xs text-gray-700 mr-2 w-4 flex-shrink-0">b.</span>
             <div className="flex-1">
-              <span className="text-sm text-gray-700">Special:</span>
+              <span className="text-xs text-gray-700">Special:</span>
               <div className="ml-4 mt-1 space-y-1">
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">( )</span>
-                  <span className="text-sm text-gray-700">Blood Chemistry</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">ECG</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">others, please specify:</span>
+                  <span className="text-xs text-gray-700 mr-2">( )</span>
+                  <span className="text-xs text-gray-700">Blood Chemistry</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">ECG</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">others, please specify:</span>
                   <div className="border-b border-gray-300 w-20 pb-1 min-h-[16px] ml-2">
                     {/* Special surveillance data would go here */}
                   </div>
@@ -145,19 +145,19 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
 
           {/* c. Schedule */}
           <div className="flex items-start">
-            <span className="text-sm text-gray-700 mr-2 w-4 flex-shrink-0">c.</span>
+            <span className="text-xs text-gray-700 mr-2 w-4 flex-shrink-0">c.</span>
             <div className="flex-1">
-              <span className="text-sm text-gray-700">Schedule of Annual medical examination:</span>
+              <span className="text-xs text-gray-700">Schedule of Annual medical examination:</span>
               <div className="ml-4 mt-1">
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">( )</span>
-                  <span className="text-sm text-gray-700">Q1</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">Q2</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">Q3</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">Q4</span>
+                  <span className="text-xs text-gray-700 mr-2">( )</span>
+                  <span className="text-xs text-gray-700">Q1</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">Q2</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">Q3</span>
+                  <span className="text-xs text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-xs text-gray-700">Q4</span>
                 </div>
               </div>
             </div>
@@ -165,19 +165,19 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
 
           {/* d. Drug Testing */}
           <div className="flex items-start">
-            <span className="text-sm text-gray-700 mr-2 w-4 flex-shrink-0">d.</span>
+            <span className="text-xs text-gray-700 mr-2 w-4 flex-shrink-0">d.</span>
             <div className="flex-1">
-              <span className="text-sm text-gray-700">Is random drug testing conducted?</span>
+              <span className="text-xs text-gray-700">Is random drug testing conducted?</span>
               <div className="ml-4 mt-1">
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">Yes</span>
+                  <span className="text-xs text-gray-700 mr-2">Yes</span>
                   <div className="border-b border-gray-300 w-16 pb-1 min-h-[16px] mr-4">
                     {data.random_drug_testing ? 'Yes' : ''}
                   </div>
-                  <span className="text-sm text-gray-700 mr-2">when</span>
+                  <span className="text-xs text-gray-700 mr-2">when</span>
                   <div className="border-b border-gray-300 w-16 pb-1 min-h-[16px] mr-4"></div>
-                  <span className="text-sm text-gray-700 mr-2">No</span>
-                  <span className="text-sm text-gray-700">( )</span>
+                  <span className="text-xs text-gray-700 mr-2">No</span>
+                  <span className="text-xs text-gray-700">( )</span>
                 </div>
               </div>
             </div>
@@ -194,7 +194,7 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, isMultiPage =
 
       {/* Footer */}
       <div className={isMultiPage ? "relative mt-auto pt-8" : "mt-auto pt-8"}>
-        <span className="text-sm text-gray-600">Page | 4</span>
+        <span className="text-xs text-gray-600">Page | 4</span>
       </div>
     </div>
   );
