@@ -196,7 +196,7 @@ export default function VersionHistoryModal({
       <Transition.Root show={isOpen} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-20"
+          className="relative z-50"
           onClose={onClose}
         >
         <Transition.Child

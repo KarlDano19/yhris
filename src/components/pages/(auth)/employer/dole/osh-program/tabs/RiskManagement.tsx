@@ -5,6 +5,8 @@ import { useFieldArray } from "react-hook-form";
 
 import { MinusIcon, XCircleIcon } from "@heroicons/react/24/solid";
 
+const MAX_RISK_ENTRIES = 42;
+
 export default function RiskManagement({
   control,
   register,
@@ -30,6 +32,10 @@ export default function RiskManagement({
   }, []);
 
   const handleAddNewLine = () => {
+    if (fields.length >= MAX_RISK_ENTRIES) {
+      return; // Don't add more rows if limit is reached
+    }
+    
     append({
       task: "",
       hazard_identified: "",
@@ -188,15 +194,28 @@ export default function RiskManagement({
             </tbody>
           </table>
         </div>
-        <div className="flex justify-start mt-4">
+        <div className="flex justify-between items-center mt-4">
           <button
             type="button"
             onClick={handleAddNewLine}
-            className="bg-savoy-blue text-white px-4 py-2 rounded-md"
+            disabled={fields.length >= MAX_RISK_ENTRIES}
+            className={`px-4 py-2 rounded-md ${
+              fields.length >= MAX_RISK_ENTRIES
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                : 'bg-savoy-blue text-white hover:bg-blue-700'
+            }`}
           >
             Add new line
           </button>
+          <div className="text-sm text-gray-600">
+            {fields.length} / {MAX_RISK_ENTRIES} entries
+          </div>
         </div>
+        {fields.length >= MAX_RISK_ENTRIES && (
+          <div className="mt-2 text-sm text-amber-600">
+            Maximum limit of {MAX_RISK_ENTRIES} entries reached.
+          </div>
+        )}
       </div>
     </form>
   );

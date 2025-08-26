@@ -771,7 +771,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </button>
         </div>
 
-        <div className={`px-2 md:px-8 lg:px-4 sticky top-0 bg-white z-15 py-2 ${isScrolled ? 'border-b border-gray-200' : ''}`}>
+        <div className={`px-2 md:px-8 lg:px-4 sticky top-0 bg-white z-30 py-2 ${isScrolled ? 'border-b border-gray-200' : ''}`}>
           <h2 className="text-xl font-bold text-indigo-dye">OSH Program</h2>
           <div className="flex-1 flex justify-end space-x-4">
             <div className='relative inline-block'> 

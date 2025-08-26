@@ -33,29 +33,26 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
         {/* Risk Assessment Matrix Table Continuation */}
         {riskData.length > 22 && (
           <div className="mb-4">
-            <div className="mb-3">
-              <h3 className="text-xs font-medium text-gray-900 mb-1">Risk Assessment Matrix (Continued)</h3>
-              <div className="border border-gray-300">
-                {riskData.slice(22).map((entry, index) => (
-                  <div key={index + 22} className="grid grid-cols-5 border-t border-gray-300">
-                    <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                      {entry.task || ''}
-                    </div>
-                    <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                      {entry.hazard_identified || ''}
-                    </div>
-                    <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                      {entry.risk_description || ''}
-                    </div>
-                    <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                      {entry.priority || ''}
-                    </div>
-                    <div className="p-2 min-h-[20px] text-xs">
-                      {entry.control_measures || ''}
-                    </div>
+            <div className="border border-gray-300">
+              {riskData.slice(22).map((entry, index) => (
+                <div key={index + 22} className="grid grid-cols-5 border-t border-gray-300">
+                  <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
+                    {entry.task || ''}
                   </div>
-                ))}
-              </div>
+                  <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
+                    {entry.hazard_identified || ''}
+                  </div>
+                  <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
+                    {entry.risk_description || ''}
+                  </div>
+                  <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
+                    {entry.priority || ''}
+                  </div>
+                  <div className="p-2 min-h-[20px] text-xs">
+                    {entry.control_measures || ''}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
