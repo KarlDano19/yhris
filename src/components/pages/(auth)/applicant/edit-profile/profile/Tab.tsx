@@ -9,7 +9,7 @@ import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
 import DropDownArrow from '@/svg/DropDownArrow';
-import regions from '@/utils/location';
+import locations from '@/utils/location';
 import colleges from '@/utils/colleges';
 import nationalities from '@/utils/nationalities';
 import degrees from '@/utils/degrees';
@@ -45,7 +45,7 @@ const Tab = ({
   
   // City address autocomplete state
   const [cityInput, setCityInput] = useState('');
-  const [filteredCities, setFilteredCities] = useState(regions);
+  const [filteredCities, setFilteredCities] = useState(locations);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [selectedCityIndex, setSelectedCityIndex] = useState(-1);
   
@@ -248,10 +248,10 @@ const Tab = ({
     setValue('address', value);
     
     if (value.trim() === '') {
-      setFilteredCities(regions);
+      setFilteredCities(locations);
       setShowCityDropdown(false);
     } else {
-      const filtered = regions.filter(region =>
+      const filtered = locations.filter(region =>
         region.label.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredCities(filtered);

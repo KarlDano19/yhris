@@ -44,6 +44,8 @@ export default function AddSeparationModal({
     });
     setEmployeeSearch('');
     setEmployeeSelected(false);
+    setValue('department', '');
+    setValue('position', '');
   };
 
   const onSubmit = handleSubmit((data) => {
@@ -168,6 +170,8 @@ export default function AddSeparationModal({
                                 setValue('name', '');
                                 setEmployeeSearch('');
                                 setEmployeeSelected(false);
+                                setValue('department', '');
+                                setValue('position', '');
                               }}
                               tabIndex={-1}
                             >
@@ -186,6 +190,14 @@ export default function AddSeparationModal({
                                   setValue('name', item.id);
                                   setEmployeeSearch(`${item.firstname} ${item.lastname}`);
                                   setEmployeeSelected(true);
+                                  // Auto-fill department from employee data
+                                  if (item.department) {
+                                    setValue('department', item.department);
+                                  }
+                                  // Auto-fill position from employee data
+                                  if (item.position) {
+                                    setValue('position', item.position);
+                                  }
                                   document.getElementById('employee-dropdown')?.classList.add('hidden');
                                 }}
                               >
@@ -221,7 +233,8 @@ export default function AddSeparationModal({
                           id='position'
                           {...register('position', { required: true })}
                           type='text'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          readOnly
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
                         />
                       </div>
                     </div>
@@ -251,7 +264,8 @@ export default function AddSeparationModal({
                           id='department'
                           {...register('department', { required: true })}
                           type='text'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          readOnly
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
                         />
                       </div>
                     </div>

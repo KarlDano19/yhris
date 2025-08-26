@@ -160,6 +160,8 @@ function PersonalInformation({
                     className="text-savoy-blue hover:text-red-500 focus:outline-none text-3xl"
                     onClick={() => {
                       setValue('employee', '');
+                      setValue('address', '');
+                      setValue('sex', '');
                       setEmployeeSearch('');
                       setEmployeeSelected(false);
                     }}
@@ -178,6 +180,8 @@ function PersonalInformation({
                       className="px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white"
                       onClick={() => {
                         setValue('employee', item.id);
+                        setValue('address', item.address);
+                        setValue('sex', item.gender);
                         setEmployeeSearch(`${item.firstname} ${item.lastname}`);
                         setEmployeeSelected(true);
                         document.getElementById('employee-dropdown')?.classList.add('hidden');
@@ -246,7 +250,8 @@ function PersonalInformation({
                 type="text"
                 {...register("address", { required: true })}
                 id="address"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                readOnly
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-50"
               />
             </div>
           </div>
@@ -269,25 +274,20 @@ function PersonalInformation({
           </div>
           <div>
             <label
-              htmlFor="email"
+              htmlFor="sex"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Sex
+              Gender
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
-              <select
-                id="sex"
+              <input
+                type="text"
                 {...register("sex", { required: true })}
-                className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-              >
-                <option value="">Select...</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                <SelectChevronDown />
-              </div>
+                id="sex"
+                readOnly
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-50"
+              />
             </div>
           </div>
         </div>

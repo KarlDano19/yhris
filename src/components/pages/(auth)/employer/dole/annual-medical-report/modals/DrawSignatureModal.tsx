@@ -83,9 +83,11 @@ import {
                         canvasProps={{
                           width: 900,
                           height: 200,
-                          className: "mx-auto block rounded bg-white border",
-                          style: { width: '100%', maxWidth: 900, height: 200 }
+                          className: "w-full h-full"
                         }}
+                        backgroundColor="rgba(0,0,0,0)"
+                        minWidth={1}
+                        maxWidth={2}
                       />
                     </div>
                   </div>

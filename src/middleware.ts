@@ -36,6 +36,7 @@ export async function middleware(request: NextRequest) {
     'train',
     'settings',
     'dole',
+    'analytics',
     'audit-logs',
     'talent-search',
   ];
@@ -79,8 +80,9 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'train' ||
           firstRoute === 'settings' ||
           firstRoute === 'dole' ||
-          firstRoute === 'audit-logs' ||
-          firstRoute === 'talent-search'
+          firstRoute === 'talent-search' ||
+          firstRoute === 'analytics' ||
+          firstRoute === 'audit-logs' 
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {

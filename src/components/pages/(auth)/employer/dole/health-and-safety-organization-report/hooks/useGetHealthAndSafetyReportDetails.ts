@@ -34,10 +34,14 @@ function useGetHealthAndSafetyReportDetails(
   health_and_safety_report_id: number | null
 ) {
   const query = useQuery(
-    ["healthAndSafetyReportDetailsCache"],
+    ["healthAndSafetyReportDetailsCache", health_and_safety_report_id],
     () =>
       getHealthAndSafetyReportDetails(health_and_safety_report_id),
-    { enabled: false, refetchOnWindowFocus: false, keepPreviousData: true }
+    { 
+      enabled: !!health_and_safety_report_id, 
+      refetchOnWindowFocus: false, 
+      keepPreviousData: true 
+    }
   );
   return query;
 }

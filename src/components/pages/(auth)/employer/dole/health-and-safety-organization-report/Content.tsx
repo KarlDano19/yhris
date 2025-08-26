@@ -4,6 +4,8 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
+import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -14,19 +16,25 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
+import useFileforge from '@/components/hooks/useFileforge';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
 import useGetHealthAndSafetyReportItems from './hooks/useGetHealthAndSafetyReportItems';
-import EmailLogo from '@/svg/EmailLogo';
+import { getPrintHealthAndSafetyReportDetails } from './hooks/useGetPrintHealthandSafetyReportDetails';
+import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyReport';
 import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyReportModal';
 import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
 import SendEmailModal from './modals/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
-import { useQueryClient } from '@tanstack/react-query';
 import ExportProgressModal from './modals/ExportProgressModal';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+import EditIcon from '@/svg/EditIcon';
+import EmailLogo from '@/svg/EmailLogo';
+import PrintIcon from "@/svg/PrintIcon";
+import DeleteIcon from '@/svg/DeleteIcon';
+
+import { handlePrintPDF } from './PrintData';
 
 type PaginationProps = {
   totalRecords: number;
@@ -37,6 +45,13 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const statusOptions = [
+  { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+  { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+  { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [healthAndSafetyReportItems, setHealthAndSafetyReportItems] = useState<any>([]);
@@ -51,6 +66,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
+  const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -80,22 +96,57 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const createFormMethods = useForm();
   const editFormMethods = useForm();
 
-  const menuOptions = [
-    {
-      name: 'Export',
-      action: () => {
-        setIsExportProgressModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       setIsSelectBranchModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
+  //   },
+  // ];
+  const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
+
+  const { generatePDFLocally, isGenerating } = useFileforge({
+    pageMargins: {
+      top: '0.1in',
+      right: '0.1in',
+      bottom: '0.1in',
+      left: '0.1in'
     },
-    {
-      name: 'Generate Report',
-      action: () => {
-        setIsSelectBranchModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
+    onSuccess: () => {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message='PDF generated successfully!' type='success' />, { duration: 3000 });
     },
-  ];
+    onError: (error) => {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
+  });
+
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       setIsSelectBranchModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
+  //   },
+  // ];
 
   useEffect(() => {
     if (healthAndSafetyReportItemsData) {
@@ -123,6 +174,39 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsSearching(false);
     }
   }, [isHealthAndSafetyReportItemsLoading, isSearching]);
+
+  const handleStatusChange = async (itemId: number, newStatus: string) => {
+    try {
+      await updateHealthAndSafetyReport.mutateAsync({
+        health_and_safety_report_id: itemId,
+        data: { status: newStatus }
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      healthAndSafetyReportItemsRefetch();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  const handlePrintPDFLocal = async (item: any) => {
+    try {
+      setGeneratingItemId(item.id);
+      // Fetch detailed data using the print hook's function directly
+      const detailedData = await getPrintHealthAndSafetyReportDetails(item.id);
+      
+      // Use detailed data for PDF generation
+      await handlePrintPDF(detailedData, generatePDFLocally);
+    } catch (error) {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
+  };
 
   const handlePrintWithBranch = () => {
     if (selectedBranch) {
@@ -239,6 +323,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.comittee_type}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.chairman_name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='relative inline-block'>
+              <select
+                value={item.status || 'on-schedule'}
+                onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
+                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+              >
+                {statusOptions.map((option) => (
+                  <option 
+                    key={option.value} 
+                    value={option.value}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#111827'
+                    }}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
               <button
@@ -253,20 +363,27 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
-                // className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                // disabled={true}
-                // data-tooltip-id='email-tooltip'
-                // data-tooltip-content='Not available'
-                // data-tooltip-place='bottom'
                 disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <EmailLogo />
+              </button>
+              <button
+                onClick={() => handlePrintPDFLocal(item)}
+                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_health_safety_organization}
+                className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                {generatingItemId === item.id ? (
+                  <div className="animate-spin inline-block w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full">
+                  </div>
+                ) : (
+                  <PrintIcon />
+                )}
               </button>
               <button
                 onClick={() =>
@@ -373,7 +490,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            {/* <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
@@ -423,6 +540,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div> */}
+            <div className='flex-1 flex justify-start lg:justify-end'>
+              <button
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_health_safety_organization}
+              >
+                CREATE
+              </button>
             </div>
           </div>
 
@@ -443,6 +569,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Chairman/ Officer in Charge
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
                         Actions
@@ -675,8 +804,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
         </div>
       </div> */}
-      <Tooltip id='search-tooltip' /> 
-      <Tooltip id='email-tooltip' />
+      <Tooltip id='search-tooltip' />
     </>
   );
 }

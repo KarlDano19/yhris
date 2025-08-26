@@ -1,4 +1,4 @@
-const regions = [
+const locations = [
   {
     value: 'Metro Manila',
     label: 'Metro Manila',
@@ -309,4 +309,4 @@ const regions = [
   },
 ];
 
-export default regions;
+export default locations;

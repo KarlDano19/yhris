@@ -34,10 +34,14 @@ function useGetWorkEnvironmentRequestDetails(
   work_environment_measurement_request_id: number | null
 ) {
   const query = useQuery(
-    ["workEnvironmentRequestDetailsCache"],
+    ["workEnvironmentRequestDetailsCache", work_environment_measurement_request_id],
     () =>
       getWorkEnvironmentRequestDetails(work_environment_measurement_request_id),
-    { enabled: false, refetchOnWindowFocus: false, keepPreviousData: true }
+    { 
+      enabled: !!work_environment_measurement_request_id, 
+      refetchOnWindowFocus: false, 
+      keepPreviousData: true 
+    }
   );
   return query;
 }

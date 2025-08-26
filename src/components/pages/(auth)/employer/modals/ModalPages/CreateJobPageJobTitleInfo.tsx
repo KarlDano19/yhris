@@ -3,7 +3,7 @@ import { Dispatch } from 'react';
 import Select from 'react-select';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
-import { locationOptions } from '@/utils/locationOptions';
+import { advertiseOptions } from '@/utils/advertiseOptions';
 
 interface Field {
   onChange: (value: any) => void;
@@ -110,8 +110,8 @@ export default function CreateJobPageTitleInfo({
                   <Select
                     className='text-sm'
                     classNamePrefix='select'
-                    options={locationOptions}
-                    value={locationOptions.filter((item: any) => 
+                    options={advertiseOptions}
+                    value={advertiseOptions.filter((item: any) => 
                       Array.isArray(value) 
                         ? value.includes(item.value) 
                         : item.value === value
