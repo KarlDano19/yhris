@@ -520,7 +520,7 @@ const Details = ({
                 onFocus={() => setShowRegionDropdown(true)}
                 onBlur={() => setTimeout(() => setShowRegionDropdown(false), 200)}
                 placeholder='Type to search region...'
-                className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                className={`${watch('region') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -576,7 +576,7 @@ const Details = ({
                 onBlur={() => setTimeout(() => setShowProvinceDropdown(false), 200)}
                 placeholder='Type to search province...'
                 disabled={!selectedRegionCode}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedRegionCode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${watch('province') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedRegionCode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -632,7 +632,7 @@ const Details = ({
                 onBlur={() => setTimeout(() => setShowMunicipalityDropdown(false), 200)}
                 placeholder='Type to search city/municipality...'
                 disabled={!selectedProvince}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedProvince ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${watch('city') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedProvince ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -690,7 +690,7 @@ const Details = ({
                 onBlur={() => setTimeout(() => setShowBarangayDropdown(false), 200)}
                 placeholder='Type to search barangay...'
                 disabled={!selectedMunicipality}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedMunicipality ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${watch('locality') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedMunicipality ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
