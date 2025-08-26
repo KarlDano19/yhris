@@ -100,9 +100,31 @@ export default function VersionHistoryDetailsModal({
     setZoomLevel(Math.max(50, Math.min(optimalZoom, 200))); // Clamp between 50% and 200%
   };
 
-  // Function to get page numbers 1-14
+  // Function to check if page 4 needs pagination
+  const needsPageFourPagination = (data: T_OshProgram): boolean => {
+    try {
+      const riskData = typeof data.emergency_and_disaster_preparedness === 'string' 
+        ? JSON.parse(data.emergency_and_disaster_preparedness) 
+        : data.emergency_and_disaster_preparedness || [];
+      
+      return Array.isArray(riskData) && riskData.length >= 15;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  // Function to get page numbers based on pagination needs
   const getPageNumbers = () => {
-    return Array.from({ length: 14 }, (_, i) => i + 1);
+    if (!transformedData) return [];
+    
+    const needsPagination = needsPageFourPagination(transformedData);
+    if (needsPagination) {
+      // If page 4 needs pagination, replace page 4 with 4.1 and 4.2
+      return [1, 2, 3, 4.1, 4.2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+    } else {
+      // Normal page numbering
+      return Array.from({ length: 14 }, (_, i) => i + 1);
+    }
   };
 
   const handlePrint = async () => {
@@ -139,7 +161,7 @@ export default function VersionHistoryDetailsModal({
     const currentPageNumber = pageNumbers[currentPageIndex - 1] || currentPageIndex;
     
     let pageContent;
-    switch (currentPageIndex) {
+    switch (currentPageNumber) {
       case 1:
         pageContent = <DocumentPageOne data={transformedData as any} />;
         break;
@@ -150,7 +172,13 @@ export default function VersionHistoryDetailsModal({
         pageContent = <DocumentPageThree data={transformedData as any} />;
         break;
       case 4:
-        pageContent = <DocumentPageFour data={transformedData as any} />;
+        pageContent = <DocumentPageFour data={transformedData as any} pageNumber={1} />;
+        break;
+      case 4.1:
+        pageContent = <DocumentPageFour data={transformedData as any} pageNumber={4.1} />;
+        break;
+      case 4.2:
+        pageContent = <DocumentPageFour data={transformedData as any} pageNumber={4.2} />;
         break;
       case 5:
         pageContent = <DocumentPageFive data={transformedData as any} />;

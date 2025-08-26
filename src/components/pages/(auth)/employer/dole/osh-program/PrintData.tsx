@@ -22,6 +22,19 @@ interface PrintOshProgramOptions {
   generatePDFLocally: (content: React.ReactElement, filename: string) => Promise<void>;
 }
 
+// Function to check if page 4 needs pagination
+const needsPageFourPagination = (data: T_OshProgram): boolean => {
+  try {
+    const riskData = typeof data.emergency_and_disaster_preparedness === 'string' 
+      ? JSON.parse(data.emergency_and_disaster_preparedness) 
+      : data.emergency_and_disaster_preparedness || [];
+    
+    return Array.isArray(riskData) && riskData.length >= 15;
+  } catch (error) {
+    return false;
+  }
+};
+
 // Function to render page content based on page index
 const renderPageContent = (pageIndex: number, data: T_OshProgram) => {
   switch (pageIndex) {
@@ -32,7 +45,11 @@ const renderPageContent = (pageIndex: number, data: T_OshProgram) => {
     case 3:
       return <DocumentPageThree data={data as any} />;
     case 4:
-      return <DocumentPageFour data={data as any} />;
+      return <DocumentPageFour data={data as any} pageNumber={1} />;
+    case 4.1:
+      return <DocumentPageFour data={data as any} pageNumber={4.1} />;
+    case 4.2:
+      return <DocumentPageFour data={data as any} pageNumber={4.2} />;
     case 5:
       return <DocumentPageFive data={data as any} />;
     case 6:
@@ -67,7 +84,17 @@ export const printOshProgram = async ({
     throw new Error("No data provided for printing");
   }
 
-  const pageNumbers = Array.from({ length: 14 }, (_, i) => i + 1);
+  // Determine page numbers based on whether page 4 needs pagination
+  const needsPagination = needsPageFourPagination(data);
+  let pageNumbers: (number | number)[] = [];
+  
+  if (needsPagination) {
+    // If page 4 needs pagination, replace page 4 with 4.1 and 4.2
+    pageNumbers = [1, 2, 3, 4.1, 4.2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+  } else {
+    // Normal page numbering
+    pageNumbers = Array.from({ length: 14 }, (_, i) => i + 1);
+  }
   
   await generatePDFLocally(
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
