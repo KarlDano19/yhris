@@ -24,7 +24,7 @@ export default function UnsavedChangesModal({
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-60' initialFocus={cancelButtonRef} onClose={onClose}>
+      <Dialog as='div' className='relative z-50' initialFocus={cancelButtonRef} onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -37,7 +37,7 @@ export default function UnsavedChangesModal({
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
         </Transition.Child>
 
-        <div className='fixed inset-0 z-10 overflow-y-auto'>
+        <div className='fixed inset-0 z-50 overflow-y-auto'>
           <div className='flex min-h-full items-center justify-center p-4 text-center'>
             <Transition.Child
               as={Fragment}
@@ -72,7 +72,7 @@ export default function UnsavedChangesModal({
                   </button>
                   <button
                     type='button'
-                    className='inline-flex justify-center rounded-md border border-transparent px-4 md:px-6 py-2 text-sm font-medium bg-red-600 text-white shadow-sm hover:bg-red-700 focus:outline-none transition ease-in-out duration-150'
+                    className='inline-flex justify-center rounded-md border border-red-600 px-4 md:px-6 py-2 text-sm font-medium bg-white text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
                     onClick={onDiscard}
                     disabled={isLoading}
                   >

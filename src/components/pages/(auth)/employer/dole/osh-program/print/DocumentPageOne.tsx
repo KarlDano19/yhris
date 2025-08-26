@@ -103,6 +103,9 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   className="mr-2"
                 />
                 <span className="text-xs">Manufacturing:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.manufacturing_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -111,7 +114,10 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   readOnly
                   className="mr-2"
                 />
-                <span className="text-xs">Banks and financial institution</span>
+                <span className="text-xs">Banks and financial institution:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.bank_and_financial_institution_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -121,6 +127,9 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   className="mr-2"
                 />
                 <span className="text-xs">Service:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.service_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -129,7 +138,10 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   readOnly
                   className="mr-2"
                 />
-                <span className="text-xs">Security Agency</span>
+                <span className="text-xs">Security Agency:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.security_agency_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -139,6 +151,9 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   className="mr-2"
                 />
                 <span className="text-xs">Agri/fishing:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.agri_fishing_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -147,7 +162,10 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   readOnly
                   className="mr-2"
                 />
-                <span className="text-xs">Maintenance</span>
+                <span className="text-xs">Maintenance:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.maintenance_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -156,7 +174,10 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   readOnly
                   className="mr-2"
                 />
-                <span className="text-xs">Wholesale/retail</span>
+                <span className="text-xs">Wholesale/retail:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.wholesale_retail_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -165,7 +186,10 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   readOnly
                   className="mr-2"
                 />
-                <span className="text-xs">Construction</span>
+                <span className="text-xs">Construction:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.construction_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -174,7 +198,10 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   readOnly
                   className="mr-2"
                 />
-                <span className="text-xs">Utilities</span>
+                <span className="text-xs">Utilities:</span>
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
+                  {data.utilities_description}
+                </div>
               </div>
               <div className="flex items-center">
                 <input 
@@ -184,7 +211,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
                   className="mr-2"
                 />
                 <span className="text-xs">Others (Please specify):</span>
-                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2">
+                <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
                   {data.others_description}
                 </div>
               </div>
