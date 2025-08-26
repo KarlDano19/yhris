@@ -48,7 +48,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
           <div className="flex items-center">
             <span className="text-xs font-medium text-gray-700 mr-2">• Phone and fax numbers:</span>
             <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2">
-              {`${data.phone_number || ''} ${data.fax_number || ''}`.trim()}
+              {`${data.phone_number || ''}, ${data.fax_number || ''}`.trim()}
             </div>
           </div>
         </div>
