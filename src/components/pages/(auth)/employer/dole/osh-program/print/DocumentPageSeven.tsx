@@ -10,14 +10,14 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
   return (
     <>
       {/* Top Section - Emergency Health Personnel and Facilities */}
-      <div className="mb-6">
+      <div className="mb-6 ml-5">
         <p className="text-xs text-gray-700 mb-2">
           List of competent emergency health personnel within the worksite duly complemented
           by adequate medical supplies, equipment and facilities based on the total number of
           workers. (Use additional sheet if necessary and attach all required training certificates in
           this section.)
         </p>
-        <h2 className="text-base font-semibold text-gray-900 mb-2">
+        <h2 className="text-xs font-semibold text-gray-900 mb-2">
           Emergency Health Personnel and Facilities
         </h2>
         <div className="border border-gray-300">

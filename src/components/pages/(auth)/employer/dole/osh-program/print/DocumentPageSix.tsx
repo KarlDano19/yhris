@@ -10,61 +10,59 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
   return (
     <>
       {/* Top Section - Joint Coordinating Committee (continued from previous page) */}
-      <div className="mb-4">
+      <div className="mb-4 ml-5">
         <p className="text-xs text-gray-700 mb-2">
           <strong>(c)</strong> Joint Coordinating Committee: For two (2) or more establishments housed under one building or complex including malls.
         </p>
-        <div className="ml-4 space-y-2">
-          <div className="flex items-center">
+        <div className="ml-4 space-y-3">
+          <div className="flex items-start">
             <span className="text-xs font-medium text-gray-700 mr-2">Chairperson:</span>
-            <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
-              {data.chairperson_joint_coordinating}
+            <div className="flex-1">
+              <div className="border-b border-gray-300 pb-1 min-h-[16px]">
+                {data.chairperson_joint_coordinating}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">(Name of Building owner or his/her representative such as the building administrator)</div>
             </div>
-            <span className="text-xs text-gray-600 ml-2">(Name of Building owner or his/her representative such as the building administrator)</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-start">
             <span className="text-xs font-medium text-gray-700 mr-2">Secretary:</span>
-            <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
-              {data.secretary_joint_coordinating}
+            <div className="flex-1">
+              <div className="border-b border-gray-300 pb-1 min-h-[16px]">
+                {data.secretary_joint_coordinating}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">(Name of Safety officer appointed by the Chairperson)</div>
             </div>
-            <span className="text-xs text-gray-600 ml-2">(Name of Safety officer appointed by the Chairperson)</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-start">
             <span className="text-xs font-medium text-gray-700 mr-2">Members:</span>
-          </div>
-          <div className="ml-4 space-y-1">
-            <div className="flex items-center">
-              <span className="text-xs text-gray-700 mr-2">•</span>
-              <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] mr-2">
+            <div className="flex-1">
+              <div className="border-b border-gray-300 pb-1 min-h-[16px]">
                 {data.ex_officio_members_3}
               </div>
-              <span className="text-xs text-gray-600">(Name of 2 safety officers from the building selected to the Joint OSH Committee)</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-xs text-gray-700 mr-2">•</span>
-              <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] mr-2">
+              <div className="text-xs text-gray-600 mt-1">(Name of 2 safety officers from the building selected to the Joint OSH Committee)</div>
+              <div className="border-b border-gray-300 pb-1 min-h-[16px] mt-2">
                 {data.ex_officio_members_4}
               </div>
-              <span className="text-xs text-gray-600">(Name of two (2) workers&apos; representatives one from which must be from a union if organized from any establishments under the building)</span>
+              <div className="text-xs text-gray-600 mt-1">(Name of two (2) workers&apos; representatives one from which must be from a union if organized from any establishments under the building)</div>
             </div>
           </div>
         </div>
-        <p className="text-xs text-gray-600 mt-2">
-          (All members of the HSC shall perform their duties and responsibilities by the OSH law and its implementing guidelines.)
-        </p>
       </div>
 
       {/* Middle Section - Safety and Health Committee Minutes/Reports */}
       <div className="mb-4">
-        <div className="flex items-center mb-2">
-          <span className="text-xs text-gray-700 mr-2">Safety and Health Committee Minutes/Reports submitted to DOLE (pls attach latest OSH committee minutes/report)</span>
-        </div>
-        <div className="ml-4 space-y-1">
+        <p className="text-xs text-gray-600 mt-2 mb-3">
+          (All members of the HSC shall perform their duties and responsibilities by the OSH law and its implementing guidelines.)
+        </p>
+        <p className="text-xs text-gray-700 mb-2">
+          Safety and Health Committee Minutes/Reports submitted to DOLE (pls attach latest OSH committee minutes/report)
+        </p>
+        <div className="ml-4">
           <div className="flex items-center">
             <span className="text-xs text-gray-700 mr-2">Yes</span>
-            <span className="text-xs text-gray-700 mr-2">( )</span>
+            <div className="border-b border-gray-300 w-8 pb-1 mr-4"></div>
             <span className="text-xs text-gray-700 mr-2">No</span>
-            <span className="text-xs text-gray-700">( )</span>
+            <div className="border-b border-gray-300 w-8 pb-1"></div>
           </div>
         </div>
       </div>
@@ -76,7 +74,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
         </h2>
 
         {/* Sub-section 6.1 Safety Officer */}
-        <div className="mb-4">
+        <div className="mb-4 ml-5">
           <h3 className="text-xs font-semibold text-gray-900 mb-2">
             6.1 Safety Officer
           </h3>
@@ -121,24 +119,10 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
         </div>
 
         {/* Sub-section 6.2 Emergency Occupational Health Personnel and Facilities */}
-        <div className="mb-4">
+        <div className="mb-4 ml-5">
           <h3 className="text-xs font-semibold text-gray-900 mb-2">
             6.2 Emergency Occupational Health Personnel and Facilities
           </h3>
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <span className="text-xs font-medium text-gray-700 mr-2">Personnel:</span>
-              <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
-                {/* Health personnel data would be displayed here */}
-              </div>
-            </div>
-            <div className="flex items-center">
-              <span className="text-xs font-medium text-gray-700 mr-2">Facilities:</span>
-              <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
-                {/* Health facilities data would be displayed here */}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </>

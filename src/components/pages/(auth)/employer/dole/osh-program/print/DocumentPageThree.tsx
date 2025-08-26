@@ -39,12 +39,12 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
         {/* Signature Line */}
         <div className="flex items-center">
           <span className="text-xs text-gray-700 mr-2">[Signature]</span>
-          <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2">
+          <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2 relative">
             {typeof data.signature === 'string' && data.signature ? (
               <img 
                 src={data.signature} 
                 alt="Signature" 
-                className="max-w-full max-h-16 object-contain"
+                className="absolute -bottom-6 left-0 max-w-full max-h-16 object-contain"
               />
             ) : (
               <span className="text-gray-400">No signature available</span>

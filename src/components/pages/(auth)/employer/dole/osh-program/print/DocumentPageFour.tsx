@@ -62,11 +62,11 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
           <h2 className="text-base font-semibold text-gray-900 mb-1">
             2.2 Medical Surveillance
           </h2>
-          <p className="text-xs text-gray-700 mb-3">
+          <p className="text-xs text-gray-700 mb-3 ml-5">
             The company will require all employees to undergo a baseline or initial medical health examination prior to assigning to a potentially hazardous activity. The examination will include but not limited to the following:
           </p>
           
-          <div className="space-y-2">
+          <div className="space-y-2 ml-5">
             {/* a. Routine */}
             <div className="flex items-start">
               <span className="text-xs text-gray-700 mr-2 w-4 flex-shrink-0">a.</span>
@@ -229,11 +229,11 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
           <h2 className="text-base font-semibold text-gray-900 mb-1">
             2.2 Medical Surveillance
           </h2>
-          <p className="text-xs text-gray-700 mb-3">
+          <p className="text-xs text-gray-700 mb-3 ml-5">
             The company will require all employees to undergo a baseline or initial medical health examination prior to assigning to a potentially hazardous activity. The examination will include but not limited to the following:
           </p>
           
-          <div className="space-y-2">
+          <div className="space-y-2 ml-5">
             {/* a. Routine */}
             <div className="flex items-start">
               <span className="text-xs text-gray-700 mr-2 w-4 flex-shrink-0">a.</span>
