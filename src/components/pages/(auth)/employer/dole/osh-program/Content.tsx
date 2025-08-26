@@ -817,7 +817,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 title="View Version History"
                 className="relative"
               >
-                <HistoryIcon/>
+                <HistoryIcon className="w-10 h-10"/>
                 {versionHistoryData?.version_info && (
                   <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center min-w-[16px]">
                     {versionHistoryData.version_info.current_count > 50 ? '50+' : versionHistoryData.version_info.current_count}
