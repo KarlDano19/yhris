@@ -71,7 +71,7 @@ const Content = () => {
   const {
     tagsSearch,
     setTagsSearch,
-    handleKeyDown,
+    handleKeyDown: originalHandleKeyDown,
     handleRemoveTag: removeTagFromHook,
   } = useTagSearch(searchInput, setSearchInput, []);
 
@@ -233,6 +233,26 @@ const Content = () => {
     // Reset hasSearched if all filters are cleared
     if (!searchQuery && newFilters.location.length === 0 && !newFilters.gender && !newFilters.salary) {
       setHasSearched(false);
+    }
+  };
+
+  // Custom key handler for search input
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      // Enter key triggers search
+      event.preventDefault();
+      handleSearch();
+    } else if (event.key === "Tab" || event.key === ",") {
+      // Tab and comma add chips
+      event.preventDefault();
+      const newTagSearch = searchInput.trim();
+      if (
+        newTagSearch !== "" &&
+        !tagsSearch.some((tagSearch) => tagSearch.toLowerCase() === newTagSearch.toLowerCase())
+      ) {
+        setTagsSearch([...tagsSearch, newTagSearch]);
+        setSearchInput("");
+      }
     }
   };
 
@@ -424,7 +444,7 @@ const Content = () => {
                       onChange={(e) => setSearchInput(e.target.value)}
                       onKeyDown={handleKeyDown}
                       className='block w-full rounded-2xl border-0 py-3 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                      placeholder='Search for skills, roles, or keywords... (e.g., +skills:Python education:Computer Science)'
+                      placeholder='Search for skills, roles, or keywords... (Press Enter to search, Tab to add chips) (e.g., +skills:Python education:Computer Science)'
                     />
                   </div>
                 </div>
