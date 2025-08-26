@@ -6,6 +6,8 @@ interface DeleteVersionModalProps {
   onConfirm: () => void;
   versionNumber: string;
   isLoading?: boolean;
+  isBulkDelete?: boolean;
+  selectedCount?: number;
 }
 
 export default function DeleteVersionModal({
@@ -13,7 +15,9 @@ export default function DeleteVersionModal({
   onClose,
   onConfirm,
   versionNumber,
-  isLoading = false
+  isLoading = false,
+  isBulkDelete = false,
+  selectedCount = 0
 }: DeleteVersionModalProps) {
   
   if (!isOpen) return null;
@@ -28,10 +32,27 @@ export default function DeleteVersionModal({
             <WarningRed />
           </div>
           <div className='px-4 md:px-20 text-center'>
-            <p className='text-lg md:text-xl text-gray-600 font-bold'>
-              Are you sure you want to <span className='text-red-500'>delete</span> version{' '}
-              <span className='text-red-500'>{versionNumber}</span>?
-            </p>
+            {isBulkDelete ? (
+              <>
+                <p className='text-lg md:text-xl text-gray-600 font-bold'>
+                  Are you sure you want to <span className='text-red-500'>delete</span>{' '}
+                  <span className='text-red-500'>{selectedCount} version(s)</span>?
+                </p>
+                <p className='text-sm md:text-base text-gray-500 mt-2'>
+                  This action cannot be undone.
+                </p>
+                {versionNumber && (
+                  <p className='text-sm md:text-base text-gray-600 mt-1'>
+                    Versions: {versionNumber}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className='text-lg md:text-xl text-gray-600 font-bold'>
+                Are you sure you want to <span className='text-red-500'>delete</span> version{' '}
+                <span className='text-red-500'>{versionNumber}</span>?
+              </p>
+            )}
           </div>
           <div className='flex flex-row justify-center w-full gap-3 md:gap-8 px-4 pt-8 md:pt-10 pb-5 md:pb-7'>
             <button
@@ -50,7 +71,7 @@ export default function DeleteVersionModal({
               }}
               disabled={isLoading}
             >
-              {isLoading ? 'Deleting...' : 'Yes'}
+              {isLoading ? (isBulkDelete ? 'Deleting...' : 'Deleting...') : 'Yes'}
             </button>
           </div>
         </div>
