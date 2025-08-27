@@ -35,7 +35,7 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
 
         <div className="border border-gray-300">
           <div className="grid grid-cols-4 text-sm font-medium bg-gray-50 border-b border-gray-300">
-            <div className="p-2 border-r border-gray-300">Shift/Area/unit/Department</div>
+            <div className="p-2 border-r border-gray-300">Shift/Area/unit/<br />Department</div>
             <div className="p-2 border-r border-gray-300">Total number of workers/areas</div>
             <div className="p-2 text-center col-span-2">Health Personnel & Facilities</div>
           </div>
