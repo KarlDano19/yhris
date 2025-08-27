@@ -7,6 +7,10 @@ interface DocumentPageSixProps {
 }
 
 const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
+  // Debug: Log the duties_and_responsibilities value
+  console.log('DocumentPageSix - duties_and_responsibilities:', data.duties_and_responsibilities);
+  console.log('DocumentPageSix - data:', data);
+  
   return (
     <>
       {/* Top Section - Joint Coordinating Committee (continued from previous page) */}
@@ -60,9 +64,13 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
         <div className="ml-4">
           <div className="flex items-center">
             <span className="text-sm text-gray-700 mr-2">Yes</span>
-            <div className="border-b border-gray-300 w-8 pb-1 mr-4"></div>
+            <div className={`border border-gray-300 w-4 h-4 mr-4 flex items-center justify-center ${data.duties_and_responsibilities === true ? 'bg-gray-300' : 'bg-white'}`}>
+              {data.duties_and_responsibilities === true ? '✓' : ''}
+            </div>
             <span className="text-sm text-gray-700 mr-2">No</span>
-            <div className="border-b border-gray-300 w-8 pb-1"></div>
+            <div className={`border border-gray-300 w-4 h-4 flex items-center justify-center ${data.duties_and_responsibilities === false ? 'bg-gray-300' : 'bg-white'}`}>
+              {data.duties_and_responsibilities === false ? '✓' : ''}
+            </div>
           </div>
         </div>
       </div>
@@ -91,21 +99,28 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
             {(() => {
               try {
                 const safetyOfficersData = Array.isArray(data.safety_officers) ? data.safety_officers : [];
-                const rows = Math.max(4, safetyOfficersData.length);
                 
-                return [...Array(rows)].map((_, index) => {
-                  const officer = safetyOfficersData[index] || {};
-                  return (
+                if (safetyOfficersData.length === 0) {
+                  // Show empty rows only if no data
+                  return [...Array(4)].map((_, index) => (
                     <div key={index} className="grid grid-cols-2 border-t border-gray-300">
-                      <div className="p-2 border-r border-gray-300 min-h-[20px] text-sm">
-                        {officer.name || ''}
-                      </div>
-                      <div className="p-2 min-h-[20px] text-sm">
-                        {officer.training_and_hours || ''}
-                      </div>
+                      <div className="p-2 border-r border-gray-300 min-h-[20px]"></div>
+                      <div className="p-2 min-h-[20px]"></div>
                     </div>
-                  );
-                });
+                  ));
+                }
+                
+                // Show actual data
+                return safetyOfficersData.map((officer, index) => (
+                  <div key={index} className="grid grid-cols-2 border-t border-gray-300">
+                    <div className="p-2 border-r border-gray-300 min-h-[20px] text-sm">
+                      {officer.name || ''}
+                    </div>
+                    <div className="p-2 min-h-[20px] text-sm">
+                      {officer.training_and_hours || ''}
+                    </div>
+                  </div>
+                ));
               } catch (error) {
                 return [...Array(4)].map((_, index) => (
                   <div key={index} className="grid grid-cols-2 border-t border-gray-300">

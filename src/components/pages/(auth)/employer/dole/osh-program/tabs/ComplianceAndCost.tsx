@@ -263,9 +263,9 @@ export default function ComplianceAndCost({
         </div>
       </div>
       <div className=" gap-6 mt-24 md:mt-4">
-            <h1 className="text-sm text-gray-500 mt-2">
-            This policy is formulated for everybody&apos;s information. The company is committed to ensuring workers&apos; health and providing a healthy and safe workplace
-            </h1>
+        <h1 className="text-sm text-gray-500 mt-2">
+          This policy is formulated for everybody&apos;s information. The company is committed to ensuring workers&apos; health and providing a healthy and safe workplace
+        </h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
           <div>

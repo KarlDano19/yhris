@@ -7,6 +7,20 @@ interface DocumentPageFourteenProps {
 }
 
 const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   return (
     <>
       {/* Main Content - Annex A Policy */}
@@ -59,18 +73,18 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
           <div className="flex-1 mr-8">
             <div className="flex items-center mb-5">
               <span className="text-sm font-medium text-gray-700 mr-2">DATE:</span>
-              <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px]">
-                {data.date || ''}
+              <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px text-center">
+                {formatDate(data.date_filled) || ''}
               </div>
             </div>
-            <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px]">
-              {data.name_of_owner || ''}
+            <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px] text-center">
+              {data.name_of_owner_manager || ''}
             </div>
             <p className="text-sm text-gray-700 text-center">Owner/Manager</p>
           </div>
           <div className="flex-1">
-            <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px]">
-              {data.employees_representative_name || ''}
+            <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px] text-center">
+              {data.employees_representative || ''}
             </div>
             <p className="text-sm text-gray-700 text-center">Employees&apos; Representative</p>
           </div>

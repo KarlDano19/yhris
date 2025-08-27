@@ -7,6 +7,27 @@ interface DocumentPageSevenProps {
 }
 
 const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
+  // Debug: Log the data
+  console.log('DocumentPageSeven - health_training:', data.health_training);
+  console.log('DocumentPageSeven - risk_assessment:', data.risk_assessment);
+  console.log('DocumentPageSeven - safety_meeting:', data.safety_meeting);
+  console.log('DocumentPageSeven - data:', data);
+  
+  // Format date to readable format (MM/DD/YYYY)
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+  
   return (
     <>
       {/* Top Section - Emergency Health Personnel and Facilities */}
@@ -27,19 +48,28 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
           {(() => {
             try {
               const healthPersonnelData = Array.isArray(data.health_personnel) ? data.health_personnel : [];
-              const rows = Math.max(3, healthPersonnelData.length);
               
-              return [...Array(rows)].map((_, index) => {
-                const entry = healthPersonnelData[index] || {};
-                return (
+              if (healthPersonnelData.length === 0) {
+                // Show empty rows only if no data
+                return [...Array(3)].map((_, index) => (
                   <div key={index} className="grid grid-cols-4 text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.shift_area_department || ''}</div>
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.total_workers || ''}</div>
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.health_personnel_name || ''}</div>
-                    <div className="p-2 min-h-[24px]">{entry.facilities || ''}</div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 min-h-[24px]"></div>
                   </div>
-                );
-              });
+                ));
+              }
+              
+              // Show actual data
+              return healthPersonnelData.map((entry, index) => (
+                <div key={index} className="grid grid-cols-4 text-sm border-b border-gray-300 last:border-b-0">
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.shift_area_department || ''}</div>
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.total_workers || ''}</div>
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.health_personnel_name || ''}</div>
+                  <div className="p-2 min-h-[24px]">{entry.facilities || ''}</div>
+                </div>
+              ));
             } catch (error) {
               return [...Array(3)].map((_, index) => (
                 <div key={index} className="grid grid-cols-4 text-sm border-b border-gray-300 last:border-b-0">
@@ -61,7 +91,7 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
         </h2>
         <ul className="list-none pl-4 mb-4 space-y-1">
           <li className="text-sm text-gray-700">--Orientation of all workers on OSH</li>
-          <li className="text-sm text-gray-700">-Conduct of Risk Assesxsent, evaluation and Control</li>
+          <li className="text-sm text-gray-700">-Conduct of Risk Assessment, evaluation and Control</li>
           <li className="text-sm text-gray-700">-*Continuing training on OSH for OSH Personnel</li>
           <li className="text-sm text-gray-700">-*Work permit System</li>
         </ul>
@@ -77,18 +107,26 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
           {(() => {
             try {
               const trainingData = Array.isArray(data.health_training) ? data.health_training : [];
-              const rows = Math.max(3, trainingData.length);
               
-              return [...Array(rows)].map((_, index) => {
-                const entry = trainingData[index] || {};
-                return (
+              if (trainingData.length === 0) {
+                // Show empty rows only if no data
+                return [...Array(3)].map((_, index) => (
                   <div key={index} className="grid grid-cols-[2fr_1fr_1fr] text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.name || ''}</div>
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.employees_in_attendance || ''}</div>
-                    <div className="p-2 min-h-[24px]">{entry.date || ''}</div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 min-h-[24px]"></div>
                   </div>
-                );
-              });
+                ));
+              }
+              
+              // Show actual data
+              return trainingData.map((entry, index) => (
+                <div key={index} className="grid grid-cols-[2fr_1fr_1fr] text-sm border-b border-gray-300 last:border-b-0">
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.name_of_osh_training || ''}</div>
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.no_of_employees_in_attendance || ''}</div>
+                  <div className="p-2 min-h-[24px]">{formatDate(entry.date)}</div>
+                </div>
+              ));
             } catch (error) {
               return [...Array(3)].map((_, index) => (
                 <div key={index} className="grid grid-cols-[2fr_1fr_1fr] text-sm border-b border-gray-300 last:border-b-0">
@@ -104,23 +142,30 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
         {/* Table: Conduct of Risk Assesxsent */}
         <div className="border border-gray-300 mb-4">
           <div className="grid grid-cols-2 text-sm font-medium bg-gray-50 border-b border-gray-300">
-            <div className="p-2 border-r border-gray-300">Conduct of Risk Assesxsent (may include WEM)</div>
+            <div className="p-2 border-r border-gray-300">Conduct of Risk Assessment (may include WEM)</div>
             <div className="p-2">Date</div>
           </div>
           {(() => {
             try {
-              const riskData = Array.isArray(data.risk_assesxsent) ? data.risk_assesxsent : [];
-              const rows = Math.max(2, riskData.length);
+              const riskData = Array.isArray(data.risk_assessment) ? data.risk_assessment : [];
               
-              return [...Array(rows)].map((_, index) => {
-                const entry = riskData[index] || {};
-                return (
+              if (riskData.length === 0) {
+                // Show empty rows only if no data
+                return [...Array(2)].map((_, index) => (
                   <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.description || ''}</div>
-                    <div className="p-2 min-h-[24px]">{entry.date || ''}</div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 min-h-[24px]"></div>
                   </div>
-                );
-              });
+                ));
+              }
+              
+              // Show actual data
+              return riskData.map((entry, index) => (
+                <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.conduct_of_risk_assessment || ''}</div>
+                  <div className="p-2 min-h-[24px]">{formatDate(entry.date)}</div>
+                </div>
+              ));
             } catch (error) {
               return [...Array(2)].map((_, index) => (
                 <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
@@ -146,17 +191,24 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
           {(() => {
             try {
               const safetyData = Array.isArray(data.safety_meeting) ? data.safety_meeting : [];
-              const rows = Math.max(2, safetyData.length);
               
-              return [...Array(rows)].map((_, index) => {
-                const entry = safetyData[index] || {};
-                return (
+              if (safetyData.length === 0) {
+                // Show empty rows only if no data
+                return [...Array(2)].map((_, index) => (
                   <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.description || ''}</div>
-                    <div className="p-2 min-h-[24px]">{entry.date || ''}</div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 min-h-[24px]"></div>
                   </div>
-                );
-              });
+                ));
+              }
+              
+              // Show actual data
+              return safetyData.map((entry, index) => (
+                <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.conduct_of_risk_assessment || ''}</div>
+                  <div className="p-2 min-h-[24px]">{formatDate(entry.date)}</div>
+                </div>
+              ));
             } catch (error) {
               return [...Array(2)].map((_, index) => (
                 <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">

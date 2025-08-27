@@ -7,6 +7,21 @@ interface DocumentPageNineProps {
 }
 
 const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
+  // Format date to readable format (MM/DD/YYYY)
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+  
   return (
     <>
       {/* Top Section - Worker Facilities Continuation */}
@@ -85,11 +100,11 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <span className="text-sm text-gray-700 mr-2">Yes</span>
-                <span className="text-sm text-gray-700">({data.written_emergency_program ? '✓' : ''})</span>
+                <span className="text-sm text-gray-700">({data.written_emergency_and_disaster_program === true ? '✓' : ''})</span>
               </div>
               <div className="flex items-center">
                 <span className="text-sm text-gray-700 mr-2">No</span>
-                <span className="text-sm text-gray-700">({!data.written_emergency_program ? '✓' : ''})</span>
+                <span className="text-sm text-gray-700">({data.written_emergency_and_disaster_program === false ? '✓' : ''})</span>
               </div>
             </div>
           </div>
@@ -108,19 +123,27 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
             </div>
             {(() => {
               try {
-                const drillData = Array.isArray(data.emergency_drills) ? data.emergency_drills : [];
-                const rows = Math.max(3, drillData.length);
+                const drillData = Array.isArray(data.drills) ? data.drills : [];
                 
-                return [...Array(rows)].map((_, index) => {
-                  const entry = drillData[index] || {};
-                  return (
+                if (drillData.length === 0) {
+                  // Show empty rows only if no data
+                  return [...Array(3)].map((_, index) => (
                     <div key={index} className="grid grid-cols-3 text-sm border-b border-gray-300 last:border-b-0">
-                      <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.type_of_drills || ''}</div>
-                      <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.date || ''}</div>
-                      <div className="p-2 min-h-[24px]">{entry.responsible_person || ''}</div>
+                      <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                      <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                      <div className="p-2 min-h-[24px]"></div>
                     </div>
-                  );
-                });
+                  ));
+                }
+                
+                // Show actual data
+                return drillData.map((entry, index) => (
+                  <div key={index} className="grid grid-cols-3 text-sm border-b border-gray-300 last:border-b-0">
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.type_of_drills || ''}</div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{formatDate(entry.date)}</div>
+                    <div className="p-2 min-h-[24px]">{entry.responsible_person_position || ''}</div>
+                  </div>
+                ));
               } catch (error) {
                 return [...Array(3)].map((_, index) => (
                   <div key={index} className="grid grid-cols-3 text-sm border-b border-gray-300 last:border-b-0">
@@ -163,7 +186,7 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
           <div className="flex items-center">
             <span className="text-sm font-medium text-gray-700 mr-2">Name of Pollution Control Officer:</span>
             <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px] ml-2">
-              {data.pollution_control_officer || ''}
+              {data.polution_control_officer || ''}
             </div>
           </div>
         </div>

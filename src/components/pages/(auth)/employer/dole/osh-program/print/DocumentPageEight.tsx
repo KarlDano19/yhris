@@ -7,6 +7,21 @@ interface DocumentPageEightProps {
 }
 
 const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
+  // Format date to readable format (MM/DD/YYYY)
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+  
   return (
     <>
       {/* Top Section - Work Accident Reporting */}
@@ -33,17 +48,24 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
           {(() => {
             try {
               const reportData = Array.isArray(data.reported_incidents) ? data.reported_incidents : [];
-              const rows = Math.max(5, reportData.length);
               
-              return [...Array(rows)].map((_, index) => {
-                const entry = reportData[index] || {};
-                return (
+              if (reportData.length === 0) {
+                // Show empty rows only if no data
+                return [...Array(5)].map((_, index) => (
                   <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.report_submitted || ''}</div>
-                    <div className="p-2 min-h-[24px]">{entry.date || ''}</div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 min-h-[24px]"></div>
                   </div>
-                );
-              });
+                ));
+              }
+              
+              // Show actual data
+              return reportData.map((entry, index) => (
+                <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.report_submitted || ''}</div>
+                  <div className="p-2 min-h-[24px]">{formatDate(entry.date)}</div>
+                </div>
+              ));
             } catch (error) {
               return [...Array(5)].map((_, index) => (
                 <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
@@ -72,17 +94,24 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
           {(() => {
             try {
               const ppeData = Array.isArray(data.ppe) ? data.ppe : [];
-              const rows = Math.max(5, ppeData.length);
               
-              return [...Array(rows)].map((_, index) => {
-                const entry = ppeData[index] || {};
-                return (
+              if (ppeData.length === 0) {
+                // Show empty rows only if no data
+                return [...Array(5)].map((_, index) => (
                   <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.ppe_provided || ''}</div>
-                    <div className="p-2 min-h-[24px]">{entry.number_of_workers_given || ''}</div>
+                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
+                    <div className="p-2 min-h-[24px]"></div>
                   </div>
-                );
-              });
+                ));
+              }
+              
+              // Show actual data
+              return ppeData.map((entry, index) => (
+                <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">
+                  <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.ppe_provided || ''}</div>
+                  <div className="p-2 min-h-[24px]">{entry.number_of_workers_given || ''}</div>
+                </div>
+              ));
             } catch (error) {
               return [...Array(5)].map((_, index) => (
                 <div key={index} className="grid grid-cols-2 text-sm border-b border-gray-300 last:border-b-0">

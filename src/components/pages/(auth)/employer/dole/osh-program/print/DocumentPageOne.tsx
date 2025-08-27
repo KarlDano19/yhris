@@ -82,7 +82,6 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
               <div className="border-b border-gray-300 w-20 pb-1 min-h-[20px] mr-2">
                 {data.number_of_female_employees}
               </div>
-              <span className="text-sm text-gray-600">Pls specify</span>
             </div>
           </div>
         </div>
