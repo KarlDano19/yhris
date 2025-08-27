@@ -230,21 +230,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Submit data to server
     await submitDataToServer(processedData);
   });
-
-  // Validate all required fields for the current tab
-  const validateRequiredFields = (data: ExtendedOshProgram): boolean => {
-    // Validate required fields for current tab
-    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
-    const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
-
-    if (missingFields.length > 0) {
-      setValidationMessage(`Please fill out all required fields marked with *`);
-      return false;
-    }
-
-    return true;
-  };
-
+  
   // Process the form data for the current tab
   const processFormData = (data: ExtendedOshProgram): ExtendedOshProgram => {
     // Get the fields for the current tab
