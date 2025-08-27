@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import useGetApplicantItemsList, { buildSearchQuery } from './hook/useGetApplicantItems';
 import CustomToast from '@/components/CustomToast';
 import useTagSearch from '@/components/hooks/useTagSearch';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import ImageBackground from '@/assets/talent-search/Talent-Search-Background.png';
 import ImageBackground3 from '@/assets/talent-search/Talent_Search_Image_3.png';
 import ImageBackground4 from '@/assets/talent-search/Talent_Search_Image_4.png';
@@ -45,6 +46,7 @@ const STORAGE_KEYS = {
   SEARCH_TAGS: 'talent-search-tags',
   STARRED_TAGS: 'talent-search-starred-tags',
   SEARCH_INPUT: 'talent-search-input',
+  HAS_SEARCHED: 'talent-search-has-searched',
 };
 
 const Content = () => {
@@ -68,6 +70,34 @@ const Content = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [showFavoritesPanel, setShowFavoritesPanel] = useState(false);
 
+  // Helper component to display applicant avatar with fallback
+  const ApplicantAvatar = ({ applicant, size = 100 }: { applicant: any; size?: number }) => {
+    const [imageError, setImageError] = useState(false);
+    
+    if (!applicant.photo || imageError) {
+      return (
+        <PlaceholderAvatar
+          width={size}
+          height={size}
+          firstName={applicant.firstname}
+          lastName={applicant.lastname}
+          className="flex-shrink-0"
+        />
+      );
+    }
+
+    return (
+      <Image
+        src={applicant.photo}
+        alt={`${applicant.firstname} ${applicant.lastname}`}
+        width={size}
+        height={size}
+        className="rounded-xl object-cover flex-shrink-0"
+        onError={() => setImageError(true)}
+      />
+    );
+  };
+
   const {
     tagsSearch,
     setTagsSearch,
@@ -86,11 +116,17 @@ const Content = () => {
   // Load saved state from localStorage on component mount
   useEffect(() => {
     try {
+      let shouldShowResults = false;
+      
       // Load filters
       const savedFilters = localStorage.getItem(STORAGE_KEYS.SEARCH_FILTERS);
       if (savedFilters) {
         const parsedFilters = JSON.parse(savedFilters);
         setFilters(parsedFilters);
+        // Check if there are any active filters
+        if (parsedFilters.search || parsedFilters.location.length > 0 || parsedFilters.gender || parsedFilters.salary) {
+          shouldShowResults = true;
+        }
       }
 
       // Load tags
@@ -98,6 +134,9 @@ const Content = () => {
       if (savedTags) {
         const parsedTags = JSON.parse(savedTags);
         setTagsSearch(parsedTags);
+        if (parsedTags.length > 0) {
+          shouldShowResults = true;
+        }
       }
 
       // Load starred tags
@@ -105,6 +144,9 @@ const Content = () => {
       if (savedStarredTags) {
         const parsedStarredTags = JSON.parse(savedStarredTags);
         setStarredTags(new Set(parsedStarredTags));
+        if (parsedStarredTags.length > 0) {
+          shouldShowResults = true;
+        }
       }
 
       // Load search input
@@ -112,10 +154,20 @@ const Content = () => {
       if (savedSearchInput) {
         setSearchInput(savedSearchInput);
       }
+
+      // Load hasSearched state or set it based on whether there are active filters
+      const savedHasSearched = localStorage.getItem(STORAGE_KEYS.HAS_SEARCHED);
+      if (savedHasSearched) {
+        const parsedHasSearched = JSON.parse(savedHasSearched);
+        setHasSearched(parsedHasSearched || shouldShowResults);
+      } else if (shouldShowResults) {
+        // If no saved hasSearched state but we have filters, show results
+        setHasSearched(true);
+      }
     } catch (error) {
       console.error('Error loading saved search state:', error);
     }
-  }, []);
+  }, [setTagsSearch]);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -150,6 +202,14 @@ const Content = () => {
     }
   }, [searchInput]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.HAS_SEARCHED, JSON.stringify(hasSearched));
+    } catch (error) {
+      console.error('Error saving hasSearched state:', error);
+    }
+  }, [hasSearched]);
+
   // Clear saved state function
   const clearSavedState = () => {
     try {
@@ -157,6 +217,7 @@ const Content = () => {
       localStorage.removeItem(STORAGE_KEYS.SEARCH_TAGS);
       localStorage.removeItem(STORAGE_KEYS.STARRED_TAGS);
       localStorage.removeItem(STORAGE_KEYS.SEARCH_INPUT);
+      localStorage.removeItem(STORAGE_KEYS.HAS_SEARCHED);
     } catch (error) {
       console.error('Error clearing saved state:', error);
     }
@@ -516,6 +577,7 @@ const Content = () => {
                     setTagsSearch([]);
                     setStarredTags(new Set());
                     setSearchInput('');
+                    setHasSearched(false);
                     clearSavedState();
                   }}
                   className='bg-white rounded-md border border-red-600 py-2 px-5 text-red-600 text-sm font-semibold shadow hover:shadow-md focus:shadow-none'
@@ -623,7 +685,7 @@ const Content = () => {
                             <div className='flex flex-col h-full'>
                               <div className='flex-1'>
                                 <div className='flex justify-between'>
-                                  <Image src={applicant.photo} alt={applicant.firstname} width={100} height={100} />
+                                  <ApplicantAvatar applicant={applicant} size={120} />
                                   <div className='flex flex-col'>
                                     <h4 className='font-semibold text-lg mb-1'>
                                       {applicant.firstname} {applicant.lastname}
@@ -768,7 +830,7 @@ const Content = () => {
                             <div className='flex flex-col h-full'>
                               <div className='flex-1'>
                                 <div className='flex justify-between'>
-                                  <Image src={applicant.photo} alt={applicant.firstname} width={100} height={100} />
+                                  <ApplicantAvatar applicant={applicant} size={120} />
                                   <div className='flex flex-col'>
                                     <h4 className='font-semibold text-lg mb-1'>
                                       {applicant.firstname} {applicant.lastname}
