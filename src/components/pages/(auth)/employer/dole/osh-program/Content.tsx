@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import Link from "next/link";
-
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 import CustomToast from "@/components/CustomToast";
-
+import VersionHistoryModal from "./modals/VersionHistoryModal";
+import VersionHistoryDetailsModal from "./modals/VersionHistoryDetailsModal";
+import UnsavedChangesModal from "./modals/UnsavedChangesModal";
 import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
 import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
 import useGetOshProgramVersionHistory from "./hooks/useGetOshProgramVersionHistory";
@@ -20,14 +21,11 @@ import RiskManagement from "./tabs/RiskManagement";
 import SafetyMeasures from "./tabs/SafetyMeasures";
 import ComplianceAndCost from "./tabs/ComplianceAndCost";
 import HealthAndWelfare from "./tabs/HealthAndWelfare";
-import UnsavedChangesModal from "./modals/UnsavedChangesModal";
 
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import PrintIcon from "@/svg/PrintIcon";
 import HistoryIcon from "@/svg/HistoryIcon";
 import SelectChevronDown from "@/svg/SelectChevronDown";
-import VersionHistoryModal from "./modals/VersionHistoryModal";
-import VersionHistoryDetailsModal from "./modals/VersionHistoryDetailsModal";
+
 
 // Import shared print utility
 import { printOshProgram } from "./PrintData";
@@ -72,8 +70,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     .find(["employerProfileCache"]) as {
     state: { data: { name: string; mobile_number: string; building: string; street: string; locality: string; city: string; country: string; zip_code: string } } | undefined;
   };
-  
-
   
   // Only fetch once on initial mount, then rely on manual refetch
   const { data: oshProgramDetails, refetch, isLoading } = useGetOshProgramDetails(true);

@@ -2,18 +2,19 @@
 
 import { Fragment, useState, useEffect } from 'react';
 
-import Pagination from '@/components/Pagination';
-
+import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
-import DeleteIcon from '@/svg/DeleteIcon';
 
+import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import useGetOshProgramVersionHistory from '../hooks/useGetOshProgramVersionHistory';
 import useDeleteOshProgramVersion from '../hooks/useDeleteOshProgramVersion';
 import useBulkDeleteOshProgramVersions from '../hooks/useBulkDeleteOshProgramVersions';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 import DeleteVersionModal from './DeleteVersionModal';
+
+import DeleteIcon from '@/svg/DeleteIcon';
+
 
 interface VersionHistoryModalProps {
   isOpen: boolean;

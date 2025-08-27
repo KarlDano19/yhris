@@ -2,17 +2,15 @@
 
 import { Fragment, useState } from 'react';
 
+import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
 import { 
   XCircleIcon, 
   ArrowDownTrayIcon,
-  PlusIcon,
-  MinusIcon,
-  ArrowsPointingOutIcon
 } from "@heroicons/react/24/solid";
-import useFileforge from '../hooks/useFileforge';
-import { printOshProgram } from '../PrintData';
 
+import useFileforge from '../hooks/useFileforge';
+import CustomToast from '@/components/CustomToast';
 // Import individual page components for preview
 import DocumentPageOne from '../print/DocumentPageOne';
 import DocumentPageTwo from '../print/DocumentPageTwo';
@@ -28,10 +26,10 @@ import DocumentPageEleven from '../print/DocumentPageEleven';
 import DocumentPageTwelve from '../print/DocumentPageTwelve';
 import DocumentPageThirteen from '../print/DocumentPageThirteen';
 import DocumentPageFourteen from '../print/DocumentPageFourteen';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
+
 import { T_OshProgram } from '@/types/osh-program';
+import { printOshProgram } from '../PrintData';
 
 interface VersionHistoryDetailsModalProps {
   isOpen: boolean;

@@ -1,8 +1,5 @@
 import React from 'react';
 
-import { T_OshProgram } from '@/types/osh-program';
-
-// Import existing page components
 import DocumentPageOne from './DocumentPageOne';
 import DocumentPageTwo from './DocumentPageTwo';
 import DocumentPageThree from './DocumentPageThree';
@@ -17,6 +14,8 @@ import DocumentPageEleven from './DocumentPageEleven';
 import DocumentPageTwelve from './DocumentPageTwelve';
 import DocumentPageThirteen from './DocumentPageThirteen';
 import DocumentPageFourteen from './DocumentPageFourteen';
+
+import { T_OshProgram } from '@/types/osh-program';
 
 interface OshProgramDocumentProps {
   data: T_OshProgram;

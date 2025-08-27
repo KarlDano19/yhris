@@ -5,13 +5,13 @@ import { Controller } from "react-hook-form";
 
 import dynamic from "next/dynamic";
 
-import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../modals/DrawSignatureModal";
 import FilePreviewModal from "../modals/FilePreviewModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+
+import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
 export default function ProgramAndPolicy({
   control,

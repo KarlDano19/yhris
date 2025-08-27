@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useFieldArray } from "react-hook-form";
 
+import { useFieldArray } from "react-hook-form";
 import { MinusIcon, XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function RiskManagement({
