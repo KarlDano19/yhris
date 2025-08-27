@@ -9,87 +9,53 @@ interface DocumentPageElevenProps {
 const DocumentPageEleven: React.FC<DocumentPageElevenProps> = ({ data }) => {
   return (
     <>
-      {/* General Personal Protective Equipment (PPE) Requirements */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 mb-1">
-          <strong>Face Shield</strong> - Required for jack hammering & grinding operations.
+      {/* Section 19.0 Cost of implementing company OSH program */}
+      <div className="mb-6 flex-1">
+        <h2 className="text-base font-bold text-gray-900 mb-3">
+          19.0 Cost of implementing company OSH program
+        </h2>
+        <p className="text-sm text-gray-700 mb-4">
+          Php <span className="border-b border-gray-400 px-8">{data.cost_osh_program || ''}</span>; Annual estimated amount for OSH program implementation to include but not
+          limited to the following: orientation/training of workers, safety officer, OH personnel,
+          purchase and maintenance of PPE, first aid medicine and other medical supplies, safety
+          signages and devices, fire safety equipment/tools, safety of equipment (i.e. machine
+          guards) etc.
         </p>
-        <p className="text-sm text-gray-700 mb-1">
-          <strong>Goggles</strong> - Required for welding works.
-        </p>
-        <p className="text-sm text-gray-700 mb-1">
-          <strong>Dusk Mask</strong> - Required for cement handling and housekeeping operations.
-        </p>
-        <p className="text-sm text-gray-700 mb-1">
-          <strong>Respirator</strong> - Required in confined areas (cleaning of tanks etc.), painting, and handling chemical, especially toxic matter.
-        </p>
-        
-        {/* Disciplinary Action Schedule for General PPE */}
-        <p className="text-sm text-gray-700 mb-2 mt-2">
-          <strong>Disciplinary Action Schedule (applies to the above PPE):</strong>
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Written reprimand</li>
-          <li className="text-sm text-gray-700">• Second offense - ONE (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Fifth offense - Dismissal</li>
-        </ul>
-      </div>
 
-      {/* C. Safety Harness & Life Lines */}
-      <div className="mb-4 ml-5">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>C. Safety Harness & Life Lines</strong> - Required for employees working above 6 ft. where there is a great danger of falling. Examples include the perimeter of a building being constructed, column and rebar installations, formworks, plastering works outside the building, painting crane installations and repair, and other situations as required by the Establishment safety engineer.
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Written reprimand</li>
-          <li className="text-sm text-gray-700">• Second offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Fifth offense - Dismissal</li>
-        </ul>
-      </div>
-
-      {/* D. Ear Muff */}
-      <div className="mb-4 ml-5">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>D. Ear Muff</strong> - Required for employees engaged in usual noise exposures such as generator tending, heliports, and tinsmith works (air conduct assembly).
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Written reprimand</li>
-          <li className="text-sm text-gray-700">• Second offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Fifth offense - Dismissal</li>
-        </ul>
-      </div>
-
-      {/* E. Rain Boots (Rubber Boots) */}
-      <div className="mb-4 ml-5">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>E. Rain Boots (Rubber Boots)</strong> - Required for employees engaged in masonry works, especially those belonging to pouring and concreting crews, those assigned in dewatering works, and operations where wearing safety shoes is an unlikely deterrent.
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Written reprimand</li>
-          <li className="text-sm text-gray-700">• Second offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Fifth offense - Dismissal</li>
-        </ul>
-      </div>
-
-      {/* F. Rain Coat */}
-      <div className="mb-4 flex-1 ml-5">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>F. Rain Coat</strong> - Required during the rainy season (a must for all employees working at an active level/floor). Site supervisors may opt to send workers home (at the discretion of site operations).
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Written reprimand</li>
-          <li className="text-sm text-gray-700">• Second offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Seven (7) days suspension</li>
-        </ul>
+        <div className="border border-gray-300">
+          <div className="grid grid-cols-2 text-sm font-medium bg-gray-50 border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">OSH Item</div>
+            <div className="p-2">Estimated Cost/year</div>
+          </div>
+          <div className="grid grid-cols-2 text-sm border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">PPEs</div>
+            <div className="p-2">{data.ppe_cost || ''}</div>
+          </div>
+          <div className="grid grid-cols-2 text-sm border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">OSH trainings</div>
+            <div className="p-2">{data.osh_training_cost || ''}</div>
+          </div>
+          <div className="grid grid-cols-2 text-sm border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">Safety Signages</div>
+            <div className="p-2">{data.safety_signages_cost || ''}</div>
+          </div>
+          <div className="grid grid-cols-2 text-sm border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">Machine Guards and related equipment</div>
+            <div className="p-2">{data.machine_guards_cost || ''}</div>
+          </div>
+          <div className="grid grid-cols-2 text-sm border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">Medical examinations</div>
+            <div className="p-2">{data.medical_examinations_cost || ''}</div>
+          </div>
+          <div className="grid grid-cols-2 text-sm border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">Medical supplies/medicines</div>
+            <div className="p-2">{data.medical_supplies_cost || ''}</div>
+          </div>
+          <div className="grid grid-cols-2 text-sm border-b border-gray-300">
+            <div className="p-2 border-r border-gray-300">Others: <span className="border-b border-gray-400 px-8">{data.others_name || ''}</span></div>
+            <div className="p-2">{data.others_cost || ''}</div>
+          </div>
+        </div>
       </div>
     </>
   );

@@ -16,23 +16,30 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
         </h1>
       </div>
 
-      {/* Content Paragraphs */}
-      <div className="space-y-6 mb-10">
-        {/* Paragraph 1 */}
-        <div className="text-sm leading-relaxed text-gray-900">
-          <span className="font-bold uppercase">{data.company_name || 'COMPANY'}</span> do hereby commit to comply with the requirements of RA 11058 and DOLE Department Order 198-18 (its Implementing Rules and Regulations) and the applicable provisions of the Occupational Safety and Health Standards (OSHS).
+      {/* Company Commitment Content */}
+      {data.company_commitment ? (
+        <div className="space-y-6 mb-10">
+          <div 
+            className="text-sm leading-relaxed text-gray-900 prose prose-sm max-w-none [&>p]:mb-6 [&>p]:leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: data.company_commitment }}
+          />
         </div>
+      ) : (
+        <div className="space-y-6 mb-10">
+          {/* Default Content if no custom commitment */}
+          <div className="text-sm leading-relaxed text-gray-900">
+            <span className="font-bold uppercase">{data.company_name || 'COMPANY'}</span> do hereby commit to comply with the requirements of RA 11058 and DOLE Department Order 198-18 (its Implementing Rules and Regulations) and the applicable provisions of the Occupational Safety and Health Standards (OSHS).
+          </div>
 
-        {/* Paragraph 2 */}
-        <div className="text-sm leading-relaxed text-gray-900">
-          We acknowledge the company&apos;s obligation and responsibilities to provide appropriate funds for implementing this OSH program including orientation and training of its employees on OSH, provision and dissemination of IEC materials on safety and health, provision of Personal Protective Equipment (PPE) when necessary and other OSH related requirements and activities, to ensure the protection for our workers and employees against injuries, illnesses and death through safe and healthy working conditions and environment.
-        </div>
+          <div className="text-sm leading-relaxed text-gray-900">
+            We acknowledge the company&apos;s obligation and responsibilities to provide appropriate funds for implementing this OSH program including orientation and training of its employees on OSH, provision and dissemination of IEC materials on safety and health, provision of Personal Protective Equipment (PPE) when necessary and other OSH related requirements and activities, to ensure the protection for our workers and employees against injuries, illnesses and death through safe and healthy working conditions and environment.
+          </div>
 
-        {/* Paragraph 3 */}
-        <div className="text-sm leading-relaxed text-gray-900">
-          We commit to conduct risk assesxsent as required to prevent workplace accidents as well as comply with other provisions of this OSH program. That we are also fully aware of the penalties and sanctions for OSH violations as provided for in RA 11058 and its Implementing Rules and Regulations.
+          <div className="text-sm leading-relaxed text-gray-900">
+            We commit to conduct risk assesxsent as required to prevent workplace accidents as well as comply with other provisions of this OSH program. That we are also fully aware of the penalties and sanctions for OSH violations as provided for in RA 11058 and its Implementing Rules and Regulations.
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Signature Block */}
       <div className="mt-10 space-y-6 w-3/4 m-40">

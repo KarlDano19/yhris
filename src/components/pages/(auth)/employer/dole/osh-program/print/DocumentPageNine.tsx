@@ -191,33 +191,15 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
           </div>
         </div>
 
-        {/* Subsection 1. OIL LEAKS AND SPILLAGE */}
-        <div className="mb-4 ml-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">
-            1. OIL LEAKS AND SPILLAGE
-          </h3>
-          <ul className="list-none pl-4 space-y-1">
-            <li className="text-sm text-gray-700">• Implement proper storage and handling of fuel and lubricants</li>
-            <li className="text-sm text-gray-700">• Provide oil catch or drip trays.</li>
-            <li className="text-sm text-gray-700">• Clean up immediately any spillage and leak</li>
-            <li className="text-sm text-gray-700">• Utilize only equipment in good condition. Disallow entry of equipment with leaks into the Establishment</li>
-            <li className="text-sm text-gray-700">• Deploy fire extinguisher in fuel and oil storage areas</li>
-          </ul>
-        </div>
-
-        {/* Subsection 2. GARBAGE */}
-        <div className="mb-4 ml-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">
-            2. GARBAGE
-          </h3>
-          <ul className="list-none pl-4 space-y-1">
-            <li className="text-sm text-gray-700">• Designate garbage collection area</li>
-            <li className="text-sm text-gray-700">• Clean up the site daily</li>
-            <li className="text-sm text-gray-700">• Dispose garbage off site regularly and frequently</li>
-            <li className="text-sm text-gray-700">• Disallow eating in the work areas</li>
-            <li className="text-sm text-gray-700">• Designate mess hall area away from the work areas.</li>
-          </ul>
-        </div>
+        {/* Waste Management System Content */}
+        {data.waste_management_system_message && (
+          <div className="mb-4 ml-5">
+            <div 
+              className="text-sm text-gray-700 prose prose-sm max-w-none [&>p]:mb-3 [&>ul]:ml-4 [&>ol]:ml-4 [&>li]:mb-1"
+              dangerouslySetInnerHTML={{ __html: data.waste_management_system_message }}
+            />
+          </div>
+        )}
       </div>
     </>
   );

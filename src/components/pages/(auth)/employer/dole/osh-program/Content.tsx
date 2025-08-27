@@ -807,7 +807,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <HistoryIcon className="w-10 h-10"/>
                 {versionHistoryData?.version_info && (
-                  <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center min-w-[16px]">
+                  <div className="absolute -top-3 -right-3 bg-red-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center min-w-[16px]">
                     {versionHistoryData.version_info.current_count > 50 ? '50+' : versionHistoryData.version_info.current_count}
                   </div>
                 )}

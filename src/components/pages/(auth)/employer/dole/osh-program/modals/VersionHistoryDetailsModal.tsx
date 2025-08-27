@@ -24,8 +24,6 @@ import DocumentPageNine from '../print/DocumentPageNine';
 import DocumentPageTen from '../print/DocumentPageTen';
 import DocumentPageEleven from '../print/DocumentPageEleven';
 import DocumentPageTwelve from '../print/DocumentPageTwelve';
-import DocumentPageThirteen from '../print/DocumentPageThirteen';
-import DocumentPageFourteen from '../print/DocumentPageFourteen';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
 
 import { T_OshProgram } from '@/types/osh-program';
@@ -47,7 +45,7 @@ export default function VersionHistoryDetailsModal({
   versionId,
 }: VersionHistoryDetailsModalProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 14;
+  const totalPages = 12;
 
   // Fetch version details
   const { data: versionData, isLoading } = useGetOshProgramVersionDetails(
@@ -143,12 +141,6 @@ export default function VersionHistoryDetailsModal({
         break;
       case 12:
         pageContent = <DocumentPageTwelve data={transformedData} />;
-        break;
-      case 13:
-        pageContent = <DocumentPageThirteen data={transformedData} />;
-        break;
-      case 14:
-        pageContent = <DocumentPageFourteen data={transformedData} />;
         break;
       default:
         pageContent = <DocumentPageOne data={transformedData} />;

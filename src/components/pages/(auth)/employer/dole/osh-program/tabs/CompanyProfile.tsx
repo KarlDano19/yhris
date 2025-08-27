@@ -325,7 +325,8 @@ export default function CompanyProfile({
                 type="text"
                 {...register("complete_address")}
                 id="complete_address"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
+                readOnly
+                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
                   ${isMissingField('complete_address') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>

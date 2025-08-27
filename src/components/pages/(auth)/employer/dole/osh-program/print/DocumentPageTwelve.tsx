@@ -7,110 +7,88 @@ interface DocumentPageTwelveProps {
 }
 
 const DocumentPageTwelve: React.FC<DocumentPageTwelveProps> = ({ data }) => {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   return (
     <>
-      {/* Page Header - Continuation from previous page */}
-      <div className="mb-4 ml-10">
+      {/* Main Content - Annex A Policy */}
+      <div className="mb-6">
+        <h1 className="text-base font-bold text-gray-900 mb-4 text-center">
+          ANNEX A: WORKPLACE POLICY AND PROGRAM ON PROMOTING WORKERS HEALTH AND ENSURING PREVENTION AND CONTROL OF HEALTH-RELATED ISSUES AND ILLNESS
+        </h1>
+
+        {/* Company Commitment */}
+        <p className="text-sm text-gray-700 mb-4">
+          {data.company_name || 'EL FUERTE SECURTY AGENCY'} is committed to promote and ensure a healthy and safe working environment through its various health programs for its employees. We shall conform to the all issuances and laws that guarantee workers health and safety at all times.
+        </p>
+
+        {/* Company Programs and Activities */}
         <p className="text-sm text-gray-700 mb-2">
-        • Fifth offense - Dismissal
+          Worker&apos;s health is maintained through:
         </p>
-      </div>
-
-      {/* G. Hand Gloves */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 mb-2 ml-5">
-          <strong>G. Hand Gloves</strong> - Required for employees engaged in material handling, steelworks, welding operations, tinsmith, and chipping works.
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Written reprimand</li>
-          <li className="text-sm text-gray-700">• Second offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Fifth offense - Dismissal</li>
+        <ul className="list-none pl-4 space-y-1 mb-4">
+          <li className="text-sm text-gray-700">a) Orientation and education of employees</li>
+          <li className="text-sm text-gray-700">b) Access to reliable information on illness and hazards at work</li>
+          <li className="text-sm text-gray-700">c) Referral to medical experts for diagnosis and management of illness or health-related concerns</li>
+          <li className="text-sm text-gray-700">d) Provision of health-related programs such as proper nutrition and exercise activities.</li>
         </ul>
-      </div>
 
-      {/* 2. Smoking at Restricted Area */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 mb-2 ">
-          <strong>2. Smoking at Restricted Area</strong>
+        {/* Compliance with Government Issuances */}
+        <p className="text-sm text-gray-700 mb-4">
+          The programs comply with Government issuances on promoting healthy lifestyle, addressing mental health in the workplace, and preventing and controlling substance abuse.
         </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Second offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Dismissal</li>
-        </ul>
-      </div>
 
-      {/* 3. Unauthorized used/tinkering playing of fire fighting equipments */}
-      <div className="mb-4">
+        {/* Workers' Rights */}
         <p className="text-sm text-gray-700 mb-2">
-          <strong>3. Unauthorized used/tinkering playing of fire fighting equipments</strong>
+          The following workers&apos; rights arising from illness are guaranteed and promoted:
         </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Second offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Dismissal</li>
+        <ul className="list-none pl-4 space-y-1 mb-4">
+          <li className="text-sm text-gray-700">a) Confidentiality of information</li>
+          <li className="text-sm text-gray-700">b) Non-discrimination including non-termination</li>
+          <li className="text-sm text-gray-700">c) Work accommodation following a course of illness</li>
+          <li className="text-sm text-gray-700">d) Assistance to compensation</li>
         </ul>
+
+        {/* Policy Purpose */}
+        <p className="text-sm text-gray-700 mb-6">
+          This policy is formulated for everybody&apos;s information. The company is committed to ensuring workers&apos; health and providing a healthy and safe workplace.
+        </p>
       </div>
 
-      {/* 4. Driving under the influence of Liquor */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>4. Driving under the influence of Liquor that resulted into a Vehicular Accident</strong>
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Dismissal and to pay incurred damages.</li>
-        </ul>
-      </div>
-
-      {/* 5. Failure to report personal accident */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>5. Failure to report his/her personal accident (work connected within 24 hrs. at the Establishment clinic and/or advise his/her immediate superior)</strong>
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Second offense - Five (5) days suspension</li>
-        </ul>
-      </div>
-
-      {/* 6. Failure to observe speed limit */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>6. Failure to observe the 20 KPH speed limit at the construction site</strong>
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Written reprimand</li>
-          <li className="text-sm text-gray-700">• Second offense - One (1) day suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Third (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Fourth offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Fifth offense - Dismissal</li>
-        </ul>
-      </div>
-
-      {/* 7. Deliberate removal/tampering of safety signs */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>7. Deliberate removal/tampering of safety signs and foster including traffic signs on site (unauthorized)</strong>
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Second offense - Dismissal</li>
-        </ul>
-      </div>
-
-      {/* 8. Unhygienic Practice */}
-      <div className="mb-4 flex-1">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>8. Unhygienic Practice (Urinating, removal of vowel elsewhere on site other than the prescribed area)</strong>
-        </p>
-        <ul className="list-none pl-4 space-y-1 ml-5">
-          <li className="text-sm text-gray-700">• First offense - Three (3) days suspension</li>
-          <li className="text-sm text-gray-700">• Second offense - Seven (7) days suspension</li>
-          <li className="text-sm text-gray-700">• Third offense - Dismissal</li>
-        </ul>
+      {/* Signature Block */}
+      <div className="mb-6">
+        <div className="flex justify-between items-end">
+          <div className="flex-1 mr-8">
+            <div className="flex items-center mb-5">
+              <span className="text-sm font-medium text-gray-700 mr-2">DATE:</span>
+              <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px text-center">
+                {formatDate(data.date_filled) || ''}
+              </div>
+            </div>
+            <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px] text-center">
+              {data.name_of_owner_manager || ''}
+            </div>
+            <p className="text-sm text-gray-700 text-center">Owner/Manager</p>
+          </div>
+          <div className="flex-1">
+            <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px] text-center">
+              {data.employees_representative || ''}
+            </div>
+            <p className="text-sm text-gray-700 text-center">Employees&apos; Representative</p>
+          </div>
+        </div>
       </div>
     </>
   );

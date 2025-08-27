@@ -12,8 +12,6 @@ import DocumentPageNine from './DocumentPageNine';
 import DocumentPageTen from './DocumentPageTen';
 import DocumentPageEleven from './DocumentPageEleven';
 import DocumentPageTwelve from './DocumentPageTwelve';
-import DocumentPageThirteen from './DocumentPageThirteen';
-import DocumentPageFourteen from './DocumentPageFourteen';
 
 import { T_OshProgram } from '@/types/osh-program';
 
