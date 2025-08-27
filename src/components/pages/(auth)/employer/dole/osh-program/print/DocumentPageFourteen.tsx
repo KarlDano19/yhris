@@ -16,39 +16,39 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
         </h1>
 
         {/* Company Commitment */}
-        <p className="text-xs text-gray-700 mb-4">
+        <p className="text-sm text-gray-700 mb-4">
           {data.company_name || 'EL FUERTE SECURTY AGENCY'} is committed to promote and ensure a healthy and safe working environment through its various health programs for its employees. We shall conform to the all issuances and laws that guarantee workers health and safety at all times.
         </p>
 
         {/* Company Programs and Activities */}
-        <p className="text-xs text-gray-700 mb-2">
+        <p className="text-sm text-gray-700 mb-2">
           Worker&apos;s health is maintained through:
         </p>
         <ul className="list-none pl-4 space-y-1 mb-4">
-          <li className="text-xs text-gray-700">a) Orientation and education of employees</li>
-          <li className="text-xs text-gray-700">b) Access to reliable information on illness and hazards at work</li>
-          <li className="text-xs text-gray-700">c) Referral to medical experts for diagnosis and management of illness or health-related concerns</li>
-          <li className="text-xs text-gray-700">d) Provision of health-related programs such as proper nutrition and exercise activities.</li>
+          <li className="text-sm text-gray-700">a) Orientation and education of employees</li>
+          <li className="text-sm text-gray-700">b) Access to reliable information on illness and hazards at work</li>
+          <li className="text-sm text-gray-700">c) Referral to medical experts for diagnosis and management of illness or health-related concerns</li>
+          <li className="text-sm text-gray-700">d) Provision of health-related programs such as proper nutrition and exercise activities.</li>
         </ul>
 
         {/* Compliance with Government Issuances */}
-        <p className="text-xs text-gray-700 mb-4">
+        <p className="text-sm text-gray-700 mb-4">
           The programs comply with Government issuances on promoting healthy lifestyle, addressing mental health in the workplace, and preventing and controlling substance abuse.
         </p>
 
         {/* Workers' Rights */}
-        <p className="text-xs text-gray-700 mb-2">
+        <p className="text-sm text-gray-700 mb-2">
           The following workers&apos; rights arising from illness are guaranteed and promoted:
         </p>
         <ul className="list-none pl-4 space-y-1 mb-4">
-          <li className="text-xs text-gray-700">a) Confidentiality of information</li>
-          <li className="text-xs text-gray-700">b) Non-discrimination including non-termination</li>
-          <li className="text-xs text-gray-700">c) Work accommodation following a course of illness</li>
-          <li className="text-xs text-gray-700">d) Assistance to compensation</li>
+          <li className="text-sm text-gray-700">a) Confidentiality of information</li>
+          <li className="text-sm text-gray-700">b) Non-discrimination including non-termination</li>
+          <li className="text-sm text-gray-700">c) Work accommodation following a course of illness</li>
+          <li className="text-sm text-gray-700">d) Assistance to compensation</li>
         </ul>
 
         {/* Policy Purpose */}
-        <p className="text-xs text-gray-700 mb-6">
+        <p className="text-sm text-gray-700 mb-6">
           This policy is formulated for everybody&apos;s information. The company is committed to ensuring workers&apos; health and providing a healthy and safe workplace.
         </p>
       </div>
@@ -58,7 +58,7 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
         <div className="flex justify-between items-end">
           <div className="flex-1 mr-8">
             <div className="flex items-center mb-5">
-              <span className="text-xs font-medium text-gray-700 mr-2">DATE:</span>
+              <span className="text-sm font-medium text-gray-700 mr-2">DATE:</span>
               <div className="border-b border-gray-300 flex-1 pb-1 min-h-[16px]">
                 {data.date || ''}
               </div>
@@ -66,13 +66,13 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
             <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px]">
               {data.name_of_owner || ''}
             </div>
-            <p className="text-xs text-gray-700 text-center">Owner/Manager</p>
+            <p className="text-sm text-gray-700 text-center">Owner/Manager</p>
           </div>
           <div className="flex-1">
             <div className="border-b border-gray-400 pb-1 mb-2 min-h-[20px]">
               {data.employees_representative_name || ''}
             </div>
-            <p className="text-xs text-gray-700 text-center">Employees&apos; Representative</p>
+            <p className="text-sm text-gray-700 text-center">Employees&apos; Representative</p>
           </div>
         </div>
       </div>

@@ -26,7 +26,7 @@ export default function VersionHistoryModal({
   onClose,
   onViewDetails,
 }: VersionHistoryModalProps) {
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [versionToDelete, setVersionToDelete] = useState<{ id: number; versionNumber: string } | null>(null);

@@ -19,17 +19,17 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
       {/* Content Paragraphs */}
       <div className="space-y-6 mb-10">
         {/* Paragraph 1 */}
-        <div className="text-xs leading-relaxed text-gray-900">
+        <div className="text-sm leading-relaxed text-gray-900">
           <span className="font-bold uppercase">{data.company_name || 'COMPANY'}</span> do hereby commit to comply with the requirements of RA 11058 and DOLE Department Order 198-18 (its Implementing Rules and Regulations) and the applicable provisions of the Occupational Safety and Health Standards (OSHS).
         </div>
 
         {/* Paragraph 2 */}
-        <div className="text-xs leading-relaxed text-gray-900">
+        <div className="text-sm leading-relaxed text-gray-900">
           We acknowledge the company&apos;s obligation and responsibilities to provide appropriate funds for implementing this OSH program including orientation and training of its employees on OSH, provision and dissemination of IEC materials on safety and health, provision of Personal Protective Equipment (PPE) when necessary and other OSH related requirements and activities, to ensure the protection for our workers and employees against injuries, illnesses and death through safe and healthy working conditions and environment.
         </div>
 
         {/* Paragraph 3 */}
-        <div className="text-xs leading-relaxed text-gray-900">
+        <div className="text-sm leading-relaxed text-gray-900">
           We commit to conduct risk assesxsent as required to prevent workplace accidents as well as comply with other provisions of this OSH program. That we are also fully aware of the penalties and sanctions for OSH violations as provided for in RA 11058 and its Implementing Rules and Regulations.
         </div>
       </div>
@@ -38,7 +38,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
       <div className="mt-10 space-y-6 w-3/4 m-40">
         {/* Signature Line */}
         <div className="flex items-center">
-          <span className="text-xs text-gray-700 mr-2">[Signature]</span>
+          <span className="text-sm text-gray-700 mr-2">[Signature]</span>
           <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2 relative">
             {typeof data.signature === 'string' && data.signature ? (
               <img 
@@ -54,7 +54,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
 
         {/* Name Line */}
         <div className="flex items-center">
-          <span className="text-xs text-gray-700 mr-2">[Name]</span>
+          <span className="text-sm text-gray-700 mr-2">[Name]</span>
           <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2">
             {data.name_of_owner}
           </div>
@@ -62,7 +62,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
 
         {/* Title Line */}
         <div className="flex items-center">
-          <span className="text-xs text-gray-700 mr-2">[President] / [Chief Executive Officer] / [Owner]</span>
+          <span className="text-sm text-gray-700 mr-2">[President] / [Chief Executive Officer] / [Owner]</span>
           <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2">
             Owner/Manager
           </div>
@@ -70,7 +70,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
 
         {/* Date Line */}
         <div className="flex items-center">
-          <span className="text-xs text-gray-700 mr-2">[Date]:</span>
+          <span className="text-sm text-gray-700 mr-2">[Date]:</span>
           <div className="border-b border-gray-300 flex-1 pb-1 min-h-[20px] ml-2">
             {data.date}
           </div>

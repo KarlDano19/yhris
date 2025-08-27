@@ -5,10 +5,30 @@ import { compile } from '@fileforge/react-print';
 interface UseFileforgeProps {
   onSuccess?: (pdfUrl?: string) => void;
   onError?: (error: Error) => void;
+  pageMargins?: {
+    top?: string;
+    right?: string;
+    bottom?: string;
+    left?: string;
+  };
 }
 
-const useFileforge = ({ onSuccess, onError }: UseFileforgeProps = {}) => {
+const useFileforge = ({ onSuccess, onError, pageMargins }: UseFileforgeProps = {}) => {
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Default margins
+  const defaultMargins = {
+    top: '0.5in',
+    right: '0.1in',
+    bottom: '0.1in',
+    left: '0.1in'
+  };
+
+  // Merge custom margins with defaults
+  const margins = {
+    ...defaultMargins,
+    ...pageMargins
+  };
 
   const generatePDFLocally = async (
     component: React.ReactElement,
@@ -43,8 +63,18 @@ const useFileforge = ({ onSuccess, onError }: UseFileforgeProps = {}) => {
                 print-color-adjust: exact !important;
               }
               .no-print { display: none !important; }
+              .preview-container {
+                background-color: white !important;
+                padding: 0 !important;
+              }
+              .a4-page {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                margin-bottom: 0 !important;
+                background-color: white !important;
+              }
               @page {
-                margin: 0;
+                margin: ${margins.top} ${margins.right} ${margins.bottom} ${margins.left};
                 size: A4;
               }
             }

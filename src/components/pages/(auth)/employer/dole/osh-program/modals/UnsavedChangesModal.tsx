@@ -63,7 +63,7 @@ export default function UnsavedChangesModal({
                 <div className='flex flex-row justify-center w-full gap-2 md:gap-4 px-4 pt-6 md:pt-8 pb-4 md:pb-6'>
                   <button
                     type='button'
-                    className='inline-flex justify-center rounded-md border border-blue-600 px-4 md:px-6 py-2 text-sm font-medium bg-white text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
+                    className='inline-flex justify-center rounded-md border border-blue-600 px-4 md:px-6 py-2 text-sm font-medium bg-white text-gray-700 shadow-sm hover:text-white hover:bg-blue-600 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
                     onClick={onClose}
                     ref={cancelButtonRef}
                     disabled={isLoading}
@@ -72,7 +72,7 @@ export default function UnsavedChangesModal({
                   </button>
                   <button
                     type='button'
-                    className='inline-flex justify-center rounded-md border border-red-600 px-4 md:px-6 py-2 text-sm font-medium bg-white text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
+                    className='inline-flex justify-center rounded-md border border-red-600 px-4 md:px-6 py-2 text-sm font-medium bg-white text-gray-700 shadow-sm hover:text-white hover:bg-red-600 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
                     onClick={onDiscard}
                     disabled={isLoading}
                   >

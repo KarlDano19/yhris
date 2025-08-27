@@ -14,21 +14,7 @@ import useFileforge from '../hooks/useFileforge';
 import { printOshProgram } from '../PrintData';
 
 // Import document components for preview (not for printing)
-import DocumentPageOne from '../print/DocumentPageOne';
-import DocumentPageTwo from '../print/DocumentPageTwo';
-import DocumentPageThree from '../print/DocumentPageThree';
-import DocumentPageFour from '../print/DocumentPageFour';
-import DocumentPageFive from '../print/DocumentPageFive';
-import DocumentPageSix from '../print/DocumentPageSix';
-import DocumentPageSeven from '../print/DocumentPageSeven';
-import DocumentPageEight from '../print/DocumentPageEight';
-import DocumentPageNine from '../print/DocumentPageNine';
-import DocumentPageTen from '../print/DocumentPageTen';
-import DocumentPageEleven from '../print/DocumentPageEleven';
-import DocumentPageTwelve from '../print/DocumentPageTwelve';
-import DocumentPageThirteen from '../print/DocumentPageThirteen';
-import DocumentPageFourteen from '../print/DocumentPageFourteen';
-import Document from '../print/Document';
+import OshProgramDocument from '../print/OshProgramDocument';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
@@ -48,11 +34,8 @@ export default function VersionHistoryDetailsModal({
   onClose,
   onBack,
   versionId,
-  currentPage = 1,
-  totalPages = 14
 }: VersionHistoryDetailsModalProps) {
   const [zoomLevel, setZoomLevel] = useState(100);
-  const [currentPageIndex, setCurrentPageIndex] = useState(1);
 
   // Fetch version details
   const { data: versionData, isLoading } = useGetOshProgramVersionDetails(
@@ -64,12 +47,18 @@ export default function VersionHistoryDetailsModal({
   const transformedData = versionData as unknown as T_OshProgram;
 
   const { generatePDFLocally, isGenerating } = useFileforge({
+    pageMargins: {
+      top: '0.2in',
+      right: '0.2in',
+      bottom: '0.2in',
+      left: '0.2in'
+    },
     onSuccess: () => {
       toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
     },
     onError: (error) => {
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
-    }
+    },
   });
 
   const handleZoomIn = () => {
@@ -100,34 +89,7 @@ export default function VersionHistoryDetailsModal({
     setZoomLevel(Math.max(50, Math.min(optimalZoom, 200))); // Clamp between 50% and 200%
   };
 
-  // Function to check if page 4 needs pagination
-  const needsPageFourPagination = (data: T_OshProgram): boolean => {
-    try {
-      const riskData = typeof data.emergency_and_disaster_preparedness === 'string' 
-        ? JSON.parse(data.emergency_and_disaster_preparedness) 
-        : data.emergency_and_disaster_preparedness || [];
-      
-      return Array.isArray(riskData) && riskData.length >= 15;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  // Function to get page numbers based on pagination needs
-  const getPageNumbers = () => {
-    if (!transformedData) return [];
-    
-    const needsPagination = needsPageFourPagination(transformedData);
-    if (needsPagination) {
-      // If page 4 needs pagination, replace page 4 with 4.1 and 4.2
-      return [1, 2, 3, 4.1, 4.2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-    } else {
-      // Normal page numbering
-      return Array.from({ length: 14 }, (_, i) => i + 1);
-    }
-  };
-
-  const handlePrint = async () => {
+ const handlePrint = async () => {
     if (!transformedData) return;
     
     try {
@@ -139,88 +101,18 @@ export default function VersionHistoryDetailsModal({
     } catch (error) {
       console.error('Print error:', error);
     }
-  };
-
-  const handleNextPage = () => {
-    if (currentPageIndex < totalPages) {
-      setCurrentPageIndex(currentPageIndex + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPageIndex > 1) {
-      setCurrentPageIndex(currentPageIndex - 1);
-    }
-  };
+  }; 
 
   // Function to render the current page with Document wrapper
   const renderCurrentPage = () => {
     if (!transformedData) return null;
     
-    const pageNumbers = getPageNumbers();
-    const currentPageNumber = pageNumbers[currentPageIndex - 1] || currentPageIndex;
-    
-    let pageContent;
-    switch (currentPageNumber) {
-      case 1:
-        pageContent = <DocumentPageOne data={transformedData as any} />;
-        break;
-      case 2:
-        pageContent = <DocumentPageTwo data={transformedData as any} />;
-        break;
-      case 3:
-        pageContent = <DocumentPageThree data={transformedData as any} />;
-        break;
-      case 4:
-        pageContent = <DocumentPageFour data={transformedData as any} pageNumber={1} />;
-        break;
-      case 4.1:
-        pageContent = <DocumentPageFour data={transformedData as any} pageNumber={4.1} />;
-        break;
-      case 4.2:
-        pageContent = <DocumentPageFour data={transformedData as any} pageNumber={4.2} />;
-        break;
-      case 5:
-        pageContent = <DocumentPageFive data={transformedData as any} />;
-        break;
-      case 6:
-        pageContent = <DocumentPageSix data={transformedData as any} />;
-        break;
-      case 7:
-        pageContent = <DocumentPageSeven data={transformedData as any} />;
-        break;
-      case 8:
-        pageContent = <DocumentPageEight data={transformedData as any} />;
-        break;
-      case 9:
-        pageContent = <DocumentPageNine data={transformedData as any} />;
-        break;
-      case 10:
-        pageContent = <DocumentPageTen data={transformedData as any} />;
-        break;
-      case 11:
-        pageContent = <DocumentPageEleven data={transformedData as any} />;
-        break;
-      case 12:
-        pageContent = <DocumentPageTwelve data={transformedData as any} />;
-        break;
-      case 13:
-        pageContent = <DocumentPageThirteen data={transformedData as any} />;
-        break;
-      case 14:
-        pageContent = <DocumentPageFourteen data={transformedData as any} />;
-        break;
-      default:
-        pageContent = <DocumentPageOne data={transformedData as any} />;
-    }
-    
+    // For now, we'll show the full document in preview mode
+    // In the future, we could implement page-by-page preview if needed
     return (
-      <Document 
-        isMultiPage={true} 
-        pageNumber={currentPageNumber}
-      >
-        {pageContent}
-      </Document>
+      <div className="bg-white shadow-lg relative flex-shrink-0" style={{ transform: `scale(${zoomLevel / 100})` }}>
+        <OshProgramDocument data={transformedData} />
+      </div>
     );
   };
 
@@ -230,7 +122,7 @@ export default function VersionHistoryDetailsModal({
       <Dialog
         as="div"
         className="relative z-50"
-        onClose={onClose}
+        onClose={onBack}
       >
         <Transition.Child
           as={Fragment}
@@ -263,31 +155,20 @@ export default function VersionHistoryDetailsModal({
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer hover:text-gray-200"
-                    onClick={onClose}
+                    onClick={onBack}
                   />
                 </div>
                 
-                {/* Page indicator */}
+                {/* Document Info */}
                 <div className="bg-gray-50 px-4 py-2 border-b">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
-                      Page {currentPageIndex} of {transformedData ? getPageNumbers().length : totalPages}
+                      OSH Program Document - Full View
                     </p>
                     <div className="flex items-center space-x-2">
-                      <button
-                        onClick={handlePrevPage}
-                        disabled={currentPageIndex === 1}
-                        className="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={handleNextPage}
-                        disabled={currentPageIndex === (transformedData ? getPageNumbers().length : totalPages)}
-                        className="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
+                      <span className="text-sm text-gray-600">
+                        Zoom: {zoomLevel}%
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -296,7 +177,7 @@ export default function VersionHistoryDetailsModal({
                 <div className="p-6 flex justify-center overflow-auto bg-gray-100">
                   {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-savoy-blue"></div>
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
                     </div>
                   ) : transformedData ? (
                     <div className="bg-white shadow-lg relative flex-shrink-0">

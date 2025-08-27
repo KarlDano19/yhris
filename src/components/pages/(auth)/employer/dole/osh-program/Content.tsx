@@ -128,12 +128,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Fileforge hook for PDF generation
   const { generatePDFLocally, isGenerating } = useFileforge({
+    pageMargins: {
+      top: '0.2in',
+      right: '0.2in',
+      bottom: '0.2in',
+      left: '0.2in'
+    },
     onSuccess: () => {
       toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
     },
     onError: (error) => {
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
-    }
+    },
   });
 
   const statusOptions = [
