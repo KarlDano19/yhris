@@ -13,8 +13,21 @@ import {
 import useFileforge from '../hooks/useFileforge';
 import { printOshProgram } from '../PrintData';
 
-// Import document components for preview (not for printing)
-import OshProgramDocument from '../print/OshProgramDocument';
+// Import individual page components for preview
+import DocumentPageOne from '../print/DocumentPageOne';
+import DocumentPageTwo from '../print/DocumentPageTwo';
+import DocumentPageThree from '../print/DocumentPageThree';
+import DocumentPageFour from '../print/DocumentPageFour';
+import DocumentPageFive from '../print/DocumentPageFive';
+import DocumentPageSix from '../print/DocumentPageSix';
+import DocumentPageSeven from '../print/DocumentPageSeven';
+import DocumentPageEight from '../print/DocumentPageEight';
+import DocumentPageNine from '../print/DocumentPageNine';
+import DocumentPageTen from '../print/DocumentPageTen';
+import DocumentPageEleven from '../print/DocumentPageEleven';
+import DocumentPageTwelve from '../print/DocumentPageTwelve';
+import DocumentPageThirteen from '../print/DocumentPageThirteen';
+import DocumentPageFourteen from '../print/DocumentPageFourteen';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
@@ -35,7 +48,8 @@ export default function VersionHistoryDetailsModal({
   onBack,
   versionId,
 }: VersionHistoryDetailsModalProps) {
-  const [zoomLevel, setZoomLevel] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 14;
 
   // Fetch version details
   const { data: versionData, isLoading } = useGetOshProgramVersionDetails(
@@ -61,35 +75,9 @@ export default function VersionHistoryDetailsModal({
     },
   });
 
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 25, 200));
-  };
 
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 25, 50));
-  };
 
-  const handleFitToPage = () => {
-    // Calculate optimal zoom level based on viewport
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const documentWidth = 210; // mm
-    const documentHeight = 297; // mm
-    
-    // Convert mm to pixels (approximate)
-    const mmToPx = 3.779527559; // 1mm ≈ 3.78px
-    const docWidthPx = documentWidth * mmToPx;
-    const docHeightPx = documentHeight * mmToPx;
-    
-    // Calculate zoom to fit width or height (whichever is smaller)
-    const widthRatio = (viewportWidth * 0.8) / docWidthPx; // 80% of viewport width
-    const heightRatio = (viewportHeight * 0.6) / docHeightPx; // 60% of viewport height
-    
-    const optimalZoom = Math.min(widthRatio, heightRatio) * 100;
-    setZoomLevel(Math.max(50, Math.min(optimalZoom, 200))); // Clamp between 50% and 200%
-  };
-
- const handlePrint = async () => {
+   const handlePrint = async () => {
     if (!transformedData) return;
     
     try {
@@ -101,17 +89,90 @@ export default function VersionHistoryDetailsModal({
     } catch (error) {
       console.error('Print error:', error);
     }
-  }; 
+  };
 
-  // Function to render the current page with Document wrapper
-  const renderCurrentPage = () => {
+  // Navigation functions
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Function to render individual page content
+  const renderPageContent = () => {
     if (!transformedData) return null;
     
-    // For now, we'll show the full document in preview mode
-    // In the future, we could implement page-by-page preview if needed
+    let pageContent;
+    switch (currentPage) {
+      case 1:
+        pageContent = <DocumentPageOne data={transformedData} />;
+        break;
+      case 2:
+        pageContent = <DocumentPageTwo data={transformedData} />;
+        break;
+      case 3:
+        pageContent = <DocumentPageThree data={transformedData} />;
+        break;
+      case 4:
+        pageContent = <DocumentPageFour data={transformedData} />;
+        break;
+      case 5:
+        pageContent = <DocumentPageFive data={transformedData} />;
+        break;
+      case 6:
+        pageContent = <DocumentPageSix data={transformedData} />;
+        break;
+      case 7:
+        pageContent = <DocumentPageSeven data={transformedData} />;
+        break;
+      case 8:
+        pageContent = <DocumentPageEight data={transformedData} />;
+        break;
+      case 9:
+        pageContent = <DocumentPageNine data={transformedData} />;
+        break;
+      case 10:
+        pageContent = <DocumentPageTen data={transformedData} />;
+        break;
+      case 11:
+        pageContent = <DocumentPageEleven data={transformedData} />;
+        break;
+      case 12:
+        pageContent = <DocumentPageTwelve data={transformedData} />;
+        break;
+      case 13:
+        pageContent = <DocumentPageThirteen data={transformedData} />;
+        break;
+      case 14:
+        pageContent = <DocumentPageFourteen data={transformedData} />;
+        break;
+      default:
+        pageContent = <DocumentPageOne data={transformedData} />;
+    }
+    
     return (
-      <div className="bg-white shadow-lg relative flex-shrink-0" style={{ transform: `scale(${zoomLevel / 100})` }}>
-        <OshProgramDocument data={transformedData} />
+      <div className="bg-white shadow-lg relative flex-shrink-0">
+        <div 
+          className="a4-page"
+          style={{
+            width: '210mm',
+            minHeight: '297mm',
+            margin: '0 auto',
+            fontFamily: 'Arial, sans-serif',
+            boxSizing: 'border-box',
+            padding: '32px 35px 32px 50px',
+            backgroundColor: 'white',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          }}
+        >
+          {pageContent}
+        </div>
       </div>
     );
   };
@@ -160,15 +221,50 @@ export default function VersionHistoryDetailsModal({
                 </div>
                 
                 {/* Document Info */}
-                <div className="bg-gray-50 px-4 py-2 border-b">
+                <div className="bg-gray-50 px-4 py-4 border-b">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
-                      OSH Program Document - Full View
+                      OSH Program Document - Page {currentPage} of {totalPages}
                     </p>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Zoom: {zoomLevel}%
-                      </span>
+                      {/* Page Navigation */}
+                      <button
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 1}
+                        className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Previous Page"
+                      >
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      
+                      <button
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Next Page"
+                      >
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+
+                      <div className="w-px h-7 bg-gray-300"></div>
+
+                      {/* Download Button */}
+                      <button
+                        onClick={handlePrint}
+                        disabled={isGenerating}
+                        className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={isGenerating ? "Generating PDF..." : "Download PDF"}
+                      >
+                        {isGenerating ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                        ) : (
+                          <ArrowDownTrayIcon className="w-7 h-7" />
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -181,7 +277,7 @@ export default function VersionHistoryDetailsModal({
                     </div>
                   ) : transformedData ? (
                     <div className="bg-white shadow-lg relative flex-shrink-0">
-                      {renderCurrentPage()}
+                      {renderPageContent()}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-64">
@@ -190,45 +286,7 @@ export default function VersionHistoryDetailsModal({
                   )}
                 </div>
 
-                {/* Document Controls */}
-                <div className="bg-gray-50 px-4 py-3 border-t">
-                  <div className="flex items-center justify-center space-x-4">
-                    <button
-                      onClick={handleZoomIn}
-                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded"
-                      title="Zoom In"
-                    >
-                      <PlusIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={handleZoomOut}
-                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded"
-                      title="Zoom Out"
-                    >
-                      <MinusIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={handleFitToPage}
-                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded"
-                      title="Fit to Page"
-                    >
-                      <ArrowsPointingOutIcon className="w-5 h-5" />
-                    </button>
 
-                    <button
-                      onClick={handlePrint}
-                      disabled={isGenerating}
-                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={isGenerating ? "Generating PDF..." : "Print"}
-                    >
-                      {isGenerating ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
-                      ) : (
-                        <ArrowDownTrayIcon className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
 
                 {/* Footer */}
                 <div className="bg-gray-50 px-4 py-3 border-t">
@@ -240,7 +298,7 @@ export default function VersionHistoryDetailsModal({
                       Back
                     </button>
                     <button
-                      onClick={onClose}
+                      onClick={onBack}
                       className="px-4 py-2 text-sm font-medium text-white bg-savoy-blue border border-transparent rounded-md hover:bg-savoy-blue-dark"
                     >
                       Close
