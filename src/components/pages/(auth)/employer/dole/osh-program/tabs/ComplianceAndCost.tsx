@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import dynamic from "next/dynamic";
 
 import { Controller } from "react-hook-form";
-import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 
@@ -42,21 +41,6 @@ export default function ComplianceAndCost({
   return (
     <form onSubmit={onSubmit}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="mt-2">
           <label
             htmlFor="message"
@@ -211,14 +195,13 @@ export default function ComplianceAndCost({
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Other&apos;s: specify
-              <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
               <input
                 type="text"
                 {...register("others_name")}
                 id="others_name"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('others_name') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
               </td>

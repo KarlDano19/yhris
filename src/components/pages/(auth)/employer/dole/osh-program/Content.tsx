@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import { useQueryClient } from "@tanstack/react-query";
@@ -210,7 +210,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Store missing fields for UI highlighting
       setMissingFields(missingFields as string[]);
       setValidationMessage(`Please fill out all required fields marked with *`);
-      return;
+      // Throw an error to prevent submission and show error toast
+      throw new Error("Please fill out all required fields marked with *");
     }
 
     // Clear missing fields if validation passes
@@ -693,6 +694,47 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [oshProgramDetails, setValue]);
 
+  // Function to validate the current tab and show missing fields
+  const validateCurrentTab = useCallback(() => {
+    const formValues = watch();
+    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
+    const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !formValues[field]);
+
+    if (missingFields.length > 0) {
+      setMissingFields(missingFields as string[]);
+      setValidationMessage(`Please fill out all required fields marked with *`);
+    } else {
+      setMissingFields([]);
+      setValidationMessage("");
+    }
+  }, [watch, selectedTab]);
+
+  // Run validation when component mounts and when form data is loaded
+  useEffect(() => {
+    if (oshProgramDetails) {
+      // Run validation after form data is loaded
+      setTimeout(() => {
+        validateCurrentTab();
+      }, 200);
+    }
+  }, [oshProgramDetails, selectedTab, validateCurrentTab]);
+
+  // Auto-clear validation when user starts filling required fields
+  useEffect(() => {
+    if (validationMessage && missingFields.length > 0) {
+      const formValues = watch();
+      const allRequiredFieldsFilled = missingFields.every(field => {
+        const value = formValues[field];
+        return value !== undefined && value !== null && value !== '';
+      });
+      
+      if (allRequiredFieldsFilled) {
+        setValidationMessage("");
+        setMissingFields([]);
+      }
+    }
+  }, [validationMessage, missingFields, watch]);
+
   // Function to handle tab changes
   const handleTabChange = (tabIndex: TabNumber) => {
     // Clear any validation errors
@@ -703,6 +745,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     // Set the new tab
     setSelectedTab(tabIndex);
+    
+    // Run validation for the new tab after a short delay to ensure form values are set
+    setTimeout(() => {
+      validateCurrentTab();
+    }, 100);
   };
 
   // Custom submit handler

@@ -334,7 +334,7 @@ export const OSH_PROGRAM_TABS = {
     5: [] as (keyof T_OshProgram)[],
     
     6: [
-      'others_name', 'name_of_owner_manager', 'employees_representative', 'date_filled'
+      'name_of_owner_manager', 'employees_representative', 'date_filled'
     ] as (keyof T_OshProgram)[]
   }
 };

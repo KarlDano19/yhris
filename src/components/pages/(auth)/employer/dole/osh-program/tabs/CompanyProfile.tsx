@@ -5,8 +5,6 @@ import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
-
 export default function CompanyProfile({
   control,
   register,
@@ -225,21 +223,6 @@ export default function CompanyProfile({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4">
           <div>
             <label
