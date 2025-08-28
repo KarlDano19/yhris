@@ -325,7 +325,7 @@ export default function ProgramAndPolicy({
               htmlFor="signature"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Draw Signature
+              Draw or Upload Signature
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
@@ -368,8 +368,7 @@ export default function ProgramAndPolicy({
               htmlFor="signature"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Upload Signature
-              <span className="text-red-600">*</span>
+              &nbsp;
             </label>
             <div className="relative mt-2">
               <input

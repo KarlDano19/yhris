@@ -202,14 +202,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
     // Validate required fields
     const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
-    const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
+    
+    // Only validate if there are required fields for this tab
+    if (requiredFields.length > 0) {
+      const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
 
-    if (missingFields.length > 0) {
-      // Store missing fields for UI highlighting
-      setMissingFields(missingFields as string[]);
-      setValidationMessage(`Please fill out all required fields marked with *`);
-      // Throw an error to prevent submission and show error toast
-      throw new Error("Please fill out all required fields marked with *");
+      if (missingFields.length > 0) {
+        // Store missing fields for UI highlighting
+        setMissingFields(missingFields as string[]);
+        setValidationMessage(`Please fill out all required fields marked with *`);
+        // Throw an error to prevent submission and show error toast
+        throw new Error("Please fill out all required fields marked with *");
+      }
     }
 
     // Clear missing fields if validation passes
@@ -696,6 +700,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const validateCurrentTab = useCallback(() => {
     const formValues = watch();
     const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
+    
+    // If there are no required fields for this tab, clear any existing validation
+    if (requiredFields.length === 0) {
+      setMissingFields([]);
+      setValidationMessage("");
+      return;
+    }
+    
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !formValues[field]);
 
     if (missingFields.length > 0) {
@@ -707,15 +719,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [watch, selectedTab]);
 
-  // Run validation when component mounts and when form data is loaded
+  // Clear validation when component mounts and when form data is loaded
   useEffect(() => {
     if (oshProgramDetails) {
-      // Run validation after form data is loaded
-      setTimeout(() => {
-        validateCurrentTab();
-      }, 200);
+      // Clear any existing validation messages
+      setValidationMessage("");
+      setMissingFields([]);
     }
-  }, [oshProgramDetails, selectedTab, validateCurrentTab]);
+  }, [oshProgramDetails, selectedTab]);
 
   // Auto-clear validation when user starts filling required fields
   useEffect(() => {
@@ -743,11 +754,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     // Set the new tab
     setSelectedTab(tabIndex);
-    
-    // Run validation for the new tab after a short delay to ensure form values are set
-    setTimeout(() => {
-      validateCurrentTab();
-    }, 100);
   };
 
   // Custom submit handler
