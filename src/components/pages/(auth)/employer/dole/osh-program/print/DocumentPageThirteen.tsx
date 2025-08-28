@@ -36,8 +36,8 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
               break-inside: avoid;
             }
             .certificate-image {
-              max-height: 150px !important;
-              max-width: 250px !important;
+              max-height: 350px !important;
+              max-width: 450px !important;
             }
           }
         `
@@ -51,10 +51,10 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
 
       {/* Safety Officer Certificates */}
       <div className="mb-6">
-        <div className="space-y-4">
+        <div className="space-y-6">
           {safetyOfficers.length > 0 ? (
             safetyOfficers.map((officer: any, index: number) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-3 officer-card">
+              <div key={index} className="border border-gray-200 rounded-lg p-4 officer-card">
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="text-sm font-semibold text-gray-900">
@@ -79,7 +79,7 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
 
                 {/* Certificate Display */}
                 {officer.certificate && (
-                  <div className="mt-2 bg-gray-50 p-3 rounded-md certificate-container">
+                  <div className="mt-3 bg-gray-50 p-4 rounded-md certificate-container">
                     {typeof officer.certificate === 'string' && officer.certificate ? (
                       <>
                         {/* Check if it's an image */}
@@ -89,7 +89,7 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
                               src={officer.certificate}
                               alt={`Certificate for ${officer.name}`}
                               className="max-w-full h-auto border border-gray-300 rounded mx-auto certificate-image"
-                              style={{ maxHeight: '200px', maxWidth: '300px', objectFit: 'contain' }}
+                              style={{ maxHeight: '400px', maxWidth: '500px', objectFit: 'contain' }}
                             />
                             <p className="text-xs text-gray-500 mt-2">
                               {officer.certificate.split('/').pop()}
