@@ -158,8 +158,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
   };
 
-
-
   // Version History Modal Handlers
   const handleOpenVersionHistory = () => {
     setIsVersionHistoryModalOpen(true);
