@@ -357,11 +357,12 @@ export default function UpdateJobModal({
                   <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
                     <CreateJobPagePreview
                       firstFormGetValues={firstForm.getValues}
+                      secondFormGetValues={secondForm.getValues}
+                      thirdFormGetValues={thirdForm.getValues}
                       fourthFormGetValues={fourthForm.getValues}
                       setPageNumber={setPageNumber}
                       onSubmit={seventhFormSubmit}
                       fileProps={fileProps}
-
                     />
                   </div>
                   <div style={{ display: pageNumber == 8 ? 'block' : 'none' }}>

@@ -3,20 +3,11 @@
 import {  useEffect, useState } from "react";
 
 import {  Controller } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
-
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
-
-
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
 
 function ExposureData({
   control,
@@ -31,35 +22,18 @@ function ExposureData({
   setSelectedTab: any;
   setValue: any;
 }) {
-  const queryClient = useQueryClient();
-
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
   });
 
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
-  const cachedProfile = queryClient
-    .getQueryCache()
-    .find(["employerProfileCache"]) as {
-    state: { data: CachedProfileData } | undefined;
-  };
 
   useEffect(() => {
     if (employeeData) {
       setValue("number_of_employees", employeeData.length);
     }
-
-    if (cachedProfile?.state?.data) {
-      setValue("company_name", cachedProfile.state.data.name || "");
-      setValue(
-        "type_of_industry",
-        cachedProfile.state.data.type_of_industry || ""
-      );
-      setValue("address", cachedProfile.state.data.city || "");
-      setValue("year", new Date().getFullYear() || "");
-    }
-  }, [employeeData, cachedProfile, setValue]);
+  }, [employeeData, setValue]);
 
   return (
     <form onSubmit={onSubmit}>

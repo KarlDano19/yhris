@@ -5,6 +5,8 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -15,17 +17,17 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
-import ExportProgressModal from './modals/ExportProgressModal';
-import CreateWorkAccidentIllnessReportModal from './modals/CreateWorkAccidentIllnessReportModal';
-import useGetWorkAccidentIlnessReportsItems from './hooks/useGetWorkAccidentIlnessReportsItems';
-import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIllnessReportModal';
-import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIllnessReportModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
+import useGetWorkAccidentIlnessReportsItems from './hooks/useGetWorkAccidentIlnessReportsItems';
+import CreateWorkAccidentIllnessReportModal from './modals/CreateWorkAccidentIllnessReportModal';
+import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIllnessReportModal';
+import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIllnessReportModal';
 import SelectBranchModal from './modals/SelectBranchModal';
-import { useQueryClient } from '@tanstack/react-query';
+import ExportProgressModal from './modals/ExportProgressModal';
+
+import EditIcon from '@/svg/EditIcon';
+import PrintIcon from "@/svg/PrintIcon";
+import DeleteIcon from '@/svg/DeleteIcon';
 
 type PaginationProps = {
   totalRecords: number;
@@ -85,6 +87,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isWorkAccidentIlnessReportsLoading,
     refetch: workAccidentIlnessReportsRefetch,
   } = useGetWorkAccidentIlnessReportsItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
+  
   const menuOptions = [
     {
       name: 'Export',
@@ -101,6 +104,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       disabled: !cachedRigths?.state?.data?.generate_dole_wair,
     },
   ];
+
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
@@ -673,9 +677,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tr key={rowIndex}>
                     <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
                       {item.employee}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.time_of_incident}
                     </td>
                     <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
                       {item.age}

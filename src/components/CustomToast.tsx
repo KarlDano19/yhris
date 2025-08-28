@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import toast from 'react-hot-toast';
 
@@ -12,7 +12,40 @@ import {
   HandRaisedIcon,
 } from '@heroicons/react/20/solid';
 
-const CustomToast = ({ message, type }: { message: string; type: 'success' | 'error' | 'info' | 'warning'; onClose?: () => void }) => {
+const CustomToast = ({ 
+  message, 
+  type, 
+  duration = 4000 
+}: { 
+  message: string; 
+  type: 'success' | 'error' | 'info' | 'warning'; 
+  onClose?: () => void;
+  duration?: number;
+}) => {
+  const [progress, setProgress] = useState(100);
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - startTime;
+      const newProgress = Math.max(0, 100 - (elapsed / duration) * 100);
+      
+      console.log('Progress:', newProgress, 'Elapsed:', elapsed, 'Duration:', duration); // Debug log
+      setProgress(newProgress);
+      
+      // Only close when the full duration has passed
+      if (elapsed >= duration) {
+        clearInterval(interval);
+        toast.remove();
+      }
+    }, 50); // Fixed 50ms interval for smooth animation
+    
+    return () => {
+      clearInterval(interval);
+    };
+  }, [duration]);
+
   const renderIcon = () => {
     const className = 'h-9 w-9 text-white';
     if (type === 'success') {
@@ -54,6 +87,19 @@ const CustomToast = ({ message, type }: { message: string; type: 'success' | 'er
             </button>
           </div>
         </div>
+      </div>
+      {/* Loading bar */}
+      <div className='h-1 bg-black bg-opacity-30'>
+        <div 
+          className={classNames(
+            'h-full transition-all duration-75 ease-out',
+            type === 'success' ? 'bg-green-200' : '',
+            type === 'error' ? 'bg-red-200' : '',
+            type === 'info' ? 'bg-blue-200' : '',
+            type === 'warning' ? 'bg-orange-200' : ''
+          )}
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   );

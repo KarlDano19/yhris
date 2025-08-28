@@ -4,6 +4,8 @@ import ReactPaginate from 'react-paginate';
 
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
 interface PaginationProps {
   pagination: {
     totalPages: number;
@@ -28,17 +30,22 @@ interface RecordsPerPageSelectProps {
 const RecordsPerPageSelect: React.FC<RecordsPerPageSelectProps> = ({ pageSize, onPageSizeChange, pageSizes, selectId = 'role', className = '' }) => (
   <div className={`flex items-center ${className}`}>
     <p className='text-sm text-gray-500 mx-2'>Records per page</p>
-    <select
-      id={selectId}
-      className='w-14 mx-2 p-1 rounded-md border-0 text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm'
-      onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
-      defaultValue={pageSize}
-      placeholder='Select...'
-    >
-      {pageSizes.map((item: number, index: number) => {
-        return <option key={index} value={item}>{item}</option>;
-      })}
-    </select>
+    <div className="relative">
+      <select
+        id={selectId}
+        className='w-16 mx-2 p-1 pl-2 rounded-md border-0 text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm appearance-none'
+        onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
+        defaultValue={pageSize}
+        placeholder='Select...'
+      >
+        {pageSizes.map((item: number, index: number) => {
+          return <option key={index} value={item}>{item}</option>;
+        })}
+      </select>
+      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+        <SelectChevronDown />
+      </div>
+    </div>
   </div>
 );
 

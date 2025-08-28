@@ -93,27 +93,35 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
       <div className='w-8 h-8 overflow-hidden rounded-full ml-2'>
         <img src={image} alt={name} width='50' height='50' className='w-full h-full object-cover' />
       </div>
-      <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
-        {name}
-        {isPassedFinalInterview && (
-          <span>
-            <br />
-            {capitalizeFirstLetter(applicant.status)}
-          </span>
-        )}
-        {isRejected && (
-          <span>
-            <br />
-            {capitalizeFirstLetter(applicant.status)}
-          </span>
-        )}
-        {isWithdrawn && (
-          <span>
-            <br />
-            {capitalizeFirstLetter(applicant.status)}
-          </span>
-        )}
-      </p>
+      <div className='flex-1'>
+        <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
+          {name}
+          {isPassedFinalInterview && (
+            <span>
+              <br />
+              {capitalizeFirstLetter(applicant.status)}
+            </span>
+          )}
+          {isRejected && (
+            <span>
+              <br />
+              {capitalizeFirstLetter(applicant.status)}
+            </span>
+          )}
+          {isWithdrawn && (
+            <span>
+              <br />
+              {capitalizeFirstLetter(applicant.status)}
+            </span>
+          )}
+                              </p>
+                      {applicant.stage_notes && applicant.stage_notes.length > 0 && (
+                        <div className='flex items-center mt-1'>
+                          <div className='w-2 h-2 bg-blue-500 rounded-full mr-1'></div>
+                          <span className='text-xs text-gray-500'>Has stage notes</span>
+                        </div>
+                      )}
+      </div>
       <button onClick={handleOpenMenu} type='button' className='ml-auto text-indigo-dye disabled:text-gray-400'>
         <EllipsisVerticalIcon className='w-7 h-7' />
       </button>

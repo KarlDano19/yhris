@@ -70,9 +70,10 @@ function EditAnnualMedicalReportModal({
       };
 
       // General Information
+      setValue("name_of_establishment", annualMedicalReportData.name_of_establishment);
+      setValue("name_of_owner_manager", annualMedicalReportData.name_of_owner_manager);
       setValue("address", annualMedicalReportData.address);
       setValue("type_of_industry", annualMedicalReportData.type_of_industry);
-      setValue("name_of_owner_manager", annualMedicalReportData.name_of_owner_manager);
       setValue("total_number_of_employees", annualMedicalReportData.total_number_of_employees);
       setValue("number_of_shifts", annualMedicalReportData.number_of_shifts);
       setValue("male_office_workers", annualMedicalReportData.male_office_workers);
@@ -93,6 +94,10 @@ function EditAnnualMedicalReportModal({
       setValue("occupational_health_services_by_other_specification", annualMedicalReportData.occupational_health_services_by_other_specification);
       setValue("occupational_health_services_as_a_service", parseArrayField(annualMedicalReportData.occupational_health_services_as_a_service));
       setValue("employer_engages_the_services_of", parseArrayField(annualMedicalReportData.employer_engages_the_services_of));
+      setValue("occupational_health_consultant_address", annualMedicalReportData.occupational_health_consultant_address);
+      setValue("occupational_health_physician_address", annualMedicalReportData.occupational_health_physician_address);
+      setValue("occupational_health_dentist_address", annualMedicalReportData.occupational_health_dentist_address);
+      setValue("occupational_health_nurse_address", annualMedicalReportData.occupational_health_nurse_address);
       setValue("conduct_inspection_of_workplace", parseArrayField(annualMedicalReportData.conduct_inspection_of_workplace));
       setValue("conduct_inspection_of_workplace_other_specification", annualMedicalReportData.conduct_inspection_of_workplace_other_specification);
 
@@ -452,10 +457,24 @@ function EditAnnualMedicalReportModal({
         setValue("others_heat_female", annualMedicalReportData.others_heat_female);
         setValue("others_heat_total", annualMedicalReportData.others_heat_total);
 
-        // Diseases due to Radiation
-        setValue("decompression_sickness_male", annualMedicalReportData.decompression_sickness_male);
-        setValue("decompression_sickness_female", annualMedicalReportData.decompression_sickness_female);
-        setValue("decompression_sickness_total", annualMedicalReportData.decompression_sickness_total);
+        // Diseases due to Pressure Abnormalities
+        setValue("chilblain_male", annualMedicalReportData.chilblain_male);
+        setValue("chilblain_female", annualMedicalReportData.chilblain_female);
+        setValue("chilblain_total", annualMedicalReportData.chilblain_total);
+        setValue("frost_bite_male", annualMedicalReportData.frost_bite_male);
+        setValue("frost_bite_female", annualMedicalReportData.frost_bite_female);
+        setValue("frost_bite_total", annualMedicalReportData.frost_bite_total);
+        setValue("immersion_foot_male", annualMedicalReportData.immersion_foot_male);
+        setValue("immersion_foot_female", annualMedicalReportData.immersion_foot_female);
+        setValue("immersion_foot_total", annualMedicalReportData.immersion_foot_total);
+        setValue("general_hypothermia_male", annualMedicalReportData.general_hypothermia_male);
+        setValue("general_hypothermia_female", annualMedicalReportData.general_hypothermia_female);
+        setValue("general_hypothermia_total", annualMedicalReportData.general_hypothermia_total);
+        setValue("others_cold_temperature_male", annualMedicalReportData.others_cold_temperature_male);
+        setValue("others_cold_temperature_female", annualMedicalReportData.others_cold_temperature_female);
+        setValue("others_cold_temperature_total", annualMedicalReportData.others_cold_temperature_total);
+
+        // Diseases due to Pressure Abnormalities
         setValue("air_embolism_male", annualMedicalReportData.air_embolism_male);
         setValue("air_embolism_female", annualMedicalReportData.air_embolism_female);
         setValue("air_embolism_total", annualMedicalReportData.air_embolism_total);
@@ -471,6 +490,8 @@ function EditAnnualMedicalReportModal({
         setValue("altitude_sickness_male", annualMedicalReportData.altitude_sickness_male);
         setValue("altitude_sickness_female", annualMedicalReportData.altitude_sickness_female);
         setValue("altitude_sickness_total", annualMedicalReportData.altitude_sickness_total);
+
+        // Diseases due to Radiation
         setValue("cataract_radiation_male", annualMedicalReportData.cataract_radiation_male);
         setValue("cataract_radiation_female", annualMedicalReportData.cataract_radiation_female);
         setValue("cataract_radiation_total", annualMedicalReportData.cataract_radiation_total);
@@ -484,6 +505,11 @@ function EditAnnualMedicalReportModal({
         setValue("radiation_related_cancers_female", annualMedicalReportData.radiation_related_cancers_female);
         setValue("radiation_related_cancers_total", annualMedicalReportData.radiation_related_cancers_total);
 
+        // TOTAL NUMBER OF CASES - Physical Environment
+        setValue("physical_environment_total_male", annualMedicalReportData.physical_environment_total_male);
+        setValue("physical_environment_total_female", annualMedicalReportData.physical_environment_total_female);
+        setValue("physical_environment_total", annualMedicalReportData.physical_environment_total);
+
       // Workplace Safety Compliance
         // Report of Occupational Accidents/Injuries
         setValue("contusion_bruises_hematoma_male", annualMedicalReportData.contusion_bruises_hematoma_male);
@@ -495,6 +521,9 @@ function EditAnnualMedicalReportModal({
         setValue("cuts_lacerations_punctures_male", annualMedicalReportData.cuts_lacerations_punctures_male);
         setValue("cuts_lacerations_punctures_female", annualMedicalReportData.cuts_lacerations_punctures_female);
         setValue("cuts_lacerations_punctures_total", annualMedicalReportData.cuts_lacerations_punctures_total);
+        setValue("concussion_male", annualMedicalReportData.concussion_male);
+        setValue("concussion_female", annualMedicalReportData.concussion_female);
+        setValue("concussion_total", annualMedicalReportData.concussion_total);
         setValue("avulsion_male", annualMedicalReportData.avulsion_male);
         setValue("avulsion_female", annualMedicalReportData.avulsion_female);
         setValue("avulsion_total", annualMedicalReportData.avulsion_total);
@@ -558,6 +587,8 @@ function EditAnnualMedicalReportModal({
       setValue("physical_fitness_program_others", annualMedicalReportData.physical_fitness_program_others);
 
       // Workplace Hazards
+
+      // Chemical Hazards
       setValue("dust_sources", annualMedicalReportData.dust_sources);
       setValue("dust_workers_exposed", annualMedicalReportData.dust_workers_exposed);
       setValue("liquids_sources", annualMedicalReportData.liquids_sources);
@@ -566,6 +597,10 @@ function EditAnnualMedicalReportModal({
       setValue("mist_fumes_vapors_workers_exposed", annualMedicalReportData.mist_fumes_vapors_workers_exposed);
       setValue("gas_sources", annualMedicalReportData.gas_sources);
       setValue("gas_workers_exposed", annualMedicalReportData.gas_workers_exposed);
+      setValue("others_chemical_hazards_sources", annualMedicalReportData.others_chemical_hazards_sources);
+      setValue("others_chemical_hazards_workers_exposed", annualMedicalReportData.others_chemical_hazards_workers_exposed);
+
+      // Physical Hazards
       setValue("noise_sources", annualMedicalReportData.noise_sources);
       setValue("noise_workers_exposed", annualMedicalReportData.noise_workers_exposed);
       setValue("temperature_humidity_sources", annualMedicalReportData.temperature_humidity_sources);
@@ -578,8 +613,10 @@ function EditAnnualMedicalReportModal({
       setValue("radiation_ultraviolet_microwave_workers_exposed", annualMedicalReportData.radiation_ultraviolet_microwave_workers_exposed);
       setValue("vibration_sources", annualMedicalReportData.vibration_sources);
       setValue("vibration_workers_exposed", annualMedicalReportData.vibration_workers_exposed);
-      setValue("others_sources", annualMedicalReportData.others_sources);
-      setValue("others_workers_exposed", annualMedicalReportData.others_workers_exposed);
+      setValue("others_physical_hazards_sources", annualMedicalReportData.others_physical_hazards_sources);
+      setValue("others_physical_hazards_workers_exposed", annualMedicalReportData.others_physical_hazards_workers_exposed);
+
+      // Biological Hazards
       setValue("viral_sources", annualMedicalReportData.viral_sources);
       setValue("viral_workers_exposed", annualMedicalReportData.viral_workers_exposed);
       setValue("bacterial_sources", annualMedicalReportData.bacterial_sources);
@@ -588,7 +625,10 @@ function EditAnnualMedicalReportModal({
       setValue("fungal_workers_exposed", annualMedicalReportData.fungal_workers_exposed);
       setValue("parasitic_sources", annualMedicalReportData.parasitic_sources);
       setValue("parasitic_workers_exposed", annualMedicalReportData.parasitic_workers_exposed);
-      setValue("chemical_sources", annualMedicalReportData.chemical_sources);
+      setValue("others_biological_hazards_sources", annualMedicalReportData.others_biological_hazards_sources);
+      setValue("others_biological_hazards_workers_exposed", annualMedicalReportData.others_biological_hazards_workers_exposed);
+
+      // Ergonomic Stress
       setValue("exhausting_physical_work_sources", annualMedicalReportData.exhausting_physical_work_sources);
       setValue("exhausting_physical_work_workers_exposed", annualMedicalReportData.exhausting_physical_work_workers_exposed);
       setValue("prolonged_standing_sources", annualMedicalReportData.prolonged_standing_sources);
@@ -599,6 +639,8 @@ function EditAnnualMedicalReportModal({
       setValue("unfavorable_work_posture_workers_exposed", annualMedicalReportData.unfavorable_work_posture_workers_exposed);
       setValue("static_monotonous_work_sources", annualMedicalReportData.static_monotonous_work_sources);
       setValue("static_monotonous_work_workers_exposed", annualMedicalReportData.static_monotonous_work_workers_exposed);
+      setValue("others_ergonomic_stress_sources", annualMedicalReportData.others_ergonomic_stress_sources);
+      setValue("others_ergonomic_stress_workers_exposed", annualMedicalReportData.others_ergonomic_stress_workers_exposed);
 
       // Report Details
       setValue("prepared_by", annualMedicalReportData.prepared_by);

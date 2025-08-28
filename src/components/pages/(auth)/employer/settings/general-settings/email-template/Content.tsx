@@ -251,7 +251,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateModalOpen(true)}
-                disabled={!hasActiveSubscription}
+                // disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>

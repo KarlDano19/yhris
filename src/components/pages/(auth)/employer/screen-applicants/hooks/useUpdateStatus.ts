@@ -4,7 +4,8 @@ import { getCookie } from 'cookies-next';
 async function updateStatus(data: any) {
     const finalData: any = {
       "status": data.status,
-      "job_posting": data.job_posting_id
+      "job_posting": data.job_posting_id,
+      "stage_notes": data.stage_notes
     }
     
     // Include personalized feedback if provided (for rejections)

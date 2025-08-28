@@ -12,6 +12,7 @@ import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useSendEmail from '../hooks/useSendEmail'
 import useGetSafetyAndHealthPolicyDetails from '../hooks/useGetSafetyANdHelathPolicyDetails'
 
@@ -61,6 +62,8 @@ export default function SendEmailModal({
     const [inputTo, setInputTo] = useState('');
     const [inputCc, setInputCc] = useState('');
     const [inputBcc, setInputBcc] = useState('');
+    const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
+    const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
     const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
     const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
     const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
@@ -73,6 +76,7 @@ export default function SendEmailModal({
         },
     });
     const { data: dataEmailTemplate } = useGetEmailTemplateItems();
+    const { data: employeeData } = useGetEmployeeItems();
     const { mutate, isLoading } = useSendEmail();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
@@ -107,6 +111,34 @@ export default function SendEmailModal({
       }
     }, [watch('subject'), clearErrors]);
 
+    // Filter employees based on input
+    useEffect(() => {
+      if (employeeData && inputTo.trim()) {
+        const filtered = employeeData.filter((employee: any) => {
+          const searchTerm = inputTo.toLowerCase();
+          const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+          const email = employee.email?.toLowerCase() || '';
+          
+          return fullName.includes(searchTerm) || email.includes(searchTerm);
+        }).slice(0, 5); // Limit to 5 suggestions
+        
+        setFilteredEmployees(filtered);
+        setShowEmployeeSuggestions(filtered.length > 0);
+      } else {
+        setFilteredEmployees([]);
+        setShowEmployeeSuggestions(false);
+      }
+    }, [inputTo, employeeData]);
+
+    const handleEmployeeSelect = (employee: any) => {
+      if (employee.email && !tagsTo.includes(employee.email)) {
+        // Add the email directly to tagsTo using the setter
+        setTagsTo([...tagsTo, employee.email]);
+      }
+      setInputTo('');
+      setShowEmployeeSuggestions(false);
+    };
+
     // Get filename from attachment URL
     const getFilenameFromUrl = (url: string) => {
         if (!url) return '';
@@ -139,11 +171,28 @@ export default function SendEmailModal({
         if (selectedTemplate && dataEmailTemplate) {
             const template = dataEmailTemplate.find((item: any) => item.id === parseInt(selectedTemplate));
             if (template) {
-                if (employeeEmail) {
-                    setTagsTo([employeeEmail, ...template.to]);
-                } else {
-                    setTagsTo(template.to);
-                }
+                // Use functional update to access current tagsTo state without causing infinite loop
+                setTagsTo(currentTagsTo => {
+                    const templateRecipients = template.to || [];
+                    
+                    // Combine existing emails with template emails, avoiding duplicates
+                    const combinedEmails = [...currentTagsTo];
+                    
+                    // Add template emails that aren't already present
+                    templateRecipients.forEach((email: string) => {
+                        if (!combinedEmails.includes(email)) {
+                            combinedEmails.push(email);
+                        }
+                    });
+                    
+                    // Ensure employeeEmail is included if it exists
+                    if (employeeEmail && !combinedEmails.includes(employeeEmail)) {
+                        combinedEmails.unshift(employeeEmail);
+                    }
+                    
+                    return combinedEmails;
+                });
+                
                 if (template.bcc) {
                     setIsBCCOpen(true);
                     setTagsBcc(template.bcc);
@@ -165,6 +214,10 @@ export default function SendEmailModal({
             setValue('message', '');
             // Don't reset subject to default here to allow manual entry
         }
+        // Clear employee suggestions when template changes
+        setInputTo('');
+        setShowEmployeeSuggestions(false);
+        setFilteredEmployees([]);
     }, [selectedTemplate, dataEmailTemplate, employeeEmail, setTagsTo, setTagsCc, setTagsBcc, setValue, clearErrors]);
 
     const onSubmit = handleSubmit((data) => {
@@ -240,6 +293,9 @@ export default function SendEmailModal({
       reset();
       setAttachment(null);
       setAttachmentExist(false);
+      setInputTo('');
+      setShowEmployeeSuggestions(false);
+      setFilteredEmployees([]);
       
       // Close the modal
       setIsOpen(null);
@@ -294,6 +350,43 @@ export default function SendEmailModal({
                                 {...register('template')}
                                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 onChange={(event) => {
+                                    const template = dataEmailTemplate.find(
+                                        (item: any) => item.id === parseInt(event.target.value)
+                                    );
+                                    if (template) {
+                                        setValue('subject', template.subject);
+                                        
+                                        // Preserve existing manually entered emails and add template emails
+                                        const currentEmails = tagsTo;
+                                        const templateRecipients = template.to || [];
+                                        
+                                        // Combine existing emails with template emails, avoiding duplicates
+                                        const combinedEmails = [...currentEmails];
+                                        
+                                        // Add template emails that aren't already present
+                                        templateRecipients.forEach((email: string) => {
+                                            if (!combinedEmails.includes(email)) {
+                                                combinedEmails.push(email);
+                                            }
+                                        });
+                                        
+                                        // Ensure employeeEmail is included if it exists
+                                        if (employeeEmail && !combinedEmails.includes(employeeEmail)) {
+                                            combinedEmails.unshift(employeeEmail);
+                                        }
+                                        
+                                        setTagsTo(combinedEmails);
+                                        
+                                        if (template.bcc) {
+                                            setIsBCCOpen(true);
+                                            setTagsBcc(template.bcc);
+                                        }
+                                        if (template.cc) {
+                                            setIsCCOPen(true);
+                                            setTagsCc(template.cc);
+                                        }
+                                        setValue('message', template.body);
+                                    }
                                     setValue('template', event.target.value);
                                     setSelectedTemplate(event.target.value);
                                 }}
@@ -373,16 +466,37 @@ export default function SendEmailModal({
                                     value={inputTo}
                                     onKeyDown={handleKeyDownTo}
                                     onChange={(e) => setInputTo(e.target.value)}
+                                    onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
                                     className='focus:none outline-none px-2 py-1 grow'
                                   />
                                   <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
                                     <div className='px-1'>
                                       <h2 className='text-[12px] font-medium'>
-                                        Add multiple recipients by pressing Tab or Enter.
+                                        Add multiple recipients by pressing Tab or Enter, or search for employees (case-sensitive).
                                       </h2>
                                     </div>
                                   </Tooltip>
                                 </div>
+                                
+                                {/* Employee Suggestions Dropdown */}
+                                {showEmployeeSuggestions && (
+                                  <div className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+                                    {filteredEmployees.map((employee: any) => (
+                                      <div
+                                        key={employee.id}
+                                        className='px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0'
+                                        onClick={() => handleEmployeeSelect(employee)}
+                                      >
+                                        <div className='text-sm font-medium text-gray-900'>
+                                          {employee.firstname} {employee.lastname}
+                                        </div>
+                                        <div className='text-xs text-gray-500'>
+                                          {employee.email}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <button
                                 type='button'

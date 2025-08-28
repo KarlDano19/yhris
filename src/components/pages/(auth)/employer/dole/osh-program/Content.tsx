@@ -5,21 +5,24 @@ import { useForm } from "react-hook-form";
 
 import Link from "next/link";
 
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
+
+import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
+import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
 import CompanyProfile from "./tabs/CompanyProfile";
 import ProgramAndPolicy from "./tabs/ProgramAndPolicy";
 import RiskManagement from "./tabs/RiskManagement";
 import SafetyMeasures from "./tabs/SafetyMeasures";
 import ComplianceAndCost from "./tabs/ComplianceAndCost";
 import HealthAndWelfare from "./tabs/HealthAndWelfare";
-import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
-import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import HistoryIcon from "@/svg/HistoryIcon";
 import DownloadBorderIcon from "@/svg/DownloadBorderIcon";
+import SelectChevronDown from "@/svg/SelectChevronDown";
 
 import { 
   T_OshProgram, 
@@ -43,11 +46,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [safetySignageUrl, setSafetySignageUrl] = useState<string>("");
   const [safetySignageAttachmentExist, setSafetySignageAttachmentExist] = useState(false);
   
+  const queryClient = useQueryClient();
+  
   // Only fetch once on initial mount, then rely on manual refetch
   const { data: oshProgramDetails, refetch, isLoading } = useGetOshProgramDetails(true);
-  const { mutate: updateOshProgramDetails } = useUpdateOshProgramDetails();
+  const { mutateAsync: updateOshProgramDetails } = useUpdateOshProgramDetails();
 
-  const onSubmit = handleSubmit((data: ExtendedOshProgram) => {
+  const statusOptions = [
+    { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+    { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+    { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+    { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+  ];
+
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      await updateOshProgramDetails({
+        ...oshProgramDetails,
+        status: newStatus
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      // Invalidate cache to trigger refetch - no need for explicit refetch
+      await queryClient.invalidateQueries({ queryKey: ['oshProgramDetails'] });
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
+  };
+
+  const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
     // Validate required fields
     const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
     const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
@@ -67,7 +99,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const processedData = processFormData(data);
 
     // Submit data to server
-    submitDataToServer(processedData);
+    await submitDataToServer(processedData);
   });
 
   // Validate all required fields for the current tab
@@ -244,18 +276,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   // Submit the processed data to the server
-  const submitDataToServer = (processedData: ExtendedOshProgram): void => {
+  const submitDataToServer = async (processedData: ExtendedOshProgram): Promise<void> => {
     setValidationMessage("");
-    const callbackReq = {
-      onSuccess: () => {
-        // Handle successful submission
-        handleSuccessfulSubmission();
-      },
-      onError: (error: any) => {
-        toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
-      }
-    };
-    updateOshProgramDetails(processedData, callbackReq);
+    
+    try {
+      await updateOshProgramDetails(processedData);
+      handleSuccessfulSubmission();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
+    }
   };
 
   // Handle successful submission
@@ -491,6 +520,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             
             {/* <DownloadBorderIcon/> */}
             {/* <HistoryIcon/> */}
+            <div className='relative inline-block'>
+              <select
+                value={oshProgramDetails?.status || 'on-schedule'}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                disabled={!hasActiveSubscription}
+                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(oshProgramDetails?.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+              >
+                {statusOptions.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#111827'
+                    }}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                <SelectChevronDown />
+              </div>
+            </div>
             <button
               className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
               onClick={submitCurrentTab}

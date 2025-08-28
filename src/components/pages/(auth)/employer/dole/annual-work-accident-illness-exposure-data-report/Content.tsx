@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useRef, forwardRef } from 'react';
 
 import Link from 'next/link';
 
@@ -9,24 +9,33 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
-import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
+import { createPortal } from 'react-dom';
+import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
-import DeleteReportModal from './modals/DeleteReportModal';
-import SendEmailModal from './modals/SendEmailModal';
-import SelectBranchModal from './modals/SelectBranchModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
-import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
+
+import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
+import useUpdateAnnualAccidentIllness from './hooks/useUpdateAnnualAccidentIllness';
+import { getPrintAnnualAccidentIllnessReportDetails } from './hooks/useGetPrintAnnualAccidentIllnessDetails';
 import CreateReportModal from './modals/CreateReportModal';
 import EditReportModal from './modals/EditReportModal';
-import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
+import DeleteReportModal from './modals/DeleteReportModal';
+import SendEmailModal from './modals/SendEmailModal';
+import SelectBranchModal from './modals/SelectBranchModal';
+import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
+import useFileforge from '@/components/hooks/useFileforge';
+import { handlePrintPDF } from './PrintData';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
+import PrintIcon from "@/svg/PrintIcon";
+import DeleteIcon from '@/svg/DeleteIcon';
+
 
 type PaginationProps = {
   totalRecords: number;
@@ -37,6 +46,13 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const statusOptions = [
+  { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+  { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+  { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const queryClient = useQueryClient();
@@ -77,10 +93,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
 
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
+
+  const { generatePDFLocally, isGenerating } = useFileforge({
+    pageMargins: {
+      top: '0.1in',
+      right: '0.1in',
+      bottom: '0.1in',
+      left: '0.1in'
+    },
+    onSuccess: () => {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
+  });
 
   useEffect(() => {
     if (annualAccidentIllnessReportData) {
@@ -137,6 +175,54 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleMenuClick = (event: React.MouseEvent, id: number) => {
     event.stopPropagation();
     setOpenMenuId(openMenuId === id ? null : id);
+  };
+
+  const handleStatusChange = async (itemId: number, newStatus: string) => {
+    try {
+      await updateAnnualAccidentIllnessReport.mutateAsync({
+        annual_work_accident_illness_exposure_data_report_id: itemId,
+        data: { status: newStatus }
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      annualAccidentIllnessReportRefetch();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  const handlePrintPDFLocal = async (item: any) => {
+    try {
+      setGeneratingItemId(item.id);
+      // Fetch detailed data using the print hook's function directly
+      const detailedData = await getPrintAnnualAccidentIllnessReportDetails(item.id);
+      
+      // Filter data by year and get the correct item
+      const year = item.year || new Date().getFullYear();
+      
+      // Find the report for the specific year (filter by year only)
+      const filteredItem = annualAccidentIllnessReportItems.find((reportItem: any) => 
+        reportItem.year === year
+      );
+      
+      // Create item with filtered data
+      const itemWithData = {
+        ...(detailedData || filteredItem || item),
+        exposure_data: `JANUARY 1 TO DECEMBER 31, ${year}`,
+        // Ensure we use the number of employees from the filtered year
+        number_of_employees: filteredItem ? filteredItem.number_of_employees : item.number_of_employees,
+      };
+      
+      await handlePrintPDF(itemWithData, generatePDFLocally);
+    } catch (error) {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
   };
 
   const handlePrintWithBranch = () => {
@@ -218,21 +304,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Menu options for Export and Generate Report
   const menuOptions = [
-    // {
-    //   name: 'Export',
-    //   action: () => {
-    //     setIsExportProgressModalOpen(true);
-    //   },
-    //   disabled: !cachedRigths?.state?.data?.export_dole_awair,
-    // },
     {
-      name: 'Generate Report',
+      name: 'Export',
       action: () => {
-        setIsSelectBranchModalOpen(true);
+        setIsExportProgressModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.generate_dole_awair,
+      // disabled: !cachedRigths?.state?.data?.export_dole_awair,
+      disabled: false,
     },
+    // {
+    //   name: 'Generate Report',
+    //   action: () => {
+    //     setIsSelectBranchModalOpen(true);
+    //   },
+    //   disabled: !cachedRigths?.state?.data?.generate_dole_awair,
+    // },
   ];
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.right - 138 + window.scrollX, // 138px = 8.6rem
+    });
+    setOpenMenuId(id);
+  };
 
   const renderRows = () => {
     if (isAnnualAccidentIllnessReportLoading) {
@@ -272,6 +368,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.total_non_disabling_injuries}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.frequency_rate}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.severity_rate}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='relative inline-block'>
+              <select
+                value={item.status || 'on-schedule'}
+                onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+              >
+                {statusOptions.map((option) => (
+                  <option 
+                    key={option.value} 
+                    value={option.value}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#111827'
+                    }}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
               <button
@@ -296,47 +418,29 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EmailLogo />
               </button>
-              <div className='flex-1 flex justify-end relative menu-container'>
-                <button 
-                  className='py-2.5 px-3 rounded-md border border-gray-300 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                  onClick={(e) => handleMenuClick(e, item.id)}
-                >
-                  <span className='sr-only'>Open options</span>
-                  <div className='flex gap-4'>
-                    <EllipsisHorizontalIcon className='flex-none h-4 w-4 text-black' aria-hidden='true' />
+              <button
+                onClick={() => handlePrintPDFLocal(item)}
+                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_awair}
+                className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                {generatingItemId === item.id ? (
+                  <div className="animate-spin inline-block w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full">
                   </div>
-                </button>
-                {openMenuId === item.id && (
-                  <div 
-                    className='absolute z-50 origin-top-right right-0 mt-2 w-[8.6rem] rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
-                    style={{ top: '100%' }}
-                  >
-                    <div className='py-1'>
-                      <span
-                        className='block px-4 py-2 text-sm cursor-pointer text-center text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        onClick={() => {
-                          setIsExportProgressModalOpen(true);
-                          setOpenMenuId(null);
-                        }}
-                      >
-                        Download
-                      </span>
-                      <span
-                        className='block px-4 py-2 text-sm cursor-pointer text-center text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        onClick={() => {
-                          setIsDeleteAnnualAccidentIllnessReportModalOpen({
-                            id: item.id,
-                            open: true,
-                          });
-                          setOpenMenuId(null);
-                        }}
-                      >
-                        Delete
-                      </span>
-                    </div>
-                  </div>
+                ) : (
+                  <PrintIcon />
                 )}
-              </div>
+              </button>
+              <button
+                onClick={() =>
+                  setIsDeleteAnnualAccidentIllnessReportModalOpen({
+                    id: item.id,
+                    open: true,
+                  })
+                }
+                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+              >
+                <DeleteIcon />
+              </button>
             </div>
           </td>
         </tr>
@@ -495,6 +599,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Severity Rate
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions

@@ -4,6 +4,8 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
+import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -14,18 +16,25 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
+import useFileforge from '@/components/hooks/useFileforge';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import EditIcon from '@/svg/EditIcon';
-import DeleteIcon from '@/svg/DeleteIcon';
-import CreateWemRequestModal from './modals/CreateWemRequestModal';
-import ExportProgressModal from '../employee-compensation-logbook/modals/ExportProgressModal';
 import useGetWorkEnvironmentRequestItems from './hooks/useGetWorkEnvironmentRequestItems';
+import { getPrintWorkEnvironmentRequestDetails } from './hooks/useGetPrintWorkEnvironmentRequestDetails';
+import useUpdateWorkEnvironmentRequest from './hooks/useUpdateWorkEnvironmentRequest';
+import CreateWemRequestModal from './modals/CreateWemRequestModal';
 import DeleteWemRequestModal from './modals/DeleteWemRequestModal';
 import EditWemRequestModal from './modals/EditWemRequestModal';
-import EmailLogo from '@/svg/EmailLogo';
 import SendEmailModal from './modals/SendEmailModal';
-import { useQueryClient } from '@tanstack/react-query';
+import ExportProgressModal from '../employee-compensation-logbook/modals/ExportProgressModal';
+
+import SelectChevronDown from '@/svg/SelectChevronDown';
+import EditIcon from '@/svg/EditIcon';
+import EmailLogo from '@/svg/EmailLogo';
+import PrintIcon from "@/svg/PrintIcon";
+import DeleteIcon from '@/svg/DeleteIcon';
+
+import { handlePrintPDF } from './PrintData';
+
 
 type PaginationProps = {
   totalRecords: number;
@@ -36,6 +45,13 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const statusOptions = [
+  { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
+  { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
+  { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
+];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [workEnvironmentRequestItems, setWorkEnvironmentRequestItems] = useState<any>([]);
@@ -50,8 +66,21 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
+  const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
+
+  const { generatePDFLocally, isGenerating } = useFileforge({
+    onSuccess: () => {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
+    }
+  });
 
   // Form Methods
   const createFormMethods = useForm();
@@ -76,23 +105,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  
 
-  const menuOptions = [
-    {
-      name: 'Export',
-      action: () => {
-        setIsExportProgressModalOpen(true);
-      },
-      disabled: !cachedRigths?.state?.data?.export_dole_work_environment_request,
-    },
-    {
-      name: 'Generate Report',
-      action: () => {
-        handlePrint();
-      },
-      disabled: !cachedRigths?.state?.data?.generate_dole_work_environment_request,
-    },
-  ];
+
+  // const menuOptions = [
+  //   {
+  //     name: 'Export',
+  //     action: () => {
+  //       setIsExportProgressModalOpen(true);
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.export_dole_work_environment_request,
+  //   },
+  //   {
+  //     name: 'Generate Report',
+  //     action: () => {
+  //       handlePrint();
+  //     },
+  //     disabled: !cachedRigths?.state?.data?.generate_dole_work_environment_request,
+  //   },
+  // ];
 
   useEffect(() => {
     if (workEnvironmentRequestItemsData) {
@@ -121,40 +152,93 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isWorkEnvironmentRequestItemsLoading, isSearching]);
 
-  const handlePrint = () => {
-    // Create a new div element
-    const printDiv = document.createElement('div');
-
-    // Copy the content of the original printSection
-    const originalPrintSection = document.getElementById('printSection');
-    if (originalPrintSection) {
-      printDiv.innerHTML = originalPrintSection.innerHTML;
+  const handleStatusChange = async (itemId: number, newStatus: string) => {
+    try {
+      await updateWorkEnvironmentRequestStatus.mutateAsync({
+        work_environment_measurement_request_id: itemId,
+        data: { status: newStatus }
+      });
+      
+      toast.custom(() => <CustomToast message='Status updated successfully.' type='success' />, { duration: 3000 });
+      workEnvironmentRequestItemsRefetch();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to update status.'} type='error' />, { duration: 5000 });
     }
-
-    // Style the new div to be off-screen
-    printDiv.style.width = '1980px';
-    printDiv.style.height = '100%';
-    printDiv.style.position = 'absolute';
-    printDiv.style.left = '-9999px';
-    printDiv.style.top = '-9999px';
-
-    // Add the new div to the body
-    document.body.appendChild(printDiv);
-
-    // Use html2canvas on the new div
-    html2canvas(printDiv).then((canvas) => {
-      // Remove the temporary div
-      document.body.removeChild(printDiv);
-
-      const imgData = canvas.toDataURL('image/png');
-      const newWindow = window.open('', '_blank');
-      newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
-      newWindow?.document.close();
-      setTimeout(() => {
-        newWindow?.print();
-      }, 500);
-    });
   };
+
+  const getStatusColor = (status: string) => {
+    // Handle backward compatibility with old status values
+    const statusMapping: { [key: string]: string } = {
+      'on-schedule': 'on-schedule',
+      'for-submission': 'for-submission', 
+      'for-review': 'for-review',
+      'approved': 'approved',
+    };
+    
+    const mappedStatus = statusMapping[status] || status;
+    
+    switch (mappedStatus) {
+      case 'on-schedule':
+        return 'bg-purple-100 text-purple-700';
+      case 'for-submission':
+        return 'bg-blue-100 text-blue-700';
+      case 'for-review':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'approved':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  const handlePrintPDFLocal = async (item: any) => {
+    try {
+      setGeneratingItemId(item.id);
+      // Fetch detailed data using the print hook's function directly
+      const detailedData = await getPrintWorkEnvironmentRequestDetails(item.id);
+      
+      // Use the detailed data directly for PDF generation
+      await handlePrintPDF(detailedData, generatePDFLocally);
+    } catch (error) {
+      setGeneratingItemId(null);
+      toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
+  };
+
+  // const handlePrint = () => {
+  //   // Create a new div element
+  //   const printDiv = document.createElement('div');
+
+  //   // Copy the content of the original printSection
+  //   const originalPrintSection = document.getElementById('printSection');
+  //   if (originalPrintSection) {
+  //     printDiv.innerHTML = originalPrintSection.innerHTML;
+  //   }
+
+  //   // Style the new div to be off-screen
+  //   printDiv.style.width = '1980px';
+  //   printDiv.style.height = '100%';
+  //   printDiv.style.position = 'absolute';
+  //   printDiv.style.left = '-9999px';
+  //   printDiv.style.top = '-9999px';
+
+  //   // Add the new div to the body
+  //   document.body.appendChild(printDiv);
+
+  //   // Use html2canvas on the new div
+  //   html2canvas(printDiv).then((canvas) => {
+  //     // Remove the temporary div
+  //     document.body.removeChild(printDiv);
+
+  //     const imgData = canvas.toDataURL('image/png');
+  //     const newWindow = window.open('', '_blank');
+  //     newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
+  //     newWindow?.document.close();
+  //     setTimeout(() => {
+  //       newWindow?.print();
+  //     }, 500);
+  //   });
+  // };
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -190,6 +274,37 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const pageSizeChange = (value: number) => {
     setCurrentPage(1);
     setPageSize(value);
+  };
+
+  const formatListVertical = (data: string[] | string) => {
+    // Handle both array and string inputs
+    let items: string[] = [];
+    
+    if (Array.isArray(data)) {
+      // If it's an array, check if it contains comma-separated strings
+      if (data.length === 1 && typeof data[0] === 'string' && data[0].includes(',')) {
+        // Handle case like ["OSHC,None (New Client),Accredited Wem Officer"]
+        items = data[0].split(',').map(item => item.trim()).filter(item => item.length > 0);
+      } else {
+        // Handle regular array of strings
+        items = data;
+      }
+    } else if (typeof data === 'string') {
+      // Split by comma and clean up whitespace
+      items = data.split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+    
+    if (!items || items.length === 0) return null;
+    
+    return (
+      <ul className="list-disc list-inside">
+        {items.map((str, index) => (
+          <li key={index} className="text-left">
+            {str.charAt(0).toUpperCase() + str.slice(1)}
+          </li>
+        ))}
+      </ul>
+    );
   };
 
   const renderRows = () => {
@@ -231,18 +346,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ')}
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.purpose_of_wem_request
-              .map((purpose: string) => purpose.charAt(0).toUpperCase() + purpose.slice(1))
-              .join(' ')}
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {formatListVertical(item.purpose_of_wem_request)}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {formatListVertical(item.wem_conducted_by)}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {formatListVertical(item.name_of_safety_officer)}
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.wem_conducted_by
-              .map((conductedBy: string) => conductedBy.charAt(0).toUpperCase() + conductedBy.slice(1))
-              .join(' ')}
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.name_of_safety_officer.map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ')}
+            <div className='relative inline-block'>
+              <select
+                value={item.status || 'on-schedule'}
+                onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
+                className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
+              >
+                {statusOptions.map((option) => (
+                  <option 
+                    key={option.value} 
+                    value={option.value}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#111827'
+                    }}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
+                <SelectChevronDown />
+              </div>
+            </div>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
@@ -258,20 +395,27 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <EditIcon />
               </button>
               <button
-                // className='opacity-50'
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                // disabled={true}
-                // data-tooltip-id='email-tooltip'
-                // data-tooltip-content='Not available'
-                // data-tooltip-place='bottom'
                 disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <EmailLogo />
+              </button>
+              <button
+                onClick={() => handlePrintPDFLocal(item)}
+                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_work_environment_request}
+                className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                {generatingItemId === item.id ? (
+                  <div className="animate-spin inline-block w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full">
+                  </div>
+                ) : (
+                  <PrintIcon />
+                )}
               </button>
               <button
                 onClick={() =>
@@ -291,7 +435,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>
               Please click create to add work environment measurement request.
@@ -378,7 +522,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
             </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            {/* <div className='flex-1 flex justify-start lg:justify-end'>
               <button
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
@@ -428,6 +572,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div> */}
+            <div className='flex-1 flex justify-start lg:justify-end'>
+              <button
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
+                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_work_environment_request}
+              >
+                CREATE
+              </button>
             </div>
           </div>
 
@@ -454,6 +607,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Safety Officer(s)
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
@@ -512,7 +668,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsSendEmailModalOpen}
         />
       )}
-      {/* Print Section */}
+      {/* Print Section
       <div className='container mx-auto p-4 hidden'>
         <div id='printSection'>
           <div className='overflow-x-auto'>
@@ -677,10 +833,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
           <p className='mt-4 text-xl text-center'>-- Nothing follows --</p>
         </div>
-      </div>
+      </div> */}
 
       <Tooltip id='search-tooltip'/>
-      <Tooltip id='email-tooltip'/>
     </>
   );
 }

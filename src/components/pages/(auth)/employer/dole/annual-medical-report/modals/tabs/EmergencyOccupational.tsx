@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function EmergencyOccupational({
   register,
@@ -23,14 +23,8 @@ function EmergencyOccupational({
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
-
-  // Add this useEffect to check if "Other" option is selected on load
-  useEffect(() => {
-    const value = watch("provided_treatment_room_medical_clinic");
-    if (value === "Other" || value === "other") {
-      setIsOtherCheckedA(true);
-    }
-  }, [watch("provided_treatment_room_medical_clinic")]);
+  const otherCheckboxARef = useRef<HTMLInputElement>(null);
+  const otherCheckboxDRef = useRef<HTMLInputElement>(null);
 
   // Helper to check if a checkbox group is filled
   const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
@@ -127,6 +121,47 @@ function EmergencyOccupational({
   const scheduleAttendance = watch("schedule_of_attendance_of_full_time_first_aider");
   const personnelTraining = watch("occupational_health_personnel_training");
   const personnelTrainingOther = watch("occupational_health_personnel_training_other_specification");
+
+  // Sync local state with form data
+  useEffect(() => {
+    if (Array.isArray(providedTreatmentRoom) && providedTreatmentRoom.includes("Other")) {
+      setIsOtherCheckedA(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else if (providedTreatmentRoomOther) {
+      setIsOtherCheckedA(true);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedA(false);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = false;
+      }
+    }
+  }, [providedTreatmentRoom, providedTreatmentRoomOther]);
+
+  useEffect(() => {
+    if (Array.isArray(personnelTraining) && personnelTraining.includes("Other")) {
+      setIsOtherCheckedD(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else if (personnelTrainingOther) {
+      setIsOtherCheckedD(true);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedD(false);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = false;
+      }
+    }
+  }, [personnelTraining, personnelTrainingOther]);
 
   useEffect(() => {
     if (isChecked(providedTreatmentRoom)) {
@@ -229,36 +264,44 @@ function EmergencyOccupational({
                 {...register("provided_treatment_room_medical_clinic")}
                 id="provided_treatment_room_medical_clinic_other"
                 value="Other"
-                onChange={(e) => setIsOtherCheckedA(e.target.checked)}
+                ref={otherCheckboxARef}
+                onChange={(e) => {
+                  setIsOtherCheckedA(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && providedTreatmentRoomOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
               />
-              <label
-                htmlFor="provided_treatment_room_medical_clinic_other"
-                className="ml-2"
-              >
-                others, please specify
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            {isOtherCheckedA && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "provided_treatment_room_medical_clinic_other_specification",
-                    {
-                      required: isOtherCheckedA,
-                    }
+              {!isOtherCheckedA ? (
+                <label
+                  htmlFor="provided_treatment_room_medical_clinic_other"
+                  className="ml-2"
+                >
+                  others, please specify
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "provided_treatment_room_medical_clinic_other_specification",
+                      {
+                        required: isOtherCheckedA,
+                      }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.provided_treatment_room_medical_clinic_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.provided_treatment_room_medical_clinic_other_specification.message || "Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300"
-                />
-                {errors.provided_treatment_room_medical_clinic_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.provided_treatment_room_medical_clinic_other_specification.message || "Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -652,38 +695,46 @@ function EmergencyOccupational({
               <input
                 type="checkbox"
                 {...register("occupational_health_personnel_training")}
-                id="occupational_health_personnel_other"
+                id="occupational_health_personnel_training_other"
                 value="Other"
-                onChange={(e) => setIsOtherCheckedD(e.target.checked)}
+                ref={otherCheckboxDRef}
+                onChange={(e) => {
+                  setIsOtherCheckedD(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && personnelTrainingOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
               />
-              <label
-                htmlFor="occupational_health_personnel_other"
-                className="ml-2"
-              >
-                others, please specify
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            {isOtherCheckedD && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "occupational_health_personnel_training_other_specification",
-                    {
-                      required: isOtherCheckedD,
-                    }
+              {!isOtherCheckedD ? (
+                <label
+                  htmlFor="occupational_health_personnel_training_other"
+                  className="ml-2"
+                >
+                  others, please specify
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "occupational_health_personnel_training_other_specification",
+                      {
+                        required: isOtherCheckedD,
+                      }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.occupational_health_personnel_training_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.occupational_health_personnel_training_other_specification.message || "Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300"
-                />
-                {errors.occupational_health_personnel_training_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.occupational_health_personnel_training_other_specification.message || "Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

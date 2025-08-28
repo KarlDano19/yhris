@@ -312,7 +312,7 @@ function WorkplaceSafetyCompliance({
 
           {/* Ergonomic Hazards Section */}
           <ToggleSection
-            title="b. Ergonomic Stress:"
+            title="c. Ergonomic Stress:"
             isOpen={isErgonomicHazardsOpen}
             onToggle={toggleErgonomicHazardsOpen}
           >
@@ -321,7 +321,7 @@ function WorkplaceSafetyCompliance({
 
           {/* Biological Hazards Section */}
           <ToggleSection
-            title="b. Biological Hazards:"
+            title="d. Biological Hazards:"
             isOpen={isBiologicalHazardsOpen}
             onToggle={toggleBiologicalHazardsOpen}
           >

@@ -5,26 +5,27 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
-import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
-import ExportProgressModal from './modals/ExportProgressModal';
+
+import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
 import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensationLogModal';
 import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
 import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
-import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import SelectBranchModal from './modals/SelectBranchModal';
+import ExportProgressModal from './modals/ExportProgressModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
@@ -108,9 +109,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (employeeCompensationLogbookData) {
       employeeCompensationLogbookData.records.map((item: any) => {
-        item.date_of_entry = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_entry));
-        item.date_of_notification = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_notification));
-        item.date_of_contingency = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_contingency));
+        // Safely handle date formatting with null/undefined checks
+        if (item.date_of_entry) {
+          item.date_of_entry = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_entry));
+        }
+        if (item.date_of_notification) {
+          item.date_of_notification = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_notification));
+        }
+        if (item.date_of_contingency) {
+          item.date_of_contingency = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_contingency));
+        }
         return item;
       });
       setEmployeeCompensationLogbookItems(employeeCompensationLogbookData.records);
@@ -263,7 +271,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>
               Please click create to add employee compensation logbook.

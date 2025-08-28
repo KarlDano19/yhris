@@ -58,6 +58,7 @@ export default function EditReportModal({
       setValue('total_non_disabling_injuries', annualAccidentIllnessReportData.total_non_disabling_injuries);
       setValue('type_of_industry', annualAccidentIllnessReportData.type_of_industry);
       setValue('year', annualAccidentIllnessReportData.year);
+      setValue('injury_summary', annualAccidentIllnessReportData.injury_summary);
       
       // Set signature field value from backend data for preview
       setValue('signature', annualAccidentIllnessReportData.signature);

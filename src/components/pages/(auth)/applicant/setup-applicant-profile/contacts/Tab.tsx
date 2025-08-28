@@ -7,12 +7,12 @@ import AskProfModal from '../modals/AskProfModal';
 function ContactsTab({
   register,
   setValue,
-  onSubmit,
+  handleSubmit,
   setCurrentTab,
 }: {
   register: any;
   setValue: any;
-  onSubmit: any;
+  handleSubmit: any;
   setCurrentTab: any;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,6 +29,10 @@ function ContactsTab({
   //   onSubmit();
   //   setIsModalOpen(false);
   // };
+
+  const onSubmit = handleSubmit((data: any) => {
+    setCurrentTab(3);
+  });
 
   return (
     <>
@@ -180,7 +184,7 @@ function ContactsTab({
             className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
             tabIndex={8}
           >
-            Save
+            Next
           </button>
         </div>
       </form>

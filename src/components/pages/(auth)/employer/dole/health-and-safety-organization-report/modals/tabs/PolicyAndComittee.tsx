@@ -29,7 +29,7 @@ function PolicyAndComittee({
 }) {
   const [fileUrl, setFileUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
-  const [committeeType, setCommitteeType] = useState<string>("a");
+  const [committeeType, setCommitteeType] = useState<string>("A");
   const [fileSource, setFileSource] = useState<string>("");
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -98,11 +98,11 @@ function PolicyAndComittee({
 
   // Mapping of committee types to the number of members
   const committeeMembersCount = {
-    a: 2,
-    b: 3,
-    c: 3,
-    d: 2,
-    e: 2,
+    A: 3,
+    B: 3,
+    C: 3,
+    D: 2,
+    E: 2,
   };
 
   return (
