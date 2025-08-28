@@ -101,7 +101,7 @@ const DocumentContent: React.FC<{ data: T_OshProgram; forPrint?: boolean }> = ({
       <DocumentPageNine data={data} />
     </A4Page>
 
-    <A4Page forPrint={forPrint}>
+    <A4Page forPrint={forPrint} noPageBreak={true}>
       <DocumentPageTen data={data} />
     </A4Page>
 

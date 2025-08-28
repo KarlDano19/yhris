@@ -24,54 +24,79 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
   
   return (
     <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media print {
+            .no-repeat-header thead {
+              display: table-row-group !important;
+            }
+            .no-repeat-header thead tr {
+              page-break-after: avoid !important;
+            }
+          }
+        `
+      }} />
       {/* Top Section - Worker Facilities Continuation */}
       <div className="mb-6">
-        <div className="border border-gray-300">
-          {[
-            {
-              facility: 'c. Suitable living accommodation (if applicable)',
-              provided: data.suitable_living_accommodation,
-              remarks: data.suitable_living_accommodation_remarks || ''
-            },
-            {
-              facility: 'd. Separate sanitary, washing and sleeping facilities (if applicable)',
-              provided: data.separate_sanitary_washing_and_sleeping_facilities,
-              remarks: data.separate_sanitary_washing_and_sleeping_facilities_remarks || ''
-            },
-            {
-              facility: 'e. Lactation station (in consonance with DOLE D.O. 143-15)',
-              provided: data.lactation_station,
-              remarks: data.lactation_station_remarks || ''
-            },
-            {
-              facility: 'f. Ramps, railings, and the like',
-              provided: data.ramps_railings_and_like,
-              remarks: data.ramps_railings_and_like_remarks || ''
-            },
-            {
-              facility: 'g. Other workers\' welfare facilities as prescribed by OSHS and other related issuances',
-              provided: data.other_workers_welfare_facilities,
-              remarks: data.other_workers_welfare_facilities_remarks || ''
-            }
-          ].map((entry, index) => (
-            <div key={index} className="grid grid-cols-[2fr_1fr_1fr] text-sm border-b border-gray-300 last:border-b-0">
-              <div className="p-2 border-r border-gray-300 min-h-[24px]">
-                {entry.facility}
-              </div>
-              <div className="grid grid-cols-2 border-r border-gray-300">
-                <div className="p-2 border-r border-gray-300 min-h-[24px] text-center">
+        <table className="w-full border-collapse border border-gray-300 no-repeat-header">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">FACILITIES</th>
+              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-center" colSpan={2}>PROVIDED? (YES/NO)</th>
+              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">REMARKS</th>
+            </tr>
+            <tr className="bg-gray-50">
+              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left"></th>
+              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-center">YES</th>
+              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-center">NO</th>
+              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              {
+                facility: 'c. Suitable living accommodation (if applicable)',
+                provided: data.suitable_living_accommodation,
+                remarks: data.suitable_living_accommodation_remarks || ''
+              },
+              {
+                facility: 'd. Separate sanitary, washing and sleeping facilities (if applicable)',
+                provided: data.separate_sanitary_washing_and_sleeping_facilities,
+                remarks: data.separate_sanitary_washing_and_sleeping_facilities_remarks || ''
+              },
+              {
+                facility: 'e. Lactation station (in consonance with DOLE D.O. 143-15)',
+                provided: data.lactation_station,
+                remarks: data.lactation_station_remarks || ''
+              },
+              {
+                facility: 'f. Ramps, railings, and the like',
+                provided: data.ramps_railings_and_like,
+                remarks: data.ramps_railings_and_like_remarks || ''
+              },
+              {
+                facility: 'g. Other workers\' welfare facilities as prescribed by OSHS and other related issuances',
+                provided: data.other_workers_welfare_facilities,
+                remarks: data.other_workers_welfare_facilities_remarks || ''
+              }
+            ].map((entry, index) => (
+              <tr key={index}>
+                <td className="border border-gray-300 p-2 min-h-[24px] text-sm">
+                  {entry.facility}
+                </td>
+                <td className="border border-gray-300 p-2 min-h-[24px] text-sm text-center">
                   {entry.provided ? '✓' : ''}
-                </div>
-                <div className="p-2 min-h-[24px] text-center">
+                </td>
+                <td className="border border-gray-300 p-2 min-h-[24px] text-sm text-center">
                   {!entry.provided ? '✓' : ''}
-                </div>
-              </div>
-              <div className="p-2 min-h-[24px]">
-                {entry.remarks}
-              </div>
-            </div>
-          ))}
-        </div>
+                </td>
+                <td className="border border-gray-300 p-2 min-h-[24px] text-sm">
+                  {entry.remarks}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Section 14.0 Emergency and Disaster Preparedness */}
@@ -102,46 +127,50 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
           <h3 className="text-sm font-semibold text-gray-900 mb-2">
             14.2 Types and number of Drills conducted
           </h3>
-          <div className="border border-gray-300">
-            <div className="grid grid-cols-3 text-sm font-medium bg-gray-50 border-b border-gray-300">
-              <div className="p-2 border-r border-gray-300">Type of Drills (fire, earthquake)</div>
-              <div className="p-2 border-r border-gray-300">Date</div>
-              <div className="p-2">Responsible person/position</div>
-            </div>
-            {(() => {
-              try {
-                const drillData = Array.isArray(data.drills) ? data.drills : [];
-                
-                if (drillData.length === 0) {
-                  // Show empty rows only if no data
+          <table className="w-full border-collapse border border-gray-300 no-repeat-header">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Type of Drills (fire, earthquake)</th>
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Date</th>
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Responsible person/position</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(() => {
+                try {
+                  const drillData = Array.isArray(data.drills) ? data.drills : [];
+                  
+                  if (drillData.length === 0) {
+                    // Show empty rows only if no data
+                    return [...Array(3)].map((_, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 p-2 min-h-[24px] text-sm"></td>
+                        <td className="border border-gray-300 p-2 min-h-[24px] text-sm"></td>
+                        <td className="border border-gray-300 p-2 min-h-[24px] text-sm"></td>
+                      </tr>
+                    ));
+                  }
+                  
+                  // Show actual data
+                  return drillData.map((entry, index) => (
+                    <tr key={index}>
+                      <td className="border border-gray-300 p-2 min-h-[24px] text-sm">{entry.type_of_drills || ''}</td>
+                      <td className="border border-gray-300 p-2 min-h-[24px] text-sm">{formatDate(entry.date)}</td>
+                      <td className="border border-gray-300 p-2 min-h-[24px] text-sm">{entry.responsible_person_position || ''}</td>
+                    </tr>
+                  ));
+                } catch (error) {
                   return [...Array(3)].map((_, index) => (
-                    <div key={index} className="grid grid-cols-3 text-sm border-b border-gray-300 last:border-b-0">
-                      <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
-                      <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
-                      <div className="p-2 min-h-[24px]"></div>
-                    </div>
+                    <tr key={index}>
+                      <td className="border border-gray-300 p-2 min-h-[24px] text-sm"></td>
+                      <td className="border border-gray-300 p-2 min-h-[24px] text-sm"></td>
+                      <td className="border border-gray-300 p-2 min-h-[24px] text-sm"></td>
+                    </tr>
                   ));
                 }
-                
-                // Show actual data
-                return drillData.map((entry, index) => (
-                  <div key={index} className="grid grid-cols-3 text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{entry.type_of_drills || ''}</div>
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]">{formatDate(entry.date)}</div>
-                    <div className="p-2 min-h-[24px]">{entry.responsible_person_position || ''}</div>
-                  </div>
-                ));
-              } catch (error) {
-                return [...Array(3)].map((_, index) => (
-                  <div key={index} className="grid grid-cols-3 text-sm border-b border-gray-300 last:border-b-0">
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
-                    <div className="p-2 border-r border-gray-300 min-h-[24px]"></div>
-                    <div className="p-2 min-h-[24px]"></div>
-                  </div>
-                ));
-              }
-            })()}
-          </div>
+              })()}
+            </tbody>
+          </table>
         </div>
       </div>
 

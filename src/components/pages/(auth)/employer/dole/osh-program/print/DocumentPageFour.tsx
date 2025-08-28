@@ -25,6 +25,18 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media print {
+            .no-repeat-header thead {
+              display: table-row-group !important;
+            }
+            .no-repeat-header thead tr {
+              page-break-after: avoid !important;
+            }
+          }
+        `
+      }} />
       {/* Document Header */}
       <div className="mb-6">
         <h1 className="text-lg font-bold text-gray-900">
@@ -44,44 +56,48 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
         {/* Risk Assessment Matrix Table */}
         <div className="mb-3">
           <h3 className="text-sm font-medium text-gray-900 mb-1">Risk Assessment Matrix</h3>
-          <div className="border border-gray-300">
-            <div className="grid grid-cols-5 bg-gray-100 text-sm font-medium text-gray-900">
-              <div className="p-2 border-r border-gray-300">Task</div>
-              <div className="p-2 border-r border-gray-300">Hazard Identified</div>
-              <div className="p-2 border-r border-gray-300">Risk Description</div>
-              <div className="p-2 border-r border-gray-300">Priority: likelihood of injury and illness to occur (low, medium, high)</div>
-              <div className="p-2">Control Measures</div>
-            </div>
-            {riskData.map((entry, index) => (
-              <div key={index} className="grid grid-cols-5 border-t border-gray-300">
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                  {entry.task || ''}
-                </div>
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                  {entry.hazard_identified || ''}
-                </div>
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                  {entry.risk_description || ''}
-                </div>
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs">
-                  {entry.priority || ''}
-                </div>
-                <div className="p-2 min-h-[20px] text-xs">
-                  {entry.control_measures || ''}
-                </div>
-              </div>
-            ))}
-            {/* Add empty rows to ensure minimum table height */}
-            {riskData.length < 6 && [...Array(6 - riskData.length)].map((_, index) => (
-              <div key={`empty-${index}`} className="grid grid-cols-5 border-t border-gray-300">
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs"></div>
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs"></div>
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs"></div>
-                <div className="p-2 border-r border-gray-300 min-h-[20px] text-xs"></div>
-                <div className="p-2 min-h-[20px] text-xs"></div>
-              </div>
-            ))}
-          </div>
+          <table className="w-full border-collapse border border-gray-300 no-repeat-header">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Task</th>
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Hazard Identified</th>
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Risk Description</th>
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Priority: likelihood of injury and illness to occur (low, medium, high)</th>
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Control Measures</th>
+              </tr>
+            </thead>
+            <tbody>
+              {riskData.map((entry, index) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs">
+                    {entry.task || ''}
+                  </td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs">
+                    {entry.hazard_identified || ''}
+                  </td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs">
+                    {entry.risk_description || ''}
+                  </td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs">
+                    {entry.priority || ''}
+                  </td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs">
+                    {entry.control_measures || ''}
+                  </td>
+                </tr>
+              ))}
+              {/* Add empty rows to ensure minimum table height */}
+              {riskData.length < 6 && [...Array(6 - riskData.length)].map((_, index) => (
+                <tr key={`empty-${index}`}>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs"></td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs"></td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs"></td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs"></td>
+                  <td className="border border-gray-300 p-2 min-h-[20px] text-xs"></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

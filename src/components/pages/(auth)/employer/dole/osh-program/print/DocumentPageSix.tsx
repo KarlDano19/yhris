@@ -13,6 +13,18 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
   
   return (
     <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media print {
+            .no-repeat-header thead {
+              display: table-row-group !important;
+            }
+            .no-repeat-header thead tr {
+              page-break-after: avoid !important;
+            }
+          }
+        `
+      }} />
       {/* Top Section - Joint Coordinating Committee (continued from previous page) */}
       <div className="mb-4 ml-5">
         <p className="text-sm text-gray-700 mb-2">
@@ -91,46 +103,50 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
           </p>
           
           {/* Safety Officers Table */}
-          <div className="border border-gray-300">
-            <div className="grid grid-cols-2 bg-gray-100 text-sm font-medium text-gray-900">
-              <div className="p-2 border-r border-gray-300">Name of Safety Officer(s):</div>
-              <div className="p-2">Training(s) (kindly include number of hours)</div>
-            </div>
-            {(() => {
-              try {
-                const safetyOfficersData = Array.isArray(data.safety_officers) ? data.safety_officers : [];
-                
-                if (safetyOfficersData.length === 0) {
-                  // Show empty rows only if no data
+          <table className="w-full border-collapse border border-gray-300 no-repeat-header">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Name of Safety Officer(s):</th>
+                <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">Training(s) (kindly include number of hours)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(() => {
+                try {
+                  const safetyOfficersData = Array.isArray(data.safety_officers) ? data.safety_officers : [];
+                  
+                  if (safetyOfficersData.length === 0) {
+                    // Show empty rows only if no data
+                    return [...Array(4)].map((_, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 p-2 min-h-[20px] text-sm"></td>
+                        <td className="border border-gray-300 p-2 min-h-[20px] text-sm"></td>
+                      </tr>
+                    ));
+                  }
+                  
+                  // Show actual data
+                  return safetyOfficersData.map((officer, index) => (
+                    <tr key={index}>
+                      <td className="border border-gray-300 p-2 min-h-[20px] text-sm">
+                        {officer.name || ''}
+                      </td>
+                      <td className="border border-gray-300 p-2 min-h-[20px] text-sm">
+                        {officer.training_and_hours || ''}
+                      </td>
+                    </tr>
+                  ));
+                } catch (error) {
                   return [...Array(4)].map((_, index) => (
-                    <div key={index} className="grid grid-cols-2 border-t border-gray-300">
-                      <div className="p-2 border-r border-gray-300 min-h-[20px]"></div>
-                      <div className="p-2 min-h-[20px]"></div>
-                    </div>
+                    <tr key={index}>
+                      <td className="border border-gray-300 p-2 min-h-[20px] text-sm"></td>
+                      <td className="border border-gray-300 p-2 min-h-[20px] text-sm"></td>
+                    </tr>
                   ));
                 }
-                
-                // Show actual data
-                return safetyOfficersData.map((officer, index) => (
-                  <div key={index} className="grid grid-cols-2 border-t border-gray-300">
-                    <div className="p-2 border-r border-gray-300 min-h-[20px] text-sm">
-                      {officer.name || ''}
-                    </div>
-                    <div className="p-2 min-h-[20px] text-sm">
-                      {officer.training_and_hours || ''}
-                    </div>
-                  </div>
-                ));
-              } catch (error) {
-                return [...Array(4)].map((_, index) => (
-                  <div key={index} className="grid grid-cols-2 border-t border-gray-300">
-                    <div className="p-2 border-r border-gray-300 min-h-[20px]"></div>
-                    <div className="p-2 min-h-[20px]"></div>
-                  </div>
-                ));
-              }
-            })()}
-          </div>
+              })()}
+            </tbody>
+          </table>
         </div>
 
         {/* Sub-section 6.2 Emergency Occupational Health Personnel and Facilities */}
