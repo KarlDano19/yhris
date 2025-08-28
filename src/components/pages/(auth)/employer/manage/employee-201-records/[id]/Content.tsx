@@ -1,7 +1,14 @@
+// components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type { Employee } from "@/types/employee-201-records/employee";
 
@@ -31,9 +38,18 @@ import { useSectionLoader } from "./hooks/useSectionLoader";
 import { SectionMap, sectionOrder } from "./types/section";
 
 // PATCH hooks
-import { usePersonalDetailsPatch, buildPersonalDetailsPayload } from "./hooks/usePersonalDetailsPatch";
-import { useEmploymentDetailsPatch, buildEmploymentDetailsPayload } from "./hooks/useEmploymentDetailsPatch";
-import { useTrainingDevelopmentPatch, buildTrainingDevelopmentPayload } from "./hooks/useTrainingDevelopmentPatch";
+import {
+  usePersonalDetailsPatch,
+  buildPersonalDetailsPayload,
+} from "./hooks/usePersonalDetailsPatch";
+import {
+  useEmploymentDetailsPatch,
+  buildEmploymentDetailsPayload,
+} from "./hooks/useEmploymentDetailsPatch";
+import {
+  useTrainingDevelopmentPatch,
+  buildTrainingDevelopmentPayload,
+} from "./hooks/useTrainingDevelopmentPatch";
 
 export interface ContentProps {
   params: { id: string };
@@ -55,7 +71,13 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   // per-section flags
   const [sections, setSections] = useState<SectionMap>(() =>
     sectionOrder.reduce((acc, key) => {
-      acc[key] = { loaded: false, loading: false, dirty: false, saving: false };
+      acc[key] = {
+        loaded: false,
+        loading: false,
+        dirty: false,
+        saving: false,
+        hasErrors: false, // ← important for disabling Save
+      };
       return acc;
     }, {} as SectionMap)
   );
@@ -64,8 +86,12 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   const personalPatchRef = useRef<Record<string, any>>({});
   const employmentPatchRef = useRef<Record<string, any>>({});
   const trainingRowsRef = useRef<any[]>([]);
+  const trainingPrevSnapRef = useRef<string>("[]");
 
-  const isDirty = useMemo(() => Object.values(sections).some((s) => s.dirty), [sections]);
+  const isDirty = useMemo(
+    () => Object.values(sections).some((s) => s.dirty),
+    [sections]
+  );
 
   // ------------------------ Data hooks ------------------------
   const { data, isLoading } = useEmployee(params?.id);
@@ -76,17 +102,19 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   const { save: savePersonal } = usePersonalDetailsPatch(params?.id);
   const { save: saveEmployment } = useEmploymentDetailsPatch(params?.id);
   const { save: saveTraining } = useTrainingDevelopmentPatch(params?.id);
-  
 
   // Section loader with race guard
   const { loadSection } = useSectionLoader(setSections);
 
   // ------------------------ Derived flags ------------------------
   const canSave = !!(
-    !isLoading &&
-    !sections[activeTab]?.loading &&
-    !sections[activeTab]?.saving &&
-    sections[activeTab]?.dirty
+    (
+      !isLoading &&
+      !sections[activeTab]?.loading &&
+      !sections[activeTab]?.saving &&
+      sections[activeTab]?.dirty &&
+      !sections[activeTab]?.hasErrors
+    ) // ← block save when the active form has errors
   );
   const saving = sections[activeTab]?.saving;
 
@@ -144,9 +172,17 @@ export default function Employee201Content({ params, emp }: ContentProps) {
 
   // Wrapper change → mark dirty (guards inputs only; still keep per-form emit)
   const handleWrapperChange: React.FormEventHandler<HTMLDivElement> = (e) => {
+    if (activeTab === "training") return;
     const t = e.target as HTMLElement;
-    if (t instanceof HTMLInputElement || t instanceof HTMLSelectElement || t instanceof HTMLTextAreaElement) {
-      setSections((prev) => ({ ...prev, [activeTab]: { ...prev[activeTab], dirty: true } }));
+    if (
+      t instanceof HTMLInputElement ||
+      t instanceof HTMLSelectElement ||
+      t instanceof HTMLTextAreaElement
+    ) {
+      setSections((prev) => ({
+        ...prev,
+        [activeTab]: { ...prev[activeTab], dirty: true },
+      }));
     }
   };
 
@@ -160,7 +196,9 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   }
 
   async function saveEmploymentTab() {
-    const payload = buildEmploymentDetailsPayload(employmentPatchRef.current || {});
+    const payload = buildEmploymentDetailsPayload(
+      employmentPatchRef.current || {}
+    );
     const res = await saveEmployment(payload);
     if (!res.ok) throw res.error;
     employmentPatchRef.current = {}; // clear after success
@@ -168,7 +206,9 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   }
 
   async function saveTrainingTab() {
-    const payload = buildTrainingDevelopmentPayload(trainingRowsRef.current || []);
+    const payload = buildTrainingDevelopmentPayload(
+      trainingRowsRef.current || []
+    );
     const res = await saveTraining(payload);
     if (!res.ok) throw res.error;
     // clear local buffer after success (optional)
@@ -186,7 +226,10 @@ export default function Employee201Content({ params, emp }: ContentProps) {
     }
 
     setConfirmBusy(true);
-    setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: true } }));
+    setSections((prev) => ({
+      ...prev,
+      [key]: { ...prev[key], saving: true },
+    }));
 
     const savePromise = (async () => {
       if (key === "personal") {
@@ -195,14 +238,19 @@ export default function Employee201Content({ params, emp }: ContentProps) {
         await saveEmploymentTab();
       } else if (key === "training") {
         await saveTrainingTab();
-      }else {
+      } else {
         // fallback demo save for other tabs
         await new Promise<void>((r) => setTimeout(r, 1000));
       }
 
       setSections((prev) => ({
         ...prev,
-        [key]: { ...prev[key], saving: false, dirty: false, savedAt: Date.now() },
+        [key]: {
+          ...prev[key],
+          saving: false,
+          dirty: false,
+          savedAt: Date.now(),
+        },
       }));
     })();
 
@@ -214,7 +262,11 @@ export default function Employee201Content({ params, emp }: ContentProps) {
 
     setConfirmBusy(false);
     if (ok) setShowConfirm(false);
-    else setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: false } }));
+    else
+      setSections((prev) => ({
+        ...prev,
+        [key]: { ...prev[key], saving: false },
+      }));
   }, [activeTab, sections]);
 
   // ------------------------ Tab click ------------------------
@@ -232,6 +284,31 @@ export default function Employee201Content({ params, emp }: ContentProps) {
     },
     [activeTab, sections]
   );
+
+  // helper to mark errors for a section (stable)
+  const markSectionErrors = useCallback((key: TabKey, hasErrors: boolean) => {
+    setSections((prev) => ({
+      ...prev,
+      [key]: { ...prev[key], hasErrors },
+    }));
+  }, []);
+
+  const handleTrainingReady = useCallback((rows: any[]) => {
+    trainingRowsRef.current = rows ?? [];
+    trainingPrevSnapRef.current = JSON.stringify(trainingRowsRef.current);
+  }, []);
+
+  // stable handler: only mark dirty if rows actually changed
+  const handleTrainingChange = useCallback((rows: any[]) => {
+    const snap = JSON.stringify(rows ?? []);
+    if (snap === trainingPrevSnapRef.current) return; // identical → ignore
+    trainingRowsRef.current = rows ?? [];
+    trainingPrevSnapRef.current = snap;
+    setSections((prev) => ({
+      ...prev,
+      training: { ...prev.training, dirty: true },
+    }));
+  }, []);
 
   // ------------------------ Render ------------------------
   const renderActiveForm = () => {
@@ -255,8 +332,14 @@ export default function Employee201Content({ params, emp }: ContentProps) {
             emp={employeeDetails}
             onPatchChange={(patch) => {
               Object.assign(personalPatchRef.current, patch);
-              setSections((prev) => ({ ...prev, personal: { ...prev.personal, dirty: true } }));
+              setSections((prev) => ({
+                ...prev,
+                personal: { ...prev.personal, dirty: true },
+              }));
             }}
+            onErrorsChange={(hasErrors) =>
+              markSectionErrors("personal", hasErrors)
+            }
           />
         );
 
@@ -266,8 +349,14 @@ export default function Employee201Content({ params, emp }: ContentProps) {
             emp={employeeDetails}
             onPatchChange={(patch) => {
               Object.assign(employmentPatchRef.current, patch);
-              setSections((prev) => ({ ...prev, employment: { ...prev.employment, dirty: true } }));
+              setSections((prev) => ({
+                ...prev,
+                employment: { ...prev.employment, dirty: true },
+              }));
             }}
+            onErrorsChange={(hasErrors) =>
+              markSectionErrors("employment", hasErrors)
+            }
           />
         );
 
@@ -275,23 +364,26 @@ export default function Employee201Content({ params, emp }: ContentProps) {
         return (
           <TrainingDevelopmentForm
             emp={employeeDetails}
-            onChange={(rows) => {
-              trainingRowsRef.current = rows;
-              setSections((prev) => ({
-                ...prev,
-                training: { ...prev.training, dirty: true },
-              }));
-            }}
+            onReady={handleTrainingReady}
+            onChange={handleTrainingChange}
+            onErrorsChange={(hasErrors) =>
+              markSectionErrors("training", hasErrors)
+            }
           />
         );
+
       case "disciplinary":
         return <DisciplinaryRecordsForm emp={employeeDetails} />;
+
       case "performance":
         return <PerformanceEvaluationForm emp={employeeDetails} />;
+
       case "benefits":
         return <BenefitsComplianceForm emp={employeeDetails} />;
+
       case "documents":
         return <DocumentRepositoryForm emp={employeeDetails} />;
+
       default:
         return null;
     }
@@ -333,7 +425,11 @@ export default function Employee201Content({ params, emp }: ContentProps) {
           {isLoading ? (
             <EmployeeHeaderSkeleton />
           ) : (
-            <EmployeeHeader employee={employee} activeTab={activeTab} setActiveTab={handleTabClick} />
+            <EmployeeHeader
+              employee={employee}
+              activeTab={activeTab}
+              setActiveTab={handleTabClick}
+            />
           )}
         </div>
 
@@ -368,8 +464,12 @@ export default function Employee201Content({ params, emp }: ContentProps) {
         <ConfirmModal
           title="Save changes?"
           message="Are you sure you want to save this section’s changes?"
-          onCancel={() => { if (!confirmBusy) setShowConfirm(false); }}
-          onConfirm={() => { if (!confirmBusy) void saveCurrentSection(); }}
+          onCancel={() => {
+            if (!confirmBusy) setShowConfirm(false);
+          }}
+          onConfirm={() => {
+            if (!confirmBusy) void saveCurrentSection();
+          }}
           busy={confirmBusy}
         />
       )}
@@ -383,9 +483,16 @@ export default function Employee201Content({ params, emp }: ContentProps) {
             setPendingTab(null);
           }}
           onDiscard={() => {
-            setSections((prev) => ({ ...prev, [activeTab]: { ...prev[activeTab], dirty: false } }));
+            setSections((prev) => ({
+              ...prev,
+              [activeTab]: { ...prev[activeTab], dirty: false },
+            }));
             setShowLeaveConfirm(false);
-            notify.warning("Discarded changes.");
+            if (activeTab === "training") {
+              // wipe any uncommitted edits and baseline
+              trainingRowsRef.current = [];
+              trainingPrevSnapRef.current = "[]";
+            }
             proceedAfterLeave();
           }}
           onSaveAndLeave={async () => {
@@ -396,14 +503,22 @@ export default function Employee201Content({ params, emp }: ContentProps) {
               proceedAfterLeave();
               return;
             }
-            setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: true } }));
+            setSections((prev) => ({
+              ...prev,
+              [key]: { ...prev[key], saving: true },
+            }));
 
             const leavePromise = (async () => {
               // keep modal flow light for non-main save actions
               await new Promise<void>((r) => setTimeout(r, 1000));
               setSections((prev) => ({
                 ...prev,
-                [key]: { ...prev[key], saving: false, dirty: false, savedAt: Date.now() },
+                [key]: {
+                  ...prev[key],
+                  saving: false,
+                  dirty: false,
+                  savedAt: Date.now(),
+                },
               }));
             })();
 
@@ -415,7 +530,11 @@ export default function Employee201Content({ params, emp }: ContentProps) {
 
             setShowLeaveConfirm(false);
             if (ok) proceedAfterLeave();
-            else setSections((prev) => ({ ...prev, [key]: { ...prev[key], saving: false } }));
+            else
+              setSections((prev) => ({
+                ...prev,
+                [key]: { ...prev[key], saving: false },
+              }));
           }}
         />
       )}

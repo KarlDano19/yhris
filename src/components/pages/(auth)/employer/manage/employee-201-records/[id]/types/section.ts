@@ -7,6 +7,7 @@ export type SectionState = {
   dirty: boolean;
   saving: boolean;
   savedAt?: number;
+  hasErrors:boolean
 };
 
 export type SectionMap = Record<TabKey, SectionState>;

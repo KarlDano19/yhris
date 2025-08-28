@@ -17,7 +17,8 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "BGC, Taguig",
     contactNumber: "09171234567",
     name: "Adrian Cortez",
-    governmentIds: { tin: "12345678901", sss: "1234567890", pagibig: "1234567890", philhealth: "1234567890" },
+    // leave invalid/empty as requested
+    governmentIds: { tin: "", sss: "", pagibig: "", philhealth: "" },
     emergencyContact: { name: "Maria Cortez", relation: "Wife", contactNumber: "09181234567", address: "BGC, Taguig" },
   },
   {
@@ -40,7 +41,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Xavier Estates, Cagayan de Oro",
     contactNumber: "09161452781",
     name: "Bianca Reyes",
-    governmentIds: { tin: "12345668901", sss: "234567899010", pagibig: "9807654321", philhealth: "43215623891" },
+    governmentIds: { tin: "123456789", sss: "2345678901", pagibig: "980765432109", philhealth: "432156238912" },
     emergencyContact: { name: "Lissandra Reyes", relation: "Mother", contactNumber: "09161829021", address: "Xavier Estates, Cagayan de Oro" },
   },
   {
@@ -59,7 +60,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Makati City",
     contactNumber: "09170001111",
     name: "Carlos Mendoza",
-    governmentIds: { tin: "22345678901", sss: "2234567890", pagibig: "2234567890", philhealth: "2234567890" },
+    governmentIds: { tin: "223456789", sss: "2234567890", pagibig: "223456789012", philhealth: "223456789012" },
     emergencyContact: { name: "Ana Mendoza", relation: "Sister", contactNumber: "09179998888", address: "Makati City" },
   },
   {
@@ -78,7 +79,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Davao City",
     contactNumber: "09170002222",
     name: "Diane Villanueva",
-    governmentIds: { tin: "32345678901", sss: "3234567890", pagibig: "3234567890", philhealth: "3234567890" },
+    governmentIds: { tin: "323456789", sss: "3234567890", pagibig: "323456789012", philhealth: "323456789012" },
     emergencyContact: { name: "Juan Villanueva", relation: "Husband", contactNumber: "09175551234", address: "Davao City" },
   },
   {
@@ -97,7 +98,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Cebu City",
     contactNumber: "09170003333",
     name: "Elias Santos",
-    governmentIds: { tin: "42345678901", sss: "4234567890", pagibig: "4234567890", philhealth: "4234567890" },
+    governmentIds: { tin: "423456789", sss: "4234567890", pagibig: "423456789012", philhealth: "423456789012" },
     emergencyContact: { name: "Maria Santos", relation: "Wife", contactNumber: "09175554321", address: "Cebu City" },
   },
   {
@@ -116,7 +117,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Pasig City",
     contactNumber: "09170004444",
     name: "Faye Domingo",
-    governmentIds: { tin: "52345678901", sss: "5234567890", pagibig: "5234567890", philhealth: "5234567890" },
+    governmentIds: { tin: "523456789", sss: "5234567890", pagibig: "523456789012", philhealth: "523456789012" },
     emergencyContact: { name: "Peter Domingo", relation: "Brother", contactNumber: "09175556789", address: "Pasig City" },
   },
   {
@@ -135,7 +136,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Quezon City",
     contactNumber: "09170005555",
     name: "Gabriel Navarro",
-    governmentIds: { tin: "62345678901", sss: "6234567890", pagibig: "6234567890", philhealth: "6234567890" },
+    governmentIds: { tin: "623456789", sss: "6234567890", pagibig: "623456789012", philhealth: "623456789012" },
     emergencyContact: { name: "Sandra Navarro", relation: "Mother", contactNumber: "09175557890", address: "Quezon City" },
   },
   {
@@ -154,7 +155,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Davao City",
     contactNumber: "09170006666",
     name: "Hazel De Guzman",
-    governmentIds: { tin: "72345678901", sss: "7234567890", pagibig: "7234567890", philhealth: "7234567890" },
+    governmentIds: { tin: "723456789", sss: "7234567890", pagibig: "723456789012", philhealth: "723456789012" },
     emergencyContact: { name: "Michael De Guzman", relation: "Father", contactNumber: "09175558901", address: "Davao City" },
   },
   {
@@ -176,7 +177,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Mandaluyong City",
     contactNumber: "09170007777",
     name: "Ivan Morales",
-    governmentIds: { tin: "82345678901", sss: "8234567890", pagibig: "8234567890", philhealth: "8234567890" },
+    governmentIds: { tin: "823456789", sss: "8234567890", pagibig: "823456789012", philhealth: "823456789012" },
     emergencyContact: { name: "Jose Morales", relation: "Father", contactNumber: "09175559012", address: "Mandaluyong City" },
   },
   {
@@ -195,7 +196,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Cebu City",
     contactNumber: "09170008888",
     name: "Janelle Cruz",
-    governmentIds: { tin: "92345678901", sss: "9234567890", pagibig: "9234567890", philhealth: "9234567890" },
+    governmentIds: { tin: "923456789", sss: "9234567890", pagibig: "923456789012", philhealth: "923456789012" },
     emergencyContact: { name: "Leo Cruz", relation: "Husband", contactNumber: "09175550123", address: "Cebu City" },
   },
   {
@@ -214,7 +215,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Davao City",
     contactNumber: "09170009999",
     name: "Kevin Salazar",
-    governmentIds: { tin: "13345678901", sss: "1334567890", pagibig: "1334567890", philhealth: "1334567890" },
+    governmentIds: { tin: "133456789", sss: "1334567890", pagibig: "133456789012", philhealth: "133456789012" },
     emergencyContact: { name: "Karla Salazar", relation: "Wife", contactNumber: "09175551235", address: "Davao City" },
   },
   {
@@ -233,7 +234,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     address: "Pasay City",
     contactNumber: "09170100000",
     name: "Lara Bautista",
-    governmentIds: { tin: "14345678901", sss: "1434567890", pagibig: "1434567890", philhealth: "1434567890" },
+    governmentIds: { tin: "143456789", sss: "1434567890", pagibig: "143456789012", philhealth: "143456789012" },
     emergencyContact: { name: "Lito Bautista", relation: "Father", contactNumber: "09175551236", address: "Pasay City" },
   },
 ];

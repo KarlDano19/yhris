@@ -1,51 +1,58 @@
-import { useRef } from "react";
+// hooks/useSectionLoader.ts
+import { useRef, useCallback } from "react";
 import type { TabKey } from "../components/EmployeeHeader";
 
-type SectionState = {
+type BaseSectionState = {
   loaded: boolean;
   loading: boolean;
   dirty: boolean;
   saving: boolean;
   savedAt?: number;
 };
-type SectionMap = Record<TabKey, SectionState>;
 
-/** Simulated fetch for a section. Replace with a real call if needed. */
+/** Simulated fetch; replace with your real call if needed. */
 async function mockFetchSection(_key: TabKey) {
-  await new Promise<void>((resolve) => setTimeout(resolve, 600 + Math.random() * 600));
+  await new Promise<void>((resolve) =>
+    setTimeout(resolve, 600 + Math.random() * 600)
+  );
 }
 
 /**
- * Returns a race-safe loader for sections.
- * Commits the loaded state only if the in-flight token still matches.
+ * Race-safe loader for sections.
+ * Generic over your own SectionMap type.
  */
-export function useSectionLoader(
-  setSections: React.Dispatch<React.SetStateAction<SectionMap>>,
+export function useSectionLoader<TMap extends Record<TabKey, BaseSectionState>>(
+  setSections: React.Dispatch<React.SetStateAction<TMap>>,
   fetcher: (key: TabKey) => Promise<void> = mockFetchSection
 ) {
-  const inflight = useRef<Record<TabKey, number>>({} as any);
+  const inflight = useRef<Partial<Record<TabKey, number>>>({});
 
-  async function loadSection(key: TabKey) {
-    setSections((prev) => {
-      const s = prev[key];
-      if (!s || s.loaded || s.loading) return prev;
-      return { ...prev, [key]: { ...s, loading: true } };
-    });
+  const loadSection = useCallback(
+    async (key: TabKey) => {
+      // optimistically mark loading
+      setSections((prev) => {
+        const s = prev[key];
+        if (!s || s.loaded || s.loading) return prev;
+        return { ...prev, [key]: { ...s, loading: true } };
+      });
 
-    const token = Date.now();
-    inflight.current[key] = token;
+      const token = Date.now();
+      inflight.current[key] = token;
 
-    try {
-      await fetcher(key);
-    } finally {
-      if (inflight.current[key] === token) {
-        setSections((prev) => ({
-          ...prev,
-          [key]: { ...prev[key], loading: false, loaded: true },
-        }));
+      try {
+        await fetcher(key);
+      } finally {
+        // commit only if still latest
+        if (inflight.current[key] === token) {
+          setSections((prev) => ({
+            ...prev,
+            [key]: { ...prev[key], loading: false, loaded: true },
+          }));
+        }
       }
-    }
-  }
+    },
+    [setSections, fetcher]
+  );
 
   return { loadSection };
 }

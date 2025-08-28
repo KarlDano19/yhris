@@ -6,17 +6,20 @@ import html2canvas from "html2canvas";
 import { SalaryHistoryEntry } from "./SalaryHistoryModal";
 import TrendChart, { TrendPoint } from "../../common/TrendChart";
 import { ChevronDoubleRightIcon } from "@heroicons/react/20/solid";
+import { ArrowPathIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { notify } from "../../utils/notify"; // 👈 add toast helper
 
 type HrNote = { id: string; text: string; createdAt: Date };
 
 export default function SalaryHistoryAnalysis({
-  employeeName, // used only in PDF/export
+  employeeName,
   currentSalary,
   lastAdjustmentAmount,
   daysBetweenChanges,
   entries,
-  onExportPdf, // optional external override
-  onAddNote, // optional persistence callback
+  onExportPdf,
+  onAddNote,
+  onDeleteNote,
 }: {
   employeeName: string;
   currentSalary: number;
@@ -25,13 +28,10 @@ export default function SalaryHistoryAnalysis({
   entries: SalaryHistoryEntry[];
   onExportPdf?: () => void;
   onAddNote?: (text: string) => void;
+  onDeleteNote?: (id: string) => void;
 }) {
-  // Build points for chart (x = epoch ms, y = salary)
   const points: TrendPoint[] = entries?.length
-    ? entries.map((e) => ({
-        x: new Date(e.effectiveDate).getTime(),
-        y: e.salary,
-      }))
+    ? entries.map((e) => ({ x: new Date(e.effectiveDate).getTime(), y: e.salary }))
     : [];
 
   const pct =
@@ -39,10 +39,10 @@ export default function SalaryHistoryAnalysis({
       ? (lastAdjustmentAmount / entries[entries.length - 2].salary) * 100
       : 0;
 
-  // HR Notes state (local; you can hydrate from server if needed)
   const [notes, setNotes] = useState<HrNote[]>([]);
   const [isWriting, setIsWriting] = useState(false);
   const [draft, setDraft] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const startAddNote = () => {
     setIsWriting(true);
@@ -55,18 +55,37 @@ export default function SalaryHistoryAnalysis({
   const saveNote = () => {
     const text = draft.trim();
     if (!text) return;
-    const newNote: HrNote = {
-      id: cryptoRandomId(),
-      text,
-      createdAt: new Date(),
-    };
+    const newNote: HrNote = { id: cryptoRandomId(), text, createdAt: new Date() };
     setNotes((prev) => [newNote, ...prev]);
     setIsWriting(false);
     setDraft("");
     onAddNote?.(text);
+    notify.success("Note added."); // 👈 toast
   };
 
-  /* ---------- EXPORT TO PDF (captures ALL content; tiles = 3 cols; name visible) ---------- */
+  const handleDeleteNote = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const ok = await notify.promise(
+        (async () => {
+          // mimic latency or call your API here
+          await sleep(800);
+          await onDeleteNote?.(id);
+          setNotes((prev) => prev.filter((n) => n.id !== id)); // remove only on success
+        })(),
+        {
+          loading: "Deleting note…",
+          success: "Note deleted.",
+          error: "Failed to delete note.",
+        }
+      );
+      // ok returns true/false; state changes already handled above when resolved
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  /* ---------- EXPORT TO PDF ---------- */
   const captureRef = useRef<HTMLDivElement>(null);
 
   const handleExportPdf = async () => {
@@ -75,73 +94,74 @@ export default function SalaryHistoryAnalysis({
     const node = captureRef.current;
     if (!node) return;
 
-    const canvas = await html2canvas(node, {
-      backgroundColor: "#ffffff",
-      scale: 2,
-      useCORS: true,
-      onclone: (doc) => {
-        const root = doc.getElementById("salary-analysis-capture");
-        if (!root) return;
-
-        root.setAttribute("data-export", "true");
-
-        // Ensure sticky pieces are static
-        root.querySelectorAll(".sticky").forEach((el) => {
-          (el as HTMLElement).style.position = "static";
-          (el as HTMLElement).style.top = "auto";
+    await notify.promise(
+      (async () => {
+        const canvas = await html2canvas(node, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
+          onclone: (doc) => {
+            const root = doc.getElementById("salary-analysis-capture");
+            if (!root) return;
+            root.setAttribute("data-export", "true");
+            root.querySelectorAll(".sticky").forEach((el) => {
+              (el as HTMLElement).style.position = "static";
+              (el as HTMLElement).style.top = "auto";
+            });
+            const grid = root.querySelector(".tile-grid") as HTMLElement | null;
+            if (grid) {
+              grid.style.display = "grid";
+              grid.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
+              grid.style.gap = "12px";
+            }
+            const style = doc.createElement("style");
+            style.textContent = `
+              [data-export] .no-print { display: none !important; }
+              [data-export] .export-only { display: block !important; }
+              [data-export] .card { border-color: #ffffffff !important; }
+            `;
+            doc.head.appendChild(style);
+          },
         });
 
-        // Force tiles to 3 columns in export
-        const grid = root.querySelector(".tile-grid") as HTMLElement | null;
-        if (grid) {
-          grid.style.display = "grid";
-          grid.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
-          grid.style.gap = "12px";
+        const pdf = new jsPDF({ unit: "pt", format: "a4" });
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 24;
+
+        const imgW = pageW - margin * 2;
+        const ratio = canvas.width / imgW;
+        const sliceH = (pageH - margin * 2) * ratio;
+
+        const pageCanvas = document.createElement("canvas");
+        const ctx = pageCanvas.getContext("2d")!;
+
+        let drawn = 0;
+        while (drawn < canvas.height) {
+          const h = Math.min(sliceH, canvas.height - drawn);
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = h;
+          ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(canvas, 0, drawn, canvas.width, h, 0, 0, canvas.width, h);
+
+          const pageImg = pageCanvas.toDataURL("image/png");
+          if (drawn > 0) pdf.addPage();
+          pdf.addImage(pageImg, "PNG", margin, margin, imgW, h / ratio);
+
+          drawn += h;
         }
 
-        // Export-only styles:
-        const style = doc.createElement("style");
-        style.textContent = `
-          /* Hide things with .no-print during export */
-          [data-export] .no-print { display: none !important; }
-          /* Show items that are hidden on web but needed in export (e.g., employee name) */
-          [data-export] .export-only { display: block !important; }
-          /* Tweak card borders to be clear on PDF */
-          [data-export] .card { border-color: #ffffffff !important; }
-        `;
-        doc.head.appendChild(style);
-      },
-    });
-
-    const pdf = new jsPDF({ unit: "pt", format: "a4" });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 24;
-
-    const imgW = pageW - margin * 2;
-    const ratio = canvas.width / imgW;
-    const sliceH = (pageH - margin * 2) * ratio;
-
-    const pageCanvas = document.createElement("canvas");
-    const ctx = pageCanvas.getContext("2d")!;
-
-    let drawn = 0;
-    while (drawn < canvas.height) {
-      const h = Math.min(sliceH, canvas.height - drawn);
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = h;
-      ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-      ctx.drawImage(canvas, 0, drawn, canvas.width, h, 0, 0, canvas.width, h);
-
-      const pageImg = pageCanvas.toDataURL("image/png");
-      if (drawn > 0) pdf.addPage();
-      pdf.addImage(pageImg, "PNG", margin, margin, imgW, h / ratio);
-
-      drawn += h;
-    }
-
-    pdf.save(`Salary_History_Analysis_${employeeName}.pdf`);
+        pdf.save(`Salary_History_Analysis_${employeeName}.pdf`);
+      })(),
+      {
+        loading: "Exporting PDF…",
+        success: "PDF exported.",
+        error: "Failed to export PDF.",
+      }
+    );
   };
+
+  const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   return (
     <div className="space-y-4">
@@ -161,31 +181,19 @@ export default function SalaryHistoryAnalysis({
         {/* Employee name (hidden on web, shown only in export) */}
         <div className="export-only hidden rounded-xl border card px-4 py-3">
           <div className="text-sm text-gray-500">Salary History Analysis</div>
-          <div className="mt-1 text-lg font-semibold text-gray-900">
-            {employeeName}
-          </div>
+          <div className="mt-1 text-lg font-semibold text-gray-900">{employeeName}</div>
         </div>
 
         {/* Tiles */}
         <div className="tile-grid grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
-          <Metric
-            title="Current Salary"
-            value={`₱ ${formatMoney(currentSalary)}`}
-            up
-          />
+          <Metric title="Current Salary" value={`₱ ${formatMoney(currentSalary)}`} up />
           <Metric
             title="Last Adjustment"
             value={
               <>
-                {`${lastAdjustmentAmount >= 0 ? "+" : "−"} ₱ ${formatMoney(
-                  Math.abs(lastAdjustmentAmount)
-                )} `}
+                {`${lastAdjustmentAmount >= 0 ? "+" : "−"} ₱ ${formatMoney(Math.abs(lastAdjustmentAmount))} `}
                 {Number.isFinite(pct) && (
-                  <span
-                    style={{
-                      color: lastAdjustmentAmount >= 0 ? "#4CEE52" : "#FF4C4C",
-                    }}
-                  >
+                  <span style={{ color: lastAdjustmentAmount >= 0 ? "#4CEE52" : "#FF4C4C" }}>
                     ({pct.toFixed(1)}%)
                   </span>
                 )}
@@ -193,17 +201,12 @@ export default function SalaryHistoryAnalysis({
             }
             up={lastAdjustmentAmount >= 0}
           />
-          <Metric
-            title="Time Gap Between Changes"
-            value={`${daysBetweenChanges} day(s)`}
-          />
+          <Metric title="Time Gap Between Changes" value={`${daysBetweenChanges} day(s)`} />
         </div>
 
         {/* Trend card */}
         <div className="rounded-xl border card">
-          <div className="border-b px-4 py-2 text-sm font-medium text-gray-700">
-            Salary Trend
-          </div>
+          <div className="border-b px-4 py-2 text-sm font-medium text-gray-700">Salary Trend</div>
           <div className="px-4 py-3">
             {points.length > 0 ? (
               <TrendChart points={points} />
@@ -215,9 +218,8 @@ export default function SalaryHistoryAnalysis({
           </div>
         </div>
 
-        {/* Notes: editor (web only) + list (always in PDF) */}
+        {/* Notes */}
         <div className="space-y-2">
-          {/* Add HR Notes button + editor — visible on web, hidden in export */}
           <div className="no-print">
             {!isWriting ? (
               <button
@@ -257,20 +259,35 @@ export default function SalaryHistoryAnalysis({
             )}
           </div>
 
-          {/* Notes list / empty state (included in PDF) */}
           <div className="rounded-xl border border-dashed p-4 card">
             {notes.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-500">
-                No HR notes yet.
-              </div>
+              <div className="p-6 text-center text-sm text-gray-500">No HR notes yet.</div>
             ) : (
               <ul className="space-y-3">
                 {notes.map((n) => (
-                  <li key={n.id} className="rounded-lg border bg-white p-3">
-                    <p className="text-sm text-gray-700">{n.text}</p>
-                    <div className="mt-2 text-xs text-gray-400">
-                      {formatDateTime(n.createdAt)}
+                  <li key={n.id} className="flex items-start justify-between rounded-lg border bg-white p-3">
+                    <div className="pr-2">
+                      <p className="text-sm text-gray-700">{n.text}</p>
+                      <div className="mt-2 text-xs text-gray-400">{formatDateTime(n.createdAt)}</div>
                     </div>
+
+                    {/* Delete button (web only; hidden in PDF) */}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteNote(n.id)}
+                      className={`no-print ml-2 flex items-center justify-center text-gray-400 hover:text-red-500 ${
+                        deletingId === n.id ? "cursor-wait text-gray-400 hover:text-gray-400" : ""
+                      }`}
+                      title={deletingId === n.id ? "Deleting…" : "Delete note"}
+                      aria-label={`Delete note from ${formatDateTime(n.createdAt)}`}
+                      disabled={deletingId === n.id}
+                    >
+                      {deletingId === n.id ? (
+                        <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <TrashIcon className="h-5 w-5" />
+                      )}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -283,12 +300,9 @@ export default function SalaryHistoryAnalysis({
 }
 
 /* ---------- helpers ---------- */
-
 function TrendIcon({ up = true }: { up?: boolean }) {
-  // center of the 13x19 viewBox is roughly (6.5, 9.5)
   const rotate = up ? undefined : "rotate(180 6.5 9.5)";
   const fill = up ? "#4CEE52" : "#FF4C4C";
-
   return (
     <svg
       viewBox="0 0 13 19"
@@ -300,24 +314,13 @@ function TrendIcon({ up = true }: { up?: boolean }) {
       preserveAspectRatio="xMidYMid meet"
     >
       <g transform={rotate}>
-        <path
-          d="M12.666 18.9902L0.666016 18.9902L6.66602 9.99023L12.666 18.9902ZM12.666 8.99023L0.666016 8.99023L6.66602 -0.00976562L12.666 8.99023Z"
-          fill={fill}
-        />
+        <path d="M12.666 18.9902L0.666016 18.9902L6.66602 9.99023L12.666 18.9902ZM12.666 8.99023L0.666016 8.99023L6.66602 -0.00976562L12.666 8.99023Z" fill={fill} />
       </g>
     </svg>
   );
 }
 
-function Metric({
-  title,
-  value,
-  up,
-}: {
-  title: string;
-  value: React.ReactNode;
-  up?: boolean;
-}) {
+function Metric({ title, value, up }: { title: string; value: React.ReactNode; up?: boolean }) {
   return (
     <div className="metric-card relative flex h-28 flex-col items-center justify-center rounded-xl border border-slate-300/70 p-4 print:break-inside-avoid">
       {up !== undefined && <TrendIcon up={up} />}
@@ -327,13 +330,8 @@ function Metric({
   );
 }
 
-
-
 function formatMoney(n: number) {
-  return n.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function formatDateTime(d: Date) {
   return new Date(d).toLocaleString(undefined, {
@@ -345,7 +343,6 @@ function formatDateTime(d: Date) {
   });
 }
 function cryptoRandomId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
-    return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }

@@ -123,7 +123,6 @@ export default function EmployeeHeader({
             Employment Details
           </Tab>
           <Tab
-            dot
             active={activeTab === "training"}
             onClick={() => setActiveTab("training")}
             icon={<AcademicCapIcon className="h-7 w-7 md:h-9 md:w-9" />}
@@ -131,10 +130,11 @@ export default function EmployeeHeader({
             Training &amp; Development
           </Tab>
           <Tab
-            dot
             active={activeTab === "disciplinary"}
             onClick={() => setActiveTab("disciplinary")}
             icon={<ExclamationTriangleIcon className="h-7 w-7 md:h-9 md:w-9" />}
+            disabled
+            tooltip="Coming soon"
           >
             Disciplinary Records
           </Tab>
@@ -142,6 +142,8 @@ export default function EmployeeHeader({
             active={activeTab === "performance"}
             onClick={() => setActiveTab("performance")}
             icon={<ChartBarIcon className="h-7 w-7 md:h-9 md:w-9" />}
+            disabled
+            tooltip="Coming soon"
           >
             Performance &amp; Evaluation
           </Tab>
@@ -149,6 +151,8 @@ export default function EmployeeHeader({
             active={activeTab === "benefits"}
             onClick={() => setActiveTab("benefits")}
             icon={<Cog6ToothIcon className="h-7 w-7 md:h-9 md:w-9" />}
+            disabled
+            tooltip="Coming soon"
           >
             Benefits &amp; Government Compliance
           </Tab>
@@ -156,6 +160,8 @@ export default function EmployeeHeader({
             active={activeTab === "documents"}
             onClick={() => setActiveTab("documents")}
             icon={<ArchiveBoxIcon className="h-7 w-7 md:h-9 md:w-9" />}
+            disabled
+            tooltip="Coming soon"
           >
             Document Repository
           </Tab>
