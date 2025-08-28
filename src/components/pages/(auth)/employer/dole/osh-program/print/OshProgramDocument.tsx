@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import DocumentPageOne from './DocumentPageOne';
 import DocumentPageTwo from './DocumentPageTwo';
@@ -16,6 +16,7 @@ import DocumentPageThirteen from './DocumentPageThirteen';
 import DocumentPageFourteen from './DocumentPageFourteen';
 
 import { T_OshProgram } from '@/types/osh-program';
+import { ChevronUpIcon } from "@heroicons/react/24/solid";
 
 interface OshProgramDocumentProps {
   data: T_OshProgram;
@@ -124,9 +125,62 @@ const DocumentContent: React.FC<{ data: T_OshProgram; forPrint?: boolean }> = ({
 
 // Preview
 const OshProgramDocumentPreview: React.FC<OshProgramDocumentProps> = ({ data }) => {
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const documentRef = useRef<HTMLDivElement>(null);
+
+  // Handle scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      const documentElement = documentRef.current;
+      if (documentElement) {
+        const { scrollTop, scrollHeight, clientHeight } = documentElement;
+        // Show button when scrolled down more than 300px or near bottom
+        const shouldShow = scrollTop > 300 || (scrollTop + clientHeight >= scrollHeight - 50);
+        setShowScrollToTop(shouldShow);
+      }
+    };
+
+    const documentElement = documentRef.current;
+    if (documentElement) {
+      documentElement.addEventListener('scroll', handleScroll);
+      // Check initial scroll position
+      handleScroll();
+      
+      return () => {
+        documentElement.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, []);
+
+  const scrollToTop = () => {
+    const documentElement = documentRef.current;
+    if (documentElement) {
+      documentElement.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <div className="text-black font-sans text-xs leading-tight">
-      <DocumentContent data={data} />
+    <div className="relative">
+      <div 
+        ref={documentRef}
+        className="text-black leading-tight max-h-[77vh] overflow-auto"
+      >
+        <DocumentContent data={data} />
+      </div>
+      
+      {/* Floating Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-6 z-50 bg-savoy-blue hover:bg-savoy-blue-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 ease-in-out hover:scale-110 focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:ring-offset-2"
+          title="Scroll to top"
+        >
+          <ChevronUpIcon className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 };
