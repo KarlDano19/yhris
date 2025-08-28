@@ -19,9 +19,9 @@ const useFileforge = ({ onSuccess, onError, pageMargins }: UseFileforgeProps = {
   // Default margins
   const defaultMargins = {
     top: '0.5in',
-    right: '0.1in',
-    bottom: '0.1in',
-    left: '0.1in'
+    right: '0.5in',
+    bottom: '0.5in',
+    left: '0.5in'
   };
 
   // Merge custom margins with defaults

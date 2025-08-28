@@ -1,4 +1,4 @@
-import OshProgramDocument from "./print/OshProgramDocument";
+import { OshProgramDocumentPrint } from "./print/OshProgramDocument";
 
 import { T_OshProgram } from "@/types/osh-program";
 
@@ -20,19 +20,7 @@ export const printOshProgram = async ({
   // Generate PDF using the single-page document approach
   await generatePDFLocally(
     <div className="bg-white">
-      <style jsx>{`
-        .page-break {
-          page-break-after: always;
-          break-after: page;
-        }
-        @media print {
-          .page-break {
-            page-break-after: always;
-            break-after: page;
-          }
-        }
-      `}</style>
-      <OshProgramDocument data={data} />
+      <OshProgramDocumentPrint  data={data} />
     </div>,
     filename
   );

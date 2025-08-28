@@ -27,19 +27,6 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
       {/* Top Section - Worker Facilities Continuation */}
       <div className="mb-6">
         <div className="border border-gray-300">
-          <div className="grid grid-cols-[2fr_1fr_1fr] text-sm font-medium bg-gray-50 border-b border-gray-300">
-            <div className="p-2 border-r border-gray-300">FACILITIES</div>
-            <div className="p-2 border-r border-gray-300 text-center">PROVIDED? (YES/NO)</div>
-            <div className="p-2">REMARKS</div>
-          </div>
-          <div className="grid grid-cols-[2fr_1fr_1fr] text-sm font-medium bg-gray-50 border-b border-gray-300">
-            <div className="p-2 border-r border-gray-300"></div>
-            <div className="grid grid-cols-2 border-r border-gray-300">
-              <div className="p-2 border-r border-gray-300 text-center">YES</div>
-              <div className="p-2 text-center">NO</div>
-            </div>
-            <div className="p-2"></div>
-          </div>
           {[
             {
               facility: 'c. Suitable living accommodation (if applicable)',

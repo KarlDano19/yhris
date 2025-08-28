@@ -101,15 +101,23 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
             <div className="flex-1">
               <span className="text-sm text-gray-700">Routine:</span>
               <div className="ml-4 mt-1 space-y-1">
-                <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">( )</span>
+                <div className="flex items-center flex-wrap">
+                  <span className="text-sm text-gray-700 mr-2">
+                    ({Array.isArray(data.routine_medical_surveillance) && data.routine_medical_surveillance.includes('CBC') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">CBC</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.routine_medical_surveillance) && data.routine_medical_surveillance.includes('Chest X-ray') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">Chest X-ray</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.routine_medical_surveillance) && data.routine_medical_surveillance.includes('Urinalysis') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">Urinalysis</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">Stool exam</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.routine_medical_surveillance) && data.routine_medical_surveillance.includes('Stool Examination') ? '✓' : ' '})
+                  </span>
+                  <span className="text-sm text-gray-700">Stool Examination</span>
                 </div>
               </div>
             </div>
@@ -121,15 +129,24 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
             <div className="flex-1">
               <span className="text-sm text-gray-700">Special:</span>
               <div className="ml-4 mt-1 space-y-1">
-                <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">( )</span>
+                <div className="flex items-center flex-wrap">
+                  <span className="text-sm text-gray-700 mr-2">
+                    ({Array.isArray(data.special_medical_surveillance) && data.special_medical_surveillance.includes('Blood Chemistry') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">Blood Chemistry</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.special_medical_surveillance) && data.special_medical_surveillance.includes('ECG') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">ECG</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
-                  <span className="text-sm text-gray-700">others, please specify:</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.special_medical_surveillance) && data.special_medical_surveillance.some(item => item.startsWith('Others')) ? '✓' : ' '})
+                  </span>
+                  <span className="text-sm text-gray-700">Others, please specify:</span>
                   <div className="border-b border-gray-300 w-20 pb-1 min-h-[16px] ml-2">
-                    {/* Special surveillance data would go here */}
+                    <span className="text-xs text-gray-600">
+                      {Array.isArray(data.special_medical_surveillance) && 
+                       data.special_medical_surveillance.find(item => item.startsWith('Others:'))?.replace('Others: ', '') || ''}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -143,13 +160,21 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
               <span className="text-sm text-gray-700">Schedule of Annual medical examination:</span>
               <div className="ml-4 mt-1">
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">( )</span>
+                  <span className="text-sm text-gray-700 mr-2">
+                    ({Array.isArray(data.schedule_of_annual_medical_examination) && data.schedule_of_annual_medical_examination.includes('Q1') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">Q1</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.schedule_of_annual_medical_examination) && data.schedule_of_annual_medical_examination.includes('Q2') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">Q2</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.schedule_of_annual_medical_examination) && data.schedule_of_annual_medical_examination.includes('Q3') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">Q3</span>
-                  <span className="text-sm text-gray-700 mr-2 ml-4">( )</span>
+                  <span className="text-sm text-gray-700 mr-2 ml-4">
+                    ({Array.isArray(data.schedule_of_annual_medical_examination) && data.schedule_of_annual_medical_examination.includes('Q4') ? '✓' : ' '})
+                  </span>
                   <span className="text-sm text-gray-700">Q4</span>
                 </div>
               </div>
@@ -163,14 +188,13 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
               <span className="text-sm text-gray-700">Is random drug testing conducted?</span>
               <div className="ml-4 mt-1">
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">Yes</span>
-                  <div className="border-b border-gray-300 w-16 pb-1 min-h-[16px] mr-4">
-                    {data.random_drug_testing ? 'Yes' : ''}
-                  </div>
-                  <span className="text-sm text-gray-700 mr-2">when</span>
-                  <div className="border-b border-gray-300 w-16 pb-1 min-h-[16px] mr-4"></div>
-                  <span className="text-sm text-gray-700 mr-2">No</span>
-                  <span className="text-sm text-gray-700">( )</span>
+                  <span className="text-sm text-gray-700 mr-2">
+                    ({data.random_drug_testing === true ? '✓' : ' '}) Yes
+                  </span>
+                  <span className="text-sm text-gray-700 mr-4 ml-4">when ________________</span>
+                  <span className="text-sm text-gray-700 mr-2">
+                    ({data.random_drug_testing === false ? '✓' : ' '}) No
+                  </span>
                 </div>
               </div>
             </div>

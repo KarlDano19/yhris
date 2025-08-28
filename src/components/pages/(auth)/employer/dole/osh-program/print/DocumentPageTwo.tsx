@@ -21,7 +21,7 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
 
       {/* Basic Components Content */}
       {data.basic_components && (
-        <div className="space-y-3 flex-1">
+      <div className="space-y-3 flex-1">
           <div 
             className="text-sm text-gray-700 [&>p]:flex [&>p]:items-start [&>p]:mb-3 [&>ol]:space-y-3 [&>ul]:space-y-3 [&>li]:flex [&>li]:items-start"
             dangerouslySetInnerHTML={{ __html: data.basic_components }}

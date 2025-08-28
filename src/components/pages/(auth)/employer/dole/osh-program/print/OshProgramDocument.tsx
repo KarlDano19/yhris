@@ -12,6 +12,8 @@ import DocumentPageNine from './DocumentPageNine';
 import DocumentPageTen from './DocumentPageTen';
 import DocumentPageEleven from './DocumentPageEleven';
 import DocumentPageTwelve from './DocumentPageTwelve';
+import DocumentPageThirteen from './DocumentPageThirteen';
+import DocumentPageFourteen from './DocumentPageFourteen';
 
 import { T_OshProgram } from '@/types/osh-program';
 
@@ -24,9 +26,9 @@ const a4PageStyles = {
   pageBreakAfter: 'always' as const,
   breakAfter: 'page' as const,
   width: '210mm',
-  minHeight: '297mm', // Changed from fixed height to minHeight
+  minHeight: '297mm',
   margin: '0 auto',
-  marginBottom: '40px', // Increased gap between pages for preview
+  marginBottom: '20px',
   fontFamily: 'Arial, sans-serif',
   boxSizing: 'border-box' as const,
   padding: '32px 35px 32px 50px',
@@ -35,24 +37,105 @@ const a4PageStyles = {
 };
 
 // A4 Page wrapper component
-const A4Page: React.FC<{ children: React.ReactNode; isLastPage?: boolean }> = ({ 
+const A4Page: React.FC<{ 
+  children: React.ReactNode; 
+  isLastPage?: boolean; 
+  noPageBreak?: boolean;
+  forPrint?: boolean;
+}> = ({ 
   children, 
-  isLastPage = false 
+  isLastPage = false,
+  noPageBreak = false,
+  forPrint = false
 }) => (
   <div 
     className="a4-page"
     style={{ 
-      ...a4PageStyles,
-      pageBreakAfter: isLastPage ? 'auto' : 'always',
-      breakAfter: isLastPage ? 'auto' : 'page',
-      marginBottom: isLastPage ? '0' : '40px'
+      ...(forPrint ? {} : a4PageStyles),
+      pageBreakAfter: isLastPage ? 'auto' : (noPageBreak ? 'auto' : 'always'),
+      breakAfter: isLastPage ? 'auto' : (noPageBreak ? 'auto' : 'page'),
+      marginBottom: isLastPage ? '0' : '20px'
     }}
   >
     {children}
   </div>
 );
 
-const OshProgramDocument: React.FC<OshProgramDocumentProps> = ({ data }) => {
+// Shared document content component
+const DocumentContent: React.FC<{ data: T_OshProgram; forPrint?: boolean }> = ({ data, forPrint = false }) => (
+  <>
+    <A4Page forPrint={forPrint}>
+      <DocumentPageOne data={data} />
+    </A4Page>
+    
+    <A4Page forPrint={forPrint}>
+      <DocumentPageTwo data={data} />
+    </A4Page>
+    
+    <A4Page forPrint={forPrint}>
+      <DocumentPageThree data={data} />
+    </A4Page>
+    
+    <A4Page forPrint={forPrint} noPageBreak={true}>
+      <DocumentPageFour data={data} />
+    </A4Page>
+
+    <A4Page forPrint={forPrint} noPageBreak={true}>
+      <DocumentPageFive data={data} />
+    </A4Page>
+
+    <A4Page forPrint={forPrint} noPageBreak={true}>
+      <DocumentPageSix data={data} />
+    </A4Page>
+
+    <A4Page forPrint={forPrint} noPageBreak={true}>
+      <DocumentPageSeven data={data} />
+    </A4Page>
+
+    <A4Page forPrint={forPrint} noPageBreak={true}>
+      <DocumentPageEight data={data} />
+    </A4Page>
+
+    <A4Page forPrint={forPrint} noPageBreak={true}>
+      <DocumentPageNine data={data} />
+    </A4Page>
+
+    <A4Page forPrint={forPrint}>
+      <DocumentPageTen data={data} />
+    </A4Page>
+
+    <A4Page forPrint={forPrint}>
+      <DocumentPageEleven data={data} />
+    </A4Page>
+    
+    <A4Page forPrint={forPrint}>
+      <DocumentPageTwelve data={data} />
+    </A4Page>
+    
+    <A4Page forPrint={forPrint}>
+      <DocumentPageThirteen data={data} />
+    </A4Page>
+    
+    <A4Page forPrint={forPrint} isLastPage={true}>
+      <DocumentPageFourteen data={data} />
+    </A4Page>
+  </>
+);
+
+// Preview
+const OshProgramDocumentPreview: React.FC<OshProgramDocumentProps> = ({ data }) => {
+  return (
+    <div className="text-black font-sans text-xs leading-tight">
+      <DocumentContent data={data} />
+    </div>
+  );
+};
+
+export default OshProgramDocumentPreview;
+
+
+// Print
+export const OshProgramDocumentPrint: React.FC<OshProgramDocumentProps> = ({ data }) => {
   return (
     <div className="text-black font-sans text-xs leading-tight">
       <style jsx>{`
@@ -61,7 +144,7 @@ const OshProgramDocument: React.FC<OshProgramDocumentProps> = ({ data }) => {
           break-after: page;
           background-color: white;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          margin-bottom: 40px;
+          margin-bottom: 20px;
         }
         
         @media print {
@@ -84,67 +167,10 @@ const OshProgramDocument: React.FC<OshProgramDocumentProps> = ({ data }) => {
             padding: 0;
             background-color: white !important;
           }
-          /* Page margins are now handled by useFileforge hook */
         }
       `}</style>
       
-      <A4Page>
-        <DocumentPageOne data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageTwo data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageThree data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageFour data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageFive data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageSix data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageSeven data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageEight data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageNine data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageTen data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageEleven data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageTwelve data={data} />
-      </A4Page>
-      
-      <A4Page>
-        <DocumentPageThirteen data={data} />
-      </A4Page>
-      
-      <A4Page isLastPage={true}>
-        <DocumentPageFourteen data={data} />
-      </A4Page>
+      <DocumentContent data={data} forPrint={true} />
     </div>
   );
 };
-
-export default OshProgramDocument;

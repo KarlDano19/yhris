@@ -1,41 +1,26 @@
 "use client";
 
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 
 import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
-import { 
-  XCircleIcon, 
-  ArrowDownTrayIcon,
-} from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import useFileforge from '../hooks/useFileforge';
 import CustomToast from '@/components/CustomToast';
-// Import individual page components for preview
-import DocumentPageOne from '../print/DocumentPageOne';
-import DocumentPageTwo from '../print/DocumentPageTwo';
-import DocumentPageThree from '../print/DocumentPageThree';
-import DocumentPageFour from '../print/DocumentPageFour';
-import DocumentPageFive from '../print/DocumentPageFive';
-import DocumentPageSix from '../print/DocumentPageSix';
-import DocumentPageSeven from '../print/DocumentPageSeven';
-import DocumentPageEight from '../print/DocumentPageEight';
-import DocumentPageNine from '../print/DocumentPageNine';
-import DocumentPageTen from '../print/DocumentPageTen';
-import DocumentPageEleven from '../print/DocumentPageEleven';
-import DocumentPageTwelve from '../print/DocumentPageTwelve';
+
+import OshProgramDocumentPreview from '../print/OshProgramDocument';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
 
 import { T_OshProgram } from '@/types/osh-program';
 import { printOshProgram } from '../PrintData';
+import PrintIcon from "@/svg/PrintIcon";
 
 interface VersionHistoryDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBack: () => void;
   versionId?: number;
-  currentPage?: number;
-  totalPages?: number;
 }
 
 export default function VersionHistoryDetailsModal({
@@ -44,8 +29,6 @@ export default function VersionHistoryDetailsModal({
   onBack,
   versionId,
 }: VersionHistoryDetailsModalProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 12;
 
   // Fetch version details
   const { data: versionData, isLoading } = useGetOshProgramVersionDetails(
@@ -57,12 +40,6 @@ export default function VersionHistoryDetailsModal({
   const transformedData = versionData as unknown as T_OshProgram;
 
   const { generatePDFLocally, isGenerating } = useFileforge({
-    pageMargins: {
-      top: '0.2in',
-      right: '0.2in',
-      bottom: '0.2in',
-      left: '0.2in'
-    },
     onSuccess: () => {
       toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
     },
@@ -70,8 +47,6 @@ export default function VersionHistoryDetailsModal({
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
     },
   });
-
-
 
    const handlePrint = async () => {
     if (!transformedData) return;
@@ -87,85 +62,7 @@ export default function VersionHistoryDetailsModal({
     }
   };
 
-  // Navigation functions
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  // Function to render individual page content
-  const renderPageContent = () => {
-    if (!transformedData) return null;
-    
-    let pageContent;
-    switch (currentPage) {
-      case 1:
-        pageContent = <DocumentPageOne data={transformedData} />;
-        break;
-      case 2:
-        pageContent = <DocumentPageTwo data={transformedData} />;
-        break;
-      case 3:
-        pageContent = <DocumentPageThree data={transformedData} />;
-        break;
-      case 4:
-        pageContent = <DocumentPageFour data={transformedData} />;
-        break;
-      case 5:
-        pageContent = <DocumentPageFive data={transformedData} />;
-        break;
-      case 6:
-        pageContent = <DocumentPageSix data={transformedData} />;
-        break;
-      case 7:
-        pageContent = <DocumentPageSeven data={transformedData} />;
-        break;
-      case 8:
-        pageContent = <DocumentPageEight data={transformedData} />;
-        break;
-      case 9:
-        pageContent = <DocumentPageNine data={transformedData} />;
-        break;
-      case 10:
-        pageContent = <DocumentPageTen data={transformedData} />;
-        break;
-      case 11:
-        pageContent = <DocumentPageEleven data={transformedData} />;
-        break;
-      case 12:
-        pageContent = <DocumentPageTwelve data={transformedData} />;
-        break;
-      default:
-        pageContent = <DocumentPageOne data={transformedData} />;
-    }
-    
-    return (
-      <div className="bg-white shadow-lg relative flex-shrink-0">
-        <div 
-          className="a4-page"
-          style={{
-            width: '210mm',
-            minHeight: '297mm',
-            margin: '0 auto',
-            fontFamily: 'Arial, sans-serif',
-            boxSizing: 'border-box',
-            padding: '32px 35px 32px 50px',
-            backgroundColor: 'white',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          }}
-        >
-          {pageContent}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -214,45 +111,20 @@ export default function VersionHistoryDetailsModal({
                 <div className="bg-gray-50 px-4 py-4 border-b">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
-                      OSH Program Document - Page {currentPage} of {totalPages}
+                      OSH Program Document - Complete Preview
                     </p>
                     <div className="flex items-center space-x-2">
-                      {/* Page Navigation */}
-                      <button
-                        onClick={handlePrevPage}
-                        disabled={currentPage === 1}
-                        className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Previous Page"
-                      >
-                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      
-                      <button
-                        onClick={handleNextPage}
-                        disabled={currentPage === totalPages}
-                        className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Next Page"
-                      >
-                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-
-                      <div className="w-px h-7 bg-gray-300"></div>
-
                       {/* Download Button */}
                       <button
                         onClick={handlePrint}
                         disabled={isGenerating}
-                        className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                         title={isGenerating ? "Generating PDF..." : "Download PDF"}
                       >
                         {isGenerating ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                         ) : (
-                          <ArrowDownTrayIcon className="w-7 h-7" />
+                          <PrintIcon/>
                         )}
                       </button>
                     </div>
@@ -260,14 +132,14 @@ export default function VersionHistoryDetailsModal({
                 </div>
                 
                 {/* Document Content */}
-                <div className="p-6 flex justify-center overflow-auto bg-gray-100">
+                <div className="p-6 overflow-auto bg-gray-100 max-h-[70vh]">
                   {isLoading ? (
                     <div className="flex items-center justify-center h-64">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
                     </div>
                   ) : transformedData ? (
-                    <div className="bg-white shadow-lg relative flex-shrink-0">
-                      {renderPageContent()}
+                    <div className="w-full max-w-none">
+                      <OshProgramDocumentPreview data={transformedData} />
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-64">
