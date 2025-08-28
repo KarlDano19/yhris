@@ -1,4 +1,4 @@
-import { OshProgramDocumentPrint } from "./print/OshProgramDocument";
+import { OshProgramDocumentPrint } from "./documents/OshProgramDocument";
 
 import { T_OshProgram } from "@/types/osh-program";
 

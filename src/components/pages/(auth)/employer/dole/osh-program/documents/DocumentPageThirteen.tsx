@@ -36,8 +36,8 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
               break-inside: avoid;
             }
             .certificate-image {
-              max-height: 350px !important;
-              max-width: 450px !important;
+              max-height: 300px !important;
+              max-width: 400px !important;
             }
           }
         `
@@ -89,7 +89,7 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
                               src={officer.certificate}
                               alt={`Certificate for ${officer.name}`}
                               className="max-w-full h-auto border border-gray-300 rounded mx-auto certificate-image"
-                              style={{ maxHeight: '400px', maxWidth: '500px', objectFit: 'contain' }}
+                              style={{ maxHeight: '350px', maxWidth: '450px', objectFit: 'contain' }}
                             />
                             <p className="text-xs text-gray-500 mt-2">
                               {officer.certificate.split('/').pop()}

@@ -9,7 +9,7 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import useFileforge from '../hooks/useFileforge';
 import CustomToast from '@/components/CustomToast';
 
-import OshProgramDocumentPreview from '../print/OshProgramDocument';
+import OshProgramDocumentPreview from '../documents/OshProgramDocument';
 import useGetOshProgramVersionDetails from '../hooks/useGetOshProgramVersionDetails';
 
 import { T_OshProgram } from '@/types/osh-program';
