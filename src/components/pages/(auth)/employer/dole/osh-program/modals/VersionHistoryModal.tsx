@@ -20,12 +20,14 @@ interface VersionHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onViewDetails: (versionId: number) => void;
+  onViewChanges: (versionNumber: string, changes: string, versionId?: number) => void;
 }
 
 export default function VersionHistoryModal({
   isOpen,
   onClose,
   onViewDetails,
+  onViewChanges,
 }: VersionHistoryModalProps) {
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -91,6 +93,8 @@ export default function VersionHistoryModal({
     setVersionToDelete({ id: versionId, versionNumber });
     setDeleteModalOpen(true);
   };
+
+
 
   const confirmDeleteVersion = async () => {
     if (!versionToDelete) return;
@@ -198,7 +202,7 @@ export default function VersionHistoryModal({
         <Dialog
           as="div"
           className="relative z-50"
-          onClose={onClose}
+          onClose={()=>{}}
         >
         <Transition.Child
           as={Fragment}
@@ -413,8 +417,14 @@ export default function VersionHistoryModal({
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {version.version_number_formatted}
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                                {version.changes_summary || 'No changes summary available'}
+                              <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                                <button
+                                  onClick={() => onViewChanges(version.version_number_formatted, version.changes_summary || 'No changes summary available', version.id)}
+                                  className="text-left hover:text-savoy-blue hover:underline cursor-pointer truncate block w-full"
+                                  title="Click to view changes details"
+                                >
+                                  {version.changes_summary || 'No changes summary available'}
+                                </button>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {new Date(version.created_at).toLocaleDateString()}
@@ -474,15 +484,19 @@ export default function VersionHistoryModal({
     </Transition.Root>
 
       {/* Delete Version Confirmation Modal */}
-      <DeleteVersionModal
-        isOpen={deleteModalOpen}
-        onClose={closeDeleteModal}
-        onConfirm={isBulkDelete ? confirmBulkDelete : confirmDeleteVersion}
-        versionNumber={versionToDelete?.versionNumber || ''}
-        isLoading={isBulkDelete ? bulkDeleteVersionMutation.isLoading : deleteVersionMutation.isLoading}
-        isBulkDelete={isBulkDelete}
-        selectedCount={isBulkDelete ? selectedVersions.size : undefined}
-      />
+      {deleteModalOpen && (
+        <DeleteVersionModal
+          isOpen={deleteModalOpen}
+          onClose={closeDeleteModal}
+          onConfirm={isBulkDelete ? confirmBulkDelete : confirmDeleteVersion}
+          versionNumber={versionToDelete?.versionNumber || ''}
+          isLoading={isBulkDelete ? bulkDeleteVersionMutation.isLoading : deleteVersionMutation.isLoading}
+          isBulkDelete={isBulkDelete}
+          selectedCount={isBulkDelete ? selectedVersions.size : undefined}
+        />
+      )}
+
+
     </>
   );
 }

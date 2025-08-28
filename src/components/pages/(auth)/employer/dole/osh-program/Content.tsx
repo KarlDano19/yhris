@@ -10,6 +10,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import CustomToast from "@/components/CustomToast";
 import VersionHistoryModal from "./modals/VersionHistoryModal";
 import VersionHistoryDetailsModal from "./modals/VersionHistoryDetailsModal";
+import ChangesDetailsModal from "./modals/ChangesDetailsModal";
 import UnsavedChangesModal from "./modals/UnsavedChangesModal";
 import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
 import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
@@ -60,6 +61,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isVersionHistoryModalOpen, setIsVersionHistoryModalOpen] = useState(false);
   const [isVersionHistoryDetailsModalOpen, setIsVersionHistoryDetailsModalOpen] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
+  
+  // Changes Details Modal States
+  const [isChangesDetailsModalOpen, setIsChangesDetailsModalOpen] = useState(false);
+  const [selectedVersionChanges, setSelectedVersionChanges] = useState<{ versionNumber: string; changes: string; versionId?: number } | null>(null);
   
   const queryClient = useQueryClient();
   
@@ -182,6 +187,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleBackToVersionHistory = () => {
     setIsVersionHistoryDetailsModalOpen(false);
     setIsVersionHistoryModalOpen(true);
+  };
+
+  // Changes Details Modal Handlers
+  const handleViewChanges = (versionNumber: string, changes: string, versionId?: number) => {
+    setSelectedVersionChanges({ versionNumber, changes, versionId });
+    setIsChangesDetailsModalOpen(true);
+  };
+
+  const handleCloseChangesDetails = () => {
+    setIsChangesDetailsModalOpen(false);
+    setIsVersionHistoryModalOpen(true);
+  };
+
+  const handleViewDetailsFromChanges = () => {
+    if (selectedVersionChanges?.versionId) {
+      setSelectedVersionId(selectedVersionChanges.versionId);
+      setIsChangesDetailsModalOpen(false);
+      setIsVersionHistoryDetailsModalOpen(true);
+    }
   };
 
   // Print function to generate PDF of the latest OSH program version
@@ -1124,6 +1148,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isVersionHistoryModalOpen}
           onClose={handleCloseVersionHistory}
           onViewDetails={handleViewVersionDetails}
+          onViewChanges={handleViewChanges}
         />
       )}
 
@@ -1136,6 +1161,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           versionId={selectedVersionId || undefined}
         />
       )}
+
+              {/* Changes Details Modal */}
+        {isChangesDetailsModalOpen && (
+          <ChangesDetailsModal
+            isOpen={isChangesDetailsModalOpen}
+            onClose={handleCloseChangesDetails}
+            onViewDetails={selectedVersionChanges?.versionId ? handleViewDetailsFromChanges : undefined}
+            versionNumber={selectedVersionChanges?.versionNumber || ''}
+            changes={selectedVersionChanges?.changes || ''}
+          />
+        )}
     </>
   );
 }
