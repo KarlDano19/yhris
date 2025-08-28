@@ -55,29 +55,47 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media print {
+            .facility-card {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .attachment-container {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .attachment-image {
+              max-height: 150px !important;
+              max-width: 250px !important;
+            }
+          }
+        `
+      }} />
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-lg font-bold text-gray-900 mb-4">
+      <div className="mb-4">
+        <h1 className="text-lg font-bold text-gray-900 mb-2">
           Dust Control and Management Facilities & Attachments
         </h1>
       </div>
 
       {/* Facilities with Attachments */}
       <div className="mb-6">
-        <div className="space-y-6">
+        <div className="space-y-4">
           {dustControlFacilities.map((facility, index) => {
             const hasAttachment = data[facility.attachmentField as keyof T_OshProgram];
             const facilityValue = data[facility.valueField as keyof T_OshProgram];
             const remarks = data[facility.remarksField as keyof T_OshProgram];
             
             return (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
+              <div key={index} className="border border-gray-200 rounded-lg p-3 facility-card">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-gray-900 mb-2">
                       {facility.name}
                     </h3>
-                    <div className="grid grid-cols-2 gap-4 mb-2">
+                    <div className="grid grid-cols-3 gap-4 mb-2">
                       <div>
                         <span className="text-xs text-gray-600">Status: </span>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -98,19 +116,17 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
                           {hasAttachment ? '📎 Available' : 'None'}
                         </span>
                       </div>
-                    </div>
-                    {remarks && (
-                      <div className="mt-2">
+                      <div>
                         <span className="text-xs text-gray-600">Remarks: </span>
-                        <span className="text-xs text-gray-700">{remarks as string}</span>
+                        <span className="text-xs text-gray-700">{remarks ? remarks as string : 'None'}</span>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Attachment Display */}
                 {hasAttachment && (
-                  <div className="mt-3 bg-gray-50 p-4 rounded-md">
+                  <div className="mt-2 bg-gray-50 p-3 rounded-md attachment-container">
                     {typeof hasAttachment === 'string' && hasAttachment ? (
                       <>
                         {/* Check if it's an image */}
@@ -119,8 +135,8 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
                             <img 
                               src={hasAttachment}
                               alt={`Attachment for ${facility.name}`}
-                              className="max-w-full h-auto border border-gray-300 rounded mx-auto"
-                              style={{ maxHeight: '400px', objectFit: 'contain' }}
+                              className="max-w-full h-auto border border-gray-300 rounded mx-auto attachment-image"
+                              style={{ maxHeight: '200px', maxWidth: '300px', objectFit: 'contain' }}
                             />
                             <p className="text-xs text-gray-500 mt-2">
                               {hasAttachment.split('/').pop()}
@@ -162,7 +178,7 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
       </div>
 
       {/* Summary Section */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <h3 className="text-sm font-medium text-gray-900 mb-2">Summary</h3>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>

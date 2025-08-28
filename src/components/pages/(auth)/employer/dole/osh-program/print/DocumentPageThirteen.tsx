@@ -24,19 +24,37 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media print {
+            .officer-card {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .certificate-container {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .certificate-image {
+              max-height: 150px !important;
+              max-width: 250px !important;
+            }
+          }
+        `
+      }} />
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-lg font-bold text-gray-900 mb-4">
+      <div className="mb-4">
+        <h1 className="text-lg font-bold text-gray-900 mb-2">
           Safety Officers and Certificates
         </h1>
       </div>
 
       {/* Safety Officer Certificates */}
       <div className="mb-6">
-        <div className="space-y-6">
+        <div className="space-y-4">
           {safetyOfficers.length > 0 ? (
             safetyOfficers.map((officer: any, index: number) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
+              <div key={index} className="border border-gray-200 rounded-lg p-3 officer-card">
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="text-sm font-semibold text-gray-900">
@@ -61,7 +79,7 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
 
                 {/* Certificate Display */}
                 {officer.certificate && (
-                  <div className="mt-3 bg-gray-50 p-4 rounded-md">
+                  <div className="mt-2 bg-gray-50 p-3 rounded-md certificate-container">
                     {typeof officer.certificate === 'string' && officer.certificate ? (
                       <>
                         {/* Check if it's an image */}
@@ -70,8 +88,8 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
                             <img 
                               src={officer.certificate}
                               alt={`Certificate for ${officer.name}`}
-                              className="max-w-full h-auto border border-gray-300 rounded mx-auto"
-                              style={{ maxHeight: '400px', objectFit: 'contain' }}
+                              className="max-w-full h-auto border border-gray-300 rounded mx-auto certificate-image"
+                              style={{ maxHeight: '200px', maxWidth: '300px', objectFit: 'contain' }}
                             />
                             <p className="text-xs text-gray-500 mt-2">
                               {officer.certificate.split('/').pop()}
@@ -117,7 +135,7 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
       </div>
 
       {/* Summary Section */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <h3 className="text-sm font-medium text-gray-900 mb-2">Summary</h3>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>

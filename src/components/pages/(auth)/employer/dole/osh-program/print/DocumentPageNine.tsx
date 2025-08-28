@@ -38,20 +38,13 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
       }} />
       {/* Top Section - Worker Facilities Continuation */}
       <div className="mb-6">
-        <table className="w-full border-collapse border border-gray-300 no-repeat-header">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">FACILITIES</th>
-              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-center" colSpan={2}>PROVIDED? (YES/NO)</th>
-              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">REMARKS</th>
-            </tr>
-            <tr className="bg-gray-50">
-              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left"></th>
-              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-center">YES</th>
-              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-center">NO</th>
-              <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left"></th>
-            </tr>
-          </thead>
+        <table className="w-full border-collapse border border-gray-300 no-repeat-header" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '40%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '30%' }} />
+          </colgroup>
           <tbody>
             {[
               {

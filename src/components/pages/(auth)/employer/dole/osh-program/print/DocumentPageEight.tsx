@@ -172,7 +172,13 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
         <h2 className="text-base font-bold text-gray-900 mb-2">
           13.0 Workers Facilities Provided
         </h2>
-        <table className="w-full border-collapse border border-gray-300 no-repeat-header">
+        <table className="w-full border-collapse border border-gray-300 no-repeat-header" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '40%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '30%' }} />
+          </colgroup>
           <thead>
             <tr className="bg-gray-50">
               <th className="border border-gray-300 p-2 text-sm font-medium text-gray-900 text-left">FACILITIES</th>
@@ -197,7 +203,7 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
                 facility: 'b. Adequate sanitary and washing facilities',
                 provided: data.adequate_sanitary_and_washing_facilities,
                 remarks: data.adequate_sanitary_and_washing_facilities_remarks || ''
-              }
+              },
             ].map((entry, index) => (
               <tr key={index}>
                 <td className="border border-gray-300 p-2 min-h-[24px] text-sm">
