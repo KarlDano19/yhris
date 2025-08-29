@@ -311,31 +311,28 @@ export default function VersionHistoryModal({
                   )}
 
                   {/* Bulk Actions */}
-                  {selectedVersions.size > 0 && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-medium text-blue-800">
-                            {selectedVersions.size} version(s) selected
-                          </span>
-                          <button
-                            onClick={() => setSelectedVersions(new Set())}
-                            className="text-sm text-blue-600 hover:text-blue-800 underline"
-                          >
-                            Clear Selection
-                          </button>
-                        </div>
+                  {selectedVersions.size > 1 && (
+                    <div className="mb-4 p-3">
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={handleBulkDelete}
                           disabled={bulkDeleteVersionMutation.isLoading}
-                          className="mr-5 text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Delete Selected Versions"
+                          className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {bulkDeleteVersionMutation.isLoading ? (
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
+                            <div className="flex items-center gap-2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              Deleting...
+                            </div>
                           ) : (
-                            <DeleteIcon />
+                            'Delete Selected'
                           )}
+                        </button>
+                        <button
+                          onClick={() => setSelectedVersions(new Set())}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                          Clear Selected
                         </button>
                       </div>
                     </div>
@@ -362,16 +359,16 @@ export default function VersionHistoryModal({
                               className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
                             />
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Version No.
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Changes
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Date Updated
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Actions
                           </th>
                         </tr>
@@ -440,8 +437,8 @@ export default function VersionHistoryModal({
                                   </button>
                                   <button
                                     onClick={() => handleDeleteVersion(version.id, version.version_number_formatted)}
-                                    disabled={deleteVersionMutation.isLoading}
-                                    className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={deleteVersionMutation.isLoading || selectedVersions.size > 1}
+                                    className={`text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${selectedVersions.size > 1 ? 'invisible' : ''}`}
                                     title="Delete Version"
                                   >
                                     {deleteVersionMutation.isLoading ? (
