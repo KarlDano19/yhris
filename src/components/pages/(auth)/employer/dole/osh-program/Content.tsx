@@ -174,7 +174,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
   // CONSTANTS AND CONFIGURATION
   // ============================================================================
-  
+
   const statusOptions = [
     { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
     { value: 'for-submission', label: 'For Submission', color: 'bg-blue-100 text-blue-700' },
@@ -206,7 +206,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
   // STATUS AND PRINT HANDLERS
   // ============================================================================
-  
+
   const handleStatusChange = async (newStatus: string) => {
     try {
       await updateOshProgramDetails({
@@ -332,7 +332,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Submit data to server
     await submitDataToServer(processedData);
   });
-
+  
   // Main submit handler (UI layer) - handles user interactions and state management
   const submitCurrentTab = async () => {
     // Prevent multiple submissions
@@ -341,9 +341,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Check if there are actual changes before submitting
     if (!hasUnsavedChanges()) {
       toast.custom(() => <CustomToast message="No changes detected. Nothing to save." type="info" />);
-      return;
-    }
-    
+        return;
+      }
+      
     // First clear any existing validation messages
     setValidationMessage("");
     setMissingFields([]);
@@ -370,7 +370,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
   // CHANGE DETECTION AND NAVIGATION
   // ============================================================================
-  
+
   // Check if there are unsaved changes in the current tab
   const hasUnsavedChanges = (): boolean => {
     const formValues = watch();
@@ -423,7 +423,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
   // UNSAVED CHANGES MODAL HANDLERS
   // ============================================================================
-  
+
   // Handle save changes from modal
   const handleSaveChanges = async () => {
     setIsSavingChanges(true);
@@ -457,7 +457,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
   // SUBMISSION HANDLERS
   // ============================================================================
-  
+
   // Handle successful submission
   const handleSuccessfulSubmission = (): void => {
     // Refresh data from backend to ensure frontend state is in sync
@@ -484,7 +484,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
   // TAB AND UI HANDLERS
   // ============================================================================
-  
+
   // Function to handle tab changes
   const handleTabChange = (tabIndex: TabNumber) => {
     // Clear any validation errors
