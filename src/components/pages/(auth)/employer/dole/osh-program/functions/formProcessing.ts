@@ -7,19 +7,16 @@ type ExtendedOshProgram = Partial<T_OshProgram> & {
   [key: string]: any;
 };
 
-// Helper function to get facility fields (assuming this exists in the original context)
-const getFacilityFields = (): string[] => {
-  // This should match the facility fields from the original implementation
-  return [
-    'adequate_supply_of_drinking_water_attachment',
-    'adequate_sanitary_and_washing_facilities_attachment',
-    'suitable_living_accommodation_attachment',
-    'separate_sanitary_washing_and_sleeping_facilities_attachment',
-    'lactation_station_attachment',
-    'ramps_railings_and_like_attachment',
-    'other_workers_welfare_facilities_attachment'
-  ];
-};
+// Facility attachment fields
+const facilityAttachmentFields = [
+  'adequate_supply_of_drinking_water_attachment',
+  'adequate_sanitary_and_washing_facilities_attachment',
+  'suitable_living_accommodation_attachment',
+  'separate_sanitary_washing_and_sleeping_facilities_attachment',
+  'lactation_station_attachment',
+  'ramps_railings_and_like_attachment',
+  'other_workers_welfare_facilities_attachment'
+];
 
 // Process attachments based on the current tab
 export const processAttachments = (
@@ -42,7 +39,7 @@ export const processAttachments = (
   // Special handling for file attachments in Tab 5 (Safety Measures)
   if (selectedTab === 5) {
     // Include all the facility attachment fields
-    getFacilityFields().forEach(field => {
+    facilityAttachmentFields.forEach(field => {
       if (data[field] !== undefined) {
         processedData[field] = data[field];
       }

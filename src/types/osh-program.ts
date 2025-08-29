@@ -346,22 +346,3 @@ export const OSH_PROGRAM_TABS = {
   }
 };
 
-// Helper functions to access fields
-export const getTabFields = (tabNumber: OSH_PROGRAM_TAB_NUMBER) => 
-  OSH_PROGRAM_TABS.FIELDS[tabNumber];
-
-export const getRequiredFields = (tabNumber: OSH_PROGRAM_TAB_NUMBER) => 
-  OSH_PROGRAM_TABS.REQUIRED_FIELDS[tabNumber];
-
-// Helper for facility fields
-export const getFacilityFields = () => {
-  return [
-    'adequate_supply_of_drinking_water',
-    'adequate_sanitary_and_washing_facilities',
-    'suitable_living_accommodation',
-    'separate_sanitary_washing_and_sleeping_facilities',
-    'lactation_station',
-    'ramps_railings_and_like',
-    'other_workers_welfare_facilities'
-  ];
-};
