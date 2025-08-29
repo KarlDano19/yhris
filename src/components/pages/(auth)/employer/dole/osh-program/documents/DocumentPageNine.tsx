@@ -204,7 +204,7 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
         {data.waste_management_system_message && (
           <div className="mb-4 ml-5">
             <div 
-              className="text-sm text-gray-700 prose prose-sm max-w-none [&>p]:mb-3 [&>ul]:ml-4 [&>ol]:ml-4 [&>li]:mb-1"
+              className="ql-editor !p-0 text-sm text-gray-700"
               dangerouslySetInnerHTML={{ __html: data.waste_management_system_message }}
             />
           </div>

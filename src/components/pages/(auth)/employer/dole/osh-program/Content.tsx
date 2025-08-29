@@ -232,8 +232,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   // Get version history for limit checking
   const { data: versionHistoryData, refetch: refetchVersionHistory } = useGetOshProgramVersionHistory({
-    page_size: 1,
-    current_page: 1
+    pageSize: 1,
+    currentPage: 1
   });
 
   // Fileforge hook for PDF generation

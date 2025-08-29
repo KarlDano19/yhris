@@ -31,7 +31,7 @@ const DocumentPageTwelve: React.FC<DocumentPageTwelveProps> = ({ data }) => {
 
         {data.annex_a_message && (
           <div 
-            className="text-sm leading-relaxed text-gray-900 prose prose-sm max-w-none [&>p]:mb-4 [&>p]:leading-relaxed [&>ol]:mb-4 [&>ul]:mb-4 [&>li]:mb-1"
+            className="ql-editor !p-0 text-sm text-gray-700"
             dangerouslySetInnerHTML={{ __html: data.annex_a_message }}
           />
         )}

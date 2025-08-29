@@ -20,7 +20,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
       {data.company_commitment ? (
         <div className="space-y-6 mb-10">
           <div 
-            className="text-sm leading-relaxed text-gray-900 prose prose-sm max-w-none [&>p]:mb-6 [&>p]:leading-relaxed"
+            className="ql-editor !p-0 text-sm text-gray-700"
             dangerouslySetInnerHTML={{ __html: data.company_commitment }}
           />
         </div>

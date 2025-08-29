@@ -49,7 +49,54 @@ const useFileforge = ({ onSuccess, onError, pageMargins }: UseFileforgeProps = {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${filename}</title>
           <script src="https://cdn.tailwindcss.com"></script>
+          <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.6/quill.snow.css">
           <style>
+            /* React Quill styles for print - matching preview exactly */
+            .ql-editor {
+              box-sizing: border-box;
+              line-height: 1.42;
+              height: 100%;
+              outline: none;
+              overflow-y: auto;
+              tab-size: 4;
+              -moz-tab-size: 4;
+              text-align: left;
+              white-space: pre-wrap;
+              word-wrap: break-word;
+              padding: 0 !important;
+            }
+            
+            .ql-editor ul { 
+              padding-left: unset !important;
+            }
+            
+            .ql-editor ul > li {
+              padding-left: 0.5em !important;
+            }
+            
+            .ql-editor ol {
+              padding-left: 0;
+              list-style-type: none;
+            }
+            
+            .ql-editor ol > li {
+              list-style-type: none;
+            }
+            
+            /* React Quill indentation styles - matching quill-tooltips.css */
+            .ql-indent-1 {
+              margin-left: 1.25rem !important;
+            }
+            .ql-indent-2 {
+              margin-left: 2.5rem !important;
+            }
+            .ql-indent-3 {
+              margin-left: 3.75rem !important;
+            }
+            .ql-indent-4 {
+              margin-left: 5rem !important;
+            }
+
             @media print {
               body { 
                 margin: 0; 

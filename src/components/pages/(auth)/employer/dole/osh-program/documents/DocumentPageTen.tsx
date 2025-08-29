@@ -32,7 +32,7 @@ const DocumentPageTen: React.FC<DocumentPageTenProps> = ({ data }) => {
         {data.prohibited_acts_and_penalties_message && (
           <div className="mb-6">
             <div 
-              className="text-sm text-gray-700 prose prose-sm max-w-none [&>p]:mb-3 [&>ul]:ml-4 [&>ol]:ml-4 [&>li]:mb-1 [&>h1]:text-base [&>h1]:font-semibold [&>h1]:text-gray-900 [&>h1]:mb-2 [&>h2]:text-sm [&>h2]:font-medium [&>h2]:text-gray-900 [&>h2]:mb-2 [&>h3]:text-sm [&>h3]:font-medium [&>h3]:text-gray-900 [&>h3]:mb-1"
+              className="ql-editor !p-0 text-sm text-gray-700"
               dangerouslySetInnerHTML={{ __html: data.prohibited_acts_and_penalties_message }}
             />
           </div>
