@@ -77,7 +77,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed', 'Rejected'],
+    status: ['Ongoing', 'Passed', 'Rejected', 'Withdrawn'],
   });
 
   // Get screening questions and ideal answers from the job posting
@@ -97,14 +97,20 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     if (!screeningQuestions.length || !applicants?.length) return applicants;
 
     return applicants.map((applicant) => {
-      // Skip already processed applicants
-      if (applicant.screeningFit) return applicant;
-
       // Get the applicant's screening answers
       const answers =
         applicant.applicant?.screening_answers && applicant.applicant.screening_answers !== null
           ? applicant.applicant.screening_answers
           : [];
+
+      // If applicant is rejected or withdrawn, they are automatically "Not Fit"
+      if (applicant.status === 'rejected' || applicant.status === 'withdrawn') {
+        return {
+          ...applicant,
+          screeningFit: 'bad',
+          screeningAnswers: answers,
+        };
+      }
 
       // Only check if mustHave questions match their ideal answers
       let isGoodFit = true;
