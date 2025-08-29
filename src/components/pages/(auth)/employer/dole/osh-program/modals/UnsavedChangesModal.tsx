@@ -73,7 +73,7 @@ export default function UnsavedChangesModal({
                   </button>
                   <button
                     type='button'
-                    className='inline-flex justify-center rounded-md border border-red-600 px-4 md:px-6 py-2 text-sm font-medium bg-white text-gray-700 shadow-sm hover:text-white hover:bg-red-600 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
+                    className='inline-flex justify-center rounded-md border border-red-400 px-4 md:px-6 py-2 text-sm font-medium bg-white text-gray-700 shadow-sm hover:text-white hover:bg-red-500 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
                     onClick={onDiscard}
                     disabled={isLoading}
                   >
