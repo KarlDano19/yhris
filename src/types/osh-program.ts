@@ -1,28 +1,6 @@
-// Base types for nested objects
-export type T_SafetyOfficer = {
-  id?: number | string;
-  name: string;
-  training_and_hours: string;
-  certificate?: File | string | null;
-};
-
-export type T_HealthPersonnel = {
-  id?: number | string;
-  shift_area_department: string;
-  total_workers: number;
-  health_personnel_name: string;
-  facilities: string;
-  attachment?: File | string | null;
-};
-
-// Type for facility fields that follow the same pattern
-export type FacilityField = {
-  active: boolean;
-  remarks: string;
-  attachment: File | string | null;
-};
-
 // Tab interfaces for better organization
+
+// Company Profile Tab
 interface CompanyProfileTab {
   company_name: string;
   date_established: string;
@@ -49,6 +27,7 @@ interface CompanyProfileTab {
   services_description: string;
 }
 
+// Policy Tab
 interface PolicyTab {
   basic_components: string;
   company_commitment: string;
@@ -58,6 +37,7 @@ interface PolicyTab {
   signature_source: 'draw' | 'upload' | null;
 }
 
+// Risk Management Tab
 interface RiskManagementTab {
   emergency_and_disaster_preparedness: Array<{
     task: string;
@@ -68,6 +48,7 @@ interface RiskManagementTab {
   }> | string;
 }
 
+// Health Welfare Tab
 interface HealthWelfareTab {
   routine_medical_surveillance: string[];
   special_medical_surveillance: string[];
@@ -103,6 +84,24 @@ interface HealthWelfareTab {
   reported_incidents: any;
 }
 
+// Base types for nested objects
+export type T_SafetyOfficer = {
+  id?: number | string;
+  name: string;
+  training_and_hours: string;
+  certificate?: File | string | null;
+};
+
+export type T_HealthPersonnel = {
+  id?: number | string;
+  shift_area_department: string;
+  total_workers: number;
+  health_personnel_name: string;
+  facilities: string;
+  attachment?: File | string | null;
+};
+
+// Safety Measures Tab
 interface SafetyMeasuresTab {
   ppe: any;
   ppe_description: string;
@@ -140,6 +139,14 @@ interface SafetyMeasuresTab {
   prohibited_acts_and_penalties_message: string;
 }
 
+// Type for facility fields that follow the same pattern
+export type FacilityField = {
+  active: boolean;
+  remarks: string;
+  attachment: File | string | null;
+};
+
+// Compliance Cost Tab
 interface ComplianceCostTab {
   cost_osh_program: number;
   ppe_cost: number;
