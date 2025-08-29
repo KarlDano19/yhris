@@ -535,7 +535,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
   };
 
   return (
-    <div className="mt-12 preview-container h-full bg-white">
+    <div className="mt-12 preview-container">
       {/* Title visible in UI but hidden when printing */}
       <h2 className="text-2xl font-bold mb-6 text-black preview-header print-hide">Preview</h2>
       
