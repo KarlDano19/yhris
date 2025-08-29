@@ -14,6 +14,7 @@ import DocumentPageEleven from './DocumentPageEleven';
 import DocumentPageTwelve from './DocumentPageTwelve';
 import DocumentPageThirteen from './DocumentPageThirteen';
 import DocumentPageFourteen from './DocumentPageFourteen';
+import DocumentPageFifteen from './DocumentPageFifteen';
 
 import { T_OshProgram } from '@/types/osh-program';
 import { ChevronUpIcon } from "@heroicons/react/24/solid";
@@ -117,9 +118,13 @@ const DocumentContent: React.FC<{ data: T_OshProgram; forPrint?: boolean }> = ({
     <A4Page forPrint={forPrint}>
       <DocumentPageThirteen data={data} />
     </A4Page>
+
+    <A4Page forPrint={forPrint}>
+      <DocumentPageFourteen data={data} />
+    </A4Page>
     
     <A4Page forPrint={forPrint} isLastPage={true}>
-      <DocumentPageFourteen data={data} />
+      <DocumentPageFifteen data={data} />
     </A4Page>
   </>
 );

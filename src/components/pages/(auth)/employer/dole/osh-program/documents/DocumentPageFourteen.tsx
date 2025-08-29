@@ -7,58 +7,27 @@ interface DocumentPageFourteenProps {
 }
 
 const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => {
-  // Define the dust control facilities with their field names
-  const dustControlFacilities = [
-    {
-      name: 'Adequate supply of drinking water',
-      valueField: 'adequate_supply_of_drinking_water',
-      remarksField: 'adequate_supply_of_drinking_water_remarks',
-      attachmentField: 'adequate_supply_of_drinking_water_attachment'
-    },
-    {
-      name: 'Adequate sanitary and washing facilities',
-      valueField: 'adequate_sanitary_and_washing_facilities',
-      remarksField: 'adequate_sanitary_and_washing_facilities_remarks',
-      attachmentField: 'adequate_sanitary_and_washing_facilities_attachment'
-    },
-    {
-      name: 'Suitable living accommodation (if applicable)',
-      valueField: 'suitable_living_accommodation',
-      remarksField: 'suitable_living_accommodation_remarks',
-      attachmentField: 'suitable_living_accommodation_attachment'
-    },
-    {
-      name: 'Separate sanitary, washing and sleeping facilities (if applicable)',
-      valueField: 'separate_sanitary_washing_and_sleeping_facilities',
-      remarksField: 'separate_sanitary_washing_and_sleeping_facilities_remarks',
-      attachmentField: 'separate_sanitary_washing_and_sleeping_facilities_attachment'
-    },
-    {
-      name: 'Lactation station (in consonance with DOLE D.O. 143-15)',
-      valueField: 'lactation_station',
-      remarksField: 'lactation_station_remarks',
-      attachmentField: 'lactation_station_attachment'
-    },
-    {
-      name: 'Ramps, railings, and the like',
-      valueField: 'ramps_railings_and_like',
-      remarksField: 'ramps_railings_and_like_remarks',
-      attachmentField: 'ramps_railings_and_like_attachment'
-    },
-    {
-      name: 'Other workers\' welfare facilities as prescribed by OSHS and other related issuances',
-      valueField: 'other_workers_welfare_facilities',
-      remarksField: 'other_workers_welfare_facilities_remarks',
-      attachmentField: 'other_workers_welfare_facilities_attachment'
+  // Parse health personnel data
+  const getHealthPersonnel = () => {
+    try {
+      const healthPersonnelData = typeof data.health_personnel === 'string' 
+        ? JSON.parse(data.health_personnel) 
+        : data.health_personnel || [];
+      
+      return Array.isArray(healthPersonnelData) ? healthPersonnelData : [];
+    } catch (error) {
+      return [];
     }
-  ];
+  };
+
+  const healthPersonnel = getHealthPersonnel();
 
   return (
     <>
       <style dangerouslySetInnerHTML={{
         __html: `
           @media print {
-            .facility-card {
+            .personnel-card {
               page-break-inside: avoid;
               break-inside: avoid;
             }
@@ -76,70 +45,65 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
       {/* Page Header */}
       <div className="mb-4">
         <h1 className="text-lg font-bold text-gray-900 mb-2">
-          Dust Control and Management Facilities & Attachments
+          Emergency Occupational Health Personnel and Facilities
         </h1>
       </div>
 
-      {/* Facilities with Attachments */}
+      {/* Health Personnel with Attachments */}
       <div className="mb-6">
         <div className="space-y-4">
-          {dustControlFacilities.map((facility, index) => {
-            const hasAttachment = data[facility.attachmentField as keyof T_OshProgram];
-            const facilityValue = data[facility.valueField as keyof T_OshProgram];
-            const remarks = data[facility.remarksField as keyof T_OshProgram];
-            
-            return (
-              <div key={index} className="border border-gray-200 rounded-lg p-3 facility-card">
+          {healthPersonnel.length > 0 ? (
+            healthPersonnel.map((personnel: any, index: number) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4 personnel-card">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                      {facility.name}
+                      {personnel.shift_area_department || `Health Personnel ${index + 1}`}
                     </h3>
-                    <div className="grid grid-cols-3 gap-4 mb-2">
+                    <div className="grid grid-cols-2 gap-4 mb-2">
                       <div>
-                        <span className="text-xs text-gray-600">Status: </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          facilityValue === true 
-                            ? 'bg-green-100 text-green-800' 
-                            : facilityValue === false 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {facilityValue === true ? '✓ Yes' : facilityValue === false ? '✗ No' : 'Not specified'}
-                        </span>
+                        <span className="text-xs text-gray-600">Total Workers: </span>
+                        <span className="text-xs text-gray-700 font-medium">{personnel.total_workers || 0}</span>
                       </div>
                       <div>
-                        <span className="text-xs text-gray-600">Attachment: </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          hasAttachment ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {hasAttachment ? '📎 Available' : 'None'}
-                        </span>
+                        <span className="text-xs text-gray-600">Health Personnel: </span>
+                        <span className="text-xs text-gray-700 font-medium">{personnel.health_personnel_name || 'Not specified'}</span>
                       </div>
-                      <div>
-                        <span className="text-xs text-gray-600">Remarks: </span>
-                        <span className="text-xs text-gray-700">{remarks ? remarks as string : 'None'}</span>
+                      <div className="col-span-2">
+                        <span className="text-xs text-gray-600">Facilities: </span>
+                        <span className="text-xs text-gray-700">{personnel.facilities || 'Not specified'}</span>
                       </div>
                     </div>
+                  </div>
+                  <div className="text-right">
+                    {personnel.attachment ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ✓ Attachment
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        ✗ No Attachment
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 {/* Attachment Display */}
-                {hasAttachment && (
-                  <div className="mt-2 bg-gray-50 p-3 rounded-md attachment-container">
-                    {typeof hasAttachment === 'string' && hasAttachment ? (
+                {personnel.attachment && (
+                  <div className="mt-3 bg-gray-50 p-4 rounded-md attachment-container">
+                    {typeof personnel.attachment === 'string' && personnel.attachment ? (
                       <>
                         {/* Check if it's an image */}
-                        {hasAttachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                        {personnel.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                           <div className="text-center">
                             <img 
-                              src={hasAttachment}
-                              alt={`Attachment for ${facility.name}`}
+                              src={personnel.attachment}
+                              alt={`Attachment for ${personnel.shift_area_department}`}
                               className="max-w-full h-auto border border-gray-300 rounded mx-auto attachment-image"
                               style={{ maxHeight: '350px', maxWidth: '450px', objectFit: 'contain' }}
                             />
                             <p className="text-xs text-gray-500 mt-2">
-                              {hasAttachment.split('/').pop()}
+                              {personnel.attachment.split('/').pop()}
                             </p>
                           </div>
                         ) : (
@@ -150,7 +114,7 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
                             </svg>
                             <div className="text-center">
                               <a 
-                                href={hasAttachment}
+                                href={personnel.attachment}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
@@ -158,7 +122,7 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
                                 View Document
                               </a>
                               <p className="text-xs text-gray-500 mt-1">
-                                {hasAttachment.split('/').pop()}
+                                {personnel.attachment.split('/').pop()}
                               </p>
                             </div>
                           </div>
@@ -172,8 +136,12 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
                   </div>
                 )}
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <p className="text-sm text-gray-500 italic text-center py-8">
+              No emergency occupational health personnel have been added yet.
+            </p>
+          )}
         </div>
       </div>
 
@@ -182,32 +150,30 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
         <h3 className="text-sm font-medium text-gray-900 mb-2">Summary</h3>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-600">Total Facilities:</span>
-            <span className="font-medium ml-2">{dustControlFacilities.length}</span>
+            <span className="text-gray-600">Total Health Personnel:</span>
+            <span className="font-medium ml-2">{healthPersonnel.length}</span>
           </div>
           <div>
             <span className="text-gray-600">Attachments Available:</span>
             <span className="font-medium ml-2">
-              {dustControlFacilities.filter(facility => 
-                data[facility.attachmentField as keyof T_OshProgram]
-              ).length}
+              {healthPersonnel.filter((personnel: any) => personnel.attachment).length}
             </span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm mt-2">
           <div>
-            <span className="text-gray-600">Facilities with &quot;Yes&quot;:</span>
+            <span className="text-gray-600">Total Workers Covered:</span>
             <span className="font-medium ml-2">
-              {dustControlFacilities.filter(facility => 
-                data[facility.valueField as keyof T_OshProgram] === true
-              ).length}
+              {healthPersonnel.reduce((total: number, personnel: any) => 
+                total + (personnel.total_workers || 0), 0
+              )}
             </span>
           </div>
           <div>
-            <span className="text-gray-600">Facilities with &quot;No&quot;:</span>
+            <span className="text-gray-600">Personnel with Names:</span>
             <span className="font-medium ml-2">
-              {dustControlFacilities.filter(facility => 
-                data[facility.valueField as keyof T_OshProgram] === false
+              {healthPersonnel.filter((personnel: any) => 
+                personnel.health_personnel_name && personnel.health_personnel_name.trim() !== ''
               ).length}
             </span>
           </div>
