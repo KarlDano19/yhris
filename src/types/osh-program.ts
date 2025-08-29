@@ -326,9 +326,7 @@ export const OSH_PROGRAM_TABS = {
       'date', 'name_of_owner', 'signature' 
     ] as (keyof T_OshProgram)[],
     
-    3: [
-      'emergency_and_disaster_preparedness'
-    ] as (keyof T_OshProgram)[],
+    3: [] as (keyof T_OshProgram)[],
     
     4: [
       'no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace', 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import { useQueryClient } from "@tanstack/react-query";
@@ -102,6 +102,55 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
 
   // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
+  };
+
+  const getCurrentTabName = (): string => {
+    const tabNames = {
+      1: 'Company Profile',
+      2: 'OSH Program and Policy',
+      3: 'Risk Management',
+      4: 'Health and Welfare Program',
+      5: 'Safety Measures',
+      6: 'Compliance and Cost'
+    };
+    return tabNames[selectedTab] || 'current tab';
+  };
+
+  // Function to validate required fields for the current tab
+  const validateCurrentTabFields = useCallback(() => {
+    const formValues = watch();
+    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
+    
+    // Only validate if there are required fields for this tab
+    if (requiredFields.length > 0) {
+      const missingFields = requiredFields.filter((field: keyof T_OshProgram) => {
+        const value = formValues[field];
+        return value === undefined || value === null || value === '';
+      });
+
+      if (missingFields.length > 0) {
+        // Store missing fields for UI highlighting
+        setMissingFields(missingFields as string[]);
+        setValidationMessage(`Please fill out all required fields marked with *`);
+      } else {
+        // Clear validation if all required fields are filled
+        setMissingFields([]);
+        setValidationMessage("");
+      }
+    } else {
+      // Clear validation for tabs with no required fields (Risk Management, Safety Measures)
+      setMissingFields([]);
+      setValidationMessage("");
+    }
+  }, [watch, selectedTab]);
+
+  // ============================================================================
   // EFFECTS AND LIFECYCLE
   // ============================================================================
   
@@ -181,27 +230,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     { value: 'for-review', label: 'For Review', color: 'bg-yellow-100 text-yellow-700' },
     { value: 'approved', label: 'Approved', color: 'bg-green-100 text-green-700' },
   ];
-
-  // ============================================================================
-  // UTILITY FUNCTIONS
-  // ============================================================================
-  
-  const getStatusColor = (status: string) => {
-    const statusOption = statusOptions.find(option => option.value === status);
-    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
-  };
-
-  const getCurrentTabName = (): string => {
-    const tabNames = {
-      1: 'Company Profile',
-      2: 'OSH Program and Policy',
-      3: 'Risk Management',
-      4: 'Health and Welfare Program',
-      5: 'Safety Measures',
-      6: 'Compliance and Cost'
-    };
-    return tabNames[selectedTab] || 'current tab';
-  };
 
   // ============================================================================
   // STATUS AND PRINT HANDLERS
@@ -479,7 +507,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setSafetySignageUrl,
       setSafetySignageAttachmentExist
     );
-  }, [oshProgramDetails, setValue, cachedProfile]);
+    
+    // Auto-validate required fields after form initialization
+    if (oshProgramDetails) {
+      setTimeout(() => {
+        validateCurrentTabFields();
+      }, 200);
+    }
+  }, [oshProgramDetails, setValue, cachedProfile, validateCurrentTabFields]);
 
   // ============================================================================
   // TAB AND UI HANDLERS
@@ -495,6 +530,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     // Set the new tab
     setSelectedTab(tabIndex);
+    
+    // Check if the new tab has required fields
+    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[tabIndex] || [];
+    
+    // Only validate if there are required fields for this tab
+    if (requiredFields.length > 0) {
+      // Auto-validate required fields for the new tab after a short delay
+      setTimeout(() => {
+        validateCurrentTabFields();
+      }, 100);
+    }
+    // If no required fields, validation is already cleared above
   };
 
   return (
