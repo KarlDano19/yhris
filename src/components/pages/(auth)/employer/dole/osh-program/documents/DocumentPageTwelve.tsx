@@ -23,8 +23,8 @@ const DocumentPageTwelve: React.FC<DocumentPageTwelveProps> = ({ data }) => {
 
   return (
     <>
-      {/* Main Content - Annex A Message */}
-      <div className="mb-6">
+      {/* Main Content - Annex A Policy */}
+      <div id="document-page-12" className="mb-6">
         <h1 className="text-base font-bold text-gray-900 mb-4 text-center">
           ANNEX A: WORKPLACE POLICY AND PROGRAM ON PROMOTING WORKERS HEALTH AND ENSURING PREVENTION AND CONTROL OF HEALTH-RELATED ISSUES AND ILLNESS
         </h1>

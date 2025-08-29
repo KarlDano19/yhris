@@ -10,7 +10,7 @@ const DocumentPageFive: React.FC<DocumentPageFiveProps> = ({ data }) => {
   return (
     <>
       {/* Top Section - First Aid Facilities (continued from previous page) */}
-      <div className="mb-4">
+      <div id="document-page-5" className="mb-4">
         <div className="space-y-2 ml-5">
           <div className="flex items-center">
             <span className="text-sm text-gray-700 mr-2">•</span>

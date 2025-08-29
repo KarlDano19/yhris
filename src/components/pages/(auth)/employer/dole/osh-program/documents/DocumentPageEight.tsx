@@ -37,7 +37,7 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
         `
       }} />
       {/* Top Section - Work Accident Reporting */}
-      <div className="mb-2">
+      <div id="document-page-8" className="mb-2">
         <p className="text-sm text-gray-700 mb-2">
           After the conduct of investigation, the company shall prepare and submit work accident report using the prescribed form (WAIR).
         </p>

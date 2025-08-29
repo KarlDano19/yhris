@@ -10,7 +10,7 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
   return (
     <>
       {/* Document Header */}
-      <div className="text-center mb-6">
+      <div id="document-page-2" className="text-center mb-6">
         <h1 className="text-xl font-bold text-gray-900 mb-2">
           Basic Components of Company OSH Program and Policy
         </h1>

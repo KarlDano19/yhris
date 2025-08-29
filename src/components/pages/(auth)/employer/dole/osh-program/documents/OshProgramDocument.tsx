@@ -20,6 +20,7 @@ import { ChevronUpIcon } from "@heroicons/react/24/solid";
 
 interface OshProgramDocumentProps {
   data: T_OshProgram;
+  scrollToPage?: number; // Page number to scroll to (1-3 for now)
 }
 
 // Common A4 page styles
@@ -124,7 +125,7 @@ const DocumentContent: React.FC<{ data: T_OshProgram; forPrint?: boolean }> = ({
 );
 
 // Preview
-const OshProgramDocumentPreview: React.FC<OshProgramDocumentProps> = ({ data }) => {
+const OshProgramDocumentPreview: React.FC<OshProgramDocumentProps> = ({ data, scrollToPage }) => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
 
@@ -151,6 +152,31 @@ const OshProgramDocumentPreview: React.FC<OshProgramDocumentProps> = ({ data }) 
       };
     }
   }, []);
+
+  // Auto-scroll to specific page when scrollToPage prop changes
+  useEffect(() => {
+    if (scrollToPage && scrollToPage >= 1 && scrollToPage <= 12) {
+      const targetElement = document.getElementById(`document-page-${scrollToPage}`);
+      const documentElement = documentRef.current;
+      
+      if (targetElement && documentElement) {
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+          const targetRect = targetElement.getBoundingClientRect();
+          const containerRect = documentElement.getBoundingClientRect();
+          const scrollTop = documentElement.scrollTop;
+          
+          // Calculate the position to scroll to
+          const targetScrollTop = scrollTop + targetRect.top - containerRect.top - 20; // 20px offset from top
+          
+          documentElement.scrollTo({
+            top: targetScrollTop,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    }
+  }, [scrollToPage]);
 
   const scrollToTop = () => {
     const documentElement = documentRef.current;

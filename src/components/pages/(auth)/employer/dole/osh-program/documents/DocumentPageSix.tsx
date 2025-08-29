@@ -26,7 +26,7 @@ const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
         `
       }} />
       {/* Top Section - Joint Coordinating Committee (continued from previous page) */}
-      <div className="mb-4 ml-5">
+      <div id="document-page-6" className="mb-4 ml-5">
         <p className="text-sm text-gray-700 mb-2">
           <strong>(c)</strong> Joint Coordinating Committee: For two (2) or more establishments housed under one building or complex including malls.
         </p>

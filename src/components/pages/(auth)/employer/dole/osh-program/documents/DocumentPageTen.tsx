@@ -10,7 +10,7 @@ const DocumentPageTen: React.FC<DocumentPageTenProps> = ({ data }) => {
   return (
     <>
       {/* Top Section - Previous Section Headers */}
-      <div className="mb-6">
+      <div id="document-page-10" className="mb-6">
         <h2 className="text-base font-bold text-gray-900 mb-2">
           16.0 Compliance with Reportorial Government Requirements (refer to item 9.0)
         </h2>

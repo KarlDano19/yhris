@@ -10,7 +10,7 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
   return (
     <>
       {/* Document Header */}
-      <div className="text-center mb-8">
+      <div id="document-page-1" className="text-center mb-8">
         <h1 className="text-xl font-bold text-gray-900 mb-2">
           Occupational Safety and Health (OSH) Program of
         </h1>

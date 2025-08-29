@@ -10,7 +10,7 @@ const DocumentPageThree: React.FC<DocumentPageThreeProps> = ({ data }) => {
   return (
     <>
       {/* Document Header */}
-      <div className="text-left mb-8">
+      <div id="document-page-3" className="text-left mb-8">
         <h1 className="text-lg font-bold text-gray-900">
           1.0 Company Commitment to Comply with OSH Policy
         </h1>

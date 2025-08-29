@@ -1,10 +1,10 @@
 "use client";
 
-import { Fragment } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 
 import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
 import useFileforge from '../hooks/useFileforge';
 import CustomToast from '@/components/CustomToast';
@@ -21,6 +21,8 @@ interface VersionHistoryDetailsModalProps {
   onClose: () => void;
   onBack: () => void;
   versionId?: number;
+  scrollToPage?: number; // Page number to scroll to (1-3 for now)
+  relevantPages?: number[]; // Array of pages that contain changes
 }
 
 export default function VersionHistoryDetailsModal({
@@ -28,7 +30,13 @@ export default function VersionHistoryDetailsModal({
   onClose,
   onBack,
   versionId,
+  scrollToPage,
+  relevantPages = [],
 }: VersionHistoryDetailsModalProps) {
+
+  // State for page navigation
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentScrollPage, setCurrentScrollPage] = useState<number | undefined>(scrollToPage);
 
   // Fetch version details
   const { data: versionData, isLoading } = useGetOshProgramVersionDetails(
@@ -38,6 +46,31 @@ export default function VersionHistoryDetailsModal({
 
   // Use version data directly since it matches T_OshProgram structure
   const transformedData = versionData as unknown as T_OshProgram;
+
+  // Reset navigation when modal opens or relevant pages change
+  useEffect(() => {
+    if (isOpen && relevantPages.length > 0) {
+      setCurrentPageIndex(0);
+      setCurrentScrollPage(relevantPages[0]);
+    }
+  }, [isOpen, relevantPages]);
+
+  // Navigation functions
+  const goToPreviousPage = () => {
+    if (currentPageIndex > 0) {
+      const newIndex = currentPageIndex - 1;
+      setCurrentPageIndex(newIndex);
+      setCurrentScrollPage(relevantPages[newIndex]);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPageIndex < relevantPages.length - 1) {
+      const newIndex = currentPageIndex + 1;
+      setCurrentPageIndex(newIndex);
+      setCurrentScrollPage(relevantPages[newIndex]);
+    }
+  };
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     onSuccess: () => {
@@ -114,6 +147,33 @@ export default function VersionHistoryDetailsModal({
                       OSH Program Document - Complete Preview
                     </p>
                     <div className="flex items-center space-x-2">
+                      {/* Page Navigation Controls */}
+                      {relevantPages.length > 1 && (
+                        <div className="flex items-center space-x-2 mr-4">
+                          <button
+                            onClick={goToPreviousPage}
+                            disabled={currentPageIndex === 0}
+                            className="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20"
+                            title="Previous change page"
+                          >
+                            <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
+                          </button>
+                          
+                          <span className="text-gray-600 text-sm font-medium">
+                            {currentPageIndex + 1}/{relevantPages.length}
+                          </span>
+                          
+                          <button
+                            onClick={goToNextPage}
+                            disabled={currentPageIndex === relevantPages.length - 1}
+                            className="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20"
+                            title="Next change page"
+                          >
+                            <ChevronRightIcon className="w-5 h-5 text-gray-600" />
+                          </button>
+                        </div>
+                      )}
+
                       {/* Download Button */}
                       <button
                         onClick={handlePrint}
@@ -157,7 +217,7 @@ export default function VersionHistoryDetailsModal({
                     </div>
                   ) : transformedData ? (
                     <div className="w-full max-w-none">
-                      <OshProgramDocumentPreview data={transformedData} />
+                      <OshProgramDocumentPreview data={transformedData} scrollToPage={currentScrollPage} />
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-64">

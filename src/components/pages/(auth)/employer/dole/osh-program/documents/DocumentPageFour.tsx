@@ -38,7 +38,7 @@ const DocumentPageFour: React.FC<DocumentPageFourProps> = ({ data, pageNumber = 
         `
       }} />
       {/* Document Header */}
-      <div className="mb-6">
+      <div id="document-page-4" className="mb-6">
         <h1 className="text-lg font-bold text-gray-900">
           2.0 General Safety and Health Programs
         </h1>

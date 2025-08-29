@@ -22,7 +22,7 @@ const DocumentPageEleven: React.FC<DocumentPageElevenProps> = ({ data }) => {
         `
       }} />
       {/* Section 19.0 Cost of implementing company OSH program */}
-      <div className="mb-6 mt-6 flex-1">
+      <div id="document-page-11" className="mb-6 mt-6 flex-1">
         <h2 className="text-base font-bold text-gray-900 mb-3">
           19.0 Cost of implementing company OSH program
         </h2>

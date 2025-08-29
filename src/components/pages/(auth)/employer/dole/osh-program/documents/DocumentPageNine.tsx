@@ -37,7 +37,7 @@ const DocumentPageNine: React.FC<DocumentPageNineProps> = ({ data }) => {
         `
       }} />
       {/* Top Section - Worker Facilities Continuation */}
-      <div className="mb-6">
+      <div id="document-page-9" className="mb-6">
         <table className="w-full border-collapse border border-gray-300 no-repeat-header" style={{ tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: '40%' }} />

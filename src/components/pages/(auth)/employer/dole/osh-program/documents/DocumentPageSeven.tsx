@@ -43,7 +43,7 @@ const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
         `
       }} />
       {/* Top Section - Emergency Health Personnel and Facilities */}
-      <div className="mb-6 ml-5">
+      <div id="document-page-7" className="mb-6 ml-5">
 
         <table className="w-full border-collapse border border-gray-300 no-repeat-header">
           <thead>
