@@ -38,8 +38,8 @@ export default function VersionHistoryModal({
 
   // Fetch version history data
   const { data: versionHistoryData, isLoading, refetch } = useGetOshProgramVersionHistory({
-    page_size: pageSize,
-    current_page: currentPage,
+    pageSize: pageSize,
+    currentPage: currentPage,
   });
 
   // Delete version mutation

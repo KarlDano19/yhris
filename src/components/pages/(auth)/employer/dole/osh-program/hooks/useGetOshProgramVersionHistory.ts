@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 interface VersionHistoryParams {
-  page_size?: number;
-  current_page?: number;
+  pageSize?: number;
+  currentPage?: number;
 }
 
 interface VersionHistoryResponse {
@@ -33,8 +33,8 @@ async function getOshProgramVersionHistory(params: VersionHistoryParams = {}): P
         const token = getCookie("token");
         const queryParams = new URLSearchParams();
         
-        if (params.page_size) queryParams.append('page_size', params.page_size.toString());
-        if (params.current_page) queryParams.append('current_page', params.current_page.toString());
+        if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+        if (params.currentPage) queryParams.append('currentPage', params.currentPage.toString());
         
         const config = {
             method: "GET",
