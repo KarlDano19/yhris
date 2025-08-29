@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 
 import { useFieldArray, Controller } from "react-hook-form";
-import { XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, EyeIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import FilePreviewModal from "../modals/FilePreviewModal";
@@ -154,6 +154,10 @@ export default function SafetyMeasures({
                       >
                         No. Of Workers
                       </th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      ></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -179,6 +183,17 @@ export default function SafetyMeasures({
                             id={`ppe.${index}.no_of_workers`}
                             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           />
+                        </td>
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                          <div className="flex justify-center items-center">
+                            <button
+                              type="button"
+                              className="flex justify-center items-center rounded-md bg-red-600 p-2 text-white"
+                              onClick={() => ppeRemove(index)}
+                            >
+                              <MinusIcon className="h-5 w-5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1011,6 +1026,10 @@ export default function SafetyMeasures({
                   >
                     Responsible person/position
                   </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                  ></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -1060,6 +1079,17 @@ export default function SafetyMeasures({
                         id={`drills.${index}.responsible_person_position`}
                         className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                       />
+                    </td>
+                    <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                      <div className="flex justify-center items-center">
+                        <button
+                          type="button"
+                          className="flex justify-center items-center rounded-md bg-red-600 p-2 text-white"
+                          onClick={() => drillsRemove(index)}
+                        >
+                          <MinusIcon className="h-5 w-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
