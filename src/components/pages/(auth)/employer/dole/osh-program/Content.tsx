@@ -12,10 +12,10 @@ import VersionHistoryModal from "./modals/VersionHistoryModal";
 import VersionHistoryDetailsModal from "./modals/VersionHistoryDetailsModal";
 import ChangesDetailsModal from "./modals/ChangesDetailsModal";
 import UnsavedChangesModal from "./modals/UnsavedChangesModal";
+import useFileforge from "./hooks/useFileforge";
 import useGetOshProgramDetails from "./hooks/useGetOshProgramDetails";
 import useUpdateOshProgramDetails from "./hooks/useUpdateOshProgramDetails";
 import useGetOshProgramVersionHistory from "./hooks/useGetOshProgramVersionHistory";
-import useFileforge from "./hooks/useFileforge";
 import CompanyProfile from "./tabs/CompanyProfile";
 import ProgramAndPolicy from "./tabs/ProgramAndPolicy";
 import RiskManagement from "./tabs/RiskManagement";
@@ -23,22 +23,26 @@ import SafetyMeasures from "./tabs/SafetyMeasures";
 import ComplianceAndCost from "./tabs/ComplianceAndCost";
 import HealthAndWelfare from "./tabs/HealthAndWelfare";
 
-// Import shared print utility
+import { getRelevantPagesFromChanges } from "./content-functions/pageRelevance";
+import { 
+  validateCurrentTabFields, 
+  hasUnsavedChanges, 
+  autoClearValidation, 
+  validateFormSubmission 
+} from "./content-functions/formValidation";
+import { initializeFormValues } from "./content-functions/formInitialization";
+import { processFormData } from "./content-functions/formProcessing";
 import { printOshProgram } from "./PrintData";
 
-// Import extracted functions
-import { initializeFormValues } from "./functions/formInitialization";
-import { processFormData } from "./functions/formProcessing";
+import PrintIcon from "@/svg/PrintIcon";
+import HistoryIcon from "@/svg/HistoryIcon";
+import SelectChevronDown from "@/svg/SelectChevronDown";
 
 import { 
   T_OshProgram, 
   OSH_PROGRAM_TAB_NUMBER as TabNumber, 
   OSH_PROGRAM_TABS
 } from "@/types/osh-program";
-
-import PrintIcon from "@/svg/PrintIcon";
-import HistoryIcon from "@/svg/HistoryIcon";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 // Define ExtendedOshProgram type within the file
 type ExtendedOshProgram = Partial<T_OshProgram> & {
@@ -70,148 +74,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   // Track navigation source for auto-scroll
   const [isNavigatingFromChanges, setIsNavigatingFromChanges] = useState(false);
-  
-  // Function to determine which pages contain changes based on changes description
-  const getRelevantPagesFromChanges = (changes: string): number[] => {
-    if (!changes) return [];
-    
-    const changesLower = changes.toLowerCase();
-    const relevantPages: number[] = [];
-    
-    // Define page-specific keywords based on backend readable field names from get_version_changes_summary
-    // Using more specific keywords to avoid cross-page matches
-    const pageKeywords = [
-      // Page 1 - Company Profile (based on backend field_groups['Company Profile'])
-      {
-        page: 1,
-        keywords: [
-          'company name', 'date established', 'complete address', 'phone number', 'fax number',
-          'website url', 'company owner', 'number of male employees', 'number of female employees',
-          'total number of employees', 'business description', 'product description', 'services description'
-        ]
-      },
-      // Page 2 - Basic Components (based on backend field_groups['OSH Program Policy'])
-      {
-        page: 2,
-        keywords: [
-          'basic components'
-        ]
-      },
-      // Page 3 - Company Commitment (based on backend field_groups['OSH Program Policy'])
-      {
-        page: 3,
-        keywords: [
-          'company commitment', 'signature', 'signature source'
-        ]
-      },
-      // Page 4 - General Safety and Health Programs (based on backend field_groups['Health Welfare'])
-      {
-        page: 4,
-        keywords: [
-          'routine medical surveillance', 'special medical surveillance', 'schedule of annual medical examination',
-          'random drug testing', 'number of treatment rooms/first aid rooms', 'number of clinics in the workplace',
-          'hospitals you\'re affiliated with'
-        ]
-      },
-      // Page 5 - Health Programs and Safety Committee (based on backend field_groups['Health Welfare'])
-      {
-        page: 5,
-        keywords: [
-          'duties and responsibilities'
-        ]
-      },
-      // Page 6 - OSH Personnel and Facilities (based on backend field_groups['Health Welfare'])
-      {
-        page: 6,
-        keywords: [
-          'health training'
-        ]
-      },
-      // Page 7 - Safety Training and Meetings (based on backend field_groups['Health Welfare'])
-      {
-        page: 7,
-        keywords: [
-          'risk assessment', 'safety meeting', 'reported incidents'
-        ]
-      },
-      // Page 8 - PPE and Safety Measures (based on backend field_groups['Safety Measures'])
-      {
-        page: 8,
-        keywords: [
-          'personal protective equipment (ppe)', 'ppe description', 'safety signage',
-          'adequate supply of drinking water', 'adequate sanitary and washing facilities'
-        ]
-      },
-      // Page 9 - Emergency and Waste Management (based on backend field_groups['Safety Measures'])
-      {
-        page: 9,
-        keywords: [
-          'suitable living accommodation', 'separate sanitary, washing and sleeping facilities',
-          'lactation station', 'ramps, railings and the like', 'other workers\' welfare facilities',
-          'written emergency and disaster program', 'emergency drills', 'written pollution control program',
-          'pollution control officer', 'waste management system'
-        ]
-      },
-      // Page 10 - Compliance and Prohibited Acts (based on backend field_groups['Safety Measures'])
-      {
-        page: 10,
-        keywords: [
-          'prohibited acts and penalties'
-        ]
-      },
-      // Page 11 - Cost Implementation (based on backend field_groups['Compliance & Cost'])
-      {
-        page: 11,
-        keywords: [
-          'cost of osh program', 'ppe cost', 'osh training cost', 'safety signages cost',
-          'machine guards cost', 'medical examinations cost', 'medical supplies cost',
-          'other items', 'other items cost'
-        ]
-      },
-      // Page 12 - Annex A Health Policy (based on backend field_groups['Compliance & Cost'])
-      {
-        page: 12,
-        keywords: [
-          'annex a health policy', 'name of owner/manager', 'employees\' representative', 'date filled'
-        ]
-      }
-    ];
-    
-    // Check for exact matches first (most specific)
-    for (const { page, keywords } of pageKeywords) {
-      for (const keyword of keywords) {
-        if (changesLower.includes(keyword.toLowerCase())) {
-          if (!relevantPages.includes(page)) {
-            relevantPages.push(page);
-          }
-        }
-      }
-    }
-    
-    // If no specific matches found, try broader category matching
-    if (relevantPages.length === 0) {
-      if (changesLower.includes('health welfare') || changesLower.includes('medical surveillance')) {
-        relevantPages.push(4);
-      } else if (changesLower.includes('safety measures') || changesLower.includes('ppe')) {
-        relevantPages.push(8);
-      } else if (changesLower.includes('risk management') || changesLower.includes('emergency')) {
-        relevantPages.push(3);
-      } else if (changesLower.includes('company profile') || changesLower.includes('company name')) {
-        relevantPages.push(1);
-      } else if (changesLower.includes('cost') || changesLower.includes('budget')) {
-        relevantPages.push(11);
-      } else {
-        // Default to page 1 if no matches found
-        relevantPages.push(1);
-      }
-    }
-    
-    // Debug logging
-    console.log('Changes:', changes);
-    console.log('Detected relevant pages:', relevantPages);
-    
-    return relevantPages;
-  };
   
   const queryClient = useQueryClient();
   
@@ -245,55 +107,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
     },
   });
-
-  // ============================================================================
-  // UTILITY FUNCTIONS
-  // ============================================================================
-
-  const getStatusColor = (status: string) => {
-    const statusOption = statusOptions.find(option => option.value === status);
-    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
-  };
-
-  const getCurrentTabName = (): string => {
-    const tabNames = {
-      1: 'Company Profile',
-      2: 'OSH Program and Policy',
-      3: 'Risk Management',
-      4: 'Health and Welfare Program',
-      5: 'Safety Measures',
-      6: 'Compliance and Cost'
-    };
-    return tabNames[selectedTab] || 'current tab';
-  };
-
-  // Function to validate required fields for the current tab
-  const validateCurrentTabFields = useCallback(() => {
-    const formValues = watch();
-    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
-    
-    // Only validate if there are required fields for this tab
-    if (requiredFields.length > 0) {
-      const missingFields = requiredFields.filter((field: keyof T_OshProgram) => {
-        const value = formValues[field];
-        return value === undefined || value === null || value === '';
-      });
-
-      if (missingFields.length > 0) {
-        // Store missing fields for UI highlighting
-        setMissingFields(missingFields as string[]);
-        setValidationMessage(`Please fill out all required fields marked with *`);
-      } else {
-        // Clear validation if all required fields are filled
-        setMissingFields([]);
-        setValidationMessage("");
-      }
-    } else {
-      // Clear validation for tabs with no required fields (Risk Management, Safety Measures)
-      setMissingFields([]);
-      setValidationMessage("");
-    }
-  }, [watch, selectedTab]);
 
   // ============================================================================
   // EFFECTS AND LIFECYCLE
@@ -351,19 +164,34 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Auto-clear validation when user starts filling required fields
   useEffect(() => {
-    if (validationMessage && missingFields.length > 0) {
-      const formValues = watch();
-      const allRequiredFieldsFilled = missingFields.every(field => {
-        const value = formValues[field];
-        return value !== undefined && value !== null && value !== '';
-      });
-      
-      if (allRequiredFieldsFilled) {
-        setValidationMessage("");
-        setMissingFields([]);
-      }
-    }
+    autoClearValidation(watch, validationMessage, missingFields, setValidationMessage, setMissingFields);
   }, [validationMessage, missingFields, watch]);
+
+  // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
+
+  const getStatusColor = (status: string) => {
+    const statusOption = statusOptions.find(option => option.value === status);
+    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
+  };
+
+  const getCurrentTabName = (): string => {
+    const tabNames = {
+      1: 'Company Profile',
+      2: 'OSH Program and Policy',
+      3: 'Risk Management',
+      4: 'Health and Welfare Program',
+      5: 'Safety Measures',
+      6: 'Compliance and Cost'
+    };
+    return tabNames[selectedTab] || 'current tab';
+  };
+
+  // Function to validate required fields for the current tab
+  const validateCurrentTabFieldsCallback = useCallback(() => {
+    validateCurrentTabFields(watch, selectedTab, setMissingFields, setValidationMessage);
+  }, [watch, selectedTab]);
 
   // ============================================================================
   // CONSTANTS AND CONFIGURATION
@@ -484,24 +312,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Form validation and processing handler (Form layer)
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
     // Validate required fields
-    const requiredFields = OSH_PROGRAM_TABS.REQUIRED_FIELDS[selectedTab] || [];
-    
-    // Only validate if there are required fields for this tab
-    if (requiredFields.length > 0) {
-      const missingFields = requiredFields.filter((field: keyof T_OshProgram) => !data[field]);
-
-      if (missingFields.length > 0) {
-        // Store missing fields for UI highlighting
-        setMissingFields(missingFields as string[]);
-        setValidationMessage(`Please fill out all required fields marked with *`);
-        // Throw an error to prevent submission and show error toast
-        throw new Error("Please fill out all required fields marked with *");
-      }
+    if (!validateFormSubmission(data, selectedTab, setMissingFields, setValidationMessage)) {
+      // Throw an error to prevent submission and show error toast
+      throw new Error("Please fill out all required fields marked with *");
     }
-
-    // Clear missing fields if validation passes
-    setMissingFields([]);
-    setValidationMessage("");
 
     // Process form data
     const processedData = processFormData(data, selectedTab, oshProgramDetails, watch);
@@ -516,7 +330,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (isSaving) return;
     
     // Check if there are actual changes before submitting
-    if (!hasUnsavedChanges()) {
+    if (!hasUnsavedChangesCallback()) {
       toast.custom(() => <CustomToast message="No changes detected. Nothing to save." type="info" />);
         return;
       }
@@ -549,47 +363,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
 
   // Check if there are unsaved changes in the current tab
-  const hasUnsavedChanges = (): boolean => {
-    const formValues = watch();
-    const originalData = oshProgramDetails;
-    
-    if (!originalData) return false;
-    
-    // Get fields for the current tab only
-    const currentTabFields = OSH_PROGRAM_TABS.FIELDS[selectedTab] || [];
-    
-    // Compare form values with original data for current tab only
-    for (const field of currentTabFields) {
-      const formValue = formValues[field];
-      const originalValue = originalData[field];
-      
-      // Handle different data types
-      if (formValue !== originalValue) {
-        // For arrays, do deep comparison
-        if (Array.isArray(formValue) && Array.isArray(originalValue)) {
-          if (JSON.stringify(formValue) !== JSON.stringify(originalValue)) {
-            return true;
-          }
-        }
-        // For objects, do deep comparison
-        else if (typeof formValue === 'object' && typeof originalValue === 'object' && formValue !== null && originalValue !== null) {
-          if (JSON.stringify(formValue) !== JSON.stringify(originalValue)) {
-            return true;
-          }
-        }
-        // For primitive values, direct comparison
-        else if (formValue !== originalValue) {
-          return true;
-        }
-      }
-    }
-    
-    return false;
+  const hasUnsavedChangesCallback = (): boolean => {
+    return hasUnsavedChanges(watch, selectedTab, oshProgramDetails);
   };
 
   // Handle navigation with unsaved changes check
   const handleNavigation = (url: string) => {
-    if (hasUnsavedChanges()) {
+    if (hasUnsavedChangesCallback()) {
       setPendingNavigation(url);
       setShowUnsavedChangesModal(true);
     } else {
@@ -660,10 +440,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Auto-validate required fields after form initialization
     if (oshProgramDetails) {
       setTimeout(() => {
-        validateCurrentTabFields();
+        validateCurrentTabFieldsCallback();
       }, 200);
     }
-  }, [oshProgramDetails, setValue, cachedProfile, validateCurrentTabFields]);
+  }, [oshProgramDetails, setValue, cachedProfile, validateCurrentTabFieldsCallback]);
 
   // ============================================================================
   // TAB AND UI HANDLERS
@@ -687,7 +467,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (requiredFields.length > 0) {
       // Auto-validate required fields for the new tab after a short delay
       setTimeout(() => {
-        validateCurrentTabFields();
+        validateCurrentTabFieldsCallback();
       }, 100);
     }
     // If no required fields, validation is already cleared above
