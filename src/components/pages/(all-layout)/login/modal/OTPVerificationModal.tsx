@@ -35,6 +35,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   const [timeRemaining, setTimeRemaining] = useState<number>(timeRemainingSeconds);
   const [isResending, setIsResending] = useState<boolean>(false);
   const [rememberDevice, setRememberDevice] = useState<boolean>(false); // NEW: Add remember device state
+  const [currentRemainingAttempts, setCurrentRemainingAttempts] = useState<number>(remainingAttempts); // Track attempts internally
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -64,8 +65,9 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
       setOtpCode(new Array(6).fill(''));
       setTimeRemaining(timeRemainingSeconds); 
       setIsResending(false);
+      setCurrentRemainingAttempts(remainingAttempts); // Reset attempts counter
     }
-  }, [isOpen, timeRemainingSeconds]);
+  }, [isOpen, timeRemainingSeconds, remainingAttempts]);
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
@@ -107,6 +109,12 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   };
 
   const handleVerifyOTP = () => {
+    // If no attempts remaining, trigger resend instead
+    if (currentRemainingAttempts <= 0) {
+      handleResendOTP();
+      return;
+    }
+
     const otpString = otpCode.join('');
     if (!otpString || otpString.length !== 6) {
       toast.custom(() => <CustomToast message='Please enter the complete 6-digit OTP code' type='error' />, {
@@ -130,6 +138,20 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
         });
       },
       onError: (err: any) => {
+        // Extract remaining attempts from error message
+        // Error format: "Invalid OTP code. X attempt(s) remaining."
+        const attemptMatch = err.match(/(\d+)\s+attempt\(s\)\s+remaining/);
+        if (attemptMatch) {
+          const remaining = parseInt(attemptMatch[1], 10);
+          setCurrentRemainingAttempts(remaining);
+        } else {
+          // If no attempts info in error, assume we used one attempt
+          setCurrentRemainingAttempts(Math.max(0, currentRemainingAttempts - 1));
+        }
+        
+        // Clear OTP input for next attempt
+        setOtpCode(new Array(6).fill(''));
+        
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 4000,
         });
@@ -140,7 +162,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   };
 
   const handleResendOTP = () => {
-    if (isResending || timeRemaining > 0) return;
+    if (isResending || (timeRemaining > 0 && currentRemainingAttempts > 0)) return;
 
     const payload = {
       session_id: sessionId,
@@ -150,6 +172,18 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
       onSuccess: (data: any) => {
         setIsResending(false);
         setTimeRemaining(data.time_remaining_seconds || 300); // 5 minutes default
+        
+        // Reset attempts counter when new OTP is sent
+        if (data.remaining_attempts) {
+          setCurrentRemainingAttempts(data.remaining_attempts);
+        } else {
+          // Default to 3 attempts if not specified
+          setCurrentRemainingAttempts(3);
+        }
+        
+        // Clear any entered OTP
+        setOtpCode(new Array(6).fill(''));
+        
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 4000,
         });
@@ -238,7 +272,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                       onChange={(e) => handleInputChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       className='w-12 h-12 text-center text-lg font-semibold border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
-                      disabled={isVerifying || isExpired}
+                      disabled={isVerifying || isExpired || currentRemainingAttempts <= 0}
                       autoFocus={index === 0}
                     />
                   ))}
@@ -268,7 +302,12 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                     <span>Expires in {formatTime(timeRemaining)}</span>
                   )}
                 </div>
-                <div className='text-gray-600'>{remainingAttempts} attempts remaining</div>
+                <div className={`text-gray-600 ${
+                  currentRemainingAttempts <= 0 ? 'text-red-600 font-semibold' : 
+                  currentRemainingAttempts === 1 ? 'text-orange-600 font-semibold' : ''
+                }`}>
+                  {currentRemainingAttempts <= 0 ? 'No attempts remaining' : `${currentRemainingAttempts} attempts remaining`}
+                </div>
               </div>
 
               {/* Action Buttons */}
@@ -276,7 +315,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                 <button
                   type='button'
                   onClick={handleVerifyOTP}
-                  disabled={isVerifying || isExpired || !isOtpComplete}
+                  disabled={isVerifying || isExpired || (currentRemainingAttempts > 0 && !isOtpComplete)}
                   className='w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm'
                 >
                   {isVerifying ? (
@@ -303,6 +342,8 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                       </svg>
                       Verifying...
                     </>
+                  ) : currentRemainingAttempts <= 0 ? (
+                    'Request New OTP'
                   ) : (
                     'Verify Code'
                   )}
@@ -311,7 +352,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                 <button
                   type='button'
                   onClick={handleResendOTP}
-                  disabled={isResendLoading || isResending || (!isExpired && timeRemaining > 30)}
+                  disabled={isResendLoading || isResending || (!isExpired && timeRemaining > 30 && currentRemainingAttempts > 0)}
                   className='w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm'
                 >
                   {isResendLoading || isResending ? (

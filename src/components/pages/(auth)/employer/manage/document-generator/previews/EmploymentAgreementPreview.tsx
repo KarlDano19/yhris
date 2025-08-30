@@ -373,7 +373,7 @@ export default function EmploymentAgreementPreview({ formData }: EmploymentAgree
   };
 
   return (
-    <div className="mt-12 agreement-preview-container border-rounded-">
+    <div className="mt-12 agreement-preview-container">
       {/* Title visible in UI but hidden when printing */}
       <h2 className="text-2xl font-bold mb-6 text-black preview-header print-hide">Preview</h2>
       

@@ -31,7 +31,7 @@ const CustomToast = ({
       const elapsed = now - startTime;
       const newProgress = Math.max(0, 100 - (elapsed / duration) * 100);
       
-      console.log('Progress:', newProgress, 'Elapsed:', elapsed, 'Duration:', duration); // Debug log
+      // console.log('Progress:', newProgress, 'Elapsed:', elapsed, 'Duration:', duration); // Debug log
       setProgress(newProgress);
       
       // Only close when the full duration has passed
