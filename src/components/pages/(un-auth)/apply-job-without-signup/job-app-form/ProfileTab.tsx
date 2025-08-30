@@ -6,6 +6,7 @@ import { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import DropDownArrow from '@/svg/DropDownArrow';
 import regions from '@/utils/location';
@@ -635,18 +636,20 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
           </div>
           <div className="grid-item">
             <label
-              htmlFor="age"
+              htmlFor="birth_date"
               className="text-sm font-medium leading-6 text-gray-900"
             >
-              Age
+              Birth Date
             </label>
-            <div className="mt-2">
-              <input
-                type="number"
-                {...register("age", { min: 0, max: 120 })}
-                id="age"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                min="0"
+            <div className="mt-2 relative">
+              <CustomDatePicker
+                id="birth_date"
+                placeholder="mm/dd/yyyy"
+                className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                selected={watch("birth_date") ? new Date(watch("birth_date")) : null}
+                pickerOnChange={(date: any) => setValue("birth_date", date)}
+                inputOnChange={(value: any) => setValue("birth_date", value)}
+                required={true}
               />
             </div>
           </div>

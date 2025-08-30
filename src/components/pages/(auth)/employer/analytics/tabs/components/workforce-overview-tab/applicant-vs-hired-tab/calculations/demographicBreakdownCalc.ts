@@ -179,14 +179,25 @@ export interface DemographicDataItem {
   
     const mostCommonRegions = sortedByAdvertiseOrder.length > 0 ? sortedByAdvertiseOrder.map(region => region.replace(/^- | -$/g, '')) : ['N/A'];
   
-    // Calculate age distribution using age field from applicants
+        // Calculate age distribution dynamically from birth_date
     const ageGroups = filteredApplicants.reduce((acc: any, applicant: any) => {
-      // First try to use the age field directly
-      let age = applicant.applicant?.age;
+      let age = null;
       
-      // If age is not available, calculate from birth_date
-      if (!age && applicant.applicant?.birth_date) {
-        age = new Date().getFullYear() - new Date(applicant.applicant.birth_date).getFullYear();
+      // Calculate age from birth_date (prioritize this method)
+      if (applicant.applicant?.birth_date) {
+        const birthDate = new Date(applicant.applicant.birth_date);
+        const today = new Date();
+        age = today.getFullYear() - birthDate.getFullYear();
+        
+        // Adjust for cases where birthday hasn't occurred this year
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+      }
+      // Fallback to stored age field if birth_date is not available
+      else if (applicant.applicant?.age) {
+        age = applicant.applicant.age;
       }
       
       if (age && age > 0) {
@@ -197,7 +208,7 @@ export interface DemographicDataItem {
         else if (age >= 46 && age <= 55) ageGroup = '46-55';
         else if (age >= 56) ageGroup = '56+';
         else ageGroup = 'Unknown';
-  
+
         acc[ageGroup] = (acc[ageGroup] || 0) + 1;
       }
       return acc;
