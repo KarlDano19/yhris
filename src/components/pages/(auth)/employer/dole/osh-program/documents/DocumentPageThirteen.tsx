@@ -36,8 +36,8 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
               break-inside: avoid;
             }
             .certificate-image {
-              max-height: 300px !important;
-              max-width: 400px !important;
+              max-height: 500px !important;
+              max-width: 600px !important;
             }
           }
         `
@@ -89,11 +89,8 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
                               src={officer.certificate}
                               alt={`Certificate for ${officer.name}`}
                               className="max-w-full h-auto border border-gray-300 rounded mx-auto certificate-image"
-                              style={{ maxHeight: '350px', maxWidth: '450px', objectFit: 'contain' }}
+                              style={{ maxHeight: '500px', maxWidth: '600px', objectFit: 'contain' }}
                             />
-                            <p className="text-xs text-gray-500 mt-2">
-                              {officer.certificate.split('/').pop()}
-                            </p>
                           </div>
                         ) : (
                           /* For non-image files, show download link */
@@ -110,9 +107,6 @@ const DocumentPageThirteen: React.FC<DocumentPageThirteenProps> = ({ data }) => 
                               >
                                 View Certificate Document
                               </a>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {officer.certificate.split('/').pop()}
-                              </p>
                             </div>
                           </div>
                         )}

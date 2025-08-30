@@ -128,7 +128,7 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
                 return ppeData.map((entry, index) => (
                   <tr key={index}>
                     <td className="border border-gray-300 p-2 min-h-[24px] text-sm">{entry.ppe_provided || ''}</td>
-                    <td className="border border-gray-300 p-2 min-h-[24px] text-sm">{entry.number_of_workers_given || ''}</td>
+                    <td className="border border-gray-300 p-2 min-h-[24px] text-sm">{entry.no_of_workers || ''}</td>
                   </tr>
                 ));
               } catch (error) {
@@ -153,8 +153,18 @@ const DocumentPageEight: React.FC<DocumentPageEightProps> = ({ data }) => {
           The safety signages include warning to workers and employees and the public about the hazards within the workplace.
         </p>
         <p className="text-sm text-gray-700 mb-2">
-          Type of Safety Signage: Kindly attach picture.
+          Type of Safety Signage:
         </p>
+        {data.safety_signage && typeof data.safety_signage === 'string' && (
+          <div className="mt-4 flex justify-center">
+            <img 
+              src={data.safety_signage}
+              alt="Safety Signage"
+              className="max-w-full h-auto border border-gray-300 rounded"
+              style={{ maxHeight: '400px', maxWidth: '500px', objectFit: 'contain' }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Section 12.0 Dust control and management */}

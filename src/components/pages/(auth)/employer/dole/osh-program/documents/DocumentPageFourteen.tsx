@@ -36,8 +36,8 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
               break-inside: avoid;
             }
             .attachment-image {
-              max-height: 300px !important;
-              max-width: 400px !important;
+              max-height: 500px !important;
+              max-width: 600px !important;
             }
           }
         `
@@ -100,7 +100,7 @@ const DocumentPageFourteen: React.FC<DocumentPageFourteenProps> = ({ data }) => 
                               src={personnel.attachment}
                               alt={`Attachment for ${personnel.shift_area_department}`}
                               className="max-w-full h-auto border border-gray-300 rounded mx-auto attachment-image"
-                              style={{ maxHeight: '350px', maxWidth: '450px', objectFit: 'contain' }}
+                              style={{ maxHeight: '500px', maxWidth: '600px', objectFit: 'contain' }}
                             />
                             <p className="text-xs text-gray-500 mt-2">
                               {personnel.attachment.split('/').pop()}

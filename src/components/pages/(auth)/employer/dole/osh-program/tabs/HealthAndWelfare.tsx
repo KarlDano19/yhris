@@ -911,6 +911,7 @@ export default function HealthAndWelfare({
                               id={`certificate_${item.id || index}`}
                               type="file"
                               className="hidden rounded-md w-full border-0 px-2 sm:px-3 py-1.5 text-gray-900 placeholder:text-gray-400 text-xs sm:text-sm sm:leading-6"
+                              accept="image/*"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
@@ -1073,6 +1074,7 @@ export default function HealthAndWelfare({
                               id={`attachment_${item.id || index}`}
                               type="file"
                               className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                              accept="image/*"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {

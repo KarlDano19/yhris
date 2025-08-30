@@ -67,8 +67,8 @@ const DocumentPageFifteen: React.FC<DocumentPageFifteenProps> = ({ data }) => {
               break-inside: avoid;
             }
             .attachment-image {
-              max-height: 300px !important;
-              max-width: 400px !important;
+              max-height: 500px !important;
+              max-width: 600px !important;
             }
           }
         `
@@ -136,7 +136,7 @@ const DocumentPageFifteen: React.FC<DocumentPageFifteenProps> = ({ data }) => {
                               src={hasAttachment}
                               alt={`Attachment for ${facility.name}`}
                               className="max-w-full h-auto border border-gray-300 rounded mx-auto attachment-image"
-                              style={{ maxHeight: '350px', maxWidth: '450px', objectFit: 'contain' }}
+                              style={{ maxHeight: '500px', maxWidth: '600px', objectFit: 'contain' }}
                             />
                             <p className="text-xs text-gray-500 mt-2">
                               {hasAttachment.split('/').pop()}

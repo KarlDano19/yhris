@@ -412,6 +412,7 @@ export default function SafetyMeasures({
                           id={`adequate_supply_of_drinking_water_attachment`}
                           {...register(`adequate_supply_of_drinking_water_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -494,6 +495,7 @@ export default function SafetyMeasures({
                           id={`adequate_sanitary_and_washing_facilities_attachment`}
                           {...register(`adequate_sanitary_and_washing_facilities_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -574,6 +576,7 @@ export default function SafetyMeasures({
                           id={`suitable_living_accommodation_attachment`}
                           {...register(`suitable_living_accommodation_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -659,6 +662,7 @@ export default function SafetyMeasures({
                             `separate_sanitary_washing_and_sleeping_facilities_attachment`
                           )}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -739,6 +743,7 @@ export default function SafetyMeasures({
                           id={`lactation_station_attachment`}
                           {...register(`lactation_station_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -819,6 +824,7 @@ export default function SafetyMeasures({
                           id={`ramps_railings_and_like_attachment`}
                           {...register(`ramps_railings_and_like_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -902,6 +908,7 @@ export default function SafetyMeasures({
                           id={`other_workers_welfare_facilities_attachment`}
                           {...register(`other_workers_welfare_facilities_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
