@@ -116,9 +116,13 @@ const Content = () => {
       <div className="fixed top-4 left-4 z-50">
         <Link 
           href="/landing-page" 
-          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 hover:shadow-xl"
+          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
+          shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
+          hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
+          transform transition-all duration-300 ease-out hover:scale-105 active:scale-95
+          border border-gray-100"
         >
-          <ChevronLeftIcon />
+          <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
         </Link>
       </div>
       

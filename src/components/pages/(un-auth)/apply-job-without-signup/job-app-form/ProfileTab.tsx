@@ -641,7 +641,7 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
               htmlFor="birth_date"
               className="text-sm font-medium leading-6 text-gray-900"
             >
-              Birth Date
+              Birth Date<span className="text-red-500">*</span>
             </label>
             <div className="mt-2 relative">
               <CustomDatePicker
