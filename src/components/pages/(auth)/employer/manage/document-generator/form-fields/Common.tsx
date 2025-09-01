@@ -236,12 +236,17 @@ export function CommonFields({
               disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
             } ${
               showCompanyNameValidation
-                ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-blue-500'
                 : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
             }`}
             placeholder="Enter company name"
             required
             disabled={disabled}
+            style={{
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden'
+            }}
           />
         </div>
       )}

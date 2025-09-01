@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
@@ -80,6 +81,10 @@ export default function Form({
   const [isSubmitted, setIsSubmitted] = useState(false);
   // Add a key state to force complete re-render of form fields
   const [formKey, setFormKey] = useState(0);
+  
+  // Get cached profile data for company name
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
 
   // Update local formData when initialData changes from parent
   useEffect(() => {
@@ -92,6 +97,38 @@ export default function Form({
       }
     }
   }, [initialData, documentType]);
+  
+  // Populate company name from cached profile data
+  useEffect(() => {
+    const profileData = cachedProfile?.state?.data as { name?: string };
+    if (profileData?.name) {
+      const companyName = profileData.name;
+      
+      // Update form data based on document type
+      if (documentType === 'employee-certificate') {
+        const updatedData = {
+          ...formData,
+          companyName: companyName
+        };
+        setFormData(updatedData);
+        onFormChange(updatedData);
+      } else if (documentType === 'employment-agreement') {
+        const updatedData = {
+          ...formData,
+          companyName: companyName
+        };
+        setFormData(updatedData);
+        onFormChange(updatedData);
+      } else if (documentType === 'notice-to-explain') {
+        const updatedData = {
+          ...formData,
+          companyName: companyName
+        };
+        setFormData(updatedData);
+        onFormChange(updatedData);
+      }
+    }
+  }, [cachedProfile, documentType, formData, onFormChange]);
   
   // Debounce effect for color changes
   useEffect(() => {

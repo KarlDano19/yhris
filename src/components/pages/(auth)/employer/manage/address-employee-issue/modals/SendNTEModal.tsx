@@ -90,18 +90,32 @@ export default function SendNTEModal({
       const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
       const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       if (employeeIssueItemsCopy[itemIndex]) {
-        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+        const employeeEmail = employeeIssueItemsCopy[itemIndex].email;
+        setApplicantEmail(employeeEmail);
+        
+        // Always ensure the employee email is set in tagsTo if it's not already there
+        // This handles the case when the modal opens immediately after document generation
+        if (employeeEmail && !tagsTo.includes(employeeEmail)) {
+          setTagsTo(prev => [...prev.filter(tag => tag !== employeeEmail), employeeEmail]);
+        }
       }
     }
-  }, [isOpen]);
+  }, [isOpen, employeeIssueItems, tagsTo]);
 
 
   // Prefill fields from backend when details are loaded
   useEffect(() => {
     if (employeeIssueDetails) {
       setValue('subject', employeeIssueDetails.nte_subject || '');
-      setTagsTo(employeeIssueDetails.nte_to ? JSON.parse(employeeIssueDetails.nte_to) : []);
+      
+      // Set tagsTo from backend data, or fall back to employee email if not set
+      if (employeeIssueDetails.nte_to) {
+        setTagsTo(JSON.parse(employeeIssueDetails.nte_to));
+      } else if (applicantEmail && !tagsTo.length) {
+        // If no backend data but we have the applicant email, use it
+        setTagsTo([applicantEmail]);
+      }
+      
       setTagsCc(employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : []);
       setTagsBcc(employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []);
       setValue('message', employeeIssueDetails.nte_message || '');
@@ -109,7 +123,7 @@ export default function SendNTEModal({
         setPdfAttachment(employeeIssueDetails.nte_attachment);
       }
     }
-  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue]);
+  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue, applicantEmail, tagsTo.length]);
 
   // Clear errors when subject changes
   useEffect(() => {
