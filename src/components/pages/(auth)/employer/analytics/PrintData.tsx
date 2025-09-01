@@ -390,6 +390,7 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     if (!data || !Array.isArray(data)) return [];
     
     return data.map((item: any) => ({
+      id: item.id?.toString() || `${item.name}_${item.incident_date}_${item.issue_type}`,
       name: item.name || 'N/A',
       department: item.department || 'N/A',
       issueType: item.issue_type || 'Not Specified',
@@ -430,7 +431,7 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
     if (currentPrintOption === 'selected' && selectedEmployeeIssues && selectedEmployeeIssues.length > 0) {
       // Filter by selected employee issues only when option is 'selected' and we have selections
       filteredData = allData.filter(issue => 
-        selectedEmployeeIssues.includes(issue.name)
+        selectedEmployeeIssues.includes(issue.id)
       );
     } else {
       // If currentPrintOption is 'all' or undefined, use all employee issues (no filtering)

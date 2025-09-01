@@ -32,6 +32,7 @@ interface IssueTypeRecord {
 }
 
 interface EmployeeIssueRecord {
+  id: string;
   name: string;
   department: string;
   issueType: string;
@@ -130,7 +131,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
       : Array.from(allSelections.step3.selectedRecords);
       
     const employeeIssueSelections = allSelections.step4.selectedOption === 'all'
-      ? employeeIssueRecords.map(record => record.name)
+      ? employeeIssueRecords.map(record => record.id)
       : Array.from(allSelections.step4.selectedRecords);
     
 

@@ -189,6 +189,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     if (!apiData || !apiData.records) return [];
     
     return apiData.records.map((item: any) => ({
+      id: item.id?.toString() || `${item.name}_${item.incident_date}_${item.issue_type}`,
       name: item.name || 'N/A',
       department: item.department || 'N/A',
       issueType: item.issue_type || 'Not Specified',
@@ -269,6 +270,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     if (!apiData || !Array.isArray(apiData)) return [];
     
     return apiData.map((item: any) => ({
+      id: item.id?.toString() || `${item.name}_${item.incident_date}_${item.issue_type}`,
       name: item.name || 'N/A',
       department: item.department || 'N/A',
       issueType: item.issue_type || 'Not Specified',
