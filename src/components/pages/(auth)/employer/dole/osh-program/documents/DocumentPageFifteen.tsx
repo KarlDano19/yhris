@@ -138,9 +138,6 @@ const DocumentPageFifteen: React.FC<DocumentPageFifteenProps> = ({ data }) => {
                               className="max-w-full h-auto border border-gray-300 rounded mx-auto attachment-image"
                               style={{ maxHeight: '500px', maxWidth: '600px', objectFit: 'contain' }}
                             />
-                            <p className="text-xs text-gray-500 mt-2">
-                              {hasAttachment.split('/').pop()}
-                            </p>
                           </div>
                         ) : (
                           /* For non-image files, show download link */
