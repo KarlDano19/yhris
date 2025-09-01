@@ -26,9 +26,9 @@ import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
-import ColumnFilterModal from './modals/ColumnFilterModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, FunnelIcon } from '@heroicons/react/24/solid';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
@@ -41,6 +41,22 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const columnDefinitions = [
+  { key: 'date_hired', label: 'Date Hired' },
+  { key: 'system_id', label: 'System ID' },
+  { key: 'employee_id', label: 'Employee ID' },
+  { key: 'firstname', label: 'First Name' },
+  { key: 'middlename', label: 'Middle Name' },
+  { key: 'lastname', label: 'Last Name' },
+  { key: 'location', label: 'Location' },
+  { key: 'position', label: 'Position' },
+  { key: 'department', label: 'Department' },
+  { key: 'email', label: 'Email' },
+  { key: 'mobile', label: 'Contact No.' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'address', label: 'Address' },
+];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
@@ -62,7 +78,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalRecords: 0,
   });
   const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
-  const [isColumnFilterModalOpen, setIsColumnFilterModalOpen] = useState<boolean>(false);
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
     date_hired: false,
     system_id: false,
@@ -445,27 +460,60 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                onClick={() => setIsColumnFilterModalOpen(true)}
-                className='bg-blue-500 rounded-l-md py-2 px-4 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'
-                title='Filter Columns'
-              >
-                <FunnelIcon className='h-4 w-4' />
-                FILTER
-              </button>
-              <button
-                onClick={() => setIsAddEmployeeModalOpen(true)}
-                className='bg-green-500 py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled={!cachedRigths?.state?.data?.create_employee}
-              >
-                CREATE
-              </button>
-              <Menu as='div' className='relative'>
-                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                  <span className='sr-only'>Open options</span>
-                  <div className='flex gap-4'>
-                    <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
-                  </div>
+              <div className='flex'>
+                <button
+                  onClick={() => setIsAddEmployeeModalOpen(true)}
+                  className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                  disabled={!cachedRigths?.state?.data?.create_employee}
+                >
+                  CREATE
+                </button>
+                <Menu as='div' className='relative'>
+                  <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                    <span className='sr-only'>Open options</span>
+                    <div className='flex gap-4'>
+                      <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
+                    </div>
+                  </Menu.Button>
+                  <Transition
+                    as={Fragment}
+                    enter='transition ease-out duration-100'
+                    enterFrom='transform opacity-0 scale-95'
+                    enterTo='transform opacity-100 scale-100'
+                    leave='transition ease-in duration-75'
+                    leaveFrom='transform opacity-100 scale-100'
+                    leaveTo='transform opacity-0 scale-95'
+                  >
+                    <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                      <div className='py-1'>
+                        {menuOptions.map((item) => (
+                          <Menu.Item key={item.name}>
+                            {({ active }) => (
+                              <span
+                                className={classNames(
+                                  'block px-4 py-2 text-sm cursor-pointer text-center',
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                  item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
+                                )}
+                                onClick={() => {
+                                  if (!item.disabled) {
+                                    item.action();
+                                  }
+                                }}
+                              >
+                                {item.name}
+                              </span>
+                            )}
+                          </Menu.Item>
+                        ))}
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+              </div>
+              <Menu as='div' className='relative ml-2'>
+                <Menu.Button className='bg-savoy-blue rounded-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'>
+                  <Cog6ToothIcon className='h-5 w-5' />
                 </Menu.Button>
                 <Transition
                   as={Fragment}
@@ -476,28 +524,39 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   leaveFrom='transform opacity-100 scale-100'
                   leaveTo='transform opacity-0 scale-95'
                 >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                    <div className='py-1'>
-                      {menuOptions.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <span
-                              className={classNames(
-                                'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
-                              )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
-                            >
-                              {item.name}
-                            </span>
-                          )}
-                        </Menu.Item>
-                      ))}
+                  <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                    <div className='p-4'>
+                      <div className='mb-4'>
+                        <h3 className='text-sm font-semibold text-gray-900 mb-2'>
+                          Filter Columns ({Object.values(visibleColumns).filter(Boolean).length} of {columnDefinitions.length})
+                        </h3>
+                        <p className='text-xs text-gray-600'>
+                          Select which columns to display in the table.
+                        </p>
+                      </div>
+                      <div className='max-h-64 overflow-y-auto mb-4'>
+                        <div className='grid grid-cols-1 gap-2'>
+                          {columnDefinitions.map((column) => (
+                            <label key={column.key} className='flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50'>
+                              <input
+                                type='checkbox'
+                                checked={visibleColumns[column.key] || false}
+                                onChange={() => handleColumnToggle(column.key)}
+                                className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded'
+                              />
+                              <span className='text-sm text-gray-700'>{column.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className='flex gap-2'>
+                        <button
+                          onClick={handleColumnReset}
+                          className='flex-1 bg-gray-500 text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-gray-600'
+                        >
+                          Reset
+                        </button>
+                      </div>
                     </div>
                   </Menu.Items>
                 </Transition>
@@ -651,14 +710,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         departmentItems={departmentItems}
         positionItems={positionItems}
       />
-      <ColumnFilterModal
-        isOpen={isColumnFilterModalOpen}
-        setIsOpen={setIsColumnFilterModalOpen}
-        visibleColumns={visibleColumns}
-        onColumnToggle={handleColumnToggle}
-        onReset={handleColumnReset}
-        onApply={() => {}}
-      />
+
     </>
   );
 };
