@@ -6,7 +6,7 @@ async function submitApplication(data: any) {
       firstname: data.firstName,
       middlename: data.middleName,
       lastname: data.lastName,
-      age: data.age,
+      birth_date: data.birth_date,
       gender: data.gender,
       email: data.email,
       mobile: data.mobileNo,

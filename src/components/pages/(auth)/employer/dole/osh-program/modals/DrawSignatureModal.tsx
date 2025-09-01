@@ -4,12 +4,11 @@ import {
     useRef,
     useEffect,
   } from "react";
-  
+
+  import SignatureCanvas from "react-signature-canvas";
   import { Dialog, Transition } from "@headlessui/react";
   import { XCircleIcon } from "@heroicons/react/24/solid";
-  
-  import SignatureCanvas from "react-signature-canvas";
-  
+
   export default function SignatureModal({
     isOpen,
     setIsOpen,
@@ -89,7 +88,7 @@ import {
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-20"
+          className="relative z-50"
           initialFocus={cancelButtonRef}
           onClose={() => setIsOpen(false)}
         >

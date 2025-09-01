@@ -5,7 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getIronSession } from 'iron-session';
-import { SessionData, defaultSession, sessionOptions, isOTPVerificationValid } from '@/lib/session';
+import { SessionData, defaultSession, sessionOptions } from '@/lib/session';
+// import { SessionData, defaultSession, sessionOptions, isOTPVerificationValid } from '@/lib/session';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,12 +16,12 @@ export async function GET(request: NextRequest) {
     const sessionData = session.isLoggedIn ? session : defaultSession;
     
     // Add OTP verification status
-    if (sessionData.otpVerified && sessionData.otpVerifiedAt) {
-      sessionData.otpVerified = isOTPVerificationValid(sessionData.otpVerifiedAt);
-      if (!sessionData.otpVerified) {
-        sessionData.otpVerifiedAt = '';
-      }
-    }
+    // if (sessionData.otpVerified && sessionData.otpVerifiedAt) {
+    //   sessionData.otpVerified = isOTPVerificationValid(sessionData.otpVerifiedAt);
+    //   if (!sessionData.otpVerified) {
+    //     sessionData.otpVerifiedAt = '';
+    //   }
+    // }
     
     return NextResponse.json(sessionData);
   } catch (error) {

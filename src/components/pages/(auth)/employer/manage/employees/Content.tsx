@@ -26,8 +26,9 @@ import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
+import ColumnFilterModal from './modals/ColumnFilterModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, FunnelIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
@@ -61,6 +62,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalRecords: 0,
   });
   const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
+  const [isColumnFilterModalOpen, setIsColumnFilterModalOpen] = useState<boolean>(false);
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    date_hired: false,
+    system_id: false,
+    employee_id: false,
+    firstname: true,
+    middlename: true,
+    lastname: true,
+    location: true,
+    position: true,
+    department: true,
+    email: true,
+    mobile: false,
+    gender: false,
+    address: false,
+  });
   const [pendingFilter, setPendingFilter] = useState<any>({
     from: '',
     to: '',
@@ -180,6 +197,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleColumnToggle = (columnKey: string) => {
+    setVisibleColumns(prev => ({
+      ...prev,
+      [columnKey]: !prev[columnKey]
+    }));
+  };
+
+  const handleColumnReset = () => {
+    const defaultColumns: Record<string, boolean> = {
+      date_hired: false,
+      system_id: false,
+      employee_id: false,
+      firstname: true,
+      middlename: true,
+      lastname: true,
+      location: true,
+      position: true,
+      department: true,
+      email: true,
+      mobile: false,
+      gender: false,
+      address: false,
+    };
+    setVisibleColumns(defaultColumns);
+  };
+
   const renderRows = () => {
     if (isSearching || isEmployeeListLoading) {
       return (
@@ -211,21 +254,47 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.system_id}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_id}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position || 'N/A'}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
-            {item.address}
-          </td>
+          {visibleColumns.date_hired && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
+          )}
+          {visibleColumns.system_id && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.system_id}</td>
+          )}
+          {visibleColumns.employee_id && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_id}</td>
+          )}
+          {visibleColumns.firstname && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
+          )}
+          {visibleColumns.middlename && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
+          )}
+          {visibleColumns.lastname && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
+          )}
+          {visibleColumns.location && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
+          )}
+          {visibleColumns.position && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position || 'N/A'}</td>
+          )}
+          {visibleColumns.department && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
+          )}
+          {visibleColumns.email && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
+          )}
+          {visibleColumns.mobile && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
+          )}
+          {visibleColumns.gender && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
+          )}
+          {visibleColumns.address && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
+              {item.address}
+            </td>
+          )}
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
               <button
@@ -336,8 +405,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       {employeeItemsAll
                         .filter(
                           (item: any) =>
-                            item.firstname.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.lastname.toLowerCase().includes(pendingFilter.search.toLowerCase())
+                            item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
                         )
                         .map((item: any) => (
                           <li
@@ -349,7 +420,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               document.getElementById('search')?.blur();
                             }}
                           >
-                            {item.firstname} {item.lastname}
+                            <div className='flex flex-col'>
+                              <span className='font-medium'>{item.firstname} {item.lastname}</span>
+                              {(item.position || item.department) && (
+                                <span className='text-xs text-gray-500'>
+                                  {item.position && item.department 
+                                    ? `${item.position} | ${item.department}`
+                                    : item.position || item.department
+                                  }
+                                </span>
+                              )}
+                            </div>
                           </li>
                         ))}
                     </ul>
@@ -365,8 +446,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
+                onClick={() => setIsColumnFilterModalOpen(true)}
+                className='bg-blue-500 rounded-l-md py-2 px-4 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'
+                title='Filter Columns'
+              >
+                <FunnelIcon className='h-4 w-4' />
+                FILTER
+              </button>
+              <button
                 onClick={() => setIsAddEmployeeModalOpen(true)}
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                className='bg-green-500 py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 disabled={!cachedRigths?.state?.data?.create_employee}
               >
                 CREATE
@@ -423,44 +512,73 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <table className='divide-y divide-gray-300 text-center min-w-full'>
                     <thead>
                       <tr>
+                        {visibleColumns.date_hired && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Date Hired
+                          </th>
+                        )}
+                        {visibleColumns.system_id && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            System ID
+                          </th>
+                        )}
+                        {visibleColumns.employee_id && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Employee ID
+                          </th>
+                        )}
+                        {visibleColumns.firstname && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            First Name
+                          </th>
+                        )}
+                        {visibleColumns.middlename && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Middle Name
+                          </th>
+                        )}
+                        {visibleColumns.lastname && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Last Name
+                          </th>
+                        )}
+                        {visibleColumns.location && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Location
+                          </th>
+                        )}
+                        {visibleColumns.position && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Position
+                          </th>
+                        )}
+                        {visibleColumns.department && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Department
+                          </th>
+                        )}
+                        {visibleColumns.email && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Email
+                          </th>
+                        )}
+                        {visibleColumns.mobile && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Contact No.
+                          </th>
+                        )}
+                        {visibleColumns.gender && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Gender
+                          </th>
+                        )}
+                        {visibleColumns.address && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Address
+                          </th>
+                        )}
                         <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Date Hired
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          System ID
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Employee ID
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          First Name
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Middle Name
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Last Name
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Location
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Position
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Department
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Email
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Contact No.
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Gender
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Address
+                          Actions
                         </th>
                       </tr>
                     </thead>
@@ -532,6 +650,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         locationItems={locationItems}
         departmentItems={departmentItems}
         positionItems={positionItems}
+      />
+      <ColumnFilterModal
+        isOpen={isColumnFilterModalOpen}
+        setIsOpen={setIsColumnFilterModalOpen}
+        visibleColumns={visibleColumns}
+        onColumnToggle={handleColumnToggle}
+        onReset={handleColumnReset}
+        onApply={() => {}}
       />
     </>
   );
