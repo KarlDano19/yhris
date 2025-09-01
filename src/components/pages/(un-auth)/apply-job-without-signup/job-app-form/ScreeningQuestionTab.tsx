@@ -50,19 +50,22 @@ function ScreeningQuestionTab({
     let hasError = false;
     
     if (screeningQuestions.length > 0) {
-      screeningQuestions.forEach((_, index) => {
+      for (let index = 0; index < screeningQuestions.length; index++) {
         const answer = data.screeningAnswers?.[index]?.answer;
         if (!answer && answer !== false) {
-          toast.custom(() => <CustomToast message='Please answer all screening questions' type='error' />, {
-            duration: 7000,
-          });
           hasError = true;
-          return;
+          break; // Exit loop after finding first unanswered question
         }
-      });
+      }
+      
+      // Show toast only once if any question is unanswered
+      if (hasError) {
+        toast.custom(() => <CustomToast message='Please answer all screening questions' type='error' />, {
+          duration: 7000,
+        });
+        return;
+      }
     }
-    
-    if (hasError) return;
     
     // If all questions are answered, proceed to next tab
     setCurrentTab(nextTab);
