@@ -402,7 +402,7 @@ const Content = () => {
           zIndex: -2,
         }}
       />
-      <div className='fixed bottom-2 sm:bottom-4 left-2 sm:left-4 z-10'>
+      <div className='fixed bottom-2 sm:bottom-4 left-2 sm:left-4'>
         <Image
           src={ImageBackground4}
           alt='Talent Search'
@@ -414,7 +414,7 @@ const Content = () => {
           }}
         />
       </div>
-      <div className='fixed bottom-2 sm:bottom-4 right-2 sm:right-4 z-10'>
+      <div className='fixed bottom-2 sm:bottom-4 right-2 sm:right-4'>
         <Image
           src={ImageBackground3}
           alt='Talent Search'
@@ -427,7 +427,7 @@ const Content = () => {
         />
       </div>
       <div
-        className='fixed bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-10 overflow-hidden'
+        className='fixed bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 overflow-hidden'
         style={{ width: 'clamp(150px, 40vw, 300px)', height: 'clamp(100px, 25vw, 200px)' }}
       >
         <Image
@@ -445,7 +445,7 @@ const Content = () => {
 
       <div className='relative z-10'>
         {/* Floating Action Buttons */}
-        <div className='fixed bottom-1 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden'>
+        <div className='fixed bottom-1 left-1/2 transform -translate-x-1/2 z-5 bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden'>
           <div className='flex'>
             <button
               onClick={() => setShowFavoritesPanel((prev) => !prev)}

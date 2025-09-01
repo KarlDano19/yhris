@@ -305,7 +305,7 @@ function ContactsTab({ register, onSubmit, isLoading, watch, setValue }: { regis
                 <span className='sr-only'>Loading...</span>
               </div>
             ) : (
-              'SAVE'
+              'Next'
             )}
           </button>
         </div>
