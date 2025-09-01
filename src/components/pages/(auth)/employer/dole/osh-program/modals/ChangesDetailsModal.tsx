@@ -97,7 +97,7 @@ export default function ChangesDetailsModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-b-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-b-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex bg-savoy-blue p-4 items-center">
                   <div className="flex-1">
