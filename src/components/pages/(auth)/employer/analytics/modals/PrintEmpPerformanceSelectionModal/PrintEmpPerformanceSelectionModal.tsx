@@ -16,6 +16,7 @@ interface DepartmentRecord {
 }
 
 interface EmployeeRecord {
+  id: string;
   name: string;
   department: string;
   score: string;
@@ -121,7 +122,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
       : Array.from(allSelections.step1.selectedRecords);
       
     const employeeSelections = allSelections.step2.selectedOption === 'all'
-      ? employeeRecords.map(record => record.name)
+      ? employeeRecords.map(record => record.id)
       : Array.from(allSelections.step2.selectedRecords);
       
     const issueTypeSelections = allSelections.step3.selectedOption === 'all'
