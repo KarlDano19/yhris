@@ -1,6 +1,7 @@
 // Utility functions for employee issues table calculations
 
 export interface EmployeeIssueData {
+  id: string;
   name: string;
   department: string;
   issueType: string;

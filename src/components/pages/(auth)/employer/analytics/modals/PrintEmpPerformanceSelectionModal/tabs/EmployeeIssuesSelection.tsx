@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 interface EmployeeIssueRecord {
+  id: string;
   name: string;
   department: string;
   issueType: string;
@@ -98,7 +99,7 @@ const EmployeeIssuesSelection: React.FC<EmployeeIssuesSelectionProps> = ({
                 {selectedRecords.size === 0 
                   ? 'Select employee issues to include...' 
                   : selectedRecords.size === 1
-                    ? employeeIssueRecords.find(record => selectedRecords.has(record.name))?.name || 
+                    ? employeeIssueRecords.find(record => selectedRecords.has(record.id))?.name || 
                       'Selected issue'
                     : selectedRecords.size === employeeIssueRecords.length
                       ? 'All employee issues selected'
@@ -112,14 +113,14 @@ const EmployeeIssuesSelection: React.FC<EmployeeIssuesSelectionProps> = ({
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {employeeIssueRecords.map((record) => (
                   <div
-                    key={`${record.name}-${record.issueType}-${record.dateReported}`}
+                    key={record.id}
                     className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                    onClick={() => handleRecordSelection(record.name)}
+                    onClick={() => handleRecordSelection(record.id)}
                   >
                     <input
                       type="checkbox"
-                      checked={selectedRecords.has(record.name)}
-                      onChange={() => handleRecordSelection(record.name)}
+                      checked={selectedRecords.has(record.id)}
+                      onChange={() => handleRecordSelection(record.id)}
                       className="rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue mr-3"
                       onClick={(e) => e.stopPropagation()}
                     />

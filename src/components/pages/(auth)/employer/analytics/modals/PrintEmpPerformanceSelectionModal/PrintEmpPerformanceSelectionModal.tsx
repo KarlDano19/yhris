@@ -16,6 +16,7 @@ interface DepartmentRecord {
 }
 
 interface EmployeeRecord {
+  id: string;
   name: string;
   department: string;
   score: string;
@@ -31,6 +32,7 @@ interface IssueTypeRecord {
 }
 
 interface EmployeeIssueRecord {
+  id: string;
   name: string;
   department: string;
   issueType: string;
@@ -121,7 +123,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
       : Array.from(allSelections.step1.selectedRecords);
       
     const employeeSelections = allSelections.step2.selectedOption === 'all'
-      ? employeeRecords.map(record => record.name)
+      ? employeeRecords.map(record => record.id)
       : Array.from(allSelections.step2.selectedRecords);
       
     const issueTypeSelections = allSelections.step3.selectedOption === 'all'
@@ -129,7 +131,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
       : Array.from(allSelections.step3.selectedRecords);
       
     const employeeIssueSelections = allSelections.step4.selectedOption === 'all'
-      ? employeeIssueRecords.map(record => record.name)
+      ? employeeIssueRecords.map(record => record.id)
       : Array.from(allSelections.step4.selectedRecords);
     
 
@@ -325,7 +327,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-4xl">
-                <div className="flex bg-savoy-blue p-4 items-center gap-4">
+                <div className="flex bg-savoy-blue p-4 items-center gap-4 rounded-t-lg">
                   <PrinterIcon className="w-6 h-6 text-white" />
                   <h3 className="flex-1 text-white font-semibold">
                     {currentSelectionStep === 1 && 'Print Performance Rate Selection'}

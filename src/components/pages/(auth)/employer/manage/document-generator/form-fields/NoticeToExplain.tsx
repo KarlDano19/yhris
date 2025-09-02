@@ -83,7 +83,7 @@ export const DateField = ({ formData, handleInputChange, disabled, isSubmitted }
     id="dateIssued"
     label="Date Issued"
     name="dateIssued"
-    value={formData.dateIssued}
+    value={formData.dateIssued ?? ''}
     handleInputChange={handleInputChange as any}
     required={true}
     disabled={disabled}
@@ -96,7 +96,7 @@ export const IncidentDateField = ({ formData, handleInputChange, disabled, isSub
     id="incidentDate"
     label="Date of Incident"
     name="incidentDate"
-    value={formData.incidentDate}
+    value={formData.incidentDate ?? ''}
     handleInputChange={handleInputChange as any}
     required={true}
     disabled={disabled}
@@ -121,7 +121,7 @@ export const IncidentPlaceField = ({ formData, handleInputChange, disabled, isSu
         id="incidentPlace"
         name="incidentPlace"
         placeholder="Enter place of incident"
-        value={formData.incidentPlace}
+        value={formData.incidentPlace ?? ''}
         onChange={handleInputChange}
         className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
@@ -176,7 +176,7 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         id="briefBackground"
         name="briefBackground"
         placeholder="Enter brief background"
-        value={formData.briefBackground}
+        value={formData.briefBackground ?? ''}
         onChange={handleBriefBackgroundChange}
         rows={4}
         maxLength={maxLength + 1}
@@ -205,7 +205,7 @@ export const PreparedByField = ({ formData, handleInputChange, disabled }: Field
       type="text"
       id="preparedBy"
       name="preparedBy"
-      value={formData.preparedBy}
+      value={formData.preparedBy ?? ''}
       onChange={handleInputChange}
       className={`w-full px-3 py-2 border rounded-md ${
         disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
@@ -225,7 +225,7 @@ export const ReviewedByField = ({ formData, handleInputChange, disabled }: Field
       type="text"
       id="reviewedBy"
       name="reviewedBy"
-      value={formData.reviewedBy}
+      value={formData.reviewedBy ?? ''}
       onChange={handleInputChange}
       className={`w-full px-3 py-2 border rounded-md ${
         disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
@@ -253,7 +253,7 @@ export const CompanyNameField = ({ formData, handleInputChange, disabled, isSubm
         id="companyName"
         name="companyName"
         placeholder="Enter company name"
-        value={formData.companyName}
+        value={formData.companyName ?? ''}
         onChange={handleInputChange}
         className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
@@ -264,6 +264,11 @@ export const CompanyNameField = ({ formData, handleInputChange, disabled, isSubm
         }`}
         required
         disabled={disabled}
+        style={{
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden'
+        }}
       />
     </div>
   );

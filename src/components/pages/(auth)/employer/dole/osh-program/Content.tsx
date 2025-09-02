@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 
 import CustomToast from "@/components/CustomToast";
 import VersionHistoryModal from "./modals/VersionHistoryModal";
@@ -76,6 +77,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isNavigatingFromChanges, setIsNavigatingFromChanges] = useState(false);
   
   const queryClient = useQueryClient();
+  const router = useRouter();
   
   // Get cached profile data for auto-filling company information
   const cachedProfile = queryClient
@@ -185,6 +187,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       5: 'Safety Measures',
       6: 'Compliance and Cost'
     };
+    
+    // If there's pending navigation to a tab, show the target tab name
+    if (pendingNavigation && pendingNavigation.startsWith('tab-')) {
+      const targetTab = parseInt(pendingNavigation.replace('tab-', '')) as TabNumber;
+      return tabNames[targetTab] || 'target tab';
+    }
+    
     return tabNames[selectedTab] || 'current tab';
   };
 
@@ -363,9 +372,47 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // ============================================================================
 
   // Check if there are unsaved changes in the current tab
-  const hasUnsavedChangesCallback = (): boolean => {
+  const hasUnsavedChangesCallback = useCallback((): boolean => {
     return hasUnsavedChanges(watch, selectedTab, oshProgramDetails);
-  };
+  }, [watch, selectedTab, oshProgramDetails]);
+
+  // ============================================================================
+  // BROWSER NAVIGATION HANDLING
+  // ============================================================================
+
+  // Handle browser back button and beforeunload events
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChangesCallback()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (hasUnsavedChangesCallback()) {
+        e.preventDefault();
+        // Show browser's default warning by triggering beforeunload
+        const beforeUnloadEvent = new Event('beforeunload');
+        window.dispatchEvent(beforeUnloadEvent);
+        // Push the current state back to prevent navigation
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    // Push initial state to enable popstate detection
+    window.history.pushState(null, '', window.location.href);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [hasUnsavedChangesCallback]);
 
   // Handle navigation with unsaved changes check
   const handleNavigation = (url: string) => {
@@ -373,7 +420,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setPendingNavigation(url);
       setShowUnsavedChangesModal(true);
     } else {
-      window.location.href = url;
+      router.push(url);
     }
   };
 
@@ -388,7 +435,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       await submitCurrentTab();
       setShowUnsavedChangesModal(false);
       if (pendingNavigation) {
-        window.location.href = pendingNavigation;
+        handlePendingNavigation();
       }
     } catch (error) {
       console.error('Error saving changes:', error);
@@ -401,8 +448,25 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleDiscardChanges = () => {
     setShowUnsavedChangesModal(false);
     if (pendingNavigation) {
-      window.location.href = pendingNavigation;
+      handlePendingNavigation();
     }
+  };
+
+  // Handle pending navigation after save/discard
+  const handlePendingNavigation = () => {
+    if (!pendingNavigation) return;
+
+    if (pendingNavigation.startsWith('tab-')) {
+      // Handle tab navigation
+      const tabIndex = parseInt(pendingNavigation.replace('tab-', '')) as TabNumber;
+      performTabChange(tabIndex);
+    } else {
+      // Handle route navigation
+      router.push(pendingNavigation);
+    }
+    
+    // Clear pending navigation
+    setPendingNavigation(null);
   };
 
   // Handle close modal
@@ -451,6 +515,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Function to handle tab changes
   const handleTabChange = (tabIndex: TabNumber) => {
+    // Check if there are unsaved changes in the current tab
+    if (hasUnsavedChangesCallback()) {
+      // Store the target tab for navigation after saving/discarding
+      setPendingNavigation(`tab-${tabIndex}`);
+      setShowUnsavedChangesModal(true);
+      return;
+    }
+
+    // If no unsaved changes, proceed with tab change
+    performTabChange(tabIndex);
+  };
+
+  // Function to actually perform the tab change
+  const performTabChange = (tabIndex: TabNumber) => {
     // Clear any validation errors
     clearErrors();
     // Clear validation message and missing fields

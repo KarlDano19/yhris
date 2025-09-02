@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 interface EmployeeRecord {
+  id: string;
   name: string;
   department: string;
   score: string;
@@ -98,7 +99,7 @@ const PerformanceTableSelection: React.FC<PerformanceTableSelectionProps> = ({
                 {selectedRecords.size === 0 
                   ? 'Select employees to include...' 
                   : selectedRecords.size === 1
-                    ? employeeRecords.find(record => selectedRecords.has(record.name))?.name || 
+                    ? employeeRecords.find(record => selectedRecords.has(record.id))?.name || 
                       'Selected employee'
                     : selectedRecords.size === employeeRecords.length
                       ? 'All employees selected'
@@ -112,14 +113,14 @@ const PerformanceTableSelection: React.FC<PerformanceTableSelectionProps> = ({
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {employeeRecords.map((record) => (
                   <div
-                    key={record.name}
+                    key={record.id}
                     className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                    onClick={() => handleRecordSelection(record.name)}
+                    onClick={() => handleRecordSelection(record.id)}
                   >
                     <input
                       type="checkbox"
-                      checked={selectedRecords.has(record.name)}
-                      onChange={() => handleRecordSelection(record.name)}
+                      checked={selectedRecords.has(record.id)}
+                      onChange={() => handleRecordSelection(record.id)}
                       className="rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue mr-3"
                       onClick={(e) => e.stopPropagation()}
                     />
