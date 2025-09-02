@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -38,6 +39,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: uploadAttachment } = useUploadEmployeeIssueAttachments();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const urlDocType = searchParams.get('type') as DocumentType | null;
   const employeeId = searchParams.get('employee');
   
@@ -217,6 +219,12 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       const position = selectedEmployeeIssue.position || '';
       const department = selectedEmployeeIssue.department || '';
       const incidentPlace = selectedEmployeeIssue.place_of_incident || '';
+      
+      // Get company name from cached profile if available
+      const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
+      const profileData = cachedProfile?.state?.data as { name?: string };
+      const companyName = profileData?.name || '';
+      
       // Update form data
       setNoticeToExplainData(prev => ({
         ...prev,
@@ -225,12 +233,41 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         department,
         incidentDate,
         incidentPlace,
+        companyName, // Add company name from cached profile
         briefBackground: selectedEmployeeIssue.brief_background || '',
         receivedBy: employeeName,
         dateOfIssuance: new Date().toISOString().split('T')[0],
       }));
     }
   }, [documentType, employeeId, selectedEmployeeIssue]);
+  
+  // Populate company name for all document types when switching between them
+  useEffect(() => {
+    const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
+    const profileData = cachedProfile?.state?.data as { name?: string };
+    
+    if (profileData?.name) {
+      const companyName = profileData.name;
+      
+      // Populate company name for all document types when switching
+      if (documentType === 'employee-certificate' && !employeeCertificateData.companyName) {
+        setEmployeeCertificateData(prev => ({
+          ...prev,
+          companyName
+        }));
+      } else if (documentType === 'employment-agreement' && !employmentAgreementData.companyName) {
+        setEmploymentAgreementData(prev => ({
+          ...prev,
+          companyName
+        }));
+      } else if (documentType === 'notice-to-explain' && !noticeToExplainData.companyName) {
+        setNoticeToExplainData(prev => ({
+          ...prev,
+          companyName
+        }));
+      }
+    }
+  }, [documentType, queryClient]); // Only depend on document type and queryClient
   
   // Get current data based on document type
   const getCurrentData = () => {
