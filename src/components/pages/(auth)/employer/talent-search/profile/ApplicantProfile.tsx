@@ -1,7 +1,8 @@
 'use client';
+import { useState } from 'react';
 
 import Image from 'next/image';
-import { useState } from 'react';
+
 import EmailProfileModal from '../modal/EmailProfile';
 
 type T_ModalData = {
@@ -11,6 +12,49 @@ type T_ModalData = {
 
 function ApplicantProfile({ applicant }: { applicant: any }) {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState<T_ModalData | null>(null);
+
+  // Helper function to get the most recent work experience
+  const getMostRecentWorkExperience = (workExperiences: any[]) => {
+    if (!workExperiences || workExperiences.length === 0) {
+      return null;
+    }
+
+    return workExperiences.reduce((mostRecent, current) => {
+      // Check if current experience is ongoing (Present)
+      const currentIsPresent =
+        current.dateTo === 'Present' || current.dateTo === 'present' || current.dateTo === '' || !current.dateTo;
+
+      const mostRecentIsPresent =
+        mostRecent.dateTo === 'Present' ||
+        mostRecent.dateTo === 'present' ||
+        mostRecent.dateTo === '' ||
+        !mostRecent.dateTo;
+
+      // If current is present and mostRecent is not, current is more recent
+      if (currentIsPresent && !mostRecentIsPresent) {
+        return current;
+      }
+
+      // If mostRecent is present and current is not, mostRecent is more recent
+      if (mostRecentIsPresent && !currentIsPresent) {
+        return mostRecent;
+      }
+
+      // If both are present, compare start dates (more recent start date wins)
+      if (currentIsPresent && mostRecentIsPresent) {
+        const currentStartDate = new Date(current.dateFrom);
+        const mostRecentStartDate = new Date(mostRecent.dateFrom);
+        return currentStartDate > mostRecentStartDate ? current : mostRecent;
+      }
+
+      // If neither is present, compare end dates
+      const currentEndDate = new Date(current.dateTo);
+      const mostRecentEndDate = new Date(mostRecent.dateTo);
+
+      return currentEndDate > mostRecentEndDate ? current : mostRecent;
+    });
+  };
+
   // Add null check for applicant
   if (!applicant) {
     return (
@@ -21,6 +65,9 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
       </div>
     );
   }
+
+  // Get the most recent work experience
+  const mostRecentExperience = getMostRecentWorkExperience(applicant.work_experience);
 
   return (
     <>
@@ -38,22 +85,23 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
                 {applicant.firstname} {applicant.lastname}
               </h4>
               <h1 className='text-sm text-gray-500 mb-1'>{applicant.gender}</h1>
-              <h1 className='text-sm mb-1'>
-                {applicant.work_experience && applicant.work_experience.length > 0
-                  ? applicant.work_experience[0].position
-                  : 'No experience'}
-              </h1>
-              {applicant.work_experience && applicant.work_experience.length > 0 && (
+              <h1 className='text-sm mb-1'>{mostRecentExperience ? mostRecentExperience.position : 'No experience'}</h1>
+              {mostRecentExperience && (
                 <h1 className='text-sm mb-1'>
-                  {new Date(applicant.work_experience[0].dateFrom).toLocaleDateString('en-US', {
+                  {new Date(mostRecentExperience.dateFrom).toLocaleDateString('en-US', {
                     month: 'short',
                     year: 'numeric',
                   })}{' '}
                   -{' '}
-                  {new Date(applicant.work_experience[0].dateTo).toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric',
-                  })}
+                  {mostRecentExperience.dateTo === 'Present' ||
+                  mostRecentExperience.dateTo === 'present' ||
+                  mostRecentExperience.dateTo === '' ||
+                  !mostRecentExperience.dateTo
+                    ? 'Present'
+                    : new Date(mostRecentExperience.dateTo).toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric',
+                      })}
                 </h1>
               )}
             </div>
@@ -109,7 +157,7 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
           </button>
         </div>
       </div>
-      
+
       {/* Email Profile Modal */}
       {isEmailModalOpen && (
         <EmailProfileModal

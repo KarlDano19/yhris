@@ -73,7 +73,7 @@ function ApplicantProfileModal({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-7xl">
-                <div className="flex bg-savoy-blue p-2 items-center">
+                <div className="flex bg-savoy-blue p-2 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Profile Details
                   </h3>
