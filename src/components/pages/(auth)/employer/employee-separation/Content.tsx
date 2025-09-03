@@ -469,8 +469,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+            <div className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8 '>
+              <div className='min-w-full py-2 sm:px-6 lg:px-8 '>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
