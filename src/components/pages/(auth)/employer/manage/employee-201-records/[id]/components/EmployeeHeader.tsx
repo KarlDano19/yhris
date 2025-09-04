@@ -1,5 +1,5 @@
 "use client";
-
+import {  useState } from "react";
 import Image from "next/image";
 import {
   IdentificationIcon,
@@ -11,8 +11,7 @@ import {
   ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 import Tab from "../common/Tab";
-import PlacholderPicture from "@/svg/PlaceholderPicture"; // ⬅️ add this
-import type { Employee } from "@/types/employee-201-records/employee";
+import PlacholderPicture from "@/svg/PlaceholderPicture";
 
 export type TabKey =
   | "personal"
@@ -32,14 +31,21 @@ export default function EmployeeHeader({
     name: string;
     role: string;
     complete: boolean;
-    progress: number;
-    avatar: string; // "male" | "female" | URL
+    progress: number;      // 0–100
+    gender?: string | null; // "male" | "female" | undefined
+    photo?: string | null;  // URL or null
     email: string;
   };
   activeTab: TabKey;
   setActiveTab: (k: TabKey) => void;
 }) {
-  const isSvgAvatar = employee.avatar === "male" || employee.avatar === "female";
+  // --- avatar logic: prefer photo; fallback to gender placeholder ---
+  const [imgError, setImgError] = useState(false);
+  const hasPhoto = !!(employee.photo && employee.photo.trim() !== "");
+  const showPhoto = hasPhoto && !imgError;
+  const placeholderGender: "male" | "female" =
+    (employee.gender || "").toLowerCase() === "female" ? "female" : "male";
+  // -----------------------------------------------------------------
 
   return (
     <div className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
@@ -52,22 +58,24 @@ export default function EmployeeHeader({
                 employee.complete ? "border-solid" : "border-dashed"
               }`}
             />
-            {isSvgAvatar ? (
-              <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
-                <PlacholderPicture
-                  gender={employee.avatar as "male" | "female"}
-                  className="h-14 w-14 md:h-16 md:w-16"
-                  title={employee.name}
-                />
-              </div>
-            ) : (
+            {showPhoto ? (
               <Image
-                src={employee.avatar}
+                src={employee.photo as string}
                 alt={employee.name}
                 width={100}
                 height={100}
                 className="relative rounded-full object-cover"
+                onError={() => setImgError(true)}
+                priority
               />
+            ) : (
+              <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
+                <PlacholderPicture
+                  gender={placeholderGender}
+                  className="h-14 w-14 md:h-16 md:w-16"
+                  title={employee.name}
+                />
+              </div>
             )}
           </div>
 
@@ -81,6 +89,10 @@ export default function EmployeeHeader({
                 className={`h-2 w-40 overflow-hidden rounded-full md:w-48 ${
                   employee.complete ? "bg-green-100" : "bg-rose-100"
                 }`}
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={employee.progress}
               >
                 <div
                   className={`h-full ${

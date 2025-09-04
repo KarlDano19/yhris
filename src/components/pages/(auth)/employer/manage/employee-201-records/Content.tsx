@@ -33,7 +33,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     position: "ALL",
     onlyIncomplete: false,
     page: 1,
-    pageSize: 15,
+    pageSize: 12,
   });
 
   // debounce search

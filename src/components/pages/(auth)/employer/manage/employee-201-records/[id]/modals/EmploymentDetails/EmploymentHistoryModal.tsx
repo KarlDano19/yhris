@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import AddEmploymentForm from "./AddEmploymentForm";
@@ -8,13 +8,21 @@ import EmploymentHistoryEditForm from "./EmploymentHistoryEditForm";
 import EmploymentHistoryAnalysis from "./EmploymentHistoryAnalysis";
 import ConfirmModal from "../ConfirmModal";
 
-/* ===================== Types ===================== */
+// hooks
+import { useGetEmploymentHistory } from "../../hooks/useGetEmploymentHistory";
+import { useAddEmploymentHistory } from "../../hooks/useAddEmploymentHistory";
+import { useUpdateEmploymentHistory } from "../../hooks/useUpdateEmploymentHistory";
+import { useDeleteEmploymentHistory } from "../../hooks/useDeleteEmploymentHistory";
+
+// toasts
+import { notify } from "../../utils/notify";
 
 export type EmploymentHistoryItem = {
+  id?: number;
   position: string;
   company: string;
   dateFrom: string; // ISO
-  dateTo?: string;  // ISO | undefined (ongoing)
+  dateTo?: string | null; // ISO | null
   description?: string;
 };
 
@@ -22,41 +30,41 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   employeeName: string;
-
-  items: EmploymentHistoryItem[];
-
-  onAddItem?: (item: EmploymentHistoryItem) => void;
-  onEditItem?: (item: EmploymentHistoryItem, index: number) => void;
-  onDeleteItem?: (index: number) => void;
+  employeeId: number | string;
 };
-
-/* ===================== Component ===================== */
 
 export default function EmploymentHistoryModal({
   isOpen,
   onClose,
   employeeName,
-  items,
-  onAddItem,
-  onEditItem,
-  onDeleteItem,
+  employeeId,
 }: Props) {
-  // keep a local copy while modal is open
-  const [localItems, setLocalItems] = useState<EmploymentHistoryItem[]>(items);
-  useEffect(() => {
-    if (!isOpen) setLocalItems(items);
-  }, [items, isOpen]);
-
   const [showAdd, setShowAdd] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
 
-  // delete confirm
   const [confirmIdx, setConfirmIdx] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // NOTE: non-dismissible => no ESC handler, no backdrop click handler
-  if (!isOpen) return null;
+  const { entries, isLoading, error, refetch } = useGetEmploymentHistory(
+    employeeId,
+    { page: 1, pageSize: 50 }
+  );
+  const { isSaving: isAdding, addEntry } = useAddEmploymentHistory(employeeId);
+  const { isUpdating, updateEntry } = useUpdateEmploymentHistory(employeeId);
+  const { isDeleting, deleteEntry } = useDeleteEmploymentHistory(employeeId);
+
+  const itemsNewestFirst: EmploymentHistoryItem[] = useMemo(() => {
+    const mapped = entries.map((e) => ({
+      id: e.id,
+      position: e.position,
+      company: e.company,
+      dateFrom: e.start_date,
+      dateTo: e.end_date ?? null,
+      description: e.description ?? "",
+    }));
+    return sortEmploymentDesc(mapped);
+  }, [entries]);
 
   const headerTitle =
     showAdd
@@ -67,17 +75,19 @@ export default function EmploymentHistoryModal({
       ? `Employment History Analysis: ${employeeName}`
       : `Employment History: ${employeeName}`;
 
-  const itemsNewestFirst = sortEmploymentDesc(localItems);
+  useEffect(() => {
+    if (!isOpen) {
+      setShowAdd(false);
+      setEditIndex(null);
+      setShowAnalysis(false);
+      setConfirmIdx(null);
+    }
+  }, [isOpen]);
 
-  const beginEditByRef = (itemRef: EmploymentHistoryItem) => {
-    const idx = localItems.indexOf(itemRef);
-    if (idx >= 0) setEditIndex(idx);
-  };
+  if (!isOpen) return null;
 
-  const beginDeleteByRef = (itemRef: EmploymentHistoryItem) => {
-    const idx = localItems.indexOf(itemRef);
-    if (idx >= 0) setConfirmIdx(idx);
-  };
+  const beginEditByIndex = (idx: number) => setEditIndex(idx);
+  const beginDeleteByIndex = (idx: number) => setConfirmIdx(idx);
 
   return (
     <div
@@ -102,28 +112,89 @@ export default function EmploymentHistoryModal({
         {!showAdd && editIndex === null && !showAnalysis ? (
           <>
             <div className="min-h-0 flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Add button inside body, top-right */}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowAdd(true)}
-                  className="rounded-md border border-[#355fd0] px-3 py-2 text-xs font-medium text-[#355fd0] hover:bg-[#355fd0]/5"
-                >
-                  Add Employment History
-                </button>
+              {/* Top row: Add button + count / error (with skeleton while loading) */}
+              <div className="flex items-center justify-between">
+                {isLoading ? (
+                  <div className="h-8 w-44 rounded-md border bg-white animate-pulse" aria-hidden />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowAdd(true)}
+                    disabled={!!error}
+                    className={`rounded-md border px-3 py-2 text-xs font-medium ${
+                      error
+                        ? "cursor-not-allowed border-gray-300 text-gray-400"
+                        : "border-[#355fd0] text-[#355fd0] hover:bg-[#355fd0]/5"
+                    }`}
+                    title={error ? "Fix the error then try again." : undefined}
+                  >
+                    Add Employment History
+                  </button>
+                )}
+
+                {isLoading ? (
+                  <div className="h-6 w-28 rounded bg-gray-200 animate-pulse" aria-hidden />
+                ) : error ? (
+                  <button
+                    onClick={() => refetch()}
+                    className="rounded border border-red-300 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
+                  >
+                    Failed to load. Retry
+                  </button>
+                ) : (
+                  <div className="text-xs text-gray-500">
+                    {itemsNewestFirst.length} record(s)
+                  </div>
+                )}
               </div>
 
-              {itemsNewestFirst.length ? (
+              {/* List */}
+              {isLoading ? (
+                // ===== Skeleton list (3 cards) =====
+                <div className="space-y-4">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="relative rounded-xl border p-4 shadow-sm bg-white"
+                    >
+                      {/* action buttons skeleton */}
+                      <div className="absolute right-3 top-3 flex gap-2">
+                        <div className="h-5 w-5 rounded bg-gray-200 animate-pulse" />
+                        <div className="h-5 w-5 rounded bg-gray-200 animate-pulse" />
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[240px_minmax(0,1fr)]">
+                        {/* Left meta skeleton */}
+                        <div className="space-y-2">
+                          <div className="h-5 w-48 rounded bg-gray-200 animate-pulse" />
+                          <div className="h-3 w-40 rounded bg-gray-200 animate-pulse" />
+                          <div className="h-3 w-32 rounded bg-gray-200 animate-pulse" />
+                        </div>
+
+                        {/* Right description skeleton */}
+                        <div className="sm:border-l-2 sm:pl-6 border-transparent">
+                          <div className="h-4 w-28 rounded bg-gray-200 animate-pulse mb-2" />
+                          <div className="space-y-2">
+                            <div className="h-3 w-full rounded bg-gray-100 animate-pulse" />
+                            <div className="h-3 w-5/6 rounded bg-gray-100 animate-pulse" />
+                            <div className="h-3 w-3/4 rounded bg-gray-100 animate-pulse" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : itemsNewestFirst.length ? (
                 itemsNewestFirst.map((it, i) => (
                   <div
-                    key={`${it.company}-${it.position}-${i}`}
+                    key={`${it.id ?? "tmp"}-${i}`}
                     className="relative rounded-xl border p-4 shadow-sm bg-[#355fd0]/5"
                   >
-                    {/* icon actions - top right */}
+                    {/* actions */}
                     <div className="absolute right-3 top-3 flex gap-2">
                       <button
                         type="button"
-                        onClick={() => beginEditByRef(it)}
+                        onClick={() => beginEditByIndex(i)}
                         className="rounded p-1 hover:bg-white/60"
                         aria-label="Edit employment"
                         title="Edit"
@@ -132,7 +203,7 @@ export default function EmploymentHistoryModal({
                       </button>
                       <button
                         type="button"
-                        onClick={() => beginDeleteByRef(it)}
+                        onClick={() => beginDeleteByIndex(i)}
                         className="rounded p-1 hover:bg-white/60"
                         aria-label="Delete employment"
                         title="Delete"
@@ -149,12 +220,12 @@ export default function EmploymentHistoryModal({
                         </div>
                         <div className="text-xs text-gray-500">{it.company}</div>
                         <div className="mt-1 text-xs text-gray-500">
-                          {formatDateRange(it.dateFrom, it.dateTo)}
+                          {formatDateRange(it.dateFrom, it.dateTo ?? undefined)}
                         </div>
                       </div>
 
-                      {/* Right description (wider) */}
-                      <div className="sm:border-l-2 sm:pl-6 border-[#1f3b8a]">
+                      {/* Right description */}
+                      <div className="sm:border-l-2 sm:pl-6 border-black/10">
                         <div className="text-sm font-medium text-gray-700">
                           Job Description
                         </div>
@@ -172,7 +243,7 @@ export default function EmploymentHistoryModal({
               )}
             </div>
 
-            {/* Footer (outlined/filled) */}
+            {/* Footer */}
             <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t bg-white px-6 py-4 rounded-b-xl">
               <button
                 type="button"
@@ -193,38 +264,66 @@ export default function EmploymentHistoryModal({
         ) : showAdd ? (
           <AddEmploymentForm
             onBack={() => setShowAdd(false)}
-            onSaveMany={(newItems) => {
-              // merge new items and sort
-              setLocalItems((prev) => sortEmploymentDesc([...newItems, ...prev]));
-              newItems.forEach((it) => onAddItem?.(it));
-              setShowAdd(false);
+            onSaveMany={async (newItems) => {
+              await notify.promise(
+                (async () => {
+                  for (const it of newItems) {
+                    const res = await addEntry({
+                      company: it.company,
+                      position: it.position,
+                      start_date: it.dateFrom,
+                      end_date: it.dateTo ?? null,
+                      description: it.description ?? "",
+                    });
+                    if (!res.ok) throw res.error ?? new Error("Failed to add an employment record.");
+                  }
+                  setShowAdd(false);
+                  await refetch();
+                })(),
+                { success: "Employment history added.", error: "Failed to add employment history." }
+              );
             }}
+            isSaving={isAdding}
           />
         ) : showAnalysis ? (
           <EmploymentHistoryAnalysis
+            employeeId={employeeId}
             employeeName={employeeName}
-            items={localItems}
             onBack={() => setShowAnalysis(false)}
             onClose={onClose}
           />
         ) : (
           <EmploymentHistoryEditForm
-            initial={localItems[editIndex!]}
+            initial={itemsNewestFirst[editIndex!]}
             onBack={() => setEditIndex(null)}
-            onSave={(updated) => {
-              setLocalItems((prev) => {
-                const next = [...prev];
-                next[editIndex!] = updated;
-                return sortEmploymentDesc(next);
-              });
-              onEditItem?.(updated, editIndex!);
-              setEditIndex(null);
+            onSave={async (updated) => {
+              const target = itemsNewestFirst[editIndex!];
+              if (!target?.id) {
+                setEditIndex(null);
+                return;
+              }
+              await notify.promise(
+                (async () => {
+                  const res = await updateEntry(target.id!, {
+                    company: updated.company,
+                    position: updated.position,
+                    start_date: updated.dateFrom,
+                    end_date: updated.dateTo ?? null,
+                    description: updated.description ?? "",
+                  });
+                  if (!res.ok) throw res.error ?? new Error("Failed to update employment.");
+                  setEditIndex(null);
+                  await refetch();
+                })(),
+                { success: "Employment updated.", error: "Failed to save changes." }
+              );
             }}
+            isSaving={isUpdating}
           />
         )}
       </div>
 
-      {/* Delete confirm modal (non-dismissible) */}
+      {/* Delete confirm modal */}
       <ConfirmModal
         isOpen={confirmIdx !== null}
         title="Delete Employment"
@@ -232,16 +331,27 @@ export default function EmploymentHistoryModal({
         confirmText="Delete"
         cancelText="Cancel"
         intent="danger"
-        busy={deleting}
+        busy={deleting || isDeleting}
         closeOnBackdrop={false}
         closeOnEsc={false}
         onCancel={() => setConfirmIdx(null)}
         onConfirm={async () => {
           if (confirmIdx === null) return;
+          const target = itemsNewestFirst[confirmIdx];
+          if (!target?.id) {
+            setConfirmIdx(null);
+            return;
+          }
           try {
             setDeleting(true);
-            setLocalItems((prev) => prev.filter((_, i) => i !== confirmIdx));
-            onDeleteItem?.(confirmIdx);
+            await notify.promise(
+              (async () => {
+                const res = await deleteEntry(target.id!);
+                if (!res.ok) throw res.error ?? new Error("Failed to delete employment.");
+                await refetch();
+              })(),
+              { success: "Employment deleted.", error: "Failed to delete employment." }
+            );
           } finally {
             setDeleting(false);
             setConfirmIdx(null);
@@ -271,7 +381,7 @@ function formatDateRange(from: string, to?: string) {
 }
 
 function sortEmploymentDesc(arr: EmploymentHistoryItem[]) {
-  const ms = (s?: string) => (s ? new Date(s).getTime() : NaN);
+  const ms = (s?: string | null) => (s ? new Date(s).getTime() : NaN);
   return [...arr].sort((a, b) => {
     const aKey = Number.isFinite(ms(a.dateTo)) ? ms(a.dateTo) : ms(a.dateFrom);
     const bKey = Number.isFinite(ms(b.dateTo)) ? ms(b.dateTo) : ms(b.dateFrom);

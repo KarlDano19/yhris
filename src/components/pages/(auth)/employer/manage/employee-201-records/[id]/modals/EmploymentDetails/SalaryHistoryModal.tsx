@@ -1,64 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+"use client";
+
+import { useRef, useState } from "react";
 import SalaryHistoryHistory from "./SalaryHistoryHistory";
 import SalaryHistoryAnalysis from "./SalaryHistoryAnalysis";
-
-export type SalaryHistoryEntry = {
-  position: string;
-  salary: number;
-  effectiveDate: string; // ISO date
-};
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   employeeName: string;
-  entries: SalaryHistoryEntry[];
-
-  currentSalary?: number;
-  lastAdjustmentAmount?: number;
-  daysBetweenChanges?: number;
-
-  onExportPdf?: () => void;
-  onAddNote?: () => void;
+  employeeId: number | string;
 };
 
 export default function SalaryHistoryModal({
   isOpen,
   onClose,
   employeeName,
-  entries,
-  currentSalary,
-  lastAdjustmentAmount,
-  daysBetweenChanges,
-  onExportPdf,
-  onAddNote,
+  employeeId,
 }: Props) {
   const [tab, setTab] = useState<"history" | "analysis">("history");
   const dialogRef = useRef<HTMLDivElement>(null);
-
-  const sorted = [...entries].sort(
-    (a, b) =>
-      new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
-  );
-  const curSalary =
-    currentSalary ?? (sorted.length ? sorted[sorted.length - 1].salary : 0);
-  const lastAdj =
-    lastAdjustmentAmount ??
-    (sorted.length >= 2
-      ? sorted[sorted.length - 1].salary - sorted[sorted.length - 2].salary
-      : 0);
-  const gapDays =
-    daysBetweenChanges ??
-    (sorted.length >= 2
-      ? Math.max(
-          0,
-          Math.round(
-            (new Date(sorted[sorted.length - 1].effectiveDate).getTime() -
-              new Date(sorted[sorted.length - 2].effectiveDate).getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        )
-      : 0);
 
   if (!isOpen) return null;
 
@@ -73,7 +33,7 @@ export default function SalaryHistoryModal({
         ref={dialogRef}
         className="mt-8 w-full max-w-3xl rounded-xl bg-white shadow-xl flex max-h-[90vh] flex-col"
       >
-        {/* Sticky Title Bar */}
+        {/* Title Bar */}
         <div className="sticky top-0 z-20 flex items-center justify-between rounded-t-xl bg-[#355fd0] px-4 py-3 text-white">
           <h3 id="salary-history-title" className="text-sm font-semibold">
             Salary History: {employeeName}
@@ -87,35 +47,27 @@ export default function SalaryHistoryModal({
           </button>
         </div>
 
-        {/* Sticky Tabs */}
+        {/* Tabs */}
         <div className="sticky top-[44px] z-10 bg-white px-4 pt-3">
           <div className="flex gap-6 border-b">
-            <TabButton
-              active={tab === "history"}
-              onClick={() => setTab("history")}
-            >
+            <TabButton active={tab === "history"} onClick={() => setTab("history")}>
               History
             </TabButton>
-            <TabButton
-              active={tab === "analysis"}
-              onClick={() => setTab("analysis")}
-            >
+            <TabButton active={tab === "analysis"} onClick={() => setTab("analysis")}>
               Analysis
             </TabButton>
           </div>
         </div>
 
-        {/* Scrollable Content */}
+        {/* Content */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           {tab === "history" ? (
-            <SalaryHistoryHistory entries={entries} />
+            <SalaryHistoryHistory employeeId={employeeId} />
           ) : (
+            // We'll wire the analysis API next; for now, render an empty state
             <SalaryHistoryAnalysis
               employeeName={employeeName}
-              currentSalary={curSalary}
-              lastAdjustmentAmount={lastAdj}
-              daysBetweenChanges={gapDays}
-              entries={sorted}
+              employeeId={employeeId}
             />
           )}
         </div>

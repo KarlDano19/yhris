@@ -1,48 +1,88 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { SalaryHistoryEntry } from "./SalaryHistoryModal";
 import TrendChart, { TrendPoint } from "../../common/TrendChart";
-import { ChevronDoubleRightIcon } from "@heroicons/react/20/solid";
 import { ArrowPathIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { notify } from "../../utils/notify"; // 👈 add toast helper
+import { notify } from "../../utils/notify";
+import { useGetSalaryAnalysis } from "../../hooks/useGetSalaryAnalysis";
 
-type HrNote = { id: string; text: string; createdAt: Date };
+// HR notes hooks
+import { useGetHRNotes } from "../../hooks/useGetHRNotes";
+import { useAddHRNote } from "../../hooks/useAddHRNote";
+import { useDeleteHRNote } from "../../hooks/useDeleteHRNote";
+
+// ✅ your custom pagination
+import Pagination from "@/components/Pagination";
 
 export default function SalaryHistoryAnalysis({
+  employeeId,
   employeeName,
-  currentSalary,
-  lastAdjustmentAmount,
-  daysBetweenChanges,
-  entries,
   onExportPdf,
-  onAddNote,
-  onDeleteNote,
 }: {
+  employeeId: number | string;
   employeeName: string;
-  currentSalary: number;
-  lastAdjustmentAmount: number;
-  daysBetweenChanges: number;
-  entries: SalaryHistoryEntry[];
   onExportPdf?: () => void;
-  onAddNote?: (text: string) => void;
-  onDeleteNote?: (id: string) => void;
 }) {
-  const points: TrendPoint[] = entries?.length
-    ? entries.map((e) => ({ x: new Date(e.effectiveDate).getTime(), y: e.salary }))
-    : [];
+  /* ---------------- SALARY ANALYSIS ---------------- */
+  const { data, isLoading, error, refetch } = useGetSalaryAnalysis(employeeId);
+  const showLoading = isLoading || !data;
+  // Derived UI values (guarded)
+  const currentSalary = data?.currentSalary ?? 0;
+  const lastAdjustmentAmount = data?.lastAdjustmentAmount ?? 0;
+  const daysBetweenChanges = data?.daysBetweenChanges ?? 0;
 
-  const pct =
-    entries.length >= 2 && entries[entries.length - 2].salary !== 0
-      ? (lastAdjustmentAmount / entries[entries.length - 2].salary) * 100
+  const points: TrendPoint[] = useMemo(
+    () =>
+      (data?.entries ?? []).map((e) => ({
+        x: new Date(e.effectiveDate).getTime(),
+        y: e.salary,
+      })),
+    [data?.entries]
+  );
+
+  // % calc based on backend delta & current (previous = current - delta)
+  const prevSalary =
+    Number.isFinite(currentSalary) && Number.isFinite(lastAdjustmentAmount)
+      ? currentSalary - lastAdjustmentAmount
       : 0;
+  const pct = prevSalary > 0 ? (lastAdjustmentAmount / prevSalary) * 100 : 0;
 
-  const [notes, setNotes] = useState<HrNote[]>([]);
+  /* ---------------- HR NOTES (hooks + pagination) ---------------- */
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const pageType = "employee201"; // for your Pagination sizing presets
+
+  const {
+    notes,
+    isLoading: notesLoading,
+    error: notesError,
+    meta,
+    refetch: refetchNotes,
+  } = useGetHRNotes(employeeId, { page, pageSize });
+
+  // derive totals for Pagination
+  const totalRecords = meta?.total_records ?? notes.length;
+  const totalPages =
+    meta?.total_pages ?? Math.max(1, Math.ceil(totalRecords / pageSize));
+
+  // Pagination handlers (changing these state values triggers the hook to refetch)
+  const handlePageSizeChange = (value: number) => {
+    setPageSize(value);
+    setPage(1);
+  };
+  const handlePageChange = (selectedItem: { selected: number }) => {
+    setPage(selectedItem.selected + 1); // react-paginate is 0-based
+  };
+
+  const { isSaving, addNote } = useAddHRNote(employeeId);
+  const { isDeleting, deleteNote } = useDeleteHRNote(employeeId);
+
+  // Add note UI
   const [isWriting, setIsWriting] = useState(false);
   const [draft, setDraft] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const startAddNote = () => {
     setIsWriting(true);
@@ -52,34 +92,38 @@ export default function SalaryHistoryAnalysis({
     setIsWriting(false);
     setDraft("");
   };
-  const saveNote = () => {
+  const saveNote = async () => {
     const text = draft.trim();
     if (!text) return;
-    const newNote: HrNote = { id: cryptoRandomId(), text, createdAt: new Date() };
-    setNotes((prev) => [newNote, ...prev]);
-    setIsWriting(false);
-    setDraft("");
-    onAddNote?.(text);
-    notify.success("Note added."); // 👈 toast
+    await notify.promise(
+      (async () => {
+        const res = await addNote(text);
+        if (!res.ok) throw res.error;
+        setIsWriting(false);
+        setDraft("");
+        await refetchNotes();
+      })(),
+      {
+        success: "Note added.",
+        error: "Failed to add note.",
+      }
+    );
   };
 
-  const handleDeleteNote = async (id: string) => {
+  const handleDeleteNote = async (id: number) => {
     setDeletingId(id);
     try {
-      const ok = await notify.promise(
+      await notify.promise(
         (async () => {
-          // mimic latency or call your API here
-          await sleep(800);
-          await onDeleteNote?.(id);
-          setNotes((prev) => prev.filter((n) => n.id !== id)); // remove only on success
+          const res = await deleteNote(id);
+          if (!res.ok) throw res.error!;
+          await refetchNotes();
         })(),
         {
-          loading: "Deleting note…",
           success: "Note deleted.",
           error: "Failed to delete note.",
         }
       );
-      // ok returns true/false; state changes already handled above when resolved
     } finally {
       setDeletingId(null);
     }
@@ -87,7 +131,6 @@ export default function SalaryHistoryAnalysis({
 
   /* ---------- EXPORT TO PDF ---------- */
   const captureRef = useRef<HTMLDivElement>(null);
-
   const handleExportPdf = async () => {
     if (onExportPdf) return onExportPdf();
 
@@ -142,7 +185,17 @@ export default function SalaryHistoryAnalysis({
           pageCanvas.width = canvas.width;
           pageCanvas.height = h;
           ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(canvas, 0, drawn, canvas.width, h, 0, 0, canvas.width, h);
+          ctx.drawImage(
+            canvas,
+            0,
+            drawn,
+            canvas.width,
+            h,
+            0,
+            0,
+            canvas.width,
+            h
+          );
 
           const pageImg = pageCanvas.toDataURL("image/png");
           if (drawn > 0) pdf.addPage();
@@ -153,26 +206,43 @@ export default function SalaryHistoryAnalysis({
 
         pdf.save(`Salary_History_Analysis_${employeeName}.pdf`);
       })(),
-      {
-        loading: "Exporting PDF…",
-        success: "PDF exported.",
-        error: "Failed to export PDF.",
-      }
+      { success: "PDF exported.", error: "Failed to export PDF." }
     );
   };
 
-  const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
+  /* ---------- SINGLE RETURN (inline loading & error) ---------- */
   return (
     <div className="space-y-4">
-      {/* Export button (web only) */}
-      <div className="flex justify-end no-print">
+      {/* Top controls + inline error banner */}
+      <div className="flex items-center justify-between no-print">
+        {error ? (
+          <div className="mr-3 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <span>{error.message || "Failed to load salary analysis."}</span>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="inline-flex items-center gap-1 rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
+            >
+              <ArrowPathIcon className="h-4 w-4" />
+              Retry
+            </button>
+          </div>
+        ) : (
+          <div />
+        )}
+
         <button
           type="button"
           onClick={handleExportPdf}
-          className="rounded-md border border-[#355fd0] px-2 py-1 text-xs text-[#355fd0] hover:bg-[#355fd0]/5"
+          disabled={showLoading}
+          className={`rounded-md border border-[#355fd0] px-2 py-1 text-xs ${
+            showLoading
+              ? "cursor-not-allowed opacity-60 text-[#355fd0]"
+              : "text-[#355fd0] hover:bg-[#355fd0]/5"
+          }`}
+          title={showLoading ? "Please wait…" : "Export to PDF"}
         >
-          Export to PDF
+          {showLoading ? "Preparing…" : "Export to PDF"}
         </button>
       </div>
 
@@ -181,34 +251,68 @@ export default function SalaryHistoryAnalysis({
         {/* Employee name (hidden on web, shown only in export) */}
         <div className="export-only hidden rounded-xl border card px-4 py-3">
           <div className="text-sm text-gray-500">Salary History Analysis</div>
-          <div className="mt-1 text-lg font-semibold text-gray-900">{employeeName}</div>
+          <div className="mt-1 text-lg font-semibold text-gray-900">
+            {employeeName}
+          </div>
         </div>
 
         {/* Tiles */}
         <div className="tile-grid grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
-          <Metric title="Current Salary" value={`₱ ${formatMoney(currentSalary)}`} up />
-          <Metric
-            title="Last Adjustment"
-            value={
-              <>
-                {`${lastAdjustmentAmount >= 0 ? "+" : "−"} ₱ ${formatMoney(Math.abs(lastAdjustmentAmount))} `}
-                {Number.isFinite(pct) && (
-                  <span style={{ color: lastAdjustmentAmount >= 0 ? "#4CEE52" : "#FF4C4C" }}>
-                    ({pct.toFixed(1)}%)
-                  </span>
-                )}
-              </>
-            }
-            up={lastAdjustmentAmount >= 0}
-          />
-          <Metric title="Time Gap Between Changes" value={`${daysBetweenChanges} day(s)`} />
+          {showLoading ? (
+            <>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-28 rounded-xl border p-4 bg-white">
+                  <div className="h-5 w-24 bg-gray-200 rounded mb-2 animate-pulse" />
+                  <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              <Metric
+                title="Current Salary"
+                value={`₱ ${formatMoney(currentSalary)}`}
+                up={lastAdjustmentAmount >= 0}
+              />
+              <Metric
+                title="Last Adjustment"
+                value={
+                  <>
+                    {`${lastAdjustmentAmount >= 0 ? "+" : "−"} ₱ ${formatMoney(
+                      Math.abs(lastAdjustmentAmount)
+                    )} `}
+                    {Number.isFinite(pct) && (
+                      <span
+                        className="pl-2"
+                        style={{
+                          color:
+                            lastAdjustmentAmount >= 0 ? "#4CEE52" : "#FF4C4C",
+                        }}
+                      >
+                        ({pct.toFixed(1)}%)
+                      </span>
+                    )}
+                  </>
+                }
+                up={lastAdjustmentAmount >= 0}
+              />
+              <Metric
+                title="Time Gap Between Changes"
+                value={`${daysBetweenChanges} day(s)`}
+              />
+            </>
+          )}
         </div>
 
         {/* Trend card */}
         <div className="rounded-xl border card">
-          <div className="border-b px-4 py-2 text-sm font-medium text-gray-700">Salary Trend</div>
+          <div className="border-b px-4 py-2 text-sm font-medium text-gray-700">
+            Salary Trend
+          </div>
           <div className="px-4 py-3">
-            {points.length > 0 ? (
+            {showLoading ? (
+              <div className="h-48 w-full rounded bg-gray-100 animate-pulse" />
+            ) : points.length > 0 ? (
               <TrendChart points={points} />
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-center text-sm text-gray-500">
@@ -221,79 +325,134 @@ export default function SalaryHistoryAnalysis({
         {/* Notes */}
         <div className="space-y-2">
           <div className="no-print">
+            {/* Left: Add HR Notes / inline editor */}
             {!isWriting ? (
               <button
                 type="button"
                 onClick={startAddNote}
-                className="rounded-md border border-[#355fd0] px-3 py-2 text-sm text-[#355fd0] hover:bg-[#355fd0]/5"
+                disabled={notesLoading || !!notesError}
+                className={`rounded-md border px-3 py-2 text-sm ${
+                  notesLoading || notesError
+                    ? "cursor-not-allowed border-gray-300 text-gray-400"
+                    : "border-[#355fd0] text-[#355fd0] hover:bg-[#355fd0]/5"
+                }`}
+                title={notesError ? "Fix the error before adding." : undefined}
               >
                 Add HR Notes
               </button>
             ) : (
-              <div className="space-y-2">
-                <textarea
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  rows={3}
-                  placeholder="Write an HR note..."
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#355fd0]"
-                />
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={saveNote}
-                    disabled={!draft.trim()}
-                    className="rounded-md bg-[#355fd0] px-4 py-2 text-sm text-white disabled:opacity-50"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cancelAddNote}
-                    className="rounded-md border px-4 py-2 text-sm text-gray-700"
-                  >
-                    Cancel
-                  </button>
+              <div className="flex-1 mr-4">
+                <div className="space-y-2">
+                  <textarea
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    rows={3}
+                    placeholder="Write an HR note..."
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#355fd0]"
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={saveNote}
+                      disabled={!draft.trim() || isSaving}
+                      className="rounded-md bg-[#355fd0] px-4 py-2 text-sm text-white disabled:opacity-50"
+                    >
+                      {isSaving ? "Saving…" : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelAddNote}
+                      disabled={isSaving}
+                      className="rounded-md border px-4 py-2 text-sm text-gray-700"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
           </div>
-
-          <div className="rounded-xl border border-dashed p-4 card">
-            {notes.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-500">No HR notes yet.</div>
-            ) : (
-              <ul className="space-y-3">
-                {notes.map((n) => (
-                  <li key={n.id} className="flex items-start justify-between rounded-lg border bg-white p-3">
-                    <div className="pr-2">
-                      <p className="text-sm text-gray-700">{n.text}</p>
-                      <div className="mt-2 text-xs text-gray-400">{formatDateTime(n.createdAt)}</div>
-                    </div>
-
-                    {/* Delete button (web only; hidden in PDF) */}
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteNote(n.id)}
-                      className={`no-print ml-2 flex items-center justify-center text-gray-400 hover:text-red-500 ${
-                        deletingId === n.id ? "cursor-wait text-gray-400 hover:text-gray-400" : ""
-                      }`}
-                      title={deletingId === n.id ? "Deleting…" : "Delete note"}
-                      aria-label={`Delete note from ${formatDateTime(n.createdAt)}`}
-                      disabled={deletingId === n.id}
-                    >
-                      {deletingId === n.id ? (
-                        <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                      ) : (
-                        <TrashIcon className="h-5 w-5" />
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
         </div>
+
+        {/* Notes list */}
+        <div className="rounded-xl border border-dashed p-4 card">
+          {notesError && (
+            <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {notesError.message || "Failed to load HR notes."}
+            </div>
+          )}
+
+          {notesLoading ? (
+            <ul className="space-y-3">
+              {[0, 1, 2].map((i) => (
+                <li
+                  key={i}
+                  className="flex items-start justify-between rounded-lg border bg-white p-3"
+                >
+                  <div className="pr-2 w-full">
+                    <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+                    <div className="mt-2 h-3 w-32 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : notes.length === 0 ? (
+            <div className="p-6 text-center text-sm text-gray-500">
+              No HR notes yet.
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {notes.map((n) => (
+                <li
+                  key={n.id}
+                  className="flex items-start justify-between rounded-lg border bg-white p-3"
+                >
+                  <div className="pr-2">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      {n.note_content}
+                    </p>
+                    <div className="mt-2 text-xs text-gray-400">
+                      {formatDateTime(new Date(n.date_created))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteNote(n.id)}
+                    className={`no-print ml-2 flex items-center justify-center text-gray-400 hover:text-red-500 ${
+                      deletingId === n.id
+                        ? "cursor-wait text-gray-400 hover:text-gray-400"
+                        : ""
+                    }`}
+                    title={deletingId === n.id ? "Deleting…" : "Delete note"}
+                    aria-label={`Delete note from ${formatDateTime(
+                      new Date(n.date_created)
+                    )}`}
+                    disabled={deletingId === n.id || isDeleting}
+                  >
+                    {deletingId === n.id ? (
+                      <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <TrashIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <Pagination
+          pagination={{
+            totalPages,
+            totalRecords,
+          }}
+          currentPage={page}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+          onPageChange={handlePageChange}
+          pageType={pageType}
+        />
       </div>
     </div>
   );
@@ -314,24 +473,40 @@ function TrendIcon({ up = true }: { up?: boolean }) {
       preserveAspectRatio="xMidYMid meet"
     >
       <g transform={rotate}>
-        <path d="M12.666 18.9902L0.666016 18.9902L6.66602 9.99023L12.666 18.9902ZM12.666 8.99023L0.666016 8.99023L6.66602 -0.00976562L12.666 8.99023Z" fill={fill} />
+        <path
+          d="M12.666 18.9902L0.666016 18.9902L6.66602 9.99023L12.666 18.9902ZM12.666 8.99023L0.666016 8.99023L6.66602 -0.00976562L12.666 8.99023Z"
+          fill={fill}
+        />
       </g>
     </svg>
   );
 }
 
-function Metric({ title, value, up }: { title: string; value: React.ReactNode; up?: boolean }) {
+function Metric({
+  title,
+  value,
+  up,
+}: {
+  title: string;
+  value: React.ReactNode;
+  up?: boolean;
+}) {
   return (
     <div className="metric-card relative flex h-28 flex-col items-center justify-center rounded-xl border border-slate-300/70 p-4 print:break-inside-avoid">
       {up !== undefined && <TrendIcon up={up} />}
-      <div className="text-lg font-semibold text-slate-800">{value}</div>
+      <div className="flex w-full items-center justify-center text-center font-semibold text-slate-800">
+        {value}
+      </div>
       <div className="mt-1 text-xs text-gray-500">{title}</div>
     </div>
   );
 }
 
 function formatMoney(n: number) {
-  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 function formatDateTime(d: Date) {
   return new Date(d).toLocaleString(undefined, {
@@ -341,8 +516,4 @@ function formatDateTime(d: Date) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-function cryptoRandomId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }

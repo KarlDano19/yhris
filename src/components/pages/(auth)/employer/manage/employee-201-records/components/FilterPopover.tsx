@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FunnelIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import useGetLocationItems from "@/components/hooks/useGetLocationItems";
+import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
+import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 
 type FilterValues = {
-  location: string;
+  location: string;     // "ALL" | "Unspecified" | "<id as string>"
   department: string;
   position: string;
   onlyIncomplete: boolean;
@@ -11,17 +14,70 @@ type FilterValues = {
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  // initial (applied) values from Content
   initial: FilterValues;
   onApply: (vals: FilterValues) => void;
 };
 
+type ApiItem = { id: number; name: string };
+type Option = { value: string; label: string };
+
+const toOptions = (items?: ApiItem[], includeUnspecified = false): Option[] => {
+  const base: Option[] = [{ value: "ALL", label: "ALL" }];
+  const dynamic: Option[] = (items ?? [])
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    // 👇 use name for both value & label
+    .map((it) => ({ value: it.name, label: it.name }));
+  const tail: Option[] = includeUnspecified
+    ? [{ value: "Unspecified", label: "Unspecified" }]
+    : [];
+  const seen = new Set<string>();
+  return [...base, ...dynamic, ...tail].filter((o) => {
+    if (seen.has(o.value)) return false;
+    seen.add(o.value);
+    return true;
+  });
+};
+
+const ensureValue = (value: string, options: Option[]) =>
+  options.some((o) => o.value === value) ? value : "ALL";
+
 export default function FilterPopover({ open, onOpenChange, initial, onApply }: Props) {
   const [draft, setDraft] = useState<FilterValues>(initial);
 
+  // locations
+  const {
+    data: locationItems = [],
+    isLoading: isLocLoading,
+    isError: isLocError,
+    error: locError,
+  } = useGetLocationItems();
+
+  // departments
+  const {
+    data: departmentItems = [],
+    isLoading: isDeptLoading,
+    isError: isDeptError,
+    error: deptError,
+  } = useGetDepartmentItems();
+
+  // positions
+  const {
+    data: positionItems = [],
+    isLoading: isPosLoading,
+    isError: isPosError,
+    error: posError,
+  } = useGetPositionItems();
+
+  const locationOptions = useMemo(() => toOptions(locationItems as ApiItem[]), [locationItems]);
+  const departmentOptions = useMemo(() => toOptions(departmentItems as ApiItem[]), [departmentItems]);
+  const positionOptions = useMemo(() => toOptions(positionItems as ApiItem[]), [positionItems]);
+
   useEffect(() => {
-    if (open) setDraft(initial); // reset draft to current applied values on open
+    if (open) setDraft(initial);
   }, [open, initial]);
+
+  const anyLoading = isLocLoading || isDeptLoading || isPosLoading;
 
   return (
     <div className="relative">
@@ -47,18 +103,26 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
               <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Location</label>
               <div className="relative">
                 <select
-                  value={draft.location}
+                  value={ensureValue(draft.location, locationOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))}
-                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none"
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  disabled={anyLoading}
+                  aria-busy={isLocLoading}
+                  aria-invalid={isLocError || undefined}
                 >
-                  <option>ALL</option>
-                  <option>Manila</option>
-                  <option>Cebu</option>
-                  <option>Davao</option>
-                  <option>Unspecified</option>
+                  {locationOptions.map((opt) => (
+                    <option key={`loc-${opt.value}`} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDownIcon className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-indigo-dye/70" />
               </div>
+              {isLocError && (
+                <p className="mt-1 text-xs text-red-600">
+                  {(locError as any)?.message ?? String(locError) ?? "Failed to load locations."}
+                </p>
+              )}
             </div>
 
             {/* Department */}
@@ -66,19 +130,26 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
               <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Department</label>
               <div className="relative">
                 <select
-                  value={draft.department}
+                  value={ensureValue(draft.department, departmentOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
-                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none"
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  disabled={anyLoading}
+                  aria-busy={isDeptLoading}
+                  aria-invalid={isDeptError || undefined}
                 >
-                  <option>ALL</option>
-                  <option>HR</option>
-                  <option>Finance</option>
-                  <option>Engineering</option>
-                  <option>Operations</option>
-                  <option>Unspecified</option>
+                  {departmentOptions.map((opt) => (
+                    <option key={`dept-${opt.value}`} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDownIcon className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-indigo-dye/70" />
               </div>
+              {isDeptError && (
+                <p className="mt-1 text-xs text-red-600">
+                  {(deptError as any)?.message ?? String(deptError) ?? "Failed to load departments."}
+                </p>
+              )}
             </div>
 
             {/* Position */}
@@ -86,18 +157,26 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
               <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Position</label>
               <div className="relative">
                 <select
-                  value={draft.position}
+                  value={ensureValue(draft.position, positionOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, position: e.target.value }))}
-                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none"
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  disabled={anyLoading}
+                  aria-busy={isPosLoading}
+                  aria-invalid={isPosError || undefined}
                 >
-                  <option>ALL</option>
-                  <option>Associate</option>
-                  <option>Manager</option>
-                  <option>Director</option>
-                  <option>Unspecified</option>
+                  {positionOptions.map((opt) => (
+                    <option key={`pos-${opt.value}`} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDownIcon className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-indigo-dye/70" />
               </div>
+              {isPosError && (
+                <p className="mt-1 text-xs text-red-600">
+                  {(posError as any)?.message ?? String(posError) ?? "Failed to load positions."}
+                </p>
+              )}
             </div>
 
             {/* Only Incomplete */}
@@ -114,17 +193,25 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
             {/* Footer */}
             <div className="pt-2 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
               <button
-                onClick={() => setDraft({ location: "ALL", department: "ALL", position: "ALL", onlyIncomplete: false })}
+                onClick={() =>
+                  setDraft({
+                    location: "ALL",
+                    department: "ALL",
+                    position: "ALL",
+                    onlyIncomplete: false,
+                  })
+                }
                 className="rounded-lg border border-[#355fd0] bg-white px-4 py-1.5 sm:px-5 sm:py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/10"
               >
                 Reset
               </button>
               <button
                 onClick={() => {
-                  onApply(draft);     // <-- apply to API params only now
+                  onApply(draft); // "ALL" | "Unspecified" | "<id>"
                   onOpenChange(false);
                 }}
-                className="rounded-lg bg-[#355fd0] px-5 py-1.5 sm:px-6 sm:py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90"
+                className="rounded-lg bg-[#355fd0] px-5 py-1.5 sm:px-6 sm:py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-60"
+                disabled={anyLoading}
               >
                 Search
               </button>

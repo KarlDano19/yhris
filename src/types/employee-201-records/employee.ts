@@ -1,78 +1,61 @@
-// types/employee.ts
-export type GovernmentIds = {
-  tin?: string;
-  sss?: string;
-  pagibig?: string;      // PAG-IBIG
-  philhealth?: string;
-};
-
-export type EmergencyContact = {
-  name: string;
-  relation: string;      // e.g., "Mother"
-  contactNumber: string;
-  address?: string;
-};
-
 export type Employee = {
-  // core / list view
-  id: string;
-  avatar: string;
-  complete: boolean;
-  percent?: number;
-  alert?: boolean;
-  missingCount?: number;
-  totalCount?: number;
+  id: number;
 
-  // classification (kept for filters)
-  location?: string;     // e.g., "Manila"
-  department?: string;   // e.g., "Accounting"
-  position?: string;     // e.g., "Associate" | "Manager"
+  // completeness / progress
+  hasCompleteRecords: boolean;
+  progressPercentage: number;
+  incompleteRecords: { missing: string[]; count: number } | null;
 
-  // profile header
-  jobTitle?: string;     // e.g., "Accounting Officer"
-  displayDept?: string;  // if you want header to show "(Accounting)"
+  // classification
+  department: string | null; // e.g. "IT"
+  position: string | null;   // e.g. "UI/UX Designer"
 
-  // personal info section
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  address?: string;
-  contactNumber?: string;
+  // timestamps
+  created_at: string; // ISO
+  updated_at: string; // ISO
 
-  // derived convenience (for existing tiles/search)
-  name: string;          // keep this for tiles: `${firstName} ${lastName}`
+  // identifiers
+  employee_id: string | null;
+  system_id: number | null;
 
-  // PH Government IDs
-  governmentIds?: GovernmentIds;
+  // personal info
+  firstname: string;
+  middlename: string | null;
+  lastname: string;
+  email: string | null;
+  mobile: string | null;
+  address: string | null;
+  date_hired: string | null; // ISO (YYYY-MM-DD)
+  nationality?: string | null;
+  gender?: string | null;
+  religion?: string | null;
+  location?: string | null;
 
-  // Emergency contact
-  emergencyContact?: EmergencyContact;
+  // status / misc
+  is_active?: boolean;
+  is_resigned?: boolean;
+  photo?: string | null;
+  employment_status?: string | null;
 
-  // --- Employment Details (canonical) ---
-  /** ISO date string, e.g. "2025-08-08" */
-  dateHired?: string;
-  employmentStatus?:
-    | "Active"
-    | "Probationary"
-    | "Contract"
-    | "On Leave"
-    | "Terminated"
-    | string;
-  /** Monthly base salary (number) */
-  basePay?: number;
-  salaryCurrency?: string;
-  locationsList?: string[];
+  // gov IDs
+  tin?: string | null;
+  sss?: string | null;
+  pagibig?: string | null;
+  philhealth?: string | null;
 
-  // --- Legacy/alias fields (to be removed later) ---
-  /** @deprecated use id */
-  employeeId?: string;
-  /** @deprecated use dateHired */
-  hireDate?: string;
-  /** @deprecated use employmentStatus */
-  status?: string;
-  /** @deprecated use location */
-  workLocation?: string;
-  /** @deprecated use basePay */
-  salary?: number;
+  // emergency contact
+  emergency_contact?: {
+    name?: string | null;
+    contact_number?: string | null;
+    relation?: string | null;
+    address?: string | null;
+  } | null;
+
+  // relations
+  employer?: number | null;
+
+  // optional inline lists from API
+  positions_list?: { id: number; name: string }[] | string[] | null;
+  departments_list?: { id: number; name: string }[] | string[] | null;
+  locations_list?: { id: number; name: string }[] | string[] | null;
 };

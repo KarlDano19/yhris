@@ -1,16 +1,16 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Employee } from "@/types/employee-201-records/employee";
-import { MOCK_EMPLOYEES } from "../data/mockEmployees";
+import { getCookie } from "cookies-next";
 
 export type EmployeeQuery = {
   q: string;
-  location: string;
-  department: string;
-  position: string;
-  onlyIncomplete: boolean;
-  page: number;       // <-- NEW
-  pageSize: number;   // <-- NEW
+  location: string;       // "ALL" | "<name>"
+  department: string;     // "ALL" | "<name>"
+  position: string;       // "ALL" | "<name>"
+  onlyIncomplete: boolean; // (not sent to API)
+  page: number;           // current_page
+  pageSize: number;       // page_size
 };
 
 const DEFAULT_QUERY: EmployeeQuery = {
@@ -20,58 +20,92 @@ const DEFAULT_QUERY: EmployeeQuery = {
   position: "ALL",
   onlyIncomplete: false,
   page: 1,
-  pageSize: 15,
+  pageSize: 12,
 };
 
 type Meta = { total: number; totalPages: number };
 
+function buildParams(q: EmployeeQuery) {
+  const params = new URLSearchParams();
+  if (q.q.trim()) params.set("search", q.q.trim());
+
+  const setIfNotAll = (key: "department" | "position" | "location", val: string) => {
+    const s = (val || "").trim();
+    if (s && s.toLowerCase() !== "all") params.set(key, s);
+  };
+  setIfNotAll("location", q.location);
+  setIfNotAll("department", q.department);
+  setIfNotAll("position", q.position);
+
+  params.set("current_page", String(q.page));
+  params.set("page_size", String(q.pageSize));
+  return params;
+}
+
 export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
   const [query, setQuery] = useState<EmployeeQuery>({ ...DEFAULT_QUERY, ...initial });
-  const [data, setData] = useState<Employee[] | null>(null);
+  const [data, setData] = useState<Partial<Employee>[] | null>(null);
   const [meta, setMeta] = useState<Meta>({ total: 0, totalPages: 1 });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
 
   const fetchEmployees = useCallback(async (q: EmployeeQuery) => {
-    abortRef.current?.abort();
-    const ac = new AbortController();
-    abortRef.current = ac;
-
     setIsLoading(true);
     setError(null);
 
     try {
-      // Simulate network latency
-      await new Promise((res) => setTimeout(res, 800));
+      const token = getCookie("token") as string | undefined;
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+      const url = `${baseUrl}/api/employee-201/employees/?${buildParams(q).toString()}`;
 
-      // --- server-side filtering ---
-      const qNorm = q.q.trim().toLowerCase();
-      let base = MOCK_EMPLOYEES.filter((e) => e.name.toLowerCase().includes(qNorm));
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+          ...(token ? { Authorization: `Token ${token}` } : {}),
+        },
+      });
 
-      const getOr = <T extends keyof Employee>(e: Employee, k: T, fallback = "Unspecified") =>
-        ((e[k] as string | undefined) ?? fallback);
+      if (!res.ok) {
+        let errMessage = `Request failed (${res.status})`;
+        try {
+          const problem = await res.json();
+          errMessage = typeof problem === "string" ? problem : problem?.message || JSON.stringify(problem);
+        } catch {}
+        throw new Error(errMessage);
+      }
 
-      if (q.onlyIncomplete) base = base.filter((e) => !e.complete);
-      if (q.location !== "ALL")   base = base.filter((e) => getOr(e, "location")   === q.location);
-      if (q.department !== "ALL") base = base.filter((e) => getOr(e, "department") === q.department);
-      if (q.position !== "ALL")   base = base.filter((e) => getOr(e, "position")   === q.position);
+      const payload = await res.json();
 
-      // --- server-side pagination ---
-      const total = base.length;
-      const totalPages = Math.max(1, Math.ceil(total / q.pageSize));
-      const safePage = Math.min(Math.max(1, q.page), totalPages);
-      const start = (safePage - 1) * q.pageSize;
-      const paged = base.slice(start, start + q.pageSize);
+      // Accept common list shapes
+      const recordsRaw =
+        (payload?.records as Partial<Employee>[]) ??
+        (payload?.results as Partial<Employee>[]) ??
+        (payload?.data as Partial<Employee>[]) ??
+        [];
 
-      if (ac.signal.aborted) return;
-      setData(paged);
+      // Use API shape directly (no mapping)
+      const list = Array.isArray(recordsRaw) ? recordsRaw : [];
+
+      const total =
+        Number(payload?.total) ??
+        Number(payload?.count) ??
+        Number(payload?.records_total) ??
+        list.length;
+
+      const totalPages =
+        Number(payload?.total_pages) ??
+        Number(payload?.totalPages) ??
+        Math.max(1, Math.ceil(total / q.pageSize));
+
+      setData(list);
       setMeta({ total, totalPages });
-    } catch (e) {
-      if ((e as any)?.name === "AbortError") return;
-      setError(e as Error);
+    } catch (e: any) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+      setData(null);
+      setMeta({ total: 0, totalPages: 1 });
     } finally {
-      if (!ac.signal.aborted) setIsLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
@@ -79,37 +113,34 @@ export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
     fetchEmployees(query);
   }, [fetchEmployees, query]);
 
-  // setters
   const setSearch = useCallback((qstr: string) => {
-    // typing resets to page 1
     setQuery((prev) => ({ ...prev, q: qstr, page: 1 }));
   }, []);
 
-  const applyFilters = useCallback((
-    filters: Pick<EmployeeQuery, "location" | "department" | "position" | "onlyIncomplete">
-  ) => {
-    // applying filters resets to page 1
-    setQuery((prev) => ({ ...prev, ...filters, page: 1 }));
-  }, []);
+  const applyFilters = useCallback(
+    (filters: Pick<EmployeeQuery, "location" | "department" | "position" | "onlyIncomplete">) => {
+      setQuery((prev) => ({ ...prev, ...filters, page: 1 }));
+    },
+    []
+  );
 
   const setPage = useCallback((page: number) => {
     setQuery((prev) => ({ ...prev, page }));
   }, []);
 
   const setPageSize = useCallback((pageSize: number) => {
-    // changing page size resets to page 1
     setQuery((prev) => ({ ...prev, pageSize, page: 1 }));
   }, []);
 
   const refetch = useCallback(() => fetchEmployees(query), [fetchEmployees, query]);
 
   return {
-    data,
-    meta,             // { total, totalPages }
+    data,         // Partial<Employee>[] in API field names
+    meta,         // { total, totalPages }
     isLoading,
     error,
     refetch,
-    query,            // includes page & pageSize
+    query,
     setSearch,
     applyFilters,
     setPage,

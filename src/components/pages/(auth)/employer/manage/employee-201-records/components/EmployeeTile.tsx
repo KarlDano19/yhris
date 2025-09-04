@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import PlacholderPicture from "@/svg/PlaceholderPicture"; // ⬅️ use the dynamic SVG
+import PlacholderPicture from "@/svg/PlaceholderPicture"; // dynamic SVG
 import type { Employee } from "@/types/employee-201-records/employee";
 
-export default function EmployeeTile({ emp }: { emp: Employee }) {
+export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
   const [open, setOpen] = useState(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [side, setSide] = useState<"right" | "left" | "bottom">("right");
@@ -30,14 +30,25 @@ export default function EmployeeTile({ emp }: { emp: Employee }) {
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const isSvgAvatar = emp.avatar === "male" || emp.avatar === "female";
+  // ---------- display helpers (API fields) ----------
+  const displayName = `${emp.firstname ?? ""}${emp.lastname ? ` ${emp.lastname}` : ""}`.trim();
+  const [imgError, setImgError] = useState(false);
+  const rawGender = (emp.gender || "").toLowerCase();
+  const photoUrl = emp.photo || undefined;
+  const hasPhoto = !!photoUrl && photoUrl.trim() !== "";
+  const showPhoto = hasPhoto && !imgError;
+  const placeholderGender: "male" | "female" =
+    rawGender === "female" ? "female" : "male";
+
+  const complete = !!emp.hasCompleteRecords;
+  const percent = typeof emp.progressPercentage === "number" ? emp.progressPercentage : 0;
+  const missingCount = emp.incompleteRecords?.count ?? 0;
+  // --------------------------------------------------
 
   return (
     <Link href={`/manage/employee-201-records/${emp.id}`} className="block">
@@ -45,7 +56,7 @@ export default function EmployeeTile({ emp }: { emp: Employee }) {
         ref={tileRef}
         className="relative cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
       >
-        {!emp.complete && (
+        {!complete && (
           <div
             className="absolute right-5 top-4 z-20"
             onMouseEnter={handleEnter}
@@ -84,7 +95,7 @@ export default function EmployeeTile({ emp }: { emp: Employee }) {
                   <div className="mb-2 text-[12px] font-semibold text-gray-900 sm:mb-3 sm:text-[13px]">
                     Incomplete Records{" "}
                     <span className="font-bold text-rose-500">
-                      ({emp.missingCount}/{emp.totalCount})
+                      ({missingCount})
                     </span>
                   </div>
 
@@ -120,35 +131,38 @@ export default function EmployeeTile({ emp }: { emp: Employee }) {
           </div>
         )}
 
-        {/* Avatar */}
+        {/* Avatar (gender/photo from API) */}
         <div className="relative mx-auto h-24 w-24">
           <div
             className={`absolute inset-0 scale-110 rounded-full border-4 ${
-              emp.complete ? "border-yellow-400" : "border-yellow-400 border-dashed"
+              complete ? "border-yellow-400" : "border-yellow-400 border-dashed"
             }`}
           />
-          {isSvgAvatar ? (
-            <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
-              <PlacholderPicture
-                gender={emp.avatar as "male" | "female"}
-                className="h-16 w-16"
-                title={emp.name}
-              />
-            </div>
-          ) : (
+          {showPhoto ? (
             <Image
-              src={emp.avatar}
-              alt={`${emp.name} ${emp.complete ? "– complete" : "– incomplete"}`}
+              src={photoUrl!}
+              alt={`${displayName || "Employee"} ${complete ? "– complete" : "– incomplete"}`}
               width={96}
               height={96}
-              className="rounded-full object-cover"
+              className="absolute inset-0 rounded-full object-cover"
+              onError={() => setImgError(true)}
             />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
+              <PlacholderPicture
+                gender={placeholderGender}
+                className="h-16 w-16"
+                title={displayName || "Employee"}
+              />
+            </div>
           )}
         </div>
 
         <div className="mt-3 text-center">
-          <div className="text-sm font-semibold text-gray-800">{emp.name}</div>
-          {emp.complete ? (
+          <div className="text-sm font-semibold text-gray-8 00">
+            {displayName || "\u00A0"}
+          </div>
+          {complete ? (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
               Complete Records
@@ -160,17 +174,16 @@ export default function EmployeeTile({ emp }: { emp: Employee }) {
                 role="progressbar"
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-valuenow={emp.percent ?? 0}
+                aria-valuenow={percent}
                 aria-label="Record completion"
               >
                 <div
                   className="h-full bg-rose-400"
-                  style={{ width: `${emp.percent ?? 0}%` }}
+                  style={{ width: `${percent}%` }}
                 />
               </div>
               <div className="mt-1 text-[11px] font-medium text-rose-600">
-                Incomplete Records
-                {typeof emp.percent === "number" ? ` • ${emp.percent}%` : ""}
+                Incomplete Records{typeof percent === "number" ? ` • ${percent}%` : ""}
               </div>
             </div>
           )}

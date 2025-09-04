@@ -3,7 +3,7 @@ import type { Employee } from "@/types/employee-201-records/employee";
 export const MOCK_EMPLOYEES: Employee[] = [
   {
     id: "1",
-    avatar: "male",
+    gender: "male",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -23,7 +23,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "2",
-    avatar: "female",
+    gender: "female",
     complete: false,
     percent: 35,
     alert: true,
@@ -46,7 +46,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "3",
-    avatar: "male",
+    gender: "male",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -65,7 +65,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "4",
-    avatar: "female",
+    gender: "female",
     complete: true,
     percent: 100,
     location: "Davao",
@@ -84,7 +84,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "5",
-    avatar: "male",
+    gender: "male",
     complete: true,
     percent: 100,
     location: "Cebu",
@@ -103,7 +103,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "6",
-    avatar: "female",
+    gender: "female",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -122,7 +122,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "7",
-    avatar: "male",
+    gender: "male",
     complete: true,
     percent: 100,
     location: "Manila",
@@ -141,7 +141,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "8",
-    avatar: "female",
+    gender: "female",
     complete: true,
     percent: 100,
     location: "Davao",
@@ -160,7 +160,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "9",
-    avatar: "male",
+    gender: "male",
     complete: false,
     percent: 75,
     alert: true,
@@ -182,7 +182,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "10",
-    avatar: "female",
+    gender: "female",
     complete: true,
     percent: 100,
     location: "Cebu",
@@ -201,7 +201,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "11",
-    avatar: "male",
+    gender: "male",
     complete: true,
     percent: 100,
     location: "Davao",
@@ -220,7 +220,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "12",
-    avatar: "female",
+    gender: "female",
     complete: true,
     percent: 100,
     location: "Manila",

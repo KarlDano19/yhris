@@ -1,34 +1,31 @@
-// components/EmploymentDetailsForm.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
+import LabeledSelect from "../common/LabeledSelect";
+import AddableSelect from "../common/AddableSelect";
 import type { Employee } from "@/types/employee-201-records/employee";
 import { s } from "../utils/_shared";
 
-import SalaryHistoryModal, { type SalaryHistoryEntry } from "../modals/EmploymentDetails/SalaryHistoryModal";
-import EmploymentHistoryModal, { type EmploymentHistoryItem } from "../modals/EmploymentDetails/EmploymentHistoryModal";
+import SalaryHistoryModal from "../modals/EmploymentDetails/SalaryHistoryModal";
+import EmploymentHistoryModal from "../modals/EmploymentDetails/EmploymentHistoryModal";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type Props = {
   emp?: Partial<Employee>;
-  onViewSalaryHistory?: () => void;
-  onViewEmploymentHistory?: () => void;
-  /** Bubble user-edits upward (no initial mount emissions) */
   onPatchChange?: (patch: Record<string, any>) => void;
   onErrorsChange?: (hasErrors: boolean) => void;
 };
 
 const STATUS_OPTIONS = ["Active", "Probationary", "Contract", "On Leave", "Terminated"] as const;
+const uniq = (xs: (string | undefined | null)[]) =>
+  Array.from(new Set(xs.filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b));
 
 export default function EmploymentDetailsForm({
   emp,
-  onViewSalaryHistory,
-  onViewEmploymentHistory,
   onPatchChange,
   onErrorsChange,
 }: Props) {
@@ -36,87 +33,58 @@ export default function EmploymentDetailsForm({
   const [showSalaryModal, setShowSalaryModal] = useState(false);
   const [showEmploymentModal, setShowEmploymentModal] = useState(false);
 
-  // ---- date helpers ----
+  // --- helpers ---
   const toDate = (val?: string | Date | null): Date | undefined => {
     if (!val) return undefined;
     if (val instanceof Date) return isNaN(val.getTime()) ? undefined : val;
-    const mdy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(val);
-    if (mdy) {
-      const [, mm, dd, yyyy] = mdy;
-      const d = new Date(+yyyy, +mm - 1, +dd);
-      return isNaN(d.getTime()) ? undefined : d;
-    }
     const d = new Date(val);
     return isNaN(d.getTime()) ? undefined : d;
   };
+  const fmtYmd = (d?: Date | null) => {
+    if (!d) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dd}`;
+  };
 
-  const getHireDateFromEmp = (e?: Partial<Employee>): Date | undefined =>
-    toDate(s((e as any)?.hireDate)) ||
-    toDate(s((e as any)?.dateHired)) ||
-    toDate(s((e as any)?.hiredDate)) ||
-    undefined;
+  // --- initial values (API fields) ---
+  const [system_id] = useState<string>(s(emp?.system_id ?? "")); // read-only
+  const [date_hired, setDateHired] = useState<Date | undefined>(toDate(emp?.date_hired ?? null));
+  const [employment_status, setEmploymentStatus] = useState<string>(s(emp?.employment_status ?? ""));
+  const [location, setLocation] = useState<string>(s(emp?.location ?? ""));
+  const [position, setPosition] = useState<string>(s(emp?.position ?? ""));
+  const [department, setDepartment] = useState<string>(s(emp?.department ?? ""));
 
-  // ---- initial values (no emits here) ----
-  const [hireDate, setHireDate] = useState<Date | undefined>(getHireDateFromEmp(emp));
-  const [systemId, setSystemId] = useState<string>(emp?.id ?? (emp as any)?.employeeId ?? "");
-  const [employmentStatus, setEmploymentStatus] = useState<string>(emp?.employmentStatus ?? (emp as any)?.status ?? "");
-  const [location, setLocation] = useState<string>(emp?.location ?? (emp as any)?.workLocation ?? "");
+  // -------- options: from employee lists + user-added extras --------
+  const [extraPositions, setExtraPositions] = useState<string[]>([]);
+  const [extraDepartments, setExtraDepartments] = useState<string[]>([]);
+  const [extraLocations, setExtraLocations] = useState<string[]>([]);
 
-  const [salaryText, setSalaryText] = useState<string>(() => {
-    const raw = (emp as any)?.salary ?? emp?.basePay;
-    if (!raw || Number(raw) === 0) return "0.00";
-    const num = Number(raw);
-    return isNaN(num) ? "0.00" : num.toFixed(2);
-  });
-
-  // NEW: position / department (with addable options)
-  const [position, setPosition] = useState<string>(emp?.position ?? emp?.jobTitle ?? "");
-  const [department, setDepartment] = useState<string>(emp?.department ?? (emp as any)?.displayDept ?? "");
-
-  const [positionOptions, setPositionOptions] = useState<string[]>(
-    ((emp as any)?.positionsList as string[]) ?? ["Accounting Officer", "HR Associate", "Software Engineer", "Manager"]
+  const positionOptions = useMemo(
+    () => uniq([...(emp?.positions_list as string[] | undefined ?? []), ...extraPositions]),
+    [emp?.positions_list, extraPositions]
   );
-  const [departmentOptions, setDepartmentOptions] = useState<string[]>(
-    ((emp as any)?.departmentList as string[]) ?? ["HR", "Accounting", "Engineering", "Operations", "Finance"]
+  const departmentOptions = useMemo(
+    () => uniq([...(emp?.departments_list as string[] | undefined ?? []), ...extraDepartments]),
+    [emp?.departments_list, extraDepartments]
   );
+  const locations = useMemo(
+    () => uniq([...(emp?.locations_list as string[] | undefined ?? []), ...extraLocations]),
+    [emp?.locations_list, extraLocations]
+  );
+  const employeeName = ([emp?.firstname, emp?.lastname].filter(Boolean).join(" ").trim() || "—");
 
-  const locations = (emp?.locationsList as unknown as string[]) ?? ["MAIN", "Annex", "Remote"];
+  const mergeUniq = (base: (string | undefined | null)[], extras: string[]) =>
+    Array.from(new Set([...(base.filter(Boolean) as string[]), ...extras])).sort((a, b) => a.localeCompare(b));
 
-  // Example data — replace with your backend values
-  const salaryEntries: SalaryHistoryEntry[] = [
-    { position: emp?.position ?? emp?.jobTitle ?? "Accounting Officer", salary: 35000, effectiveDate: "2025-08-08" },
-    { position: emp?.position ?? emp?.jobTitle ?? "Accounting Officer", salary: 42500, effectiveDate: "2025-08-13" },
-  ];
-
-  const [employmentItems, setEmploymentItems] = useState<EmploymentHistoryItem[]>([
-    {
-      position: "Accounting Officer",
-      company: "ABC Company Inc.",
-      dateFrom: "2025-05-18",
-      dateTo: "2025-07-31",
-      description:
-        "Responsible for maintaining accurate financial records, preparing reports, and ensuring compliance with accounting policies.",
-    },
-    {
-      position: "Accounts Receivable Officer",
-      company: "JJK Medical Supplies Inc.",
-      dateFrom: "2019-06-07",
-      dateTo: "2023-05-10",
-      description: "Managed receivables to ensure timely collections, reconciled accounts, and maintained AR reports.",
-    },
-  ]);
-
-  const employeeName =
-    emp?.name ?? ([emp?.firstName, emp?.lastName].filter(Boolean).join(" ").trim() || "—");
-
-  /* ---------------- validations ---------------- */
+  /* ---------------- validations (API keys) ---------------- */
   const [errors, setErrors] = useState<Record<string, string | null>>({});
-
   const isEmpty = (v: string | undefined | null) => !v || String(v).trim().length === 0;
 
   const validate = {
-    systemId: (v: string) => (isEmpty(v) ? "System ID is required." : null),
-    hireDate: (d?: Date) => {
+    // system_id: now NOT required; omit from validation
+    date_hired: (d?: Date) => {
       if (!d || isNaN(d.getTime())) return "Date Hired is required.";
       const today = new Date();
       const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -124,34 +92,26 @@ export default function EmploymentDetailsForm({
       if (dOnly > tOnly) return "Date Hired cannot be in the future.";
       return null;
     },
-    employmentStatus: (v: string) =>
+    employment_status: (v: string) =>
       isEmpty(v)
         ? "Employment Status is required."
         : (STATUS_OPTIONS as unknown as string[]).includes(v)
         ? null
         : "Invalid employment status.",
     location: (v: string) => (isEmpty(v) ? "Location is required." : null),
-    salary: (v: string) => {
-      if (!v || v.trim() === "" || Number(v) === 0) return "Salary is required.";
-      const num = Number(v);
-      if (isNaN(num) || num <= 0) return "Salary must be greater than 0.";
-      return null;
-    },
-    position: (v: string) => (isEmpty(v) ? "Position is required." : null),          // NEW
-    department: (v: string) => (isEmpty(v) ? "Department is required." : null),      // NEW
+    position: (v: string) => (isEmpty(v) ? "Position is required." : null),
+    department: (v: string) => (isEmpty(v) ? "Department is required." : null),
   };
 
   const buildInitialErrors = (): Record<string, string | null> => ({
-    systemId: validate.systemId(systemId),
-    hireDate: validate.hireDate(hireDate),
-    employmentStatus: validate.employmentStatus(employmentStatus),
-    location: validate.location(location || "MAIN"),
-    salary: validate.salary(salaryText),
-    position: validate.position(position),       // NEW
-    department: validate.department(department), // NEW
+    // system_id removed from required validation
+    date_hired: validate.date_hired(date_hired),
+    employment_status: validate.employment_status(employment_status),
+    location: validate.location(location || ""),
+    position: validate.position(position),
+    department: validate.department(department),
   });
 
-  // Show errors immediately on initial render
   useEffect(() => {
     setErrors(buildInitialErrors());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,66 +134,75 @@ export default function EmploymentDetailsForm({
     <Section title="">
       {/* Row 1: System ID | Date Hired | Employment Status | Location */}
       <Grid className="mb-2">
+        {/* System ID: read-only, not required */}
         <Field
           label="System ID"
-          defaultValue={s(systemId)}
-          onChange={(e) => {
-            const v = e.target.value;
-            setSystemId(v);
-            emit({ systemId: v });
-            setErr("systemId", validate.systemId(v));
-          }}
-          error={errors["systemId"] || null}
-          required
+          defaultValue={s(system_id)}
+          onChange={() => {}}
+          error={null}
+          // no `required`
+          readOnly
+          disabled
         />
 
-        {/* Date Hired with CustomDatePicker */}
+        {/* Date Hired (API: date_hired YYYY-MM-DD) */}
         <div className="flex flex-col">
           <label className="mb-1 block text-sm font-medium text-gray-700">
             Date Hired <span className="ml-0.5 text-red-600">*</span>
           </label>
           <CustomDatePicker
             id="date-hired"
-            selected={hireDate ?? null}
+            selected={date_hired ?? null}
             pickerOnChange={(d: Date | null) => {
               const v = d ?? undefined;
-              setHireDate(v);
-              emit({ hireDate: v });
-              setErr("hireDate", validate.hireDate(v));
+              setDateHired(v);
+              emit({ date_hired: fmtYmd(v || undefined) });
+              setErr("date_hired", validate.date_hired(v));
             }}
             inputOnChange={(d: Date | null) => {
               const v = d ?? undefined;
-              setHireDate(v);
-              emit({ hireDate: v });
-              setErr("hireDate", validate.hireDate(v));
+              setDateHired(v);
+              emit({ date_hired: fmtYmd(v || undefined) });
+              setErr("date_hired", validate.date_hired(v));
             }}
             placeholder="MM/DD/YYYY"
             className={[
               "w-full rounded-md bg-white px-3 py-2 text-sm",
-              errors["hireDate"] ? "border border-red-500 focus:border-red-500" : "border border-gray-300 focus:border-[#355fd0]",
+              errors["date_hired"] ? "border border-red-500 focus:border-red-500" : "border border-gray-300 focus:border-[#355fd0]",
             ].join(" ")}
           />
-          <p className={`mt-1 text-xs ${errors["hireDate"] ? "text-red-600" : "text-transparent"}`}>
-            {errors["hireDate"] || "placeholder"}
+          <p className={`mt-1 text-xs ${errors["date_hired"] ? "text-red-600" : "text-transparent"}`}>
+            {errors["date_hired"] || "placeholder"}
           </p>
         </div>
 
         <LabeledSelect
           label="Employment Status"
           options={STATUS_OPTIONS as unknown as string[]}
-          value={s(employmentStatus)}
+          value={s(employment_status)}
           onChange={(val) => {
             setEmploymentStatus(val);
-            emit({ employmentStatus: val });
-            setErr("employmentStatus", validate.employmentStatus(val));
+            emit({ employment_status: val });
+            setErr("employment_status", validate.employment_status(val));
           }}
-          error={errors["employmentStatus"] || null}
+          error={errors["employment_status"] || null}
         />
 
-        <LabeledSelect
+        <AddableSelect
           label="Location"
           options={locations}
-          value={s(location || "MAIN")}
+          value={location}
+          onAddOption={(newOpt) => {
+            setExtraLocations((opts) => {
+              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+              const merged = mergeUniq((emp?.locations_list as string[] | undefined) ?? [], next);
+              emit({ locations_list: merged });
+              return next;
+            });
+            setLocation(newOpt);
+            emit({ location: newOpt });
+            setErr("location", validate.location(newOpt));
+          }}
           onChange={(val) => {
             setLocation(val);
             emit({ location: val });
@@ -242,38 +211,20 @@ export default function EmploymentDetailsForm({
           error={errors["location"] || null}
         />
       </Grid>
-          
-      {/* Row 2: Salary | Position | Department | spacer */}
-      <Grid className="mb-8">
-        <Field
-          label="Salary"
-          type="number"
-          step="0.01"
-          value={salaryText}
-          onChange={(e) => {
-            const v = e.target.value; // allow empty while typing
-            setSalaryText(v);
-            emit({ salary: v });
-            setErr("salary", validate.salary(v));
-          }}
-          onBlur={(e) => {
-            const num = parseFloat(e.target.value || "0");
-            const formatted = num.toFixed(2);
-            setSalaryText(formatted);
-            emit({ salary: formatted });
-            setErr("salary", validate.salary(formatted));
-          }}
-          error={errors["salary"] || null}
-          required
-        />
 
-        {/* NEW: Position (addable select) */}
+      {/* Row 2: Position | Department */}
+      <Grid className="mb-8">
         <AddableSelect
           label="Position"
           options={positionOptions}
           value={position}
           onAddOption={(newOpt) => {
-            setPositionOptions((opts) => (opts.includes(newOpt) ? opts : [...opts, newOpt]));
+            setExtraPositions((opts) => {
+              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+              const merged = mergeUniq((emp?.positions_list as string[] | undefined) ?? [], next);
+              emit({ positions_list: merged });
+              return next;
+            });
             setPosition(newOpt);
             emit({ position: newOpt });
             setErr("position", validate.position(newOpt));
@@ -286,13 +237,17 @@ export default function EmploymentDetailsForm({
           error={errors["position"] || null}
         />
 
-        {/* NEW: Department (addable select) */}
         <AddableSelect
           label="Department"
           options={departmentOptions}
           value={department}
           onAddOption={(newOpt) => {
-            setDepartmentOptions((opts) => (opts.includes(newOpt) ? opts : [...opts, newOpt]));
+            setExtraDepartments((opts) => {
+              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+              const merged = mergeUniq((emp?.departments_list as string[] | undefined) ?? [], next);
+              emit({ departments_list: merged });
+              return next;
+            });
             setDepartment(newOpt);
             emit({ department: newOpt });
             setErr("department", validate.department(newOpt));
@@ -305,16 +260,10 @@ export default function EmploymentDetailsForm({
           error={errors["department"] || null}
         />
 
-        <div />
-      </Grid>
-
-      {/* Row 3: history buttons */}
-      <Grid className="gap-x-10 gap-y-10">
-        <div className="flex items-end">
+        <div className="mt-6">
           <button
             type="button"
             onClick={() => {
-              onViewSalaryHistory?.();
               setShowSalaryModal(true);
             }}
             className="w-full rounded-md border border-[#355fd0] text-[#355fd0] px-4 py-2 text-sm hover:bg-[#355fd0]/5"
@@ -323,11 +272,10 @@ export default function EmploymentDetailsForm({
           </button>
         </div>
 
-        <div className="flex items-end">
+        <div className="mt-6">
           <button
             type="button"
             onClick={() => {
-              onViewEmploymentHistory?.();
               setShowEmploymentModal(true);
             }}
             className="w-full rounded-md border border-[#355fd0] text-[#355fd0] px-4 py-2 text-sm hover:bg-[#355fd0]/5"
@@ -335,180 +283,25 @@ export default function EmploymentDetailsForm({
             View Employment History
           </button>
         </div>
-
-        <div />
-        <div />
       </Grid>
 
-      {/* Salary History Modal */}
-      <SalaryHistoryModal
-        isOpen={showSalaryModal}
-        onClose={() => setShowSalaryModal(false)}
-        employeeName={employeeName}
-        entries={salaryEntries}
-        onExportPdf={() => console.log("Export Salary PDF")}
-      />
-
-      {/* Employment History Modal */}
-      <EmploymentHistoryModal
-        isOpen={showEmploymentModal}
-        onClose={() => setShowEmploymentModal(false)}
-        employeeName={employeeName}
-        items={employmentItems}
-        onAddItem={(item) => setEmploymentItems((prev) => [item, ...prev])}
-      />
-    </Section>
-  );
-}
-
-/* ---------- Basic select with error support ---------- */
-function LabeledSelect({
-  label,
-  options,
-  value,
-  defaultValue,
-  className = "",
-  error,
-  onChange,
-}: {
-  label: string;
-  options: string[];
-  value?: string;
-  defaultValue?: string;
-  className?: string;
-  error?: string | null;
-  onChange?: (value: string) => void;
-}) {
-  const val = value ?? defaultValue ?? "";
-  return (
-    <div className={className}>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
-        {label}
-        <span className="ml-0.5 text-red-600">*</span>
-      </label>
-      <div className="relative">
-        <select
-          value={val}
-          onChange={(e) => onChange?.(e.target.value)}
-          className={[
-            "appearance-none w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100",
-            error ? "ring-red-500 focus:ring-red-500" : "ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#355fd0]",
-          ].join(" ")}
-        >
-          <option value="" disabled hidden>
-            Select…
-          </option>
-          {options.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
-
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-          <SelectChevronDown />
-        </div>
-      </div>
-
-      <p className={`mt-1 text-xs ${error ? "text-red-600" : "text-transparent"}`}>{error || "placeholder"}</p>
-    </div>
-  );
-}
-
-/* ---------- AddableSelect: select with “Add new …” inline ---------- */
-function AddableSelect({
-  label,
-  options,
-  value,
-  error,
-  onChange,
-  onAddOption,
-}: {
-  label: string;
-  options: string[];
-  value?: string;
-  error?: string | null;
-  onChange?: (value: string) => void;
-  onAddOption?: (newOption: string) => void;
-}) {
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState("");
-
-  const handleAdd = () => {
-    const v = draft.trim();
-    if (!v) return;
-    onAddOption?.(v);
-    setDraft("");
-    setAdding(false);
-  };
-
-  return (
-    <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
-        {label}
-        <span className="ml-0.5 text-red-600">*</span>
-      </label>
-
-      {/* Select */}
-      <div className="relative">
-        <select
-          value={value ?? ""}
-          onChange={(e) => onChange?.(e.target.value)}
-          className={[
-            "appearance-none w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100",
-            error ? "ring-red-500 focus:ring-red-500" : "ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#355fd0]",
-          ].join(" ")}
-        >
-          <option value="" disabled hidden>
-            Select…
-          </option>
-          {options.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-          <SelectChevronDown />
-        </div>
-      </div>
-
-      {/* Helper line with "Add new" trigger or inline editor */}
-      {!adding ? (
-        <div className="mt-1 text-xs">
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            className="text-[#355fd0] hover:underline"
-          >
-            + Add new {label.toLowerCase()}
-          </button>
-          <span className={`ml-2 ${error ? "text-red-600" : "text-transparent"}`}>{error || "placeholder"}</span>
-        </div>
-      ) : (
-        <div className="mt-1 flex items-center gap-2">
-          <input
-            type="text"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={`New ${label.toLowerCase()}…`}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-[#355fd0]"
-          />
-          <button type="button" onClick={handleAdd} className="rounded-md bg-[#355fd0] px-3 py-1.5 text-xs text-white">
-            Add
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setAdding(false);
-              setDraft("");
-            }}
-            className="rounded-md border px-3 py-1.5 text-xs text-gray-700"
-          >
-            Cancel
-          </button>
-        </div>
+      {showSalaryModal && (
+        <SalaryHistoryModal
+          isOpen
+          onClose={() => setShowSalaryModal(false)}
+          employeeName={employeeName}
+          employeeId={emp?.id as string | number}
+        />
       )}
-    </div>
+
+      {showEmploymentModal && (
+        <EmploymentHistoryModal
+          isOpen
+          onClose={() => setShowEmploymentModal(false)}
+          employeeName={employeeName}
+          employeeId={emp?.id as string | number}
+        />
+      )}
+    </Section>
   );
 }

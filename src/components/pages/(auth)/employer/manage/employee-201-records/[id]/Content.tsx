@@ -1,4 +1,4 @@
-// components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+// app/(manage)/employee-201-records/[id]/Employee201Content.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -38,18 +38,18 @@ import { useSectionLoader } from "./hooks/useSectionLoader";
 import { SectionMap, sectionOrder } from "./types/section";
 
 // PATCH hooks
+import { usePersonalDetailsPatch } from "./hooks/usePersonalDetailsPatch";
+import { useEmploymentDetailsPatch } from "./hooks/useEmploymentDetailsPatch";
+
+// Training API hooks (parent-side save)
 import {
-  usePersonalDetailsPatch,
-  buildPersonalDetailsPayload,
-} from "./hooks/usePersonalDetailsPatch";
-import {
-  useEmploymentDetailsPatch,
-  buildEmploymentDetailsPayload,
-} from "./hooks/useEmploymentDetailsPatch";
-import {
-  useTrainingDevelopmentPatch,
-  buildTrainingDevelopmentPayload,
-} from "./hooks/useTrainingDevelopmentPatch";
+  useCreateTrainingRecord,
+  useUpdateTrainingRecord,
+  useDeleteTrainingRecord,
+} from "./hooks/useTrainingRecord";
+
+// Type-only import to annotate the collector ref
+import type { TrainingChangeSet } from "./components/TrainingDevelopmentForm";
 
 export interface ContentProps {
   params: { id: string };
@@ -85,8 +85,16 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   // accumulate patches from forms
   const personalPatchRef = useRef<Record<string, any>>({});
   const employmentPatchRef = useRef<Record<string, any>>({});
-  const trainingRowsRef = useRef<any[]>([]);
-  const trainingPrevSnapRef = useRef<string>("[]");
+
+  // Training: child exposes a collector we call on save
+  const trainingCollectorRef = useRef<null | (() => TrainingChangeSet)>(null);
+  const [trainingRefreshKey, setTrainingRefreshKey] = useState(0);
+
+  const [resetKey, setResetKey] = useState({
+    personal: 0,
+    employment: 0,
+    training: 0,
+  });
 
   const isDirty = useMemo(
     () => Object.values(sections).some((s) => s.dirty),
@@ -96,38 +104,41 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   // ------------------------ Data hooks ------------------------
   const { data, isLoading } = useEmployee(params?.id);
   const employee = toDisplayEmployee(data, emp);
-  const employeeDetails: Partial<Employee> | undefined = data ?? emp;
+  const [employeeDetails, setEmployeeDetails] = useState<Partial<Employee> | undefined>(data ?? emp);
 
   // PATCH hooks (sim mode by default; configure when backend is ready)
   const { save: savePersonal } = usePersonalDetailsPatch(params?.id);
   const { save: saveEmployment } = useEmploymentDetailsPatch(params?.id);
-  const { save: saveTraining } = useTrainingDevelopmentPatch(params?.id);
+
+  // Training hooks (actual API calls from parent on save)
+  const { create: createTraining } = useCreateTrainingRecord();
+  const { update: updateTraining } = useUpdateTrainingRecord();
+  const { remove: deleteTraining } = useDeleteTrainingRecord();
 
   // Section loader with race guard
   const { loadSection } = useSectionLoader(setSections);
 
   // ------------------------ Derived flags ------------------------
   const canSave = !!(
-    (
-      !isLoading &&
-      !sections[activeTab]?.loading &&
-      !sections[activeTab]?.saving &&
-      sections[activeTab]?.dirty &&
-      !sections[activeTab]?.hasErrors
-    ) // ← block save when the active form has errors
+    !isLoading &&
+    !sections[activeTab]?.loading &&
+    !sections[activeTab]?.saving &&
+    sections[activeTab]?.dirty &&
+    !sections[activeTab]?.hasErrors
   );
   const saving = sections[activeTab]?.saving;
 
   // ------------------------ Navigation helpers ------------------------
-  function attemptNavigate(href: string | "back") {
+  const attemptNavigate = useCallback((href: string | "back") => {
     if (isDirty) {
       setPendingHref(href);
       setShowLeaveConfirm(true);
     } else {
       href === "back" ? router.back() : router.push(href);
     }
-  }
-  function proceedAfterLeave() {
+  }, [isDirty, router]);
+
+  const proceedAfterLeave = useCallback(() => {
     if (pendingTab) {
       setActiveTab(pendingTab);
       void loadSection(pendingTab);
@@ -138,7 +149,11 @@ export default function Employee201Content({ params, emp }: ContentProps) {
       pendingHref === "back" ? router.back() : router.push(pendingHref);
       setPendingHref(null);
     }
-  }
+  }, [pendingHref, pendingTab, router, loadSection]);
+
+  useEffect(() => {
+    setEmployeeDetails(data ?? emp);
+  }, [data, emp]);
 
   // warn on unload when dirty
   useEffect(() => {
@@ -171,8 +186,8 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   }, [isLoading]);
 
   // Wrapper change → mark dirty (guards inputs only; still keep per-form emit)
-  const handleWrapperChange: React.FormEventHandler<HTMLDivElement> = (e) => {
-    if (activeTab === "training") return;
+  const handleWrapperChange: React.FormEventHandler<HTMLDivElement> = useCallback((e) => {
+    if (activeTab === "training") return; // training dirty comes from child
     const t = e.target as HTMLElement;
     if (
       t instanceof HTMLInputElement ||
@@ -184,37 +199,61 @@ export default function Employee201Content({ params, emp }: ContentProps) {
         [activeTab]: { ...prev[activeTab], dirty: true },
       }));
     }
-  };
+  }, [activeTab]);
 
   // ------------------------ Save helpers ------------------------
-  async function savePersonalTab() {
-    const payload = buildPersonalDetailsPayload(personalPatchRef.current || {});
+  const savePersonalTab = useCallback(async () => {
+    const payload = personalPatchRef.current || {};
     const res = await savePersonal(payload);
     if (!res.ok) throw res.error;
-    personalPatchRef.current = {}; // clear after success
+    setEmployeeDetails((prev) => ({ ...(prev || {}), ...payload }));
+    personalPatchRef.current = {};
     return res;
-  }
+  }, [savePersonal]);
 
-  async function saveEmploymentTab() {
-    const payload = buildEmploymentDetailsPayload(
-      employmentPatchRef.current || {}
-    );
+  const saveEmploymentTab = useCallback(async () => {
+    const payload = employmentPatchRef.current;
     const res = await saveEmployment(payload);
     if (!res.ok) throw res.error;
+    setEmployeeDetails((prev) => ({ ...(prev || {}), ...payload }));
     employmentPatchRef.current = {}; // clear after success
     return res;
-  }
+  }, [saveEmployment]);
 
-  async function saveTrainingTab() {
-    const payload = buildTrainingDevelopmentPayload(
-      trainingRowsRef.current || []
-    );
-    const res = await saveTraining(payload);
-    if (!res.ok) throw res.error;
-    // clear local buffer after success (optional)
-    trainingRowsRef.current = [];
-    return res;
-  }
+  const saveTrainingTab = useCallback(async () => {
+    const collect = trainingCollectorRef.current;
+    if (!collect) return { ok: true }; // nothing registered; no-op
+
+    const { creates, updates, deletes, hasErrors } = collect();
+    if (hasErrors) throw new Error("Please fix validation errors before saving.");
+
+    // Run creates → updates → deletes
+    for (const c of creates) {
+      await createTraining(params.id, {
+        training_title: c.training_title,
+        date_completed: c.date_completed,
+        training_provider: c.training_provider,
+        proof_of_completion: c.proof_of_completion || null,
+      });
+    }
+    for (const u of updates) {
+      await updateTraining(params.id, u.id, {
+        training_title: u.training_title,
+        date_completed: u.date_completed,
+        training_provider: u.training_provider,
+        ...(u.proof_of_completion !== undefined ? { proof_of_completion: u.proof_of_completion } : {}),
+        clear_file: !!u.clear_file,
+      });
+    }
+    for (const id of deletes) {
+      await deleteTraining(params.id, id);
+    }
+
+    // On success, tell the form to refetch its list
+    setTrainingRefreshKey((k) => k + 1);
+
+    return { ok: true };
+  }, [createTraining, updateTraining, deleteTraining, params.id]);
 
   const saveCurrentSection = useCallback(async () => {
     const key = activeTab;
@@ -240,7 +279,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
         await saveTrainingTab();
       } else {
         // fallback demo save for other tabs
-        await new Promise<void>((r) => setTimeout(r, 1000));
+        await new Promise<void>((r) => setTimeout(r, 800));
       }
 
       setSections((prev) => ({
@@ -255,7 +294,6 @@ export default function Employee201Content({ params, emp }: ContentProps) {
     })();
 
     const ok = await notify.promise(savePromise, {
-      loading: `Saving ${labelForTab(key)}…`,
       success: `${labelForTab(key)} saved successfully.`,
       error: `Failed to save ${labelForTab(key)}.`,
     });
@@ -267,7 +305,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
         ...prev,
         [key]: { ...prev[key], saving: false },
       }));
-  }, [activeTab, sections]);
+  }, [activeTab, sections, savePersonalTab, saveEmploymentTab, saveTrainingTab]);
 
   // ------------------------ Tab click ------------------------
   const handleTabClick = useCallback(
@@ -282,7 +320,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
       setActiveTab(key);
       void loadSection(key);
     },
-    [activeTab, sections]
+    [activeTab, sections, loadSection]
   );
 
   // helper to mark errors for a section (stable)
@@ -293,22 +331,25 @@ export default function Employee201Content({ params, emp }: ContentProps) {
     }));
   }, []);
 
-  const handleTrainingReady = useCallback((rows: any[]) => {
-    trainingRowsRef.current = rows ?? [];
-    trainingPrevSnapRef.current = JSON.stringify(trainingRowsRef.current);
-  }, []);
-
-  // stable handler: only mark dirty if rows actually changed
-  const handleTrainingChange = useCallback((rows: any[]) => {
-    const snap = JSON.stringify(rows ?? []);
-    if (snap === trainingPrevSnapRef.current) return; // identical → ignore
-    trainingRowsRef.current = rows ?? [];
-    trainingPrevSnapRef.current = snap;
+  // --------- STABLE callbacks passed to TrainingDevelopmentForm ----------
+  const handleTrainingDirtyChange = useCallback((dirty: boolean) => {
     setSections((prev) => ({
       ...prev,
-      training: { ...prev.training, dirty: true },
+      training: { ...prev.training, dirty },
     }));
   }, []);
+
+  const handleTrainingErrorsChange = useCallback(
+    (hasErrors: boolean) => markSectionErrors("training", hasErrors),
+    [markSectionErrors]
+  );
+
+  const setTrainingCollector = useCallback(
+    (fn: (() => TrainingChangeSet) | null) => {
+      trainingCollectorRef.current = fn ?? null;
+    },
+    []
+  );
 
   // ------------------------ Render ------------------------
   const renderActiveForm = () => {
@@ -329,46 +370,38 @@ export default function Employee201Content({ params, emp }: ContentProps) {
       case "personal":
         return (
           <PersonalInfoForm
+            key={`personal-${resetKey.personal}`}
             emp={employeeDetails}
             onPatchChange={(patch) => {
               Object.assign(personalPatchRef.current, patch);
-              setSections((prev) => ({
-                ...prev,
-                personal: { ...prev.personal, dirty: true },
-              }));
+              setSections((p) => ({ ...p, personal: { ...p.personal, dirty: true } }));
             }}
-            onErrorsChange={(hasErrors) =>
-              markSectionErrors("personal", hasErrors)
-            }
+            onErrorsChange={(hasErrors) => markSectionErrors("personal", hasErrors)}
           />
         );
 
       case "employment":
         return (
           <EmploymentDetailsForm
+            key={`employment-${resetKey.employment}`}
             emp={employeeDetails}
             onPatchChange={(patch) => {
               Object.assign(employmentPatchRef.current, patch);
-              setSections((prev) => ({
-                ...prev,
-                employment: { ...prev.employment, dirty: true },
-              }));
+              setSections((p) => ({ ...p, employment: { ...p.employment, dirty: true } }));
             }}
-            onErrorsChange={(hasErrors) =>
-              markSectionErrors("employment", hasErrors)
-            }
+            onErrorsChange={(hasErrors) => markSectionErrors("employment", hasErrors)}
           />
         );
 
       case "training":
         return (
           <TrainingDevelopmentForm
-            emp={employeeDetails}
-            onReady={handleTrainingReady}
-            onChange={handleTrainingChange}
-            onErrorsChange={(hasErrors) =>
-              markSectionErrors("training", hasErrors)
-            }
+            key={`training-${resetKey.training}`}
+            employeeId={employeeDetails?.id as number | string}
+            onErrorsChange={handleTrainingErrorsChange}   // ✅ stable
+            onDirtyChange={handleTrainingDirtyChange}     // ✅ stable
+            registerCollector={setTrainingCollector}      // ✅ stable
+            refreshKey={trainingRefreshKey}
           />
         );
 
@@ -426,7 +459,12 @@ export default function Employee201Content({ params, emp }: ContentProps) {
             <EmployeeHeaderSkeleton />
           ) : (
             <EmployeeHeader
-              employee={employee}
+              employee={{
+                ...toDisplayEmployee(data, emp),
+                name: toDisplayEmployee(data, emp).name ?? "",
+                role: toDisplayEmployee(data, emp).role ?? "",
+                email: toDisplayEmployee(data, emp).email ?? "",
+              }}
               activeTab={activeTab}
               setActiveTab={handleTabClick}
             />
@@ -488,10 +526,16 @@ export default function Employee201Content({ params, emp }: ContentProps) {
               [activeTab]: { ...prev[activeTab], dirty: false },
             }));
             setShowLeaveConfirm(false);
-            if (activeTab === "training") {
-              // wipe any uncommitted edits and baseline
-              trainingRowsRef.current = [];
-              trainingPrevSnapRef.current = "[]";
+            if (activeTab === "personal") {
+              personalPatchRef.current = {};
+              setResetKey((k) => ({ ...k, personal: k.personal + 1 }));
+            } else if (activeTab === "employment") {
+              employmentPatchRef.current = {};
+              setResetKey((k) => ({ ...k, employment: k.employment + 1 }));
+            } else if (activeTab === "training") {
+              // reset the child form UI
+              setTrainingRefreshKey((k) => k + 1);
+              setResetKey((k) => ({ ...k, training: k.training + 1 }));
             }
             proceedAfterLeave();
           }}
@@ -510,7 +554,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
 
             const leavePromise = (async () => {
               // keep modal flow light for non-main save actions
-              await new Promise<void>((r) => setTimeout(r, 1000));
+              await new Promise<void>((r) => setTimeout(r, 800));
               setSections((prev) => ({
                 ...prev,
                 [key]: {

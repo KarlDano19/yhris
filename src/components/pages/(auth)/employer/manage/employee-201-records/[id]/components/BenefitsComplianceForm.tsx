@@ -10,8 +10,6 @@ export default function BenefitsComplianceForm({ emp }: { emp?: Partial<Employee
       <Grid>
         <Field label="HMO Provider" defaultValue="" />
         <Field label="Coverage Start" defaultValue="" />
-        <Field label="SSS No." defaultValue={s(emp?.governmentIds?.sss)} />
-        <Field label="PhilHealth No." defaultValue={s(emp?.governmentIds?.philhealth)} />
       </Grid>
     </Section>
   );

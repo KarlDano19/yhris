@@ -9,15 +9,19 @@ export const notify = {
   warning: (msg: string) => toast.custom(<CustomToast type="warning" message={msg} />),
 
   // resolves true on success, false on failure; never throws
-  async promise(p: Promise<any>, labels: { loading: string; success: string; error: string }): Promise<boolean> {
-    const id = toast.custom(<CustomToast type="info" message={labels.loading} />);
+  async promise(
+    p: Promise<any>,
+    labels: { loading?: string; success: string; error?: string }
+  ): Promise<boolean> {
+    // Only show a loading toast if a loading label is provided
+    const id = labels.loading ? toast.custom(<CustomToast type="info" message={labels.loading} />) : null;
     try {
       await p;
-      toast.dismiss(id);
+      if (id) toast.dismiss(id);
       notify.success(labels.success);
       return true;
     } catch (e: any) {
-      toast.dismiss(id);
+      if (id) toast.dismiss(id);
       notify.error(labels.error || e?.message || "Something went wrong.");
       return false;
     }
