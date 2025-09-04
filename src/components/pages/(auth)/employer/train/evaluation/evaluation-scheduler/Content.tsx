@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
 import Pagination from '@/components/Pagination';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
 import DeleteEvaluationSchedulerModal from './modals/DeleteEvaluationSchedulerModal';
 import EditEvaluationSchedulerModal from './modals/EditEvaluationSchedulerModal';
@@ -62,6 +63,47 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
   const formMethods = useForm();
   const editFormMethods = useForm();
+
+  // Helper component to display recipient avatar with fallback
+  const RecipientAvatar = ({ recipient, size = 40 }: { recipient: any; size?: number }) => {
+    const [imageError, setImageError] = useState(false);
+
+    // Check if recipient is a string (photo URL) or object (name data)
+    const isPhotoUrl = typeof recipient === 'string';
+    const hasValidImage = isPhotoUrl && 
+      recipient.trim() !== '' && 
+      !recipient.includes('no-photo.png') &&
+      !imageError;
+
+    if (!hasValidImage) {
+      // Use actual firstname and lastname from the recipient object
+      const firstName = recipient?.firstname || '';
+      const lastName = recipient?.lastname || '';
+      
+      return (
+        <div className='w-full h-full overflow-hidden rounded-full flex items-center justify-center'>
+          <PlaceholderAvatar
+            width={size}
+            height={size}
+            firstName={firstName}
+            lastName={lastName}
+            className='flex-shrink-0'
+          />
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={recipient}
+        alt="Recipient"
+        width={size}
+        height={size}
+        className='w-full h-full rounded-full object-cover flex-shrink-0'
+        onError={() => setImageError(true)}
+      />
+    );
+  };
 
   useEffect(() => {
     if (dataEvaluationScheduler) {
@@ -143,23 +185,21 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const renderReceipientsRoundPhoto = (recipients: any) => {
+  const renderRecipientsRoundPhoto = (recipients: any) => {
     return (
-      <div className='inline-flex w-32 overflow-hidden'>
+      <div className='inline-flex w-40 overflow-x-auto overflow-y-visible py-1'>
         {(recipients || []).map((recipient: any, index: number) => {
           return (
-            <Image
+            <div
               key={index}
-              src={recipient}
-              width={40}
-              height={40}
-              alt='round-photo'
-              className={classNames(
-                'w-[40px] h-[40px] border-2 border-[#fff] rounded-full',
-                index === 0 ? 'z-0' : `relative z-${index}`
-              )}
-              style={{ left: `${-20 * index}px` }}
-            />
+              className='w-[40px] h-[40px] border-2 border-[#fff] rounded-full relative flex-shrink-0'
+              style={{ 
+                left: `${4 * index}px`,
+                zIndex: recipients.length - index
+              }}
+            >
+              <RecipientAvatar recipient={recipient} size={40} />
+            </div>
           );
         })}
       </div>
@@ -220,7 +260,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             {item.evaluation_schedule}
           </td>
           <td className='whitespace-nowrap text-ellipsis px-3 py-5 text-sm text-gray-500'>
-            {renderReceipientsRoundPhoto(item.recipients)}
+            {renderRecipientsRoundPhoto(item.recipients)}
           </td>
           <td className='whitespace-nowrap text-ellipsis px-3 py-5 text-sm text-gray-500'>
             <div className='flex justify-center space-x-2'>
@@ -334,7 +374,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Evaluation Schedule
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Receipients
+                        Recipients
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Action
