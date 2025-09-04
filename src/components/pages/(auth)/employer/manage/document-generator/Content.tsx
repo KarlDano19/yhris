@@ -92,6 +92,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [noticeToExplainData, setNoticeToExplainData] = useState<NoticeToExplainFormData>({
     employeeName: '',
     position: '',
+    department: '',
     dateIssued: '',
     companyName: '',
     dateOfIssuance: '',
@@ -110,7 +111,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     logoImage: null,
     sampleLogoPath: '',
     signature: null,
-    borderColor: '#FFC107'
+    borderColor: '#FFC107',
+    referenceNumber: ''
   });
   
   // Modal states
@@ -184,6 +186,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         setNoticeToExplainData({
           employeeName: '',
           position: '',
+          department: '',
           dateIssued: '',
           companyName: '',
           dateOfIssuance: '',
@@ -202,7 +205,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           logoImage: null,
           sampleLogoPath: '',
           signature: null,
-          borderColor: '#FFC107'
+          borderColor: '#FFC107',
+          referenceNumber: ''
         });
       }
     };
@@ -238,6 +242,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         briefBackground: selectedEmployeeIssue.brief_background || '',
         receivedBy: employeeName,
         dateOfIssuance: new Date().toISOString().split('T')[0],
+        referenceNumber: selectedEmployeeIssue.nte_id || ''
       }));
     }
   }, [documentType, employeeId, selectedEmployeeIssue]);
