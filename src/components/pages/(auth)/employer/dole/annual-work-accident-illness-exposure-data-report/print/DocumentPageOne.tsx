@@ -142,13 +142,14 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
       <div className="mt-8 flex justify-end">
         <div className="text-center relative">
           {data.signature && (
-            <div className="absolute w-full right-2 -top-10 z-10">
+            <div className="absolute w-full right-2 -top-6 z-10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src={data.signature} 
                 alt="Signature" 
                 style={{ 
-                  height: '80px', 
-                  objectFit: 'contain',
+                  height: '48px', 
+                  objectFit: 'cover',
                   display: 'block',
                   margin: '0 auto'
                 }} 
