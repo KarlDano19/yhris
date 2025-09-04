@@ -45,10 +45,8 @@ const ApplicantAvatar = ({ applicant, size = 32 }: { applicant: any; size?: numb
   const [imageError, setImageError] = useState(false);
 
   // Check if we have a valid image URL
-  const hasValidImage = applicant.image && 
-    typeof applicant.image === 'string' && 
-    applicant.image.trim() !== '' && 
-    !imageError;
+  const hasValidImage =
+    applicant.image && typeof applicant.image === 'string' && applicant.image.trim() !== '' && !imageError;
 
   if (!hasValidImage) {
     return (
