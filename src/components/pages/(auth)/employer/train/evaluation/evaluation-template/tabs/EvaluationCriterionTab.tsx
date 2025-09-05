@@ -399,7 +399,7 @@ function EvaluationCriterionTab({
             
             {isScoreExceeded && (
               <div className='mt-2 p-2 bg-red-100 border border-red-300 rounded text-red-700 text-sm'>
-                ⚠️ Total score exceeded! Please reduce individual criterion scores to stay within the limit.
+                Total score exceeded! Please reduce individual criterion scores to stay within the limit.
               </div>
             )}
           </div>
