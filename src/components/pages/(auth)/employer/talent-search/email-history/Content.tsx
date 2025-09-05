@@ -69,27 +69,84 @@ const Content = () => {
     }
   }, [emailMonitoringData]);
 
+  // Reset to first page when filters change
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [appliedFilter]);
+
   useEffect(() => {
     emailMonitoringRefetch();
   }, [appliedFilter, pageSize, currentPage, emailMonitoringRefetch]);
 
   const handleSearch = () => {
-    const dateFrom = Date.parse(pendingFilter.from);
-    const dateTo = Date.parse(pendingFilter.to);
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    const dateFrom = pendingFilter.from;
+    const dateTo = pendingFilter.to;
+    
+    // Convert dates to ISO format (YYYY-MM-DD) if they exist
+    let formattedFrom = '';
+    let formattedTo = '';
+    
+    if (dateFrom) {
+      try {
+        const fromDate = new Date(dateFrom);
+        if (isNaN(fromDate.getTime())) {
+          return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+        }
+        // Use local date to avoid timezone issues
+        const year = fromDate.getFullYear();
+        const month = String(fromDate.getMonth() + 1).padStart(2, '0');
+        const day = String(fromDate.getDate()).padStart(2, '0');
+        formattedFrom = `${year}-${month}-${day}`;
+      } catch (error) {
+        return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+      }
     }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    
+    if (dateTo) {
+      try {
+        const toDate = new Date(dateTo);
+        if (isNaN(toDate.getTime())) {
+          return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+        }
+        // Use local date to avoid timezone issues
+        const year = toDate.getFullYear();
+        const month = String(toDate.getMonth() + 1).padStart(2, '0');
+        const day = String(toDate.getDate()).padStart(2, '0');
+        formattedTo = `${year}-${month}-${day}`;
+      } catch (error) {
+        return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+      }
     }
-    if (dateFrom && dateTo && dateFrom > dateTo) {
+    
+    // Validate date range if both dates are provided
+    if (formattedFrom && formattedTo && formattedFrom > formattedTo) {
       return toast.custom(
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
         { duration: 5000 }
       );
     }
+    
     setIsSearching(true);
-    setAppliedFilter({ ...pendingFilter });
+    setAppliedFilter({ 
+      ...pendingFilter, 
+      from: formattedFrom, 
+      to: formattedTo 
+    });
+  };
+
+  const handleResetFilters = () => {
+    setPendingFilter({
+      from: '',
+      to: '',
+      search: '',
+    });
+    setAppliedFilter({
+      from: '',
+      to: '',
+      search: '',
+    });
   };
 
   useEffect(() => {
@@ -181,6 +238,33 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Email History</h2>
+          {/* {(appliedFilter.from || appliedFilter.to || appliedFilter.search) && (
+            <div className='mt-2 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md'>
+              <div className='flex items-center justify-between'>
+                <div className='text-sm text-blue-700'>
+                  <span className='font-medium'>Filters applied:</span>
+                  {appliedFilter.from && appliedFilter.to && (
+                    <span className='ml-2'>Date range: {new Date(appliedFilter.from).toLocaleDateString()} - {new Date(appliedFilter.to).toLocaleDateString()}</span>
+                  )}
+                  {appliedFilter.from && !appliedFilter.to && (
+                    <span className='ml-2'>From: {new Date(appliedFilter.from).toLocaleDateString()}</span>
+                  )}
+                  {!appliedFilter.from && appliedFilter.to && (
+                    <span className='ml-2'>Until: {new Date(appliedFilter.to).toLocaleDateString()}</span>
+                  )}
+                  {appliedFilter.search && (
+                    <span className='ml-2'>Search: &quot;{appliedFilter.search}&quot;</span>
+                  )}
+                </div>
+                <button
+                  onClick={handleResetFilters}
+                  className='text-blue-600 hover:text-blue-800 text-sm underline'
+                >
+                  Clear all
+                </button>
+              </div>
+            </div>
+          )} */}
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
@@ -253,6 +337,13 @@ const Content = () => {
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
+              {/* <button
+                className='bg-gray-500 border border-gray-500 rounded-md p-2 ml-1 hover:bg-gray-600 text-white text-sm'
+                onClick={handleResetFilters}
+                title="Reset filters"
+              >
+                Reset
+              </button> */}
             </div>
             {/* <div className='flex-1 flex justify-start lg:justify-end'>
               <button
