@@ -6,6 +6,7 @@ async function getHiredApplicants(filters: any) {
     let newFilters = { ...filters };
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
+    if (filters.is_active) newFilters.is_active = filters.is_active;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
