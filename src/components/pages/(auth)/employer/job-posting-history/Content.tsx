@@ -71,11 +71,13 @@ const Content = () => {
     from: '',
     to: '',
     search: '',
+    status: 'all', // all, active, inactive
   });
   const [appliedFilter, setAppliedFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
+    status: 'all', // all, active, inactive
   });
   const [isJobPreviewOpen, setIsJobPreviewOpen] = useState<T_JobPreviewModal | null>(null);
   const [isSetJobInactiveModalOpen, setIsSetJobInactiveModalOpen] = useState(false);
@@ -647,6 +649,56 @@ const Content = () => {
               </div>
             </div>
           </div>
+          
+          {/* Status Filter Tabs */}
+          <div className='mt-6 flex w-full border-b border-gray-200'>
+            <button
+              onClick={() => {
+                setPendingFilter({ ...pendingFilter, status: 'all' });
+                setAppliedFilter({ ...appliedFilter, status: 'all' });
+              }}
+              className={`flex-1 py-1.5 text-center text-sm ${
+                appliedFilter.status === 'all' 
+                  ? 'font-medium' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <span className={appliedFilter.status === 'all' ? 'text-indigo-600' : 'text-gray-500'}>
+                All Jobs
+              </span>
+            </button>
+            <button
+              onClick={() => {
+                setPendingFilter({ ...pendingFilter, status: 'active' });
+                setAppliedFilter({ ...appliedFilter, status: 'active' });
+              }}
+              className={`flex-1 py-1.5 text-center text-sm ${
+                appliedFilter.status === 'active' 
+                  ? 'font-medium' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <span className={appliedFilter.status === 'active' ? 'text-green-500' : 'text-gray-500'}>
+                Active
+              </span>
+            </button>
+            <button
+              onClick={() => {
+                setPendingFilter({ ...pendingFilter, status: 'inactive' });
+                setAppliedFilter({ ...appliedFilter, status: 'inactive' });
+              }}
+              className={`flex-1 py-1.5 text-center text-sm ${
+                appliedFilter.status === 'inactive' 
+                  ? 'font-medium' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <span className={appliedFilter.status === 'inactive' ? 'text-red-500' : 'text-gray-500'}>
+                Inactive
+              </span>
+            </button>
+          </div>
+
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'>
               <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8'>
