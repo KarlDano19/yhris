@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useGetDirectiveById } from './hooks/useGetDirectiveById';
 import { useSendVerification } from './hooks/useSendVerification';
 import useVerifyDirective from './hooks/useVerifyDirective';
@@ -191,7 +192,7 @@ const Content = () => {
   if (isLoadingDirective) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <LoadingSpinner size="lg" color="yellow" />
       </div>
     );
   }

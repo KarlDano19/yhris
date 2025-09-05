@@ -44,6 +44,8 @@ export default function AddSeparationModal({
     });
     setEmployeeSearch('');
     setEmployeeSelected(false);
+    setValue('department', '');
+    setValue('position', '');
   };
 
   const onSubmit = handleSubmit((data) => {
@@ -91,7 +93,7 @@ export default function AddSeparationModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Separate</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -168,6 +170,8 @@ export default function AddSeparationModal({
                                 setValue('name', '');
                                 setEmployeeSearch('');
                                 setEmployeeSelected(false);
+                                setValue('department', '');
+                                setValue('position', '');
                               }}
                               tabIndex={-1}
                             >
@@ -186,6 +190,14 @@ export default function AddSeparationModal({
                                   setValue('name', item.id);
                                   setEmployeeSearch(`${item.firstname} ${item.lastname}`);
                                   setEmployeeSelected(true);
+                                  // Auto-fill department from employee data
+                                  if (item.department) {
+                                    setValue('department', item.department);
+                                  }
+                                  // Auto-fill position from employee data
+                                  if (item.position) {
+                                    setValue('position', item.position);
+                                  }
                                   document.getElementById('employee-dropdown')?.classList.add('hidden');
                                 }}
                               >
@@ -221,7 +233,8 @@ export default function AddSeparationModal({
                           id='position'
                           {...register('position', { required: true })}
                           type='text'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          readOnly
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
                         />
                       </div>
                     </div>
@@ -251,7 +264,8 @@ export default function AddSeparationModal({
                           id='department'
                           {...register('department', { required: true })}
                           type='text'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          readOnly
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
                         />
                       </div>
                     </div>

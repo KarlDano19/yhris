@@ -20,6 +20,10 @@ const OccupationalAccident: React.FC<OccupationalAccidentProps> = ({ register, s
   const cuts_lacerations_punctures_female = watch ? watch("cuts_lacerations_punctures_female") : "";
   const cuts_lacerations_punctures_total = watch ? watch("cuts_lacerations_punctures_total") : "";
 
+  const concussion_male = watch ? watch("concussion_male") : "";
+  const concussion_female = watch ? watch("concussion_female") : "";
+  const concussion_total = watch ? watch("concussion_total") : "";
+
   const avulsion_male = watch ? watch("avulsion_male") : "";
   const avulsion_female = watch ? watch("avulsion_female") : "";
   const avulsion_total = watch ? watch("avulsion_total") : "";
@@ -288,6 +292,81 @@ const OccupationalAccident: React.FC<OccupationalAccidentProps> = ({ register, s
             <input
               type="number"
               value={cuts_lacerations_punctures_total || ""}
+              readOnly
+              className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop layout - hidden on mobile */}
+      <div className="hidden md:grid grid-cols-4 gap-6 pb-6">
+        <div className="flex justify-start items-center pl-6">
+          <div className="grid-item">
+            <h1 className="block text-sm font-medium items-start leading-6 text-gray-900">
+              Concussion
+            </h1>
+          </div>
+        </div>
+        <div className="grid-item">
+          <div className="mt-2 flex flex-row items-center">
+            <input
+              type="number"
+              {...register(`concussion_male`)}
+              id={`concussion_male`}
+              className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+        <div className="grid-item">
+          <div className="mt-2">
+            <input
+              type="number"
+              {...register(`concussion_female`)}
+              id={`concussion_female`}
+              className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+        <div className="grid-item">
+          <div className="mt-2">
+            <input
+              type="number"
+              {...register(`concussion_total`)}
+              id={`concussion_total`}
+              readOnly
+              className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+      </div>
+      {/* Mobile layout - hidden on desktop */}
+      <div className="pl-7 block md:hidden mb-6">
+        <h2 className="font-medium mb-2 text-sm">Avulsion</h2>
+        <div className="grid grid-cols-1 gap-3">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Male</label>
+            <input
+              type="number"
+              value={concussion_male || ""}
+              onChange={(e) => setValue && setValue("concussion_male", e.target.value)}
+              className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Female</label>
+            <input
+              type="number"
+              value={concussion_female || ""}
+              onChange={(e) => setValue && setValue("concussion_female", e.target.value)}
+              className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
+            <input
+              type="number"
+              value={concussion_total || ""}
               readOnly
               className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
             />

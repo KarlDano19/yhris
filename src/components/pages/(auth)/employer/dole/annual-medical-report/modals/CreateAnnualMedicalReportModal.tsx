@@ -1,6 +1,8 @@
-import { Dispatch, Fragment, useRef, useState } from "react";
+import { Dispatch, Fragment, useRef, useState, useEffect } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
+import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -16,6 +18,18 @@ import WorkplaceWelfare from "./tabs/WorkplaceWelfare";
 import useAddAnnualMedicalReport from "../hooks/useAddAnnualMedicalReport";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+
+interface CachedProfileData {
+  name: string;
+  type_of_industry: string;
+  building: string;
+  street: string;
+  locality: string;
+  city: string;
+  country: string;
+  zip_code: string;
+  region: string;
+}
 
 function CreateAnnualMedicalReportModal({
   refetch,
@@ -35,6 +49,37 @@ function CreateAnnualMedicalReportModal({
     isLoading: isLoadingAddAnnualMedicalReport,
   } = useAddAnnualMedicalReport();
   const [selectedTab, setSelectedTab] = useState(1);
+  const queryClient = useQueryClient();
+  
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(["employerProfileCache"]) as {
+    state: { data: CachedProfileData } | undefined;
+  };
+
+  // Set cached profile data when modal opens
+  useEffect(() => {
+    if (isOpen && cachedProfile?.state?.data) {
+      setValue("name_of_establishment", cachedProfile.state.data.name || "");
+      setValue(
+        "type_of_industry",
+        cachedProfile.state.data.type_of_industry || ""
+      );
+      
+      // Combine address fields from cached profile
+      const addressParts = [
+        cachedProfile.state.data.building,
+        cachedProfile.state.data.street,
+        cachedProfile.state.data.locality,
+        cachedProfile.state.data.city,
+        cachedProfile.state.data.country,
+        cachedProfile.state.data.zip_code
+      ].filter(Boolean); // Remove empty/undefined values
+      
+      const combinedAddress = addressParts.join(', ') || '\u00A0';
+      setValue("address", combinedAddress);
+    }
+  }, [isOpen, cachedProfile, setValue]);
 
   const resetForm = () => {
     reset();
@@ -95,7 +140,7 @@ function CreateAnnualMedicalReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-0 md:my-8 w-full md:max-w-5xl">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-0 md:my-8 w-full md:max-w-5xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Create Work Accident/Illness Report

@@ -12,6 +12,7 @@ import { ModalTypes, StageType, ApplicantType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
 import CustomToast from '@/components/CustomToast';
+import AddApplicantModal from '../modals/AddApplicantModal';
 import StageRequirements from '../modals/StageRequirements';
 import Checklist from '../modals/Checklist';
 import ScheduleInterview from '../modals/ScheduleInterview';
@@ -73,11 +74,12 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     return item.id === actionState.stageId;
   })?.requirements;
   const { mutate: emailMutate } = useSendEmail();
+  const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed', 'Rejected'],
+    status: ['Ongoing', 'Passed', 'Rejected', 'Withdrawn'],
   });
-  
+
   // Get screening questions and ideal answers from the job posting
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
@@ -93,19 +95,26 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   // Process applicants and evaluate their screening answers
   const processApplicants = (applicants: any[]) => {
     if (!screeningQuestions.length || !applicants?.length) return applicants;
-    
-    return applicants.map(applicant => {
-      // Skip already processed applicants
-      if (applicant.screeningFit) return applicant;
-      
+
+    return applicants.map((applicant) => {
       // Get the applicant's screening answers
-      const answers = applicant.applicant?.screening_answers && applicant.applicant.screening_answers !== null 
-        ? applicant.applicant.screening_answers 
-        : [];
-      
+      const answers =
+        applicant.applicant?.screening_answers && applicant.applicant.screening_answers !== null
+          ? applicant.applicant.screening_answers
+          : [];
+
+      // If applicant is rejected or withdrawn, they are automatically "Not Fit"
+      if (applicant.status === 'rejected' || applicant.status === 'withdrawn') {
+        return {
+          ...applicant,
+          screeningFit: 'bad',
+          screeningAnswers: answers,
+        };
+      }
+
       // Only check if mustHave questions match their ideal answers
       let isGoodFit = true;
-      
+
       if (!answers.length) {
         // If no answers (empty due to previous data), treat as good fit
         isGoodFit = true;
@@ -113,11 +122,11 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         // Process each answer and check if it matches the ideal answer for mustHave questions
         // Only check questions that should be shown to candidates
         answers.forEach((answer: { question: string; answer: string | string[] }) => {
-          const question = screeningQuestions.find(q => q.question === answer.question);
+          const question = screeningQuestions.find((q) => q.question === answer.question);
           if (question && question.mustHave && question.showToCandidates !== false) {
             const responseType = question.responseType || 'Yes / No';
             let isMatch = false;
-            
+
             if (responseType === 'Text') {
               // For text questions, just check if they provided an answer
               isMatch = String(answer.answer).trim() !== '';
@@ -125,47 +134,47 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               // For multiple choice, check if any of the applicant's answers match any ideal answers
               const idealAnswers = Array.isArray(question.idealAnswer) ? question.idealAnswer : [question.idealAnswer];
               const applicantAnswers = Array.isArray(answer.answer) ? answer.answer : [answer.answer];
-              
-              isMatch = Boolean(idealAnswers.some((ideal: any) => 
-                applicantAnswers.some((app: any) => app.toLowerCase() === ideal.toLowerCase())
-              ));
+
+              isMatch = Boolean(
+                idealAnswers.some((ideal: any) =>
+                  applicantAnswers.some((app: any) => app.toLowerCase() === ideal.toLowerCase())
+                )
+              );
             } else {
               // Default case: Yes/No or other types
               const idealAnswer = Array.isArray(question.idealAnswer) ? question.idealAnswer[0] : question.idealAnswer;
               const applicantAnswer = Array.isArray(answer.answer) ? answer.answer[0] : answer.answer;
               isMatch = applicantAnswer.toLowerCase() === idealAnswer.toLowerCase();
             }
-            
+
             // If it's a must-have and doesn't match, applicant is not a good fit
             if (!isMatch) {
               isGoodFit = false;
             }
           }
         });
-        
+
         // Check if any mustHave questions were not answered
         // Only check questions that should be shown to candidates
         screeningQuestions
-          .filter(question => question.showToCandidates !== false)
-          .forEach(question => {
+          .filter((question) => question.showToCandidates !== false)
+          .forEach((question) => {
             if (question.mustHave) {
-              const wasAnswered = answers.some(
-                (answer: { question: string }) => answer.question === question.question
-              );
-              
+              const wasAnswered = answers.some((answer: { question: string }) => answer.question === question.question);
+
               if (!wasAnswered) {
                 isGoodFit = false;
               }
             }
           });
       }
-      
+
       const screeningFit = isGoodFit ? 'good' : 'bad';
-      
-      return { 
-        ...applicant, 
+
+      return {
+        ...applicant,
         screeningFit,
-        screeningAnswers: answers
+        screeningAnswers: answers,
       };
     });
   };
@@ -192,7 +201,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       // Process the applicants to determine if they are good fits
       const processed = processApplicants(dataAppliedApplicants);
       setProcessedApplicants(processed);
-      
+
       processed.forEach((item: any) => {
         let newData = {
           id: item.applicant.id,
@@ -203,8 +212,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           checklists: [],
           status: item.status,
           stagePosition: item.job_stages,
+          stage_notes: item.stage_notes || [],
           screeningFit: item.screeningFit,
-          screeningAnswers: item.screeningAnswers || []
+          screeningAnswers: item.screeningAnswers || [],
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });
@@ -222,7 +232,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
-            toast.custom(() => <CustomToast message="Successfully set-up stage requirements." type="success" />, { duration: 4000 });
+            toast.custom(() => <CustomToast message='Successfully set-up stage requirements.' type='success' />, {
+              duration: 4000,
+            });
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -243,7 +255,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
-            toast.custom(() => <CustomToast message="Successfully updated the checklist." type="success" />, { duration: 4000 });
+            toast.custom(() => <CustomToast message='Successfully updated the checklist.' type='success' />, {
+              duration: 4000,
+            });
             jobPostDetailsRefetch();
             appliedApplicantRefetch();
             // Reset actionState after successful submission to allow modal to be reopened
@@ -301,7 +315,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       },
     },
     CHECKLIST: {
-      component: <Checklist title={title} requirements={requirements} handleFormSubmit={handleFormSubmit} hasActiveSubscription={hasActiveSubscription} />,
+      component: (
+        <Checklist
+          title={title}
+          requirements={requirements}
+          handleFormSubmit={handleFormSubmit}
+          hasActiveSubscription={hasActiveSubscription}
+        />
+      ),
       dispatch: {
         type: CHECKLIST,
         payload: { actionState, setActionState },
@@ -373,12 +394,22 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 </Link>
               </div>
               <div className='p-2 md:px-8 lg:px-4'>
-                <h2 className='text-xl font-bold text-indigo-dye'>Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications</h2>
+                <h2 className='text-xl font-bold text-indigo-dye'>
+                  Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
+                </h2>
                 {whichModal && modals[whichModal].component}
 
                 <div className='flex justify-end items-center gap-4 my-6'>
+                  <div className='flex-1 flex justify-start lg:justify-between gap-2'>
+                    <button
+                      onClick={() => setIsAddApplicantModalOpen(true)}
+                      className='rounded-lg bg-[#65c979] hover:bg-[#5cb86f] text-white py-2 px-6 font-bold text-[15px] my-6'
+                    >
+                      ADD APPLICANT
+                    </button>
+                    <AddStageBtn handleAddStage={handleAddStage} />
+                  </div>
                   <Filter onFilterChange={handleFilterChange} />
-                  <AddStageBtn handleAddStage={handleAddStage} />
                 </div>
 
                 <DragAndDrop
@@ -393,6 +424,12 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           </div>
         </StateContext.Provider>
       )}
+      <AddApplicantModal
+        refetch={appliedApplicantRefetch}
+        isOpen={isAddApplicantModalOpen}
+        setIsOpen={setIsAddApplicantModalOpen}
+        jobPostingId={params.id as string}
+      />
     </>
   );
 }

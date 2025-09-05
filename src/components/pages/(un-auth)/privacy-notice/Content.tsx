@@ -1,5 +1,11 @@
+"use client"
+import Navigation from "../landing-page/Navigation";
+import Footer from "../landing-page/Footer";
+
 function Content() {
   return (
+    <>
+    <Navigation />
     <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-14'>
       <h2 className='text-center text-2xl font-bold text-gray-900 pt-8'>YAHSHUA-ABBA Privacy Statement</h2>
       <h2 className='text-center text-2xl font-bold'>for Web App</h2>
@@ -216,6 +222,8 @@ function Content() {
       </p>
       <p className='text-justify text-gray-800'>Date last updated: 05 January 2024</p>
     </div>
+    <Footer />
+    </>
   );
 }
 

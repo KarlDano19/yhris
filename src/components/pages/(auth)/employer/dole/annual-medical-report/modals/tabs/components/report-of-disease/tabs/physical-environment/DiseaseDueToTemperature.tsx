@@ -23,24 +23,22 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
   const others_heat_male = watch ? watch("others_heat_male") : "";
   const others_heat_female = watch ? watch("others_heat_female") : "";
   const others_heat_total = watch ? watch("others_heat_total") : "";
-  const decompression_sickness_male = watch ? watch("decompression_sickness_male") : "";
-  const decompression_sickness_female = watch ? watch("decompression_sickness_female") : "";
-  const decompression_sickness_total = watch ? watch("decompression_sickness_total") : "";
-  const air_embolism_male = watch ? watch("air_embolism_male") : "";
-  const air_embolism_female = watch ? watch("air_embolism_female") : "";
-  const air_embolism_total = watch ? watch("air_embolism_total") : "";
-  const bends_disease_male = watch ? watch("bends_disease_male") : "";
-  const bends_disease_female = watch ? watch("bends_disease_female") : "";
-  const bends_disease_total = watch ? watch("bends_disease_total") : "";
-  const barotrauma_male = watch ? watch("barotrauma_male") : "";
-  const barotrauma_female = watch ? watch("barotrauma_female") : "";
-  const barotrauma_total = watch ? watch("barotrauma_total") : "";
-  const hypoxia_male = watch ? watch("hypoxia_male") : "";
-  const hypoxia_female = watch ? watch("hypoxia_female") : "";
-  const hypoxia_total = watch ? watch("hypoxia_total") : "";
-  const altitude_sickness_male = watch ? watch("altitude_sickness_male") : "";
-  const altitude_sickness_female = watch ? watch("altitude_sickness_female") : "";
-  const altitude_sickness_total = watch ? watch("altitude_sickness_total") : "";
+
+  const chilblain_male = watch ? watch("chilblain_male") : "";
+  const chilblain_female = watch ? watch("chilblain_female") : "";
+  const chilblain_total = watch ? watch("chilblain_total") : "";
+  const frost_bite_male = watch ? watch("frost_bite_male") : "";
+  const frost_bite_female = watch ? watch("frost_bite_female") : "";
+  const frost_bite_total = watch ? watch("frost_bite_total") : "";
+  const immersion_foot_male = watch ? watch("immersion_foot_male") : "";
+  const immersion_foot_female = watch ? watch("immersion_foot_female") : "";
+  const immersion_foot_total = watch ? watch("immersion_foot_total") : "";
+  const general_hypothermia_male = watch ? watch("general_hypothermia_male") : "";
+  const general_hypothermia_female = watch ? watch("general_hypothermia_female") : "";
+  const general_hypothermia_total = watch ? watch("general_hypothermia_total") : "";
+  const others_cold_temperature_male = watch ? watch("others_cold_temperature_male") : "";
+  const others_cold_temperature_female = watch ? watch("others_cold_temperature_female") : "";
+  const others_cold_temperature_total = watch ? watch("others_cold_temperature_total") : "";
 
   return (
     <>
@@ -58,6 +56,14 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           Total Number of Cases
         </h1>
       </div>
+    </div>
+    {/* Desktop Cold Temperature header - hidden on mobile */}
+    <div className="gap-4 pl-6 pt-4 pb-4 hidden md:block">
+      <h1 className="text-lg font-medium ">Hot Temperature</h1>
+    </div>
+    {/* Mobile Cold Temperature header - hidden on desktop */}
+    <div className="pl-7 block md:hidden pt-4 pb-4">
+      <h1 className="text-lg font-medium">Hot Temperature</h1>
     </div>
     {/* Desktop layout - hidden on mobile */}
     <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
@@ -442,7 +448,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
       <div className="flex justify-start items-center pl-6">
         <div className="grid-item">
           <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-            Decompression sickness
+            Chilblain
           </h1>
         </div>
       </div>
@@ -450,8 +456,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2 flex flex-row items-center">
           <input
             type="number"
-            {...register(`decompression_sickness_male`)}
-            id={`decompression_sickness_male`}
+            {...register(`chilblain_male`)}
+            id={`chilblain_male`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -460,8 +466,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`decompression_sickness_female`)}
-            id={`decompression_sickness_female`}
+            {...register(`chilblain_female`)}
+            id={`chilblain_female`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -470,8 +476,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`decompression_sickness_total`)}
-            id={`decompression_sickness_total`}
+            {...register(`chilblain_total`)}
+            id={`chilblain_total`}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
@@ -480,14 +486,14 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
     </div>
     {/* Mobile layout - hidden on desktop */}
     <div className="pl-7 block md:hidden mb-6">
-      <h2 className="font-medium mb-2 text-sm">Decompression sickness</h2>
+      <h2 className="font-medium mb-2 text-sm">Chilblain</h2>
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="text-xs text-gray-500 mb-1 block">Male</label>
           <input
             type="number"
-            value={decompression_sickness_male || ""}
-            onChange={(e) => setValue && setValue("decompression_sickness_male", e.target.value)}
+            value={chilblain_male || ""}
+            onChange={(e) => setValue && setValue("chilblain_male", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -495,8 +501,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Female</label>
           <input
             type="number"
-            value={decompression_sickness_female || ""}
-            onChange={(e) => setValue && setValue("decompression_sickness_female", e.target.value)}
+            value={chilblain_female || ""}
+            onChange={(e) => setValue && setValue("chilblain_female", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -504,7 +510,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
           <input
             type="number"
-            value={decompression_sickness_total || ""}
+            value={chilblain_total || ""}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
           />
@@ -516,7 +522,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
       <div className="flex justify-start items-center pl-6">
         <div className="grid-item">
           <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-            Air embolism
+            Frostbite
           </h1>
         </div>
       </div>
@@ -524,8 +530,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2 flex flex-row items-center">
           <input
             type="number"
-            {...register(`air_embolism_male`)}
-            id={`air_embolism_male`}
+            {...register(`frost_bite_male`)}
+            id={`frost_bite_male`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -534,8 +540,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`air_embolism_female`)}
-            id={`air_embolism_female`}
+            {...register(`frost_bite_female`)}
+            id={`frost_bite_female`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -544,8 +550,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`air_embolism_total`)}
-            id={`air_embolism_total`}
+            {...register(`frost_bite_total`)}
+            id={`frost_bite_total`}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
@@ -554,14 +560,14 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
     </div>
     {/* Mobile layout - hidden on desktop */}
     <div className="pl-7 block md:hidden mb-6">
-      <h2 className="font-medium mb-2 text-sm">Air embolism</h2>
+      <h2 className="font-medium mb-2 text-sm">Frostbite</h2>
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="text-xs text-gray-500 mb-1 block">Male</label>
           <input
             type="number"
-            value={air_embolism_male || ""}
-            onChange={(e) => setValue && setValue("air_embolism_male", e.target.value)}
+            value={frost_bite_male || ""}
+            onChange={(e) => setValue && setValue("frost_bite_male", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -569,8 +575,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Female</label>
           <input
             type="number"
-            value={air_embolism_female || ""}
-            onChange={(e) => setValue && setValue("air_embolism_female", e.target.value)}
+            value={frost_bite_female || ""}
+            onChange={(e) => setValue && setValue("frost_bite_female", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -578,7 +584,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
           <input
             type="number"
-            value={air_embolism_total || ""}
+            value={frost_bite_total || ""}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
           />
@@ -590,7 +596,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
       <div className="flex justify-start items-center pl-6">
         <div className="grid-item">
           <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-            Bends Disease
+            Immersion
           </h1>
         </div>
       </div>
@@ -598,8 +604,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2 flex flex-row items-center">
           <input
             type="number"
-            {...register(`bends_disease_male`)}
-            id={`bends_disease_male`}
+            {...register(`immersion_foot_male`)}
+            id={`immersion_foot_male`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -608,8 +614,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`bends_disease_female`)}
-            id={`bends_disease_female`}
+            {...register(`immersion_foot_female`)}
+            id={`immersion_foot_female`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -618,8 +624,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`bends_disease_total`)}
-            id={`bends_disease_total`}
+            {...register(`immersion_foot_total`)}
+            id={`immersion_foot_total`}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
@@ -628,14 +634,14 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
     </div>
     {/* Mobile layout - hidden on desktop */}
     <div className="pl-7 block md:hidden mb-6">
-      <h2 className="font-medium mb-2 text-sm">Bends Disease</h2>
+      <h2 className="font-medium mb-2 text-sm">Immersion</h2>
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="text-xs text-gray-500 mb-1 block">Male</label>
           <input
             type="number"
-            value={bends_disease_male || ""}
-            onChange={(e) => setValue && setValue("bends_disease_male", e.target.value)}
+            value={immersion_foot_male || ""}
+            onChange={(e) => setValue && setValue("immersion_foot_male", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -643,8 +649,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Female</label>
           <input
             type="number"
-            value={bends_disease_female || ""}
-            onChange={(e) => setValue && setValue("bends_disease_female", e.target.value)}
+            value={immersion_foot_female || ""}
+            onChange={(e) => setValue && setValue("immersion_foot_female", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -652,7 +658,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
           <input
             type="number"
-            value={bends_disease_total || ""}
+            value={immersion_foot_total || ""}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
           />
@@ -664,7 +670,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
       <div className="flex justify-start items-center pl-6">
         <div className="grid-item">
           <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-            Barotrauma
+            General Hypothermia
           </h1>
         </div>
       </div>
@@ -672,8 +678,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2 flex flex-row items-center">
           <input
             type="number"
-            {...register(`barotrauma_male`)}
-            id={`barotrauma_male`}
+            {...register(`general_hypothermia_male`)}
+            id={`general_hypothermia_male`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -682,8 +688,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`barotrauma_female`)}
-            id={`barotrauma_female`}
+            {...register(`general_hypothermia_female`)}
+            id={`general_hypothermia_female`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -692,8 +698,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`barotrauma_total`)}
-            id={`barotrauma_total`}
+            {...register(`general_hypothermia_total`)}
+            id={`general_hypothermia_total`}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
@@ -702,14 +708,14 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
     </div>
     {/* Mobile layout - hidden on desktop */}
     <div className="pl-7 block md:hidden mb-6">
-      <h2 className="font-medium mb-2 text-sm">Barotrauma</h2>
+      <h2 className="font-medium mb-2 text-sm">General Hypothermia</h2>
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="text-xs text-gray-500 mb-1 block">Male</label>
           <input
             type="number"
-            value={barotrauma_male || ""}
-            onChange={(e) => setValue && setValue("barotrauma_male", e.target.value)}
+            value={general_hypothermia_male || ""}
+            onChange={(e) => setValue && setValue("general_hypothermia_male", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -717,8 +723,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Female</label>
           <input
             type="number"
-            value={barotrauma_female || ""}
-            onChange={(e) => setValue && setValue("barotrauma_female", e.target.value)}
+            value={general_hypothermia_female || ""}
+            onChange={(e) => setValue && setValue("general_hypothermia_female", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -726,7 +732,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
           <input
             type="number"
-            value={barotrauma_total || ""}
+            value={general_hypothermia_total || ""}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
           />
@@ -738,7 +744,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
       <div className="flex justify-start items-center pl-6">
         <div className="grid-item">
           <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-            Hypoxia
+            Others
           </h1>
         </div>
       </div>
@@ -746,8 +752,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2 flex flex-row items-center">
           <input
             type="number"
-            {...register(`hypoxia_male`)}
-            id={`hypoxia_male`}
+            {...register(`others_cold_temperature_male`)}
+            id={`others_cold_temperature_male`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -756,8 +762,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`hypoxia_female`)}
-            id={`hypoxia_female`}
+            {...register(`others_cold_temperature_female`)}
+            id={`others_cold_temperature_female`}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
         </div>
@@ -766,8 +772,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
         <div className="mt-2">
           <input
             type="number"
-            {...register(`hypoxia_total`)}
-            id={`hypoxia_total`}
+            {...register(`others_cold_temperature_total`)}
+            id={`others_cold_temperature_total`}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
           />
@@ -776,14 +782,14 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
     </div>
     {/* Mobile layout - hidden on desktop */}
     <div className="pl-7 block md:hidden mb-6">
-      <h2 className="font-medium mb-2 text-sm">Hypoxia</h2>
+      <h2 className="font-medium mb-2 text-sm">Others</h2>
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="text-xs text-gray-500 mb-1 block">Male</label>
           <input
             type="number"
-            value={hypoxia_male || ""}
-            onChange={(e) => setValue && setValue("hypoxia_male", e.target.value)}
+            value={others_cold_temperature_male || ""}
+            onChange={(e) => setValue && setValue("others_cold_temperature_male", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -791,8 +797,8 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Female</label>
           <input
             type="number"
-            value={hypoxia_female || ""}
-            onChange={(e) => setValue && setValue("hypoxia_female", e.target.value)}
+            value={others_cold_temperature_female || ""}
+            onChange={(e) => setValue && setValue("others_cold_temperature_female", e.target.value)}
             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
           />
         </div>
@@ -800,81 +806,7 @@ const DiseaseDueToTemperature: React.FC<DiseaseDueToTemperatureProps> = ({ regis
           <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
           <input
             type="number"
-            value={hypoxia_total || ""}
-            readOnly
-            className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
-          />
-        </div>
-      </div>
-    </div>
-    {/* Desktop layout - hidden on mobile */}
-    <div className="grid-cols-4 gap-6 pb-6 hidden md:grid">
-      <div className="flex justify-start items-center pl-6">
-        <div className="grid-item">
-          <h1 className="block text-sm font-medium text-center items-start leading-6 text-gray-900">
-            Altitude sickness
-          </h1>
-        </div>
-      </div>
-      <div className="grid-item">
-        <div className="mt-2 flex flex-row items-center">
-          <input
-            type="number"
-            {...register(`altitude_sickness_male`)}
-            id={`altitude_sickness_male`}
-            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-          />
-        </div>
-      </div>
-      <div className="grid-item">
-        <div className="mt-2">
-          <input
-            type="number"
-            {...register(`altitude_sickness_female`)}
-            id={`altitude_sickness_female`}
-            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-          />
-        </div>
-      </div>
-      <div className="grid-item">
-        <div className="mt-2">
-          <input
-            type="number"
-            {...register(`altitude_sickness_total`)}
-            id={`altitude_sickness_total`}
-            readOnly
-            className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
-          />
-        </div>
-      </div>
-    </div>
-    {/* Mobile layout - hidden on desktop */}
-    <div className="pl-7 block md:hidden mb-6">
-      <h2 className="font-medium mb-2 text-sm">Altitude sickness</h2>
-      <div className="grid grid-cols-1 gap-3">
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">Male</label>
-          <input
-            type="number"
-            value={altitude_sickness_male || ""}
-            onChange={(e) => setValue && setValue("altitude_sickness_male", e.target.value)}
-            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">Female</label>
-          <input
-            type="number"
-            value={altitude_sickness_female || ""}
-            onChange={(e) => setValue && setValue("altitude_sickness_female", e.target.value)}
-            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">Total Number of Cases</label>
-          <input
-            type="number"
-            value={altitude_sickness_total || ""}
+            value={others_cold_temperature_total || ""}
             readOnly
             className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm"
           />

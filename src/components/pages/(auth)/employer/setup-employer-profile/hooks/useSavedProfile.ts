@@ -14,12 +14,14 @@ async function saveProfile(profile: T_EmployerProfile) {
     formData.append('email', profile.email);
     formData.append('mobile_number', profile.mobileNumber);
     formData.append('landline_number', profile.landlineNumber);
+    formData.append('region', profile.region);
+    formData.append('province', profile.province);
+    formData.append('city', profile.city);
+    formData.append('locality', profile.locality);
     formData.append('building', profile.building);
     formData.append('street', profile.street);
-    formData.append('locality', profile.locality);
-    formData.append('city', profile.city);
-    formData.append('zip_code', profile.zipCode);
     formData.append('country', profile.country);
+    formData.append('zip_code', profile.zipCode);
     formData.append('language', profile.language);
     formData.append('currency', profile.currency);
     if (profile.companyLogo) {

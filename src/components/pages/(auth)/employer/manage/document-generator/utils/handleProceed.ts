@@ -1,3 +1,5 @@
+import React from 'react';
+
 import type { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
 export function handleProceedUtil({
@@ -241,12 +243,12 @@ export function handleProceedUtil({
                 },
                 {
                   onSuccess: (): void => {
-                    toast.custom(() => CustomToast({ message: "PDF document created and uploaded. Ready to send.", type: "success" }), { duration: 3000 });
+                    toast.custom(() => React.createElement(CustomToast, { message: "PDF document created and uploaded. Ready to send.", type: "success" }), { duration: 3000 });
                     router.push(`/manage/address-employee-issue?openNteModal=true&employeeId=${employeeId}`);
                   },
                   onError: (error: any): void => {
                     console.error('Upload error:', error);
-                    toast.custom(() => CustomToast({ message: "Error uploading document. Please try again.", type: "error" }), { duration: 3000 });
+                    toast.custom(() => React.createElement(CustomToast, { message: "Error uploading document. Please try again.", type: "error" }), { duration: 3000 });
                   }
                 }
               );
@@ -254,18 +256,18 @@ export function handleProceedUtil({
             } catch (pdfError) {
               console.error('PDF creation error:', pdfError);
               document.body.removeChild(container);
-              toast.custom(() => CustomToast({ message: "Error creating PDF. Please try again.", type: "error" }), { duration: 3000 });
+              toast.custom(() => React.createElement(CustomToast, { message: "Error creating PDF. Please try again.", type: "error" }), { duration: 3000 });
             }
           }).catch((canvasError: any) => {
             console.error('Canvas capture error:', canvasError);
             document.body.removeChild(container);
-            toast.custom(() => CustomToast({ message: "Error capturing document. Please try again.", type: "error" }), { duration: 3000 });
+            toast.custom(() => React.createElement(CustomToast, { message: "Error capturing document. Please try again.", type: "error" }), { duration: 3000 });
           });
         }, 2500);
       };
     } catch (error) {
       console.error('Error setting up PDF generation:', error);
-      toast.custom(() => CustomToast({ message: "Error generating PDF. Please try again.", type: "error" }), { duration: 3000 });
+      toast.custom(() => React.createElement(CustomToast, { message: "Error generating PDF. Please try again.", type: "error" }), { duration: 3000 });
     }
   }
 }

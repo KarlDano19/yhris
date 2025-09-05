@@ -1,6 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
+import { useQueryClient } from '@tanstack/react-query';
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
@@ -11,6 +12,21 @@ import MonitoringAndHazardInfo from "./tabs/MonitoringAndHazardInfo";
 import DataPrivacyAndCertification from "./tabs/DataPrivacyAndCertification";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+
+interface CachedProfileData {
+  name: string;
+  type_of_industry: string;
+  user: {
+    email: string;
+  };
+  building: string;
+  street: string;
+  locality: string;
+  city: string;
+  country: string;
+  zip_code: string;
+  region: string;
+}
 
 function CreateWemRequestModal({
   refetch,
@@ -30,6 +46,31 @@ function CreateWemRequestModal({
     isLoading: isLoadingAddWorkEnvironmentRequest,
   } = useAddWorkEnvironmentRequest();
   const [selectedTab, setSelectedTab] = useState(1);
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: CachedProfileData } | undefined };
+
+  // Pre-fill form with cached profile data when modal opens
+  useEffect(() => {
+    if (isOpen && cachedProfile?.state?.data) {
+      setValue("company_name", cachedProfile.state.data.name || "");
+      setValue("type_of_industry", cachedProfile.state.data.type_of_industry || "");
+      setValue("email_address", cachedProfile.state.data.user?.email || "");
+      setValue("region", cachedProfile.state.data.region || "");
+      
+      // Combine address fields from cached profile
+      const addressParts = [
+        cachedProfile.state.data.building,
+        cachedProfile.state.data.street,
+        cachedProfile.state.data.locality,
+        cachedProfile.state.data.city,
+        cachedProfile.state.data.country,
+        cachedProfile.state.data.zip_code
+      ].filter(Boolean); // Remove empty/undefined values
+      
+      const combinedAddress = addressParts.join(', ') || '';
+      setValue("address", combinedAddress);
+    }
+  }, [isOpen, cachedProfile, setValue]);
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
@@ -88,7 +129,7 @@ function CreateWemRequestModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
                     Create Work Environment Measurement (WEM) Request

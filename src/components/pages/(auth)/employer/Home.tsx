@@ -16,7 +16,9 @@ import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
 import DoleLogo from '@/svg/DoleLogo';
 import SettingsLogo from '@/svg/SettingsLogo';
 import EmployeeKitLogo from '@/svg/EmployeeKitLogo';
+import AnalyticsLogo from '@/svg/AnalyticsLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
+import TalentSearchIcon from '@/svg/TalentSearchIcon';
 import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
 
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
@@ -46,6 +48,12 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isGrayedOut: false,
     },
     {
+      icon: <TalentSearchIcon />,
+      text: 'Talent Search',
+      link: '/talent-search',
+      isAvailable: true,
+    },
+    {
       icon: <ScreenApplicantsLogo />,
       text: 'Screen Applicants',
       link: '/screen-applicants',
@@ -73,13 +81,13 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
     },
-    {
-      icon: <PayrollLogo />,
-      text: 'Payroll',
-      link: '/payroll',
-      isAvailable: true,
-      isGrayedOut: true,
-    },
+    // {
+    //   icon: <PayrollLogo />,
+    //   text: 'Payroll',
+    //   link: '/payroll',
+    //   isAvailable: true,
+    //   isGrayedOut: true,
+    // },
     {
       icon: <EmployeeSeparationLogo />,
       text: 'Employee Separation',
@@ -87,17 +95,24 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
     },
-    {
-      icon: <EmployeeKitLogo />,
-      text: 'Employee Kit',
-      link: '/branding-kit',
-      isAvailable: true,
-      isGrayedOut: true,
-    },
+    // {
+    //   icon: <EmployeeKitLogo />,
+    //   text: 'Employee Kit',
+    //   link: '/branding-kit',
+    //   isAvailable: true,
+    //   isGrayedOut: true,
+    // },
     {
       icon: <DoleLogo />,
       text: 'DOLE',
       link: '/dole',
+      isAvailable: true,
+      isGrayedOut: !hasActiveSubscription,
+    },
+    {
+      icon: <AnalyticsLogo />,
+      text: 'Analytics',
+      link: '/analytics',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
     },

@@ -16,8 +16,9 @@ import ModalLayout from "./ModalLayout";
 import ModalFooterLayout from "../layouts/ModalFooterLayout";
 import StateContext from "../contexts/StateContext";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
+import ClipIcon from '@/svg/ClipIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import { ContextTypes, SendEmailPropTypes as PropTypes } from "../types";
@@ -29,6 +30,13 @@ const isHtmlEmpty = (html: string | null | undefined): boolean => {
   if (!html) return true;
   const trimmed = html.trim();
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
+};
+
+// Helper function to get filename from URL
+const getFilenameFromUrl = (url: string) => {
+  if (!url) return '';
+  const urlParts = url.split('/');
+  return urlParts[urlParts.length - 1];
 };
 
 export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
@@ -46,6 +54,8 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const [inputCc, setInputCc] = useState("");
   const [inputBcc, setInputBcc] = useState("");
   const [customSubject, setCustomSubject] = useState("");
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
     inputTo,
     setInputTo
@@ -99,7 +109,23 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
 
   const handleClose = () => {
     setIsOpen(false);
+    // Reset attachment state
+    setAttachment(null);
+    setAttachmentExist(false);
     setTimeout(() => setActionState(initialActionState), 400);
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
   };
 
   const handleOnSubmit = (data: any) => {
@@ -137,12 +163,17 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
       (item: any) => item.id === parseInt(data.template)
     ) : null;
     
-    data.email = tagsTo;
-    data.cc = tagsCc;
-    data.bcc = tagsBcc;
-    data.subject = customSubject || (template?.subject || '');
-    data.template = template?.subject || '';
-    handleFormSubmit(data, setIsOpen);
+    const formData = {
+      email: tagsTo,
+      cc: tagsCc,
+      bcc: tagsBcc,
+      subject: customSubject || (template?.subject || ''),
+      template: template?.subject || '',
+      message: data.message,
+      attachment: attachment,
+    };
+    
+    handleFormSubmit(formData, setIsOpen);
   };
 
   return (
@@ -457,6 +488,35 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                 value={watch("message")}
               />
             </div>
+          </div>
+          
+          {/* Attachment section */}
+          <div className='sm:col-span-4 mt-4'>
+            <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+              Attachment
+            </label>
+            <div className='mt-2'>
+              {/* File upload for new attachment */}
+              <input
+                id='attachment'
+                type='file'
+                onChange={handleAttachmentUpload}
+                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+              />
+              {attachmentExist ? (
+                <button
+                  type='button'
+                  className='underline text-savoy-blue text-sm mt-1'
+                  onClick={() => {
+                    setAttachment(null);
+                    setAttachmentExist(false);
+                  }}
+                >
+                  Remove Attachment
+                </button>
+              ) : null}
+            </div>
+            <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5MB.</p>
           </div>
         </div>
 

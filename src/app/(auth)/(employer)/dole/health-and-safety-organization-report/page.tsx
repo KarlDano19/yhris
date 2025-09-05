@@ -9,7 +9,7 @@ import Content from "@/components/pages/(auth)/employer/dole/health-and-safety-o
 import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
-  title: "Employee Compensation Logbook - Yahshua HRIS",
+  title: "Health and Safety Organization Report - Yahshua HRIS",
 };
 
 async function getSession() {

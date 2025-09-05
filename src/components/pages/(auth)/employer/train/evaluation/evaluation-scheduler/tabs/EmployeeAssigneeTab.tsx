@@ -4,7 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import "react-quill/dist/quill.snow.css";
-import Select from "react-select";
+import Select, { components } from "react-select";
 
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
@@ -16,6 +16,31 @@ interface Field {
   onChange: (value: any) => void;
   value: any;
 }
+
+// Custom Option component to display position in dropdown
+const CustomOption = (props: any) => {
+  const { data } = props;
+  return (
+    <components.Option {...props}>
+      <div>
+        <div className="font-medium">{data.label}</div>
+        {data.position && (
+          <div className="text-sm text-gray-500">{data.position}</div>
+        )}
+      </div>
+    </components.Option>
+  );
+};
+
+// Custom MultiValue component to show only name when selected
+const CustomMultiValue = (props: any) => {
+  const { data } = props;
+  return (
+    <components.MultiValue {...props}>
+      <span>{data.label}</span>
+    </components.MultiValue>
+  );
+};
 
 function EmployeeAssigneeTab({
   control,
@@ -42,6 +67,8 @@ function EmployeeAssigneeTab({
       const employeeItems = dataEmployee.map((item: any) => ({
         value: item.id,
         label: `${item.firstname} ${item.lastname}`,
+        displayLabel: item.position ? `${item.firstname} ${item.lastname} | ${item.position}` : `${item.firstname} ${item.lastname}`,
+        position: item.position,
       }));
       setEmployeeItems(employeeItems);
     }
@@ -97,6 +124,8 @@ function EmployeeAssigneeTab({
                     onChange(val ? val.map((item: any) => item.value) : [])
                   }
                   components={{
+                    Option: CustomOption,
+                    MultiValue: CustomMultiValue,
                     DropdownIndicator: () => (
                       <div className="pointer-events-none px-2">
                         <SelectChevronDown />
@@ -146,6 +175,8 @@ function EmployeeAssigneeTab({
                     onChange(val ? val.map((item: any) => item.value) : [])
                   }
                   components={{
+                    Option: CustomOption,
+                    MultiValue: CustomMultiValue,
                     DropdownIndicator: () => (
                       <div className="pointer-events-none px-2">
                         <SelectChevronDown />

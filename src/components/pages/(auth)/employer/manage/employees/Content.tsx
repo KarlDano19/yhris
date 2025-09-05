@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
 import EmployeesModal from './modals/EmployeesModal';
 import ImportModal from './modals/ImportModal';
@@ -18,13 +19,17 @@ import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItemsList from './hooks/useGetEmployeeItems';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import useGetLocationItems from '@/components/hooks/useGetLocationItems';
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
+import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
 import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
@@ -37,6 +42,22 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const columnDefinitions = [
+  { key: 'date_hired', label: 'Date Hired' },
+  { key: 'system_id', label: 'System ID' },
+  { key: 'employee_id', label: 'Employee ID' },
+  { key: 'firstname', label: 'First Name' },
+  { key: 'middlename', label: 'Middle Name' },
+  { key: 'lastname', label: 'Last Name' },
+  { key: 'location', label: 'Location' },
+  { key: 'position', label: 'Position' },
+  { key: 'department', label: 'Department' },
+  { key: 'email', label: 'Email' },
+  { key: 'mobile', label: 'Contact No.' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'address', label: 'Address' },
+];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
@@ -58,6 +79,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalRecords: 0,
   });
   const [isDataAgreementModalOpen, setIsDataAgreementModalOpen] = useState<boolean>(false);
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    date_hired: false,
+    system_id: false,
+    employee_id: false,
+    firstname: true,
+    middlename: true,
+    lastname: true,
+    location: true,
+    position: true,
+    department: true,
+    email: true,
+    mobile: false,
+    gender: false,
+    address: false,
+  });
   const [pendingFilter, setPendingFilter] = useState<any>({
     from: '',
     to: '',
@@ -74,6 +110,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: employeeListRefetch,
   } = useGetEmployeeItemsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
   const { data: employeeItemsAll } = useGetEmployeeItems();
+  const { data: locationItems } = useGetLocationItems();
+  const { data: departmentItems } = useGetDepartmentItems();
+  const { data: positionItems } = useGetPositionItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
 
@@ -174,29 +213,39 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleColumnToggle = (columnKey: string) => {
+    setVisibleColumns(prev => ({
+      ...prev,
+      [columnKey]: !prev[columnKey]
+    }));
+  };
+
+  const handleColumnReset = () => {
+    const defaultColumns: Record<string, boolean> = {
+      date_hired: false,
+      system_id: false,
+      employee_id: false,
+      firstname: true,
+      middlename: true,
+      lastname: true,
+      location: true,
+      position: true,
+      department: true,
+      email: true,
+      mobile: false,
+      gender: false,
+      address: false,
+    };
+    setVisibleColumns(defaultColumns);
+  };
+
   const renderRows = () => {
     if (isSearching || isEmployeeListLoading) {
       return (
         <tr>
           <td colSpan={100}>
-            <div role='status' className='py-5 text-center'>
-              <svg
-                aria-hidden='true'
-                className='inline w-12 h-12 mr-2 text-gray-200 animate-spin fill-yellow-400'
-                viewBox='0 0 100 101'
-                fill='none'
-                xmlns='http://www.w3.org/2000/svg'
-              >
-                <path
-                  d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
-                  fill='currentColor'
-                />
-                <path
-                  d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
-                  fill='currentFill'
-                />
-              </svg>
-              <span className='sr-only'>Loading...</span>
+            <div className='py-5'>
+              <LoadingSpinner size="lg" color="yellow" />
             </div>
           </td>
         </tr>
@@ -205,19 +254,47 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.system_id}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_id}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
-            {item.address}
-          </td>
+          {visibleColumns.date_hired && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
+          )}
+          {visibleColumns.system_id && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.system_id}</td>
+          )}
+          {visibleColumns.employee_id && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_id}</td>
+          )}
+          {visibleColumns.firstname && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.firstname}</td>
+          )}
+          {visibleColumns.middlename && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.middlename}</td>
+          )}
+          {visibleColumns.lastname && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.lastname}</td>
+          )}
+          {visibleColumns.location && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
+          )}
+          {visibleColumns.position && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position || 'N/A'}</td>
+          )}
+          {visibleColumns.department && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
+          )}
+          {visibleColumns.email && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
+          )}
+          {visibleColumns.mobile && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.mobile}</td>
+          )}
+          {visibleColumns.gender && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.gender}</td>
+          )}
+          {visibleColumns.address && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
+              {item.address}
+            </td>
+          )}
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
               <button
@@ -258,7 +335,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Employees</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Employee List</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
@@ -328,8 +405,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       {employeeItemsAll
                         .filter(
                           (item: any) =>
-                            item.firstname.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.lastname.toLowerCase().includes(pendingFilter.search.toLowerCase())
+                            item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
                         )
                         .map((item: any) => (
                           <li
@@ -341,7 +420,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               document.getElementById('search')?.blur();
                             }}
                           >
-                            {item.firstname} {item.lastname}
+                            <div className='flex flex-col'>
+                              <span className='font-medium'>{item.firstname} {item.lastname}</span>
+                              {(item.position || item.department) && (
+                                <span className='text-xs text-gray-500'>
+                                  {item.position && item.department 
+                                    ? `${item.position} | ${item.department}`
+                                    : item.position || item.department
+                                  }
+                                </span>
+                              )}
+                            </div>
                           </li>
                         ))}
                     </ul>
@@ -356,19 +445,60 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                onClick={() => setIsAddEmployeeModalOpen(true)}
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled={!cachedRigths?.state?.data?.create_employee}
-              >
-                CREATE
-              </button>
-              <Menu as='div' className='relative'>
-                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                  <span className='sr-only'>Open options</span>
-                  <div className='flex gap-4'>
-                    <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
-                  </div>
+              <div className='flex'>
+                <button
+                  onClick={() => setIsAddEmployeeModalOpen(true)}
+                  className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+                  disabled={!cachedRigths?.state?.data?.create_employee}
+                >
+                  CREATE
+                </button>
+                <Menu as='div' className='relative'>
+                  <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                    <span className='sr-only'>Open options</span>
+                    <div className='flex gap-4'>
+                      <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
+                    </div>
+                  </Menu.Button>
+                  <Transition
+                    as={Fragment}
+                    enter='transition ease-out duration-100'
+                    enterFrom='transform opacity-0 scale-95'
+                    enterTo='transform opacity-100 scale-100'
+                    leave='transition ease-in duration-75'
+                    leaveFrom='transform opacity-100 scale-100'
+                    leaveTo='transform opacity-0 scale-95'
+                  >
+                    <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                      <div className='py-1'>
+                        {menuOptions.map((item) => (
+                          <Menu.Item key={item.name}>
+                            {({ active }) => (
+                              <span
+                                className={classNames(
+                                  'block px-4 py-2 text-sm cursor-pointer text-center',
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                  item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
+                                )}
+                                onClick={() => {
+                                  if (!item.disabled) {
+                                    item.action();
+                                  }
+                                }}
+                              >
+                                {item.name}
+                              </span>
+                            )}
+                          </Menu.Item>
+                        ))}
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+              </div>
+              <Menu as='div' className='relative ml-2'>
+                <Menu.Button className='bg-savoy-blue rounded-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'>
+                  <Cog6ToothIcon className='h-5 w-5' />
                 </Menu.Button>
                 <Transition
                   as={Fragment}
@@ -379,28 +509,39 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   leaveFrom='transform opacity-100 scale-100'
                   leaveTo='transform opacity-0 scale-95'
                 >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                    <div className='py-1'>
-                      {menuOptions.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <span
-                              className={classNames(
-                                'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
-                              )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
-                            >
-                              {item.name}
-                            </span>
-                          )}
-                        </Menu.Item>
-                      ))}
+                  <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                    <div className='p-4'>
+                      <div className='mb-4'>
+                        <h3 className='text-sm font-semibold text-gray-900 mb-2'>
+                          Filter Columns ({Object.values(visibleColumns).filter(Boolean).length} of {columnDefinitions.length})
+                        </h3>
+                        <p className='text-xs text-gray-600'>
+                          Select which columns to display in the table.
+                        </p>
+                      </div>
+                      <div className='max-h-64 overflow-y-auto mb-4'>
+                        <div className='grid grid-cols-1 gap-2'>
+                          {columnDefinitions.map((column) => (
+                            <label key={column.key} className='flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50'>
+                              <input
+                                type='checkbox'
+                                checked={visibleColumns[column.key] || false}
+                                onChange={() => handleColumnToggle(column.key)}
+                                className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded'
+                              />
+                              <span className='text-sm text-gray-700'>{column.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className='flex gap-2'>
+                        <button
+                          onClick={handleColumnReset}
+                          className='flex-1 bg-gray-500 text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-gray-600'
+                        >
+                          Reset
+                        </button>
+                      </div>
                     </div>
                   </Menu.Items>
                 </Transition>
@@ -415,38 +556,73 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <table className='divide-y divide-gray-300 text-center min-w-full'>
                     <thead>
                       <tr>
+                        {visibleColumns.date_hired && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Date Hired
+                          </th>
+                        )}
+                        {visibleColumns.system_id && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            System ID
+                          </th>
+                        )}
+                        {visibleColumns.employee_id && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Employee ID
+                          </th>
+                        )}
+                        {visibleColumns.firstname && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            First Name
+                          </th>
+                        )}
+                        {visibleColumns.middlename && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Middle Name
+                          </th>
+                        )}
+                        {visibleColumns.lastname && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Last Name
+                          </th>
+                        )}
+                        {visibleColumns.location && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Location
+                          </th>
+                        )}
+                        {visibleColumns.position && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Position
+                          </th>
+                        )}
+                        {visibleColumns.department && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Department
+                          </th>
+                        )}
+                        {visibleColumns.email && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Email
+                          </th>
+                        )}
+                        {visibleColumns.mobile && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Contact No.
+                          </th>
+                        )}
+                        {visibleColumns.gender && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Gender
+                          </th>
+                        )}
+                        {visibleColumns.address && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Address
+                          </th>
+                        )}
                         <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Date Hired
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          System ID
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Employee ID
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          First Name
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Middle Name
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Last Name
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Location
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Email
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Contact No.
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Gender
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Address
+                          Actions
                         </th>
                       </tr>
                     </thead>
@@ -506,13 +682,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEmployeesEditModalOpen}
           setIsOpen={setIsEmployeesEditModalOpen}
           refetch={employeeListRefetch}
+          locationItems={locationItems}
+          departmentItems={departmentItems}
+          positionItems={positionItems}
         />
       )}
       <AddEmployeeModal
         refetch={employeeListRefetch}
         isOpen={isAddEmployeeModalOpen}
         setIsOpen={setIsAddEmployeeModalOpen}
+        locationItems={locationItems}
+        departmentItems={departmentItems}
+        positionItems={positionItems}
       />
+
     </>
   );
 };

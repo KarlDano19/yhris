@@ -93,6 +93,8 @@ export default function Form({
     }
   }, [initialData, documentType]);
   
+
+  
   // Debounce effect for color changes
   useEffect(() => {
     if (documentType !== 'employee-certificate' && documentType !== 'notice-to-explain') return;
@@ -122,7 +124,9 @@ export default function Form({
     }, 200);
     
     return () => clearTimeout(timer);
-  }, [colorValue, formData, onFormChange, documentType]);
+  }, [colorValue, documentType]); // Remove formData and onFormChange from dependencies to prevent infinite loops
+
+
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
