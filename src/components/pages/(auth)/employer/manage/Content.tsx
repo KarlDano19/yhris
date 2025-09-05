@@ -28,7 +28,7 @@ const menus = [
   },
   {
     icon: <EmployeeLogo />,
-    text: 'Employees',
+    text: 'Employee List',
     link: '/manage/employees',
   },
   {

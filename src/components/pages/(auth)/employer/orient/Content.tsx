@@ -400,7 +400,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Orient</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Onboarding</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>

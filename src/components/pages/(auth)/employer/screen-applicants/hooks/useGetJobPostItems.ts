@@ -8,6 +8,7 @@ async function getJobPostItems(filters: any) {
     newFilters.view_type = 'screen-applicants';
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
+    if (filters.is_active) newFilters.is_active = filters.is_active;
     const searchParams = new URLSearchParams(newFilters);
     const token = getCookie('token');
     const config = {
@@ -35,7 +36,7 @@ async function getJobPostItems(filters: any) {
 }
 
 function useGetJobPostItems(filters: any) {
-  const query = useQuery(['jobPostItemCache', {}], () => getJobPostItems(filters), {
+  const query = useQuery(['jobPostItemCache', filters], () => getJobPostItems(filters), {
     enabled: false,
     keepPreviousData: true,
   });

@@ -21,6 +21,7 @@ type PaginationProps = {
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
+    is_active: 'true', // Only show active job postings
   });
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
   const [currentPage, setCurrentPage] = useState(1);
