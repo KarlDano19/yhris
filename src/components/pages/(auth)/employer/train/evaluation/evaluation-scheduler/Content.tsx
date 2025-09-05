@@ -189,7 +189,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const renderRecipientsRoundPhoto = (recipients: any) => {
     return (
       <div 
-        className='inline-flex w-40 overflow-x-auto overflow-y-visible pt-1 pb-2.5 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-blue-600 [&::-webkit-scrollbar-thumb]:rounded-full'
+        className='inline-flex w-40 overflow-x-auto overflow-y-visible pb-2.5'
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: '#2d3e58 #f1f1f1'

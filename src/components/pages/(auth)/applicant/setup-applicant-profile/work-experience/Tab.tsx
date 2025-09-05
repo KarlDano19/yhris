@@ -272,7 +272,7 @@ function WorkExperienceTab({
           className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
           tabIndex={18}
         >
-          Next
+          Submit
         </button>
       </div>
     </form>

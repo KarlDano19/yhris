@@ -78,7 +78,13 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
   };
 
   return (
-    <div className='bg-[#EBF3FF] rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto'>
+    <div 
+      className='bg-[#EBF3FF] rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto'
+      style={{
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#2d3e58 #f1f1f1'
+      }}
+    >
       {filteredApplicants.length ? (
         filteredApplicants.map((applicant) => {
           return (
