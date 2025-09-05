@@ -52,7 +52,7 @@ export default function Tab({
         {children}
       </span>
       {dot && (
-        <span className="absolute top-1 right-1 inline-block h-2.5 w-2.5 rounded-full bg-rose-500" />
+        <span className="absolute top-0 right-0 inline-block h-3 w-3 rounded-full bg-rose-500" />
       )}
     </button>
   );

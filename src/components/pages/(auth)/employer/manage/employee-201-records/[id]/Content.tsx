@@ -102,7 +102,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   );
 
   // ------------------------ Data hooks ------------------------
-  const { data, isLoading } = useEmployee(params?.id);
+  const { data, isLoading, refetch } = useEmployee(params?.id);
   const employee = toDisplayEmployee(data, emp);
   const [employeeDetails, setEmployeeDetails] = useState<Partial<Employee> | undefined>(data ?? emp);
 
@@ -202,23 +202,38 @@ export default function Employee201Content({ params, emp }: ContentProps) {
   }, [activeTab]);
 
   // ------------------------ Save helpers ------------------------
+
+  const applyLocalPatch = useCallback((patch: Record<string, any>) => {
+    // shallow-merge is fine because patch only includes changed leaf fields
+    // (if you ever include nested objects like emergency_contact, you're already
+    // emitting the full object, so shallow merge still works).
+    setEmployeeDetails(prev => ({ ...(prev || {}), ...patch }));
+  }, []);
+
+
   const savePersonalTab = useCallback(async () => {
     const payload = personalPatchRef.current || {};
     const res = await savePersonal(payload);
     if (!res.ok) throw res.error;
-    setEmployeeDetails((prev) => ({ ...(prev || {}), ...payload }));
+
+    applyLocalPatch(payload)
     personalPatchRef.current = {};
+    await refetch();
+
     return res;
-  }, [savePersonal]);
+  }, [savePersonal, refetch]);
 
   const saveEmploymentTab = useCallback(async () => {
     const payload = employmentPatchRef.current;
     const res = await saveEmployment(payload);
     if (!res.ok) throw res.error;
-    setEmployeeDetails((prev) => ({ ...(prev || {}), ...payload }));
+
+    applyLocalPatch(payload)
     employmentPatchRef.current = {}; // clear after success
+    await refetch();
+
     return res;
-  }, [saveEmployment]);
+  }, [saveEmployment, refetch]);
 
   const saveTrainingTab = useCallback(async () => {
     const collect = trainingCollectorRef.current;
@@ -249,11 +264,12 @@ export default function Employee201Content({ params, emp }: ContentProps) {
       await deleteTraining(params.id, id);
     }
 
-    // On success, tell the form to refetch its list
+    // On success, tell the form to refetch its list and refresh employee details
     setTrainingRefreshKey((k) => k + 1);
+    await refetch();
 
     return { ok: true };
-  }, [createTraining, updateTraining, deleteTraining, params.id]);
+  }, [createTraining, updateTraining, deleteTraining, params.id, refetch]);
 
   const saveCurrentSection = useCallback(async () => {
     const key = activeTab;
@@ -280,6 +296,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
       } else {
         // fallback demo save for other tabs
         await new Promise<void>((r) => setTimeout(r, 800));
+        // Not calling refetch here because there’s no actual API change
       }
 
       setSections((prev) => ({
@@ -445,13 +462,13 @@ export default function Employee201Content({ params, emp }: ContentProps) {
             </h4>
           </a>
 
-          <button
-            onClick={() => setShowConfirm(true)}
-            disabled={!canSave}
-            className="rounded-md bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
+        <button
+          onClick={() => setShowConfirm(true)}
+          disabled={!canSave}
+          className="rounded-md bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
         </div>
 
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">
@@ -467,6 +484,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
               }}
               activeTab={activeTab}
               setActiveTab={handleTabClick}
+              empPartial={employeeDetails}
             />
           )}
         </div>

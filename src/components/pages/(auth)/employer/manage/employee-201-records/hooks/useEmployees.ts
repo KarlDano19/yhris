@@ -36,6 +36,8 @@ function buildParams(q: EmployeeQuery) {
   setIfNotAll("location", q.location);
   setIfNotAll("department", q.department);
   setIfNotAll("position", q.position);
+  
+  if (q.onlyIncomplete) params.set("incomplete", "1");
 
   params.set("current_page", String(q.page));
   params.set("page_size", String(q.pageSize));
@@ -88,6 +90,7 @@ export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
       const list = Array.isArray(recordsRaw) ? recordsRaw : [];
 
       const total =
+        Number(payload?.total_records) ??
         Number(payload?.total) ??
         Number(payload?.count) ??
         Number(payload?.records_total) ??

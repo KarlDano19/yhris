@@ -4,7 +4,17 @@ export type Employee = {
   // completeness / progress
   hasCompleteRecords: boolean;
   progressPercentage: number;
-  incompleteRecords: { missing: string[]; count: number } | null;
+  incompleteRecords: {
+    missing: {
+      name: string; // Section name
+      count: number;
+      items: {
+        name: string;      // Item label
+        missing?: string[]; // Optional: sub-missing items (e.g. SSS, PhilHealth)
+      }[];
+    }[];
+    count: number; // total missing items across all sections
+  } | null;
 
   // classification
   department: string | null; // e.g. "IT"

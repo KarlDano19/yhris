@@ -1,5 +1,5 @@
 "use client";
-import {  useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import {
   IdentificationIcon,
@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Tab from "../common/Tab";
 import PlacholderPicture from "@/svg/PlaceholderPicture";
+import type { Employee } from "@/types/employee-201-records/employee";
 
 export type TabKey =
   | "personal"
@@ -26,32 +27,44 @@ export default function EmployeeHeader({
   employee,
   activeTab,
   setActiveTab,
+  // NEW: pass the partial from API (contains incompleteRecords)
+  empPartial,
 }: {
   employee: {
     name: string;
     role: string;
     complete: boolean;
-    progress: number;      // 0–100
-    gender?: string | null; // "male" | "female" | undefined
-    photo?: string | null;  // URL or null
+    progress: number;
+    gender?: string | null;
+    photo?: string | null;
     email: string;
   };
   activeTab: TabKey;
   setActiveTab: (k: TabKey) => void;
+  empPartial?: Partial<Employee>;
 }) {
-  // --- avatar logic: prefer photo; fallback to gender placeholder ---
   const [imgError, setImgError] = useState(false);
   const hasPhoto = !!(employee.photo && employee.photo.trim() !== "");
   const showPhoto = hasPhoto && !imgError;
   const placeholderGender: "male" | "female" =
     (employee.gender || "").toLowerCase() === "female" ? "female" : "male";
-  // -----------------------------------------------------------------
+
+  // --- minimal: figure out which sections are incomplete
+  const missingSections = new Set<string>(
+    (empPartial?.incompleteRecords?.missing ?? [])
+      .map((s: any) => s?.name)
+      .filter(Boolean)
+  );
+  const personalIncomplete = missingSections.has("Personal Information");
+  const employmentIncomplete = missingSections.has("Employment Details");
+  const trainingIncomplete = missingSections.has("Training & Development");
+  // ---
 
   return (
     <div className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
       <div className="flex min-w-0 flex-col gap-6 md:flex-row md:items-center">
+        {/* avatar + header (unchanged) */}
         <div className="flex w-full items-center justify-center gap-4 text-center md:w-auto md:justify-start md:pr-5 md:text-left">
-          {/* Avatar */}
           <div className="relative h-[80px] w-[80px] flex-shrink-0 md:h-[100px] md:w-[100px]">
             <div
               className={`absolute inset-0 scale-110 rounded-full border-4 border-yellow-400 ${
@@ -79,11 +92,9 @@ export default function EmployeeHeader({
             )}
           </div>
 
-          {/* Name + role + progress */}
           <div>
             <div className="font-semibold text-indigo-dye">{employee.name}</div>
             <div className="text-sm text-gray-500">{employee.role}</div>
-
             <div className="mt-2 flex items-center justify-center gap-3 md:justify-start">
               <div
                 className={`h-2 w-40 overflow-hidden rounded-full md:w-48 ${
@@ -114,7 +125,7 @@ export default function EmployeeHeader({
 
         <div className="hidden h-24 w-[4px] rounded-full bg-gray-500 md:block" />
 
-        {/* Tabs */}
+        {/* Tabs: just add dot=... */}
         <nav
           className="no-scrollbar flex flex-wrap items-center justify-center gap-2 sm:gap-6 md:flex-nowrap md:justify-start md:overflow-x-auto"
           role="tablist"
@@ -123,24 +134,30 @@ export default function EmployeeHeader({
           <Tab
             active={activeTab === "personal"}
             onClick={() => setActiveTab("personal")}
+            dot={personalIncomplete}
             icon={<IdentificationIcon className="h-7 w-7 md:h-9 md:w-9" />}
           >
             Personal Information
           </Tab>
+
           <Tab
             active={activeTab === "employment"}
             onClick={() => setActiveTab("employment")}
+            dot={employmentIncomplete}
             icon={<BriefcaseIcon className="h-7 w-7 md:h-9 md:w-9" />}
           >
             Employment Details
           </Tab>
+
           <Tab
             active={activeTab === "training"}
             onClick={() => setActiveTab("training")}
+            dot={trainingIncomplete}
             icon={<AcademicCapIcon className="h-7 w-7 md:h-9 md:w-9" />}
           >
             Training &amp; Development
           </Tab>
+
           <Tab
             active={activeTab === "disciplinary"}
             onClick={() => setActiveTab("disciplinary")}
@@ -150,6 +167,7 @@ export default function EmployeeHeader({
           >
             Disciplinary Records
           </Tab>
+
           <Tab
             active={activeTab === "performance"}
             onClick={() => setActiveTab("performance")}
@@ -159,6 +177,7 @@ export default function EmployeeHeader({
           >
             Performance &amp; Evaluation
           </Tab>
+
           <Tab
             active={activeTab === "benefits"}
             onClick={() => setActiveTab("benefits")}
@@ -168,6 +187,7 @@ export default function EmployeeHeader({
           >
             Benefits &amp; Government Compliance
           </Tab>
+
           <Tab
             active={activeTab === "documents"}
             onClick={() => setActiveTab("documents")}

@@ -36,7 +36,9 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
   }, [open]);
 
   // ---------- display helpers (API fields) ----------
-  const displayName = `${emp.firstname ?? ""}${emp.lastname ? ` ${emp.lastname}` : ""}`.trim();
+  const displayName = `${emp.firstname ?? ""}${
+    emp.lastname ? ` ${emp.lastname}` : ""
+  }`.trim();
   const [imgError, setImgError] = useState(false);
   const rawGender = (emp.gender || "").toLowerCase();
   const photoUrl = emp.photo || undefined;
@@ -46,7 +48,8 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
     rawGender === "female" ? "female" : "male";
 
   const complete = !!emp.hasCompleteRecords;
-  const percent = typeof emp.progressPercentage === "number" ? emp.progressPercentage : 0;
+  const percent =
+    typeof emp.progressPercentage === "number" ? emp.progressPercentage : 0;
   const missingCount = emp.incompleteRecords?.count ?? 0;
   // --------------------------------------------------
 
@@ -100,30 +103,28 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
                   </div>
 
                   <div className="space-y-2.5 text-xs sm:space-y-3 sm:text-[13px]">
-                    <details className="group" open>
-                      <summary className="flex cursor-pointer select-none items-center justify-between rounded-md px-1 py-1.5 [&::-webkit-details-marker]:hidden">
-                        <span className="relative pl-5 font-medium text-gray-800 before:absolute before:left-0 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-gray-500 before:content-['']">
-                          Employment Details
-                        </span>
-                        <ChevronDownIcon className="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" />
-                      </summary>
-                      <ol className="ml-7 mt-1 list-decimal space-y-1 pl-4 text-rose-600">
-                        <li>Salary &amp; Compensation</li>
-                      </ol>
-                    </details>
-                    <details className="group">
-                      <summary className="flex cursor-pointer select-none items-center justify-between rounded-md px-1 py-1.5 [&::-webkit-details-marker]:hidden">
-                        <span className="relative pl-5 font-medium text-gray-800 before:absolute before:left-0 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-gray-500 before:content-['']">
-                          Document Repository
-                        </span>
-                        <ChevronDownIcon className="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" />
-                      </summary>
-                      <ol className="ml-7 mt-1 list-decimal space-y-1 pl-4 text-rose-600">
-                        <li>Job Offer Letter</li>
-                        <li>Signed Employment Contract</li>
-                        <li>Certificate of Employment (issued)</li>
-                      </ol>
-                    </details>
+                    {emp.incompleteRecords?.missing?.map((section, idx) => (
+                      <details key={idx} className="group" open={idx === 0}>
+                        <summary className="flex cursor-pointer select-none items-center justify-between rounded-md px-1 py-1.5 [&::-webkit-details-marker]:hidden">
+                          <span className="relative pl-5 font-medium text-gray-800 before:absolute before:left-0 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-gray-500 before:content-['']">
+                            {section.name}
+                          </span>
+                          <ChevronDownIcon className="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" />
+                        </summary>
+                        <ol className="ml-7 mt-1 list-decimal space-y-1 pl-4 text-rose-600">
+                          {section.items.map((item, j) => (
+                            <li key={j}>
+                              {item.name}
+                              {item.missing && item.missing.length > 0 && (
+                                <span className="ml-1 text-gray-500">
+                                  ({item.missing.join(", ")})
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </details>
+                    ))}
                   </div>
                 </div>
               )}
@@ -141,7 +142,9 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
           {showPhoto ? (
             <Image
               src={photoUrl!}
-              alt={`${displayName || "Employee"} ${complete ? "– complete" : "– incomplete"}`}
+              alt={`${displayName || "Employee"} ${
+                complete ? "– complete" : "– incomplete"
+              }`}
               width={96}
               height={96}
               className="absolute inset-0 rounded-full object-cover"
@@ -183,7 +186,8 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
                 />
               </div>
               <div className="mt-1 text-[11px] font-medium text-rose-600">
-                Incomplete Records{typeof percent === "number" ? ` • ${percent}%` : ""}
+                Incomplete Records
+                {typeof percent === "number" ? ` • ${percent}%` : ""}
               </div>
             </div>
           )}
