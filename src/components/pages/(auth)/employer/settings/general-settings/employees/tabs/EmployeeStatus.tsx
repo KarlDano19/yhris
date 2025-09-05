@@ -1,23 +1,23 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
-import useGetLocationItems from '../hooks/location/useGetLocationItems';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import Pagination from '@/components/Pagination';
+import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomToast from '@/components/CustomToast';
+import useGetEmployeeStatusItems from '../hooks/employee-status/useGetEmployeeStatusItems';
+
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
-import CustomToast from '@/components/CustomToast';
-import Pagination from '@/components/Pagination';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import LoadingSpinner from '@/components/LoadingSpinner';
-
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import DeleteIcon from '@/svg/DeleteIcon';
-import EditIcon from '@/svg/EditIcon';
 import classNames from '@/helpers/classNames';
 
 type PaginationProps = {
@@ -38,13 +38,13 @@ const formatDate = (dateString: string) => {
   return `${month}/${day}/${year}`;
 };
 
-const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
-  const [locationItems, setLocationItems] = useState<any>([]);
-  const [isAddLocationModalOpen, setIsAddLocationModalOpen] = useState<boolean>(false);
-  const [isLocationEditModalOpen, setIsLocationEditModalOpen] = useState<T_ModalData | null>(null);
-  const [isLocationDeleteModalOpen, setIsLocationDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [employeeStatusItems, setEmployeeStatusItems] = useState<any>([]);
+  const [isAddEmployeeStatusModalOpen, setIsAddEmployeeStatusModalOpen] = useState<boolean>(false);
+  const [isEmployeeStatusEditModalOpen, setIsEmployeeStatusEditModalOpen] = useState<T_ModalData | null>(null);
+  const [isEmployeeStatusDeleteModalOpen, setIsEmployeeStatusDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
@@ -63,32 +63,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     search: '',
   });
   const {
-    data: locationListData,
-    isLoading: isLocationListLoading,
-    refetch: locationListRefetch,
-  } = useGetLocationItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
+    data: employeeStatusListData,
+    isLoading: isEmployeeStatusListLoading,
+    refetch: employeeStatusListRefetch,
+  } = useGetEmployeeStatusItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   const cachedData: any = cachedProfile?.state?.data;
 
   useEffect(() => {
-    if (locationListData) {
-      setLocationItems(locationListData.records);
+    if (employeeStatusListData) {
+      setEmployeeStatusItems(employeeStatusListData.records);
       setPagination({
-        totalPages: locationListData.total_pages,
-        totalRecords: locationListData.total_records,
+        totalPages: employeeStatusListData.total_pages,
+        totalRecords: employeeStatusListData.total_records,
       });
     }
-  }, [locationListData]);
+  }, [employeeStatusListData]);
 
   useEffect(() => {
-    locationListRefetch();
-  }, [currentPage, pageSize, locationListRefetch]);
+    employeeStatusListRefetch();
+  }, [currentPage, pageSize, employeeStatusListRefetch]);
 
   useEffect(() => {
-    if (!isLocationListLoading && isSearching) {
+    if (!isEmployeeStatusListLoading && isSearching) {
       setIsSearching(false);
     }
-  }, [isLocationListLoading, isSearching]);
+  }, [isEmployeeStatusListLoading, isSearching]);
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -108,7 +108,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
-    // No need to call refetch; useGetLocationItems will refetch on appliedFilter change
   };
 
   const paginationChange = (event: any) => {
@@ -122,7 +121,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isSearching || isLocationListLoading) {
+    if (isSearching || isEmployeeStatusListLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -133,17 +132,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </tr>
       );
     }
-    if (locationItems && locationItems.length > 0) {
-      return locationItems.map((item: any) => (
+    if (employeeStatusItems && employeeStatusItems.length > 0) {
+      return employeeStatusItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
-              <button onClick={() => setIsLocationEditModalOpen({ id: item.id, open: true })}>
+              <button
+                onClick={() => setIsEmployeeStatusEditModalOpen({ id: item.id, open: true })}
+              >
                 <EditIcon />
               </button>
-              <button onClick={() => setIsLocationDeleteModalOpen({ id: item.id, open: true })}>
+              <button
+                onClick={() => setIsEmployeeStatusDeleteModalOpen({ id: item.id, open: true })}
+              >
                 <DeleteIcon />
               </button>
             </div>
@@ -155,7 +158,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <tr>
           <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add employee.</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add employee status.</h4>
           </td>
         </tr>
       );
@@ -166,7 +169,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Location</h2>
+          <h2 className='text-xl font-bold text-indigo-dye'>Employee Status</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
@@ -239,7 +242,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <button
-                onClick={() => setIsAddLocationModalOpen(true)}
+                onClick={() => setIsAddEmployeeStatusModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 disabled={!hasActiveSubscription}
               >
@@ -281,25 +284,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       <CreateModal
-        module='location'
-        refetch={locationListRefetch}
-        isOpen={isAddLocationModalOpen}
-        setIsOpen={setIsAddLocationModalOpen}
+        module='employee-status'
+        refetch={employeeStatusListRefetch}
+        isOpen={isAddEmployeeStatusModalOpen}
+        setIsOpen={setIsAddEmployeeStatusModalOpen}
       />
-      {isLocationEditModalOpen && (
+      {isEmployeeStatusEditModalOpen && (
         <EditModal
-          module='location'
-          refetch={locationListRefetch}
-          isOpen={isLocationEditModalOpen}
-          setIsOpen={setIsLocationEditModalOpen}
+          module='employee-status'
+          refetch={employeeStatusListRefetch}
+          isOpen={isEmployeeStatusEditModalOpen}
+          setIsOpen={setIsEmployeeStatusEditModalOpen}
         />
       )}
-      {isLocationDeleteModalOpen && (
+      {isEmployeeStatusDeleteModalOpen && (
         <DeleteModal
-          module='location'
-          refetch={locationListRefetch}
-          isOpen={isLocationDeleteModalOpen}
-          setIsOpen={setIsLocationDeleteModalOpen}
+          module='employee-status'
+          refetch={employeeStatusListRefetch}
+          isOpen={isEmployeeStatusDeleteModalOpen}
+          setIsOpen={setIsEmployeeStatusDeleteModalOpen}
         />
       )}
 
@@ -308,4 +311,4 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   );
 };
 
-export default Content;
+export default EmployeeStatus;
