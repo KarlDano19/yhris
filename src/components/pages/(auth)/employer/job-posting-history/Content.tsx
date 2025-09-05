@@ -461,7 +461,7 @@ const Content = () => {
                 >
                   <DeleteIcon />
                 </button>
-                <div className="relative more-menu-container">
+                <div className="relative more-menu-container pt-1">
                   <button onClick={() => handleMoreMenuClick(jobPost.id)}>
                     <MoreIconWithBorder />
                   </button>
@@ -648,8 +648,8 @@ const Content = () => {
             </div>
           </div>
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-              <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 h-[75vh]'>
+            <div className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'>
+              <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8'>
                 <table
                   className={classNames(
                     'min-w-full divide-y divide-gray-300 text-center',
