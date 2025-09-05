@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useFieldArray, Controller } from "react-hook-form";
 
 import dynamic from "next/dynamic";
 
-import { XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
+import { useFieldArray, Controller } from "react-hook-form";
+import { XCircleIcon, EyeIcon, MinusIcon } from "@heroicons/react/24/solid";
 
-import FilePreviewModal from "../modals/FilePreviewModal";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
+import FilePreviewModal from "../modals/FilePreviewModal";
 
 import ClipIcon from "@/svg/ClipIcon";
+
+import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
 export default function SafetyMeasures({
   control,
@@ -153,6 +154,10 @@ export default function SafetyMeasures({
                       >
                         No. Of Workers
                       </th>
+                      <th
+                        scope="col"
+                        className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                      ></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -178,6 +183,17 @@ export default function SafetyMeasures({
                             id={`ppe.${index}.no_of_workers`}
                             className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           />
+                        </td>
+                        <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                          <div className="flex justify-center items-center">
+                            <button
+                              type="button"
+                              className="flex justify-center items-center rounded-md bg-red-600 p-2 text-white"
+                              onClick={() => ppeRemove(index)}
+                            >
+                              <MinusIcon className="h-5 w-5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -396,6 +412,7 @@ export default function SafetyMeasures({
                           id={`adequate_supply_of_drinking_water_attachment`}
                           {...register(`adequate_supply_of_drinking_water_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -478,6 +495,7 @@ export default function SafetyMeasures({
                           id={`adequate_sanitary_and_washing_facilities_attachment`}
                           {...register(`adequate_sanitary_and_washing_facilities_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -558,6 +576,7 @@ export default function SafetyMeasures({
                           id={`suitable_living_accommodation_attachment`}
                           {...register(`suitable_living_accommodation_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -643,6 +662,7 @@ export default function SafetyMeasures({
                             `separate_sanitary_washing_and_sleeping_facilities_attachment`
                           )}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -723,6 +743,7 @@ export default function SafetyMeasures({
                           id={`lactation_station_attachment`}
                           {...register(`lactation_station_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -803,6 +824,7 @@ export default function SafetyMeasures({
                           id={`ramps_railings_and_like_attachment`}
                           {...register(`ramps_railings_and_like_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -886,6 +908,7 @@ export default function SafetyMeasures({
                           id={`other_workers_welfare_facilities_attachment`}
                           {...register(`other_workers_welfare_facilities_attachment`)}
                           type="file"
+                          accept="image/*"
                           className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -1010,6 +1033,10 @@ export default function SafetyMeasures({
                   >
                     Responsible person/position
                   </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-3 py-3.5 text-sm font-semibold text-gray-900"
+                  ></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -1059,6 +1086,17 @@ export default function SafetyMeasures({
                         id={`drills.${index}.responsible_person_position`}
                         className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                       />
+                    </td>
+                    <td className="whitespace-nowrap px-2 sm:px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                      <div className="flex justify-center items-center">
+                        <button
+                          type="button"
+                          className="flex justify-center items-center rounded-md bg-red-600 p-2 text-white"
+                          onClick={() => drillsRemove(index)}
+                        >
+                          <MinusIcon className="h-5 w-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

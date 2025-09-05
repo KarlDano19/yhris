@@ -13,7 +13,7 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useAddEmail from '../hook/useAddEmail';
-import CustomDatePicker from '@/components/CustomDatePicker'
+import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -76,9 +76,16 @@ export default function EmailProfileModal({
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
+
+  // State for follow-up CC and BCC
+  const [followUpCcStates, setFollowUpCcStates] = useState<{ [key: number]: string }>({});
+  const [followUpBccStates, setFollowUpBccStates] = useState<{ [key: number]: string }>({});
+  const [followUpCcTags, setFollowUpCcTags] = useState<{ [key: number]: string[] }>({});
+  const [followUpBccTags, setFollowUpBccTags] = useState<{ [key: number]: string[] }>({});
+  const [followUpCcOpen, setFollowUpCcOpen] = useState<{ [key: number]: boolean }>({});
+  const [followUpBccOpen, setFollowUpBccOpen] = useState<{ [key: number]: boolean }>({});
   const {
     register,
-    handleSubmit,
     reset,
     setValue,
     watch,
@@ -106,6 +113,49 @@ export default function EmailProfileModal({
   const [addingFollowUp, setAddingFollowUp] = useState(false);
   const [newFollowUpDate, setNewFollowUpDate] = useState<Date | null>(null);
 
+  // Helper functions for follow-up CC and BCC management
+  const handleFollowUpCcKeyDown = (tabIndex: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      const value = followUpCcStates[tabIndex]?.trim();
+      if (value && !followUpCcTags[tabIndex]?.includes(value)) {
+        setFollowUpCcTags((prev) => ({
+          ...prev,
+          [tabIndex]: [...(prev[tabIndex] || []), value],
+        }));
+        setFollowUpCcStates((prev) => ({ ...prev, [tabIndex]: '' }));
+      }
+    }
+  };
+
+  const handleFollowUpBccKeyDown = (tabIndex: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      const value = followUpBccStates[tabIndex]?.trim();
+      if (value && !followUpBccTags[tabIndex]?.includes(value)) {
+        setFollowUpBccTags((prev) => ({
+          ...prev,
+          [tabIndex]: [...(prev[tabIndex] || []), value],
+        }));
+        setFollowUpBccStates((prev) => ({ ...prev, [tabIndex]: '' }));
+      }
+    }
+  };
+
+  const removeFollowUpCcTag = (tabIndex: number, tagToRemove: string) => {
+    setFollowUpCcTags((prev) => ({
+      ...prev,
+      [tabIndex]: (prev[tabIndex] || []).filter((tag) => tag !== tagToRemove),
+    }));
+  };
+
+  const removeFollowUpBccTag = (tabIndex: number, tagToRemove: string) => {
+    setFollowUpBccTags((prev) => ({
+      ...prev,
+      [tabIndex]: (prev[tabIndex] || []).filter((tag) => tag !== tagToRemove),
+    }));
+  };
+
   // Add follow-up
   const handleAddFollowUp = () => {
     setAddingFollowUp(true);
@@ -127,6 +177,38 @@ export default function EmailProfileModal({
     const newArr = followUps.filter((_, i) => i !== idx);
     setFollowUps(newArr);
     setActiveTab((prev) => (prev >= idx ? Math.max(0, prev - 1) : prev));
+
+    // Clean up CC and BCC states for the removed follow-up
+    setFollowUpCcStates((prev) => {
+      const newStates = { ...prev };
+      delete newStates[idx];
+      return newStates;
+    });
+    setFollowUpBccStates((prev) => {
+      const newStates = { ...prev };
+      delete newStates[idx];
+      return newStates;
+    });
+    setFollowUpCcTags((prev) => {
+      const newTags = { ...prev };
+      delete newTags[idx];
+      return newTags;
+    });
+    setFollowUpBccTags((prev) => {
+      const newTags = { ...prev };
+      delete newTags[idx];
+      return newTags;
+    });
+    setFollowUpCcOpen((prev) => {
+      const newStates = { ...prev };
+      delete newStates[idx];
+      return newStates;
+    });
+    setFollowUpBccOpen((prev) => {
+      const newStates = { ...prev };
+      delete newStates[idx];
+      return newStates;
+    });
   };
   // Update subject/body for active tab
   const updateActiveTabField = (field: 'subject' | 'body', value: string) => {
@@ -147,6 +229,11 @@ export default function EmailProfileModal({
       const template = dataEmailTemplate.find((item: any) => item.id === parseInt(selectedTemplate));
       if (template) {
         setValue('subject', template.subject);
+        // Update main email in followUps array
+        setFollowUps((prev) =>
+          prev.map((item, idx) => (idx === 0 ? { ...item, subject: template.subject, body: template.body } : item))
+        );
+
         if (employeeEmail) {
           setTagsTo([employeeEmail, ...template.to]);
         } else {
@@ -168,6 +255,8 @@ export default function EmailProfileModal({
       setTagsCc([]);
       setTagsBcc([]);
       setValue('message', '');
+      // Clear main email in followUps array
+      setFollowUps((prev) => prev.map((item, idx) => (idx === 0 ? { ...item, subject: '', body: '' } : item)));
     }
   }, [selectedTemplate, dataEmailTemplate, employeeEmail, setTagsTo, setTagsCc, setTagsBcc, setValue]);
 
@@ -195,106 +284,6 @@ export default function EmailProfileModal({
     }
   }, [watch('subject'), clearErrors]);
 
-  const onSubmit = handleSubmit((data) => {
-    // Validate "To" field manually since it uses tags
-    if (tagsTo.length === 0) {
-      setError('to', {
-        type: 'manual',
-        message: 'At least one recipient is required',
-      });
-      toast.custom(
-        () => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />,
-        { duration: 2000 }
-      );
-      return;
-    }
-
-    // Validate applicant ID
-    if (!applicantId) {
-      toast.custom(() => <CustomToast message='Applicant ID is required' type='error' />, { duration: 2000 });
-      return;
-    }
-
-    // Validate that all follow-ups have required fields
-    const hasIncompleteFollowUps = followUps.some((followUp, index) => {
-      if (index === 0) return false; // Skip main email (handled by form validation)
-      return !followUp.subject.trim() || isHtmlEmpty(followUp.body);
-    });
-
-    if (hasIncompleteFollowUps) {
-      toast.custom(() => <CustomToast message='Please complete all follow-up emails before sending.' type='error' />, {
-        duration: 2000,
-      });
-      return;
-    }
-
-    // Prepare emails array - main email + follow-ups
-    const emailsToSend: Array<{
-      applicant: number;
-      to_email: string;
-      cc_email: string;
-      bcc_email: string;
-      subject: string;
-      body: string;
-      scheduled_date: string | null;
-    }> = [];
-
-    // Add main email (current form data)
-    const mainEmail = {
-      applicant: Number(applicantId),
-      to_email: tagsTo.join(','),
-      cc_email: tagsCc.join(','),
-      bcc_email: tagsBcc.join(','),
-      subject: data.subject,
-      body: data.message,
-      scheduled_date: null, // Send immediately
-    };
-    emailsToSend.push(mainEmail);
-
-    // Add follow-up emails
-    followUps.slice(1).forEach((followUp) => {
-      if (followUp.subject.trim() && !isHtmlEmpty(followUp.body)) {
-        const followUpEmail = {
-          applicant: Number(applicantId),
-          to_email: followUp.to,
-          cc_email: '', // Follow-ups use the same recipients as main email
-          bcc_email: '',
-          subject: followUp.subject,
-          body: followUp.body,
-          scheduled_date: followUp.date.toISOString(), // Schedule for the specified date
-        };
-        emailsToSend.push(followUpEmail);
-      }
-    });
-
-    // Send all emails
-    const sendAllEmails = async () => {
-      try {
-        for (const emailData of emailsToSend) {
-          await new Promise((resolve, reject) => {
-            sendEmail(emailData, {
-              onSuccess: resolve,
-              onError: reject,
-            });
-          });
-        }
-
-        // All emails sent successfully
-        setIsOpen({ id: 0, open: false });
-        refetch();
-        const message =
-          emailsToSend.length === 1
-            ? 'Successfully sent email.'
-            : `Successfully sent ${emailsToSend.length} emails (${emailsToSend.length - 1} follow-ups scheduled).`;
-        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 5000 });
-      } catch (error) {
-        toast.custom(() => <CustomToast message={`Error sending emails: ${error}`} type='error' />, { duration: 7000 });
-      }
-    };
-
-    sendAllEmails();
-  });
-
   const customCloseModal = () => {
     // Reset form state
     reset();
@@ -308,6 +297,14 @@ export default function EmailProfileModal({
     setInputTo('');
     setInputCc('');
     setInputBcc('');
+
+    // Reset follow-up CC and BCC states
+    setFollowUpCcStates({});
+    setFollowUpBccStates({});
+    setFollowUpCcTags({});
+    setFollowUpBccTags({});
+    setFollowUpCcOpen({});
+    setFollowUpBccOpen({});
 
     // Close the modal
     setIsOpen({ id: 0, open: false });
@@ -432,7 +429,7 @@ export default function EmailProfileModal({
                     )}
                   </div>
                   {/* Form for active tab */}
-                  <form onSubmit={onSubmit}>
+                  <div>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='subject' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -443,12 +440,12 @@ export default function EmailProfileModal({
                         <input
                           type='text'
                           id='subject'
-                          value={activeTab === 0 ? watch('subject') : followUps[activeTab]?.subject || ''}
+                          value={followUps[activeTab]?.subject || ''}
                           onChange={(e) => {
+                            updateActiveTabField('subject', e.target.value);
+                            // For main email, also update the form state for validation
                             if (activeTab === 0) {
                               setValue('subject', e.target.value);
-                            } else {
-                              updateActiveTabField('subject', e.target.value);
                             }
                           }}
                           className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
@@ -461,35 +458,36 @@ export default function EmailProfileModal({
                         </label>
                         {errors.to && <p className='text-xs text-red-600 mt-1'>{errors.to.message}</p>}
                         {activeTab === 0 ? (
-                          <div className="mt-2 flex rounded-md shadow-sm">
-                            <div className="relative flex flex-grow items-stretch focus-within:z-10">
-                              <div 
-                                className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full"
+                          <div className='mt-2 flex rounded-md shadow-sm'>
+                            <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                              <div
+                                className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
                                 data-tooltip-id='to-section-tooltip'
                                 data-tooltip-place='bottom'
                               >
                                 {tagsTo.map((tagTo) => (
                                   <div
                                     key={tagTo}
-                                    className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm"
+                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                   >
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveTagTo(tagTo)}
-                                    >
-                                      <XMarkIcon className="w-4 h-4" />
+                                    <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
+                                      <XMarkIcon className='w-4 h-4' />
                                     </button>
                                     <p>{tagTo}</p>
                                   </div>
                                 ))}
                                 <input
-                                  type="text"
+                                  type='text'
                                   value={inputTo}
                                   onKeyDown={handleKeyDownTo}
                                   onChange={(e) => setInputTo(e.target.value)}
-                                  className="focus:none outline-none px-2 py-1 grow"
+                                  className='focus:none outline-none px-2 py-1 grow'
                                 />
-                                <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                                <Tooltip
+                                  id='to-section-tooltip'
+                                  opacity={1}
+                                  style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}
+                                >
                                   <div className='px-1'>
                                     <h2 className='text-[12px] font-medium'>
                                       Add multiple recipients by pressing Tab or Enter.
@@ -499,22 +497,18 @@ export default function EmailProfileModal({
                               </div>
                             </div>
                             <button
-                              type="button"
+                              type='button'
                               className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
-                                isCCOpen
-                                  ? "bg-savoy-blue text-white hover:bg-blue-700"
-                                  : "bg-gray-50"
+                                isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                               }`}
                               onClick={() => setIsCCOPen(!isCCOpen)}
                             >
                               CC
                             </button>
                             <button
-                              type="button"
+                              type='button'
                               className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
-                                isBCCOpen
-                                  ? "bg-savoy-blue text-white hover:bg-blue-700"
-                                  : "bg-gray-50"
+                                isBCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                               }`}
                               onClick={() => setIsBCCOpen(!isBCCOpen)}
                             >
@@ -522,50 +516,72 @@ export default function EmailProfileModal({
                             </button>
                           </div>
                         ) : (
-                          <input
-                            type='text'
-                            value={followUps[activeTab]?.to || ''}
-                            readOnly
-                            className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100'
-                          />
+                          <div className='mt-2 flex rounded-md shadow-sm'>
+                            <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                              <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full bg-gray-100'>
+                                {tagsTo.map((email) => (
+                                  <span key={email} className='bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm'>
+                                    {email}
+                                  </span>
+                                ))}
+                                <div className='text-xs text-gray-500 ml-2'>Recipients inherited from main email</div>
+                              </div>
+                            </div>
+                            <button
+                              type='button'
+                              className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                                followUpCcOpen[activeTab] ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
+                              }`}
+                              onClick={() => setFollowUpCcOpen((prev) => ({ ...prev, [activeTab]: !prev[activeTab] }))}
+                            >
+                              CC
+                            </button>
+                            <button
+                              type='button'
+                              className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                                followUpBccOpen[activeTab] ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
+                              }`}
+                              onClick={() => setFollowUpBccOpen((prev) => ({ ...prev, [activeTab]: !prev[activeTab] }))}
+                            >
+                              BCC
+                            </button>
+                          </div>
                         )}
                       </div>
                       {isCCOpen && activeTab === 0 && (
-                        <div className="sm:col-span-4 mt-4">
-                          <label
-                            htmlFor="cc"
-                            className="block text-sm font-medium leading-6 text-gray-900"
-                          >
+                        <div className='sm:col-span-4 mt-4'>
+                          <label htmlFor='cc' className='block text-sm font-medium leading-6 text-gray-900'>
                             CC
                           </label>
-                          <div className="mt-2">
-                            <div 
-                              className="relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full"
+                          <div className='mt-2'>
+                            <div
+                              className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
                               data-tooltip-id='cc-section-tooltip'
                               data-tooltip-place='bottom'
                             >
                               {tagsCc.map((tag) => (
                                 <div
                                   key={tag}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveTag(tag)}
-                                  >
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTag(tag)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tag}</p>
                                 </div>
                               ))}
                               <input
-                                type="text"
+                                type='text'
                                 value={inputCc}
                                 onKeyDown={handleKeyDown}
                                 onChange={(e) => setInputCc(e.target.value)}
-                                className="focus:none outline-none px-2 py-1 grow rounded-md"
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
-                              <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                              <Tooltip
+                                id='cc-section-tooltip'
+                                opacity={1}
+                                style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}
+                              >
                                 <div className='px-1'>
                                   <h2 className='text-[12px] font-medium'>
                                     Add multiple recipients by pressing Tab or Enter.
@@ -577,41 +593,39 @@ export default function EmailProfileModal({
                         </div>
                       )}
                       {isBCCOpen && activeTab === 0 && (
-                        <div className="sm:col-span-4 mt-4">
-                          <label
-                            htmlFor="bcc"
-                            className="block text-sm font-medium leading-6 text-gray-900"
-                          >
+                        <div className='sm:col-span-4 mt-4'>
+                          <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                             BCC
                           </label>
-                          <div className="mt-2">
-                            <div 
-                              className="relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm"
+                          <div className='mt-2'>
+                            <div
+                              className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'
                               data-tooltip-id='bcc-section-tooltip'
                               data-tooltip-place='bottom'
                             >
                               {tagsBcc.map((tagBcc) => (
                                 <div
                                   key={tagBcc}
-                                  className="bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm"
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveTagBcc(tagBcc)}
-                                  >
-                                    <XMarkIcon className="w-4 h-4" />
+                                  <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
+                                    <XMarkIcon className='w-4 h-4' />
                                   </button>
                                   <p>{tagBcc}</p>
                                 </div>
                               ))}
                               <input
-                                type="text"
+                                type='text'
                                 value={inputBcc}
                                 onKeyDown={handleKeyDownBcc}
                                 onChange={(e) => setInputBcc(e.target.value)}
-                                className="focus:none outline-none px-2 py-1 grow rounded-md"
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
-                              <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
+                              <Tooltip
+                                id='bcc-section-tooltip'
+                                opacity={1}
+                                style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}
+                              >
                                 <div className='px-1'>
                                   <h2 className='text-[12px] font-medium'>
                                     Add multiple recipients by pressing Tab or Enter.
@@ -622,21 +636,113 @@ export default function EmailProfileModal({
                           </div>
                         </div>
                       )}
+                      {/* CC and BCC fields for follow-ups */}
+                      {followUpCcOpen[activeTab] && activeTab > 0 && (
+                        <div className='sm:col-span-4 mt-4'>
+                          <label htmlFor='followup-cc' className='block text-sm font-medium leading-6 text-gray-900'>
+                            CC
+                          </label>
+                          <div className='mt-2'>
+                            <div
+                              className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                              data-tooltip-id='followup-cc-section-tooltip'
+                              data-tooltip-place='bottom'
+                            >
+                              {(followUpCcTags[activeTab] || []).map((tag) => (
+                                <div
+                                  key={tag}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                >
+                                  <button type='button' onClick={() => removeFollowUpCcTag(activeTab, tag)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tag}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='text'
+                                value={followUpCcStates[activeTab] || ''}
+                                onKeyDown={(e) => handleFollowUpCcKeyDown(activeTab, e)}
+                                onChange={(e) =>
+                                  setFollowUpCcStates((prev) => ({ ...prev, [activeTab]: e.target.value }))
+                                }
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                              />
+                              <Tooltip
+                                id='followup-cc-section-tooltip'
+                                opacity={1}
+                                style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}
+                              >
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter.
+                                  </h2>
+                                </div>
+                              </Tooltip>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {followUpBccOpen[activeTab] && activeTab > 0 && (
+                        <div className='sm:col-span-4 mt-4'>
+                          <label htmlFor='followup-bcc' className='block text-sm font-medium leading-6 text-gray-900'>
+                            BCC
+                          </label>
+                          <div className='mt-2'>
+                            <div
+                              className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'
+                              data-tooltip-id='followup-bcc-section-tooltip'
+                              data-tooltip-place='bottom'
+                            >
+                              {(followUpBccTags[activeTab] || []).map((tag) => (
+                                <div
+                                  key={tag}
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                                >
+                                  <button type='button' onClick={() => removeFollowUpBccTag(activeTab, tag)}>
+                                    <XMarkIcon className='w-4 h-4' />
+                                  </button>
+                                  <p>{tag}</p>
+                                </div>
+                              ))}
+                              <input
+                                type='text'
+                                value={followUpBccStates[activeTab] || ''}
+                                onKeyDown={(e) => handleFollowUpBccKeyDown(activeTab, e)}
+                                onChange={(e) =>
+                                  setFollowUpBccStates((prev) => ({ ...prev, [activeTab]: e.target.value }))
+                                }
+                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                              />
+                              <Tooltip
+                                id='followup-bcc-section-tooltip'
+                                opacity={1}
+                                style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}
+                              >
+                                <div className='px-1'>
+                                  <h2 className='text-[12px] font-medium'>
+                                    Add multiple recipients by pressing Tab or Enter.
+                                  </h2>
+                                </div>
+                              </Tooltip>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                           Message<span className='text-red-600'>*</span>
                         </label>
                         {errors.message && <p className='text-xs text-red-600 mt-1'>{errors.message.message}</p>}
                         <div className='mt-2 h-72 mb-12'>
-                          <textarea
-                            rows={4}
-                            {...register('message', { required: 'Message is required' })}
-                            id='message'
-                            hidden
-                          />
+                          <textarea rows={4} {...register('message')} id='message' hidden />
                           <ReactQuill
+                            key={`quill-${activeTab}`}
                             onChange={(value) => {
-                              console.log('HTML Content:', value); // Temporary debugging
+                              updateActiveTabField('body', value);
+
+                              // For main email, also update form state and handle validation
                               if (activeTab === 0) {
                                 setValue('message', value);
                                 // Only clear errors when there is actual content
@@ -649,14 +755,12 @@ export default function EmailProfileModal({
                                     message: 'Message is required',
                                   });
                                 }
-                              } else {
-                                updateActiveTabField('body', value);
                               }
                             }}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%', padding: '5px 8px !important' }}
-                            value={activeTab === 0 ? watch('message') : followUps[activeTab]?.body || ''}
+                            value={followUps[activeTab]?.body || ''}
                           />
                         </div>
                       </div>
@@ -664,68 +768,177 @@ export default function EmailProfileModal({
                     <hr />
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
                       <button
-                        type='submit'
+                        type='button'
                         className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto disabled:opacity-50'
                         disabled={isLoading}
                         onClick={async (e) => {
-                          // For main email tab, validate form fields
-                          if (activeTab === 0) {
-                            // Trigger validation for all required fields
-                            const subjectValid = await trigger('subject');
+                          // Check if at least one email has complete content using followUps array
+                          const mainEmailComplete =
+                            followUps[0] &&
+                            followUps[0].subject?.trim() &&
+                            !isHtmlEmpty(followUps[0].body) &&
+                            tagsTo.length > 0;
 
-                            // Check message content specifically for empty HTML
-                            const messageContent = watch('message');
-                            let messageValid = !isHtmlEmpty(messageContent);
+                          const hasCompleteFollowUp = followUps
+                            .slice(1)
+                            .some((followUp) => followUp.subject?.trim() && !isHtmlEmpty(followUp.body));
 
-                            if (!messageValid) {
-                              setError('message', {
-                                type: 'manual',
-                                message: 'Message is required',
-                              });
-                            }
+                          // If no complete emails exist, prevent submission
+                          if (!mainEmailComplete && !hasCompleteFollowUp) {
+                            e.preventDefault();
 
-                            // Check if all validations pass
-                            if (!subjectValid || !messageValid || tagsTo.length === 0) {
-                              e.preventDefault();
-                              // Set error for "to" field if no recipients
+                            // Set errors for current tab for better UX
+                            if (activeTab === 0) {
+                              // Main email tab - check each field
+                              if (!followUps[0]?.subject?.trim()) {
+                                setError('subject', {
+                                  type: 'manual',
+                                  message: 'Subject is required',
+                                });
+                              }
+
+                              if (!followUps[0]?.body || isHtmlEmpty(followUps[0].body)) {
+                                setError('message', {
+                                  type: 'manual',
+                                  message: 'Message is required',
+                                });
+                              }
+
                               if (tagsTo.length === 0) {
                                 setError('to', {
                                   type: 'manual',
                                   message: 'At least one recipient is required',
                                 });
                               }
-                              toast.custom(
-                                () => (
-                                  <CustomToast
-                                    message={'You cannot proceed due to incomplete fields. Please review.'}
-                                    type='error'
-                                  />
-                                ),
-                                {
-                                  duration: 2000,
-                                }
-                              );
-                              return;
                             }
-                          } else {
-                            // For follow-up tabs, validate the current follow-up
-                            const currentFollowUp = followUps[activeTab];
-                            if (!currentFollowUp?.subject?.trim() || isHtmlEmpty(currentFollowUp?.body)) {
-                              e.preventDefault();
-                              toast.custom(
-                                () => (
-                                  <CustomToast
-                                    message={'Please complete the current follow-up email before sending.'}
-                                    type='error'
-                                  />
-                                ),
-                                {
-                                  duration: 2000,
-                                }
-                              );
-                              return;
-                            }
+
+                            toast.custom(
+                              () => (
+                                <CustomToast
+                                  message={'Please complete at least one email before sending.'}
+                                  type='error'
+                                />
+                              ),
+                              {
+                                duration: 2000,
+                              }
+                            );
+                            return;
                           }
+
+                          // Validate applicant ID
+                          if (!applicantId) {
+                            toast.custom(() => <CustomToast message='Applicant ID is required' type='error' />, {
+                              duration: 2000,
+                            });
+                            return;
+                          }
+
+                          // Now handle the actual email sending
+                          // Prepare emails array - main email + follow-ups
+                          const emailsToSend: Array<{
+                            applicant: number;
+                            to_email: string;
+                            cc_email: string;
+                            bcc_email: string;
+                            subject: string;
+                            body: string;
+                            scheduled_date: string | null;
+                          }> = [];
+
+                          // Add main email (from followUps[0]) only if it has content
+                          const mainEmailData = followUps[0];
+                          if (mainEmailData && mainEmailData.subject.trim() && !isHtmlEmpty(mainEmailData.body)) {
+                            const mainEmail = {
+                              applicant: Number(applicantId),
+                              to_email: tagsTo.join(','),
+                              cc_email: tagsCc.join(','),
+                              bcc_email: tagsBcc.join(','),
+                              subject: mainEmailData.subject,
+                              body: mainEmailData.body,
+                              scheduled_date: null, // Send immediately
+                            };
+                            emailsToSend.push(mainEmail);
+                          }
+
+                          // Add follow-up emails
+                          followUps.slice(1).forEach((followUp, index) => {
+                            if (followUp.subject.trim() && !isHtmlEmpty(followUp.body)) {
+                              const followUpIndex = index + 1; // Adjust index since we start from slice(1)
+                              const followUpEmail = {
+                                applicant: Number(applicantId),
+                                to_email: tagsTo.join(','), // Inherit TO recipients from main email
+                                cc_email: (followUpCcTags[followUpIndex] || []).join(','), // Additional CC recipients
+                                bcc_email: (followUpBccTags[followUpIndex] || []).join(','), // Additional BCC recipients
+                                subject: followUp.subject,
+                                body: followUp.body,
+                                scheduled_date: followUp.date.toISOString(), // Schedule for the specified date
+                              };
+                              emailsToSend.push(followUpEmail);
+                            }
+                          });
+
+                          // Check if there are any emails to send
+                          if (emailsToSend.length === 0) {
+                            toast.custom(
+                              () => (
+                                <CustomToast
+                                  message='No emails to send. Please complete at least one email.'
+                                  type='error'
+                                />
+                              ),
+                              {
+                                duration: 2000,
+                              }
+                            );
+                            return;
+                          }
+
+                          // Send all emails
+                          const sendAllEmails = async () => {
+                            try {
+                              for (const emailData of emailsToSend) {
+                                await new Promise((resolve, reject) => {
+                                  sendEmail(emailData, {
+                                    onSuccess: resolve,
+                                    onError: reject,
+                                  });
+                                });
+                              }
+
+                              // All emails sent successfully
+                              setIsOpen({ id: 0, open: false });
+                              refetch();
+
+                              // Determine success message based on what was actually sent
+                              let message = '';
+                              const mainEmailSent = emailsToSend.some((email) => email.scheduled_date === null);
+                              const followUpCount = emailsToSend.filter(
+                                (email) => email.scheduled_date !== null
+                              ).length;
+
+                              if (mainEmailSent && followUpCount > 0) {
+                                message = `Successfully sent email and scheduled ${followUpCount} follow-up${
+                                  followUpCount > 1 ? 's' : ''
+                                }.`;
+                              } else if (mainEmailSent) {
+                                message = 'Successfully sent email.';
+                              } else if (followUpCount > 0) {
+                                message = `Successfully scheduled ${followUpCount} follow-up email${
+                                  followUpCount > 1 ? 's' : ''
+                                }.`;
+                              }
+
+                              toast.custom(() => <CustomToast message={message} type='success' />, { duration: 5000 });
+                            } catch (error) {
+                              toast.custom(
+                                () => <CustomToast message={`Error sending emails: ${error}`} type='error' />,
+                                { duration: 7000 }
+                              );
+                            }
+                          };
+
+                          sendAllEmails();
                         }}
                       >
                         {isLoading ? (
@@ -749,7 +962,7 @@ export default function EmailProfileModal({
                         Close
                       </button>
                     </div>
-                  </form>
+                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

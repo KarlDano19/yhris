@@ -61,8 +61,12 @@ export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefe
               provided.innerRef(el)
               containerRef.current = el
             }}
-            style={gridCols}
-            className="grid mb-4 overflow-auto transition-all"
+            style={{
+              ...gridCols,
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#2d3e58 #f1f1f1'
+            }}
+            className="grid mb-4 overflow-auto transition-all pb-2.5"
           >
             {state.map((stage: StageType, index: number) => {
               return (

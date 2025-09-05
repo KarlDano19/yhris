@@ -17,6 +17,7 @@ interface EmployeePerformanceDocumentProps {
     count: number;
   }>;
   employeePerformanceTableData: Array<{
+    id: string;
     name: string;
     department: string;
     score: string;
@@ -34,6 +35,7 @@ interface EmployeePerformanceDocumentProps {
     count: number;
   }>;
   employeeIssuesTableData: Array<{
+    id: string;
     name: string;
     department: string;
     issueType: string;
@@ -229,8 +231,8 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
             </tr>
           </thead>
           <tbody>
-            {employeePerformanceTableData.map((item, index) => (
-              <tr key={index}>
+            {employeePerformanceTableData.map((item) => (
+              <tr key={item.id}>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.name}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.department}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.score}</td>
@@ -336,8 +338,8 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
             </tr>
           </thead>
           <tbody>
-            {employeeIssuesTableData.map((item, index) => (
-              <tr key={index}>
+            {employeeIssuesTableData.map((item) => (
+              <tr key={item.id}>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.name}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.department}</td>
                 <td className="border border-gray-300 p-1 text-center text-xs">{item.issueType}</td>

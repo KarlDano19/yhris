@@ -1,28 +1,6 @@
-// Base types for nested objects
-export type T_SafetyOfficer = {
-  id?: number | string;
-  name: string;
-  training_and_hours: string;
-  certificate?: File | string | null;
-};
-
-export type T_HealthPersonnel = {
-  id?: number | string;
-  shift_area_department: string;
-  total_workers: number;
-  health_personnel_name: string;
-  facilities: string;
-  attachment?: File | string | null;
-};
-
-// Type for facility fields that follow the same pattern
-export type FacilityField = {
-  active: boolean;
-  remarks: string;
-  attachment: File | string | null;
-};
-
 // Tab interfaces for better organization
+
+// Company Profile Tab
 interface CompanyProfileTab {
   company_name: string;
   date_established: string;
@@ -49,6 +27,7 @@ interface CompanyProfileTab {
   services_description: string;
 }
 
+// Policy Tab
 interface PolicyTab {
   basic_components: string;
   company_commitment: string;
@@ -58,6 +37,7 @@ interface PolicyTab {
   signature_source: 'draw' | 'upload' | null;
 }
 
+// Risk Management Tab
 interface RiskManagementTab {
   emergency_and_disaster_preparedness: Array<{
     task: string;
@@ -68,6 +48,7 @@ interface RiskManagementTab {
   }> | string;
 }
 
+// Health Welfare Tab
 interface HealthWelfareTab {
   routine_medical_surveillance: string[];
   special_medical_surveillance: string[];
@@ -103,6 +84,24 @@ interface HealthWelfareTab {
   reported_incidents: any;
 }
 
+// Base types for nested objects
+export type T_SafetyOfficer = {
+  id?: number | string;
+  name: string;
+  training_and_hours: string;
+  certificate?: File | string | null;
+};
+
+export type T_HealthPersonnel = {
+  id?: number | string;
+  shift_area_department: string;
+  total_workers: number;
+  health_personnel_name: string;
+  facilities: string;
+  attachment?: File | string | null;
+};
+
+// Safety Measures Tab
 interface SafetyMeasuresTab {
   ppe: any;
   ppe_description: string;
@@ -140,6 +139,14 @@ interface SafetyMeasuresTab {
   prohibited_acts_and_penalties_message: string;
 }
 
+// Type for facility fields that follow the same pattern
+export type FacilityField = {
+  active: boolean;
+  remarks: string;
+  attachment: File | string | null;
+};
+
+// Compliance Cost Tab
 interface ComplianceCostTab {
   cost_osh_program: number;
   ppe_cost: number;
@@ -319,9 +326,7 @@ export const OSH_PROGRAM_TABS = {
       'date', 'name_of_owner', 'signature' 
     ] as (keyof T_OshProgram)[],
     
-    3: [
-      'emergency_and_disaster_preparedness'
-    ] as (keyof T_OshProgram)[],
+    3: [] as (keyof T_OshProgram)[],
     
     4: [
       'no_of_treatment_rooms_first_aid_rooms', 'no_of_clinics_in_the_workplace', 
@@ -334,27 +339,8 @@ export const OSH_PROGRAM_TABS = {
     5: [] as (keyof T_OshProgram)[],
     
     6: [
-      'others_name', 'name_of_owner_manager', 'employees_representative', 'date_filled'
+      'name_of_owner_manager', 'employees_representative', 'date_filled'
     ] as (keyof T_OshProgram)[]
   }
 };
 
-// Helper functions to access fields
-export const getTabFields = (tabNumber: OSH_PROGRAM_TAB_NUMBER) => 
-  OSH_PROGRAM_TABS.FIELDS[tabNumber];
-
-export const getRequiredFields = (tabNumber: OSH_PROGRAM_TAB_NUMBER) => 
-  OSH_PROGRAM_TABS.REQUIRED_FIELDS[tabNumber];
-
-// Helper for facility fields
-export const getFacilityFields = () => {
-  return [
-    'adequate_supply_of_drinking_water',
-    'adequate_sanitary_and_washing_facilities',
-    'suitable_living_accommodation',
-    'separate_sanitary_washing_and_sleeping_facilities',
-    'lactation_station',
-    'ramps_railings_and_like',
-    'other_workers_welfare_facilities'
-  ];
-};

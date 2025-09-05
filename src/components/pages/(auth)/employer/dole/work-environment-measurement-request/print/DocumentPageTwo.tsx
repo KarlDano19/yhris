@@ -161,13 +161,14 @@ const DocumentPageTwo: React.FC<DocumentPageTwoProps> = ({ data }) => {
           <div className="flex-1 mr-8">
             <div className="text-center relative">
               {data.requestingPersonnel.signature && (
-                <div className="absolute w-full right-3 -top-7 z-10">
+                <div className="absolute w-full right-3 -top-4 z-10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={data.requestingPersonnel.signature} 
                     alt="Signature" 
                     style={{ 
                       height: '48px', 
-                      objectFit: 'contain',
+                      objectFit: 'cover',
                       display: 'block',
                       margin: '0 auto'
                     }} 

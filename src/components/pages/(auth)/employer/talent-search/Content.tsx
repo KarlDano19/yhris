@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import useGetApplicantItemsList, { buildSearchQuery } from './hook/useGetApplicantItems';
@@ -21,14 +22,13 @@ import useAddApplicantFavorite from './hook/favorites/useAddApplicantFavorite';
 import useRemoveApplicantFavorite from './hook/favorites/useRemoveApplicantFavorite';
 import ApplicantProfileModal from './modal/ApplicantProfileModal';
 import CompareApplicantsModal from './modal/CompareApplicantsModal';
+import FilterModal from './modal/FilterModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import StarIcon from '@heroicons/react/24/outline/StarIcon';
 import StarFilledIcon from '@heroicons/react/24/solid/StarIcon';
 import BookmarkIcon from '@heroicons/react/24/outline/BookmarkIcon';
 import BookmarkFilledIcon from '@heroicons/react/24/solid/BookmarkIcon';
-import FilterModal from './modal/FilterModal';
-import { Tooltip } from 'react-tooltip';
 
 type T_ModalData = {
   id: number;
@@ -70,10 +70,52 @@ const Content = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [showFavoritesPanel, setShowFavoritesPanel] = useState(false);
 
+  // Helper function to get the most recent work experience
+  const getMostRecentWorkExperience = (workExperiences: any[]) => {
+    if (!workExperiences || workExperiences.length === 0) {
+      return null;
+    }
+
+    return workExperiences.reduce((mostRecent, current) => {
+      // Check if current experience is ongoing (Present)
+      const currentIsPresent =
+        current.dateTo === 'Present' || current.dateTo === 'present' || current.dateTo === '' || !current.dateTo;
+
+      const mostRecentIsPresent =
+        mostRecent.dateTo === 'Present' ||
+        mostRecent.dateTo === 'present' ||
+        mostRecent.dateTo === '' ||
+        !mostRecent.dateTo;
+
+      // If current is present and mostRecent is not, current is more recent
+      if (currentIsPresent && !mostRecentIsPresent) {
+        return current;
+      }
+
+      // If mostRecent is present and current is not, mostRecent is more recent
+      if (mostRecentIsPresent && !currentIsPresent) {
+        return mostRecent;
+      }
+
+      // If both are present, compare start dates (more recent start date wins)
+      if (currentIsPresent && mostRecentIsPresent) {
+        const currentStartDate = new Date(current.dateFrom);
+        const mostRecentStartDate = new Date(mostRecent.dateFrom);
+        return currentStartDate > mostRecentStartDate ? current : mostRecent;
+      }
+
+      // If neither is present, compare end dates
+      const currentEndDate = new Date(current.dateTo);
+      const mostRecentEndDate = new Date(mostRecent.dateTo);
+
+      return currentEndDate > mostRecentEndDate ? current : mostRecent;
+    });
+  };
+
   // Helper component to display applicant avatar with fallback
   const ApplicantAvatar = ({ applicant, size = 100 }: { applicant: any; size?: number }) => {
     const [imageError, setImageError] = useState(false);
-    
+
     if (!applicant.photo || imageError) {
       return (
         <PlaceholderAvatar
@@ -81,7 +123,7 @@ const Content = () => {
           height={size}
           firstName={applicant.firstname}
           lastName={applicant.lastname}
-          className="flex-shrink-0"
+          className='flex-shrink-0'
         />
       );
     }
@@ -92,7 +134,7 @@ const Content = () => {
         alt={`${applicant.firstname} ${applicant.lastname}`}
         width={size}
         height={size}
-        className="rounded-xl object-cover flex-shrink-0"
+        className='rounded-xl object-cover flex-shrink-0'
         onError={() => setImageError(true)}
       />
     );
@@ -117,7 +159,7 @@ const Content = () => {
   useEffect(() => {
     try {
       let shouldShowResults = false;
-      
+
       // Load filters
       const savedFilters = localStorage.getItem(STORAGE_KEYS.SEARCH_FILTERS);
       if (savedFilters) {
@@ -234,16 +276,16 @@ const Content = () => {
       newStarredTags.add(tag);
     }
     setStarredTags(newStarredTags);
-    
+
     // Update search query after toggling star
     const searchQuery = buildSearchQuery(tagsSearch, newStarredTags);
     const newFilters = {
       ...filters,
       search: searchQuery,
     };
-    
+
     setFilters(newFilters);
-    
+
     // Reset hasSearched if all filters are cleared
     if (!searchQuery && newFilters.location.length === 0 && !newFilters.gender && !newFilters.salary) {
       setHasSearched(false);
@@ -253,7 +295,7 @@ const Content = () => {
   const handleSearch = () => {
     // Mark that search has been performed
     setHasSearched(true);
-    
+
     // Add current input as a tag if it's not empty
     let updatedTags = tagsSearch;
     if (searchInput.trim() && !tagsSearch.includes(searchInput.trim())) {
@@ -281,16 +323,16 @@ const Content = () => {
     // Remove from tags
     const newTags = tagsSearch.filter((t) => t !== tag);
     setTagsSearch(newTags);
-    
+
     // Update search query after removing tag
     const searchQuery = buildSearchQuery(newTags, newStarredTags);
     const newFilters = {
       ...filters,
       search: searchQuery,
     };
-    
+
     setFilters(newFilters);
-    
+
     // Reset hasSearched if all filters are cleared
     if (!searchQuery && newFilters.location.length === 0 && !newFilters.gender && !newFilters.salary) {
       setHasSearched(false);
@@ -299,20 +341,20 @@ const Content = () => {
 
   // Custom key handler for search input
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
+    if (event.key === 'Enter') {
       // Enter key triggers search
       event.preventDefault();
       handleSearch();
-    } else if (event.key === "Tab" || event.key === ",") {
+    } else if (event.key === 'Tab' || event.key === ',') {
       // Tab and comma add chips
       event.preventDefault();
       const newTagSearch = searchInput.trim();
       if (
-        newTagSearch !== "" &&
+        newTagSearch !== '' &&
         !tagsSearch.some((tagSearch) => tagSearch.toLowerCase() === newTagSearch.toLowerCase())
       ) {
         setTagsSearch([...tagsSearch, newTagSearch]);
-        setSearchInput("");
+        setSearchInput('');
       }
     }
   };
@@ -344,10 +386,10 @@ const Content = () => {
   const handleFilterUpdate = (filterData: { location: string[]; gender: string; salary: string }) => {
     // Mark that search has been performed (when filters are applied)
     setHasSearched(true);
-    
+
     // Build search query from current tags if any exist
     const searchQuery = buildSearchQuery(tagsSearch, starredTags);
-    
+
     // Update filters once with all the data
     setFilters({
       location: filterData.location,
@@ -355,7 +397,7 @@ const Content = () => {
       salary: filterData.salary,
       search: searchQuery, // Keep existing search query
     });
-    
+
     setIsFilterModalOpen(false);
   };
 
@@ -366,7 +408,7 @@ const Content = () => {
       // Trigger mouseleave to hide the tooltip
       tooltipElement.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
     }
-    
+
     if (isApplicantFavorited(applicantId)) {
       removeFavoriteMutation.mutate(applicantId, {
         onSuccess: () => {
@@ -374,7 +416,10 @@ const Content = () => {
           toast.custom((t) => <CustomToast message='Removed from favorites.' type='error' />, { duration: 4000 });
         },
         onError: (error: any) => {
-          toast.custom((t) => <CustomToast message={error?.toString() || 'Failed to remove favorite.'} type='error' />, { duration: 4000 });
+          toast.custom(
+            (t) => <CustomToast message={error?.toString() || 'Failed to remove favorite.'} type='error' />,
+            { duration: 4000 }
+          );
         },
       });
     } else {
@@ -384,7 +429,9 @@ const Content = () => {
           toast.custom((t) => <CustomToast message='Added to favorites.' type='success' />, { duration: 4000 });
         },
         onError: (error: any) => {
-          toast.custom((t) => <CustomToast message={error?.toString() || 'Failed to add favorite.'} type='error' />, { duration: 4000 });
+          toast.custom((t) => <CustomToast message={error?.toString() || 'Failed to add favorite.'} type='error' />, {
+            duration: 4000,
+          });
         },
       });
     }
@@ -402,7 +449,7 @@ const Content = () => {
           zIndex: -2,
         }}
       />
-      <div className='fixed bottom-2 sm:bottom-4 left-2 sm:left-4 z-10'>
+      <div className='fixed bottom-2 sm:bottom-4 left-2 sm:left-4'>
         <Image
           src={ImageBackground4}
           alt='Talent Search'
@@ -414,7 +461,7 @@ const Content = () => {
           }}
         />
       </div>
-      <div className='fixed bottom-2 sm:bottom-4 right-2 sm:right-4 z-10'>
+      <div className='fixed bottom-2 sm:bottom-4 right-2 sm:right-4'>
         <Image
           src={ImageBackground3}
           alt='Talent Search'
@@ -427,7 +474,7 @@ const Content = () => {
         />
       </div>
       <div
-        className='fixed bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-10 overflow-hidden'
+        className='fixed bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 overflow-hidden'
         style={{ width: 'clamp(150px, 40vw, 300px)', height: 'clamp(100px, 25vw, 200px)' }}
       >
         <Image
@@ -659,6 +706,10 @@ const Content = () => {
                       {favoriteApplicants.map((fav: any) => {
                         const applicant = fav.applicant;
                         if (!applicant) return null;
+
+                        // Get the most recent work experience for this applicant
+                        const mostRecentExperience = getMostRecentWorkExperience(applicant.work_experience);
+
                         return (
                           <div
                             key={applicant.id}
@@ -674,7 +725,11 @@ const Content = () => {
                               >
                                 <BookmarkFilledIcon className='h-5 w-5 text-blue-600' />
                               </button>
-                              <Tooltip id={`bookmark-tooltip-favorites-${applicant.id}`} opacity={1} style={{ fontSize: '10px' }}>
+                              <Tooltip
+                                id={`bookmark-tooltip-favorites-${applicant.id}`}
+                                opacity={1}
+                                style={{ fontSize: '10px' }}
+                              >
                                 <div>
                                   <h2 className='text-[12px] font-medium'>
                                     {isApplicantFavorited(applicant.id) ? 'Remove from favorites' : 'Add to favorites'}
@@ -692,21 +747,24 @@ const Content = () => {
                                     </h4>
                                     <h1 className='text-sm text-gray-500 mb-1'>{applicant.gender}</h1>
                                     <h1 className='text-sm mb-1'>
-                                      {applicant.work_experience && applicant.work_experience.length > 0
-                                        ? applicant.work_experience[0].position
-                                        : 'No experience'}
+                                      {mostRecentExperience ? mostRecentExperience.position : 'No experience'}
                                     </h1>
-                                    {applicant.work_experience && applicant.work_experience.length > 0 && (
+                                    {mostRecentExperience && (
                                       <h1 className='text-sm mb-1'>
-                                        {new Date(applicant.work_experience[0].dateFrom).toLocaleDateString('en-US', {
+                                        {new Date(mostRecentExperience.dateFrom).toLocaleDateString('en-US', {
                                           month: 'short',
                                           year: 'numeric',
                                         })}{' '}
                                         -{' '}
-                                        {new Date(applicant.work_experience[0].dateTo).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          year: 'numeric',
-                                        })}
+                                        {mostRecentExperience.dateTo === 'Present' ||
+                                        mostRecentExperience.dateTo === 'present' ||
+                                        mostRecentExperience.dateTo === '' ||
+                                        !mostRecentExperience.dateTo
+                                          ? 'Present'
+                                          : new Date(mostRecentExperience.dateTo).toLocaleDateString('en-US', {
+                                              month: 'short',
+                                              year: 'numeric',
+                                            })}
                                       </h1>
                                     )}
                                   </div>
@@ -752,10 +810,11 @@ const Content = () => {
                   <div className='bg-white rounded-lg shadow-md p-6'>
                     <div className='flex justify-between items-center mb-4'>
                       <h3 className='text-lg font-semibold'>
-                        {filters.search || filters.location.length > 0 || filters.gender || filters.salary 
-                          ? (filters.search ? 'Search Results' : 'Filtered Results')
-                          : 'All Available Profiles'
-                        }
+                        {filters.search || filters.location.length > 0 || filters.gender || filters.salary
+                          ? filters.search
+                            ? 'Search Results'
+                            : 'Filtered Results'
+                          : 'All Available Profiles'}
                       </h3>
                       {selectedApplicants.size > 0 && (
                         <div className='flex items-center gap-2'>
@@ -797,101 +856,113 @@ const Content = () => {
 
                     {applicantsData && Array.isArray(applicantsData) && applicantsData.length > 0 ? (
                       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                        {applicantsData.map((applicant: any) => (
-                          <div
-                            key={applicant.id}
-                            className={`border rounded-lg p-4 hover:shadow-md transition-shadow relative ${
-                              selectedApplicants.has(applicant.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-                            }`}
-                          >
-                              {/* Bookmark Icon - Top Left Corner */}
-                            <div>
-                              <button
-                                onClick={() => handleToggleBookmark(applicant.id)}
-                                className='absolute top-3 left-3 p-1 hover:bg-gray-100 rounded-full transition-colors z-10'
-                                data-tooltip-id={`bookmark-tooltip-${applicant.id}`}
-                                data-tooltip-place='right'
-                              >
-                                {isApplicantFavorited(applicant.id) ? (
-                                  <BookmarkFilledIcon className='h-5 w-5 text-blue-600' />
-                                ) : (
-                                  <BookmarkIcon className='h-5 w-5 text-gray-400 hover:text-blue-600' />
-                                )}
-                              </button>
-                              <Tooltip id={`bookmark-tooltip-${applicant.id}`} opacity={1} style={{ fontSize: '10px' }}>
-                                <div>
-                                  <h2 className='text-[12px] font-medium'>
-                                    {isApplicantFavorited(applicant.id) ? 'Remove from favorites' : 'Add to favorites'}
-                                  </h2>
-                                </div>
-                              </Tooltip>
-                            </div>
+                        {applicantsData.map((applicant: any) => {
+                          // Get the most recent work experience for this applicant
+                          const mostRecentExperience = getMostRecentWorkExperience(applicant.work_experience);
 
-                            <div className='flex flex-col h-full'>
-                              <div className='flex-1'>
-                                <div className='flex justify-between'>
-                                  <ApplicantAvatar applicant={applicant} size={120} />
-                                  <div className='flex flex-col'>
-                                    <h4 className='font-semibold text-lg mb-1'>
-                                      {applicant.firstname} {applicant.lastname}
-                                    </h4>
-                                    <h1 className='text-sm text-gray-500 mb-1'>{applicant.gender}</h1>
-                                    <h1 className='text-sm mb-1'>
-                                      {applicant.work_experience && applicant.work_experience.length > 0
-                                        ? applicant.work_experience[0].position
-                                        : 'No experience'}
-                                    </h1>
-                                    {applicant.work_experience && applicant.work_experience.length > 0 && (
-                                      <h1 className='text-sm mb-1'>
-                                        {new Date(applicant.work_experience[0].dateFrom).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          year: 'numeric',
-                                        })}{' '}
-                                        -{' '}
-                                        {applicant.work_experience[0].dateTo === 'Present' ||
-                                        applicant.work_experience[0].dateTo === 'present' ||
-                                        applicant.work_experience[0].dateTo === ''
-                                          ? 'Present'
-                                          : new Date(applicant.work_experience[0].dateTo).toLocaleDateString('en-US', {
-                                              month: 'short',
-                                              year: 'numeric',
-                                            })}
-                                      </h1>
-                                    )}
+                          return (
+                            <div
+                              key={applicant.id}
+                              className={`border rounded-lg p-4 hover:shadow-md transition-shadow relative ${
+                                selectedApplicants.has(applicant.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                              }`}
+                            >
+                              {/* Bookmark Icon - Top Left Corner */}
+                              <div>
+                                <button
+                                  onClick={() => handleToggleBookmark(applicant.id)}
+                                  className='absolute top-3 left-3 p-1 hover:bg-gray-100 rounded-full transition-colors z-10'
+                                  data-tooltip-id={`bookmark-tooltip-${applicant.id}`}
+                                  data-tooltip-place='right'
+                                >
+                                  {isApplicantFavorited(applicant.id) ? (
+                                    <BookmarkFilledIcon className='h-5 w-5 text-blue-600' />
+                                  ) : (
+                                    <BookmarkIcon className='h-5 w-5 text-gray-400 hover:text-blue-600' />
+                                  )}
+                                </button>
+                                <Tooltip
+                                  id={`bookmark-tooltip-${applicant.id}`}
+                                  opacity={1}
+                                  style={{ fontSize: '10px' }}
+                                >
+                                  <div>
+                                    <h2 className='text-[12px] font-medium'>
+                                      {isApplicantFavorited(applicant.id)
+                                        ? 'Remove from favorites'
+                                        : 'Add to favorites'}
+                                    </h2>
                                   </div>
-                                </div>
-                                {applicant.skills && (
-                                  <div className='text-sm mb-1 mt-4'>
-                                    <div className='font-bold '>Skills</div>
-                                    <div>
-                                      {Array.isArray(applicant.skills) ? applicant.skills.join(', ') : applicant.skills}
+                                </Tooltip>
+                              </div>
+
+                              <div className='flex flex-col h-full'>
+                                <div className='flex-1'>
+                                  <div className='flex justify-between'>
+                                    <ApplicantAvatar applicant={applicant} size={120} />
+                                    <div className='flex flex-col'>
+                                      <h4 className='font-semibold text-lg mb-1'>
+                                        {applicant.firstname} {applicant.lastname}
+                                      </h4>
+                                      <h1 className='text-sm text-gray-500 mb-1'>{applicant.gender}</h1>
+                                      <h1 className='text-sm mb-1'>
+                                        {mostRecentExperience ? mostRecentExperience.position : 'No experience'}
+                                      </h1>
+                                      {mostRecentExperience && (
+                                        <h1 className='text-sm mb-1'>
+                                          {new Date(mostRecentExperience.dateFrom).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            year: 'numeric',
+                                          })}{' '}
+                                          -{' '}
+                                          {mostRecentExperience.dateTo === 'Present' ||
+                                          mostRecentExperience.dateTo === 'present' ||
+                                          mostRecentExperience.dateTo === '' ||
+                                          !mostRecentExperience.dateTo
+                                            ? 'Present'
+                                            : new Date(mostRecentExperience.dateTo).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                year: 'numeric',
+                                              })}
+                                        </h1>
+                                      )}
                                     </div>
                                   </div>
-                                )}
-                              </div>
-                              <div className='mt-auto'>
-                                <div className='flex gap-2'>
-                                  <button
-                                    onClick={() => setIsApplicantProfileModalOpen({ id: applicant.id, open: true })}
-                                    className='flex-1 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors'
-                                  >
-                                    View Profile
-                                  </button>
-                                  <button
-                                    onClick={() => handleSelectApplicant(applicant.id)}
-                                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
-                                      selectedApplicants.has(applicant.id)
-                                        ? 'bg-white rounded-md border border-red-600 py-2 px-5 text-red-600 text-sm font-semibold shadow hover:shadow-md focus:shadow-none'
-                                        : 'text-blue-600 hover:bg-blue-50 border border-blue-600'
-                                    }`}
-                                  >
-                                    {selectedApplicants.has(applicant.id) ? 'Remove' : 'Compare'}
-                                  </button>
+                                  {applicant.skills && (
+                                    <div className='text-sm mb-1 mt-4'>
+                                      <div className='font-bold '>Skills</div>
+                                      <div>
+                                        {Array.isArray(applicant.skills)
+                                          ? applicant.skills.join(', ')
+                                          : applicant.skills}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className='mt-auto'>
+                                  <div className='flex gap-2'>
+                                    <button
+                                      onClick={() => setIsApplicantProfileModalOpen({ id: applicant.id, open: true })}
+                                      className='flex-1 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors'
+                                    >
+                                      View Profile
+                                    </button>
+                                    <button
+                                      onClick={() => handleSelectApplicant(applicant.id)}
+                                      className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+                                        selectedApplicants.has(applicant.id)
+                                          ? 'bg-white rounded-md border border-red-600 py-2 px-5 text-red-600 text-sm font-semibold shadow hover:shadow-md focus:shadow-none'
+                                          : 'text-blue-600 hover:bg-blue-50 border border-blue-600'
+                                      }`}
+                                    >
+                                      {selectedApplicants.has(applicant.id) ? 'Remove' : 'Compare'}
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       !isLoading && (

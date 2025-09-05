@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { useFieldArray } from "react-hook-form";
+import { useEffect, useRef } from "react";
 
+import { useFieldArray } from "react-hook-form";
 import { MinusIcon, XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function RiskManagement({
@@ -18,6 +18,9 @@ export default function RiskManagement({
     control: control,
     name: "emergency_and_disaster_preparedness",
   });
+  
+  // Ref for the table container to enable scrolling
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize with an empty row if there are no fields
   useEffect(() => {
@@ -34,26 +37,19 @@ export default function RiskManagement({
       priority: "",
       control_measures: ""
     });
+    
+    // Auto-scroll to the bottom of the page after a short delay to ensure DOM update
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                {validationMessage || "You cannot proceed due to incomplete fields. Please review."}
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="mt-2">
           <label
             htmlFor="message"
@@ -62,7 +58,7 @@ export default function RiskManagement({
             Emergency and Disaster Preparedness
           </label>
         </div>
-        <div className="mt-4 w-full overflow-x-auto">
+        <div className="mt-4 w-full overflow-x-auto" ref={tableContainerRef}>
           <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
               <tr>
@@ -181,7 +177,7 @@ export default function RiskManagement({
           <button
             type="button"
             onClick={handleAddNewLine}
-            className="bg-savoy-blue text-white px-4 py-2 rounded-md"
+            className="bg-savoy-blue text-white px-4 py-2 rounded-md hover:bg-blue-700"
           >
             Add new line
           </button>

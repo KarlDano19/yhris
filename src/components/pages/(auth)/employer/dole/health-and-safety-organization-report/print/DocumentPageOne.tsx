@@ -234,12 +234,13 @@ const DocumentPageOne: React.FC<DocumentPageOneProps> = ({ data }) => {
         <div className="text-sm mt-5 mb-1 ml-8 relative">
           {data.submittedBy.signature && (
             <div className="absolute -left-12 -top-5 z-10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src={data.submittedBy.signature} 
                 alt="Signature" 
                 style={{ 
                   height: '48px', 
-                  objectFit: 'contain',
+                  objectFit: 'cover',
                   display: 'block'
                 }} 
               />

@@ -81,13 +81,13 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
     },
-    {
-      icon: <PayrollLogo />,
-      text: 'Payroll',
-      link: '/payroll',
-      isAvailable: true,
-      isGrayedOut: true,
-    },
+    // {
+    //   icon: <PayrollLogo />,
+    //   text: 'Payroll',
+    //   link: '/payroll',
+    //   isAvailable: true,
+    //   isGrayedOut: true,
+    // },
     {
       icon: <EmployeeSeparationLogo />,
       text: 'Employee Separation',
@@ -95,13 +95,13 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
     },
-    {
-      icon: <EmployeeKitLogo />,
-      text: 'Employee Kit',
-      link: '/branding-kit',
-      isAvailable: true,
-      isGrayedOut: true,
-    },
+    // {
+    //   icon: <EmployeeKitLogo />,
+    //   text: 'Employee Kit',
+    //   link: '/branding-kit',
+    //   isAvailable: true,
+    //   isGrayedOut: true,
+    // },
     {
       icon: <DoleLogo />,
       text: 'DOLE',
