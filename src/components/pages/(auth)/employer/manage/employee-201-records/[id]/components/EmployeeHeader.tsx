@@ -27,8 +27,8 @@ export default function EmployeeHeader({
   employee,
   activeTab,
   setActiveTab,
-  // NEW: pass the partial from API (contains incompleteRecords)
   empPartial,
+  locked
 }: {
   employee: {
     name: string;
@@ -42,6 +42,7 @@ export default function EmployeeHeader({
   activeTab: TabKey;
   setActiveTab: (k: TabKey) => void;
   empPartial?: Partial<Employee>;
+  locked?: boolean;
 }) {
   const [imgError, setImgError] = useState(false);
   const hasPhoto = !!(employee.photo && employee.photo.trim() !== "");
@@ -199,6 +200,17 @@ export default function EmployeeHeader({
           </Tab>
         </nav>
       </div>
+
+      {locked && (
+        <div
+          className="absolute inset-0 z-30 bg-gray-400/35 backdrop-blur-[5px] pointer-events-auto cursor-not-allowed rounded-lg flex items-center justify-center"
+          aria-hidden="true"
+        >
+          <span className="rounded-full bg-gray-900/70 px-4 py-2 text-xs font-semibold tracking-wide text-white shadow-sm">
+            No Active Subscription
+          </span>
+        </div>
+      )}
     </div>
   );
 }

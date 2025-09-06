@@ -57,7 +57,7 @@ export interface ContentProps {
   hasActiveSubscription: boolean;
 }
 
-export default function Employee201Content({ params, emp }: ContentProps) {
+export default function Employee201Content({ params, emp, hasActiveSubscription }: ContentProps) {
   const router = useRouter();
 
   // ------------------------ State ------------------------
@@ -485,6 +485,7 @@ export default function Employee201Content({ params, emp }: ContentProps) {
               activeTab={activeTab}
               setActiveTab={handleTabClick}
               empPartial={employeeDetails}
+              locked={!hasActiveSubscription}
             />
           )}
         </div>

@@ -97,7 +97,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             Failed to load employees. <button className="underline" onClick={() => refetch()}>Retry</button>
           </div>
         ) : (
-          <EmployeeGrid employees={data ?? []} />
+          <EmployeeGrid locked={!hasActiveSubscription} employees={data ?? []} />
         )}
         {!isLoading && (data?.length ?? 0) === 0 && (
           <div className="mt-4 rounded-xl border border-dashed border-gray-300 p-10 text-center text-sm text-gray-500">
