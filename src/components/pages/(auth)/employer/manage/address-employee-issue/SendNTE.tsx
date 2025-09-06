@@ -2,7 +2,6 @@ import React, { Dispatch, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import useResetNteSent from './hooks/useResetNteSent';
 
 import classNames from '@/helpers/classNames';
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
@@ -36,7 +35,6 @@ const SendNTE = ({
 }) => {
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
-  const { resetNteSent, loading: resettingNteSent } = useResetNteSent();
   
   // const customOnclick = () => {
   //   setIsUploadEmployeeIssueAttachmentModalOpen({
@@ -49,19 +47,11 @@ const SendNTE = ({
     e.stopPropagation();
     setCheckingAttachment(true);
     try {
-      let details = employeeIssueDetails;
-      if (isNTESent) {
-        // If Resend, reset is_nte_sent to false first
-        await resetNteSent(id);
-        // Note: We'll need to handle refetching in the parent component
-        // For now, we'll use the current details
-        details = employeeIssueDetails;
-      }
       // Check if there's an attachment
-      if (details && details.nte_attachment) {
+      if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
         setIsSendNTEModalOpen({
           id,
-          attachment: details.nte_attachment
+          attachment: employeeIssueDetails.nte_attachment
         });
       } else {
         // If no attachment, redirect to document generator
@@ -94,13 +84,13 @@ const SendNTE = ({
               : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24'
           )}
-          disabled={checkingAttachment || resettingNteSent}
+          disabled={checkingAttachment}
           onClick={handleSendClick}
           title={employeeIssueDetails && employeeIssueDetails.nte_attachment
             ? (isNTESent ? 'Resend Notice to Explain' : 'Send Notice to Explain')
             : 'Click to Generate NTE'}
         >
-          {(checkingAttachment || resettingNteSent)
+          {checkingAttachment
             ? 'Checking...'
             : (isNTESent ? 'Resend' : 'Send')}
         </button>
