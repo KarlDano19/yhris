@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, useRef, useState, useEffect } from 'react';
+import React, { useReducer, useRef, useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 import { useParams } from 'next/navigation';
@@ -20,6 +20,7 @@ import SendEmail from '../modals/SendEmail';
 import Confirmation from '../modals/Confirmation';
 import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
+import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
 import Filter, { FilterOptions } from './Filter';
@@ -33,6 +34,7 @@ import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import ArchiveIcon from '@/svg/ArchiveIcon';
 
 import '../styles.css';
 
@@ -64,6 +66,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     ADD_STAGE,
     SET_ONBOARDING,
     SET_APPLICANT,
+    ARCHIVED_APPLICANTS,
   } = actionTypes;
   const [state, dispatch] = useReducer(stageReducer, INITIAL_STATE);
   const [actionState, setActionState] = useState(initialActionState);
@@ -75,14 +78,61 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   })?.requirements;
   const { mutate: emailMutate } = useSendEmail();
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
+  const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed', 'Rejected', 'Withdrawn'],
   });
 
+  // ============================================================================
+  // FORCE RE-RENDER STATE FOR ARCHIVED MODAL
+  // ============================================================================
+  const [forceArchivedModalRefresh, setForceArchivedModalRefresh] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const lastStatusUpdateRef = useRef<number>(0);
+
   // Get screening questions and ideal answers from the job posting
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
+
+  // ============================================================================
+  // FORCE REFRESH FUNCTIONS
+  // ============================================================================
+
+  /**
+   * Force refresh the archived modal with multiple strategies
+   */
+  const forceArchivedModalRefreshTrigger = useCallback(() => {
+    const now = Date.now();
+    
+    // Strategy 1: Toggle force refresh state
+    setForceArchivedModalRefresh(prev => !prev);
+    
+    // Strategy 2: Increment refresh trigger
+    setRefreshTrigger(prev => prev + 1);
+    
+    // Strategy 3: Delayed refresh for reliability
+    setTimeout(() => {
+      setForceArchivedModalRefresh(prev => !prev);
+      setRefreshTrigger(prev => prev + 1);
+    }, 100);
+    
+    // Strategy 4: Additional delayed refresh
+    setTimeout(() => {
+      setForceArchivedModalRefresh(prev => !prev);
+      setRefreshTrigger(prev => prev + 1);
+    }, 300);
+    
+    lastStatusUpdateRef.current = now;
+  }, []);
+
+  /**
+   * Check if status update should trigger archived modal refresh
+   */
+  const shouldTriggerArchivedRefresh = useCallback((status: string) => {
+    // Only trigger if status is rejected or withdrawn (archived statuses)
+    return status === 'rejected' || status === 'withdrawn';
+  }, []);
 
   useEffect(() => {
     if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
@@ -260,6 +310,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             });
             jobPostDetailsRefetch();
             appliedApplicantRefetch();
+            
+            // ============================================================================
+            // FORCE ARCHIVED MODAL REFRESH ON STATUS UPDATE
+            // ============================================================================
+            if (shouldTriggerArchivedRefresh(data.status)) {
+              forceArchivedModalRefreshTrigger();
+            }
+            
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -407,6 +465,18 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     >
                       ADD APPLICANT
                     </button>
+                    <button
+                      onClick={() => {
+                        setIsArchivedApplicantsModalOpen(true);
+                        // Trigger refresh when opening the modal
+                        forceArchivedModalRefreshTrigger();
+                      }}
+                      className="rounded-lg py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
+                      title="View archived applicants"
+                    >
+                      <ArchiveIcon />
+                      ARCHIVED APPLICANTS
+                    </button>
                     <AddStageBtn handleAddStage={handleAddStage} />
                   </div>
                   <Filter onFilterChange={handleFilterChange} />
@@ -429,6 +499,20 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         isOpen={isAddApplicantModalOpen}
         setIsOpen={setIsAddApplicantModalOpen}
         jobPostingId={params.id as string}
+      />
+      <ArchivedApplicantsModal
+        isOpen={isArchivedApplicantsModalOpen}
+        handleClose={() => setIsArchivedApplicantsModalOpen(false)}
+        jobPostingId={params.id as string}
+        forceRefresh={forceArchivedModalRefresh}
+        refreshTrigger={refreshTrigger}
+        onRefreshComplete={() => {
+          // Archived modal refresh completed
+        }}
+        onUnarchive={() => {
+          appliedApplicantRefetch();
+          setIsArchivedApplicantsModalOpen(false);
+        }}
       />
     </>
   );

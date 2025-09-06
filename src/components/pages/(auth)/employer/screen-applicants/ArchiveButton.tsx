@@ -1,0 +1,110 @@
+import React, { useState } from 'react';
+import { ArchiveBoxIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import classNames from '@/helpers/classNames';
+import useArchiveApplication from './hooks/useArchiveApplication';
+import RestoreApplicationModal from './modals/RestoreApplicationModal';
+
+interface ArchiveButtonProps {
+  appliedJobId: number;
+  isArchived: boolean;
+  status: string;
+  onSuccess?: () => void;
+  disabled?: boolean;
+  applicantName?: string;
+  jobPostingId?: string;
+}
+
+const ArchiveButton: React.FC<ArchiveButtonProps> = ({
+  appliedJobId,
+  isArchived,
+  status,
+  onSuccess,
+  disabled = false,
+  applicantName = 'Applicant',
+  jobPostingId = ''
+}) => {
+  const { archive, unarchive, isArchiving, isUnarchiving } = useArchiveApplication();
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+
+  const handleArchive = () => {
+    const callBackReq = {
+      onSuccess: (data: any) => {
+        console.log('Archive success:', data);
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: (err: any) => {
+        console.error('Archive error:', err);
+        alert(`Error: ${err.message || 'Operation failed'}`);
+      },
+    };
+
+    archive(appliedJobId, callBackReq);
+  };
+
+  const handleUnarchive = (fallbackStageId: number) => {
+    const callBackReq = {
+      onSuccess: (data: any) => {
+        console.log('Unarchive success:', data);
+        setShowRestoreModal(false);
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: (err: any) => {
+        console.error('Unarchive error:', err);
+        alert(`Error: ${err.message || 'Operation failed'}`);
+      },
+    };
+
+    unarchive(appliedJobId, fallbackStageId, callBackReq);
+  };
+
+  // Only show archive button for rejected or withdrawn applications
+  if (!isArchived && status !== 'rejected' && status !== 'withdrawn') {
+    return null;
+  }
+
+  const isLoading = isArchiving || isUnarchiving;
+
+  return (
+    <>
+      <button
+        onClick={isArchived ? () => setShowRestoreModal(true) : handleArchive}
+        disabled={disabled || isLoading}
+        className={classNames(
+          isArchived
+            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+            : 'bg-gray-500 hover:bg-gray-600 text-white',
+          'flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors duration-200',
+          'disabled:opacity-50 disabled:cursor-not-allowed'
+        )}
+        title={isArchived ? 'Restore application' : 'Archive application'}
+      >
+        {isArchived ? (
+          <>
+            <ArrowUturnLeftIcon className="w-3 h-3" />
+            Restore
+          </>
+        ) : (
+          <>
+            <ArchiveBoxIcon className="w-3 h-3" />
+            Archive
+          </>
+        )}
+      </button>
+
+      <RestoreApplicationModal
+        isOpen={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        onConfirm={handleUnarchive}
+        applicantName={applicantName}
+        jobPostingId={jobPostingId}
+        isLoading={isUnarchiving}
+      />
+    </>
+  );
+};
+
+export default ArchiveButton; 
