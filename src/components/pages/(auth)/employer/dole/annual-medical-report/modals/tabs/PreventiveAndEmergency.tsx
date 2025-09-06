@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 // eslint-disable-next-line react-hooks/exhaustive-deps
 
 function PreventiveAndEmergency({
@@ -22,6 +22,8 @@ function PreventiveAndEmergency({
 }) {
   const [isOtherCheckedA, setIsOtherCheckedA] = useState(false);
   const [isOtherCheckedD, setIsOtherCheckedD] = useState(false);
+  const otherCheckboxARef = useRef<HTMLInputElement>(null);
+  const otherCheckboxDRef = useRef<HTMLInputElement>(null);
 
   // Helper to check if a checkbox group is filled
   const isChecked = (val: any) => Array.isArray(val) ? val.length > 0 : !!val;
@@ -73,7 +75,7 @@ function PreventiveAndEmergency({
         message: "Please select at least one option."
       });
       hasError = true;
-    } else if (Array.isArray(d) && d.includes("Other") && !dOther) {
+    } else if (Array.isArray(d) && d.includes("other details") && !dOther) {
       setError("conduct_inspection_of_workplace_other_specification", {
         type: "manual",
         message: "Section (d): Please specify 'Other'."
@@ -84,7 +86,7 @@ function PreventiveAndEmergency({
     setSelectedTab(3);
   };
 
-  // Clear errors on change
+  // Watch form values
   const occupationalHealthServicesBy = watch("occupational_health_services_by");
   const occupationalHealthServicesByOther = watch("occupational_health_services_by_other_specification");
   const occupationalHealthServicesAsService = watch("occupational_health_services_as_a_service");
@@ -92,6 +94,48 @@ function PreventiveAndEmergency({
   const conductInspection = watch("conduct_inspection_of_workplace");
   const conductInspectionOther = watch("conduct_inspection_of_workplace_other_specification");
 
+  // Sync local state with form data
+  useEffect(() => {
+    if (Array.isArray(occupationalHealthServicesBy) && occupationalHealthServicesBy.includes("Other")) {
+      setIsOtherCheckedA(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else if (occupationalHealthServicesByOther) {
+      setIsOtherCheckedA(true);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedA(false);
+      if (otherCheckboxARef.current) {
+        otherCheckboxARef.current.checked = false;
+      }
+    }
+  }, [occupationalHealthServicesBy, occupationalHealthServicesByOther]);
+
+  useEffect(() => {
+    if (Array.isArray(conductInspection) && conductInspection.includes("other details")) {
+      setIsOtherCheckedD(true);
+      // Manually set the checkbox checked state
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else if (conductInspectionOther) {
+      setIsOtherCheckedD(true);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = true;
+      }
+    } else {
+      setIsOtherCheckedD(false);
+      if (otherCheckboxDRef.current) {
+        otherCheckboxDRef.current.checked = false;
+      }
+    }
+  }, [conductInspection, conductInspectionOther]);
+
+  // Clear errors on change
   useEffect(() => {
     if (isChecked(occupationalHealthServicesBy)) {
       clearErrors("occupational_health_services_by");
@@ -167,35 +211,43 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("occupational_health_services_by")}
-                id="occupational_health_services_other"
+                id="occupational_health_services_by_other"
                 value="Other"
-                onChange={(e) => setIsOtherCheckedA(e.target.checked)}
+                ref={otherCheckboxARef}
+                onChange={(e) => {
+                  setIsOtherCheckedA(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && occupationalHealthServicesByOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
               />
-              <label htmlFor="occupational_health_services_other" className="ml-2 text-sm md:text-base">
-                other bodies/groups/institution (specify)
-                <span className="text-gray-500"></span>
-              </label>
-            </div>
-            {isOtherCheckedA && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-1 md:col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "occupational_health_services_by_other_specification",
-                    {
-                      required: isOtherCheckedA,
-                    }
+              {!isOtherCheckedA ? (
+                <label htmlFor="occupational_health_services_by_other" className="ml-2 text-sm md:text-base">
+                  other bodies/groups/institution (specify)
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-1 md:col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "occupational_health_services_by_other_specification",
+                      {
+                        required: isOtherCheckedA,
+                      }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.occupational_health_services_by_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.occupational_health_services_by_other_specification.message || "Section (a): Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300 w-full"
-                />
-                {errors.occupational_health_services_by_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.occupational_health_services_by_other_specification.message || "Section (a): Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -261,65 +313,98 @@ function PreventiveAndEmergency({
               {errors.employer_engages_the_services_of.message || "Section (c) is required."}
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="relative mt-2 flex items-center gap-1">
-              <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_osh_consultant"
-                value="Occupational Health Consultant (OSH Consultant)"
-              />
-              <label
-                htmlFor="employer_engages_osh_consultant"
-                className="ml-1 text-sm md:text-base"
-              >
-                Occupational Health Consultant (OSH Consultant)
-              </label>
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center mb-2">
+              <div></div>
+              <div className="text-sm font-medium text-gray-900 text-center">Address</div>
             </div>
-            <div className="relative mt-2 flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_osh_consultant"
+                  value="Occupational Health Consultant (OSH Consultant)"
+                />
+                <label
+                  htmlFor="employer_engages_osh_consultant"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational Health Consultant (OSH Consultant)
+                </label>
+              </div>
               <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_physician"
-                value="Occupational health physician"
+                type="text"
+                {...register("occupational_health_consultant_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
               />
-              <label
-                htmlFor="employer_engages_physician"
-                className="ml-2 text-sm md:text-base"
-              >
-                Occupational health physician
-                <span className="text-gray-500"></span>
-              </label>
             </div>
-            <div className="relative mt-2 flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_physician"
+                  value="Occupational health physician"
+                />
+                <label
+                  htmlFor="employer_engages_physician"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational health physician
+                </label>
+              </div>
               <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_dentist"
-                value="Occupational health dentist"
+                type="text"
+                {...register("occupational_health_physician_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
               />
-              <label
-                htmlFor="employer_engages_dentist"
-                className="ml-2 text-sm md:text-base"
-              >
-                Occupational health dentist
-                <span className="text-gray-500"></span>
-              </label>
             </div>
-            <div className="relative mt-2 flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_dentist"
+                  value="Occupational health dentist"
+                />
+                <label
+                  htmlFor="employer_engages_dentist"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational health dentist
+                </label>
+              </div>
               <input
-                type="checkbox"
-                {...register("employer_engages_the_services_of")}
-                id="employer_engages_nurse"
-                value="Occupational health nurse"
+                type="text"
+                {...register("occupational_health_dentist_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
               />
-              <label
-                htmlFor="employer_engages_nurse"
-                className="ml-2 text-sm md:text-base"
-              >
-                Occupational health nurse
-                <span className="text-gray-500"></span>
-              </label>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("employer_engages_the_services_of")}
+                  id="employer_engages_nurse"
+                  value="Occupational health nurse"
+                />
+                <label
+                  htmlFor="employer_engages_nurse"
+                  className="text-sm md:text-base flex-1"
+                >
+                  Occupational health nurse
+                </label>
+              </div>
+              <input
+                type="text"
+                {...register("occupational_health_nurse_address")}
+                className="border-b border-gray-300 px-2 py-1 w-full"
+                placeholder="Enter address"
+              />
             </div>
           </div>
         </div>
@@ -339,27 +424,27 @@ function PreventiveAndEmergency({
               {errors.conduct_inspection_of_workplace.message || "Section (d) is required."}
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="relative mt-2 flex items-center gap-1">
               <input
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_establishment"
-                value="the establishment/undertaking"
+                id="conduct_inspection_of_workplace"
+                value="once every month"
               />
-              <label htmlFor="conduct_inspection_establishment" className="ml-1 text-sm md:text-base">
-                the establishment/undertaking
+              <label htmlFor="conduct_inspection_of_workplace" className="ml-1 text-sm md:text-base">
+                once every month
               </label>
             </div>
             <div className="relative mt-2 flex items-center gap-2">
               <input
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_government"
-                value="government authority/institution"
+                id="conduct_inspection_of_workplace"
+                value="once every three (3) months"
               />
-              <label htmlFor="conduct_inspection_government" className="ml-2 text-sm md:text-base">
-                government authority/institution
+              <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
+                once every three (3) months
                 <span className="text-gray-500"></span>
               </label>
             </div>
@@ -367,33 +452,65 @@ function PreventiveAndEmergency({
               <input
                 type="checkbox"
                 {...register("conduct_inspection_of_workplace")}
-                id="conduct_inspection_other"
-                value="Other"
-                onChange={(e) => setIsOtherCheckedD(e.target.checked)}
+                id="conduct_inspection_of_workplace"
+                value="once every two (2) months"
               />
-              <label htmlFor="conduct_inspection_other" className="ml-2 text-sm md:text-base">
-                other bodies/groups/institution (specify)
+              <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
+                once every two (2) months
                 <span className="text-gray-500"></span>
               </label>
             </div>
-            {isOtherCheckedD && (
-              <div className="relative mt-2 flex items-center gap-2 col-span-1 md:col-span-3">
-                <input
-                  type="text"
-                  {...register(
-                    "conduct_inspection_of_workplace_other_specification",
-                    { required: isOtherCheckedD }
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("conduct_inspection_of_workplace")}
+                id="conduct_inspection_of_workplace"
+                value="once every six (6) months"
+              />
+              <label htmlFor="conduct_inspection_of_workplace" className="ml-2 text-sm md:text-base">
+                once every six (6) months
+                <span className="text-gray-500"></span>
+              </label>
+            </div>
+            <div className="relative mt-2 flex items-center gap-1">
+              <input
+                type="checkbox"
+                {...register("conduct_inspection_of_workplace")}
+                id="conduct_inspection_of_workplace_other"
+                value="other details"
+                ref={otherCheckboxDRef}
+                onChange={(e) => {
+                  setIsOtherCheckedD(e.target.checked);
+                  // If unchecking and there's text, clear the text field
+                  if (!e.target.checked && conductInspectionOther) {
+                    // This will be handled by the form reset or manual clearing
+                  }
+                }}
+              />
+              {!isOtherCheckedD ? (
+                <label htmlFor="conduct_inspection_of_workplace_other" className="ml-2 text-sm md:text-base">
+                  other details
+                  <span className="text-gray-500"></span>
+                </label>
+              ) : (
+                <div className="flex items-center gap-2 col-span-1 md:col-span-3">
+                  <input
+                    type="text"
+                    {...register(
+                      "conduct_inspection_of_workplace_other_specification",
+                      { required: isOtherCheckedD }
+                    )}
+                    placeholder="Please specify"
+                    className="ml-2 border-b p-2 border-gray-300 w-56"
+                  />
+                  {errors.conduct_inspection_of_workplace_other_specification && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.conduct_inspection_of_workplace_other_specification.message || "Section (d): Please specify 'Other'."}
+                    </p>
                   )}
-                  placeholder="Please specify"
-                  className="border-b p-2 border-gray-300 w-full"
-                />
-                {errors.conduct_inspection_of_workplace_other_specification && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.conduct_inspection_of_workplace_other_specification.message || "Section (d): Please specify 'Other'."}
-                  </p>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

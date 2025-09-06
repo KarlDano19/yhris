@@ -58,6 +58,7 @@ export default function EditReportModal({
       setValue('total_non_disabling_injuries', annualAccidentIllnessReportData.total_non_disabling_injuries);
       setValue('type_of_industry', annualAccidentIllnessReportData.type_of_industry);
       setValue('year', annualAccidentIllnessReportData.year);
+      setValue('injury_summary', annualAccidentIllnessReportData.injury_summary);
       
       // Set signature field value from backend data for preview
       setValue('signature', annualAccidentIllnessReportData.signature);
@@ -140,7 +141,7 @@ export default function EditReportModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Edit Annual Work Accident/ Illness Exposure Data Report

@@ -10,6 +10,9 @@ async function getJobPostItems(filters: any) {
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    if (filters.status && filters.status !== 'all') {
+      newFilters.is_active = filters.status === 'active' ? 'true' : 'false';
+    }
     if (!newFilters.from) delete newFilters.from;
     if (!newFilters.to) delete newFilters.to;
     const searchParams = new URLSearchParams(newFilters);

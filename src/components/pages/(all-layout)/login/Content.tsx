@@ -15,6 +15,7 @@ import CustomToast from '@/components/CustomToast';
 import SplitLayout from '@/components/SplitView';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 import EmailVerificationModal from './modal/EmailVerificationModal';
+import OTPVerificationModal from './modal/OTPVerificationModal';
 
 import { EnvelopeIcon, LockClosedIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { EyeIcon } from '@heroicons/react/24/solid';
@@ -23,6 +24,7 @@ import GoogleIcon from '@/svg/GoogleIcon';
 import MainIconOnly from '@/svg/MainIconOnly';
 import FacebookRoundedIcon from '@/svg/FacebookRoundedIcon';
 import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
+import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Login } from '@/types/globals';
 
@@ -32,16 +34,29 @@ function Content() {
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
   const [showEmailVerificationModal, setEmailVerificationModal] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otpData, setOtpData] = useState<any>(null);
 
   const { mutate, isLoading } = useLogin();
   const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => {
-        if (data.is_valid) {
-          setSession(data);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+      onSuccess: (response: any) => {
+        if (response.otp_required) {
+          // Show OTP modal
+          setOtpData({
+            sessionId: response.session_id,
+            expiresAt: response.expires_at,
+            remainingAttempts: response.remaining_attempts,
+            timeRemainingSeconds: response.time_remaining_seconds,
+            email: data.email
+          });
+          setShowOTPModal(true);
+          toast.custom(() => <CustomToast message={response.message} type='success' />, { duration: 4000 });
+        } else if (response.is_valid) {
+          setSession(response);
+          toast.custom(() => <CustomToast message={response.message} type='success' />, { duration: 4000 });
         } else {
           setEmailVerificationModal(true);
         }
@@ -93,6 +108,11 @@ function Content() {
     setSession(data);
   };
 
+  const handleOTPSuccess = (data: any) => {
+    setSession(data);
+    setShowOTPModal(false);
+  };
+
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
       if (event.data.isGranted) {
@@ -121,6 +141,20 @@ function Content() {
 
   return (
     <>
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link 
+          href="/landing-page" 
+          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
+          shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
+          hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
+          transform transition-all duration-300 ease-out hover:scale-105 active:scale-95
+          border border-gray-100"
+        >
+          <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+        </Link>
+      </div>
+      
       <SplitLayout
         left={
           <>
@@ -204,6 +238,7 @@ function Content() {
                     </Link>
                     <button
                       type='submit'
+                      id='login-button'
                       className='w-full uppercase text-white bg-blue-600 enabled:hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center mb-5 disabled:opacity-50'
                       tabIndex={5}
                       disabled={isLoading}
@@ -233,7 +268,7 @@ function Content() {
                     </button>
                     <p className='text-sm font-light text-gray-500 text-center mb-9'>
                       Don&apos;t have an account yet?{' '}
-                      <Link href='/register' className='font-semibold text-blue-600 hover:underline'>
+                      <Link id='sign-up-link' href='/register' className='font-semibold text-blue-600 hover:underline'>
                         Sign Up here
                       </Link>
                     </p>
@@ -243,6 +278,7 @@ function Content() {
                   </div>
                   <div className='mb-5 relative'>
                     <button
+                      id='google-login-button'
                       className='flex lg:w-full items-center justify-center text-indigo-dye mt-8 lg:mt-4 font-semibold bg-white border border-gray-400 w-full lg:px-12 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => setCreateAccountModal(true)}
                       disabled={true}
@@ -250,6 +286,7 @@ function Content() {
                       <GoogleIcon className='w-4 h-4 mr-2' /> Google
                     </button>
                     <button
+                      id='facebook-login-button'
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => setCreateAccountModal(true)}
                       disabled={true}
@@ -257,6 +294,7 @@ function Content() {
                       <FacebookRoundedIcon className='w-4 h-4 mr-2' /> Facebook
                     </button>
                     <button
+                      id='yahshua-payroll-login-button'
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => loginWithYahshuaPayroll()}
                     >
@@ -266,11 +304,11 @@ function Content() {
                   </div>
                   <div className='text-sm'>
                     By continuing, you agree to our{' '}
-                    <Link href='/terms-of-service' target='_blank' className='text-[#355FD0] underline'>
+                    <Link id='terms-of-service-link' href='/terms-of-service' target='_blank' className='text-[#355FD0] underline'>
                       Terms of Service
                     </Link>
                     , and{' '}
-                    <Link href='/privacy-notice' target='_blank' className='text-[#355FD0] underline'>
+                    <Link id='privacy-notice-link' href='/privacy-notice' target='_blank' className='text-[#355FD0] underline'>
                       Privacy Notice
                     </Link>
                     .
@@ -282,6 +320,18 @@ function Content() {
                 isOpen={showEmailVerificationModal}
                 onClose={() => setEmailVerificationModal(false)}
               />
+              {otpData && (
+                <OTPVerificationModal
+                  email={otpData.email}
+                  sessionId={otpData.sessionId}
+                  expiresAt={otpData.expiresAt}
+                  remainingAttempts={otpData.remainingAttempts}
+                  timeRemainingSeconds={otpData.timeRemainingSeconds}
+                  isOpen={showOTPModal}
+                  onClose={() => setShowOTPModal(false)}
+                  onSuccess={handleOTPSuccess}
+                />
+              )}
             </div>
           </>
         }

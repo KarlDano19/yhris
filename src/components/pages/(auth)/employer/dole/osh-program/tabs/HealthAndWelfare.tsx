@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Controller, useFieldArray } from "react-hook-form";
 
+import { Controller, useFieldArray } from "react-hook-form";
 import { MinusIcon, XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
@@ -104,21 +104,6 @@ export default function HealthAndWelfare({
     <>
       <form>
         <div className="px-4 pt-4 pb-6">
-          <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <XCircleIcon
-                  className="h-5 w-5 text-red-400"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  You cannot proceed due to incomplete fields. Please review.
-                </h3>
-              </div>
-            </div>
-          </div>
           <div className="mt-4">
             <label
               htmlFor="message"
@@ -926,6 +911,7 @@ export default function HealthAndWelfare({
                               id={`certificate_${item.id || index}`}
                               type="file"
                               className="hidden rounded-md w-full border-0 px-2 sm:px-3 py-1.5 text-gray-900 placeholder:text-gray-400 text-xs sm:text-sm sm:leading-6"
+                              accept="image/*"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
@@ -1088,6 +1074,7 @@ export default function HealthAndWelfare({
                               id={`attachment_${item.id || index}`}
                               type="file"
                               className="hidden rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                              accept="image/*"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {

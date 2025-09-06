@@ -2,17 +2,9 @@
 
 import { useEffect } from "react";
 
-import { useQueryClient } from "@tanstack/react-query";
-
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-
-interface CachedProfileData {
-  name: string;
-  type_of_industry: string;
-  city: string;
-}
 
 function GeneralInfo({
   control,
@@ -29,32 +21,17 @@ function GeneralInfo({
   setValue: any;
   watch: any;
 }) {
-  const queryClient = useQueryClient();
-
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
   });
 
   const { data: employeeData } = useGetEmployeeItems();
-  const cachedProfile = queryClient
-    .getQueryCache()
-    .find(["employerProfileCache"]) as {
-    state: { data: CachedProfileData } | undefined;
-  };
 
   useEffect(() => {
     if (employeeData) {
       setValue("total_number_of_employees", employeeData.length);
     }
-    if (cachedProfile?.state?.data) {
-      setValue("company_name", cachedProfile.state.data.name || "");
-      setValue(
-        "type_of_industry",
-        cachedProfile.state.data.type_of_industry || ""
-      );
-      setValue("address", cachedProfile.state.data.city || "");
-    }
-  }, [employeeData, cachedProfile, setValue]);
+  }, [employeeData, setValue]);
 
   // Auto-calculate totals
   const male_office_workers = watch('male_office_workers');
@@ -114,7 +91,7 @@ function GeneralInfo({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
-              htmlFor="company_name"
+              htmlFor="name_of_establishment"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
               Name of Establishment
@@ -124,8 +101,8 @@ function GeneralInfo({
               <input
                 type="text"
                 readOnly
-                {...register("company_name", { required: true })}
-                id="company_name"
+                {...register("name_of_establishment", { required: true })}
+                id="name_of_establishment"
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>

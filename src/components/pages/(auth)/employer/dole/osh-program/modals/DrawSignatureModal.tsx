@@ -4,12 +4,11 @@ import {
     useRef,
     useEffect,
   } from "react";
-  
+
+  import SignatureCanvas from "react-signature-canvas";
   import { Dialog, Transition } from "@headlessui/react";
   import { XCircleIcon } from "@heroicons/react/24/solid";
-  
-  import SignatureCanvas from "react-signature-canvas";
-  
+
   export default function SignatureModal({
     isOpen,
     setIsOpen,
@@ -89,7 +88,7 @@ import {
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-20"
+          className="relative z-50"
           initialFocus={cancelButtonRef}
           onClose={() => setIsOpen(false)}
         >
@@ -116,7 +115,7 @@ import {
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
                   <div className="flex bg-savoy-blue p-2 items-center">
                     <h3 className="flex-1 text-white ml-2 font-semibold">
                       Draw Signature

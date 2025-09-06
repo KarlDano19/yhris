@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useRef } from "react";
+
 import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-
-import { XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function CompanyProfile({
   control,
@@ -12,7 +11,8 @@ export default function CompanyProfile({
   validationMessage,
   watch,
   setValue,
-  missingFields = []
+  missingFields = [],
+  cachedProfile
 }: {
   control: any;
   register: any;
@@ -21,6 +21,7 @@ export default function CompanyProfile({
   watch?: any;
   setValue?: any;
   missingFields?: string[];
+  cachedProfile?: { name: string; mobile_number: string; building: string; street: string; locality: string; city: string; country: string; zip_code: string };
 }) {
   // Initialize ref to track first render
   const initializedRef = useRef(false);
@@ -82,6 +83,45 @@ export default function CompanyProfile({
       setValue("total_number_of_employees", total);
     }
   }, [maleEmployees, femaleEmployees, setValue]);
+
+  // Auto-fill company information from cached profile data (fallback)
+  useEffect(() => {
+    if (cachedProfile && setValue && initializedRef.current) {
+      // Auto-fill company name if empty
+      if (cachedProfile.name) {
+        const currentCompanyName = watch ? watch("company_name") : "";
+        if (!currentCompanyName || currentCompanyName.trim() === "") {
+          setValue("company_name", cachedProfile.name, { shouldDirty: false });
+        }
+      }
+      
+      // Auto-fill phone number if empty
+      if (cachedProfile.mobile_number) {
+        const currentPhoneNumber = watch ? watch("phone_number") : "";
+        if (!currentPhoneNumber || currentPhoneNumber.trim() === "") {
+          setValue("phone_number", cachedProfile.mobile_number, { shouldDirty: false });
+        }
+      }
+      
+      // Auto-fill complete address if empty
+      if (cachedProfile.building || cachedProfile.street || cachedProfile.locality || cachedProfile.city || cachedProfile.country || cachedProfile.zip_code) {
+        const currentAddress = watch ? watch("complete_address") : "";
+        if (!currentAddress || currentAddress.trim() === "") {
+          const addressParts = [
+            cachedProfile.building,
+            cachedProfile.street,
+            cachedProfile.locality,
+            cachedProfile.city,
+            cachedProfile.country,
+            cachedProfile.zip_code
+          ].filter(Boolean);
+          
+          const combinedAddress = addressParts.join(', ');
+          setValue("complete_address", combinedAddress, { shouldDirty: false });
+        }
+      }
+    }
+  }, [cachedProfile, setValue, watch]);
 
   // Function to handle checkbox changes for business_description
   const handleBusinessDescriptionChange = (value: string, checked: boolean) => {
@@ -183,21 +223,6 @@ export default function CompanyProfile({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4">
           <div>
             <label
@@ -212,7 +237,8 @@ export default function CompanyProfile({
                 type="text"
                 {...register("company_name")}
                 id="company_name"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
+                readOnly
+                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
                   ${isMissingField('company_name') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
@@ -282,7 +308,8 @@ export default function CompanyProfile({
                 type="text"
                 {...register("complete_address")}
                 id="complete_address"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
+                readOnly
+                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
                   ${isMissingField('complete_address') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
@@ -299,7 +326,8 @@ export default function CompanyProfile({
                 type="text"
                 {...register("phone_number")}
                 id="phone_number"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                readOnly
+                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
             </div>
           </div>
@@ -402,8 +430,8 @@ export default function CompanyProfile({
                 type="number"
                 {...register("total_number_of_employees")}
                 id="total_number_of_employees"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100`}
-                disabled
+                readOnly
+                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100`}
               />
             </div>
           </div>

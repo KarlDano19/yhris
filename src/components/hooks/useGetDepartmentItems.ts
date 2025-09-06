@@ -13,7 +13,7 @@ async function getDepartmentItems() {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/departments/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/departments/?view_type=select`,
         config
       );
       if (!res.ok) {

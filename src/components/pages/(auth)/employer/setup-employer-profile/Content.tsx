@@ -20,7 +20,7 @@ import { T_EmployerProfile } from '@/types/globals';
 
 const Content = () => {
   const [progressBar, setProgressBar] = useState(0);
-  const { register, setValue, watch, handleSubmit } = useForm<T_EmployerProfile>();
+  const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger } = useForm<T_EmployerProfile>();
   const { mutate, isLoading } = useSavedProfile();
   const { updateContact } = useLoopsSync(); // Removed sendEvent
 
@@ -129,18 +129,26 @@ const Content = () => {
               </nav>
             </div>
           </div>
-          {progressBar === 0 && (
+          <div style={{ display: progressBar === 0 ? 'block' : 'none' }}>
             <Details
               register={register}
               handleSubmit={handleSubmit}
               setValue={setValue}
               watch={watch}
               setProgressBar={setProgressBar}
+              errors={errors}
+              clearErrors={clearErrors}
+              trigger={trigger}
             />
-          )}
-          {progressBar === 1 && (
-            <Settings register={register} onSubmit={onSubmit} setProgressBar={setProgressBar} isLoading={isLoading} />
-          )}
+          </div>
+          <div style={{ display: progressBar === 1 ? 'block' : 'none' }}>
+            <Settings 
+              register={register} 
+              onSubmit={onSubmit} 
+              setProgressBar={setProgressBar} 
+              isLoading={isLoading} 
+            />
+          </div>
         </div>
       </div>
     </>

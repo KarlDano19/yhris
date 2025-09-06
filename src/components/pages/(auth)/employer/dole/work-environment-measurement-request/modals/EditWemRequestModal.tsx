@@ -51,6 +51,10 @@ export default function EditWemRequestModal({
       setValue("date_of_application", workEnvironmentRequestData.date_of_application);
       setValue("company_name", workEnvironmentRequestData.company_name);
       setValue("type_of_industry", workEnvironmentRequestData.type_of_industry);
+      setValue("address", workEnvironmentRequestData.address);
+      setValue("region", workEnvironmentRequestData.region);
+      setValue("email_address", workEnvironmentRequestData.email_address);
+      setValue("tel_fax_no", workEnvironmentRequestData.tel_fax_no);
       setValue("number_of_workers_male", workEnvironmentRequestData.number_of_workers_male);
       setValue("number_of_workers_female", workEnvironmentRequestData.number_of_workers_female);
       setValue("number_of_workers_total", workEnvironmentRequestData.number_of_workers_total);
@@ -68,6 +72,7 @@ export default function EditWemRequestModal({
       setValue("safety_officer_levels", parseArrayField(workEnvironmentRequestData.safety_officer_levels));
       setValue("purpose_of_wem_request", parseArrayField(workEnvironmentRequestData.purpose_of_wem_request));
       setValue("wem_conducted_by", parseArrayField(workEnvironmentRequestData.wem_conducted_by));
+      setValue("last_wem_date", workEnvironmentRequestData.last_wem_date);
       setValue("chemical_hazards", parseArrayField(workEnvironmentRequestData.chemical_hazards));
       setValue("ventilation", parseArrayField(workEnvironmentRequestData.ventilation));
       setValue("hazards_purpose_of_wem_request", parseArrayField(workEnvironmentRequestData.hazards_purpose_of_wem_request));
@@ -76,7 +81,6 @@ export default function EditWemRequestModal({
       setValue("wem_equipment_owned_by_company", workEnvironmentRequestData.wem_equipment_owned_by_company);
       setValue("conducting_internal_wem", workEnvironmentRequestData.conducting_internal_wem ? "yes" : "no");
       setValue("date_of_internal_monitoring", workEnvironmentRequestData.date_of_internal_monitoring);
-      setValue("last_wem_date", workEnvironmentRequestData.last_wem_date);
       setValue("requesting_personnel_name", workEnvironmentRequestData.requesting_personnel_name);
       setValue("requesting_personnel_position", workEnvironmentRequestData.requesting_personnel_position);
       setValue("signature", workEnvironmentRequestData.signature);
@@ -141,7 +145,7 @@ export default function EditWemRequestModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl w-full max-w-[95vw] mx-2">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold text-sm sm:text-base">
                     Edit Work Environment Measurement (WEM) Request

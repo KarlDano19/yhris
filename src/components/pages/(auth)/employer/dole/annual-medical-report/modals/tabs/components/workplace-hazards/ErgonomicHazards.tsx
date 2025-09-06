@@ -18,8 +18,8 @@ const ErgonomicHazards: React.FC<ErgonomicHazardsProps> = ({ register, setValue,
   const unfavorable_work_posture_workers_exposed = watch ? watch("unfavorable_work_posture_workers_exposed") : "";
   const static_monotonous_work_sources = watch ? watch("static_monotonous_work_sources") : "";
   const static_monotonous_work_workers_exposed = watch ? watch("static_monotonous_work_workers_exposed") : "";
-  const others_sources = watch ? watch("others_sources") : "";
-  const others_workers_exposed = watch ? watch("others_workers_exposed") : "";
+  const others_ergonomic_stress_sources = watch ? watch("others_ergonomic_stress_sources") : "";
+  const others_ergonomic_stress_workers_exposed = watch ? watch("others_ergonomic_stress_workers_exposed") : "";
 
   return (
     <>
@@ -311,8 +311,8 @@ const ErgonomicHazards: React.FC<ErgonomicHazardsProps> = ({ register, setValue,
           <div className="mt-2">
             <input
               type="text"
-              {...register(`others_sources`)}
-              id={`others_sources`}
+              {...register(`others_ergonomic_stress_sources`)}
+              id={`others_ergonomic_stress_sources`}
               className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
             />
           </div>
@@ -321,8 +321,8 @@ const ErgonomicHazards: React.FC<ErgonomicHazardsProps> = ({ register, setValue,
           <div className="mt-2">
             <input
               type="number"
-              {...register(`others_workers_exposed`)}
-              id={`others_workers_exposed`}
+              {...register(`others_ergonomic_stress_workers_exposed`)}
+              id={`others_ergonomic_stress_workers_exposed`}
               className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
             />
           </div>
@@ -336,8 +336,8 @@ const ErgonomicHazards: React.FC<ErgonomicHazardsProps> = ({ register, setValue,
             <label className="text-xs text-gray-500 mb-1 block">Sources</label>
             <input
               type="text"
-              value={others_sources || ""}
-              onChange={(e) => setValue && setValue("others_sources", e.target.value)}
+              value={others_ergonomic_stress_sources || ""}
+              onChange={(e) => setValue && setValue("others_ergonomic_stress_sources", e.target.value)}
               className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
             />
           </div>
@@ -345,8 +345,8 @@ const ErgonomicHazards: React.FC<ErgonomicHazardsProps> = ({ register, setValue,
             <label className="text-xs text-gray-500 mb-1 block">No. of Workers Exposed</label>
             <input
               type="number"
-              value={others_workers_exposed || ""}
-              onChange={(e) => setValue && setValue("others_workers_exposed", e.target.value)}
+              value={others_ergonomic_stress_workers_exposed || ""}
+              onChange={(e) => setValue && setValue("others_ergonomic_stress_workers_exposed", e.target.value)}
               className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
             />
           </div>

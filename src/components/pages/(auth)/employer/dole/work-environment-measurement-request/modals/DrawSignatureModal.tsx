@@ -60,7 +60,7 @@ export default function SignatureModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-4 w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-4xl">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-4 w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold text-base md:text-lg">
                     Draw Signature
@@ -83,9 +83,11 @@ export default function SignatureModal({
                       canvasProps={{
                         width: 900,
                         height: 200,
-                        className: "mx-auto block rounded bg-white border",
-                        style: { width: '100%', maxWidth: 900, height: 200 }
+                        className: "w-full h-full"
                       }}
+                      backgroundColor="rgba(0,0,0,0)"
+                      minWidth={1}
+                      maxWidth={2}
                     />
                   </div>
                 </div>

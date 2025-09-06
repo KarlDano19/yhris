@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
 
 import MenuItem from '../../MenuItem';
 import EstablishmentRegistrationConfirmationModal from './modals/EstablishmentRegistrationConfirmationModal';
@@ -31,6 +32,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     useState(false);
     
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: CachedProfileData } | undefined };
   const [isSafetyAndHealthPolicyModalOpen, setIsSafetyAndHealthPolicyModalOpen] = useState(false);
   const [companyName, setCompanyName] = useState("");
@@ -41,6 +43,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setCompanyName(cachedProfile.state.data.name);
     }
   }, [cachedProfile]);
+
+  // Check for modal parameter in URL and open the appropriate modal
+  useEffect(() => {
+    const modalParam = searchParams.get('modal');
+    if (modalParam === 'safety-and-health-policy') {
+      setIsSafetyAndHealthPolicyModalOpen(true);
+    }
+  }, [searchParams]);
   const menus = [
     {
       icon: <EmployeeCompensitionLogbookLogo />,

@@ -275,8 +275,13 @@ function Content() {
                                   <input
                                     id={`score-${evaluationCriterionIndex}-${index}`}
                                     type='number'
-                                    className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-1/6 focus:outline-none'
+                                    className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-1/4 focus:outline-none'
                                     value={item.score || 0}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                                        e.preventDefault();
+                                      }
+                                    }}
                                     onChange={(event) => {
                                       const newScore = Number(event.target.value);
                                       setEvaluationForm((prevForm: any) => {

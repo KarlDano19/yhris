@@ -37,15 +37,15 @@ function useGetAnnualAccidentIllnessReportDetails(
   annual_work_accident_illness_exposure_data_report_id: number | null
 ) {
   const query = useQuery(
-    [],
+    ["annualAccidentIllnessReportDetailsCache", annual_work_accident_illness_exposure_data_report_id],
     () =>
       getAnnualAccidentIllnessReportDetails(
         annual_work_accident_illness_exposure_data_report_id
       ),
-    {
-      enabled: false,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
+    { 
+      enabled: !!annual_work_accident_illness_exposure_data_report_id, 
+      refetchOnWindowFocus: false, 
+      keepPreviousData: true 
     }
   );
   return query;

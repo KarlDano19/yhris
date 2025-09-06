@@ -5,13 +5,13 @@ import { Controller } from "react-hook-form";
 
 import dynamic from "next/dynamic";
 
-import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../modals/DrawSignatureModal";
 import FilePreviewModal from "../modals/FilePreviewModal";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
+
+import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
 export default function ProgramAndPolicy({
   control,
@@ -191,21 +191,6 @@ export default function ProgramAndPolicy({
   return (
     <form>
       <div className="px-4 pt-4 pb-6">
-        <div className={`${validationMessage ? '' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4">
           <div className="sm:col-span-4 mt-4 mb-6 md:mb-0">
             <label
@@ -340,7 +325,7 @@ export default function ProgramAndPolicy({
               htmlFor="signature"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Draw Signature
+              Draw or Upload Signature
               <span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
@@ -383,8 +368,7 @@ export default function ProgramAndPolicy({
               htmlFor="signature"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Upload Signature
-              <span className="text-red-600">*</span>
+              &nbsp;
             </label>
             <div className="relative mt-2">
               <input

@@ -1,10 +1,11 @@
-import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -13,22 +14,23 @@ import useAddEmployeeIssueItems from '../hooks/useAddEmployeeIssueItems';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 import { T_IncidentReport } from '@/types/globals';
+import { issueTypeOptions } from '@/helpers/issueTypes';
 
+interface Field {
+  onChange: (value: any) => void;
+  value: any;
+}
 
 export default function IncidentReportModal({
   employeeIssueItems,
-  departmentItems,
   employeeItems,
-  positionItems,
   setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
   employeeIssueItems: any;
-  departmentItems: any;
   employeeItems: any;
-  positionItems: any;
   setEmployeeIssueItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
@@ -62,8 +64,11 @@ export default function IncidentReportModal({
           position: '',
           department: '',
           incidentPlace: '',
+          issueType: '',
           briefBackground: ''
         });
+        setValue('department', ''); // Ensure department is cleared
+        setValue('position', ''); // Ensure position is cleared
         setEmployeeSearch('');
         setEmployeeSelected(false);
         refetch();
@@ -98,7 +103,7 @@ export default function IncidentReportModal({
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {}}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -122,7 +127,7 @@ export default function IncidentReportModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Incident Report</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -141,141 +146,123 @@ export default function IncidentReportModal({
                         </div>
                       </div>
                     </div>
-                    <div className='sm:col-span-4'>
-                      <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Employee Name<span className='text-red-600'>*</span>
-                      </label>
-                      <div className='relative mt-2'>
-                        <input
-                          id='name'
-                          type='text'
-                          placeholder='Select...'
-                          value={employeeSearch}
-                          onChange={e => setEmployeeSearch(e.target.value)}
-                          className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                          onClick={() => {
-                            if (!employeeSelected) {
-                              const dropdown = document.getElementById('employee-dropdown');
-                              if (dropdown) {
-                                dropdown.classList.toggle('hidden');
+                    <div className='grid grid-cols-2 gap-6'>
+                      <div>
+                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Employee Name<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <input
+                            id='name'
+                            type='text'
+                            placeholder='Select...'
+                            value={employeeSearch}
+                            onChange={e => setEmployeeSearch(e.target.value)}
+                            className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                            onClick={() => {
+                              if (!employeeSelected) {
+                                const dropdown = document.getElementById('employee-dropdown');
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden');
+                                }
                               }
-                            }
-                          }}
-                          readOnly={employeeSelected}
-                        />
-                        <div
-                          className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
-                          onClick={() => {
-                            if (!employeeSelected) {
-                              const dropdown = document.getElementById('employee-dropdown');
-                              if (dropdown) {
-                                dropdown.classList.toggle('hidden');
+                            }}
+                            readOnly={employeeSelected}
+                          />
+                          <input
+                            type='hidden'
+                            {...register('name', { required: true })}
+                          />
+                          <div
+                            className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
+                            onClick={() => {
+                              if (!employeeSelected) {
+                                const dropdown = document.getElementById('employee-dropdown');
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden');
+                                }
                               }
-                            }
-                          }}
-                        >
-                          {!employeeSelected ? (
-                            <span>
-                              <SelectChevronDown />
-                            </span>
-                          ) : (
-                            <button
-                              type='button'
-                              className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
-                              onClick={() => {
-                                setValue('name', '');
-                                setEmployeeSearch('');
-                                setEmployeeSelected(false);
-                              }}
-                              tabIndex={-1}
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                        <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
-                          {employeeItems
-                            .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
-                            .map((item: any) => (
-                              <div
-                                key={item.id}
-                                className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
+                            }}
+                          >
+                            {!employeeSelected ? (
+                              <span>
+                                <SelectChevronDown />
+                              </span>
+                            ) : (
+                              <button
+                                type='button'
+                                className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
                                 onClick={() => {
-                                  setValue('name', item.id);
-                                  setEmployeeSearch(`${item.firstname} ${item.lastname}`);
-                                  setEmployeeSelected(true);
-                                  document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                  setValue('name', '');
+                                  setEmployeeSearch('');
+                                  setEmployeeSelected(false);
+                                  setValue('department', ''); // Clear department when employee is cleared
+                                  setValue('position', ''); // Clear position when employee is cleared
                                 }}
+                                tabIndex={-1}
                               >
-                                {`${item.firstname} ${item.lastname}`}
-                              </div>
-                            ))}
+                                ×
+                              </button>
+                            )}
+                          </div>
+                          <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+                            {employeeItems
+                              .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
+                              .map((item: any) => (
+                                <div
+                                  key={item.id}
+                                  className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
+                                  onClick={() => {
+                                    setValue('name', item.id);
+                                    setEmployeeSearch(`${item.firstname} ${item.lastname}`);
+                                    setEmployeeSelected(true);
+                                    // Auto-fill department from employee data
+                                    if (item.department) {
+                                      setValue('department', item.department);
+                                    }
+                                    // Auto-fill position from employee data
+                                    if (item.position) {
+                                      setValue('position', item.position);
+                                    }
+                                    document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                  }}
+                                >
+                                  {`${item.firstname} ${item.lastname}`}
+                                </div>
+                              ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-6 mt-4'>
                       <div>
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
                           Position<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                          {/* <select
-                            id="position"
-                            {...register("position", { required: true })}
-                            className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                          >
-                            <option value="">Select...</option>
-                            {positionItems.map((item: any) => {
-                              return (
-                                <option key={item.id} value={item.id}>
-                                  {item.name}
-                                </option>
-                              );
-                            })}
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                            <SelectChevronDown />
-                          </div> */}
                           <input
                             id='position'
                             {...register('position', { required: true })}
                             type='text'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label htmlFor='department' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Department<span className='text-red-600'>*</span>
-                        </label>
-                        <div className='relative mt-2'>
-                          {/* <select
-                            id='department'
-                            {...register('department', { required: true })}
-                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                          >
-                            <option value='' disabled>Select...</option>
-                            {departmentItems.map((item: any) => {
-                              return (
-                                <option key={item.id} value={item.id}>
-                                  {item.name}
-                                </option>
-                              );
-                            })}
-                          </select>
-                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                            <SelectChevronDown />
-                          </div> */}
-                          <input
-                            id='department'
-                            {...register('department', { required: true })}
-                            type='text'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                            readOnly
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
                           />
                         </div>
                       </div>
                     </div>
                     <div className='grid grid-cols-2 gap-6 mt-4'>
+                      <div>
+                        <label htmlFor='department' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Department<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <input
+                            id='department'
+                            {...register('department', { required: true })}
+                            type='text'
+                            readOnly
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
+                          />
+                        </div>
+                      </div>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           Date of Incident
@@ -301,6 +288,8 @@ export default function IncidentReportModal({
                           />
                         </div>
                       </div>
+                    </div>
+                    <div className='grid grid-cols-2 gap-6 mt-4'>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                           Place of Incident
@@ -315,7 +304,45 @@ export default function IncidentReportModal({
                           />
                         </div>
                       </div>
+                      <div>
+                        <label htmlFor='issueType' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Issue Type<span className='text-red-600'>*</span>
+                        </label>
+                        <div className='relative mt-2'>
+                          <Controller
+                            name='issueType'
+                            control={control}
+                            rules={{
+                              required: "Please select an issue type",
+                            }}
+                            render={({ field: { onChange, value } }: { field: Field }) => (
+                              <Select
+                                className='text-sm'
+                                classNamePrefix='select'
+                                options={issueTypeOptions}
+                                value={issueTypeOptions.find((item: any) => item.value === value) || null}
+                                onChange={(val: any) => {
+                                  onChange(val ? val.value : '');
+                                }}
+                                components={{
+                                  DropdownIndicator: () => (
+                                    <div className='pointer-events-none px-2'>
+                                      <SelectChevronDown />
+                                    </div>
+                                  ),
+                                  IndicatorSeparator: () => null,
+                                }}
+                                isClearable={false}
+                                isOptionDisabled={(option: any) => option.isDisabled}
+                                noOptionsMessage={() => null}
+                                placeholder='Select issue type...'
+                              />
+                            )}
+                          />
+                        </div>
+                      </div>
                     </div>
+
                     <div className='sm:col-span-4 mt-4'>
                       <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
                         Brief Background<span className='text-red-600'>*</span>
@@ -345,9 +372,10 @@ export default function IncidentReportModal({
                         const position = await trigger('position');
                         const department = await trigger('department');
                         const incidentPlace = await trigger('incidentPlace');
+                        const issueType = await trigger('issueType');
                         const briefBackground = await trigger('briefBackground');
                         const incidentDate = await trigger('incidentDate');
-                        const results = [name, position, department, incidentPlace, briefBackground, incidentDate];
+                        const results = [name, position, department, incidentPlace, issueType, briefBackground, incidentDate];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
                           toast.custom(

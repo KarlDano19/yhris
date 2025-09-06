@@ -236,12 +236,17 @@ export function CommonFields({
               disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
             } ${
               showCompanyNameValidation
-                ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-blue-500'
                 : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
             }`}
             placeholder="Enter company name"
             required
             disabled={disabled}
+            style={{
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden'
+            }}
           />
         </div>
       )}
@@ -290,7 +295,7 @@ export const DateIssuanceField = ({ formData, handleInputChange, disabled, isSub
     id="dateOfIssuance"
     label="Date of Issuance"
     name="dateOfIssuance"
-    value={formData.dateOfIssuance}
+    value={formData.dateOfIssuance ?? ''}
     handleInputChange={handleInputChange}
     required={true}
     disabled={disabled}
@@ -306,7 +311,7 @@ export const PlaceIssuanceField = ({ formData, handleInputChange, disabled }: Fi
     <input
       type="text"
       name="placeOfIssuance"
-      value={formData.placeOfIssuance}
+      value={formData.placeOfIssuance ?? ''}
       onChange={handleInputChange}
       placeholder="Enter place of issuance (e.g., city)"
       className={`w-full px-3 py-2 border rounded-md ${
@@ -334,7 +339,7 @@ export const SignatoryNameField = ({ formData, handleInputChange, disabled, isSu
       <input
         type="text"
         name="signatoryName"
-        value={formData.signatoryName}
+        value={formData.signatoryName ?? ''}
         onChange={handleInputChange}
         placeholder="Enter name of signatory"
         className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${
@@ -366,7 +371,7 @@ export const SignatoryPositionField = ({ formData, handleInputChange, disabled, 
       <input
         type="text"
         name="signatoryPosition"
-        value={formData.signatoryPosition}
+        value={formData.signatoryPosition ?? ''}
         onChange={handleInputChange}
         placeholder="Enter position of signatory"
         className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${
