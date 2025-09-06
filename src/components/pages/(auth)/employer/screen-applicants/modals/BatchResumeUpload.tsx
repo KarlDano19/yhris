@@ -353,20 +353,28 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
                 <h4 className="text-sm font-medium text-green-700 mb-2">
                   Successfully Created Applicants ({results.created_applicants.length})
                 </h4>
-                <div className="bg-green-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+                <div className="bg-green-50 rounded-lg p-3 max-h-40 overflow-y-auto">
                   {results.created_applicants.map((applicant, index) => (
-                    <div key={index} className="flex justify-between items-center py-1">
-                      <div>
-                        <span className="text-sm font-medium text-green-900">
-                          {applicant.name}
-                        </span>
-                        <span className="text-xs text-green-700 ml-2">
-                          {applicant.email}
-                        </span>
+                    <div key={index} className="flex justify-between items-start py-2 border-b border-green-200 last:border-b-0">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-green-900">
+                            {applicant.name}
+                          </span>
+                          <span className="px-2 py-1 text-xs bg-green-200 text-green-800 rounded-full">
+                            Affinda AI
+                          </span>
+                        </div>
+                        <div className="text-xs text-green-700 mt-1">
+                          📧 {applicant.email}
+                        </div>
+                        <div className="text-xs text-green-600 mt-1">
+                          📄 {applicant.filename}
+                        </div>
                       </div>
-                      <span className="text-xs text-green-600">
-                        {applicant.filename}
-                      </span>
+                      <div className="text-xs text-green-600 ml-2">
+                        ID: {applicant.id}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -377,16 +385,21 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
             {results.errors && results.errors.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-red-700 mb-2">
-                  Errors ({results.errors.length})
+                  Processing Errors ({results.errors.length})
                 </h4>
-                <div className="bg-red-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+                <div className="bg-red-50 rounded-lg p-3 max-h-40 overflow-y-auto">
                   {results.errors.map((error, index) => (
-                    <div key={index} className="py-1">
-                      <div className="text-sm font-medium text-red-900">
-                        {error.filename}
+                    <div key={index} className="py-2 border-b border-red-200 last:border-b-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-red-900">
+                          📄 {error.filename}
+                        </span>
+                        <span className="px-2 py-1 text-xs bg-red-200 text-red-800 rounded-full">
+                          Failed
+                        </span>
                       </div>
-                      <div className="text-xs text-red-700">
-                        {error.error}
+                      <div className="text-xs text-red-700 mt-1 bg-red-100 p-2 rounded">
+                        ⚠️ {error.error}
                       </div>
                     </div>
                   ))}
@@ -439,11 +452,38 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
 
         {/* Processing Info */}
         {isProcessing && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-700">
-              <strong>Processing resumes...</strong> This may take a few moments. 
-              The system is extracting information from each resume and creating applicant profiles.
-            </p>
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+              <div>
+                <p className="text-sm font-medium text-blue-800">
+                  🤖 Processing resumes with Affinda AI...
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  Extracting essential contact information: names, emails, phone numbers, and locations.
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-3 bg-blue-100 rounded p-2">
+              <p className="text-xs text-blue-600">
+                <strong>Extracting contact information:</strong>
+              </p>
+              <ul className="text-xs text-blue-600 mt-1 list-disc list-inside space-y-1">
+                <li>👤 Full names with high accuracy</li>
+                <li>📧 Email addresses from any format</li>
+                <li>📱 Phone numbers (all formats supported)</li>
+                <li>📍 Location and address information</li>
+                <li>✅ Creating clean applicant profiles</li>
+              </ul>
+            </div>
+            
+            <div className="mt-2 p-2 bg-green-100 rounded">
+              <p className="text-xs text-green-700">
+                <strong>✨ Direct API:</strong> Using optimized direct API calls for faster processing 
+                and reliable contact information extraction.
+              </p>
+            </div>
           </div>
         )}
       </div>
