@@ -23,6 +23,7 @@ const Content = () => {
   const [inputValue, setInputValue] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
+    is_active: 'true', // Only show active job postings
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
