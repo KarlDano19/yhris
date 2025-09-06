@@ -183,10 +183,8 @@ export default function SendNTEModal({
         // Update current employee ID
         setCurrentEmployeeId(isOpen.id);
         
-        if (!isDifferentEmployee) {
-          // If same employee, just ensure initialization is set
-          setIsInitialized(true);
-        }
+        // Always reset initialization flag when modal opens to ensure fresh data is loaded
+        setIsInitialized(false);
       }
     }
   }, [isOpen, employeeIssueItems, setTagsTo, setValue, setTagsCc, setTagsBcc, currentEmployeeId]);
@@ -194,7 +192,8 @@ export default function SendNTEModal({
 
   // Prefill fields from backend when details are loaded
   useEffect(() => {
-    if (employeeIssueDetails && !isInitialized) {
+    if (employeeIssueDetails && isOpen && isOpen.id) {
+      // Always populate the form when we have fresh data and the modal is open
       setValue('subject', employeeIssueDetails.nte_subject || '');
       
       // Set tagsTo from backend data, or fall back to employee email if not set
@@ -214,7 +213,7 @@ export default function SendNTEModal({
       }
       setIsInitialized(true);
     }
-  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue, applicantEmail, isInitialized]);
+  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue, applicantEmail, isOpen]);
 
   // Clear errors when subject changes
   useEffect(() => {
