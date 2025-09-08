@@ -13,7 +13,6 @@ import { useGetHRNotes } from "../../hooks/useGetHRNotes";
 import { useAddHRNote } from "../../hooks/useAddHRNote";
 import { useDeleteHRNote } from "../../hooks/useDeleteHRNote";
 
-// ✅ your custom pagination
 import Pagination from "@/components/Pagination";
 
 export default function SalaryHistoryAnalysis({

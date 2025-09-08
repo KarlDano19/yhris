@@ -1,4 +1,3 @@
-// src/.../[id]/hooks/useGetSalaryAnalysis.ts
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";

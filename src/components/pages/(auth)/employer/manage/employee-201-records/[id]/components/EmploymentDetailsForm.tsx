@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
-import LabeledSelect from "../common/LabeledSelect";
 import AddableSelect from "../common/AddableSelect";
 import type { Employee } from "@/types/employee-201-records/employee";
 import { s } from "../utils/_shared";
@@ -18,16 +17,19 @@ type Props = {
   emp?: Partial<Employee>;
   onPatchChange?: (patch: Record<string, any>) => void;
   onErrorsChange?: (hasErrors: boolean) => void;
+  refetch?: () => void | Promise<void>;
 };
 
-const STATUS_OPTIONS = ["Active", "Probationary", "Contract", "On Leave", "Terminated"] as const;
 const uniq = (xs: (string | undefined | null)[]) =>
-  Array.from(new Set(xs.filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b));
+  Array.from(new Set(xs.filter(Boolean) as string[])).sort((a, b) =>
+    a.localeCompare(b)
+  );
 
 export default function EmploymentDetailsForm({
   emp,
   onPatchChange,
   onErrorsChange,
+  refetch,
 }: Props) {
   const emit = (patch: Record<string, any>) => onPatchChange?.(patch);
   const [showSalaryModal, setShowSalaryModal] = useState(false);
@@ -50,61 +52,114 @@ export default function EmploymentDetailsForm({
 
   // --- initial values (API fields) ---
   const [system_id] = useState<string>(s(emp?.system_id ?? "")); // read-only
-  const [date_hired, setDateHired] = useState<Date | undefined>(toDate(emp?.date_hired ?? null));
-  const [employment_status, setEmploymentStatus] = useState<string>(s(emp?.employment_status ?? ""));
+  const [date_hired, setDateHired] = useState<Date | undefined>(
+    toDate(emp?.date_hired ?? null)
+  );
+  const [employment_status, setEmploymentStatus] = useState<string>(
+    s(emp?.employment_status ?? "")
+  );
   const [location, setLocation] = useState<string>(s(emp?.location ?? ""));
   const [position, setPosition] = useState<string>(s(emp?.position ?? ""));
-  const [department, setDepartment] = useState<string>(s(emp?.department ?? ""));
+  const [department, setDepartment] = useState<string>(
+    s(emp?.department ?? "")
+  );
 
   // -------- options: from employee lists + user-added extras --------
   const [extraPositions, setExtraPositions] = useState<string[]>([]);
   const [extraDepartments, setExtraDepartments] = useState<string[]>([]);
   const [extraLocations, setExtraLocations] = useState<string[]>([]);
+  const [extraEmploymentStatuses, setExtraEmploymentStatuses] = useState<
+    string[]
+  >([]);
 
   const positionOptions = useMemo(
-    () => uniq([...(emp?.positions_list as string[] | undefined ?? []), ...extraPositions]),
+    () =>
+      uniq([
+        ...((emp?.positions_list as string[] | undefined) ?? []),
+        ...extraPositions,
+      ]),
     [emp?.positions_list, extraPositions]
   );
   const departmentOptions = useMemo(
-    () => uniq([...(emp?.departments_list as string[] | undefined ?? []), ...extraDepartments]),
+    () =>
+      uniq([
+        ...((emp?.departments_list as string[] | undefined) ?? []),
+        ...extraDepartments,
+      ]),
     [emp?.departments_list, extraDepartments]
   );
   const locations = useMemo(
-    () => uniq([...(emp?.locations_list as string[] | undefined ?? []), ...extraLocations]),
+    () =>
+      uniq([
+        ...((emp?.locations_list as string[] | undefined) ?? []),
+        ...extraLocations,
+      ]),
     [emp?.locations_list, extraLocations]
   );
-  const employeeName = ([emp?.firstname, emp?.lastname].filter(Boolean).join(" ").trim() || "—");
+  const employmentStatusOptions = useMemo(
+    () =>
+      uniq([
+        ...((emp?.employment_status_list as string[] | undefined) ?? []),
+        ...extraEmploymentStatuses,
+      ]),
+    [emp?.employment_status_list, extraEmploymentStatuses]
+  );
+
+  useEffect(() => {
+    setEmploymentStatus(s(emp?.employment_status ?? ""));
+  }, [emp?.employment_status]);
+
+  useEffect(() => {
+    setLocation(s(emp?.location ?? ""));
+  }, [emp?.location]);
+
+  useEffect(() => {
+    setPosition(s(emp?.position ?? ""));
+  }, [emp?.position]);
+
+  useEffect(() => {
+    setDepartment(s(emp?.department ?? ""));
+  }, [emp?.department]);
+
+  useEffect(() => {
+    setDateHired(toDate(emp?.date_hired ?? null));
+  }, [emp?.date_hired]);
+
+  const employeeName =
+    [emp?.firstname, emp?.lastname].filter(Boolean).join(" ").trim() || "—";
 
   const mergeUniq = (base: (string | undefined | null)[], extras: string[]) =>
-    Array.from(new Set([...(base.filter(Boolean) as string[]), ...extras])).sort((a, b) => a.localeCompare(b));
+    Array.from(
+      new Set([...(base.filter(Boolean) as string[]), ...extras])
+    ).sort((a, b) => a.localeCompare(b));
 
   /* ---------------- validations (API keys) ---------------- */
   const [errors, setErrors] = useState<Record<string, string | null>>({});
-  const isEmpty = (v: string | undefined | null) => !v || String(v).trim().length === 0;
+  const isEmpty = (v: string | undefined | null) =>
+    !v || String(v).trim().length === 0;
 
   const validate = {
-    // system_id: now NOT required; omit from validation
     date_hired: (d?: Date) => {
       if (!d || isNaN(d.getTime())) return "Date Hired is required.";
       const today = new Date();
       const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const tOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const tOnly = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
       if (dOnly > tOnly) return "Date Hired cannot be in the future.";
       return null;
     },
+    // required-only now that it's addable (no fixed whitelist)
     employment_status: (v: string) =>
-      isEmpty(v)
-        ? "Employment Status is required."
-        : (STATUS_OPTIONS as unknown as string[]).includes(v)
-        ? null
-        : "Invalid employment status.",
+      isEmpty(v) ? "Employment Status is required." : null,
     location: (v: string) => (isEmpty(v) ? "Location is required." : null),
     position: (v: string) => (isEmpty(v) ? "Position is required." : null),
     department: (v: string) => (isEmpty(v) ? "Department is required." : null),
   };
 
   const buildInitialErrors = (): Record<string, string | null> => ({
-    // system_id removed from required validation
     date_hired: validate.date_hired(date_hired),
     employment_status: validate.employment_status(employment_status),
     location: validate.location(location || ""),
@@ -140,7 +195,6 @@ export default function EmploymentDetailsForm({
           defaultValue={s(system_id)}
           onChange={() => {}}
           error={null}
-          // no `required`
           readOnly
           disabled
         />
@@ -168,18 +222,39 @@ export default function EmploymentDetailsForm({
             placeholder="MM/DD/YYYY"
             className={[
               "w-full rounded-md bg-white px-3 py-2 text-sm",
-              errors["date_hired"] ? "border border-red-500 focus:border-red-500" : "border border-gray-300 focus:border-[#355fd0]",
+              errors["date_hired"]
+                ? "border border-red-500 focus:border-red-500"
+                : "border border-gray-300 focus:border-[#355fd0]",
             ].join(" ")}
           />
-          <p className={`mt-1 text-xs ${errors["date_hired"] ? "text-red-600" : "text-transparent"}`}>
+          <p
+            className={`mt-1 text-xs ${
+              errors["date_hired"] ? "text-red-600" : "text-transparent"
+            }`}
+          >
             {errors["date_hired"] || "placeholder"}
           </p>
         </div>
 
-        <LabeledSelect
+        {/* Employment Status — now ADDABLE */}
+        <AddableSelect
           label="Employment Status"
-          options={STATUS_OPTIONS as unknown as string[]}
-          value={s(employment_status)}
+          options={employmentStatusOptions}
+          value={employment_status}
+          onAddOption={(newOpt) => {
+            setExtraEmploymentStatuses((opts) => {
+              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+              const merged = mergeUniq(
+                (emp?.employment_status_list as string[] | undefined) ?? [],
+                next
+              );
+              emit({ employment_status_list: merged }); // keep the list in sync (like others)
+              return next;
+            });
+            setEmploymentStatus(newOpt);
+            emit({ employment_status: newOpt });
+            setErr("employment_status", validate.employment_status(newOpt));
+          }}
           onChange={(val) => {
             setEmploymentStatus(val);
             emit({ employment_status: val });
@@ -195,7 +270,10 @@ export default function EmploymentDetailsForm({
           onAddOption={(newOpt) => {
             setExtraLocations((opts) => {
               const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
-              const merged = mergeUniq((emp?.locations_list as string[] | undefined) ?? [], next);
+              const merged = mergeUniq(
+                (emp?.locations_list as string[] | undefined) ?? [],
+                next
+              );
               emit({ locations_list: merged });
               return next;
             });
@@ -221,7 +299,10 @@ export default function EmploymentDetailsForm({
           onAddOption={(newOpt) => {
             setExtraPositions((opts) => {
               const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
-              const merged = mergeUniq((emp?.positions_list as string[] | undefined) ?? [], next);
+              const merged = mergeUniq(
+                (emp?.positions_list as string[] | undefined) ?? [],
+                next
+              );
               emit({ positions_list: merged });
               return next;
             });
@@ -244,7 +325,10 @@ export default function EmploymentDetailsForm({
           onAddOption={(newOpt) => {
             setExtraDepartments((opts) => {
               const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
-              const merged = mergeUniq((emp?.departments_list as string[] | undefined) ?? [], next);
+              const merged = mergeUniq(
+                (emp?.departments_list as string[] | undefined) ?? [],
+                next
+              );
               emit({ departments_list: merged });
               return next;
             });
@@ -291,6 +375,7 @@ export default function EmploymentDetailsForm({
           onClose={() => setShowSalaryModal(false)}
           employeeName={employeeName}
           employeeId={emp?.id as string | number}
+          onRefetch={refetch}
         />
       )}
 

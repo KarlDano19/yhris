@@ -189,6 +189,9 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
   const handleWrapperChange: React.FormEventHandler<HTMLDivElement> = useCallback((e) => {
     if (activeTab === "training") return; // training dirty comes from child
     const t = e.target as HTMLElement;
+
+    if (t.closest('[role="dialog"], [data-no-dirty]')) return;
+    
     if (
       t instanceof HTMLInputElement ||
       t instanceof HTMLSelectElement ||
@@ -264,12 +267,11 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
       await deleteTraining(params.id, id);
     }
 
-    // On success, tell the form to refetch its list and refresh employee details
+    // On success, tell the form to refetch its list
     setTrainingRefreshKey((k) => k + 1);
-    await refetch();
 
     return { ok: true };
-  }, [createTraining, updateTraining, deleteTraining, params.id, refetch]);
+  }, [createTraining, updateTraining, deleteTraining, params.id]);
 
   const saveCurrentSection = useCallback(async () => {
     const key = activeTab;
@@ -407,6 +409,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
               setSections((p) => ({ ...p, employment: { ...p.employment, dirty: true } }));
             }}
             onErrorsChange={(hasErrors) => markSectionErrors("employment", hasErrors)}
+            refetch={refetch}
           />
         );
 
@@ -415,9 +418,9 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
           <TrainingDevelopmentForm
             key={`training-${resetKey.training}`}
             employeeId={employeeDetails?.id as number | string}
-            onErrorsChange={handleTrainingErrorsChange}   // ✅ stable
-            onDirtyChange={handleTrainingDirtyChange}     // ✅ stable
-            registerCollector={setTrainingCollector}      // ✅ stable
+            onErrorsChange={handleTrainingErrorsChange}   
+            onDirtyChange={handleTrainingDirtyChange}     
+            registerCollector={setTrainingCollector}      
             refreshKey={trainingRefreshKey}
           />
         );

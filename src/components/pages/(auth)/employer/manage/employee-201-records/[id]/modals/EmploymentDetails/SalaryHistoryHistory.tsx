@@ -16,11 +16,13 @@ export default function SalaryHistoryHistory({
   entries,
   pageType = "employee201",
   onCreate,
+  onRefetch,
 }: {
   employeeId?: number | string; // if provided, we fetch with server-side pagination
   entries?: SalaryHistoryEntry[]; // optional fallback (no server pagination)
   pageType?: string;
   onCreate?: (entry: SalaryHistoryEntry) => Promise<void> | void;
+  onRefetch?: () => void | Promise<void>;
 }) {
   // -------------------- pagination state (server-driven) --------------------
   const [pageSize, setPageSize] = useState<number>(
@@ -143,6 +145,7 @@ export default function SalaryHistoryHistory({
       notify.success?.("Salary updated.");
       setShowForm(false);
       resetForm();
+      await onRefetch?.();
     } catch (err: any) {
       notify.error?.(err?.message || "Failed to update salary.");
       // optional: you could refetch() here to ensure consistency

@@ -1,4 +1,3 @@
-// ./utils/notify.tsx
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
 

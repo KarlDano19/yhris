@@ -68,4 +68,5 @@ export type Employee = {
   positions_list?: { id: number; name: string }[] | string[] | null;
   departments_list?: { id: number; name: string }[] | string[] | null;
   locations_list?: { id: number; name: string }[] | string[] | null;
+  employment_status_list?: string[] | { name: string }[] | null;
 };

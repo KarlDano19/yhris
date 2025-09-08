@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import PlacholderPicture from "@/svg/PlaceholderPicture"; // dynamic SVG
+import PlacholderPicture from "@/svg/PlaceholderPicture"; 
 import type { Employee } from "@/types/employee-201-records/employee";
 
 export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {

@@ -1,4 +1,3 @@
-// ./types/section.ts
 import type { TabKey } from "../components/EmployeeHeader";
 
 export type SectionState = {

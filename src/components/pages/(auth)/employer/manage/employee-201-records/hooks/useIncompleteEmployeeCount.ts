@@ -1,4 +1,3 @@
-// /hooks/useIncompleteEmployeeCount.ts
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { getCookie } from "cookies-next";

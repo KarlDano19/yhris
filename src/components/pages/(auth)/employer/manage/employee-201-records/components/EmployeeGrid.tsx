@@ -25,7 +25,7 @@ export default function EmployeeGrid({ employees, locked = false }: Props) {
       </div>
 
       {/* subtle grey transparent overlay that blocks interaction */}
-      {locked && (
+      {locked && employees.length > 0 && (
         <div
           className="absolute inset-0 z-30 bg-gray-400/35 backdrop-blur-[5px] pointer-events-auto cursor-not-allowed rounded-lg flex items-center justify-center"
           aria-hidden="true"

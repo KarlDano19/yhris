@@ -9,8 +9,8 @@ export type EmploymentHistoryEntry = {
   id: number;
   company: string;
   position: string;
-  start_date: string; // ISO
-  end_date: string | null; // ISO or null
+  start_date: string; 
+  end_date: string | null; 
   description?: string;
 };
 

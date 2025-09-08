@@ -1,4 +1,3 @@
-// hooks/useSectionLoader.ts
 import { useRef, useCallback } from "react";
 import type { TabKey } from "../components/EmployeeHeader";
 
@@ -12,9 +11,9 @@ type BaseSectionState = {
 
 /** Simulated fetch; replace with your real call if needed. */
 async function mockFetchSection(_key: TabKey) {
-  await new Promise<void>((resolve) =>
-    setTimeout(resolve, 600 + Math.random() * 600)
-  );
+  // await new Promise<void>((resolve) =>
+  //   setTimeout(resolve, 600 + Math.random() * 600)
+  // );
 }
 
 /**

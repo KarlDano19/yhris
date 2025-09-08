@@ -5,12 +5,12 @@ import { getCookie } from "cookies-next";
 
 export type EmployeeQuery = {
   q: string;
-  location: string;       // "ALL" | "<name>"
-  department: string;     // "ALL" | "<name>"
-  position: string;       // "ALL" | "<name>"
-  onlyIncomplete: boolean; // (not sent to API)
-  page: number;           // current_page
-  pageSize: number;       // page_size
+  location: string;       
+  department: string;     
+  position: string;       
+  onlyIncomplete: boolean;
+  page: number;           
+  pageSize: number;       
 };
 
 const DEFAULT_QUERY: EmployeeQuery = {

@@ -1,12 +1,12 @@
-// components/TrainingDevelopmentForm.tsx
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import Section from "../common/Section";
 import Field from "../common/Field";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import ConfirmModal from "../modals/ConfirmModal";
+import Pagination from "@/components/Pagination";
 import {
   useListTrainingRecords,
   type TrainingRecord,
@@ -14,35 +14,29 @@ import {
 
 /* ------------------------------- Types ------------------------------- */
 type FileAction = "keep" | "replace" | "clear";
-
 export type TrainingChangeSet = {
-  // for creations
   creates: Array<{
     training_title: string;
     date_completed: string | null;
     training_provider: string | null;
     proof_of_completion?: File | null;
   }>;
-  // for updates
   updates: Array<{
     id: number | string;
     training_title: string;
     date_completed: string | null;
     training_provider: string | null;
-    proof_of_completion?: File | null; // if replace
-    clear_file?: boolean; // if clearing
+    proof_of_completion?: File | null;
+    clear_file?: boolean;
   }>;
-  // ids to delete
   deletes: Array<number | string>;
-  // validation
   hasErrors: boolean;
 };
-
 type Row = {
-  id: string; // local
+  id: string;
   serverId?: number | string;
   title: string;
-  dateCompleted: string; // yyyy-mm-dd
+  dateCompleted: string;
   provider: string;
   file?: File | null;
   existingFileUrl?: string | null;
@@ -50,7 +44,6 @@ type Row = {
   isDirty?: boolean;
   fileAction?: FileAction;
 };
-
 type RowErrors = {
   title?: string | null;
   dateCompleted?: string | null;
@@ -58,13 +51,13 @@ type RowErrors = {
 };
 type ErrorsBag = Record<string, RowErrors>;
 
-/* ------------------------------- Utilities ------------------------------- */
+/* ------------------------------- Utils ------------------------------- */
 function cryptoRandomId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    return crypto.randomUUID();
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 const isEmpty = (v: string | null | undefined) => !v || v.trim().length === 0;
-
 function toISODateInput(value?: string | Date | null): string {
   if (!value) return "";
   const d = typeof value === "string" ? new Date(value) : value;
@@ -79,26 +72,29 @@ function toDate(iso?: string): Date | null {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? null : d;
 }
-
 function validateRow(row: Row): RowErrors {
   const errs: RowErrors = {};
   errs.title = isEmpty(row.title) ? "Training Title is required." : null;
-
   if (isEmpty(row.dateCompleted)) {
     errs.dateCompleted = "Date Completed is required.";
   } else {
     const d = toDate(row.dateCompleted);
-    if (!d) {
-      errs.dateCompleted = "Invalid date.";
-    } else {
+    if (!d) errs.dateCompleted = "Invalid date.";
+    else {
       const today = new Date();
       const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const tOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      errs.dateCompleted = dOnly > tOnly ? "Date Completed cannot be in the future." : null;
+      const tOnly = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+      errs.dateCompleted =
+        dOnly > tOnly ? "Date Completed cannot be in the future." : null;
     }
   }
-
-  errs.provider = isEmpty(row.provider) ? "Training Provider is required." : null;
+  errs.provider = isEmpty(row.provider)
+    ? "Training Provider is required."
+    : null;
   return errs;
 }
 
@@ -112,15 +108,38 @@ export default function TrainingDevelopmentForm({
 }: {
   employeeId: number | string;
   onErrorsChange?: (hasErrors: boolean) => void;
-  onDirtyChange?: (dirty: boolean) => void;                // ← tell parent when we become dirty/clean
-  registerCollector?: (fn: () => TrainingChangeSet) => void; // ← parent calls this on Save
-  refreshKey?: number;                                     // ← parent bumps to force refetch
+  onDirtyChange?: (dirty: boolean) => void;
+  registerCollector?: (fn: () => TrainingChangeSet) => void;
+  refreshKey?: number;
 }) {
-  // GET list from backend
-  const { data: listData, isLoading, error, refetch } = useListTrainingRecords(employeeId, {
+  /* ----------------------------- Pagination state ----------------------------- */
+
+  // GET list from backend (refetches automatically when page changes)
+  const {
+    data: listData,
+    isLoading,
+    error,
+    refetch,
+    setPage, 
+    setPageSize, 
+  } = useListTrainingRecords(employeeId, {
     current_page: 1,
-    page_size: 100,
+    page_size: 10, 
   });
+
+  const currentPage = listData?.current_page ?? 1;
+  const pageSize = listData?.page_size ?? 10;
+  const totalRecords = listData?.total_records ?? 0;
+  const totalPages =
+    listData?.total_pages ??
+    Math.max(1, Math.ceil((totalRecords || 0) / (pageSize || 1)));
+
+  useEffect(() => {
+    if (listData?.total_pages && currentPage > listData.total_pages) {
+      setPage(listData.total_pages);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listData?.total_pages]);
 
   // refetch when parent bumps refreshKey (after successful save)
   useEffect(() => {
@@ -131,7 +150,9 @@ export default function TrainingDevelopmentForm({
   /** Local rows and bookkeeping */
   const [rows, setRows] = useState<Row[]>([]);
   const [errorsBag, setErrorsBag] = useState<ErrorsBag>({});
-  const [deletedServerIds, setDeletedServerIds] = useState<Array<number | string>>([]);
+  const [deletedServerIds, setDeletedServerIds] = useState<
+    Array<number | string>
+  >([]);
 
   /** Confirm modal */
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -141,24 +162,29 @@ export default function TrainingDevelopmentForm({
   // seed from backend
   useEffect(() => {
     if (!listData) return;
-    const seeded: Row[] = (listData.records || []).map((r: TrainingRecord) => ([
-      r.id,
-      r.training_title,
-      toISODateInput(r.date_completed),
-      r.training_provider ?? "",
-      r.proof_of_completion ?? null,
-    ] as const)).map(([id, title, dateCompleted, provider, url]) => ({
-      id: cryptoRandomId(),
-      serverId: id,
-      title,
-      dateCompleted,
-      provider,
-      file: null,
-      existingFileUrl: url,
-      isNew: false,
-      isDirty: false,
-      fileAction: "keep",
-    }));
+    const seeded: Row[] = (listData.records || [])
+      .map(
+        (r: TrainingRecord) =>
+          [
+            r.id,
+            r.training_title,
+            toISODateInput(r.date_completed),
+            r.training_provider ?? "",
+            r.proof_of_completion ?? null,
+          ] as const
+      )
+      .map(([id, title, dateCompleted, provider, url]) => ({
+        id: cryptoRandomId(),
+        serverId: id,
+        title,
+        dateCompleted,
+        provider,
+        file: null,
+        existingFileUrl: url,
+        isNew: false,
+        isDirty: false,
+        fileAction: "keep",
+      }));
     setRows(seeded);
     const bag: ErrorsBag = {};
     for (const row of seeded) bag[row.id] = validateRow(row);
@@ -166,10 +192,13 @@ export default function TrainingDevelopmentForm({
     setDeletedServerIds([]);
     onDirtyChange?.(false);
   }, [listData, onDirtyChange]);
-
+  
   // errors aggregate
   const hasErrors = useMemo(
-    () => Object.values(errorsBag).some((e) => !!(e?.title || e?.dateCompleted || e?.provider)),
+    () =>
+      Object.values(errorsBag).some(
+        (e) => !!(e?.title || e?.dateCompleted || e?.provider)
+      ),
     [errorsBag]
   );
   useEffect(() => onErrorsChange?.(hasErrors), [hasErrors, onErrorsChange]);
@@ -189,7 +218,9 @@ export default function TrainingDevelopmentForm({
   const updateRow = useCallback(
     (id: string, patch: Partial<Row>) => {
       setRows((prev) => {
-        const next = prev.map((r) => (r.id === id ? { ...r, ...patch, isDirty: true } : r));
+        const next = prev.map((r) =>
+          r.id === id ? { ...r, ...patch, isDirty: true } : r
+        );
         const changed = next.find((r) => r.id === id)!;
         touchValidate(changed);
         return next;
@@ -216,7 +247,9 @@ export default function TrainingDevelopmentForm({
 
   const queueDelete = useCallback((row: Row) => {
     if (row.serverId != null) {
-      setDeletedServerIds((prev) => (prev.includes(row.serverId!) ? prev : [...prev, row.serverId!]));
+      setDeletedServerIds((prev) =>
+        prev.includes(row.serverId!) ? prev : [...prev, row.serverId!]
+      );
     }
     setRows((prev) => prev.filter((r) => r.id !== row.id));
     setErrorsBag((prev) => {
@@ -248,13 +281,14 @@ export default function TrainingDevelopmentForm({
     setConfirmRowId(null);
   };
 
-  /* ------------------------------ Collector ------------------------------ */
+  /* ------------------------------- Collector ------------------------------- */
   const collect = useCallback<() => TrainingChangeSet>(() => {
-    // validate before returning
     const bag: ErrorsBag = {};
     for (const r of rows) bag[r.id] = validateRow(r);
     setErrorsBag(bag);
-    const anyErrors = Object.values(bag).some((e) => !!(e.title || e.dateCompleted || e.provider));
+    const anyErrors = Object.values(bag).some(
+      (e) => !!(e.title || e.dateCompleted || e.provider)
+    );
 
     const creates = rows
       .filter((r) => r.isNew)
@@ -274,17 +308,17 @@ export default function TrainingDevelopmentForm({
           training_title: r.title,
           date_completed: r.dateCompleted || null,
           training_provider: r.provider || "",
-          ...(r.fileAction === "replace" ? { proof_of_completion: r.file ?? null } : {}),
+          ...(r.fileAction === "replace"
+            ? { proof_of_completion: r.file ?? null }
+            : {}),
           ...(clear ? { clear_file: true } : {}),
         };
       });
 
     const deletes = [...deletedServerIds];
-
     return { creates, updates, deletes, hasErrors: anyErrors };
   }, [rows, deletedServerIds]);
 
-  // give the parent our collector
   useEffect(() => {
     registerCollector?.(collect);
   }, [collect, registerCollector]);
@@ -294,7 +328,9 @@ export default function TrainingDevelopmentForm({
     <Section>
       {/* Header (no Save button here) */}
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-slate-700">Completed Trainings</h3>
+        <h3 className="text-sm font-medium text-slate-700">
+          Completed Trainings
+        </h3>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -309,7 +345,13 @@ export default function TrainingDevelopmentForm({
 
       {/* Loading / Error / Empty */}
       {isLoading && (
-        <div className="rounded-xl border bg-white p-6 text-sm text-gray-600">Loading…</div>
+        <div className="space-y-6 animate-pulse">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="h-10 w-full rounded-md bg-gray-200" />
+            ))}
+          </div>
+        </div>
       )}
       {error && !isLoading && (
         <div className="rounded-xl border bg-white p-6 text-sm text-red-600">
@@ -318,16 +360,17 @@ export default function TrainingDevelopmentForm({
       )}
       {!isLoading && !error && rows.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
-          <p className="text-sm">No trainings yet. Click “Add Training” to get started.</p>
+          <p className="text-sm">
+            No trainings yet. Click “Add Training” to get started.
+          </p>
         </div>
       )}
 
       {/* Rows */}
-      {rows.map((row) => {
+      {!isLoading && rows.map((row) => {
         const rowErr = errorsBag[row.id] ?? {};
-        // ✅ Treat server file as "present" only when we're keeping it.
-        const hasServerFile = !!row.existingFileUrl && row.fileAction === "keep";
-
+        const hasServerFile =
+          !!row.existingFileUrl && row.fileAction === "keep";
         return (
           <div key={row.id} className="mb-5">
             <div className="relative rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -363,10 +406,14 @@ export default function TrainingDevelopmentForm({
                       id={`training-date-${row.id}`}
                       selected={toDate(row.dateCompleted)}
                       pickerOnChange={(d: Date | null) =>
-                        updateRow(row.id, { dateCompleted: d ? toISODateInput(d) : "" })
+                        updateRow(row.id, {
+                          dateCompleted: d ? toISODateInput(d) : "",
+                        })
                       }
                       inputOnChange={(d: Date | null) =>
-                        updateRow(row.id, { dateCompleted: d ? toISODateInput(d) : "" })
+                        updateRow(row.id, {
+                          dateCompleted: d ? toISODateInput(d) : "",
+                        })
                       }
                       placeholder="MM/DD/YYYY"
                       className={[
@@ -377,7 +424,11 @@ export default function TrainingDevelopmentForm({
                       ].join(" ")}
                     />
                   </div>
-                  <p className={`mt-1 text-xs ${rowErr.dateCompleted ? "text-red-600" : "text-transparent"}`}>
+                  <p
+                    className={`mt-1 text-xs ${
+                      rowErr.dateCompleted ? "text-red-600" : "text-transparent"
+                    }`}
+                  >
                     {rowErr.dateCompleted || "placeholder"}
                   </p>
                 </div>
@@ -386,7 +437,9 @@ export default function TrainingDevelopmentForm({
                   label="Training Provider"
                   placeholder="Enter Training Provider..."
                   value={row.provider}
-                  onChange={(e) => updateRow(row.id, { provider: e.target.value })}
+                  onChange={(e) =>
+                    updateRow(row.id, { provider: e.target.value })
+                  }
                   error={rowErr.provider ?? null}
                   required
                 />
@@ -397,7 +450,6 @@ export default function TrainingDevelopmentForm({
                     Proof of Completion (e.g., Certificate)
                   </label>
 
-                  {/* Existing server file (only when keeping) */}
                   {hasServerFile && (
                     <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
                       <a
@@ -412,7 +464,10 @@ export default function TrainingDevelopmentForm({
                         <button
                           type="button"
                           onClick={() =>
-                            updateRow(row.id, { fileAction: "clear", file: null })
+                            updateRow(row.id, {
+                              fileAction: "clear",
+                              file: null,
+                            })
                           }
                           className="text-xs text-red-600 hover:underline"
                         >
@@ -427,7 +482,9 @@ export default function TrainingDevelopmentForm({
                             onChange={(e) =>
                               updateRow(row.id, {
                                 file: e.target.files?.[0] ?? null,
-                                fileAction: e.target.files?.[0] ? "replace" : "keep",
+                                fileAction: e.target.files?.[0]
+                                  ? "replace"
+                                  : "keep",
                               })
                             }
                           />
@@ -436,14 +493,14 @@ export default function TrainingDevelopmentForm({
                     </div>
                   )}
 
-                  {/* If we cleared the server file, show a note */}
-                  {!hasServerFile && row.fileAction === "clear" && row.existingFileUrl && (
-                    <div className="mb-2 text-xs text-orange-600">
-                      File will be removed on Save.
-                    </div>
-                  )}
+                  {!hasServerFile &&
+                    row.fileAction === "clear" &&
+                    row.existingFileUrl && (
+                      <div className="mb-2 text-xs text-orange-600">
+                        File will be removed on Save.
+                      </div>
+                    )}
 
-                  {/* New/replace file chooser when not keeping the server file */}
                   {!hasServerFile && (
                     <>
                       {row.file ? (
@@ -454,7 +511,9 @@ export default function TrainingDevelopmentForm({
                             onClick={() =>
                               updateRow(row.id, {
                                 file: null,
-                                fileAction: row.existingFileUrl ? "clear" : "keep",
+                                fileAction: row.existingFileUrl
+                                  ? "clear"
+                                  : "keep",
                               })
                             }
                             className="text-xs text-red-600 hover:underline"
@@ -469,7 +528,11 @@ export default function TrainingDevelopmentForm({
                           onChange={(e) =>
                             updateRow(row.id, {
                               file: e.target.files?.[0] ?? null,
-                              fileAction: e.target.files?.[0] ? "replace" : (row.existingFileUrl ? "clear" : "keep"),
+                              fileAction: e.target.files?.[0]
+                                ? "replace"
+                                : row.existingFileUrl
+                                ? "clear"
+                                : "keep",
                             })
                           }
                           className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
@@ -478,7 +541,6 @@ export default function TrainingDevelopmentForm({
                     </>
                   )}
 
-                  {/* reserved helper line for grid alignment */}
                   <p className="mt-1 text-xs text-transparent">placeholder</p>
                 </div>
               </div>
@@ -486,6 +548,16 @@ export default function TrainingDevelopmentForm({
           </div>
         );
       })}
+
+      {/* Pagination footer */}
+      <Pagination
+        pagination={{ totalPages, totalRecords }}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        onPageSizeChange={(size: number) => setPageSize(size)} // 👈 calls hook
+        onPageChange={({ selected }) => setPage(selected + 1)} // 👈 calls hook
+        pageType="standard" // or whatever your component expects
+      />
 
       {/* Confirm modal */}
       {confirmOpen && (

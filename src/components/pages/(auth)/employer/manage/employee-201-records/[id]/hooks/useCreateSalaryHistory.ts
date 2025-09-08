@@ -22,11 +22,8 @@ export type CreateResult<T = unknown> =
   | { ok: false; error: Error; status?: number };
 
 type UseCreateSalaryHistoryOptions = {
-  /** Include Authorization header with cookie token (default: true) */
   withTokenHeader?: boolean;
-  /** Extra headers (merged after defaults) */
   headers?: Record<string, string>;
-  /** fetch credentials mode (e.g. "include") */
   credentials?: RequestCredentials;
 };
 
@@ -126,7 +123,6 @@ export function useCreateSalaryHistory(
           throw new Error(msg || `HTTP ${res.status}`);
         }
 
-        // response can be serializer object (recommended)
         let dataObj: any = {};
         try {
           dataObj = await res.json();

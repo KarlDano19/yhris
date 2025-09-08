@@ -1,4 +1,3 @@
-// hooks/useEmploymentDetailsPatch.ts
 "use client";
 
 import { useCallback, useState } from "react";
@@ -57,7 +56,7 @@ export function useEmploymentDetailsPatch(employeeId?: string) {
         try {
           data = await res.json();
         } catch {
-          data = payload; // some PATCH endpoints return no body
+          data = payload; 
         }
 
         setIsSaving(false);

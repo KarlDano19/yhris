@@ -1,4 +1,3 @@
-// ./utils/labelForTab.ts
 import type { TabKey } from "../components/EmployeeHeader";
 
 export function labelForTab(key: TabKey) {

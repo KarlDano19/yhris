@@ -9,6 +9,7 @@ type Props = {
   onClose: () => void;
   employeeName: string;
   employeeId: number | string;
+  onRefetch?: () => void | Promise<void>;
 };
 
 export default function SalaryHistoryModal({
@@ -16,6 +17,7 @@ export default function SalaryHistoryModal({
   onClose,
   employeeName,
   employeeId,
+  onRefetch,
 }: Props) {
   const [tab, setTab] = useState<"history" | "analysis">("history");
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -28,6 +30,7 @@ export default function SalaryHistoryModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="salary-history-title"
+      data-no-dirty // 👈 marker for parent
     >
       <div
         ref={dialogRef}
@@ -62,7 +65,7 @@ export default function SalaryHistoryModal({
         {/* Content */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           {tab === "history" ? (
-            <SalaryHistoryHistory employeeId={employeeId} />
+            <SalaryHistoryHistory employeeId={employeeId} onRefetch={onRefetch}/>
           ) : (
             // We'll wire the analysis API next; for now, render an empty state
             <SalaryHistoryAnalysis

@@ -9,12 +9,11 @@ import { s } from "../utils/_shared";
 
 type Props = {
   emp?: Partial<Employee>;
-  onPatchChange?: (patch: Record<string, any>) => void; // emits API-shaped keys
+  onPatchChange?: (patch: Record<string, any>) => void; 
   onErrorsChange?: (hasErrors: boolean) => void;
 };
 
 export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }: Props) {
-  // top-level (API keys)
   const [firstname, setFirstname] = useState(s(emp?.firstname));
   const [middlename, setMiddlename] = useState(s(emp?.middlename));
   const [lastname,   setLastname]   = useState(s(emp?.lastname));
@@ -22,13 +21,13 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
   const [address,    setAddress]    = useState(s(emp?.address));
   const [mobile,     setMobile]     = useState(s(emp?.mobile));
 
-  // government ids (API top-level)
+  // government ids
   const [tin,        setTin]        = useState(s(emp?.tin));
   const [sss,        setSss]        = useState(s(emp?.sss));
   const [pagibig,    setPagibig]    = useState(s(emp?.pagibig));
   const [philhealth, setPhilhealth] = useState(s(emp?.philhealth));
 
-  // emergency contact (API nested)
+  // emergency contact
   const [ecName,     setEcName]     = useState(s(emp?.emergency_contact?.name));
   const [ecRelation, setEcRelation] = useState(s(emp?.emergency_contact?.relation));
   const [ecContact,  setEcContact]  = useState(s(emp?.emergency_contact?.contact_number));

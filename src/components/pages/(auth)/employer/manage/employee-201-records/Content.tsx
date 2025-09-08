@@ -14,33 +14,43 @@ import { useEmployees } from "./hooks/useEmployees";
 export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [q, setQ] = useState("");
 
-  // hook now controls search, filters, AND pagination
+  // Stable initial options (no 'q' here; search is driven via setSearch)
+  const baseOpts = useMemo(
+    () => ({
+      location: "ALL",
+      department: "ALL",
+      position: "ALL",
+      onlyIncomplete: false,
+      page: 1,
+      pageSize: 12,
+    }),
+    []
+  );
+
   const {
     data,
     meta,
     isLoading,
     error,
     refetch,
-    query,
-    setSearch,
-    applyFilters,
+    query,         // includes current q/page/pageSize/etc managed by the hook
+    setSearch,     // drive search term here (debounced below)
+    applyFilters,  // updates filters + resets page inside the hook
     setPage,
     setPageSize,
-  } = useEmployees({
-    q,
-    location: "ALL",
-    department: "ALL",
-    position: "ALL",
-    onlyIncomplete: false,
-    page: 1,
-    pageSize: 12,
-  });
+  } = useEmployees(baseOpts);
 
-  // debounce search
+  // Debounce search → setSearch, skip first run (initial fetch already happened)
+  const didInit = useRef(false);
   useEffect(() => {
-    const t = setTimeout(() => setSearch(q), 300);
+    if (!didInit.current) { didInit.current = true; return; }
+
+    const t = setTimeout(() => {
+      if (q !== (query.q ?? "")) setSearch(q);
+    }, 300);
+
     return () => clearTimeout(t);
-  }, [q, setSearch]);
+  }, [q, setSearch, query.q]);
 
   // filter popover plumbing
   const [showFilter, setShowFilter] = useState(false);
@@ -66,7 +76,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         <h2 className="text-xl font-bold text-indigo-dye">Employee 201 Records</h2>
       </div>
 
-
       {/* actions */}
       <div className="mt-6 px-2 md:px-8 lg:px-4 flex items-center gap-3">
         <SearchBar value={q} onChange={setQ} />
@@ -82,7 +91,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               onlyIncomplete: query.onlyIncomplete,
             }}
             onApply={(vals) => {
-              applyFilters(vals);  // triggers API + resets to page 1 inside hook
+              // triggers API + resets to page 1 inside the hook
+              applyFilters(vals);
             }}
           />
         </div>
@@ -94,7 +104,10 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           <SkeletonGrid />
         ) : error ? (
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700 text-sm">
-            Failed to load employees. <button className="underline" onClick={() => refetch()}>Retry</button>
+            Failed to load employees.{" "}
+            <button className="underline" onClick={() => refetch()}>
+              Retry
+            </button>
           </div>
         ) : (
           <EmployeeGrid locked={!hasActiveSubscription} employees={data ?? []} />
@@ -108,15 +121,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
       {/* footer */}
       <div className="px-2 md:px-8 lg:px-4 mt-8 mb-12">
-            <Pagination
-              pagination={{ totalPages: meta.totalPages, totalRecords: meta.total }}
-              currentPage={query.page}                     // 1-based
-              pageSize={query.pageSize}
-              onPageSizeChange={(n) => setPageSize(n)}     // triggers your hook + resets to page 1
-              onPageChange={({ selected }) => setPage(selected + 1)} // react-paginate is 0-based
-              pageType="employee201" // optional, if you want custom page-size buckets
-            />
-          </div>
+        <Pagination
+          pagination={{ totalPages: meta?.totalPages ?? 1, totalRecords: meta?.total ?? 0 }}
+          currentPage={query.page}
+          pageSize={query.pageSize}
+          onPageSizeChange={(n: number) => setPageSize(n)}
+          onPageChange={({ selected }) => setPage(selected + 1)}
+          pageType="employee201"
+        />
+      </div>
     </div>
   );
 }

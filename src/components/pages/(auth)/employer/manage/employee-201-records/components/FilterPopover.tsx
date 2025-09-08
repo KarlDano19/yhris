@@ -5,7 +5,7 @@ import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 
 type FilterValues = {
-  location: string;     // "ALL" | "Unspecified" | "<id as string>"
+  location: string;   
   department: string;
   position: string;
   onlyIncomplete: boolean;
@@ -26,7 +26,6 @@ const toOptions = (items?: ApiItem[], includeUnspecified = false): Option[] => {
   const dynamic: Option[] = (items ?? [])
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
-    // 👇 use name for both value & label
     .map((it) => ({ value: it.name, label: it.name }));
   const tail: Option[] = includeUnspecified
     ? [{ value: "Unspecified", label: "Unspecified" }]
@@ -207,7 +206,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
               </button>
               <button
                 onClick={() => {
-                  onApply(draft); // "ALL" | "Unspecified" | "<id>"
+                  onApply(draft); 
                   onOpenChange(false);
                 }}
                 className="rounded-lg bg-[#355fd0] px-5 py-1.5 sm:px-6 sm:py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-60"
