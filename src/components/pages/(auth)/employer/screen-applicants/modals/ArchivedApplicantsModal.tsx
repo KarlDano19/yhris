@@ -6,6 +6,7 @@ import ArchiveButton from '../ArchiveButton';
 import { ApplicantType } from '../types';
 import RestoreApplicationModal from './RestoreApplicationModal';
 import useArchiveApplication from '../hooks/useArchiveApplication';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 interface ArchivedApplicantsModalProps {
   isOpen: boolean;
@@ -17,6 +18,37 @@ interface ArchivedApplicantsModalProps {
   refreshTrigger?: number;
   onRefreshComplete?: () => void;
 }
+
+const ApplicantAvatar = ({ applicant, size = 40 }: { applicant: any; size?: number }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const hasValidImage = applicant.applicant?.photo_url && 
+    applicant.applicant.photo_url.trim() !== '' && 
+    !imageError;
+
+  if (!hasValidImage) {
+    return (
+      <PlaceholderAvatar
+        width={size}
+        height={size}
+        firstName={applicant.applicant?.firstname || ''}
+        lastName={applicant.applicant?.lastname || ''}
+        className='flex-shrink-0'
+      />
+    );
+  }
+
+  return (
+    <img
+      src={applicant.applicant.photo_url}
+      alt={`${applicant.applicant?.firstname} ${applicant.applicant?.lastname}` || 'Applicant'}
+      width={size}
+      height={size}
+      className='w-full h-full rounded-full object-cover flex-shrink-0'
+      onError={() => setImageError(true)}
+    />
+  );
+};
 
 const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   isOpen,
@@ -325,18 +357,8 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
               onChange={() => handleSelectApplicant(applicant.id)}
               className="h-4 w-4 mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-              {applicant.applicant?.photo_url && applicant.applicant.photo_url !== 'http://localhost:8000/static/assets/no-photo.png' ? (
-                <img
-                  src={applicant.applicant.photo_url}
-                  alt="Applicant"
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-gray-600 font-medium">
-                  {applicant.applicant?.firstname?.charAt(0) || 'A'}
-                </span>
-              )}
+            <div className="w-10 h-10 overflow-hidden rounded-full">
+              <ApplicantAvatar applicant={applicant} size={40} />
             </div>
           </div>
           <div>
