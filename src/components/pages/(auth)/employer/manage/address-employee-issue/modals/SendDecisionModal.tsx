@@ -629,7 +629,7 @@ export default function SendDecisionModal({
         onConfirm={handleUnsavedChangesConfirm}
         isLoading={false}
         isSwitchingEmployee={false}
-        contentType="decision"
+        contentType="email"
       />
     </>
   );
