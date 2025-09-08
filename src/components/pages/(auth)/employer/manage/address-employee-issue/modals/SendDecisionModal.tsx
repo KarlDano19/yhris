@@ -8,12 +8,12 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from './UnsavedChangesModal';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
-import UnsavedChangesModal from './UnsavedChangesModal';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
