@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
-import UnsavedChangesModal from './UnsavedChangesModal';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import useAddInvestigationReportItems from '../hooks/useAddInvestigationReportItems';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
