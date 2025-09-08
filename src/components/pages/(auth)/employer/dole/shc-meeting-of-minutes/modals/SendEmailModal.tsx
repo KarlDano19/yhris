@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
@@ -58,13 +59,15 @@ export default function SendEmailModal({
     const cancelButtonRef = useRef(null);
     const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
     const [employeeEmail, setEmployeeEmail] = useState<string | null>(null);
-    const [isCCOpen, setIsCCOPen] = useState(false);
+    const [isCCOpen, setIsCCOpen] = useState(false);
     const [isBCCOpen, setIsBCCOpen] = useState(false);
     const [inputTo, setInputTo] = useState('');
     const [inputCc, setInputCc] = useState('');
     const [inputBcc, setInputBcc] = useState('');
     const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
     const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
+    const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+    const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
     const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
     const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
     const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
@@ -89,6 +92,70 @@ export default function SendEmailModal({
     // Add state for attachment
     const [attachment, setAttachment] = useState<File | null>(null);
     const [attachmentExist, setAttachmentExist] = useState(false);
+
+    // Function to check if there are unsaved changes
+    const hasUnsavedChanges = () => {
+        const formData = watch();
+        // Check if tagsTo has any recipients
+        const hasRecipients = tagsTo.length > 0;
+        
+        return (
+            (formData.template && formData.template !== '') ||
+            (formData.subject && formData.subject.trim() !== '') ||
+            hasRecipients ||
+            (tagsCc.length > 0) ||
+            (tagsBcc.length > 0) ||
+            (formData.message && !isHtmlEmpty(formData.message)) ||
+            attachment !== null
+        );
+    };
+
+    // Function to handle confirmation modal close (cancel)
+    const handleUnsavedChangesCancel = () => {
+        setIsUnsavedChangesModalOpen(false);
+        setPendingCloseAction(null);
+    };
+
+    // Function to handle confirmation modal confirm (proceed with close)
+    const handleUnsavedChangesConfirm = () => {
+        setIsUnsavedChangesModalOpen(false);
+        const action = pendingCloseAction;
+        setPendingCloseAction(null);
+        
+        // Execute the pending close action
+        if (action) {
+            action();
+        }
+    };
+
+    // Function to reset all form data
+    const resetFormData = () => {
+        setValue('template', '');
+        setValue('subject', '');
+        setValue('message', '');
+        setTagsTo([]);
+        setTagsCc([]);
+        setTagsBcc([]);
+        setInputTo('');
+        setInputCc('');
+        setInputBcc('');
+        setIsCCOpen(false);
+        setIsBCCOpen(false);
+        setAttachment(null);
+        setAttachmentExist(false);
+        setShowEmployeeSuggestions(false);
+        setFilteredEmployees([]);
+    };
+
+    // Function to handle modal close with unsaved changes check
+    const handleModalClose = (closeAction: () => void) => {
+        if (hasUnsavedChanges()) {
+            setPendingCloseAction(() => closeAction);
+            setIsUnsavedChangesModalOpen(true);
+        } else {
+            closeAction();
+        }
+    };
 
     // Get filename from attachment URL
     const getFilenameFromUrl = (url: string) => {
@@ -151,7 +218,7 @@ export default function SendEmailModal({
                     setTagsBcc(template.bcc);
                 }
                 if (template.cc) {
-                    setIsCCOPen(true);
+                    setIsCCOpen(true);
                     setTagsCc(template.cc);
                 }
                 setValue('message', template.body);
@@ -266,11 +333,11 @@ export default function SendEmailModal({
 
         const callbackReq = {
             onSuccess: () => {
+                // Reset form data before closing modal to prevent unsaved changes detection
+                resetFormData();
+                reset();
                 setIsOpen({ id: 0, open: false });
                 refetch();
-                // Clear attachment state after successful send
-                setAttachment(null);
-                setAttachmentExist(false);
                 toast.custom(() => <CustomToast message={'Successfully sent email.'} type='success' />, {
                     duration: 5000,
                   });
@@ -283,17 +350,15 @@ export default function SendEmailModal({
     });
 
     const customCloseModal = () => {
-      // Reset form state
-      reset();
-      setAttachment(null);
-      setAttachmentExist(false);
-      setInputTo('');
-      setShowEmployeeSuggestions(false);
-      setFilteredEmployees([]);
-      
-      // Close the modal
-      setIsOpen({ id: 0, open: false });
-  };
+        handleModalClose(() => {
+            // Reset form state
+            resetFormData();
+            reset();
+            
+            // Close the modal
+            setIsOpen({ id: 0, open: false });
+        });
+    };
 
     return (
         <>
@@ -371,7 +436,7 @@ export default function SendEmailModal({
                                             setTagsBcc(template.bcc);
                                         }
                                         if (template.cc) {
-                                            setIsCCOPen(true);
+                                            setIsCCOpen(true);
                                             setTagsCc(template.cc);
                                         }
                                         setValue('message', template.body);
@@ -487,7 +552,7 @@ export default function SendEmailModal({
                                 className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
                                   isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                                 }`}
-                                onClick={() => setIsCCOPen(!isCCOpen)}
+                                onClick={() => setIsCCOpen(!isCCOpen)}
                               >
                                 CC
                               </button>
@@ -733,6 +798,18 @@ export default function SendEmailModal({
               </div>
             </Dialog>
           </Transition.Root>
+          
+          {/* Unsaved Changes Confirmation Modal */}
+          {isUnsavedChangesModalOpen && (
+            <UnsavedChangesModal
+              isOpen={isUnsavedChangesModalOpen}
+              onClose={handleUnsavedChangesCancel}
+              onConfirm={handleUnsavedChangesConfirm}
+              isLoading={false}
+              isSwitchingEmployee={false}
+              contentType="email"
+            />
+          )}
         </>
       );
 }
