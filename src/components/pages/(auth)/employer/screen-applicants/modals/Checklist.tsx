@@ -1,6 +1,7 @@
 import { ChangeEvent, ChangeEventHandler, FormEventHandler, useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import ModalLayout from './ModalLayout';
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import StateContext from '../contexts/StateContext';
@@ -54,6 +55,8 @@ export default function Checklist({
   const [isOpen, setIsOpen] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [activeTab, setActiveTab] = useState<number | null>(null);
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
   let applicant: ApplicantType | undefined;
@@ -76,6 +79,55 @@ export default function Checklist({
     .sort((a, b) => a.orderBy - b.orderBy);
 
   const currentStatus = watch('status');
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const formData = getValues();
+    const originalStatus = applicant?.status;
+    const originalStageNotes = applicant?.stage_notes?.find((note) => note.job_stage === actionState.stageId)?.notes || '';
+    
+    return (
+      (formData.status && formData.status !== originalStatus) ||
+      (currentStageNotes.trim() !== originalStageNotes.trim()) ||
+      (checks.length > 0)
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    setValue('status', applicant?.status || '');
+    setChecks([]);
+    setCurrentStageNotes('');
+    setActiveTab(actionState.stageId);
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   // Set the initial status based on the applicant's screening fit
   useEffect(() => {
@@ -122,8 +174,11 @@ export default function Checklist({
   }, [applicant?.stage_notes, actionState.stageId]);
 
   const handleClose = () => {
-    setIsOpen(false);
-    setTimeout(() => setActionState(initialActionState), 400);
+    handleModalClose(() => {
+      resetFormData();
+      setIsOpen(false);
+      setTimeout(() => setActionState(initialActionState), 400);
+    });
   };
 
   const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
@@ -139,6 +194,8 @@ export default function Checklist({
     // Check if applicant is being marked as "Hired" (passed status in final stage)
     const isBeingHired = data.status === 'passed' && actionState.isFinalStage;
 
+    // Reset form data before closing modal to prevent unsaved changes detection
+    resetFormData();
     setIsOpen(false);
 
     if (isBeingHired && !hasActiveSubscription) {
@@ -320,6 +377,16 @@ export default function Checklist({
       {!hasActiveSubscription && (
         <ScreenApplicantGoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handlePremiumModalClose} />
       )}
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      <UnsavedChangesModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={handleUnsavedChangesCancel}
+        onConfirm={handleUnsavedChangesConfirm}
+        isLoading={false}
+        isSwitchingEmployee={false}
+        contentType="checklist"
+      />
     </>
   );
 }
