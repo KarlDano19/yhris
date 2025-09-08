@@ -66,7 +66,6 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
           }
         }, {
           onSuccess: (data: any) => {
-            console.log('Batch unarchive success:', data);
             setRestoreInProgress(false);
             setSelectedStageId(null);
             if (onSuccess) {

@@ -34,7 +34,6 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
   const handleArchive = () => {
     const callBackReq = {
       onSuccess: (data: any) => {
-        console.log('Archive success:', data);
         if (onSuccess) {
           onSuccess();
         }
@@ -51,7 +50,6 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
   const handleUnarchive = (fallbackStageId: number) => {
     const callBackReq = {
       onSuccess: (data: any) => {
-        console.log('Unarchive success:', data);
         setShowRestoreModal(false);
         if (onSuccess) {
           onSuccess();

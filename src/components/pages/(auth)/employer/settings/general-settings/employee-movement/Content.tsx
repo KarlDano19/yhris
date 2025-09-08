@@ -119,7 +119,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         });
       },
     };
-    console.log(submissionData);
     addApproval(submissionData, callbackReq);
   });
 
