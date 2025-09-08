@@ -1,22 +1,19 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { XMarkIcon, ArchiveBoxIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import ModalLayout from './ModalLayout';
-import useGetArchivedApplicants from '../hooks/useGetArchivedApplicants';
-import ArchiveButton from '../ArchiveButton';
-import { ApplicantType } from '../types';
-import RestoreApplicationModal from './RestoreApplicationModal';
-import useArchiveApplication from '../hooks/useArchiveApplication';
+import React, { useState, useCallback } from 'react';
+
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+import ModalLayout from './ModalLayout';
+import ArchiveButton from '../ArchiveButton';
+import RestoreApplicationModal from './RestoreApplicationModal';
+import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';
+
+import { ArchiveBoxIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 interface ArchivedApplicantsModalProps {
   isOpen: boolean;
   handleClose: () => void;
   jobPostingId: string;
+  archivedApplicants?: any[];
   onUnarchive?: () => void;
-  // Add these new props for better communication
-  forceRefresh?: boolean;
-  refreshTrigger?: number;
-  onRefreshComplete?: () => void;
 }
 
 const ApplicantAvatar = ({ applicant, size = 40 }: { applicant: any; size?: number }) => {
@@ -54,30 +51,15 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   isOpen,
   handleClose,
   jobPostingId,
-  onUnarchive,
-  forceRefresh = false,
-  refreshTrigger = 0,
-  onRefreshComplete
+  archivedApplicants = [],
+  onUnarchive
 }) => {
-  const {
-    data: archivedApplicants,
-    isLoading: isArchivedApplicantsLoading,
-    refetch: archivedApplicantsRefetch,
-  } = useGetArchivedApplicants(jobPostingId);
   
   const [activeTab, setActiveTab] = useState<'rejected' | 'withdrawn'>('rejected');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplicants, setSelectedApplicants] = useState<number[]>([]);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [forceUpdate, setForceUpdate] = useState(0);
-  const { unarchiveBatch, isUnarchiving } = useArchiveApplication();
-
-  // Refs for tracking data changes
-  const previousDataRef = useRef<any>(null);
-  const lastUpdateTimeRef = useRef<number>(0);
-  const previousForceRefreshRef = useRef<boolean>(false);
-  const previousRefreshTriggerRef = useRef<number>(0);
+  const { mutate: unarchiveBatch, isLoading: isUnarchiving } = useBatchUnarchiveApplications();
 
   // Separate applications by status
   const rejectedApplicants = archivedApplicants?.filter((applicant: any) => applicant.status === 'rejected') || [];
@@ -98,167 +80,12 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
     applicant.applicant?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // ============================================================================
-  // ENHANCED AUTO-RENDERING FUNCTIONS
-  // ============================================================================
-
-  /**
-   * Force data refresh with multiple strategies
-   */
-  const forceDataRefresh = useCallback(() => {
-    // Strategy 1: Direct refetch
-    archivedApplicantsRefetch();
-    
-    // Strategy 2: Force component re-render
-    setForceUpdate(prev => prev + 1);
-    
-    // Strategy 3: Delayed refetch for reliability
-    setTimeout(() => {
-      archivedApplicantsRefetch();
-    }, 100);
-    
-    // Strategy 4: Additional delayed refetch
-    setTimeout(() => {
-      archivedApplicantsRefetch();
-    }, 300);
-    
-    // Strategy 5: Final delayed refetch
-    setTimeout(() => {
-      archivedApplicantsRefetch();
-    }, 300);
-  }, [archivedApplicantsRefetch]);
-
-  /**
-   * Detect data changes and trigger refresh
-   */
-  const detectDataChanges = useCallback(() => {
-    const currentData = archivedApplicants;
-    const previousData = previousDataRef.current;
-    
-    if (previousData && currentData) {
-      const currentLength = currentData.length;
-      const previousLength = previousData.length;
-      
-      // Check if data has changed
-      if (currentLength !== previousLength) {
-        forceDataRefresh();
-      } else {
-        // Check for status changes in individual items
-        const hasStatusChange = currentData.some((current: any, index: number) => {
-          const previous = previousData[index];
-          return previous && current.status !== previous.status;
-        });
-        
-        if (hasStatusChange) {
-          forceDataRefresh();
-        }
-      }
-    }
-    
-    // Update previous data reference
-    previousDataRef.current = currentData;
-  }, [archivedApplicants, forceDataRefresh]);
-
-  // ============================================================================
-  // EFFECTS FOR AUTO-RENDERING
-  // ============================================================================
-
-  /**
-   * Handle search completion
-   */
-  useEffect(() => {
-    if (!isArchivedApplicantsLoading && isSearching) {
-      setIsSearching(false);
-    }
-  }, [isArchivedApplicantsLoading, isSearching]);
-
-  /**
-   * Detect data changes and trigger auto-refresh
-   */
-  useEffect(() => {
-    detectDataChanges();
-  }, [detectDataChanges]);
-
-  /**
-   * Auto-refresh when modal opens
-   */
-  useEffect(() => {
-    if (isOpen) {
-      forceDataRefresh();
-    }
-  }, [isOpen, forceDataRefresh]);
-
-  /**
-   * Handle external force refresh prop
-   */
-  useEffect(() => {
-    if (forceRefresh && forceRefresh !== previousForceRefreshRef.current) {
-      previousForceRefreshRef.current = forceRefresh;
-      forceDataRefresh();
-      
-      // Notify parent that refresh is complete
-      if (onRefreshComplete) {
-        setTimeout(() => {
-          onRefreshComplete();
-        }, 1000);
-      }
-    }
-  }, [forceRefresh, forceDataRefresh, onRefreshComplete]);
-
-  /**
-   * Handle external refresh trigger prop
-   */
-  useEffect(() => {
-    if (refreshTrigger > 0 && refreshTrigger !== previousRefreshTriggerRef.current) {
-      previousRefreshTriggerRef.current = refreshTrigger;
-      forceDataRefresh();
-      
-      // Notify parent that refresh is complete
-      if (onRefreshComplete) {
-        setTimeout(() => {
-          onRefreshComplete();
-        }, 1000);
-      }
-    }
-  }, [refreshTrigger, forceDataRefresh, onRefreshComplete]);
-
-  /**
-   * Background refresh every 1 second when modal is open
-   */
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    const intervalId = setInterval(() => {
-      const now = Date.now();
-      // Only refresh if it's been at least 500ms since last update
-      if (now - lastUpdateTimeRef.current > 500) {
-        archivedApplicantsRefetch();
-        lastUpdateTimeRef.current = now;
-      }
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
-  }, [isOpen, archivedApplicantsRefetch]);
-
-  /**
-   * Force refresh when jobPostingId changes
-   */
-  useEffect(() => {
-    if (jobPostingId) {
-      forceDataRefresh();
-    }
-  }, [jobPostingId, forceDataRefresh]);
 
   // ============================================================================
   // EVENT HANDLERS
   // ============================================================================
 
   const handleUnarchive = useCallback(() => {
-    lastUpdateTimeRef.current = Date.now();
-    
-    // Multiple refresh strategies
-    forceDataRefresh();
-    
     // Call the parent callback to refresh the main applicants list
     if (onUnarchive) {
       onUnarchive();
@@ -266,12 +93,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
     
     // Clear selection after successful unarchive
     setSelectedApplicants([]);
-  }, [forceDataRefresh, onUnarchive]);
-
-  const handleSearch = useCallback(() => {
-    setIsSearching(true);
-    forceDataRefresh();
-  }, [forceDataRefresh]);
+  }, [onUnarchive]);
 
   const handleSelectApplicant = (applicantId: number) => {
     setSelectedApplicants(prev => {
@@ -303,7 +125,6 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
     const callBackReq = {
       onSuccess: (data: any) => {
         setShowRestoreModal(false);
-        lastUpdateTimeRef.current = Date.now();
         handleUnarchive();
       },
       onError: (err: any) => {
@@ -314,7 +135,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
       }
     };
     
-    unarchiveBatch(selectedApplicants, fallbackStageId, callBackReq);
+    unarchiveBatch({ appliedJobIds: selectedApplicants, fallbackStageId, progressCallback: callBackReq.onProgress }, callBackReq);
   }, [selectedApplicants, unarchiveBatch, handleUnarchive]);
 
   // ============================================================================
@@ -345,7 +166,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
 
   const renderApplicantCard = (applicant: any) => (
     <div
-      key={`${applicant.id}-${forceUpdate}-${refreshTrigger}`} // Enhanced key for force re-render
+      key={applicant.id}
       className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
     >
       <div className="flex items-start justify-between">
@@ -452,7 +273,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleSearch();
+                      // Search is handled by the filter logic automatically
                     }
                   }}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -463,7 +284,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                 <button
                   onClick={() => setShowRestoreModal(true)}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  disabled={isUnarchiving || isSearching}
+                  disabled={isUnarchiving}
                 >
                   {isUnarchiving ? (
                     <span className="flex items-center">
@@ -483,12 +304,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
 
           {/* Content */}
           <div className="flex-1 overflow-hidden">
-            {isArchivedApplicantsLoading || isSearching ? (
-              <div className="flex justify-center items-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              </div>
-            ) : (
-              <div className="h-full overflow-y-auto p-6">
+            <div className="h-full overflow-y-auto p-6">
                 {activeTab === 'rejected' && (
                   <>
                     {filteredRejectedApplicants.length > 0 && (
@@ -511,7 +327,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                       <div className="text-center py-8 text-gray-500">
                         <ArchiveBoxIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                         {searchTerm ? (
-                          <p>No rejected applications found matching "{searchTerm}"</p>
+                          <p>No rejected applications found matching &quot;{searchTerm}&quot;</p>
                         ) : rejectedApplicants.length === 0 ? (
                           <p>No rejected applications found</p>
                         ) : (
@@ -548,7 +364,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                       <div className="text-center py-8 text-gray-500">
                         <ArchiveBoxIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                         {searchTerm ? (
-                          <p>No withdrawn applications found matching "{searchTerm}"</p>
+                          <p>No withdrawn applications found matching &quot;{searchTerm}&quot;</p>
                         ) : withdrawnApplicants.length === 0 ? (
                           <p>No withdrawn applications found</p>
                         ) : (
@@ -562,8 +378,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                     )}
                   </>
                 )}
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </ModalLayout>

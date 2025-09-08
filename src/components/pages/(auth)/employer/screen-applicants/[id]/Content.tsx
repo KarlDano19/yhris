@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 import { INITIAL_STATE, stageReducer } from '../reducers/stageReducer';
 import { initialActionState } from '../lib/initialActionState';
-import { ModalTypes, StageType, ApplicantType } from '../types';
+import { ModalTypes, StageType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
 import CustomToast from '@/components/CustomToast';
@@ -31,7 +31,6 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
-import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import ArchiveIcon from '@/svg/ArchiveIcon';
@@ -56,7 +55,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     isLoading: isGetJobPostDetailsLoading,
     refetch: jobPostDetailsRefetch,
   } = useGetJobPostDetails(params.id);
-  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(params.id);
+  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(params.id, false);
+  const { data: dataArchivedApplicants, refetch: archivedApplicantRefetch } = useGetAppliedApplicants(params.id, true);
   const {
     CLEAR_STAGE,
     STAGE_REQUIREMENTS,
@@ -81,50 +81,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed', 'Rejected', 'Withdrawn'],
+    status: ['Ongoing', 'Passed'],
   });
 
-  // ============================================================================
-  // FORCE RE-RENDER STATE FOR ARCHIVED MODAL
-  // ============================================================================
-  const [forceArchivedModalRefresh, setForceArchivedModalRefresh] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const lastStatusUpdateRef = useRef<number>(0);
 
   // Get screening questions and ideal answers from the job posting
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
 
-  // ============================================================================
-  // FORCE REFRESH FUNCTIONS
-  // ============================================================================
-
-  /**
-   * Force refresh the archived modal with multiple strategies
-   */
-  const forceArchivedModalRefreshTrigger = useCallback(() => {
-    const now = Date.now();
-    
-    // Strategy 1: Toggle force refresh state
-    setForceArchivedModalRefresh(prev => !prev);
-    
-    // Strategy 2: Increment refresh trigger
-    setRefreshTrigger(prev => prev + 1);
-    
-    // Strategy 3: Delayed refresh for reliability
-    setTimeout(() => {
-      setForceArchivedModalRefresh(prev => !prev);
-      setRefreshTrigger(prev => prev + 1);
-    }, 100);
-    
-    // Strategy 4: Additional delayed refresh
-    setTimeout(() => {
-      setForceArchivedModalRefresh(prev => !prev);
-      setRefreshTrigger(prev => prev + 1);
-    }, 300);
-    
-    lastStatusUpdateRef.current = now;
-  }, []);
 
   /**
    * Check if status update should trigger archived modal refresh
@@ -146,21 +110,17 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const processApplicants = (applicants: any[]) => {
     if (!screeningQuestions.length || !applicants?.length) return applicants;
 
-    return applicants.map((applicant) => {
+    // Filter out rejected and withdrawn applicants from the main list
+    const activeApplicants = applicants.filter((applicant) => 
+      applicant.status !== 'rejected' && applicant.status !== 'withdrawn'
+    );
+
+    return activeApplicants.map((applicant) => {
       // Get the applicant's screening answers
       const answers =
         applicant.applicant?.screening_answers && applicant.applicant.screening_answers !== null
           ? applicant.applicant.screening_answers
           : [];
-
-      // If applicant is rejected or withdrawn, they are automatically "Not Fit"
-      if (applicant.status === 'rejected' || applicant.status === 'withdrawn') {
-        return {
-          ...applicant,
-          screeningFit: 'bad',
-          screeningAnswers: answers,
-        };
-      }
 
       // Only check if mustHave questions match their ideal answers
       let isGoodFit = true;
@@ -312,10 +272,10 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             appliedApplicantRefetch();
             
             // ============================================================================
-            // FORCE ARCHIVED MODAL REFRESH ON STATUS UPDATE
+            // REFRESH ARCHIVED APPLICANTS ON STATUS UPDATE
             // ============================================================================
             if (shouldTriggerArchivedRefresh(data.status)) {
-              forceArchivedModalRefreshTrigger();
+              archivedApplicantRefetch();
             }
             
             // Reset actionState after successful submission to allow modal to be reopened
@@ -410,7 +370,11 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       component: <Success title={title} />,
     },
     CONFIRMATION: {
-      component: <Confirmation />,
+      component: <Confirmation onStageDeleted={() => {
+        jobPostDetailsRefetch();
+        appliedApplicantRefetch();
+        archivedApplicantRefetch();
+      }} />,
     },
     APPLICANT_FORM: {
       component: <ApplicantForm title={title} />,
@@ -468,8 +432,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     <button
                       onClick={() => {
                         setIsArchivedApplicantsModalOpen(true);
-                        // Trigger refresh when opening the modal
-                        forceArchivedModalRefreshTrigger();
                       }}
                       className="rounded-lg py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
                       title="View archived applicants"
@@ -504,13 +466,10 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         isOpen={isArchivedApplicantsModalOpen}
         handleClose={() => setIsArchivedApplicantsModalOpen(false)}
         jobPostingId={params.id as string}
-        forceRefresh={forceArchivedModalRefresh}
-        refreshTrigger={refreshTrigger}
-        onRefreshComplete={() => {
-          // Archived modal refresh completed
-        }}
+        archivedApplicants={dataArchivedApplicants}
         onUnarchive={() => {
           appliedApplicantRefetch();
+          archivedApplicantRefetch();
           setIsArchivedApplicantsModalOpen(false);
         }}
       />

@@ -1,9 +1,13 @@
 import React, { useState, Fragment, useRef } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
-import classNames from '@/helpers/classNames';
+
 import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
-import useArchiveApplication from '../hooks/useArchiveApplication';
+import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';
+
+import classNames from '@/helpers/classNames';
+
+import { XCircleIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
 
 interface RestoreApplicationModalProps {
   isOpen: boolean;
@@ -35,7 +39,7 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
   const [totalCount, setTotalCount] = useState(0);
   const cancelButtonRef = useRef(null);
   
-  const { unarchiveBatch, isUnarchiving } = useArchiveApplication();
+  const { mutate: unarchiveBatch, isLoading: isUnarchiving } = useBatchUnarchiveApplications();
 
   const availableStages = jobPostDetails?.job_stages?.filter((stage: any) => stage.is_active) || [];
 
@@ -54,7 +58,13 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
         setTotalCount(selectedApplicantIds.length);
         
         // Call the batch unarchive function
-        unarchiveBatch(selectedApplicantIds, selectedStageId, {
+        unarchiveBatch({ 
+          appliedJobIds: selectedApplicantIds, 
+          fallbackStageId: selectedStageId,
+          progressCallback: (processed: number) => {
+            setProcessedCount(processed);
+          }
+        }, {
           onSuccess: (data: any) => {
             console.log('Batch unarchive success:', data);
             setRestoreInProgress(false);
@@ -68,9 +78,6 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
             console.error('Batch unarchive error:', err);
             alert(`Error: ${err.message || 'Operation failed'}`);
             setRestoreInProgress(false);
-          },
-          onProgress: (processed: number) => {
-            setProcessedCount(processed);
           }
         });
       } else {
@@ -130,12 +137,12 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                       <div className="mt-2">
                         {isMultiple ? (
                           <p className="text-sm text-gray-500">
-                            You're about to restore <strong>{applicantName}</strong>. 
+                            You&apos;re about to restore <strong>{applicantName}</strong>. 
                             Please select a fallback stage to place these applicants:
                           </p>
                         ) : (
                           <p className="text-sm text-gray-500">
-                            You're about to restore <strong>{applicantName}</strong>'s application. 
+                            You&apos;re about to restore <strong>{applicantName}</strong>&apos;s application. 
                             Please select a fallback stage to place the applicant:
                           </p>
                         )}

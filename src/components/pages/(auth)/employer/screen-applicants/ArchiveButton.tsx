@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+
 import { ArchiveBoxIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
-import classNames from '@/helpers/classNames';
-import useArchiveApplication from './hooks/useArchiveApplication';
+
 import RestoreApplicationModal from './modals/RestoreApplicationModal';
+import useArchiveApplication from './hooks/useArchiveApplication';
+import useUnarchiveApplication from './hooks/useUnarchiveApplication';
+
+import classNames from '@/helpers/classNames';
 
 interface ArchiveButtonProps {
   appliedJobId: number;
@@ -23,7 +27,8 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
   applicantName = 'Applicant',
   jobPostingId = ''
 }) => {
-  const { archive, unarchive, isArchiving, isUnarchiving } = useArchiveApplication();
+  const { mutate: archive, isLoading: isArchiving } = useArchiveApplication();
+  const { mutate: unarchive, isLoading: isUnarchiving } = useUnarchiveApplication();
   const [showRestoreModal, setShowRestoreModal] = useState(false);
 
   const handleArchive = () => {
@@ -58,7 +63,7 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
       },
     };
 
-    unarchive(appliedJobId, fallbackStageId, callBackReq);
+    unarchive({ appliedJobId, fallbackStageId }, callBackReq);
   };
 
   // Only show archive button for rejected or withdrawn applications
