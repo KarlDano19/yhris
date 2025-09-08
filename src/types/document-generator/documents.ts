@@ -35,6 +35,7 @@ export interface EmploymentAgreementFormData {
 export interface NoticeToExplainFormData {
     employeeName: string;
     position: string;
+    department?: string;
     dateIssued: string;
     companyName: string;
     dateOfIssuance: string;
@@ -54,7 +55,8 @@ export interface NoticeToExplainFormData {
     sampleLogoPath: string;
     signature: File | string | null;
     borderColor: string;
-    } 
+    referenceNumber?: string;
+} 
 
 export interface PrintOptions {
     elementId: string;
