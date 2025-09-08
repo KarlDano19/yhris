@@ -6,6 +6,7 @@ import { Marker } from '@react-google-maps/api';
 import { useForm } from 'react-hook-form';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import { ApplicantType, ContextTypes, ScheduleInterviewPropTypes as PropTypes } from '../types';
 import { initialActionState } from '../lib/initialActionState';
 import classNames from '@/helpers/classNames';
@@ -25,6 +26,13 @@ import CalendarIcon from '@/svg/CalendarIcon';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
+
+// Helper function to check if HTML content is empty
+const isHtmlEmpty = (html: string | null | undefined): boolean => {
+  if (!html) return true;
+  const trimmed = html.trim();
+  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
+};
 
 const containerStyle = {
   width: 'auto',
@@ -101,6 +109,8 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   const [selectionId, setSelectionId] = useState('video');
   const [input, setInput] = useState('');
   const [noTags, setNoTags] = useState(false);
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tags, handleKeyDown, handleRemoveTag } = useTagInput(input, setInput);
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
@@ -112,6 +122,66 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
       ?.applicants.find((applicant) => applicant.id === actionState.applicantId);
   }, [state, actionState]);
   const { data: dataIntegrationItems, refetch: refetchIntegrationItems } = useGetThirdPartyIntegrationItems();
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const formData = watch();
+    return (
+      (formData.date && formData.date !== '') ||
+      (formData.startTime && formData.startTime !== '') ||
+      (formData.duration && formData.duration !== '') ||
+      (formData.platform && formData.platform !== '') ||
+      (formData.phoneNumber && formData.phoneNumber.trim() !== '') ||
+      (formData.integrated_id && formData.integrated_id !== '') ||
+      (formData.message && !isHtmlEmpty(formData.message)) ||
+      (tags.length > 0)
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    setValue('date', '');
+    setValue('startTime', '');
+    setValue('duration', '');
+    setValue('platform', '');
+    setValue('phoneNumber', '');
+    setValue('integrated_id', '');
+    setValue('message', '');
+    // Reset tags by clearing input and removing all existing tags
+    setInput('');
+    tags.forEach(tag => handleRemoveTag(tag));
+    setNoTags(false);
+    setSelectionId('video');
+    setCoordinates({ lat: 0, lng: 0 });
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   const onLoad = useCallback(function callback(map: any) {
     navigator.geolocation.getCurrentPosition(
@@ -161,8 +231,11 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   }, []);
 
   const handleClose = () => {
-    setIsOpen(false);
-    setTimeout(() => setActionState(initialActionState), 400);
+    handleModalClose(() => {
+      resetFormData();
+      setIsOpen(false);
+      setTimeout(() => setActionState(initialActionState), 400);
+    });
   };
 
   const onSubmit = (data: any) => {
@@ -171,7 +244,11 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
       data.emails = tags;
       data.selectionId = selectionId;
       data.coordinates = coordinates;
-      handleFormSubmit(data, setIsOpen);
+      handleFormSubmit(data, () => {
+        // Reset form data before closing modal to prevent unsaved changes detection
+        resetFormData();
+        setIsOpen(false);
+      });
     } else {
       setNoTags(true);
     }
@@ -189,9 +266,10 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   };
 
   return (
-    <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
-      <form onSubmit={handleSubmit((data) => onSubmit(data))}>
-        <div className='p-4'>
+    <>
+      <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
+        <form onSubmit={handleSubmit((data) => onSubmit(data))}>
+          <div className='p-4'>
           {/* <div className='flex items-center gap-3 flex-wrap mb-8'>
               <div className='text-indigo-dye flex-grow'>
                 <label htmlFor='date' className='block mb-2'>
@@ -354,7 +432,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 <select
                   {...register('duration')}
                   id='duration'
-                  className='w-full py-2 px-4 focus:none outline-none rounded-full'
+                  className='w-full py-2 px-4 focus:none outline-none rounded-md'
                   defaultValue=''
                 >
                   <option value='' disabled>Select...</option>
@@ -596,7 +674,20 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
             )}
           </button>
         </ModalFooterLayout>
-      </form>
-    </ModalLayout>
+        </form>
+      </ModalLayout>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="schedule interview"
+        />
+      )}
+    </>
   );
 }
