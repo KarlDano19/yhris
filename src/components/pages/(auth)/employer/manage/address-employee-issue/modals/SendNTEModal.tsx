@@ -797,14 +797,16 @@ export default function SendNTEModal({
       </Transition.Root>
       
       {/* Unsaved Changes Confirmation Modal */}
-      <UnsavedChangesModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={handleUnsavedChangesCancel}
-        onConfirm={handleUnsavedChangesConfirm}
-        isLoading={false}
-        isSwitchingEmployee={false}
-        contentType="email"
-      />
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="email"
+        />
+      )}
     </>
   );
 }

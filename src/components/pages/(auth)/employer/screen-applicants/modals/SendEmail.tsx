@@ -649,14 +649,16 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
       </ModalLayout>
       
       {/* Unsaved Changes Confirmation Modal */}
-      <UnsavedChangesModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={handleUnsavedChangesCancel}
-        onConfirm={handleUnsavedChangesConfirm}
-        isLoading={false}
-        isSwitchingEmployee={false}
-        contentType="email"
-      />
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="email"
+        />
+      )}
     </>
   );
 }

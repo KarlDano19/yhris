@@ -386,14 +386,16 @@ export default function InvestigationModal({
       />
       
       {/* Unsaved Changes Confirmation Modal */}
-      <UnsavedChangesModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={handleUnsavedChangesCancel}
-        onConfirm={handleUnsavedChangesConfirm}
-        isLoading={false}
-        isSwitchingEmployee={false}
-        contentType="investigation"
-      />
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="investigation"
+        />
+      )}
     </>
   );
 }

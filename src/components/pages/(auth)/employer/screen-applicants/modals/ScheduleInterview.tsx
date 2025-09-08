@@ -678,14 +678,16 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
       </ModalLayout>
       
       {/* Unsaved Changes Confirmation Modal */}
-      <UnsavedChangesModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={handleUnsavedChangesCancel}
-        onConfirm={handleUnsavedChangesConfirm}
-        isLoading={false}
-        isSwitchingEmployee={false}
-        contentType="schedule interview"
-      />
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="schedule interview"
+        />
+      )}
     </>
   );
 }

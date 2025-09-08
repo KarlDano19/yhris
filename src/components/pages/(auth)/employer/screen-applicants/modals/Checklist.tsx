@@ -379,14 +379,16 @@ export default function Checklist({
       )}
       
       {/* Unsaved Changes Confirmation Modal */}
-      <UnsavedChangesModal
-        isOpen={isUnsavedChangesModalOpen}
-        onClose={handleUnsavedChangesCancel}
-        onConfirm={handleUnsavedChangesConfirm}
-        isLoading={false}
-        isSwitchingEmployee={false}
-        contentType="checklist"
-      />
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="checklist"
+        />
+      )}
     </>
   );
 }
