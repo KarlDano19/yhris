@@ -8,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from './UnsavedChangesModal';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
@@ -70,13 +71,24 @@ export default function SendNTEModal({
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [messageContent, setMessageContent] = useState<string>('');
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [currentEmployeeId, setCurrentEmployeeId] = useState<number | null>(null);
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   const { register, handleSubmit, reset, watch, setValue, trigger, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
     defaultValues: {
       template: '',
+      subject: '',
       message: '',
+      email: '',
+      cc: '',
+      bcc: '',
+      to: '',
     },
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
@@ -84,6 +96,68 @@ export default function SendNTEModal({
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const subject = watch('subject');
+    const message = watch('message');
+    
+    // Check if tagsTo has more than just the applicant email (user-added recipients)
+    const hasUserAddedRecipients = tagsTo.length > 1 || (tagsTo.length === 1 && tagsTo[0] !== applicantEmail);
+    
+    return (
+      (subject && subject.trim() !== '') ||
+      (!isHtmlEmpty(message)) ||
+      selectedTemplateId !== '' ||
+      hasUserAddedRecipients ||
+      tagsCc.length > 0 ||
+      tagsBcc.length > 0
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    setSelectedTemplateId('');
+    setValue('template', '');
+    setValue('subject', '');
+    setValue('message', '');
+    setMessageContent('');
+    setTagsTo([]);
+    setTagsCc([]);
+    setTagsBcc([]);
+    setIsCCOpen(false);
+    setIsBCCOpen(false);
+    setCurrentEmployeeId(null);
+    setIsInitialized(false);
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   useEffect(() => {
     if (isOpen && isOpen.id) {
@@ -93,25 +167,39 @@ export default function SendNTEModal({
         const employeeEmail = employeeIssueItemsCopy[itemIndex].email;
         setApplicantEmail(employeeEmail);
         
-        // Always ensure the employee email is set in tagsTo if it's not already there
-        // This handles the case when the modal opens immediately after document generation
-        if (employeeEmail && !tagsTo.includes(employeeEmail)) {
-          setTagsTo(prev => [...prev.filter(tag => tag !== employeeEmail), employeeEmail]);
+        // Check if this is a different employee than the current one
+        const isDifferentEmployee = currentEmployeeId !== isOpen.id;
+        
+        if (isDifferentEmployee) {
+          // Reset everything for new employee
+          resetFormData();
+          
+          // Set the employee email for new employee
+          if (employeeEmail) {
+            setTagsTo([employeeEmail]);
+          }
         }
+        
+        // Update current employee ID
+        setCurrentEmployeeId(isOpen.id);
+        
+        // Always reset initialization flag when modal opens to ensure fresh data is loaded
+        setIsInitialized(false);
       }
     }
-  }, [isOpen, employeeIssueItems, tagsTo]);
+  }, [isOpen, employeeIssueItems, setTagsTo, setValue, setTagsCc, setTagsBcc, currentEmployeeId]);
 
 
   // Prefill fields from backend when details are loaded
   useEffect(() => {
-    if (employeeIssueDetails) {
+    if (employeeIssueDetails && isOpen && isOpen.id) {
+      // Always populate the form when we have fresh data and the modal is open
       setValue('subject', employeeIssueDetails.nte_subject || '');
       
       // Set tagsTo from backend data, or fall back to employee email if not set
       if (employeeIssueDetails.nte_to) {
         setTagsTo(JSON.parse(employeeIssueDetails.nte_to));
-      } else if (applicantEmail && !tagsTo.length) {
+      } else if (applicantEmail) {
         // If no backend data but we have the applicant email, use it
         setTagsTo([applicantEmail]);
       }
@@ -119,11 +207,13 @@ export default function SendNTEModal({
       setTagsCc(employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : []);
       setTagsBcc(employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []);
       setValue('message', employeeIssueDetails.nte_message || '');
+      setMessageContent(employeeIssueDetails.nte_message || '');
       if (employeeIssueDetails.nte_attachment) {
         setPdfAttachment(employeeIssueDetails.nte_attachment);
       }
+      setIsInitialized(true);
     }
-  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue, applicantEmail, tagsTo.length]);
+  }, [employeeIssueDetails, setTagsTo, setTagsCc, setTagsBcc, setValue, applicantEmail, isOpen]);
 
   // Clear errors when subject changes
   useEffect(() => {
@@ -148,6 +238,48 @@ export default function SendNTEModal({
       clearErrors('message');
     }
   }, [watch('message'), clearErrors]);
+
+  // Watch for template selection changes and update form fields
+  useEffect(() => {
+    if (selectedTemplateId && dataEmailTemplate) {
+      const template = dataEmailTemplate.find(
+        (item: any) => item.id === parseInt(selectedTemplateId)
+      );
+      
+      if (template) {
+        // Use setTimeout to ensure the form is ready
+        setTimeout(() => {
+          setValue('subject', template.subject || '', { 
+            shouldValidate: true, 
+            shouldDirty: true 
+          });
+          
+          setValue('message', template.body || '', { 
+            shouldValidate: true, 
+            shouldDirty: true 
+          });
+          
+          // Also set the message content state for ReactQuill
+          setMessageContent(template.body || '');
+          
+          // Set CC and BCC
+          if (template.cc && template.cc.length > 0) {
+            setIsCCOpen(true);
+            setTagsCc(template.cc);
+          }
+          
+          if (template.bcc && template.bcc.length > 0) {
+            setIsBCCOpen(true);
+            setTagsBcc(template.bcc);
+          }
+          
+          clearErrors('subject');
+          clearErrors('message');
+          clearErrors('to');
+        }, 100);
+      }
+    }
+  }, [selectedTemplateId, dataEmailTemplate, setValue, clearErrors, setTagsCc, setTagsBcc, setIsCCOpen, setIsBCCOpen]);
 
   const onSubmit = handleSubmit((data) => {
     // Validate "To" field manually since it uses tags
@@ -193,9 +325,10 @@ export default function SendNTEModal({
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
           setIsOpen(null);
-          setPdfAttachment(null); // Clear attachment state
+          // Reset form data after successful submission
+          resetFormData();
+          setPdfAttachment(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-          reset();
           if (refetch) {
             refetch();
           }
@@ -229,7 +362,12 @@ export default function SendNTEModal({
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {
+          handleModalClose(() => {
+            resetFormData();
+            setIsOpen(null);
+          });
+        }}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -256,7 +394,12 @@ export default function SendNTEModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Send NTE</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
+                      handleModalClose(() => {
+                        resetFormData();
+                        setIsOpen(null);
+                      });
+                    }} />
                   </div>
                   
                   <form onSubmit={onSubmit}>
@@ -271,37 +414,52 @@ export default function SendNTEModal({
                             {...register('template')}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                             onChange={(event) => {
-                              const template = dataEmailTemplate.find(
-                                (item: any) => item.id === parseInt(event.target.value)
-                              );
-                              if (template) {
-                                setValue('subject', template.subject);
+                              const templateId = event.target.value;
+                              setSelectedTemplateId(templateId);
+                              
+                              if (templateId === 'unselect') {
+                                // Clear template selection but preserve applicant email
+                                setValue('template', '');
+                                setValue('subject', '');
+                                setValue('message', '');
+                                setMessageContent('');
+                                setTagsCc([]);
+                                setTagsBcc([]);
+                                setIsCCOpen(false);
+                                setIsBCCOpen(false);
+                                clearErrors('subject');
+                                clearErrors('message');
+                                
+                                // Preserve only the applicant email in To field
                                 if (applicantEmail) {
-                                  // Check if template.to already contains the applicant email to avoid duplicates
-                                  const templateRecipients = template.to || [];
-                                  if (!templateRecipients.includes(applicantEmail)) {
-                                    // Only add applicantEmail if it's not already in the template recipients
-                                    setTagsTo([applicantEmail, ...templateRecipients]);
-                                  } else {
-                                    // Use template recipients as is since it already includes the applicant email
-                                    setTagsTo(templateRecipients);
+                                  setTagsTo([applicantEmail]);
+                                }
+                                return;
+                              }
+                              
+                              // Handle To field immediately since it doesn't depend on form state
+                              const template = dataEmailTemplate.find(
+                                (item: any) => item.id === parseInt(templateId)
+                              );
+                              
+                              if (template) {
+                                // Merge template recipients with existing recipients
+                                const templateRecipients = template.to || [];
+                                const existingRecipients = tagsTo;
+                                
+                                // Combine existing and template recipients, avoiding duplicates
+                                const combinedRecipients = [...existingRecipients];
+                                templateRecipients.forEach((recipient: string) => {
+                                  if (!combinedRecipients.includes(recipient)) {
+                                    combinedRecipients.push(recipient);
                                   }
-                                } else {
-                                  setTagsTo(template.to || []);
-                                }
-                                if (template.bcc) {
-                                  setIsBCCOpen(true);
-                                  setTagsBcc(template.bcc);
-                                }
-                                if (template.cc) {
-                                  setIsCCOpen(true);
-                                  setTagsCc(template.cc);
-                                }
-                                setValue('message', template.body);
+                                });
+                                
+                                setTagsTo(combinedRecipients);
                               }
                             }}
                           >
-                            <option value='' disabled>
+                            <option value='unselect'>
                               Select...
                             </option>
                             {(dataEmailTemplate || []).map((item: any) => (
@@ -327,19 +485,20 @@ export default function SendNTEModal({
                         <input
                           type='text'
                           id='subject'
-                          {...register('subject', { required: 'Subject is required' })}
-                          className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                          onChange={(e) => {
-                            setValue('subject', e.target.value);
-                            if (e.target.value.trim() !== '') {
-                              clearErrors('subject');
-                            } else {
-                              setError('subject', {
-                                type: 'manual',
-                                message: 'Subject is required'
-                              });
+                          {...register('subject', { 
+                            required: 'Subject is required',
+                            onChange: (e) => {
+                              if (e.target.value.trim() !== '') {
+                                clearErrors('subject');
+                              } else {
+                                setError('subject', {
+                                  type: 'manual',
+                                  message: 'Subject is required'
+                                });
+                              }
                             }
-                          }}
+                          })}
+                          className='mt-2 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         />
 
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -497,8 +656,10 @@ export default function SendNTEModal({
                         <div className='mt-2 h-72'>
                           <textarea rows={4} {...register('message', { required: 'Message is required' })} id='message' hidden />
                           <ReactQuill
+                            key={selectedTemplateId}
                             onChange={(value) => {
                               setValue('message', value);
+                              setMessageContent(value);
                               // Only clear errors when there is actual content
                               if (!isHtmlEmpty(value)) {
                                 clearErrors('message');
@@ -513,7 +674,7 @@ export default function SendNTEModal({
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%', padding: '5px 8px !important' }}
-                            value={watch('message')}
+                            value={messageContent || watch('message')}
                           />
                         </div>
                       </div>
@@ -616,7 +777,12 @@ export default function SendNTEModal({
                       <button
                         type='button'
                         className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={() => setIsOpen(null)}
+                        onClick={() => {
+                          handleModalClose(() => {
+                            resetFormData();
+                            setIsOpen(null);
+                          });
+                        }}
                         ref={cancelButtonRef}
                       >
                         Close
@@ -629,6 +795,16 @@ export default function SendNTEModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      <UnsavedChangesModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={handleUnsavedChangesCancel}
+        onConfirm={handleUnsavedChangesConfirm}
+        isLoading={false}
+        isSwitchingEmployee={false}
+        contentType="email"
+      />
     </>
   );
 }

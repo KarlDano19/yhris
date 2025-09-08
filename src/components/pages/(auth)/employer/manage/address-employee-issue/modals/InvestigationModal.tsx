@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
+import UnsavedChangesModal from './UnsavedChangesModal';
 import useAddInvestigationReportItems from '../hooks/useAddInvestigationReportItems';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -26,13 +27,64 @@ export default function InvestigationModal({
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
   const { mutate, isLoading } = useAddInvestigationReportItems();
-  const { register, handleSubmit, reset, control, setValue } = useForm<T_Investigation>();
+  const { register, handleSubmit, reset, control, setValue, watch } = useForm<T_Investigation>();
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toAddData, setToAddData] = useState<any>(null);
   const [toSaveData, setToSaveData] = useState<any>(null);
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const cancelButtonRef = useRef(null);
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const formData = watch();
+    return (
+      (formData.witness && formData.witness.trim() !== '') ||
+      (formData.presider && formData.presider.trim() !== '') ||
+      (formData.isAttendHearing && formData.isAttendHearing !== 'Select...' && formData.isAttendHearing.trim() !== '') ||
+      (formData.resultOfInvestigation && formData.resultOfInvestigation.trim() !== '') ||
+      (formData.decision && formData.decision !== 'Select...' && formData.decision.trim() !== '') ||
+      (formData.other && formData.other.trim() !== '') ||
+      toSaveData?.attachments
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    reset();
+    setToSaveData(null);
+    setToAddData(null);
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   const onSubmit = handleSubmit((data) => {
     if (isOpen && isOpen.id) {
@@ -64,13 +116,14 @@ export default function InvestigationModal({
     }
   });
   const saveData = () => {
-    setIsConfirmModalOpen(false);
     const callbackReq = {
       onSuccess: (data: any) => {
         setEmployeeIssueItems([...toAddData]);
         toast.custom(() => <CustomToast message='Investigated succesfully.' type='success' />, { duration: 5000 });
+        // Reset form data before closing modal to prevent unsaved changes detection
+        resetFormData();
+        setIsConfirmModalOpen(false);
         setIsOpen(null);
-        reset();
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -80,12 +133,6 @@ export default function InvestigationModal({
       },
     };
     mutate(toSaveData, callbackReq);
-  };
-  const updateConfirmModal = (value: boolean) => {
-    if (!value) {
-      setIsConfirmModalOpen(false);
-      reset();
-    }
   };
   const uploadOnChange = ({ target }: { target: any }) => {
     const file = target.files[0];
@@ -101,7 +148,16 @@ export default function InvestigationModal({
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {
+          // Don't close investigation modal if confirmation modal is open
+          if (isConfirmModalOpen) {
+            return;
+          }
+          handleModalClose(() => {
+            resetFormData();
+            setIsOpen(null);
+          });
+        }}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -128,7 +184,16 @@ export default function InvestigationModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Investigation Report Template</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
+                      // Don't close investigation modal if confirmation modal is open
+                      if (isConfirmModalOpen) {
+                        return;
+                      }
+                      handleModalClose(() => {
+                        resetFormData();
+                        setIsOpen(null);
+                      });
+                    }} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
@@ -289,7 +354,16 @@ export default function InvestigationModal({
                       <button
                         type='button'
                         className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={() => setIsOpen(null)}
+                        onClick={() => {
+                          // Don't close investigation modal if confirmation modal is open
+                          if (isConfirmModalOpen) {
+                            return;
+                          }
+                          handleModalClose(() => {
+                            resetFormData();
+                            setIsOpen(null);
+                          });
+                        }}
                         ref={cancelButtonRef}
                       >
                         Close
@@ -302,12 +376,23 @@ export default function InvestigationModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
       <ConfirmModal
         message='Are you sure that you have investigated the reported incident?'
         isOpen={isConfirmModalOpen}
-        setIsOpen={updateConfirmModal}
+        setIsOpen={setIsConfirmModalOpen}
         confirmAction={saveData}
         isLoading={false}
+      />
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      <UnsavedChangesModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={handleUnsavedChangesCancel}
+        onConfirm={handleUnsavedChangesConfirm}
+        isLoading={false}
+        isSwitchingEmployee={false}
+        contentType="investigation"
       />
     </>
   );
