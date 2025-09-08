@@ -13,6 +13,7 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
+import UnsavedChangesModal from './UnsavedChangesModal';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -67,6 +68,8 @@ export default function SendDecisionModal({
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
@@ -78,6 +81,64 @@ export default function SendDecisionModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const formData = watch();
+    // Check if tagsTo has more than just the default applicant email
+    const hasAdditionalRecipients = tagsTo.length > 1 || (tagsTo.length === 1 && tagsTo[0] !== applicantEmail);
+    
+    return (
+      (formData.template && formData.template !== '') ||
+      (formData.subject && formData.subject.trim() !== '') ||
+      hasAdditionalRecipients ||
+      (tagsCc.length > 0) ||
+      (tagsBcc.length > 0) ||
+      (formData.message && !isHtmlEmpty(formData.message))
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    reset();
+    setTagsTo([]);
+    setTagsCc([]);
+    setTagsBcc([]);
+    setInputTo('');
+    setInputCc('');
+    setInputBcc('');
+    setIsCCOPen(false);
+    setIsBCCOpen(false);
+    setApplicantEmail(null);
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   useEffect(() => {
     if (isOpen && isOpen.id) {
@@ -152,9 +213,10 @@ export default function SendDecisionModal({
       const callbackReq = {
         onSuccess: (data: any) => {
           setEmployeeIssueItems([...employeeIssueItemsCopy]);
-          setIsOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-          reset();
+          // Reset form data before closing modal to prevent unsaved changes detection
+          resetFormData();
+          setIsOpen(null);
           if (refetch) {
             refetch();
           }
@@ -174,7 +236,12 @@ export default function SendDecisionModal({
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {
+          handleModalClose(() => {
+            resetFormData();
+            setIsOpen(null);
+          });
+        }}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -201,7 +268,12 @@ export default function SendDecisionModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Send Decision</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
+                      handleModalClose(() => {
+                        resetFormData();
+                        setIsOpen(null);
+                      });
+                    }} />
                   </div>
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
@@ -531,7 +603,12 @@ export default function SendDecisionModal({
                       <button
                         type='button'
                         className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={() => setIsOpen(null)}
+                        onClick={() => {
+                          handleModalClose(() => {
+                            resetFormData();
+                            setIsOpen(null);
+                          });
+                        }}
                         ref={cancelButtonRef}
                       >
                         Close
@@ -544,6 +621,16 @@ export default function SendDecisionModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      <UnsavedChangesModal
+        isOpen={isUnsavedChangesModalOpen}
+        onClose={handleUnsavedChangesCancel}
+        onConfirm={handleUnsavedChangesConfirm}
+        isLoading={false}
+        isSwitchingEmployee={false}
+        contentType="decision"
+      />
     </>
   );
 }
