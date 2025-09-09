@@ -194,6 +194,7 @@ export default function EmploymentDetailsForm({
       <Grid className="mb-2">
         {/* System ID: read-only, not required */}
         <Field
+          dataTestid="systemid-field"
           label="System ID"
           defaultValue={s(system_id)}
           onChange={() => {}}
@@ -241,6 +242,7 @@ export default function EmploymentDetailsForm({
 
         {/* Employment Status — now ADDABLE */}
         <AddableSelect
+          dataTestid="employment-status-select"
           label="Employment Status"
           options={employmentStatusOptions}
           value={employment_status}
@@ -267,6 +269,7 @@ export default function EmploymentDetailsForm({
         />
 
         <AddableSelect
+          dataTestid="location-select"
           label="Location"
           options={locations}
           value={location}
@@ -296,6 +299,7 @@ export default function EmploymentDetailsForm({
       {/* Row 2: Position | Department */}
       <Grid className="mb-8">
         <AddableSelect
+          dataTestid="position-select"
           label="Position"
           options={positionOptions}
           value={position}
@@ -322,6 +326,7 @@ export default function EmploymentDetailsForm({
         />
 
         <AddableSelect
+          dataTestid="department-select"
           label="Department"
           options={departmentOptions}
           value={department}
@@ -349,6 +354,7 @@ export default function EmploymentDetailsForm({
 
         <div className="mt-6">
           <button
+            data-testid="view-salary-history-btn"
             type="button"
             onClick={() => {
               setShowSalaryModal(true);
@@ -361,6 +367,7 @@ export default function EmploymentDetailsForm({
 
         <div className="mt-6">
           <button
+            data-testid="view-employment-history-btn"
             type="button"
             onClick={() => {
               setShowEmploymentModal(true);

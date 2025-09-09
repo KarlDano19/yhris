@@ -19,6 +19,7 @@ type FieldProps = {
   /** new (backwards compatible) */
   readOnly?: boolean;
   disabled?: boolean;
+  dataTestid?: string;
 };
 
 export default function Field({
@@ -36,6 +37,7 @@ export default function Field({
   required = false,
   readOnly = false,
   disabled = false,
+  dataTestid="",
 }: FieldProps) {
   const id = useId();
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
@@ -57,7 +59,7 @@ export default function Field({
   }
 
   return (
-    <div className={className}>
+    <div data-testid={dataTestid} className={className}>
       <label
         htmlFor={id}
         className="mb-1 block text-sm font-medium text-gray-700"

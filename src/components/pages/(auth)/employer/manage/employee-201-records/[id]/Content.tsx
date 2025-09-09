@@ -433,6 +433,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
         {/* Top bar + Save */}
         <div className="flex items-center justify-between gap-4 py-4">
           <a
+            data-testid="back-link"
             href="/manage/employee-201-records"
             onClick={(e) => {
               e.preventDefault();
@@ -451,6 +452,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
           </a>
 
         <button
+          data-testid="save-btn"
           onClick={() => setShowConfirm(true)}
           disabled={!canSave}
           className="rounded-md bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-50"

@@ -275,6 +275,7 @@ export default function AddEmploymentForm({
         {/* DRAFT block */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4" key={draftKey}>
           <Field
+            dataTestid="position-field"
             label="Position"
             defaultValue={draft.position}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -288,6 +289,7 @@ export default function AddEmploymentForm({
           />
 
           <Field
+            dataTestid="company-field"
             label="Company Name"
             defaultValue={draft.company}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -379,7 +381,7 @@ export default function AddEmploymentForm({
           </label>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4" data-testid="job-description-field">
           {/* Textarea + hint */}
           <label className="block" key={`desc-${draftKey}`}>
             <span className="mb-1 block text-sm font-medium text-gray-700">
@@ -414,6 +416,7 @@ export default function AddEmploymentForm({
         {/* Add button */}
         <div className="mt-4">
           <button
+            data-testid="add-employment-more"
             type="button"
             onClick={addDraftToList}
             disabled={isSaving || !canAddDraft}
@@ -557,6 +560,7 @@ export default function AddEmploymentForm({
       {/* Sticky bottom bar */}
       <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t bg-white px-6 py-4 rounded-b-xl">
         <button
+          data-testid="back-btn"
           type="button"
           onClick={onBack}
           disabled={isSaving}
@@ -565,6 +569,7 @@ export default function AddEmploymentForm({
           Back
         </button>
         <button
+          data-testid="save-btn"
           type="button"
           onClick={handleSaveAll}
           disabled={

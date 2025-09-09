@@ -83,6 +83,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
   return (
     <div className="relative">
       <button
+        data-testid="filter-btn"
         onClick={() => onOpenChange(!open)}
         className="flex items-center gap-2 border border-gray-300 bg-white px-4 py-2 text-sm rounded-md hover:bg-gray-50"
         aria-haspopup="dialog"
@@ -94,6 +95,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
 
       {open && (
         <div
+          data-testid="filter-dialog"
           role="dialog"
           aria-label="Employee filters"
           className="absolute z-40 mt-3 right-0 w-[75vw] max-w-[260px] sm:w-[420px] sm:max-w-none rounded-xl border border-gray-200 bg-white shadow-xl"
@@ -104,6 +106,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
               <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Location</label>
               <div className="relative">
                 <select
+                  data-testid="select-location"
                   value={ensureValue(draft.location, locationOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))}
                   className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
@@ -131,6 +134,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
               <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Department</label>
               <div className="relative">
                 <select
+                  data-testid="select-department"
                   value={ensureValue(draft.department, departmentOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
                   className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
@@ -158,6 +162,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
               <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Position</label>
               <div className="relative">
                 <select
+                  data-testid="select-position"
                   value={ensureValue(draft.position, positionOptions)}
                   onChange={(e) => setDraft((d) => ({ ...d, position: e.target.value }))}
                   className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
@@ -183,6 +188,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
             {/* Only Incomplete */}
             <label className="flex items-center gap-2 text-sm">
               <input
+                data-testid="check-incomplete"
                 type="checkbox"
                 className="h-4 w-4 rounded border-gray-300 text-[#355fd0] focus:ring-[#355fd0]"
                 checked={draft.onlyIncomplete}
@@ -194,6 +200,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
             {/* Footer */}
             <div className="pt-2 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
               <button
+                data-testid='reset-btn'
                 onClick={() =>
                   setDraft({
                     location: "ALL",
@@ -207,6 +214,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
                 Reset
               </button>
               <button
+                data-testid='search-btn'
                 onClick={() => {
                   onApply(draft); 
                   onOpenChange(false);

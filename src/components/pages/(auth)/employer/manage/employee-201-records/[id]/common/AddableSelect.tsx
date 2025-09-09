@@ -10,6 +10,7 @@ type Props = {
   error?: string | null;
   onChange?: (value: string) => void;
   onAddOption?: (newOption: string) => void;
+  dataTestid?: string;
 };
 
 export default function AddableSelect({
@@ -19,6 +20,7 @@ export default function AddableSelect({
   error,
   onChange,
   onAddOption,
+  dataTestid,
 }: Props) {
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
@@ -32,7 +34,7 @@ export default function AddableSelect({
   };
 
   return (
-    <div>
+    <div data-testid={dataTestid}>
       <label className="mb-1 block text-sm font-medium text-gray-700">
         {label}
         <span className="ml-0.5 text-red-600">*</span>

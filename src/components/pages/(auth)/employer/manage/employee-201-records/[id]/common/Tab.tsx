@@ -8,6 +8,7 @@ export default function Tab({
   onClick,
   disabled = false,
   tooltip,
+  dataTestid
 }: {
   children: React.ReactNode;
   icon: React.ReactNode;
@@ -16,9 +17,11 @@ export default function Tab({
   onClick?: () => void;
   disabled?: boolean;
   tooltip?: string;
+  dataTestid?: string;
 }) {
   return (
     <button
+      data-testid={dataTestid}
       type="button"
       onClick={!disabled ? onClick : undefined}
       role="tab"
@@ -52,7 +55,7 @@ export default function Tab({
         {children}
       </span>
       {dot && (
-        <span className="absolute top-0 right-0 inline-block h-3 w-3 rounded-full bg-rose-500" />
+        <span data-testid="has-incomplete-indicator" className="absolute top-0 right-0 inline-block h-3 w-3 rounded-full bg-rose-500" />
       )}
     </button>
   );

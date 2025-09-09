@@ -79,6 +79,7 @@ export default function ConfirmModal({
 
   return (
     <div
+      data-testid="confirm-modal"
       className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6"
       role="dialog"
       aria-modal="true"
@@ -116,6 +117,7 @@ export default function ConfirmModal({
 
         <div className="mt-3 sm:mt-5 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-4">
           <button
+            data-testid="cancel-btn"
             onClick={onCancel}
             disabled={busy}
             className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs sm:text-sm sm:px-5 sm:py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
@@ -124,6 +126,7 @@ export default function ConfirmModal({
           </button>
 
           <button
+             data-testid="proceed-btn"
             onClick={onConfirm}
             disabled={busy}
             className="rounded-md px-3 py-1.5 text-xs sm:text-sm sm:px-5 sm:py-2 font-semibold text-white disabled:opacity-70 flex items-center justify-center"

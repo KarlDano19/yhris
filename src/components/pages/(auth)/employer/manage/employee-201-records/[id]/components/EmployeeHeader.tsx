@@ -67,7 +67,7 @@ export default function EmployeeHeader({
   // ---
 
   return (
-    <div className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
+    <div data-testid="employee-profile-header" className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
       <div className="flex min-w-0 flex-col gap-6 md:flex-row md:items-center">
         {/* avatar + header (unchanged) */}
         <div className="flex w-full items-center justify-center gap-4 text-center md:w-auto md:justify-start md:pr-5 md:text-left">
@@ -98,7 +98,7 @@ export default function EmployeeHeader({
             )}
           </div>
 
-          <div>
+          <div data-testid="employee-details">
             <div className="font-semibold text-indigo-dye">{employee.name}</div>
             <div className="text-sm text-gray-500">{employee.role}</div>
             <div className="mt-2 flex items-center justify-center gap-3 md:justify-start">
@@ -138,6 +138,7 @@ export default function EmployeeHeader({
           aria-label="Employee sections"
         >
           <Tab
+            dataTestid="personal-tab-btn"
             active={activeTab === "personal"}
             onClick={() => setActiveTab("personal")}
             dot={personalIncomplete}
@@ -147,6 +148,7 @@ export default function EmployeeHeader({
           </Tab>
 
           <Tab
+            dataTestid="employment-tab-btn"
             active={activeTab === "employment"}
             onClick={() => setActiveTab("employment")}
             dot={employmentIncomplete}
@@ -156,6 +158,7 @@ export default function EmployeeHeader({
           </Tab>
 
           <Tab
+            dataTestid="training-tab-btn"
             active={activeTab === "training"}
             onClick={() => setActiveTab("training")}
             dot={trainingIncomplete}
@@ -165,6 +168,7 @@ export default function EmployeeHeader({
           </Tab>
 
           <Tab
+            dataTestid="disciplinary-tab-btn"
             active={activeTab === "disciplinary"}
             onClick={() => setActiveTab("disciplinary")}
             icon={<ExclamationTriangleIcon className="h-7 w-7 md:h-9 md:w-9" />}
@@ -175,6 +179,7 @@ export default function EmployeeHeader({
           </Tab>
 
           <Tab
+            dataTestid="performance-tab-btn"
             active={activeTab === "performance"}
             onClick={() => setActiveTab("performance")}
             icon={<ChartBarIcon className="h-7 w-7 md:h-9 md:w-9" />}
@@ -185,6 +190,7 @@ export default function EmployeeHeader({
           </Tab>
 
           <Tab
+            dataTestid="benefits-tab-btn"
             active={activeTab === "benefits"}
             onClick={() => setActiveTab("benefits")}
             icon={<Cog6ToothIcon className="h-7 w-7 md:h-9 md:w-9" />}
@@ -195,6 +201,7 @@ export default function EmployeeHeader({
           </Tab>
 
           <Tab
+            dataTestid="documents-tab-btn"
             active={activeTab === "documents"}
             onClick={() => setActiveTab("documents")}
             icon={<ArchiveBoxIcon className="h-7 w-7 md:h-9 md:w-9" />}
@@ -208,6 +215,7 @@ export default function EmployeeHeader({
 
       {locked && (
         <div
+          data-testid="no-active-sub"
           className="absolute inset-0 z-30 bg-gray-400/35 backdrop-blur-[5px] pointer-events-auto cursor-not-allowed rounded-lg flex items-center justify-center"
           aria-hidden="true"
         >

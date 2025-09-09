@@ -8,6 +8,7 @@ function SearchBar({ value, onChange }: Props) {
   return (
     <div className="relative w-full max-w-md">
       <input
+        data-testid="search-input"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search…"

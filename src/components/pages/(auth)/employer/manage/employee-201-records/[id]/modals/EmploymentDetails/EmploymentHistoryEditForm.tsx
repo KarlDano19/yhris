@@ -123,6 +123,7 @@ export default function EmploymentHistoryEditForm({
       <div className="flex-1 overflow-y-auto p-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <Field
+            dataTestid="position-field"
             label="Position"
             defaultValue={form.position}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,6 +137,7 @@ export default function EmploymentHistoryEditForm({
           />
 
           <Field
+            dataTestid="company-field"
             label="Company Name"
             defaultValue={form.company}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +239,7 @@ export default function EmploymentHistoryEditForm({
           </label>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4" data-testid="job-description-field">
           {/* Description (textarea + hint) */}
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">
@@ -272,6 +274,7 @@ export default function EmploymentHistoryEditForm({
       {/* Sticky footer */}
       <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t bg-white px-6 py-4 rounded-b-xl">
         <button
+          data-testid="back-btn"
           type="button"
           onClick={onBack}
           disabled={isSaving}
@@ -280,6 +283,7 @@ export default function EmploymentHistoryEditForm({
           Back
         </button>
         <button
+          data-testid="save-btn"
           type="button"
           disabled={!canSave}
           onClick={handleSave}

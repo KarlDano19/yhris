@@ -236,6 +236,7 @@ export default function SalaryHistoryAnalysis({
         )}
 
         <button
+          data-testid="export-pdf-btn"
           type="button"
           onClick={handleExportPdf}
           disabled={showLoading}
@@ -274,12 +275,14 @@ export default function SalaryHistoryAnalysis({
           ) : (
             <>
               <Metric
+                dataTestid="current-salary-tile"
                 title="Current Salary"
                 value={`₱ ${formatMoney(currentSalary)}`}
                 up={trend(lastAdjustmentAmount)} 
               />
 
               <Metric
+                dataTestid="last-adjustment-tile"
                 title="Last Adjustment"
                 value={
                   <>
@@ -305,6 +308,7 @@ export default function SalaryHistoryAnalysis({
               />
 
               <Metric
+                dataTestid="time-gap-tile"
                 title="Time Gap Between Changes"
                 value={`${daysBetweenChanges} day(s)`}
               />
@@ -336,6 +340,7 @@ export default function SalaryHistoryAnalysis({
             {/* Left: Add HR Notes / inline editor */}
             {!isWriting ? (
               <button
+                data-testid="add-hr-note-btn"
                 type="button"
                 onClick={startAddNote}
                 disabled={notesLoading || !!notesError}
@@ -352,6 +357,7 @@ export default function SalaryHistoryAnalysis({
               <div className="flex-1 mr-4">
                 <div className="space-y-2">
                   <textarea
+                    data-testid="hr-note-content-input"
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     rows={3}
@@ -360,6 +366,7 @@ export default function SalaryHistoryAnalysis({
                   />
                   <div className="flex items-center gap-2">
                     <button
+                      data-testid="save-hr-note-btn"
                       type="button"
                       onClick={saveNote}
                       disabled={!draft.trim() || isSaving}
@@ -368,6 +375,7 @@ export default function SalaryHistoryAnalysis({
                       {isSaving ? "Saving…" : "Save"}
                     </button>
                     <button
+                      data-testid="cancel-hr-note-btn"
                       type="button"
                       onClick={cancelAddNote}
                       disabled={isSaving}
@@ -405,26 +413,28 @@ export default function SalaryHistoryAnalysis({
               ))}
             </ul>
           ) : notes.length === 0 ? (
-            <div className="p-6 text-center text-sm text-gray-500">
+            <div data-testid="no-notes-view" className="p-6 text-center text-sm text-gray-500">
               No HR notes yet.
             </div>
           ) : (
             <ul className="space-y-3">
               {notes.map((n) => (
                 <li
+                  data-testid="note-item"
                   key={n.id}
                   className="flex items-start justify-between rounded-lg border bg-white p-3"
                 >
                   <div className="pr-2">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    <p data-testid="note-content" className="text-sm text-gray-700 whitespace-pre-wrap">
                       {n.note_content}
                     </p>
-                    <div className="mt-2 text-xs text-gray-400">
+                    <div data-testid="note-created" className="mt-2 text-xs text-gray-400">
                       {formatDateTime(new Date(n.date_created))}
                     </div>
                   </div>
 
                   <button
+                    data-testid="delete-hr-note-btn"
                     type="button"
                     onClick={() => handleDeleteNote(n.id)}
                     className={`no-print ml-2 flex items-center justify-center text-gray-400 hover:text-red-500 ${
@@ -494,13 +504,15 @@ function Metric({
   title,
   value,
   up,
+  dataTestid
 }: {
   title: string;
   value: React.ReactNode;
   up?: boolean;
+  dataTestid?: string;
 }) {
   return (
-    <div className="metric-card relative flex h-28 flex-col items-center justify-center rounded-xl border border-slate-300/70 p-4 print:break-inside-avoid">
+    <div data-testid={dataTestid} className="metric-card relative flex h-28 flex-col items-center justify-center rounded-xl border border-slate-300/70 p-4 print:break-inside-avoid">
       {up !== undefined && <TrendIcon up={up} />}
       <div className="flex w-full items-center justify-center text-center font-semibold text-slate-800">
         {value}

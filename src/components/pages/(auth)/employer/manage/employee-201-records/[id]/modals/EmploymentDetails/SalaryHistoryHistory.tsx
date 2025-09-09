@@ -187,6 +187,7 @@ export default function SalaryHistoryHistory({
       <div className="flex justify-end no-print mb-4">
         {!showForm ? (
           <button
+            data-testid="add-salary-btn"
             type="button"
             onClick={() => setShowForm(true)}
             disabled={isLoading || !!loadError}
@@ -202,6 +203,7 @@ export default function SalaryHistoryHistory({
           <div className="w-full rounded-lg border p-3 bg-white">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <AddableSelect
+                dataTestid="position-select"
                 label="Position"
                 options={positionOptions}
                 value={position}
@@ -215,6 +217,7 @@ export default function SalaryHistoryHistory({
                 error={errors["position"] || null}
               />
               <Field
+                dataTestid="salary-input"
                 label="Salary"
                 type="number"
                 step="0.01"
@@ -268,6 +271,7 @@ export default function SalaryHistoryHistory({
 
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
+                data-testid="cancel-btn"
                 type="button"
                 onClick={() => {
                   setShowForm(false);
@@ -278,6 +282,7 @@ export default function SalaryHistoryHistory({
                 Cancel
               </button>
               <button
+                data-testid="save-btn"
                 type="button"
                 onClick={handleSave}
                 disabled={isCreating}
@@ -325,7 +330,7 @@ export default function SalaryHistoryHistory({
             {loadError.message || "Failed to load salary history."}
           </div>
         ) : (
-          <table className="min-w-full divide-y divide-gray-200">
+          <table data-testid="salary-history-table" className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <Th>Position</Th>

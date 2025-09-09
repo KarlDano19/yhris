@@ -2,7 +2,7 @@ import Skeleton from "../common/Skeleton";
 
 export default function EmployeeHeaderSkeleton() {
   return (
-    <div className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
+    <div data-testid="profile-header-loading" className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
       <div className="flex flex-col md:flex-row md:items-center gap-6 min-w-0">
         <div className="flex w-full md:w-auto justify-center md:justify-start items-center gap-4 md:pr-5 text-center md:text-left">
           <div className="relative flex-shrink-0">

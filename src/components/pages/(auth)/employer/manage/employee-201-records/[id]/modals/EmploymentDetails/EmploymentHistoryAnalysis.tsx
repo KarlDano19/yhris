@@ -95,7 +95,7 @@ export default function EmploymentHistoryAnalysis({
               Employment History Analysis — {employeeName}
             </h3>
 
-            <div className="rounded-xl border bg-[#f6f8ff] p-4 sm:p-6">
+            <div data-testid="employment-analysis" className="rounded-xl border bg-[#f6f8ff] p-4 sm:p-6">
               <ul className="space-y-3 text-sm text-gray-700">
                 <Li label="Total Years of Experience" value={data.total_experience} />
                 <Li label="Average Tenure per Job" value={data.average_tenure} sub="(average across all roles)" />
@@ -153,6 +153,7 @@ export default function EmploymentHistoryAnalysis({
       {/* Footer buttons */}
       <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t bg-white px-6 py-4 rounded-b-xl">
         <button
+          data-testid="close-btn"
           type="button"
           onClick={onClose}
           className="rounded-md border border-[#355fd0] px-4 py-2 text-sm text-[#355fd0] hover:bg-[#355fd0]/5"
@@ -160,6 +161,7 @@ export default function EmploymentHistoryAnalysis({
           Close
         </button>
         <button
+          data-testid="back-btn"
           type="button"
           onClick={onBack}
           className="rounded-md bg-[#355fd0] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f54b8]"

@@ -27,6 +27,7 @@ export default function SalaryHistoryModal({
 
   return (
     <div
+      data-testid="salary-history-modal"
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
@@ -43,6 +44,7 @@ export default function SalaryHistoryModal({
             Salary History: {employeeName}
           </h3>
           <button
+            data-testid="close-modal-btn"
             aria-label="Close"
             onClick={onClose}
             className="rounded-full p-1 hover:bg-white/10 focus:outline-none"
@@ -54,10 +56,10 @@ export default function SalaryHistoryModal({
         {/* Tabs */}
         <div className="sticky top-[44px] z-10 bg-white px-4 pt-3">
           <div className="flex gap-6 border-b">
-            <TabButton active={tab === "history"} onClick={() => setTab("history")}>
+            <TabButton dataTestid="history-btn" active={tab === "history"} onClick={() => setTab("history")}>
               History
             </TabButton>
-            <TabButton active={tab === "analysis"} onClick={() => setTab("analysis")}>
+            <TabButton dataTestid="analysis-btn" active={tab === "analysis"} onClick={() => setTab("analysis")}>
               Analysis
             </TabButton>
           </div>
@@ -84,13 +86,16 @@ function TabButton({
   active,
   onClick,
   children,
+  dataTestid
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  dataTestid?: string
 }) {
   return (
     <button
+      data-testid={dataTestid}
       className={`relative px-1 pb-3 text-sm font-medium ${
         active ? "text-[#355fd0]" : "text-gray-500"
       }`}

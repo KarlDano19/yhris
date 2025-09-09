@@ -58,7 +58,7 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
   // --------------------------------------------------
 
   return (
-    <Link href={`/manage/employee-201-records/${emp.id}`} className="block">
+    <Link data-testid="employee-tile" href={`/manage/employee-201-records/${emp.id}`} className="block">
       <div
         ref={tileRef}
         className="relative cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
@@ -71,6 +71,7 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
           >
             <div className="relative">
               <button
+                data-testid="employee-tile-info"
                 type="button"
                 aria-label="View incomplete record details"
                 aria-expanded={open}
@@ -86,6 +87,7 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
 
               {open && (
                 <div
+                  data-testid="incomplete-records-dialog"
                   className={
                     "absolute z-50 w-[76vw] max-w-[260px] rounded-xl border border-gray-200 bg-white p-3 shadow-xl ring-1 ring-black/5 sm:w-[300px] " +
                     (side === "right"
@@ -165,7 +167,7 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
           )}
         </div>
 
-        <div className="mt-3 text-center">
+        <div data-testid="employee-details" className="mt-3 text-center">
           <div className="text-sm font-semibold text-gray-8 00">
             {displayName || "\u00A0"}
           </div>

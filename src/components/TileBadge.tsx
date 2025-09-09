@@ -26,6 +26,7 @@ export default function TileBadge({
 
   return (
     <span
+      data-testid="incomplete-employees-count"
       className={
         "absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full " +
         "bg-rose-500 text-white ring-2 ring-white shadow-sm sm:h-7 sm:w-7 " +

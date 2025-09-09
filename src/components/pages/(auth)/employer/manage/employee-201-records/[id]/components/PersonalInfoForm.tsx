@@ -185,6 +185,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
       <Section>
         <Grid>
           <Field
+            dataTestid="first-name-field"
             label="First Name"
             defaultValue={firstname}
             onChange={handle(setFirstname, "firstname", validateTop.firstname)}
@@ -192,6 +193,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="middle-name-field"
             label="Middle Name"
             defaultValue={middlename}
             placeholder="Enter Middle Name..."
@@ -199,6 +201,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             error={errors["middlename"] || null}
           />
           <Field
+            dataTestid="last-name-field"
             label="Last Name"
             defaultValue={lastname}
             onChange={handle(setLastname, "lastname", validateTop.lastname)}
@@ -206,6 +209,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="email-field"
             label="Email Address"
             defaultValue={email}
             onChange={handle(setEmail, "email", validateTop.email)}
@@ -213,6 +217,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="address-field"
             className="sm:col-span-2"
             label="Address"
             defaultValue={address}
@@ -221,6 +226,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             hint="House/Unit, Street, Barangay, City, Province"
           />
           <Field
+            dataTestid="contact-no-field"
             label="Contact Number"
             defaultValue={mobile}
             onChange={handlePhone(setMobile, "mobile", validateTop.mobile)}
@@ -234,6 +240,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
       <Section title="Government IDs">
         <Grid>
           <Field
+            dataTestid="tin-field"
             label="TIN"
             value={tin}
             onChange={(e) => {
@@ -247,6 +254,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="sss-field"
             label="SSS"
             value={sss}
             onChange={(e) => {
@@ -260,6 +268,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="pagibig-field"
             label="PAG-IBIG"
             value={pagibig}
             onChange={(e) => {
@@ -273,6 +282,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="philhealth-field"
             label="PhilHealth"
             value={philhealth}
             onChange={(e) => {
@@ -291,6 +301,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
       <Section title="Emergency Contact">
         <Grid>
           <Field
+            dataTestid="emergency-name-field"
             label="Name"
             defaultValue={ecName}
             onChange={(e) => {
@@ -303,6 +314,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="emergency-relation-field"
             label="Relation"
             defaultValue={ecRelation}
             onChange={(e) => {
@@ -314,6 +326,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             error={errors["emergency_contact.relation"] || null}
           />
           <Field
+            dataTestid="emergency-no-field"
             label="Contact Number"
             defaultValue={ecContact}
             onChange={(e) => {
@@ -327,6 +340,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             required
           />
           <Field
+            dataTestid="emergency-address-field"
             className="sm:col-span-2"
             label="Address"
             defaultValue={ecAddress}

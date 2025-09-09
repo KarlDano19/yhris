@@ -90,6 +90,7 @@ export default function EmploymentHistoryModal({
 
   return (
     <div
+      data-testid="employment-history-modal"
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
@@ -99,6 +100,7 @@ export default function EmploymentHistoryModal({
         <div className="sticky top-0 z-20 flex items-center justify-between rounded-t-xl bg-[#355fd0] px-5 py-3 text-white">
           <h3 className="text-sm font-semibold">{headerTitle}</h3>
           <button
+            data-testid="close-modal-btn"
             aria-label="Close"
             onClick={onClose}
             className="rounded-full p-1 hover:bg-white/10 focus:outline-none"
@@ -117,6 +119,7 @@ export default function EmploymentHistoryModal({
                   <div className="h-8 w-44 rounded-md border bg-white animate-pulse" aria-hidden />
                 ) : (
                   <button
+                    data-testid="add-employment-btn"
                     type="button"
                     onClick={() => setShowAdd(true)}
                     disabled={!!error}
@@ -141,7 +144,7 @@ export default function EmploymentHistoryModal({
                     Failed to load. Retry
                   </button>
                 ) : (
-                  <div className="text-xs text-gray-500">
+                  <div data-testid="count-indicator" className="text-xs text-gray-500">
                     {itemsNewestFirst.length} record(s)
                   </div>
                 )}
@@ -186,12 +189,14 @@ export default function EmploymentHistoryModal({
               ) : itemsNewestFirst.length ? (
                 itemsNewestFirst.map((it, i) => (
                   <div
+                    data-testid="employment-item"
                     key={`${it.id ?? "tmp"}-${i}`}
                     className="relative rounded-xl border p-4 shadow-sm bg-[#355fd0]/5"
                   >
                     {/* actions */}
                     <div className="absolute right-3 top-3 flex gap-2">
                       <button
+                        data-testid="edit-employment-btn"
                         type="button"
                         onClick={() => beginEditByIndex(i)}
                         className="rounded p-1 hover:bg-white/60"
@@ -201,6 +206,7 @@ export default function EmploymentHistoryModal({
                         <PencilSquareIcon className="h-5 w-5 text-[#355fd0]" />
                       </button>
                       <button
+                        data-testid="delete-employment-btn"
                         type="button"
                         onClick={() => beginDeleteByIndex(i)}
                         className="rounded p-1 hover:bg-white/60"
@@ -214,21 +220,21 @@ export default function EmploymentHistoryModal({
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-[240px_minmax(0,1fr)]">
                       {/* Left meta */}
                       <div>
-                        <div className="text-base font-semibold text-gray-900">
+                        <div data-testid="employment-position" className="text-base font-semibold text-gray-900">
                           {it.position}
                         </div>
-                        <div className="text-xs text-gray-500">{it.company}</div>
-                        <div className="mt-1 text-xs text-gray-500">
+                        <div data-testid="employment-company" className="text-xs text-gray-500">{it.company}</div>
+                        <div data-testid="employment-date" className="mt-1 text-xs text-gray-500">
                           {formatDateRange(it.dateFrom, it.dateTo ?? undefined)}
                         </div>
                       </div>
 
                       {/* Right description */}
                       <div className="sm:border-l-2 sm:pl-6 border-black/10">
-                        <div className="text-sm font-medium text-gray-700">
+                        <div  className="text-sm font-medium text-gray-700">
                           Job Description
                         </div>
-                        <p className="mt-1 text-xs text-gray-600 whitespace-pre-line">
+                        <p data-testid="job-description" className="mt-1 text-xs text-gray-600 whitespace-pre-line">
                           {it.description || "—"}
                         </p>
                       </div>
@@ -236,7 +242,7 @@ export default function EmploymentHistoryModal({
                   </div>
                 ))
               ) : (
-                <div className="rounded-xl border border-dashed p-6 text-center text-sm text-gray-500">
+                <div data-testid="no-employment-view" className="rounded-xl border border-dashed p-6 text-center text-sm text-gray-500">
                   No employment history yet.
                 </div>
               )}
@@ -245,6 +251,7 @@ export default function EmploymentHistoryModal({
             {/* Footer */}
             <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t bg-white px-6 py-4 rounded-b-xl">
               <button
+                data-testid="close-btn"
                 type="button"
                 onClick={onClose}
                 className="rounded-md border border-[#355fd0] px-4 py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/5"
@@ -252,6 +259,7 @@ export default function EmploymentHistoryModal({
                 Close
               </button>
               <button
+                data-testid="employment-analysis-btn"
                 type="button"
                 onClick={() => setShowAnalysis(true)}
                 className="rounded-md bg-[#355fd0] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f54b8]"

@@ -336,6 +336,7 @@ export default function TrainingDevelopmentForm({
         </h3>
         <div className="flex items-center gap-2">
           <button
+            data-testid="add-training-btn"
             type="button"
             onClick={addRow}
             className="flex items-center gap-2 rounded-lg border border-blue-500 text-blue-600 px-3 py-2 text-sm hover:bg-blue-50"
@@ -392,6 +393,7 @@ export default function TrainingDevelopmentForm({
               {/* Fields */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Field
+                  dataTestid="title-field"
                   label="Training Title"
                   placeholder="Enter Training Title..."
                   value={row.title}
@@ -437,6 +439,7 @@ export default function TrainingDevelopmentForm({
                 </div>
 
                 <Field
+                  dataTestid="provider-field"
                   label="Training Provider"
                   placeholder="Enter Training Provider..."
                   value={row.provider}
@@ -448,7 +451,7 @@ export default function TrainingDevelopmentForm({
                 />
 
                 {/* Proof of completion */}
-                <div>
+                <div data-testid="proof-field">
                   <label className="mb-1 block text-sm font-medium text-gray-700">
                     Proof of Completion (e.g., Certificate)
                   </label>
@@ -465,6 +468,7 @@ export default function TrainingDevelopmentForm({
                       </a>
                       <div className="flex items-center gap-2">
                         <button
+                          data-testid="remove-file-btn"
                           type="button"
                           onClick={() =>
                             updateRow(row.id, {
@@ -476,7 +480,7 @@ export default function TrainingDevelopmentForm({
                         >
                           Remove
                         </button>
-                        <label className="text-xs text-blue-600 hover:underline cursor-pointer">
+                        <label data-testid="replace-file-btn" className="text-xs text-blue-600 hover:underline cursor-pointer">
                           Replace
                           <input
                             type="file"
@@ -510,6 +514,7 @@ export default function TrainingDevelopmentForm({
                         <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
                           <span className="truncate">{row.file.name}</span>
                           <button
+                            data-testid="remove-file-btn"
                             type="button"
                             onClick={() =>
                               updateRow(row.id, {
