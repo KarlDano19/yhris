@@ -209,6 +209,8 @@ export default function SalaryHistoryAnalysis({
     );
   };
 
+  const trend = (n: number | undefined) => (n === 0 ? undefined : n! > 0);
+
   /* ---------- SINGLE RETURN (inline loading & error) ---------- */
   return (
     <div className="space-y-4">
@@ -271,21 +273,24 @@ export default function SalaryHistoryAnalysis({
               <Metric
                 title="Current Salary"
                 value={`₱ ${formatMoney(currentSalary)}`}
-                up={lastAdjustmentAmount >= 0}
+                up={trend(lastAdjustmentAmount)} 
               />
+
               <Metric
                 title="Last Adjustment"
                 value={
                   <>
-                    {`${lastAdjustmentAmount >= 0 ? "+" : "−"} ₱ ${formatMoney(
-                      Math.abs(lastAdjustmentAmount)
-                    )} `}
-                    {Number.isFinite(pct) && (
+                    {lastAdjustmentAmount > 0
+                      ? `+ ₱ ${formatMoney(lastAdjustmentAmount)}`
+                      : lastAdjustmentAmount < 0
+                      ? `− ₱ ${formatMoney(Math.abs(lastAdjustmentAmount))}`
+                      : `₱ 0`}
+                    {Number.isFinite(pct) && lastAdjustmentAmount !== 0 && (
                       <span
                         className="pl-2"
                         style={{
                           color:
-                            lastAdjustmentAmount >= 0 ? "#4CEE52" : "#FF4C4C",
+                            lastAdjustmentAmount > 0 ? "#4CEE52" : "#FF4C4C",
                         }}
                       >
                         ({pct.toFixed(1)}%)
@@ -293,8 +298,9 @@ export default function SalaryHistoryAnalysis({
                     )}
                   </>
                 }
-                up={lastAdjustmentAmount >= 0}
+                up={trend(lastAdjustmentAmount)} 
               />
+
               <Metric
                 title="Time Gap Between Changes"
                 value={`${daysBetweenChanges} day(s)`}
