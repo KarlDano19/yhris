@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { FunnelIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+
 import useGetLocationItems from "@/components/hooks/useGetLocationItems";
 import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";

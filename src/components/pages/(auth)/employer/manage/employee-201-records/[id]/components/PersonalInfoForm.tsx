@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
-import type { Employee } from "@/types/employee-201-records/employee";
+
 import { s } from "../utils/_shared";
+
+import type { Employee } from "@/types/employee-201-records/employee";
 
 type Props = {
   emp?: Partial<Employee>;

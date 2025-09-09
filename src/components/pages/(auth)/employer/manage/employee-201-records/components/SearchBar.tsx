@@ -1,5 +1,7 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { memo } from "react";
+
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+
 
 type Props = { value: string; onChange: (v: string) => void };
 function SearchBar({ value, onChange }: Props) {

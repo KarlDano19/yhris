@@ -1,4 +1,5 @@
 import { useRef, useCallback } from "react";
+
 import type { TabKey } from "../components/EmployeeHeader";
 
 type BaseSectionState = {

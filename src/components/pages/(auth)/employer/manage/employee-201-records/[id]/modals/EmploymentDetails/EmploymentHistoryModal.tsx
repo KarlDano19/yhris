@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import AddEmploymentForm from "./AddEmploymentForm";
@@ -8,13 +9,11 @@ import EmploymentHistoryEditForm from "./EmploymentHistoryEditForm";
 import EmploymentHistoryAnalysis from "./EmploymentHistoryAnalysis";
 import ConfirmModal from "../ConfirmModal";
 
-// hooks
 import { useGetEmploymentHistory } from "../../hooks/useGetEmploymentHistory";
 import { useAddEmploymentHistory } from "../../hooks/useAddEmploymentHistory";
 import { useUpdateEmploymentHistory } from "../../hooks/useUpdateEmploymentHistory";
 import { useDeleteEmploymentHistory } from "../../hooks/useDeleteEmploymentHistory";
 
-// toasts
 import { notify } from "../../utils/notify";
 
 export type EmploymentHistoryItem = {

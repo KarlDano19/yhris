@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Employee } from "@/types/employee-201-records/employee";
+
 import { getCookie } from "cookies-next";
 
-// fetch options from API
 import useGetLocationItems from "@/components/hooks/useGetLocationItems";
 import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 import useGetEmployeeStatusItems from "@/components/hooks/useGetEmployeeStatusItems";
+
+import type { Employee } from "@/types/employee-201-records/employee";
 
 type UseEmployeeOptions = { noCache?: boolean };
 type UseEmployeeResult = {

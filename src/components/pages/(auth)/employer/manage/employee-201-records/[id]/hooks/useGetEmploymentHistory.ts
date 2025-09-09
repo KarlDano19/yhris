@@ -69,7 +69,7 @@ export function useGetEmploymentHistory(employeeId?: number | string, opts: Opti
           ...(token ? { Authorization: `Token ${token}` } : {}),
         },
       });
-      console.log(res)
+
       if (!res.ok) {
         const problem = await res.json().catch(() => ({}));
         throw new Error(problem?.detail || problem?.message || `Request failed (${res.status})`);

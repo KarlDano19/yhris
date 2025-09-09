@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import type { Employee } from "@/types/employee-201-records/employee";
 import { getCookie } from "cookies-next";
+import type { Employee } from "@/types/employee-201-records/employee";
 
 export type EmployeeQuery = {
   q: string;

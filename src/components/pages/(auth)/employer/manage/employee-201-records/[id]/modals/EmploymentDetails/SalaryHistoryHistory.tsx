@@ -1,15 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import Pagination from "@/components/Pagination";
-import Field from "../../common/Field";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import { notify } from "../../utils/notify";
-import type { SalaryHistoryEntry } from "../../hooks/useGetSalaryHistory";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";
+
+import Field from "../../common/Field";
 import AddableSelect from "../../common/AddableSelect";
+
+import { notify } from "../../utils/notify";
+
 import { useGetSalaryHistory } from "../../hooks/useGetSalaryHistory";
 import { useCreateSalaryHistory } from "../../hooks/useCreateSalaryHistory";
+
+import type { SalaryHistoryEntry } from "../../hooks/useGetSalaryHistory";
 
 export default function SalaryHistoryHistory({
   employeeId,

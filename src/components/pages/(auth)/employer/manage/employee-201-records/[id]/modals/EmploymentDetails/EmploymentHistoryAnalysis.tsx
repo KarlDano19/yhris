@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { useEmploymentHistoryAnalysis } from "../../hooks/useEmploymentHistoryAnalysis";
 
 export default function EmploymentHistoryAnalysis({

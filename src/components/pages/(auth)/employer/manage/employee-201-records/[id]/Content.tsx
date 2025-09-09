@@ -1,28 +1,21 @@
-// app/(manage)/employee-201-records/[id]/Employee201Content.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import type { Employee } from "@/types/employee-201-records/employee";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 
-// Data
+import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+
+import type { Employee } from "@/types/employee-201-records/employee";
+import type { TrainingChangeSet } from "./components/TrainingDevelopmentForm";
+
 import { useEmployee } from "./hooks/useEmployee";
 import { toDisplayEmployee } from "./utils/toDisplayEmployee";
 
-// UI
 import EmployeeHeaderSkeleton from "./components/EmployeeHeaderSkeleton";
 import EmployeeHeader, { TabKey } from "./components/EmployeeHeader";
 import ConfirmModal from "./modals/ConfirmModal";
 import LeaveConfirmModal from "./modals/LeaveConfirmModal";
 
-// Forms
 import PersonalInfoForm from "./components/PersonalInfoForm";
 import EmploymentDetailsForm from "./components/EmploymentDetailsForm";
 import TrainingDevelopmentForm from "./components/TrainingDevelopmentForm";
@@ -31,25 +24,17 @@ import PerformanceEvaluationForm from "./components/PerformanceEvaluationForm";
 import BenefitsComplianceForm from "./components/BenefitsComplianceForm";
 import DocumentRepositoryForm from "./components/DocumentRepositoryForm";
 
-// Helpers
 import { notify } from "./utils/notify";
 import { labelForTab } from "./utils/labelForTab";
 import { useSectionLoader } from "./hooks/useSectionLoader";
 import { SectionMap, sectionOrder } from "./types/section";
 
-// PATCH hooks
 import { usePersonalDetailsPatch } from "./hooks/usePersonalDetailsPatch";
 import { useEmploymentDetailsPatch } from "./hooks/useEmploymentDetailsPatch";
 
-// Training API hooks (parent-side save)
-import {
-  useCreateTrainingRecord,
-  useUpdateTrainingRecord,
-  useDeleteTrainingRecord,
-} from "./hooks/useTrainingRecord";
-
-// Type-only import to annotate the collector ref
-import type { TrainingChangeSet } from "./components/TrainingDevelopmentForm";
+import { useCreateTrainingRecord } from "./hooks/useCreateTrainingRecord";
+import { usePatchTrainingRecord } from "./hooks/usePatchTrainingRecord";
+import { useDeleteTrainingRecord } from "./hooks/useDeleteTrainingRecord";
 
 export interface ContentProps {
   params: { id: string };
@@ -112,7 +97,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
 
   // Training hooks (actual API calls from parent on save)
   const { create: createTraining } = useCreateTrainingRecord();
-  const { update: updateTraining } = useUpdateTrainingRecord();
+  const { update: updateTraining } = usePatchTrainingRecord();
   const { remove: deleteTraining } = useDeleteTrainingRecord();
 
   // Section loader with race guard

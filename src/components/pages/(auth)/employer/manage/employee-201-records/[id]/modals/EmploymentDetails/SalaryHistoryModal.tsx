@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+
 import SalaryHistoryHistory from "./SalaryHistoryHistory";
 import SalaryHistoryAnalysis from "./SalaryHistoryAnalysis";
 

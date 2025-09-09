@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
 import AddableSelect from "../common/AddableSelect";
-import type { Employee } from "@/types/employee-201-records/employee";
+
 import { s } from "../utils/_shared";
 
 import SalaryHistoryModal from "../modals/EmploymentDetails/SalaryHistoryModal";
 import EmploymentHistoryModal from "../modals/EmploymentDetails/EmploymentHistoryModal";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
+
+import type { Employee } from "@/types/employee-201-records/employee";
 
 type Props = {
   emp?: Partial<Employee>;

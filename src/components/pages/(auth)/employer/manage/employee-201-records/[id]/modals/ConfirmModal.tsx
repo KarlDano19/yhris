@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect } from "react";
 
 type Intent = "primary" | "danger" | "warning" | "success";

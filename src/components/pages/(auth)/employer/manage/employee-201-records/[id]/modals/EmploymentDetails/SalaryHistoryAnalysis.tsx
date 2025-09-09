@@ -1,19 +1,22 @@
 "use client";
 
 import { useRef, useState, useMemo } from "react";
+
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import TrendChart, { TrendPoint } from "../../common/TrendChart";
+
 import { ArrowPathIcon, TrashIcon } from "@heroicons/react/24/outline";
+
+import TrendChart, { TrendPoint } from "../../common/TrendChart";
+
+import Pagination from "@/components/Pagination";
+
 import { notify } from "../../utils/notify";
 import { useGetSalaryAnalysis } from "../../hooks/useGetSalaryAnalysis";
 
-// HR notes hooks
 import { useGetHRNotes } from "../../hooks/useGetHRNotes";
 import { useAddHRNote } from "../../hooks/useAddHRNote";
 import { useDeleteHRNote } from "../../hooks/useDeleteHRNote";
-
-import Pagination from "@/components/Pagination";
 
 export default function SalaryHistoryAnalysis({
   employeeId,

@@ -1,16 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { TrashIcon } from "@heroicons/react/24/outline";
+
+import CustomDatePicker from "@/components/CustomDatePicker";
+import Pagination from "@/components/Pagination";
+
+import ConfirmModal from "../modals/ConfirmModal";
 import Section from "../common/Section";
 import Field from "../common/Field";
-import CustomDatePicker from "@/components/CustomDatePicker";
-import ConfirmModal from "../modals/ConfirmModal";
-import Pagination from "@/components/Pagination";
-import {
-  useListTrainingRecords,
-  type TrainingRecord,
-} from "../hooks/useTrainingRecord";
+
+import { useGetTrainingRecordsList } from "../hooks/useGetTrainingRecordsList";
+import { TrainingRecord } from "../types/trainingRecords";
+
 
 /* ------------------------------- Types ------------------------------- */
 type FileAction = "keep" | "replace" | "clear";
@@ -122,7 +125,7 @@ export default function TrainingDevelopmentForm({
     refetch,
     setPage, 
     setPageSize, 
-  } = useListTrainingRecords(employeeId, {
+  } = useGetTrainingRecordsList(employeeId, {
     current_page: 1,
     page_size: 10, 
   });

@@ -1,6 +1,9 @@
 "use client";
+
 import { useState } from "react";
+
 import Image from "next/image";
+
 import {
   IdentificationIcon,
   BriefcaseIcon,
@@ -10,8 +13,10 @@ import {
   Cog6ToothIcon,
   ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
+
 import Tab from "../common/Tab";
 import PlacholderPicture from "@/svg/PlaceholderPicture";
+
 import type { Employee } from "@/types/employee-201-records/employee";
 
 export type TabKey =
