@@ -301,6 +301,26 @@ export default function CreateJobPageJobSettings({
     }
   };
 
+  const handleToggleShowToCandidates = (id: number) => {
+    const question = screeningQuestions.find(q => q.id === id);
+    const updatedQuestions = screeningQuestions.map((q) => 
+      q.id === id ? { ...q, showToCandidates: !q.showToCandidates } : q
+    );
+    setLocalScreeningQuestions(updatedQuestions);
+    
+    // Update parent component state if available
+    if (setScreeningQuestions) {
+      setScreeningQuestions(updatedQuestions);
+    }
+    
+    // If it's a custom question, update custom questions state
+    if (question?.presetId && question.presetId.startsWith('custom-question')) {
+      setCustomQuestions(prev => 
+        prev.map(q => q.id === id ? { ...q, showToCandidates: !q.showToCandidates } : q)
+      );
+    }
+  };
+
   const handleEdit = (id: number) => {
     setEditingQuestion(id);
     setShowAddForm(true);
@@ -525,15 +545,15 @@ export default function CreateJobPageJobSettings({
     setIsRejectionSettingsOpen(!isRejectionSettingsOpen);
   };
   
-
-
-  // Handle submission with validation
+  // Handle submission with validation (NO MAXIMUM LIMIT)
   const handleSubmit = () => {
     if (screeningQuestions.length < 3) {
       setValidationError("At least 3 screening questions are required");
       setIsScreeningOpen(true);
       return;
     }
+    
+    // NO MAXIMUM LIMIT - Users can add unlimited questions!
     setValidationError(null);
     
     // Update parent component state if available
@@ -565,7 +585,12 @@ export default function CreateJobPageJobSettings({
           <div className="flex items-start justify-between border-b border-gray-200 py-4">
             <div className="flex-grow">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-medium font-semibold text-gray-900">Screening questions</div>
+                <div className="text-medium font-semibold text-gray-900">
+                  Screening questions
+                  <span className="ml-2 text-sm font-normal text-gray-500">
+                    ({screeningQuestions.length} configured)
+                  </span>
+                </div>
                 <button 
                   type="button" 
                   className="ml-4 p-1 rounded hover:bg-gray-100"
@@ -577,29 +602,36 @@ export default function CreateJobPageJobSettings({
                 </button>
               </div>
 
-              {/* Show Questions in Collapsed View */}
+              {/* Show Questions in Collapsed View - SCROLLABLE */}
               {!isScreeningOpen && screeningQuestions.length > 0 && (
                 <div className="ml-5 text-sm text-gray-900">
-                  <ol className="list-decimal">
-                    {screeningQuestions.map((question, index) => (
-                      <li key={question.id} className={index > 0 ? 'mt-2' : ''}>
-                        {question.question}
-                        <div className="text-xs text-gray-500">
-                          {question.responseType === 'Text' ? (
-                            'No ideal answer required'
-                          ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
-                            question.idealAnswer.length > 0 ? (
-                              `Ideal answers: ${question.idealAnswer.join(', ')}`
+                  <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
+                    <ol className="list-decimal space-y-2">
+                      {screeningQuestions.map((question, index) => (
+                        <li key={question.id} className="text-sm">
+                          <div className="font-medium text-gray-900">{question.question}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {question.responseType === 'Text' ? (
+                              'No ideal answer required'
+                            ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
+                              question.idealAnswer.length > 0 ? (
+                                `Ideal answers: ${question.idealAnswer.join(', ')}`
+                              ) : (
+                                'No ideal answers selected'
+                              )
                             ) : (
-                              'No ideal answers selected'
-                            )
-                          ) : (
-                            `Ideal answer: ${question.idealAnswer}`
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
+                              `Ideal answer: ${question.idealAnswer}`
+                            )}
+                            {question.showToCandidates !== undefined && (
+                              <span className="ml-2">
+                                | Show to candidates: {question.showToCandidates ? 'Yes' : 'No'}
+                              </span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
                 </div>
               )}
               
@@ -622,32 +654,46 @@ export default function CreateJobPageJobSettings({
                 </div>
               )}
 
-              {/* List of current questions */}
-              {screeningQuestions.map((q) => (
-                <ScreeningQuestion
-                  key={q.id}
-                  question={q.question}
-                  idealAnswer={q.idealAnswer}
-                  degree={q.degree}
-                  mustHave={q.mustHave}
-                  recommended={q.recommended}
-                  onRemove={() => handleRemove(q.id)}
-                  onToggleMustHave={() => handleToggleMustHave(q.id)}
-                  editable={true}
-                  onEdit={() => handleEdit(q.id)}
-                  responseType={q.responseType}
-                  options={q.options}
-                />
-              ))}
-
-              {/* Add custom or preset question options */}
-              {screeningQuestions.length === 0 ? (
-                <div className="text-center my-6 text-gray-500">
-                  No screening questions yet. Add some questions below.
+              {/* Question Count Indicator */}
+              <div className="mb-4 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {screeningQuestions.length} screening questions configured
                 </div>
-              ) : null}
-              
+                <div className="text-xs text-gray-500">
+                  Minimum 3 questions required
+                </div>
+              </div>
 
+              {/* Scrollable List of Current Questions */}
+              <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4 bg-gray-50 mb-4">
+                {screeningQuestions.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No screening questions yet.</p>
+                    <p className="text-sm">Add some questions below.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {screeningQuestions.map((q) => (
+                      <ScreeningQuestion
+                        key={q.id}
+                        question={q.question}
+                        idealAnswer={q.idealAnswer}
+                        degree={q.degree}
+                        mustHave={q.mustHave}
+                        showToCandidates={q.showToCandidates}
+                        recommended={q.recommended}
+                        onRemove={() => handleRemove(q.id)}
+                        onToggleMustHave={() => handleToggleMustHave(q.id)}
+                        onToggleShowToCandidates={() => handleToggleShowToCandidates(q.id)}
+                        editable={true}
+                        onEdit={() => handleEdit(q.id)}
+                        responseType={q.responseType}
+                        options={q.options}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Preset question options section */}
               <div className="mt-4">

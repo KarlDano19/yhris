@@ -429,18 +429,18 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     >
                       ADD APPLICANT
                     </button>
-                    <button
-                      onClick={() => {
-                        setIsArchivedApplicantsModalOpen(true);
-                      }}
-                      className="rounded-lg py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
-                      title="View archived applicants"
-                    >
-                      <ArchiveIcon />
-                      ARCHIVED APPLICANTS
-                    </button>
+                    
                     <AddStageBtn handleAddStage={handleAddStage} />
                   </div>
+                  <button
+                    onClick={() => {
+                      setIsArchivedApplicantsModalOpen(true);
+                    }}
+                    className="rounded-lg py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
+                    >
+                    <ArchiveIcon />
+                      ARCHIVED
+                    </button>
                   <Filter onFilterChange={handleFilterChange} />
                 </div>
 

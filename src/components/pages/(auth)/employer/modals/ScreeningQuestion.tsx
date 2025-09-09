@@ -5,9 +5,11 @@ interface ScreeningQuestionProps {
   idealAnswer: string | string[];
   degree?: string;
   mustHave: boolean;
+  showToCandidates: boolean;
   recommended?: boolean;
   onRemove: () => void;
   onToggleMustHave: () => void;
+  onToggleShowToCandidates: () => void;
   editable: boolean;
   onEdit: () => void;
   responseType?: string;
@@ -19,9 +21,11 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
   idealAnswer,
   degree,
   mustHave,
+  showToCandidates,
   recommended,
   onRemove,
   onToggleMustHave,
+  onToggleShowToCandidates,
   editable,
   onEdit,
   responseType = 'Yes / No',
@@ -110,16 +114,27 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
       </div>
       {renderOptions()}
       <div className="flex items-center mt-3 gap-2 justify-between">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={mustHave}
-            onChange={onToggleMustHave}
-            id="mustHaveCheckbox"
-            className="w-4 h-4"
-          />
-          <label className="text-sm text-gray-700 font-medium">Must–have qualification</label>
-          
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={mustHave}
+              onChange={onToggleMustHave}
+              id="mustHaveCheckbox"
+              className="w-4 h-4"
+            />
+            <label className="text-sm text-gray-700 font-medium">Must–have qualification</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showToCandidates}
+              onChange={onToggleShowToCandidates}
+              id="showToCandidatesCheckbox"
+              className="w-4 h-4"
+            />
+            <label className="text-sm text-gray-700 font-medium">Show to candidates</label>
+          </div>
         </div>
         {recommended && (
           <div>
