@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
@@ -54,11 +55,13 @@ export default function QuitclaimModal({
   const cancelButtonRef = useRef(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
-  const [isCCOpen, setIsCCOPen] = useState(false);
+  const [isCCOpen, setIsCCOpen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
@@ -70,6 +73,65 @@ export default function QuitclaimModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchSeparationItem();
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const formData = watch();
+    // Check if tagsTo has more than just the default applicant email
+    const hasAdditionalRecipients = tagsTo.length > 1 || (tagsTo.length === 1 && tagsTo[0] !== applicantEmail);
+    
+    return (
+      (formData.template && formData.template !== '') ||
+      (formData.subject && formData.subject.trim() !== '') ||
+      hasAdditionalRecipients ||
+      (tagsCc.length > 0) ||
+      (tagsBcc.length > 0) ||
+      (formData.message && !isHtmlEmpty(formData.message))
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    setValue('template', '');
+    setValue('subject', '');
+    setValue('message', '');
+    setTagsTo(applicantEmail ? [applicantEmail] : []);
+    setTagsCc([]);
+    setTagsBcc([]);
+    setInputTo('');
+    setInputCc('');
+    setInputBcc('');
+    setIsCCOpen(false);
+    setIsBCCOpen(false);
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   useEffect(() => {
     if (isOpen && isOpen.id) {
@@ -137,8 +199,11 @@ export default function QuitclaimModal({
       separationItemsCopy[itemIndex].isQuitclaimSigned = true;
       const callbackReq = {
         onSuccess: (data: any) => {
+          // Reset form data before closing modal to prevent unsaved changes detection
+          resetFormData();
+          reset();
           setSeparationItems([...separationItemsCopy]);
-          customCloseModal();
+          setIsOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
@@ -154,8 +219,11 @@ export default function QuitclaimModal({
   });
 
   const customCloseModal = () => {
-    // reset();
-    setIsOpen(null);
+    handleModalClose(() => {
+      resetFormData();
+      reset();
+      setIsOpen(null);
+    });
   };
 
   return (
@@ -225,7 +293,7 @@ export default function QuitclaimModal({
                                   setTagsBcc(template.bcc);
                                 }
                                 if (template.cc) {
-                                  setIsCCOPen(true);
+                                  setIsCCOpen(true);
                                   setTagsCc(template.cc);
                                 }
                                 setValue('message', template.body);
@@ -319,7 +387,7 @@ export default function QuitclaimModal({
                             className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
                               isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                             }`}
-                            onClick={() => setIsCCOPen(!isCCOpen)}
+                            onClick={() => setIsCCOpen(!isCCOpen)}
                           >
                             CC
                           </button>
@@ -531,6 +599,18 @@ export default function QuitclaimModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="email"
+        />
+      )}
     </>
   );
 }

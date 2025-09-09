@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -15,17 +15,19 @@ type T_ModalData = {
   open: boolean;
 };
 
-export default function AddUserAccountModal({
+export default function UpdateUserAccountModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  formMethods: UseFormReturn;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue } = formMethods;
   const {
     data: accountDetailsData,
     refetch: refetchAccountDetails,

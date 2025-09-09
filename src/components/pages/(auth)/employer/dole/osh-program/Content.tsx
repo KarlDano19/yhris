@@ -179,23 +179,27 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
   };
 
+  // Shared tab names mapping
+  const tabNames = {
+    1: 'Company Profile',
+    2: 'OSH Program and Policy',
+    3: 'Risk Management',
+    4: 'Health and Welfare Program',
+    5: 'Safety Measures',
+    6: 'Compliance and Cost'
+  };
+
   const getCurrentTabName = (): string => {
-    const tabNames = {
-      1: 'Company Profile',
-      2: 'OSH Program and Policy',
-      3: 'Risk Management',
-      4: 'Health and Welfare Program',
-      5: 'Safety Measures',
-      6: 'Compliance and Cost'
-    };
-    
-    // If there's pending navigation to a tab, show the target tab name
+    return tabNames[selectedTab] || 'current tab';
+  };
+
+  const getTargetTabName = (): string => {
     if (pendingNavigation && pendingNavigation.startsWith('tab-')) {
       const targetTab = parseInt(pendingNavigation.replace('tab-', '')) as TabNumber;
       return tabNames[targetTab] || 'target tab';
     }
     
-    return tabNames[selectedTab] || 'current tab';
+    return '';
   };
 
   // Function to validate required fields for the current tab
@@ -859,6 +863,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         onDiscard={handleDiscardChanges}
         isLoading={isSavingChanges}
         currentTab={getCurrentTabName()}
+        isNavigatingToTab={pendingNavigation?.startsWith('tab-') || false}
+        targetTab={getTargetTabName()}
       />
       )}
 

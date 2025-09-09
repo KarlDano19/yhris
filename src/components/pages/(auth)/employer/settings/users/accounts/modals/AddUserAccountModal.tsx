@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { UseFormReturn, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -13,17 +13,19 @@ export default function AddUserAccountModal({
   refetch,
   isOpen,
   setIsOpen,
+  formMethods,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
+  formMethods: UseFormReturn;
 }) {
   const cancelButtonRef = useRef(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, control } = formMethods;
   const { mutate: addAccounts, isLoading: isLoadingAddAccounts } = useAddAccounts();
 
   const onSubmit = handleSubmit((data) => {
