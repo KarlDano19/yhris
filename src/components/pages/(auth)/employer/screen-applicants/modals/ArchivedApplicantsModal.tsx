@@ -381,9 +381,8 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
             </div>
           </div>
         </div>
-      </ModalLayout>
-      
-      {/* Restore Multiple Applications Modal */}
+
+        {/* Restore Multiple Applications Modal */}
       {showRestoreModal && (
         <RestoreApplicationModal
           isOpen={showRestoreModal}
@@ -396,6 +395,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
           onSuccess={handleUnarchive}
         />
       )}
+      </ModalLayout> 
     </>
   );
 };

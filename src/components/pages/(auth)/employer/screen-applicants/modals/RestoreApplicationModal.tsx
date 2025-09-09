@@ -7,7 +7,7 @@ import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplication
 
 import classNames from '@/helpers/classNames';
 
-import { XCircleIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 interface RestoreApplicationModalProps {
   isOpen: boolean;
@@ -126,9 +126,7 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl">
                 <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                   <div className="flex items-start">
-                    <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                      <ArrowUturnLeftIcon className="h-6 w-6 text-blue-600" />
-                    </div>
+                    
                     <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left flex-1">
                       <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
                         {getModalTitle()}
