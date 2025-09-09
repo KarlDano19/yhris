@@ -176,7 +176,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
         </div>
       )}
       
-      <button onClick={handleOpenMenu} type='button' className='text-indigo-dye disabled:text-gray-400'>
+      <button onClick={handleOpenMenu} type='button' className='text-indigo-dye disabled:text-gray-400' data-testid="elipsis-btn">
         <EllipsisVerticalIcon className='w-7 h-7' />
       </button>
 
