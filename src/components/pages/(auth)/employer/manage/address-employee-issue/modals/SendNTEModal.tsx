@@ -160,34 +160,30 @@ export default function SendNTEModal({
   };
 
   useEffect(() => {
-    if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
-      if (employeeIssueItemsCopy[itemIndex]) {
-        const employeeEmail = employeeIssueItemsCopy[itemIndex].email;
-        setApplicantEmail(employeeEmail);
+    if (isOpen && isOpen.id && employeeIssueDetails) {
+      const employeeEmail = employeeIssueDetails.email;
+      setApplicantEmail(employeeEmail);
+      
+      // Check if this is a different employee than the current one
+      const isDifferentEmployee = currentEmployeeId !== isOpen.id;
+      
+      if (isDifferentEmployee) {
+        // Reset everything for new employee
+        resetFormData();
         
-        // Check if this is a different employee than the current one
-        const isDifferentEmployee = currentEmployeeId !== isOpen.id;
-        
-        if (isDifferentEmployee) {
-          // Reset everything for new employee
-          resetFormData();
-          
-          // Set the employee email for new employee
-          if (employeeEmail) {
-            setTagsTo([employeeEmail]);
-          }
+        // Set the employee email for new employee
+        if (employeeEmail) {
+          setTagsTo([employeeEmail]);
         }
-        
-        // Update current employee ID
-        setCurrentEmployeeId(isOpen.id);
-        
-        // Always reset initialization flag when modal opens to ensure fresh data is loaded
-        setIsInitialized(false);
       }
+      
+      // Update current employee ID
+      setCurrentEmployeeId(isOpen.id);
+      
+      // Always reset initialization flag when modal opens to ensure fresh data is loaded
+      setIsInitialized(false);
     }
-  }, [isOpen, employeeIssueItems, setTagsTo, setValue, setTagsCc, setTagsBcc, currentEmployeeId]);
+  }, [isOpen, employeeIssueDetails, setTagsTo, setValue, setTagsCc, setTagsBcc, currentEmployeeId]);
 
 
   // Prefill fields from backend when details are loaded
@@ -292,38 +288,38 @@ export default function SendNTEModal({
     }
 
     if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
-      employeeIssueItemsCopy[itemIndex].id = isOpen.id;
-      employeeIssueItemsCopy[itemIndex].actionType = 'sending';
-      employeeIssueItemsCopy[itemIndex].emailType = 'nte';
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template ? template.subject : '';
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.to = tagsTo;
-      if (tagsCc) {
-        employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = tagsCc;
-      }
-      if (tagsBcc) {
-        employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
-      }
-      // Store message as HTML (preserve formatting)
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
-      // Save nte_to, nte_cc, nte_bcc as JSON stringified arrays
-      employeeIssueItemsCopy[itemIndex].nte_subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].nte_to = JSON.stringify(tagsTo);
-      employeeIssueItemsCopy[itemIndex].nte_cc = JSON.stringify(tagsCc);
-      employeeIssueItemsCopy[itemIndex].nte_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].nte_message = data.message;
-      // Include PDF attachment if available
-      if (pdfAttachment) {
-        employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;
-        employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment = pdfAttachment;
-      }
-      employeeIssueItemsCopy[itemIndex].isNTESent = true;
+      
+      // Create the payload directly without depending on employeeIssueItems array
+      const payload = {
+        id: isOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'nte',
+        issueNTEForm: {
+          template: template ? template.subject : '',
+          subject: data.subject,
+          to: tagsTo,
+          cc: tagsCc,
+          bcc: tagsBcc,
+          message: data.message,
+          attachment: pdfAttachment || null
+        },
+        sendDecisionForm: {}, // Required by type but not used for NTE
+        dateReceived: null, // Required by type but not used for sending
+        nte_subject: data.subject,
+        nte_to: JSON.stringify(tagsTo),
+        nte_cc: JSON.stringify(tagsCc),
+        nte_bcc: JSON.stringify(tagsBcc),
+        nte_message: data.message,
+        decision_subject: '', // Required by type but not used for NTE
+        decision_to: '', // Required by type but not used for NTE
+        decision_cc: '', // Required by type but not used for NTE
+        decision_bcc: '', // Required by type but not used for NTE
+        decision_message: '' // Required by type but not used for NTE
+      };
+      
       const callbackReq = {
         onSuccess: (data: any) => {
-          setEmployeeIssueItems([...employeeIssueItemsCopy]);
           setIsOpen(null);
           // Reset form data after successful submission
           resetFormData();
@@ -339,7 +335,7 @@ export default function SendNTEModal({
           });
         },
       };
-      mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
+      mutate(payload, callbackReq);
     } else {
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
