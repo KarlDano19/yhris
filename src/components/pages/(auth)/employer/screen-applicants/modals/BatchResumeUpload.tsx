@@ -457,31 +457,30 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
               <div>
                 <p className="text-sm font-medium text-blue-800">
-                  🤖 Processing resumes with Affinda AI...
+                  🤖 Processing resumes with dual Affinda AI calls...
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
-                  Extracting essential contact information: names, emails, phone numbers, and locations.
+                  Making two API calls per resume: contact info extraction + AI summary generation.
                 </p>
               </div>
             </div>
             
             <div className="mt-3 bg-blue-100 rounded p-2">
               <p className="text-xs text-blue-600">
-                <strong>Extracting contact information:</strong>
+                <strong>Dual API Processing:</strong>
               </p>
               <ul className="text-xs text-blue-600 mt-1 list-disc list-inside space-y-1">
-                <li>👤 Full names with high accuracy</li>
-                <li>📧 Email addresses from any format</li>
-                <li>📱 Phone numbers (all formats supported)</li>
-                <li>📍 Location and address information</li>
-                <li>✅ Creating clean applicant profiles</li>
+                <li>👤 API Call 1: Contact info & work experience</li>
+                <li>📝 API Call 2: AI-generated resume summaries</li>
+                <li>🔄 Parallel processing for optimal speed</li>
+                <li>✅ Creating comprehensive applicant profiles</li>
               </ul>
             </div>
             
             <div className="mt-2 p-2 bg-green-100 rounded">
               <p className="text-xs text-green-700">
-                <strong>✨ Direct API:</strong> Using optimized direct API calls for faster processing 
-                and reliable contact information extraction.
+                <strong>✨ Enhanced Extraction:</strong> Using specialized document types for 
+                maximum accuracy in both contact extraction and summary generation.
               </p>
             </div>
           </div>

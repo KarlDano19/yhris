@@ -169,6 +169,49 @@ export default function ApplicantForm({ title }: PropTypes) {
     );
   };
 
+  const renderSummaryTab = () => {
+    return (
+      <>
+        {applicantProfile.resume_summary && applicantProfile.resume_summary.trim() !== '' ? (
+          <div className='mt-6'>
+            <div className='bg-blue-50 rounded-lg p-6 border border-blue-200'>
+              <div className='flex items-start'>
+                <div className='mr-3'>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-700 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className='flex-1'>
+                  <h4 className='font-semibold text-blue-900 mb-3 flex items-center'>
+                    AI-Generated Resume Summary
+                    <span className='ml-2 px-2 py-1 text-xs bg-blue-200 text-blue-800 rounded-full'>
+                      Affinda AI
+                    </span>
+                  </h4>
+                  <div className='text-gray-700 leading-relaxed whitespace-pre-wrap'>
+                    {applicantProfile.resume_summary}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className='mt-8 text-center'>
+            <div className='bg-gray-50 rounded-lg p-8 border border-gray-200'>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h4 className='text-gray-600 font-medium mb-2'>No Resume Summary Available</h4>
+              <p className='text-gray-500 text-sm'>
+                No AI-generated summary was extracted from this applicant&apos;s resume.
+              </p>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   const renderResumeView = () => {
     return (
       <>
@@ -214,7 +257,7 @@ export default function ApplicantForm({ title }: PropTypes) {
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
-                    <div className='w-full grid grid-cols-3'>
+                    <div className='w-full grid grid-cols-4'>
                       <div className='mr-2'>
                         <button
                           className={classNames(
@@ -223,7 +266,7 @@ export default function ApplicantForm({ title }: PropTypes) {
                           )}
                           onClick={() => setCurrentTab(1)}
                         >
-                          Applicant Profile
+                          Profile
                         </button>
                       </div>
                       <div className='mx-2'>
@@ -237,13 +280,24 @@ export default function ApplicantForm({ title }: PropTypes) {
                           Job Experience
                         </button>
                       </div>
-                      <div className='ml-2'>
+                      <div className='mx-2'>
                         <button
                           className={classNames(
                             'px-4 py-2 font-bold rounded-md w-full',
                             currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
                           )}
                           onClick={() => setCurrentTab(3)}
+                        >
+                          Summary
+                        </button>
+                      </div>
+                      <div className='ml-2'>
+                        <button
+                          className={classNames(
+                            'px-4 py-2 font-bold rounded-md w-full',
+                            currentTab == 4 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                          )}
+                          onClick={() => setCurrentTab(4)}
                         >
                           Answers
                         </button>
@@ -255,6 +309,9 @@ export default function ApplicantForm({ title }: PropTypes) {
                     <div className='h-[28rem] overflow-y-auto'>{renderJobExpTab()}</div>
                   )}
                   {!viewCV && currentTab == 3 && (
+                    <div className='h-[28rem] overflow-y-auto'>{renderSummaryTab()}</div>
+                  )}
+                  {!viewCV && currentTab == 4 && (
                     <div className='h-[28rem] overflow-y-auto'>{renderAnswersTab()}</div>
                   )}
                   {viewCV && renderResumeView()}
