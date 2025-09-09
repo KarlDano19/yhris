@@ -57,7 +57,7 @@ export default function ApplicantForm({ title }: PropTypes) {
             <div
               className='bg-gray-300 h-48 w-36 rounded-md mx-auto lg:mx-0 flex items-center justify-center'
               style={{
-                backgroundImage: `url(${applicantProfile.photo})`,
+                backgroundImage: `url(${applicantProfile.photo_url})`,
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',

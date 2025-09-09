@@ -75,7 +75,7 @@ export type ApplicantType = {
   id: number;
   email: string | null;
   applicationId: number;
-  image: string;
+  photo_url: string;
   name: string;
   checklists: string[];
   status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | null | undefined;

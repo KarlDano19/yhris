@@ -211,7 +211,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           id: item.applicant.id,
           email: item.applicant.email,
           applicationId: item.id,
-          image: `${item.applicant.photo}`,
+          image: item.applicant.photo_url || item.applicant.photo || null,
           name: item.applicant.name,
           checklists: [],
           status: item.status,
