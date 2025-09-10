@@ -7,12 +7,13 @@ type UploadParams = {
   nte_attachment?: File;
   decision_attachment?: File;
   // Additional fields for NTE document generation
+  nte_logo?: File;
+  border_color?: string;
   company_name?: string;
   date_issued?: string;
   prepared_by?: string;
   reviewed_by?: string;
-  logo_file?: File;
-  signature_file?: File;
+  hr_signature?: File;
 };
 
 async function uploadEmployeeIssueAttachments(params: UploadParams) {
@@ -22,12 +23,13 @@ async function uploadEmployeeIssueAttachments(params: UploadParams) {
       employee_issue_id, 
       nte_attachment, 
       decision_attachment,
+      nte_logo,
+      border_color,
       company_name,
       date_issued,
       prepared_by,
       reviewed_by,
-      logo_file,
-      signature_file
+      hr_signature,
     } = params;
 
     const formData = new FormData();
@@ -35,12 +37,13 @@ async function uploadEmployeeIssueAttachments(params: UploadParams) {
     formData.append('decision_attachment', decision_attachment || '');
     
     // Add additional fields if provided
+    if (nte_logo) formData.append('nte_logo', nte_logo);
+    if (border_color) formData.append('border_color', border_color);
     if (company_name) formData.append('company_name', company_name);
     if (date_issued) formData.append('date_issued', date_issued);
     if (prepared_by) formData.append('prepared_by', prepared_by);
     if (reviewed_by) formData.append('reviewed_by', reviewed_by);
-    if (logo_file) formData.append('logo_file', logo_file);
-    if (signature_file) formData.append('signature_file', signature_file);
+    if (hr_signature) formData.append('hr_signature', hr_signature);
 
     const config = {
       method: 'PATCH',
