@@ -732,19 +732,21 @@ export default function SendNTEModal({
                               >
                                 <ArrowTopRightOnSquareIcon className="h-5 w-5" />
                               </button>
-                              <button
-                                type="button"
-                                onClick={handleDeleteAttachment}
-                                disabled={isDeleting}
-                                className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-2"
-                                title="Delete attachment"
-                              >
-                                {isDeleting ? (
-                                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                  <TrashIcon className="h-4 w-4" />
-                                )}
-                              </button>
+                              {!employeeIssueDetails?.is_nte_sent && (
+                                <button
+                                  type="button"
+                                  onClick={handleDeleteAttachment}
+                                  disabled={isDeleting}
+                                  className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                                  title="Delete attachment"
+                                >
+                                  {isDeleting ? (
+                                    <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <TrashIcon className="h-4 w-4" />
+                                  )}
+                                </button>
+                              )}
                             </>
                           )}
                           {!pdfAttachment && (
