@@ -737,6 +737,7 @@ export default function SendNTEModal({
                                 onClick={handleDeleteAttachment}
                                 disabled={isDeleting}
                                 className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                                title="Delete attachment"
                               >
                                 {isDeleting ? (
                                   <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
